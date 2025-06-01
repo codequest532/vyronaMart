@@ -39,7 +39,16 @@ import {
   Building,
   ShoppingCart,
   Wallet,
-  Gift
+  Gift,
+  Instagram,
+  ExternalLink,
+  Verified,
+  Camera,
+  ThumbsUp,
+  MessageCircle,
+  Share2,
+  Eye,
+  TrendingUp
 } from "lucide-react";
 
 type TabType = "home" | "social" | "space" | "read" | "mall" | "profile";
@@ -47,7 +56,7 @@ type TabType = "home" | "social" | "space" | "read" | "mall" | "profile";
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const { user, updateCoins } = useUserData();
-  const { showNotification } = useToastNotifications();
+  const { notification, showNotification, hideNotification } = useToastNotifications();
 
   const { data: products = [] } = useQuery({
     queryKey: ["/api/products"],
@@ -90,8 +99,16 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <Header user={user} />
+      <CartButton />
+      <NotificationToast 
+        title={notification.title}
+        message={notification.message}
+        type={notification.type}
+        isVisible={notification.isVisible}
+        onHide={hideNotification}
+      />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
@@ -169,32 +186,129 @@ export default function Home() {
               </Card>
             </div>
 
-            {/* Trending Products */}
+            {/* Product Categories */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-900">Trending Products</h3>
-                  <Button variant="ghost" className="text-blue-600">View All</Button>
+                  <h3 className="text-xl font-bold text-gray-900">Shop by Category</h3>
+                  <Button variant="ghost" className="text-blue-600">View All Categories</Button>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  {[
+                    { name: "Electronics", icon: Laptop, color: "blue", count: products.filter(p => p.category === "electronics").length },
+                    { name: "Fashion", icon: Shirt, color: "pink", count: products.filter(p => p.category === "fashion").length },
+                    { name: "Books", icon: Book, color: "purple", count: products.filter(p => p.category === "mystery" || p.category === "sci-fi").length },
+                    { name: "Home & Living", icon: HomeIcon, color: "green", count: products.filter(p => p.category === "home").length || 3 },
+                  ].map((category) => (
+                    <Card key={category.name} className={`bg-${category.color}-50 border-${category.color}-200 cursor-pointer hover:bg-${category.color}-100 hover:shadow-lg transition-all duration-300 group`}>
+                      <CardContent className="p-6 text-center">
+                        <div className={`w-16 h-16 bg-${category.color}-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
+                          <category.icon className={`text-${category.color}-600 h-8 w-8`} />
+                        </div>
+                        <h4 className="font-semibold text-gray-900 mb-2">{category.name}</h4>
+                        <p className="text-sm text-gray-600">{category.count}+ products</p>
+                        <Badge variant="secondary" className={`mt-2 text-${category.color}-600 bg-${category.color}-50`}>
+                          Earn up to 50 coins
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Trending Products */}
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-bold text-gray-900">🔥 Trending Products</h4>
+                  <Button variant="ghost" className="text-blue-600 text-sm">View All</Button>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {products.slice(0, 4).map((product) => (
                     <div 
                       key={product.id} 
-                      className="group cursor-pointer"
+                      className="group cursor-pointer bg-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
                       onClick={() => handleProductClick(product.name)}
                     >
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        className="w-full h-40 object-cover rounded-lg mb-3 group-hover:scale-105 transition-transform"
-                      />
-                      <h4 className="font-semibold text-sm">{product.name}</h4>
-                      <p className="text-blue-600 font-bold">₹{(product.price / 100).toLocaleString()}</p>
-                      <Badge variant="secondary" className="mt-1 text-green-600 bg-green-50">
-                        +{Math.floor(product.price / 10000)} coins
-                      </Badge>
+                      <div className="relative">
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name}
+                          className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs">
+                            +{Math.floor(product.price / 10000)}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <h4 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2">{product.name}</h4>
+                        <p className="text-blue-600 font-bold text-lg">₹{(product.price / 100).toLocaleString()}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-gray-500">Free shipping</span>
+                          <Button size="sm" className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700">
+                            Add to Cart
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Game Explorer */}
+            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">🎮 Game Explorer</h3>
+                    <p className="text-gray-600">Play games, earn coins, and unlock exclusive rewards!</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-purple-600">2,450</div>
+                    <div className="text-sm text-gray-500">Your Coins</div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { name: "Ludo Battle", icon: Dice1, color: "from-red-400 to-red-600", reward: "50-100 coins", players: "2-4 players" },
+                    { name: "Trivia Master", icon: Brain, color: "from-blue-400 to-blue-600", reward: "30-80 coins", players: "1-6 players" },
+                    { name: "Merge Tiles", icon: Grid3X3, color: "from-green-400 to-green-600", reward: "40-90 coins", players: "Solo" },
+                    { name: "Lucky Wheel", icon: Target, color: "from-purple-400 to-purple-600", reward: "10-200 coins", players: "Daily spins" },
+                  ].map((game) => (
+                    <div 
+                      key={game.name}
+                      className={`bg-gradient-to-br ${game.color} rounded-xl p-4 text-white cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-300 group relative overflow-hidden`}
+                      onClick={() => handleGameClick(game.name)}
+                    >
+                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="relative z-10">
+                        <game.icon className="h-8 w-8 mb-3" />
+                        <h4 className="font-semibold mb-1">{game.name}</h4>
+                        <p className="text-xs opacity-90 mb-2">{game.players}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium">{game.reward}</span>
+                          <Play className="h-4 w-4 opacity-80" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-6 p-4 bg-white/50 rounded-lg backdrop-blur-sm">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Trophy className="text-amber-500 h-6 w-6" />
+                      <div>
+                        <h5 className="font-semibold text-gray-900">Daily Challenge</h5>
+                        <p className="text-sm text-gray-600">Complete 3 games to unlock bonus rewards</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-bold text-amber-600">Progress: 1/3</div>
+                      <Progress value={33} className="w-20 mt-1" />
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -207,7 +321,96 @@ export default function Home() {
             <Card className="vyrona-gradient-social text-white">
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-2">VyronaSocial</h2>
-                <p className="opacity-90">Shop with friends, play games, and win together!</p>
+                <p className="opacity-90">Shop with friends, connect with Instagram sellers, and win together!</p>
+              </CardContent>
+            </Card>
+
+            {/* Instagram Seller Connect */}
+            <Card className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                      <Instagram className="text-white h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">Instagram Store Connect</h3>
+                      <p className="text-gray-600">Discover and shop from your favorite Instagram sellers</p>
+                    </div>
+                  </div>
+                  <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white">
+                    <Instagram className="mr-2 h-4 w-4" />
+                    Connect Store
+                  </Button>
+                </div>
+
+                {/* Featured Instagram Sellers */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[
+                    { username: "@trendy_fashion_tn", followers: "12.5K", category: "Fashion", verified: true, products: 156, rating: 4.8 },
+                    { username: "@chennai_electronics", followers: "8.3K", category: "Electronics", verified: true, products: 89, rating: 4.9 },
+                    { username: "@homestyle_decor", followers: "15.2K", category: "Home Decor", verified: false, products: 234, rating: 4.7 },
+                  ].map((seller, index) => (
+                    <Card key={index} className="bg-white border border-pink-100 hover:border-pink-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {seller.username.charAt(1).toUpperCase()}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-1">
+                              <h4 className="font-semibold text-gray-900">{seller.username}</h4>
+                              {seller.verified && <Verified className="text-blue-500 h-4 w-4" />}
+                            </div>
+                            <p className="text-sm text-gray-500">{seller.followers} followers</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Category:</span>
+                            <Badge variant="secondary" className="text-pink-600 bg-pink-50">{seller.category}</Badge>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Products:</span>
+                            <span className="font-semibold">{seller.products}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Rating:</span>
+                            <div className="flex items-center space-x-1">
+                              <Star className="text-amber-400 h-4 w-4 fill-current" />
+                              <span className="font-semibold">{seller.rating}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-4 flex items-center space-x-2">
+                          <Button size="sm" className="flex-1 bg-pink-600 hover:bg-pink-700">
+                            <Eye className="mr-1 h-3 w-3" />
+                            View Store
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-pink-200 text-pink-600">
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Instagram Connect Stats */}
+                <div className="mt-6 grid grid-cols-3 gap-4">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-pink-600">500+</div>
+                    <div className="text-sm text-gray-600">Connected Sellers</div>
+                  </div>
+                  <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-purple-600">15K+</div>
+                    <div className="text-sm text-gray-600">Products Available</div>
+                  </div>
+                  <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
+                    <div className="text-2xl font-bold text-green-600">95%</div>
+                    <div className="text-sm text-gray-600">Customer Satisfaction</div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -215,7 +418,7 @@ export default function Home() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Active Shopping Rooms</h3>
+                  <h3 className="text-lg font-bold text-gray-900">🛍️ Active Shopping Rooms</h3>
                   <Button className="bg-pink-600 hover:bg-pink-700">
                     <Users className="mr-2 h-4 w-4" />
                     Create Room
@@ -223,31 +426,44 @@ export default function Home() {
                 </div>
                 
                 <div className="space-y-4">
-                  {shoppingRooms.map((room) => (
-                    <Card key={room.id} className="border border-gray-200 hover:border-pink-300 transition-colors cursor-pointer">
+                  {(shoppingRooms as any[]).map((room: any) => (
+                    <Card key={room.id} className="border border-gray-200 hover:border-pink-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center">
-                              <Users className="text-pink-600 h-5 w-5" />
+                            <div className="w-12 h-12 bg-gradient-to-br from-pink-100 to-purple-100 rounded-xl flex items-center justify-center">
+                              <Users className="text-pink-600 h-6 w-6" />
                             </div>
                             <div>
-                              <h4 className="font-semibold">{room.name}</h4>
+                              <h4 className="font-semibold text-gray-900">{room.name}</h4>
                               <p className="text-sm text-gray-500">{room.memberCount} friends shopping • Playing {room.currentGame}</p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium text-green-600">₹{(room.totalCart / 100).toLocaleString()} shared cart</div>
-                            <div className="text-xs text-gray-500">Group discount: 15%</div>
+                            <div className="text-lg font-bold text-green-600">₹{(room.totalCart / 100).toLocaleString()}</div>
+                            <div className="text-xs text-gray-500">Group discount: 15% off</div>
                           </div>
                         </div>
-                        <div className="mt-3 flex items-center space-x-2">
-                          <div className="flex -space-x-2">
-                            {Array.from({ length: room.memberCount }).map((_, i) => (
-                              <div key={i} className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full border-2 border-white"></div>
-                            ))}
+                        <div className="mt-4 flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex -space-x-2">
+                              {Array.from({ length: room.memberCount }).map((_, i) => (
+                                <div key={i} className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full border-2 border-white flex items-center justify-center text-white text-xs font-bold">
+                                  {i + 1}
+                                </div>
+                              ))}
+                            </div>
+                            <span className="text-sm text-gray-600">+200 bonus coins</span>
                           </div>
-                          <span className="text-xs text-gray-500">Join game to unlock 200 bonus coins!</span>
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" variant="outline" className="border-pink-200 text-pink-600">
+                              <MessageCircle className="mr-1 h-3 w-3" />
+                              Chat
+                            </Button>
+                            <Button size="sm" className="bg-pink-600 hover:bg-pink-700">
+                              Join Room
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -259,22 +475,29 @@ export default function Home() {
             {/* Social Games */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Social Games</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">🎮 Social Games</h3>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {[
-                    { name: "Ludo", icon: Dice1, color: "from-red-400 to-red-600", desc: "Compete while shopping" },
-                    { name: "Trivia", icon: Brain, color: "from-blue-400 to-blue-600", desc: "Test product knowledge" },
-                    { name: "2048 Merge", icon: Grid3X3, color: "from-green-400 to-green-600", desc: "Build mega carts" },
-                    { name: "Spin Wheel", icon: Target, color: "from-purple-400 to-purple-600", desc: "Daily room rewards" },
+                    { name: "Ludo Battle", icon: Dice1, color: "from-red-400 to-red-600", desc: "Compete while shopping", reward: "50-100 coins" },
+                    { name: "Product Trivia", icon: Brain, color: "from-blue-400 to-blue-600", desc: "Test product knowledge", reward: "30-80 coins" },
+                    { name: "Cart Builder", icon: Grid3X3, color: "from-green-400 to-green-600", desc: "Build mega carts together", reward: "40-90 coins" },
+                    { name: "Lucky Wheel", icon: Target, color: "from-purple-400 to-purple-600", desc: "Daily room rewards", reward: "10-200 coins" },
                   ].map((game) => (
                     <div 
                       key={game.name}
-                      className={`bg-gradient-to-br ${game.color} rounded-lg p-4 text-white cursor-pointer hover:scale-105 transition-transform`}
+                      className={`bg-gradient-to-br ${game.color} rounded-xl p-4 text-white cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-300 group relative overflow-hidden`}
                       onClick={() => handleGameClick(game.name)}
                     >
-                      <game.icon className="h-8 w-8 mb-2" />
-                      <h4 className="font-semibold">{game.name}</h4>
-                      <p className="text-xs opacity-80">{game.desc}</p>
+                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="relative z-10">
+                        <game.icon className="h-8 w-8 mb-3" />
+                        <h4 className="font-semibold mb-1">{game.name}</h4>
+                        <p className="text-xs opacity-90 mb-2">{game.desc}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium">{game.reward}</span>
+                          <Play className="h-4 w-4 opacity-80" />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
