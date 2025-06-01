@@ -26,7 +26,10 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
             key={tab.id}
             variant={activeTab === tab.id ? "default" : "ghost"}
             size="sm"
-            onClick={() => onTabChange(tab.id)}
+            onClick={() => {
+              console.log("TabNavigation: Clicked", tab.id);
+              onTabChange(tab.id);
+            }}
             className={`tab-btn flex-shrink-0 ${
               activeTab === tab.id 
                 ? "bg-blue-100 text-blue-700 hover:bg-blue-200" 
