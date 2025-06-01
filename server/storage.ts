@@ -5,6 +5,8 @@ import {
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
   type Achievement, type InsertAchievement, type GameScore, type InsertGameScore
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // Users
@@ -333,4 +335,226 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUserCoins(id: number, coins: number): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ vyronaCoins: coins })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async updateUserXP(id: number, xp: number): Promise<User | undefined> {
+    const newLevel = Math.floor(xp / 1000) + 1;
+    const [user] = await db
+      .update(users)
+      .set({ xp, level: newLevel })
+      .where(eq(users.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  async getProducts(module?: string, category?: string): Promise<Product[]> {
+    if (module && category) {
+      return await db.select().from(products).where(and(eq(products.module, module), eq(products.category, category)));
+    } else if (module) {
+      return await db.select().from(products).where(eq(products.module, module));
+    } else if (category) {
+      return await db.select().from(products).where(eq(products.category, category));
+    }
+    
+    return await db.select().from(products);
+  }
+
+  async getProduct(id: number): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product || undefined;
+  }
+
+  async createProduct(insertProduct: InsertProduct): Promise<Product> {
+    const [product] = await db
+      .insert(products)
+      .values(insertProduct)
+      .returning();
+    return product;
+  }
+
+  async getStores(type?: string): Promise<Store[]> {
+    if (type) {
+      return await db.select().from(stores).where(eq(stores.type, type));
+    }
+    return await db.select().from(stores);
+  }
+
+  async getStore(id: number): Promise<Store | undefined> {
+    const [store] = await db.select().from(stores).where(eq(stores.id, id));
+    return store || undefined;
+  }
+
+  async createStore(insertStore: InsertStore): Promise<Store> {
+    const [store] = await db
+      .insert(stores)
+      .values(insertStore)
+      .returning();
+    return store;
+  }
+
+  async getShoppingRooms(): Promise<ShoppingRoom[]> {
+    return await db.select().from(shoppingRooms).where(eq(shoppingRooms.isActive, true));
+  }
+
+  async getShoppingRoom(id: number): Promise<ShoppingRoom | undefined> {
+    const [room] = await db.select().from(shoppingRooms).where(eq(shoppingRooms.id, id));
+    return room || undefined;
+  }
+
+  async createShoppingRoom(insertRoom: InsertShoppingRoom): Promise<ShoppingRoom> {
+    const [room] = await db
+      .insert(shoppingRooms)
+      .values(insertRoom)
+      .returning();
+    return room;
+  }
+
+  async getCartItems(userId: number, roomId?: number): Promise<CartItem[]> {
+    if (roomId !== undefined) {
+      return await db.select().from(cartItems)
+        .where(eq(cartItems.userId, userId))
+        .where(eq(cartItems.roomId, roomId));
+    }
+    return await db.select().from(cartItems)
+      .where(eq(cartItems.userId, userId))
+      .where(eq(cartItems.roomId, null));
+  }
+
+  async addCartItem(insertItem: InsertCartItem): Promise<CartItem> {
+    const [item] = await db
+      .insert(cartItems)
+      .values(insertItem)
+      .returning();
+    return item;
+  }
+
+  async removeCartItem(id: number): Promise<boolean> {
+    const result = await db.delete(cartItems).where(eq(cartItems.id, id));
+    return result.rowCount > 0;
+  }
+
+  async getOrders(userId: number): Promise<Order[]> {
+    return await db.select().from(orders).where(eq(orders.userId, userId));
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const [order] = await db
+      .insert(orders)
+      .values(insertOrder)
+      .returning();
+    return order;
+  }
+
+  async getUserAchievements(userId: number): Promise<Achievement[]> {
+    return await db.select().from(achievements).where(eq(achievements.userId, userId));
+  }
+
+  async addAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
+    const [achievement] = await db
+      .insert(achievements)
+      .values(insertAchievement)
+      .returning();
+    return achievement;
+  }
+
+  async addGameScore(insertScore: InsertGameScore): Promise<GameScore> {
+    const [score] = await db
+      .insert(gameScores)
+      .values(insertScore)
+      .returning();
+    return score;
+  }
+
+  async getUserGameScores(userId: number): Promise<GameScore[]> {
+    return await db.select().from(gameScores).where(eq(gameScores.userId, userId));
+  }
+
+  // Seed initial data when needed
+  async seedInitialData(): Promise<void> {
+    // Check if data already exists
+    const existingUsers = await db.select().from(users).limit(1);
+    if (existingUsers.length > 0) {
+      return; // Data already seeded
+    }
+
+    // Create demo user
+    const [demoUser] = await db.insert(users).values({
+      username: "arjun_krishnan",
+      email: "arjun@example.com",
+      password: "hashed_password",
+      vyronaCoins: 2450,
+      xp: 12340,
+      level: 12,
+    }).returning();
+
+    // Seed stores
+    const storeData = [
+      { name: "Raja Kirana Store", type: "kirana", address: "T. Nagar, Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 480, reviewCount: 120 },
+      { name: "Trendy Fashion Hub", type: "fashion", address: "T. Nagar, Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 420, reviewCount: 85 },
+      { name: "Express Avenue", type: "mall", address: "Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 450, reviewCount: 2500 },
+      { name: "Phoenix MarketCity", type: "mall", address: "Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 470, reviewCount: 3200 },
+      { name: "Central Library", type: "library", address: "Anna Nagar, Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 460, reviewCount: 890 },
+    ];
+
+    const createdStores = await db.insert(stores).values(storeData).returning();
+
+    // Seed products
+    const productData = [
+      { name: "Gaming Smartphone", description: "High quality Gaming Smartphone", price: 2599900, category: "electronics", module: "space", storeId: createdStores[0].id, imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9", metadata: null },
+      { name: "Trendy Jacket", description: "High quality Trendy Jacket", price: 289900, category: "fashion", module: "space", storeId: createdStores[1].id, imageUrl: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105", metadata: null },
+      { name: "The Silent Patient", description: "High quality The Silent Patient", price: 29900, category: "mystery", module: "read", storeId: createdStores[4].id, imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f", metadata: { author: "Alex Michaelides", rentalPrice: 5000 } },
+      { name: "Gaming Headphones", description: "High quality Gaming Headphones", price: 499900, category: "electronics", module: "mall", storeId: createdStores[2].id, imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", metadata: null },
+      { name: "Dune Chronicles", description: "High quality Dune Chronicles", price: 49900, category: "sci-fi", module: "read", storeId: createdStores[4].id, imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d", metadata: { author: "Frank Herbert", rentalPrice: 7500 } },
+    ];
+
+    await db.insert(products).values(productData);
+
+    // Seed shopping rooms
+    const roomData = [
+      { name: "Fashion Friday Squad", creatorId: demoUser.id, currentGame: "ludo", totalCart: 1245000, memberCount: 4, isActive: true },
+      { name: "Tech Hunters", creatorId: demoUser.id, currentGame: "trivia", totalCart: 4590000, memberCount: 2, isActive: true },
+    ];
+
+    await db.insert(shoppingRooms).values(roomData);
+
+    // Seed achievements
+    const achievementData = [
+      { userId: demoUser.id, type: "first_purchase" },
+      { userId: demoUser.id, type: "social_shopper" },
+      { userId: demoUser.id, type: "game_master" },
+      { userId: demoUser.id, type: "book_lover" },
+      { userId: demoUser.id, type: "local_explorer" },
+    ];
+
+    await db.insert(achievements).values(achievementData);
+  }
+}
+
+// Use DatabaseStorage instead of MemStorage
+export const storage = new DatabaseStorage();
