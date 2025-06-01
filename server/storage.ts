@@ -1,9 +1,10 @@
 import { 
-  users, products, stores, shoppingRooms, cartItems, orders, achievements, gameScores,
+  users, products, stores, shoppingRooms, cartItems, orders, achievements, gameScores, otpVerifications,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
-  type Achievement, type InsertAchievement, type GameScore, type InsertGameScore
+  type Achievement, type InsertAchievement, type GameScore, type InsertGameScore,
+  type OtpVerification, type InsertOtpVerification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNull } from "drizzle-orm";
@@ -15,6 +16,12 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserCoins(id: number, coins: number): Promise<User | undefined>;
   updateUserXP(id: number, xp: number): Promise<User | undefined>;
+  updateUserPassword(email: string, newPassword: string): Promise<void>;
+
+  // OTP Verification
+  createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification>;
+  getOtpVerification(identifier: string, otp: string, type: string): Promise<OtpVerification | undefined>;
+  markOtpAsVerified(id: number): Promise<void>;
 
   // Products
   getProducts(module?: string, category?: string): Promise<Product[]>;

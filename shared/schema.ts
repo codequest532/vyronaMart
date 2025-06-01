@@ -6,10 +6,21 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
+  mobile: text("mobile"),
   password: text("password").notNull(),
   vyronaCoins: integer("vyrona_coins").notNull().default(0),
   xp: integer("xp").notNull().default(0),
   level: integer("level").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const otpVerifications = pgTable("otp_verifications", {
+  id: serial("id").primaryKey(),
+  identifier: text("identifier").notNull(), // email or mobile
+  otp: text("otp").notNull(),
+  type: text("type").notNull(), // 'email' or 'mobile' or 'password_reset'
+  expiresAt: timestamp("expires_at").notNull(),
+  verified: boolean("verified").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -120,6 +131,11 @@ export const insertGameScoreSchema = createInsertSchema(gameScores).omit({
   playedAt: true,
 });
 
+export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -137,3 +153,5 @@ export type Achievement = typeof achievements.$inferSelect;
 export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 export type GameScore = typeof gameScores.$inferSelect;
 export type InsertGameScore = z.infer<typeof insertGameScoreSchema>;
+export type OtpVerification = typeof otpVerifications.$inferSelect;
+export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;

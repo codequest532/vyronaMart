@@ -24,7 +24,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/signup", async (req, res) => {
     try {
-      const { username, email, password } = req.body;
+      const { username, email, mobile, password } = req.body;
       
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
@@ -36,6 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const newUser = await storage.createUser({
         username,
         email,
+        mobile: mobile || null,
         password,
         vyronaCoins: 500, // Welcome bonus
         xp: 0,
@@ -45,6 +46,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ user: { ...newUser, password: undefined } });
     } catch (error) {
       res.status(500).json({ message: "Signup failed" });
+    }
+  });
+
+  // Forgot password - send OTP
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      // Store OTP in database
+      await storage.createOtpVerification({
+        identifier: email,
+        otp,
+        type: "password_reset",
+        expiresAt,
+        verified: false
+      });
+
+      // In a real app, you would send email/SMS here
+      // For demo purposes, we'll return the OTP in response
+      res.json({ 
+        message: "OTP sent successfully",
+        // Remove this in production - only for demo
+        otp: otp,
+        expiresAt: expiresAt
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send OTP" });
+    }
+  });
+
+  // Verify OTP and reset password
+  app.post("/api/auth/verify-otp", async (req, res) => {
+    try {
+      const { email, otp, newPassword } = req.body;
+      
+      const verification = await storage.getOtpVerification(email, otp, "password_reset");
+      
+      if (!verification || verification.verified) {
+        return res.status(400).json({ message: "Invalid or expired OTP" });
+      }
+
+      if (new Date() > verification.expiresAt) {
+        return res.status(400).json({ message: "OTP has expired" });
+      }
+
+      // Mark OTP as verified
+      await storage.markOtpAsVerified(verification.id);
+
+      // Update user password
+      await storage.updateUserPassword(email, newPassword);
+
+      res.json({ message: "Password reset successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to reset password" });
     }
   });
 
