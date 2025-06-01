@@ -791,24 +791,39 @@ export default function Home() {
           <div className="space-y-6">
             <Card className="vyrona-gradient-profile text-white">
               <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                    <User className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold">{user.username}</h2>
-                    <p className="opacity-90">Level {user.level} • VyronaMart Explorer</p>
-                    <div className="flex items-center space-x-4 mt-2">
-                      <div className="flex items-center space-x-1">
-                        <Coins className="text-amber-300 h-4 w-4" />
-                        <span className="font-semibold">{user.vyronaCoins.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Star className="text-yellow-300 h-4 w-4" />
-                        <span className="font-semibold">{user.xp.toLocaleString()} XP</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                      <User className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{user.username}</h2>
+                      <p className="opacity-90">{user.email}</p>
+                      {user.mobile && <p className="opacity-90">{user.mobile}</p>}
+                      <p className="opacity-90">Level {user.level} • VyronaMart Explorer</p>
+                      <div className="flex items-center space-x-4 mt-2">
+                        <div className="flex items-center space-x-1">
+                          <Coins className="text-amber-300 h-4 w-4" />
+                          <span className="font-semibold">{user.vyronaCoins.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Star className="text-yellow-300 h-4 w-4" />
+                          <span className="font-semibold">{user.xp.toLocaleString()} XP</span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                    onClick={() => {
+                      // Clear user data and redirect to landing
+                      queryClient.clear();
+                      window.location.href = "/";
+                    }}
+                  >
+                    Logout
+                  </Button>
                 </div>
               </CardContent>
             </Card>
