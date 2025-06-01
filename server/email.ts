@@ -18,7 +18,7 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: params.to }];
-    sendSmtpEmail.sender = { email: 'no-reply@vyronamart.app', name: 'VyronaMart' };
+    sendSmtpEmail.sender = { email: 'mgmags25@gmail.com', name: 'VyronaMart' };
     sendSmtpEmail.subject = params.subject;
     sendSmtpEmail.htmlContent = params.htmlContent;
     if (params.textContent) {
