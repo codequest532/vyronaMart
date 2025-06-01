@@ -438,12 +438,10 @@ export class DatabaseStorage implements IStorage {
   async getCartItems(userId: number, roomId?: number): Promise<CartItem[]> {
     if (roomId !== undefined) {
       return await db.select().from(cartItems)
-        .where(eq(cartItems.userId, userId))
-        .where(eq(cartItems.roomId, roomId));
+        .where(and(eq(cartItems.userId, userId), eq(cartItems.roomId, roomId)));
     }
     return await db.select().from(cartItems)
-      .where(eq(cartItems.userId, userId))
-      .where(eq(cartItems.roomId, null));
+      .where(and(eq(cartItems.userId, userId), isNull(cartItems.roomId)));
   }
 
   async addCartItem(insertItem: InsertCartItem): Promise<CartItem> {
@@ -456,7 +454,7 @@ export class DatabaseStorage implements IStorage {
 
   async removeCartItem(id: number): Promise<boolean> {
     const result = await db.delete(cartItems).where(eq(cartItems.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getOrders(userId: number): Promise<Order[]> {
