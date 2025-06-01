@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema } from "@shared/schema";
 import { z } from "zod";
+import { sendOTPEmail } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication endpoints
@@ -72,12 +73,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verified: false
       });
 
-      // In a real app, you would send email/SMS here
-      // For demo purposes, we'll return the OTP in response
+      // Send OTP via email using Brevo
+      const emailSent = await sendOTPEmail(email, otp);
+      
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send OTP email" });
+      }
+
       res.json({ 
-        message: "OTP sent successfully",
-        // Remove this in production - only for demo
-        otp: otp,
+        message: "OTP sent successfully to your email",
         expiresAt: expiresAt
       });
     } catch (error) {
