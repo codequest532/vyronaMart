@@ -5,6 +5,49 @@ import { insertUserSchema, insertProductSchema, insertCartItemSchema, insertGame
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication endpoints
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user || user.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // In a real app, you'd create a session/JWT here
+      res.json({ user: { ...user, password: undefined } });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+      
+      // Create new user with bonus coins
+      const newUser = await storage.createUser({
+        username,
+        email,
+        password,
+        vyronaCoins: 500, // Welcome bonus
+        xp: 0,
+        level: 1
+      });
+      
+      res.json({ user: { ...newUser, password: undefined } });
+    } catch (error) {
+      res.status(500).json({ message: "Signup failed" });
+    }
+  });
+
   // User routes
   app.get("/api/user/:id", async (req, res) => {
     try {
