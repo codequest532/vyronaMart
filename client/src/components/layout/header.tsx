@@ -9,9 +9,10 @@ import type { User as UserType } from "@shared/schema";
 
 interface HeaderProps {
   user: UserType;
+  onNavigateToProfile?: () => void;
 }
 
-export default function Header({ user }: HeaderProps) {
+export default function Header({ user, onNavigateToProfile }: HeaderProps) {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
@@ -104,13 +105,13 @@ export default function Header({ user }: HeaderProps) {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onNavigateToProfile?.()}>
                   <User className="mr-2 h-4 w-4" />
                   <span>View Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <span>Account Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600">
