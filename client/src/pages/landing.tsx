@@ -39,11 +39,17 @@ export default function Landing() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      return await apiRequest("/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       });
+      
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+      
+      return await response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -51,7 +57,7 @@ export default function Landing() {
         description: "You've successfully logged in to VyronaMart.",
       });
       // Store user data and refresh queries
-      queryClient.setQueryData(["/api/user/1"], data.user);
+      queryClient.setQueryData(["/api/user", data.user.id], data.user);
       queryClient.invalidateQueries();
     },
     onError: (error) => {
@@ -65,11 +71,17 @@ export default function Landing() {
 
   const signupMutation = useMutation({
     mutationFn: async (data: { username: string; email: string; password: string }) => {
-      return await apiRequest("/api/auth/signup", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       });
+      
+      if (!response.ok) {
+        throw new Error("Signup failed");
+      }
+      
+      return await response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -77,7 +89,7 @@ export default function Landing() {
         description: `Account created successfully! You've received 500 VyronaCoins as a welcome bonus.`,
       });
       // Store user data and refresh queries
-      queryClient.setQueryData(["/api/user/1"], data.user);
+      queryClient.setQueryData(["/api/user", data.user.id], data.user);
       queryClient.invalidateQueries();
     },
     onError: (error) => {
