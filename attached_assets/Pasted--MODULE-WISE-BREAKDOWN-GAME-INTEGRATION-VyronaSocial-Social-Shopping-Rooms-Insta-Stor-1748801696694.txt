@@ -1,0 +1,87 @@
+ MODULE-WISE BREAKDOWN + GAME INTEGRATION
+🧑‍🤝‍🧑 VyronaSocial – Social Shopping Rooms + Insta Store Connect
+Core Features:
+
+Create/Join Shopping Rooms
+
+Share Carts, Chat, Vote on Products
+
+Invite friends for discounts
+
+Integrated Instagram Store Catalogues
+
+Game Layers:
+
+Game Type	Use Case
+🎲 Ludo	Compete with friends while browsing together – win coupons based on tile outcomes.
+🧠 Trivia Quizzes	Test each other's knowledge on products or brands in the cart – unlock surprise offers.
+🧩 Tile Merge Game (2048)	Collaboratively build a “mega cart” by merging product types to reveal exclusive deals.
+🃏 Spin Wheel / Scratch Cards	Random daily games for everyone in a room – win shared benefits.
+
+📍 VyronaSpace – Hyperlocal Retail Integration
+Core Features:
+
+Discover local Kirana, Fashion, and Lifestyle stores
+
+Book slots, pickup, or get delivery
+
+Live stock updates from nearby stores
+
+Geo-targeted offers
+
+Game Layers:
+
+Game Type	Use Case
+📍 Treasure Hunt	Users explore a Tamil Nadu map and unlock rewards at different local store zones.
+🧱 Stack the Product	Stack groceries or fashion items in a game to get time-limited discounts from local stores.
+🧗‍♀️ Temple Run / Adventure Platformer	Run through streets (virtual map) collecting coins representing local brands/products.
+📦 Idle Tycoon	"Manage" a Vyrona partner store to understand how it works; unlock real coupons through virtual sales.
+
+📚 VyronaRead – Book Commerce Meets Gaming
+Tagline: “Read. Return. Repeat.”
+
+Core Features:
+
+Buy new/used books
+
+Rent for 7/14/30 days
+
+Peer-to-peer lend/donate system
+
+Partnered Libraries + E-delivery
+
+Game Layers:
+
+Game Type	Use Case
+📖 Reading Trivia Quizzes	Answer genre-based or book-specific questions to earn XP or discounts.
+🎮 Candy Crush (Match-3)	Match books by theme/genre to unlock free rentals.
+🧠 Memory Flip Game	Match authors with books, unlock reading badges.
+🧩 Merge Game	Merge related genres (Sci-Fi + Romance) to get curated lists or mystery book boxes.
+🎯 Book Hunt in Platformer	Run/jump in a side-scroller to collect letters spelling book titles. Earn coins.
+
+🏬 VyronaMallConnect – Mall Brands to Your Doorstep
+Core Features:
+
+Explore branded stores in city malls
+
+Access mall offers, pre-book stock, schedule pick-up or delivery
+
+Live inventory and brand events
+
+Game Layers:
+
+Game Type	Use Case
+🧱 Brick Breaker / Bubble Shooter	Break down layers to reveal exclusive mall deals or bundles.
+👗 Avatar Dress-Up / Customization Game	Use virtual products from real brands to dress your avatar – earn style points = discounts.
+✂️ Flash Sale Memory Match	Match brands with their offers in a timed game. Correct matches = limited-time access.
+🧠 Chess / Strategy Game	Compete with others; winners get free delivery or priority access to drops.
+👩‍🍳 Mall Food Game (Cooking Mini-Game)	Cook mall food virtually; unlock food court coupons in real life.
+
+🎯 Game Economy: VyronaCoins + XP System
+Earn Coins/XP By	Use Coins For
+Playing games	Product discounts
+Shopping	Free shipping
+Inviting friends	Entry to premium levels
+Completing quests	Early access to offers
+Participating in mall events	Avatar accessories, loot boxes
+
