@@ -380,6 +380,39 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
+  async updateUserPassword(email: string, newPassword: string): Promise<void> {
+    await db.update(users)
+      .set({ password: newPassword })
+      .where(eq(users.email, email));
+  }
+
+  async createOtpVerification(otpData: InsertOtpVerification): Promise<OtpVerification> {
+    const [otp] = await db
+      .insert(otpVerifications)
+      .values(otpData)
+      .returning();
+    return otp;
+  }
+
+  async getOtpVerification(identifier: string, otp: string, type: string): Promise<OtpVerification | undefined> {
+    const [verification] = await db
+      .select()
+      .from(otpVerifications)
+      .where(and(
+        eq(otpVerifications.identifier, identifier),
+        eq(otpVerifications.otp, otp),
+        eq(otpVerifications.type, type)
+      ));
+    return verification;
+  }
+
+  async markOtpAsVerified(id: number): Promise<void> {
+    await db
+      .update(otpVerifications)
+      .set({ verified: true })
+      .where(eq(otpVerifications.id, id));
+  }
+
   async getProducts(module?: string, category?: string): Promise<Product[]> {
     if (module && category) {
       return await db.select().from(products).where(and(eq(products.module, module), eq(products.category, category)));
