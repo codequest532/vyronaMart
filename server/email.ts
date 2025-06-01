@@ -18,18 +18,22 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
     sendSmtpEmail.to = [{ email: params.to }];
-    sendSmtpEmail.sender = { email: 'noreply@vyronamart.com', name: 'VyronaMart' };
+    sendSmtpEmail.sender = { email: 'no-reply@vyronamart.app', name: 'VyronaMart' };
     sendSmtpEmail.subject = params.subject;
     sendSmtpEmail.htmlContent = params.htmlContent;
     if (params.textContent) {
       sendSmtpEmail.textContent = params.textContent;
     }
 
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('Email sent successfully to:', params.to);
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('Email sent successfully to:', params.to, 'Message ID:', result.body?.messageId);
     return true;
   } catch (error) {
-    console.error('Brevo email error:', error);
+    console.error('Brevo email error details:', error);
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
     return false;
   }
 }
