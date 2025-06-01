@@ -23,9 +23,11 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
         {tabs.map((tab) => (
           <div
             key={tab.id}
-            onClick={() => {
-              console.log("TabNavigation: Clicked", tab.id);
+            onClick={(e) => {
+              console.log("TabNavigation: Clicked", tab.id, "Event:", e);
+              console.log("Calling onTabChange with:", tab.id);
               onTabChange(tab.id);
+              console.log("onTabChange called");
             }}
             className={`tab-btn flex-shrink-0 cursor-pointer flex flex-col items-center justify-center p-3 rounded-lg transition-colors ${
               activeTab === tab.id 

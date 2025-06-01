@@ -1,8 +1,10 @@
-import { Coins, Star, User, Gamepad2, ShoppingBag, Bell, Search } from "lucide-react";
+import { Coins, Star, User, Gamepad2, ShoppingBag, Bell, Search, LogOut, Settings, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { queryClient } from "@/lib/queryClient";
 import type { User as UserType } from "@shared/schema";
 
 interface HeaderProps {
@@ -10,6 +12,16 @@ interface HeaderProps {
 }
 
 export default function Header({ user }: HeaderProps) {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      queryClient.clear();
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -75,18 +87,38 @@ export default function Header({ user }: HeaderProps) {
               <span className="font-bold">Lv.{user.level}</span>
             </Badge>
 
-            {/* Profile Avatar */}
-            <div className="flex items-center space-x-2">
-              <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-blue-200 hover:ring-blue-400 transition-all">
-                <AvatarFallback className="vyrona-gradient-profile text-white font-bold">
-                  {user.username.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden lg:block">
-                <div className="text-sm font-semibold text-gray-900">{user.username}</div>
-                <div className="text-xs text-gray-500">Premium Member</div>
-              </div>
-            </div>
+            {/* Profile Avatar with Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors">
+                  <Avatar className="w-10 h-10 ring-2 ring-blue-200 hover:ring-blue-400 transition-all">
+                    <AvatarFallback className="vyrona-gradient-profile text-white font-bold">
+                      {user.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden lg:block">
+                    <div className="text-sm font-semibold text-gray-900">{user.username}</div>
+                    <div className="text-xs text-gray-500">Premium Member</div>
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>View Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
