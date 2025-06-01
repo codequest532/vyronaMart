@@ -5,30 +5,42 @@ import type { User } from "@shared/schema";
 export function useUserData() {
   const queryClient = useQueryClient();
   
-  // For demo purposes, we'll use user ID 1
-  const userId = 1;
-
+  // Check if we have a current user stored in the query cache
+  const currentUser = queryClient.getQueryData<User>(["/api/current-user"]);
+  
   const { data: user, isLoading, error } = useQuery<User>({
-    queryKey: [`/api/user/${userId}`],
+    queryKey: ["/api/current-user"],
+    enabled: false, // Only fetch when explicitly enabled
+    retry: false,
   });
+
+  const actualUser = user || currentUser;
 
   const updateCoinsMutation = useMutation({
     mutationFn: async (amount: number) => {
-      const response = await apiRequest("POST", `/api/user/${userId}/coins`, { amount });
+      if (!actualUser) throw new Error("No user logged in");
+      const response = await apiRequest("POST", `/api/user/${actualUser.id}/coins`, { amount });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/user/${userId}`] });
+      if (actualUser) {
+        queryClient.invalidateQueries({ queryKey: [`/api/user/${actualUser.id}`] });
+        queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      }
     },
   });
 
   const updateXPMutation = useMutation({
     mutationFn: async (amount: number) => {
-      const response = await apiRequest("POST", `/api/user/${userId}/xp`, { amount });
+      if (!actualUser) throw new Error("No user logged in");
+      const response = await apiRequest("POST", `/api/user/${actualUser.id}/xp`, { amount });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/user/${userId}`] });
+      if (actualUser) {
+        queryClient.invalidateQueries({ queryKey: [`/api/user/${actualUser.id}`] });
+        queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      }
     },
   });
 
@@ -41,8 +53,8 @@ export function useUserData() {
   };
 
   return {
-    user,
-    isLoading,
+    user: actualUser,
+    isLoading: false, // We'll manage auth state manually
     error,
     updateCoins,
     updateXP,

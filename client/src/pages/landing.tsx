@@ -57,7 +57,7 @@ export default function Landing() {
         description: "You've successfully logged in to VyronaMart.",
       });
       // Store user data and refresh queries
-      queryClient.setQueryData(["/api/user", data.user.id], data.user);
+      queryClient.setQueryData(["/api/current-user"], data.user);
       queryClient.invalidateQueries();
     },
     onError: (error) => {
@@ -89,7 +89,7 @@ export default function Landing() {
         description: `Account created successfully! You've received 500 VyronaCoins as a welcome bonus.`,
       });
       // Store user data and refresh queries
-      queryClient.setQueryData(["/api/user", data.user.id], data.user);
+      queryClient.setQueryData(["/api/current-user"], data.user);
       queryClient.invalidateQueries();
     },
     onError: (error) => {
