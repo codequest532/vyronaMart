@@ -56,6 +56,11 @@ type TabType = "home" | "social" | "space" | "read" | "mall" | "profile";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
+  
+  const handleTabChange = (tab: TabType) => {
+    console.log("Tab clicked:", tab);
+    setActiveTab(tab);
+  };
   const { user, updateCoins } = useUserData();
   const { notification, showNotification, hideNotification } = useToastNotifications();
 
@@ -112,7 +117,7 @@ export default function Home() {
       />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* Home Tab */}
         {activeTab === "home" && (
