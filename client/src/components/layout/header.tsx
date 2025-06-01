@@ -23,6 +23,10 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
     }
   };
 
+  const handleAccountSettings = () => {
+    alert('Account Settings:\n\n• Change Password\n• Update Mobile Number\n• Notification Preferences\n• Privacy Settings\n• Payment Methods\n\nThis feature will be available soon!');
+  };
+
   return (
     <header className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -109,7 +113,7 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
                   <User className="mr-2 h-4 w-4" />
                   <span>View Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleAccountSettings}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Account Settings</span>
                 </DropdownMenuItem>
