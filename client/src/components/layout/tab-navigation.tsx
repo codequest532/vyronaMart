@@ -1,5 +1,4 @@
 import { Home, Users, MapPin, Book, ShoppingBag, UserCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 type TabType = "home" | "social" | "space" | "read" | "mall" | "profile";
 
@@ -22,15 +21,13 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
     <nav className="mb-8">
       <div className="flex space-x-2 bg-white rounded-xl p-2 shadow-sm border border-gray-100 overflow-x-auto">
         {tabs.map((tab) => (
-          <Button
+          <div
             key={tab.id}
-            variant={activeTab === tab.id ? "default" : "ghost"}
-            size="sm"
             onClick={() => {
               console.log("TabNavigation: Clicked", tab.id);
               onTabChange(tab.id);
             }}
-            className={`tab-btn flex-shrink-0 ${
+            className={`tab-btn flex-shrink-0 cursor-pointer flex flex-col items-center justify-center p-3 rounded-lg transition-colors ${
               activeTab === tab.id 
                 ? "bg-blue-100 text-blue-700 hover:bg-blue-200" 
                 : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
@@ -38,7 +35,7 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
           >
             <tab.icon className="h-4 w-4 mb-1" />
             <span className="text-xs font-medium hidden sm:block">{tab.label}</span>
-          </Button>
+          </div>
         ))}
       </div>
     </nav>
