@@ -1,9 +1,14 @@
-import { Coins, Star, User, Gamepad2, ShoppingBag, Bell, Search, LogOut, Settings, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { Coins, Star, User, Gamepad2, ShoppingBag, Bell, Search, LogOut, Settings, ChevronDown, Lock, Phone, BellRing, Shield, CreditCard, Eye, EyeOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { queryClient } from "@/lib/queryClient";
 import type { User as UserType } from "@shared/schema";
 
@@ -13,6 +18,10 @@ interface HeaderProps {
 }
 
 export default function Header({ user, onNavigateToProfile }: HeaderProps) {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
@@ -21,10 +30,6 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
     } catch (error) {
       console.error('Logout failed:', error);
     }
-  };
-
-  const handleAccountSettings = () => {
-    alert('Account Settings:\n\n• Change Password\n• Update Mobile Number\n• Notification Preferences\n• Privacy Settings\n• Payment Methods\n\nThis feature will be available soon!');
   };
 
   return (
@@ -113,7 +118,7 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
                   <User className="mr-2 h-4 w-4" />
                   <span>View Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleAccountSettings}>
+                <DropdownMenuItem onClick={() => setIsSettingsOpen(true)}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Account Settings</span>
                 </DropdownMenuItem>
@@ -127,6 +132,272 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
           </div>
         </div>
       </div>
+
+      {/* Account Settings Modal */}
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Account Settings
+            </DialogTitle>
+          </DialogHeader>
+          
+          <Tabs defaultValue="password" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="password" className="flex items-center gap-1">
+                <Lock className="h-4 w-4" />
+                Password
+              </TabsTrigger>
+              <TabsTrigger value="mobile" className="flex items-center gap-1">
+                <Phone className="h-4 w-4" />
+                Mobile
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="flex items-center gap-1">
+                <BellRing className="h-4 w-4" />
+                Alerts
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className="flex items-center gap-1">
+                <Shield className="h-4 w-4" />
+                Privacy
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="flex items-center gap-1">
+                <CreditCard className="h-4 w-4" />
+                Payment
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Change Password Tab */}
+            <TabsContent value="password" className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Change Password</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="current-password">Current Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="current-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter current password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirm-password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm new password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                <Button className="w-full">Update Password</Button>
+              </div>
+            </TabsContent>
+
+            {/* Update Mobile Number Tab */}
+            <TabsContent value="mobile" className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Update Mobile Number</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="current-mobile">Current Mobile Number</Label>
+                  <Input
+                    id="current-mobile"
+                    value={user.mobile || "Not set"}
+                    disabled
+                    className="bg-gray-50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-mobile">New Mobile Number</Label>
+                  <Input
+                    id="new-mobile"
+                    type="tel"
+                    placeholder="Enter new mobile number"
+                  />
+                </div>
+                <Button className="w-full">Send OTP to New Number</Button>
+                <div className="space-y-2">
+                  <Label htmlFor="otp">Enter OTP</Label>
+                  <Input
+                    id="otp"
+                    placeholder="Enter 6-digit OTP"
+                    maxLength={6}
+                  />
+                </div>
+                <Button className="w-full" variant="outline">Verify & Update</Button>
+              </div>
+            </TabsContent>
+
+            {/* Notification Preferences Tab */}
+            <TabsContent value="notifications" className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Notification Preferences</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Order Updates</Label>
+                      <p className="text-sm text-gray-600">Get notified about your order status</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Game Achievements</Label>
+                      <p className="text-sm text-gray-600">Notifications for game rewards and achievements</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Price Alerts</Label>
+                      <p className="text-sm text-gray-600">Get notified when items go on sale</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Social Updates</Label>
+                      <p className="text-sm text-gray-600">Updates from your shopping rooms and friends</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Promotional Offers</Label>
+                      <p className="text-sm text-gray-600">Special deals and promotional content</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Privacy Settings Tab */}
+            <TabsContent value="privacy" className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Privacy Settings</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Profile Visibility</Label>
+                      <p className="text-sm text-gray-600">Allow others to see your profile</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Activity Status</Label>
+                      <p className="text-sm text-gray-600">Show when you're online</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Purchase History</Label>
+                      <p className="text-sm text-gray-600">Allow friends to see your recent purchases</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Game Statistics</Label>
+                      <p className="text-sm text-gray-600">Show your game scores and achievements</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Data Analytics</Label>
+                      <p className="text-sm text-gray-600">Help improve our services with usage data</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Payment Methods Tab */}
+            <TabsContent value="payments" className="space-y-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Payment Methods</h3>
+                <div className="space-y-4">
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <CreditCard className="h-6 w-6 text-gray-600" />
+                        <div>
+                          <p className="font-medium">•••• •••• •••• 4242</p>
+                          <p className="text-sm text-gray-600">Expires 12/25</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">Remove</Button>
+                    </div>
+                  </div>
+                  <Button className="w-full" variant="outline">
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Add New Payment Method
+                  </Button>
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Billing Address</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="first-name">First Name</Label>
+                        <Input id="first-name" defaultValue={user.username} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="last-name">Last Name</Label>
+                        <Input id="last-name" placeholder="Last name" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">Address</Label>
+                      <Input id="address" placeholder="Street address" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="city">City</Label>
+                        <Input id="city" placeholder="City" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="zip">ZIP Code</Label>
+                        <Input id="zip" placeholder="ZIP code" />
+                      </div>
+                    </div>
+                    <Button className="w-full">Update Billing Address</Button>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
