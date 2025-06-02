@@ -144,7 +144,7 @@ export class MemStorage implements IStorage {
         username: "admin",
         email: "mgmags25@gmail.com",
         mobile: null,
-        password: "admin123",
+        password: "12345678",
         role: "admin",
         vyronaCoins: 1000,
         xp: 0,
@@ -715,7 +715,32 @@ export class DatabaseStorage implements IStorage {
 
   // Seed initial data when needed
   async seedInitialData(): Promise<void> {
-    // No initial seed data - clean development environment
+    // Check if admin account exists, if not create it
+    const existingAdmin = await this.getUserByEmail("mgmags25@gmail.com");
+    
+    if (!existingAdmin) {
+      // Create admin account
+      await this.createUser({
+        username: "admin",
+        email: "mgmags25@gmail.com",
+        mobile: null,
+        password: "12345678",
+        role: "admin",
+        vyronaCoins: 1000,
+        xp: 0,
+        level: 1,
+        isActive: true,
+        isVerified: true
+      });
+      console.log("Admin account created for mgmags25@gmail.com");
+    } else if (existingAdmin.role !== "admin") {
+      // Upgrade existing account to admin
+      await db
+        .update(users)
+        .set({ role: "admin" })
+        .where(eq(users.email, "mgmags25@gmail.com"));
+      console.log("Existing account upgraded to admin for mgmags25@gmail.com");
+    }
   }
 }
 

@@ -32,6 +32,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, password } = req.body;
       const user = await storage.getUserByEmail(email);
       
+      console.log("Login attempt:", { email, password });
+      console.log("Found user:", user ? { ...user, password: user.password } : "No user found");
+      
       if (!user || user.password !== password) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
@@ -39,6 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // In a real app, you'd create a session/JWT here
       res.json({ user: { ...user, password: undefined } });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
     }
   });
