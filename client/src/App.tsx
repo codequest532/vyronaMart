@@ -10,6 +10,9 @@ import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";
+import Login from "@/pages/login";
+import AdminDashboard from "@/pages/admin-dashboard";
+import SellerDashboard from "@/pages/seller-dashboard";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
@@ -29,6 +32,16 @@ function Router() {
 
   return (
     <Switch>
+      {/* Authentication Route */}
+      <Route path="/login" component={Login} />
+      
+      {/* Admin Interface */}
+      <Route path="/admin" component={AdminDashboard} />
+      
+      {/* Seller Interface */}
+      <Route path="/seller" component={SellerDashboard} />
+      
+      {/* Customer Interface (Default) */}
       {user ? (
         <Route path="/" component={Home} />
       ) : (
@@ -43,6 +56,8 @@ function Router() {
       <Route path="/social" component={VyronaSocial} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
+      
+      {/* 404 Not Found */}
       <Route component={NotFound} />
     </Switch>
   );

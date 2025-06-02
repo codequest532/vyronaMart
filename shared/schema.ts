@@ -8,9 +8,12 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   mobile: text("mobile"),
   password: text("password").notNull(),
+  role: text("role").notNull().default("customer"), // 'customer', 'seller', 'admin'
   vyronaCoins: integer("vyrona_coins").notNull().default(0),
   xp: integer("xp").notNull().default(0),
   level: integer("level").notNull().default(1),
+  isActive: boolean("is_active").notNull().default(true),
+  isVerified: boolean("is_verified").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
