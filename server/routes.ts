@@ -589,17 +589,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/books", async (req, res) => {
     try {
       const { type, category } = req.query;
-      let books = [];
+      
+      // Get books from products where module is "read"
+      const allProducts = await storage.getProducts("read", category as string);
+      let books = allProducts;
 
       if (type === 'physical') {
-        books = await storage.getPhysicalBooks();
+        books = allProducts.filter(book => (book.metadata as any)?.type === 'physical');
       } else if (type === 'digital') {
-        books = await storage.getEBooks();
-      } else {
-        // Get all books
-        const physicalBooks = await storage.getPhysicalBooks();
-        const digitalBooks = await storage.getEBooks();
-        books = [...physicalBooks, ...digitalBooks];
+        books = allProducts.filter(book => (book.metadata as any)?.type === 'digital');
       }
 
       res.json(books);
@@ -615,17 +613,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { userId, action } = req.body; // action: 'buy' or 'rent'
       
-      const book = await storage.getBookById(parseInt(id));
-      if (!book) {
+      const book = await storage.getProduct(parseInt(id));
+      if (!book || book.module !== 'read') {
         return res.status(404).json({ message: "Book not found" });
       }
 
-      const order = await storage.createBookOrder({
+      const order = await storage.createOrder({
         userId,
-        bookId: parseInt(id),
-        action,
-        amount: book.price || 0,
-        status: 'completed'
+        module: 'read',
+        totalAmount: book.price,
+        status: 'completed',
+        metadata: {
+          productId: book.id,
+          action,
+          bookTitle: book.name
+        }
       });
 
       res.json(order);

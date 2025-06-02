@@ -840,7 +840,37 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {products.filter(p => p.module === "read").map((book) => (
+                  {/* Sample books for VyronaRead testing */}
+                  {[
+                    {
+                      id: 1,
+                      name: "The Art of Programming",
+                      price: 2999,
+                      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
+                      metadata: { author: "Robert Martin", type: "physical", rentalPrice: 599 }
+                    },
+                    {
+                      id: 2,
+                      name: "Digital Marketing Mastery",
+                      price: 1999,
+                      imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400",
+                      metadata: { author: "Sarah Johnson", type: "physical", rentalPrice: 399 }
+                    },
+                    {
+                      id: 3,
+                      name: "Modern Web Development",
+                      price: 1499,
+                      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
+                      metadata: { author: "Alex Thompson", type: "digital" }
+                    },
+                    {
+                      id: 4,
+                      name: "Data Science Fundamentals",
+                      price: 2499,
+                      imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400",
+                      metadata: { author: "Dr. Emily Chen", type: "digital" }
+                    }
+                  ].map((book) => (
                     <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
                       <div className="relative">
                         <img 
