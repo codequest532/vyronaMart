@@ -225,7 +225,78 @@ export default function Home() {
                   </div>
                   <Button variant="ghost" className="text-purple-600">View All Books</Button>
                 </div>
-                <VyronaReadBooksSection />
+                <div className="space-y-4">
+                  {books && books.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {books.slice(0, 6).map((book: any) => (
+                        <div key={book.id} className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">{book.title}</h4>
+                              <p className="text-xs text-gray-600 mb-1">{book.author}</p>
+                              <p className="text-xs text-gray-500">{book.genre} • {book.pages} pages</p>
+                            </div>
+                            <Badge variant={book.type === 'physical' ? 'default' : 'secondary'} className="text-xs">
+                              {book.type === 'physical' ? 'Physical' : 'Digital'}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg font-bold text-purple-600">${book.price}</span>
+                              {book.type === 'digital' && (
+                                <span className="text-xs text-gray-500">or rent $2.99</span>
+                              )}
+                            </div>
+                            <div className="flex gap-1">
+                              <Button 
+                                size="sm" 
+                                className="text-xs bg-purple-600 hover:bg-purple-700"
+                                onClick={() => {
+                                  showNotification(`Purchased "${book.title}" successfully! +15 VyronaCoins`, "success");
+                                  updateCoins(15);
+                                }}
+                              >
+                                Buy
+                              </Button>
+                              {book.type === 'digital' && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-xs border-purple-300 text-purple-600"
+                                  onClick={() => {
+                                    showNotification(`Rented "${book.title}" for 30 days! +10 VyronaCoins`, "success");
+                                    updateCoins(10);
+                                  }}
+                                >
+                                  Rent
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="mt-3 pt-3 border-t border-purple-200">
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span>Library: {book.libraryName || 'VyronaRead'}</span>
+                              <span>{book.condition || 'New'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Book className="text-purple-600 h-8 w-8" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 mb-2">No Books Available Yet</h4>
+                      <p className="text-gray-500 text-sm mb-4">Books will appear here once library integrations are approved by admin</p>
+                      <Badge variant="secondary" className="text-purple-600 bg-purple-50">
+                        Library Integration Required
+                      </Badge>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
