@@ -1005,14 +1005,11 @@ export default function Home() {
                               size="sm" 
                               variant="outline"
                               onClick={() => {
-                                setActiveTab("read-book");
-                                setSelectedBook(book);
-                                showNotification("Opening E-Reader", "Starting VyronaRead experience", "success");
+                                handleBookPurchase(book.id, 'rent');
                               }}
                               className="flex-1"
                             >
-                              <Play className="h-4 w-4 mr-1" />
-                              Read
+                              Rent
                             </Button>
                           )}
                         </div>
