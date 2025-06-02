@@ -1075,6 +1075,113 @@ export default function SellerDashboard() {
                 </Card>
               </div>
 
+              {/* Integrated Libraries Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Integrated Physical Libraries</CardTitle>
+                  <CardDescription>Manage libraries connected to VyronaMart</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Add New Library */}
+                    <div className="flex gap-2">
+                      <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddBookDialog(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Library
+                      </Button>
+                      <Button variant="outline">
+                        <Search className="h-4 w-4 mr-2" />
+                        Search Libraries
+                      </Button>
+                    </div>
+
+                    {/* Libraries List */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Library className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">Central City Library</h4>
+                            <p className="text-sm text-gray-600">Main Branch • 1,250 books</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary">Active</Badge>
+                              <span className="text-xs text-green-600">Synced 2 hours ago</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <Library className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">University Library</h4>
+                            <p className="text-sm text-gray-600">Academic Branch • 2,800 books</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary">Active</Badge>
+                              <span className="text-xs text-green-600">Synced 1 hour ago</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Library className="h-6 w-6 text-purple-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">Community Reading Center</h4>
+                            <p className="text-sm text-gray-600">Local Branch • 850 books</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline">Pending Sync</Badge>
+                              <span className="text-xs text-orange-600">Last synced 6 hours ago</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Quick Actions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
