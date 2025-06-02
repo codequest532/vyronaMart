@@ -54,11 +54,53 @@ import {
   TrendingUp
 } from "lucide-react";
 
-type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
+type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const [, setLocation] = useLocation();
+  const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [fontSize, setFontSize] = useState(16);
+  const [darkMode, setDarkMode] = useState(false);
+  const [bookmarks, setBookmarks] = useState<number[]>([]);
+  const [readingProgress, setReadingProgress] = useState(68);
+
+  // Sample book content
+  const sampleBookContent = [
+    {
+      page: 1,
+      content: "Chapter 1: The Art of Programming\n\nProgramming is not just about writing code; it's about crafting elegant solutions to complex problems. In this comprehensive guide, we'll explore the fundamental principles that distinguish great programmers from merely competent ones.\n\nThe journey begins with understanding that code is communication. When you write a program, you're not just instructing a computer—you're conveying your thoughts to future developers who will read, maintain, and extend your work.\n\nEvery line of code tells a story. Make sure it's a story worth telling."
+    },
+    {
+      page: 2,
+      content: "Chapter 1 (continued)\n\nThe first principle of great programming is clarity. Your code should read like well-written prose. Variable names should be descriptive, functions should have single responsibilities, and the overall structure should flow logically from one concept to the next.\n\nConsider this example:\n\n```javascript\nfunction calculateTotalPrice(items, taxRate) {\n  const subtotal = items.reduce((sum, item) => sum + item.price, 0);\n  const tax = subtotal * taxRate;\n  return subtotal + tax;\n}\n```\n\nThis function clearly communicates its purpose and implementation."
+    },
+    {
+      page: 3,
+      content: "Chapter 2: Clean Code Principles\n\nClean code is not just a luxury—it's a necessity in professional software development. The cost of maintaining poorly written code far exceeds the initial time investment required to write it correctly.\n\nThe characteristics of clean code include:\n\n• Readability: Code should be self-documenting\n• Simplicity: Avoid unnecessary complexity\n• Consistency: Follow established patterns\n• Testability: Design for easy testing\n• Maintainability: Consider future developers\n\nRemember: You are not just writing code for the computer—you are writing it for humans."
+    }
+  ];
+
+  const totalPages = sampleBookContent.length;
+
+  const handlePageChange = (direction: 'next' | 'prev') => {
+    if (direction === 'next' && currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      setReadingProgress(Math.round((currentPage / totalPages) * 100));
+    } else if (direction === 'prev' && currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      setReadingProgress(Math.round(((currentPage - 2) / totalPages) * 100));
+    }
+  };
+
+  const toggleBookmark = () => {
+    if (bookmarks.includes(currentPage)) {
+      setBookmarks(bookmarks.filter(page => page !== currentPage));
+    } else {
+      setBookmarks([...bookmarks, currentPage]);
+    }
+  };
   
   const handleTabChange = (tab: TabType) => {
     console.log("Tab clicked:", tab);
@@ -946,8 +988,9 @@ export default function Home() {
                               size="sm" 
                               variant="outline"
                               onClick={() => {
+                                setActiveTab("read-book");
+                                setSelectedBook(book);
                                 showNotification("Opening E-Reader", "Starting VyronaRead experience", "success");
-                                // Would navigate to e-reader
                               }}
                               className="flex-1"
                             >
@@ -1357,6 +1400,219 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {activeTab === "read-book" && selectedBook && (
+        <div className="fixed inset-0 bg-white dark:bg-gray-900 flex flex-col z-50">
+          {/* E-Reader Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setActiveTab("read")}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                ← Back to Library
+              </Button>
+              <div>
+                <h1 className="font-semibold text-gray-900 dark:text-white">{selectedBook.name}</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">by {selectedBook.author}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Page {currentPage} of {totalPages} • {readingProgress}%
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleBookmark}
+                  className={bookmarks.includes(currentPage) ? "text-yellow-500" : "text-gray-400"}
+                >
+                  <BookOpen className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  {darkMode ? "☀️" : "🌙"}
+                </Button>
+                
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    disabled={fontSize <= 12}
+                  >
+                    A-
+                  </Button>
+                  <span className="text-sm text-gray-600 w-8 text-center">{fontSize}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+                    disabled={fontSize >= 24}
+                  >
+                    A+
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* E-Reader Content */}
+          <div className={`flex-1 overflow-hidden ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+            <div className="h-full flex">
+              {/* Main Reading Area */}
+              <div className="flex-1 p-8 overflow-y-auto">
+                <div 
+                  className="max-w-3xl mx-auto leading-relaxed"
+                  style={{ fontSize: `${fontSize}px`, lineHeight: 1.6 }}
+                >
+                  <pre className="whitespace-pre-wrap font-serif">
+                    {sampleBookContent[currentPage - 1]?.content}
+                  </pre>
+                </div>
+              </div>
+
+              {/* Side Panel */}
+              <div className="w-80 border-l border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
+                <div className="space-y-6">
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-3">Reading Progress</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Progress</span>
+                        <span>{readingProgress}%</span>
+                      </div>
+                      <Progress value={readingProgress} className="h-2" />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Page {currentPage}</span>
+                        <span>{totalPages} pages</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-3">Bookmarks</h3>
+                    {bookmarks.length > 0 ? (
+                      <div className="space-y-2">
+                        {bookmarks.map((page) => (
+                          <div
+                            key={page}
+                            className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            <span className="text-sm">Page {page}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBookmarks(bookmarks.filter(p => p !== page));
+                              }}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500">No bookmarks yet</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-white mb-3">Settings</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm text-gray-600 dark:text-gray-400">Font Size</label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                            disabled={fontSize <= 12}
+                          >
+                            -
+                          </Button>
+                          <span className="text-sm w-12 text-center">{fontSize}px</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFontSize(Math.min(24, fontSize + 2))}
+                            disabled={fontSize >= 24}
+                          >
+                            +
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="text-sm text-gray-600 dark:text-gray-400">Theme</label>
+                        <div className="flex space-x-2 mt-1">
+                          <Button
+                            variant={!darkMode ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setDarkMode(false)}
+                          >
+                            Light
+                          </Button>
+                          <Button
+                            variant={darkMode ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setDarkMode(true)}
+                          >
+                            Dark
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* E-Reader Footer */}
+          <div className="flex items-center justify-between p-4 border-t border-gray-200 dark:border-gray-700">
+            <Button
+              variant="outline"
+              onClick={() => handlePageChange('prev')}
+              disabled={currentPage <= 1}
+              className="flex items-center space-x-2"
+            >
+              <span>←</span>
+              <span>Previous</span>
+            </Button>
+            
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Page {currentPage} of {totalPages}
+              </div>
+              <Progress value={(currentPage / totalPages) * 100} className="w-32 h-2" />
+            </div>
+            
+            <Button
+              variant="outline"
+              onClick={() => handlePageChange('next')}
+              disabled={currentPage >= totalPages}
+              className="flex items-center space-x-2"
+            >
+              <span>Next</span>
+              <span>→</span>
+            </Button>
+          </div>
+        </div>
+      )}
 
       <CartButton />
       <NotificationToast />
