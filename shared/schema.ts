@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -360,3 +360,133 @@ export type InstagramOrder = typeof instagramOrders.$inferSelect;
 export type InsertInstagramOrder = z.infer<typeof insertInstagramOrderSchema>;
 export type InstagramAnalytics = typeof instagramAnalytics.$inferSelect;
 export type InsertInstagramAnalytics = z.infer<typeof insertInstagramAnalyticsSchema>;
+
+// VyronaRead Books Tables
+export const libraryIntegrationRequests = pgTable("library_integration_requests", {
+  id: serial("id").primaryKey(),
+  sellerId: integer("seller_id").notNull().references(() => users.id),
+  libraryName: varchar("library_name", { length: 255 }).notNull(),
+  libraryType: varchar("library_type", { length: 100 }).notNull(),
+  address: text("address").notNull(),
+  contactPerson: varchar("contact_person", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 50 }),
+  email: varchar("email", { length: 255 }),
+  description: text("description"),
+  status: varchar("status", { length: 50 }).default("pending").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  processedAt: timestamp("processed_at"),
+  processedBy: integer("processed_by").references(() => users.id),
+  adminNotes: text("admin_notes"),
+});
+
+export const physicalBooks = pgTable("physical_books", {
+  id: serial("id").primaryKey(),
+  libraryId: integer("library_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  author: varchar("author", { length: 255 }).notNull(),
+  isbn: varchar("isbn", { length: 50 }),
+  category: varchar("category", { length: 100 }),
+  copies: integer("copies").default(1).notNull(),
+  available: integer("available").default(1).notNull(),
+  publisher: varchar("publisher", { length: 255 }),
+  publicationYear: varchar("publication_year", { length: 10 }),
+  language: varchar("language", { length: 50 }).default("English"),
+  location: varchar("location", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const bookLoans = pgTable("book_loans", {
+  id: serial("id").primaryKey(),
+  bookId: integer("book_id").notNull().references(() => physicalBooks.id),
+  borrowerId: integer("borrower_id").notNull().references(() => users.id),
+  libraryId: integer("library_id").notNull(),
+  loanDate: timestamp("loan_date").defaultNow().notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  returnDate: timestamp("return_date"),
+  status: varchar("status", { length: 50 }).default("active").notNull(),
+  renewalCount: integer("renewal_count").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const eBooks = pgTable("e_books", {
+  id: serial("id").primaryKey(),
+  sellerId: integer("seller_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  author: varchar("author", { length: 255 }).notNull(),
+  isbn: varchar("isbn", { length: 50 }),
+  category: varchar("category", { length: 100 }),
+  format: varchar("format", { length: 50 }).notNull(), // PDF, EPUB, MOBI
+  fileUrl: text("file_url").notNull(),
+  fileSize: integer("file_size"), // in bytes
+  salePrice: decimal("sale_price", { precision: 10, scale: 2 }),
+  rentalPrice: decimal("rental_price", { precision: 10, scale: 2 }),
+  description: text("description"),
+  publisher: varchar("publisher", { length: 255 }),
+  publicationYear: varchar("publication_year", { length: 10 }),
+  language: varchar("language", { length: 50 }).default("English"),
+  status: varchar("status", { length: 50 }).default("active").notNull(),
+  downloads: integer("downloads").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Schema validation for inserts
+export const insertLibraryIntegrationRequestSchema = createInsertSchema(libraryIntegrationRequests, {
+  sellerId: z.number(),
+  libraryName: z.string().min(1),
+  libraryType: z.string().min(1),
+  address: z.string().min(1),
+  contactPerson: z.string().min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+  processedAt: true,
+  processedBy: true,
+  status: true,
+  adminNotes: true,
+});
+
+export const insertPhysicalBookSchema = createInsertSchema(physicalBooks, {
+  libraryId: z.number(),
+  title: z.string().min(1),
+  author: z.string().min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBookLoanSchema = createInsertSchema(bookLoans, {
+  bookId: z.number(),
+  borrowerId: z.number(),
+  libraryId: z.number(),
+  dueDate: z.date(),
+}).omit({
+  id: true,
+  createdAt: true,
+  loanDate: true,
+});
+
+export const insertEBookSchema = createInsertSchema(eBooks, {
+  sellerId: z.number(),
+  title: z.string().min(1),
+  author: z.string().min(1),
+  format: z.string().min(1),
+  fileUrl: z.string().min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  downloads: true,
+});
+
+// Types
+export type LibraryIntegrationRequest = typeof libraryIntegrationRequests.$inferSelect;
+export type InsertLibraryIntegrationRequest = z.infer<typeof insertLibraryIntegrationRequestSchema>;
+export type PhysicalBook = typeof physicalBooks.$inferSelect;
+export type InsertPhysicalBook = z.infer<typeof insertPhysicalBookSchema>;
+export type BookLoan = typeof bookLoans.$inferSelect;
+export type InsertBookLoan = z.infer<typeof insertBookLoanSchema>;
+export type EBook = typeof eBooks.$inferSelect;
+export type InsertEBook = z.infer<typeof insertEBookSchema>;

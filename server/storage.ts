@@ -108,6 +108,28 @@ export interface IStorage {
   // VyronaInstaShop - Analytics
   recordInstagramAnalytics(analytics: InsertInstagramAnalytics): Promise<InstagramAnalytics>;
   getInstagramAnalytics(storeId: number, startDate: Date, endDate: Date): Promise<InstagramAnalytics[]>;
+
+  // VyronaRead Books - Library Integration Requests
+  createLibraryIntegrationRequest(request: InsertLibraryIntegrationRequest): Promise<LibraryIntegrationRequest>;
+  getLibraryIntegrationRequests(): Promise<LibraryIntegrationRequest[]>;
+  updateLibraryIntegrationRequestStatus(id: number, status: string, processedBy: number, adminNotes?: string): Promise<LibraryIntegrationRequest | undefined>;
+
+  // VyronaRead Books - Physical Books
+  createPhysicalBook(book: InsertPhysicalBook): Promise<PhysicalBook>;
+  getPhysicalBooks(libraryId?: number): Promise<PhysicalBook[]>;
+  updatePhysicalBook(id: number, updates: Partial<InsertPhysicalBook>): Promise<PhysicalBook | undefined>;
+  deletePhysicalBook(id: number): Promise<boolean>;
+
+  // VyronaRead Books - E-Books
+  createEBook(ebook: InsertEBook): Promise<EBook>;
+  getEBooks(sellerId: number): Promise<EBook[]>;
+  updateEBook(id: number, updates: Partial<InsertEBook>): Promise<EBook | undefined>;
+  deleteEBook(id: number): Promise<boolean>;
+
+  // VyronaRead Books - Book Loans
+  createBookLoan(loan: InsertBookLoan): Promise<BookLoan>;
+  getBookLoans(libraryId?: number, borrowerId?: number): Promise<BookLoan[]>;
+  returnBook(loanId: number): Promise<BookLoan | undefined>;
 }
 
 export class MemStorage implements IStorage {
