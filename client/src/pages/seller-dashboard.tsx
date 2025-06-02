@@ -92,6 +92,14 @@ export default function SellerDashboard() {
     }));
   };
 
+  const handleDeleteBook = (bookTitle: string) => {
+    if (confirm(`Are you sure you want to delete "${bookTitle}" from your library?`)) {
+      // In a real implementation, this would call an API to delete the book
+      console.log(`Deleting book: ${bookTitle}`);
+      // Show success message or update state
+    }
+  };
+
   const statCards = [
     {
       title: "Active Products",
@@ -972,9 +980,14 @@ export default function SellerDashboard() {
                                 <Eye className="h-4 w-4 mr-1" />
                                 View
                               </Button>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4 mr-1" />
-                                Edit
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDeleteBook("The Psychology of Money")}
+                                className="text-red-600 hover:text-red-700 hover:border-red-300"
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
                               </Button>
                               <Button variant="outline" size="sm">
                                 <Book className="h-4 w-4 mr-1" />
@@ -1011,9 +1024,14 @@ export default function SellerDashboard() {
                                 <Eye className="h-4 w-4 mr-1" />
                                 View
                               </Button>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4 mr-1" />
-                                Edit
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDeleteBook("Atomic Habits")}
+                                className="text-red-600 hover:text-red-700 hover:border-red-300"
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
                               </Button>
                               <Button variant="outline" size="sm">
                                 <Book className="h-4 w-4 mr-1" />
@@ -1051,9 +1069,14 @@ export default function SellerDashboard() {
                                 <AlertCircle className="h-4 w-4 mr-1" />
                                 Follow Up
                               </Button>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-4 w-4 mr-1" />
-                                Edit
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDeleteBook("The Lean Startup")}
+                                className="text-red-600 hover:text-red-700 hover:border-red-300"
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
                               </Button>
                             </div>
                           </div>
