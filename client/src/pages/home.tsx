@@ -116,9 +116,39 @@ export default function Home() {
     showNotification("Product Viewed!", `Earned ${coinReward} coins`, "success");
   };
 
+  const handleLibraryBorrow = async (bookId: string, libraryId: number) => {
+    if (!user) {
+      showNotification("Login Required", "Please login to borrow books", "success");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/library-books/${bookId}/borrow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, libraryId }),
+      });
+
+      if (response.ok) {
+        const coinReward = 25;
+        updateCoins(coinReward);
+        showNotification("Book Borrowed!", `Successfully borrowed from library. Earned ${coinReward} coins!`, "success");
+        
+        // Refresh library data
+        queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
+      } else {
+        const error = await response.json();
+        showNotification("Borrow Failed", error.message || "Unable to borrow book", "success");
+      }
+    } catch (error) {
+      console.error('Library borrow error:', error);
+      showNotification("Error", "Failed to borrow book from library", "success");
+    }
+  };
+
   const handleBookPurchase = async (bookId: number, action: 'buy' | 'rent') => {
     if (!user) {
-      showNotification("Login Required", "Please login to purchase books", "error");
+      showNotification("Login Required", "Please login to purchase books", "success");
       return;
     }
 
