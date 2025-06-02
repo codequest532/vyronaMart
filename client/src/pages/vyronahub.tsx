@@ -89,12 +89,10 @@ export default function VyronaHub() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<{
     mainImage: File | null;
-    additionalImages: File[];
-    videos: File[];
+    additionalMedia: File[];
   }>({
     mainImage: null,
-    additionalImages: [],
-    videos: []
+    additionalMedia: []
   });
   const [isUploading, setIsUploading] = useState(false);
 
@@ -199,30 +197,27 @@ export default function VyronaHub() {
     }
   };
 
-  const handleAdditionalImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAdditionalMediaUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const mediaFiles = files.filter(file => 
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    );
     
-    if (uploadedFiles.additionalImages.length + imageFiles.length > 5) {
+    const currentImages = uploadedFiles.additionalMedia.filter(file => file.type.startsWith('image/')).length;
+    const currentVideos = uploadedFiles.additionalMedia.filter(file => file.type.startsWith('video/')).length;
+    const newImages = mediaFiles.filter(file => file.type.startsWith('image/')).length;
+    const newVideos = mediaFiles.filter(file => file.type.startsWith('video/')).length;
+    
+    if (currentImages + newImages > 5) {
       toast({
         title: "Upload Limit",
-        description: "You can upload maximum 5 additional images",
+        description: "You can upload maximum 5 images",
         variant: "destructive",
       });
       return;
     }
     
-    setUploadedFiles(prev => ({
-      ...prev,
-      additionalImages: [...prev.additionalImages, ...imageFiles]
-    }));
-  };
-
-  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    const videoFiles = files.filter(file => file.type.startsWith('video/'));
-    
-    if (uploadedFiles.videos.length + videoFiles.length > 2) {
+    if (currentVideos + newVideos > 2) {
       toast({
         title: "Upload Limit",
         description: "You can upload maximum 2 videos",
@@ -231,27 +226,29 @@ export default function VyronaHub() {
       return;
     }
     
+    if (uploadedFiles.additionalMedia.length + mediaFiles.length > 7) {
+      toast({
+        title: "Upload Limit",
+        description: "You can upload maximum 7 files total (5 images + 2 videos)",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setUploadedFiles(prev => ({
       ...prev,
-      videos: [...prev.videos, ...videoFiles]
+      additionalMedia: [...prev.additionalMedia, ...mediaFiles]
     }));
   };
 
-  const removeAdditionalImage = (index: number) => {
+  const removeAdditionalMedia = (index: number) => {
     setUploadedFiles(prev => ({
       ...prev,
-      additionalImages: prev.additionalImages.filter((_, i) => i !== index)
+      additionalMedia: prev.additionalMedia.filter((_, i) => i !== index)
     }));
   };
 
-  const removeVideo = (index: number) => {
-    setUploadedFiles(prev => ({
-      ...prev,
-      videos: prev.videos.filter((_, i) => i !== index)
-    }));
-  };
-
-  const openGoogleDrivePicker = (type: 'image' | 'video') => {
+  const openGoogleDrivePicker = () => {
     // Google Drive picker implementation
     toast({
       title: "Google Drive Integration",
@@ -632,7 +629,7 @@ export default function VyronaHub() {
                                   <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => openGoogleDrivePicker('image')}
+                                    onClick={openGoogleDrivePicker}
                                   >
                                     <Cloud className="h-4 w-4 mr-2" />
                                     Google Drive
@@ -659,24 +656,38 @@ export default function VyronaHub() {
                         />
                       </div>
 
-                      {/* Additional Images Upload */}
+                      {/* Additional Images/Videos Upload */}
                       <div className="space-y-4">
-                        <FormLabel>Additional Images (Max 5)</FormLabel>
+                        <FormLabel>Additional Images/Videos (Max 5 images + 2 videos)</FormLabel>
                         <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
                           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                            {uploadedFiles.additionalImages.map((file, index) => (
+                            {uploadedFiles.additionalMedia.map((file, index) => (
                               <div key={index} className="relative">
-                                <img
-                                  src={URL.createObjectURL(file)}
-                                  alt={`Additional ${index + 1}`}
-                                  className="w-full h-24 object-cover rounded-lg"
-                                />
+                                {file.type.startsWith('image/') ? (
+                                  <img
+                                    src={URL.createObjectURL(file)}
+                                    alt={`Media ${index + 1}`}
+                                    className="w-full h-24 object-cover rounded-lg"
+                                  />
+                                ) : (
+                                  <div className="relative">
+                                    <video
+                                      src={URL.createObjectURL(file)}
+                                      className="w-full h-24 object-cover rounded-lg"
+                                      controls
+                                    />
+                                    <div className="absolute bottom-1 left-1 bg-black bg-opacity-60 text-white text-xs px-1 rounded">
+                                      <Video className="h-3 w-3 inline mr-1" />
+                                      Video
+                                    </div>
+                                  </div>
+                                )}
                                 <Button
                                   type="button"
                                   variant="destructive"
                                   size="sm"
                                   className="absolute top-1 right-1 h-6 w-6 p-0"
-                                  onClick={() => removeAdditionalImage(index)}
+                                  onClick={() => removeAdditionalMedia(index)}
                                 >
                                   <X className="h-3 w-3" />
                                 </Button>
@@ -684,96 +695,41 @@ export default function VyronaHub() {
                             ))}
                           </div>
                           
-                          {uploadedFiles.additionalImages.length < 5 && (
-                            <div className="text-center">
-                              <div className="flex justify-center gap-2">
-                                <Button type="button" variant="outline" size="sm" className="relative">
-                                  <Upload className="h-4 w-4 mr-2" />
-                                  Upload Images
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    multiple
-                                    onChange={handleAdditionalImageUpload}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                  />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openGoogleDrivePicker('image')}
-                                >
-                                  <Cloud className="h-4 w-4 mr-2" />
-                                  Google Drive
-                                </Button>
-                              </div>
-                              <p className="mt-2 text-xs text-gray-500">
-                                {uploadedFiles.additionalImages.length}/5 images uploaded
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Product Videos Upload */}
-                      <div className="space-y-4">
-                        <FormLabel>Product Videos (Max 2)</FormLabel>
-                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            {uploadedFiles.videos.map((file, index) => (
-                              <div key={index} className="relative">
-                                <video
-                                  src={URL.createObjectURL(file)}
-                                  className="w-full h-32 object-cover rounded-lg"
-                                  controls
-                                />
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="sm"
-                                  className="absolute top-1 right-1 h-6 w-6 p-0"
-                                  onClick={() => removeVideo(index)}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
-                                <p className="text-xs text-gray-500 mt-1 truncate">
-                                  {file.name}
+                          {(() => {
+                            const currentImages = uploadedFiles.additionalMedia.filter(file => file.type.startsWith('image/')).length;
+                            const currentVideos = uploadedFiles.additionalMedia.filter(file => file.type.startsWith('video/')).length;
+                            const canUploadMore = currentImages < 5 || currentVideos < 2;
+                            
+                            return canUploadMore && (
+                              <div className="text-center">
+                                <div className="flex justify-center gap-2">
+                                  <Button type="button" variant="outline" size="sm" className="relative">
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Upload Images/Videos
+                                    <input
+                                      type="file"
+                                      accept="image/*,video/*"
+                                      multiple
+                                      onChange={handleAdditionalMediaUpload}
+                                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={openGoogleDrivePicker}
+                                  >
+                                    <Cloud className="h-4 w-4 mr-2" />
+                                    Google Drive
+                                  </Button>
+                                </div>
+                                <p className="mt-2 text-xs text-gray-500">
+                                  {currentImages}/5 images • {currentVideos}/2 videos • Supports JPG, PNG, MP4, MOV
                                 </p>
                               </div>
-                            ))}
-                          </div>
-                          
-                          {uploadedFiles.videos.length < 2 && (
-                            <div className="text-center">
-                              <Video className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                              <div className="flex justify-center gap-2">
-                                <Button type="button" variant="outline" size="sm" className="relative">
-                                  <Upload className="h-4 w-4 mr-2" />
-                                  Upload Videos
-                                  <input
-                                    type="file"
-                                    accept="video/*"
-                                    multiple
-                                    onChange={handleVideoUpload}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                  />
-                                </Button>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openGoogleDrivePicker('video')}
-                                >
-                                  <Cloud className="h-4 w-4 mr-2" />
-                                  Google Drive
-                                </Button>
-                              </div>
-                              <p className="mt-2 text-xs text-gray-500">
-                                {uploadedFiles.videos.length}/2 videos uploaded • MP4, MOV, AVI supported
-                              </p>
-                            </div>
-                          )}
+                            );
+                          })()}
                         </div>
                       </div>
                       
