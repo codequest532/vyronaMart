@@ -624,7 +624,7 @@ export default function Landing() {
               
               <div className="text-center mt-8">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
-                  Explore VyronaHub
+                  Shop Smart
                   <ShoppingBag className="ml-2 h-5 w-5" />
                 </Button>
               </div>
