@@ -137,16 +137,16 @@ export default function Home() {
     setActiveTab(tab);
   };
 
+  const handleProductClick = (productName: string) => {
+    showNotification(`${productName} added to cart!`, 'success');
+    updateCoins(user.vyronaCoins + 10);
+  };
+
   const handleGameClick = (gameName: string) => {
     const rewards = [15, 25, 35, 50];
     const reward = rewards[Math.floor(Math.random() * rewards.length)];
     updateCoins(reward);
     showNotification(`You earned ${reward} VyronaCoins playing ${gameName}!`, "game");
-  };
-
-  const handleProductClick = (productName: string) => {
-    showNotification(`Added ${productName} to cart! +5 VyronaCoins`, "success");
-    updateCoins(5);
   };
 
   if (!user) {
@@ -201,103 +201,109 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Complete Shopping Universe */}
+            {/* All Products Section */}
             <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
               <CardContent className="p-6">
-                <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">🛒 VyronaHub - Complete Shopping Universe</h3>
-                  <p className="text-gray-600">Your one-stop destination for everything awesome - gadgets to groceries!</p>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">🛒 All Products</h3>
+                    <p className="text-gray-600">Discover amazing products from our verified sellers</p>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <Filter className="h-4 w-4 text-gray-500" />
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Browse by Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Categories</SelectItem>
+                          <SelectItem value="Electronics">🔌 Electronics</SelectItem>
+                          <SelectItem value="Fashion & Apparels">👗 Fashion & Apparels</SelectItem>
+                          <SelectItem value="Home & Kitchen">🏠 Home & Kitchen</SelectItem>
+                          <SelectItem value="Kids Corner">🧸 Kids Corner</SelectItem>
+                          <SelectItem value="Organic Store">🥬 Organic Store</SelectItem>
+                          <SelectItem value="Groceries">🛒 Groceries</SelectItem>
+                          <SelectItem value="Home Automation">🏡 Home Automation</SelectItem>
+                          <SelectItem value="Office & Stationery">🧾 Office & Stationery</SelectItem>
+                          <SelectItem value="Health & Wellness">🧘 Health & Wellness</SelectItem>
+                          <SelectItem value="Pet Care">🐶 Pet Care</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[
-                    {
-                      icon: "🔌",
-                      title: "Electronics",
-                      items: ["Smartphones & Accessories", "Laptops & Tablets", "Smart TVs & Monitors", "Wearables & Smart Devices"],
-                      color: "blue"
-                    },
-                    {
-                      icon: "👗",
-                      title: "Fashion & Apparels",
-                      items: ["Men's, Women's & Kids' Wear", "Footwear & Accessories", "Ethnic & Western Clothing", "Bags, Wallets & Belts"],
-                      color: "pink"
-                    },
-                    {
-                      icon: "🏠",
-                      title: "Home & Kitchen",
-                      items: ["Kitchen Appliances & Tools", "Storage & Organization", "Furnishings & Decor", "Lighting & Cleaning"],
-                      color: "green"
-                    },
-                    {
-                      icon: "🧸",
-                      title: "Kids Corner",
-                      items: ["Toys, Games & Puzzles", "School Supplies & Stationery", "Baby Care Products", "Learning & Educational Kits"],
-                      color: "yellow"
-                    },
-                    {
-                      icon: "🥬",
-                      title: "Organic Store",
-                      items: ["Organic Fruits & Vegetables", "Herbal Juices & Superfoods", "Ayurvedic & Natural Products", "Organic Skincare & Wellness"],
-                      color: "emerald"
-                    },
-                    {
-                      icon: "🛒",
-                      title: "Groceries",
-                      items: ["Daily Essentials (Atta, Rice, Pulses)", "Oils, Spices & Condiments", "Beverages & Snacks", "Dairy, Bakery & Frozen Foods"],
-                      color: "orange"
-                    },
-                    {
-                      icon: "🏡",
-                      title: "Home Automation",
-                      items: ["Smart Plugs & Switches", "Voice Assistants (Alexa, Google)", "Smart Lights & Sensors", "Home Security & Surveillance"],
-                      color: "indigo"
-                    },
-                    {
-                      icon: "🧾",
-                      title: "Office & Stationery",
-                      items: ["Office Chairs & Desks", "Files, Folders & Organizers", "Pens, Notebooks & Writing Tools", "Printers & Computer Accessories"],
-                      color: "gray"
-                    },
-                    {
-                      icon: "🧘",
-                      title: "Health & Wellness",
-                      items: ["Fitness Equipment (Yoga Mats)", "Health Monitoring Devices", "Nutrition & Supplements", "Skincare & Personal Hygiene"],
-                      color: "teal"
-                    },
-                    {
-                      icon: "🐶",
-                      title: "Pet Care",
-                      items: ["Pet Food & Treats", "Grooming Essentials", "Beds, Toys & Accessories", "Leashes, Collars & Carriers"],
-                      color: "amber"
-                    }
-                  ].map((category, index) => (
-                    <Card key={index} className={`bg-${category.color}-50 border-${category.color}-200 hover:shadow-lg transition-all duration-300 cursor-pointer group`}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="text-2xl">{category.icon}</div>
-                          <h4 className="font-bold text-gray-900">{category.title}</h4>
-                        </div>
-                        <ul className="space-y-1">
-                          {category.items.map((item, itemIndex) => (
-                            <li key={itemIndex} className="text-sm text-gray-600 flex items-start">
-                              <span className="mr-2">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <div className="mt-3 flex items-center justify-between">
-                          <Badge variant="secondary" className={`text-${category.color}-600 bg-${category.color}-50`}>
-                            Shop Now
-                          </Badge>
-                          <span className="text-xs text-gray-500 group-hover:text-gray-700">
-                            View All →
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                {products && (products as any[]).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {(products as any[])
+                      .filter((product: any) => selectedCategory === "all" || product.category === selectedCategory)
+                      .map((product: any) => (
+                        <Card key={product.id} className="bg-white border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                          <CardContent className="p-4">
+                            <div className="relative mb-4">
+                              {product.imageUrl ? (
+                                <img 
+                                  src={product.imageUrl} 
+                                  alt={product.name}
+                                  className="w-full h-40 object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center">
+                                  <ShoppingBag className="h-12 w-12 text-gray-400" />
+                                </div>
+                              )}
+                              <div className="absolute top-2 right-2">
+                                <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs">
+                                  +{Math.floor((product.price || 0) / 1000)} coins
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">{product.name}</h4>
+                              <p className="text-xs text-gray-500 capitalize">{product.category}</p>
+                              {product.description && (
+                                <p className="text-xs text-gray-600 line-clamp-2">{product.description}</p>
+                              )}
+                              
+                              <div className="flex items-center justify-between pt-2">
+                                <div className="text-lg font-bold text-blue-600">
+                                  ₹{((product.price || 0) / 100).toLocaleString()}
+                                </div>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs"
+                                  onClick={() => handleProductClick(product.name)}
+                                >
+                                  Add to Cart
+                                </Button>
+                              </div>
+                              
+                              <div className="flex items-center justify-between text-xs text-gray-500">
+                                <span>Free shipping</span>
+                                <span className="flex items-center">
+                                  <Star className="h-3 w-3 text-yellow-400 mr-1" />
+                                  4.5
+                                </span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h4 className="text-lg font-semibold text-gray-600 mb-2">No Products Available</h4>
+                    <p className="text-gray-500">Sellers can upload products through the seller interface</p>
+                    <div className="mt-4">
+                      <Button variant="outline" className="text-blue-600 border-blue-300">
+                        Browse Categories
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
                   <div className="flex items-center justify-between">
