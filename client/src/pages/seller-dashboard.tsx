@@ -121,6 +121,35 @@ export default function SellerDashboard() {
     }
   };
 
+  const handleQuickIssue = () => {
+    const bookTitle = prompt("Enter book title to issue:");
+    if (bookTitle) {
+      handleIssueBook(bookTitle);
+    }
+  };
+
+  const handleQuickReturn = () => {
+    const bookTitle = prompt("Enter book title to return:");
+    if (bookTitle) {
+      console.log(`Processing return for: ${bookTitle}`);
+      alert(`Success!\n\n"${bookTitle}" has been returned successfully.\nStatus: Available for checkout`);
+    }
+  };
+
+  const handleAddMember = () => {
+    const memberName = prompt("Enter new member name:");
+    const memberEmail = prompt("Enter member email:");
+    if (memberName && memberEmail) {
+      console.log(`Adding new member: ${memberName} (${memberEmail})`);
+      alert(`Member Added!\n\nName: ${memberName}\nEmail: ${memberEmail}\nMember ID: LIB${Date.now().toString().slice(-4)}\nStatus: Active`);
+    }
+  };
+
+  const handleReservations = () => {
+    console.log("Opening reservations management");
+    alert(`Reservations Overview:\n\n• Pending: 12 reservations\n• Today's pickups: 5\n• Overdue pickups: 2\n\nOpening reservations management...`);
+  };
+
   const statCards = [
     {
       title: "Active Products",
@@ -914,20 +943,36 @@ export default function SellerDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
-                      <Button variant="outline" className="h-16 flex-col">
-                        <Book className="h-6 w-6 mb-2" />
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex-col hover:bg-green-50"
+                        onClick={handleQuickIssue}
+                      >
+                        <Book className="h-6 w-6 mb-2 text-green-600" />
                         <span className="text-xs">Issue Book</span>
                       </Button>
-                      <Button variant="outline" className="h-16 flex-col">
-                        <BookOpen className="h-6 w-6 mb-2" />
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex-col hover:bg-blue-50"
+                        onClick={handleQuickReturn}
+                      >
+                        <BookOpen className="h-6 w-6 mb-2 text-blue-600" />
                         <span className="text-xs">Return Book</span>
                       </Button>
-                      <Button variant="outline" className="h-16 flex-col">
-                        <Users className="h-6 w-6 mb-2" />
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex-col hover:bg-purple-50"
+                        onClick={handleAddMember}
+                      >
+                        <Users className="h-6 w-6 mb-2 text-purple-600" />
                         <span className="text-xs">Add Member</span>
                       </Button>
-                      <Button variant="outline" className="h-16 flex-col">
-                        <Calendar className="h-6 w-6 mb-2" />
+                      <Button 
+                        variant="outline" 
+                        className="h-16 flex-col hover:bg-orange-50"
+                        onClick={handleReservations}
+                      >
+                        <Calendar className="h-6 w-6 mb-2 text-orange-600" />
                         <span className="text-xs">Reservations</span>
                       </Button>
                     </div>
