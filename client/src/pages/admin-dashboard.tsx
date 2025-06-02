@@ -778,7 +778,7 @@ export default function AdminDashboard() {
                       <BarChart3 className="h-6 w-6 mb-2" />
                       <span className="text-xs">Analytics</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/vyronahub')}>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab('products')}>
                       <Package className="h-6 w-6 mb-2" />
                       <span className="text-xs">VyronaHub</span>
                     </Button>
@@ -808,7 +808,7 @@ export default function AdminDashboard() {
                     <div className="space-y-3">
                       <h4 className="font-semibold text-gray-900 dark:text-white">Core Modules</h4>
                       <div className="space-y-2">
-                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setLocation('/vyronahub')}>
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setActiveTab('products')}>
                           <Package className="h-5 w-5 text-blue-600" />
                           <span className="text-sm">VyronaHub - Product Catalog</span>
                         </div>
