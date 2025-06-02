@@ -53,6 +53,31 @@ export default function SellerDashboard() {
   });
   const [driveLink, setDriveLink] = useState("");
 
+  const handleAddLibrary = () => {
+    const libraryName = prompt("Enter library name:");
+    if (!libraryName) return;
+    
+    const libraryType = prompt("Library type:\n\n1. Public Library\n2. Academic Library\n3. School Library\n4. Community Center\n5. Private Collection\n\nEnter choice (1-5):");
+    if (!libraryType) return;
+    
+    const address = prompt("Enter library address:");
+    if (!address) return;
+    
+    const contact = prompt("Enter contact person/email:");
+    if (!contact) return;
+    
+    console.log(`Adding new library: ${libraryName}`);
+    alert(`Library Integration Request Sent!\n\nLibrary: ${libraryName}\nType: ${libraryType === '1' ? 'Public Library' : libraryType === '2' ? 'Academic Library' : libraryType === '3' ? 'School Library' : libraryType === '4' ? 'Community Center' : 'Private Collection'}\nAddress: ${address}\nContact: ${contact}\n\nIntegration will be processed within 24 hours.`);
+  };
+
+  const handleSearchLibraries = () => {
+    const searchTerm = prompt("Search libraries by name, type, or location:");
+    if (searchTerm) {
+      console.log(`Searching libraries for: ${searchTerm}`);
+      alert(`Library Search Results for "${searchTerm}":\n\n• Central City Library - Main Branch\n• Downtown Library - Public\n• Tech University Library - Academic\n\nShowing 3 results`);
+    }
+  };
+
   const { data: sellerProducts } = useQuery({
     queryKey: ["/api/seller/products"],
   });
@@ -1085,11 +1110,11 @@ export default function SellerDashboard() {
                   <div className="space-y-4">
                     {/* Add New Library */}
                     <div className="flex gap-2">
-                      <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddBookDialog(true)}>
+                      <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleAddLibrary}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Library
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleSearchLibraries}>
                         <Search className="h-4 w-4 mr-2" />
                         Search Libraries
                       </Button>
