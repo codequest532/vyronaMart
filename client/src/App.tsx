@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
+import ProductDetails from "@/pages/product-details";
+import StoreDetails from "@/pages/store-details";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
@@ -29,6 +31,12 @@ function Router() {
       ) : (
         <Route path="/" component={Landing} />
       )}
+      <Route path="/product/:productId">
+        {(params) => <ProductDetails productId={params.productId} />}
+      </Route>
+      <Route path="/store/:storeId">
+        {(params) => <StoreDetails storeId={params.storeId} />}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
