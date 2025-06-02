@@ -55,10 +55,10 @@ import {
   TrendingUp
 } from "lucide-react";
 
-type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
+type TabType = "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<TabType>("home");
+  const [activeTab, setActiveTab] = useState<TabType>("vyronahub");
   const [, setLocation] = useLocation();
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -265,31 +265,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
-        {/* Home Tab */}
-        {activeTab === "home" && (
-          <div className="space-y-8">
-            {/* Hero Section */}
-            <Card className="vyrona-gradient-primary text-white relative overflow-hidden">
-              <CardContent className="p-8">
-                <div className="relative z-10">
-                  <h2 className="text-3xl font-bold mb-2">Welcome to VyronaMart!</h2>
-                  <p className="text-lg opacity-90 mb-6">Your gamified shopping universe awaits</p>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="bg-white/20 rounded-lg px-4 py-2 backdrop-blur-sm">
-                      <div className="text-sm opacity-80">Daily Streak</div>
-                      <div className="font-bold text-lg">Day 7</div>
-                    </div>
-                    <div className="bg-white/20 rounded-lg px-4 py-2 backdrop-blur-sm">
-                      <div className="text-sm opacity-80">Today's Rewards</div>
-                      <div className="font-bold text-lg">+150 Coins</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute top-4 right-4 text-6xl opacity-20">
-                  <Gamepad2 className="animate-bounce-slow" />
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Quick Actions Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
