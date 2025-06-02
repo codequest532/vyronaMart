@@ -517,7 +517,7 @@ export default function Landing() {
             <section className="mb-12">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold mb-4">VyronaHub - Complete Shopping Universe</h2>
-                <p className="text-lg text-gray-600">From electronics to organics - everything you love, all in one place</p>
+                <p className="text-lg text-gray-600">Your one-stop destination for everything awesome - gadgets to groceries!</p>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-6">
                 <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
