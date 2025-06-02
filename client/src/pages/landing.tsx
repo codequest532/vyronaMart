@@ -799,40 +799,7 @@ export default function Landing() {
               </div>
             </section>
 
-            {/* VyronaMart Unique Features */}
-            <section className="mb-12 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-center mb-8">Why Choose VyronaMart?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
-                    🎮
-                  </div>
-                  <h3 className="font-bold mb-2">Gamified Shopping</h3>
-                  <p className="text-sm text-gray-600">Earn coins, XP, and unlock achievements with every purchase</p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
-                    🎯
-                  </div>
-                  <h3 className="font-bold mb-2">Social Shopping Rooms</h3>
-                  <p className="text-sm text-gray-600">Shop together with friends in interactive multiplayer rooms</p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
-                    🏆
-                  </div>
-                  <h3 className="font-bold mb-2">Rewards & Levels</h3>
-                  <p className="text-sm text-gray-600">Level up your profile and unlock exclusive rewards</p>
-                </div>
-                <div className="text-center">
-                  <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
-                    🏬
-                  </div>
-                  <h3 className="font-bold mb-2">MallConnect Integration</h3>
-                  <p className="text-sm text-gray-600">City mall shops delivering through our e-commerce platform</p>
-                </div>
-              </div>
-            </section>
+
 
             {/* MallConnect - Premium Stores */}
             <section className="mb-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8">
@@ -961,6 +928,41 @@ export default function Landing() {
               
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-500">Supporting local businesses while serving your neighborhood</p>
+              </div>
+            </section>
+
+            {/* VyronaMart Unique Features */}
+            <section className="mb-12 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8">
+              <h2 className="text-2xl font-bold text-center mb-8">Why Choose VyronaMart?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🎮
+                  </div>
+                  <h3 className="font-bold mb-2">Gamified Shopping</h3>
+                  <p className="text-sm text-gray-600">Earn coins, XP, and unlock achievements with every purchase</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🎯
+                  </div>
+                  <h3 className="font-bold mb-2">Social Shopping Rooms</h3>
+                  <p className="text-sm text-gray-600">Shop together with friends in interactive multiplayer rooms</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🏆
+                  </div>
+                  <h3 className="font-bold mb-2">Rewards & Levels</h3>
+                  <p className="text-sm text-gray-600">Level up your profile and unlock exclusive rewards</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🏬
+                  </div>
+                  <h3 className="font-bold mb-2">MallConnect Integration</h3>
+                  <p className="text-sm text-gray-600">City mall shops delivering through our e-commerce platform</p>
+                </div>
               </div>
             </section>
           </>
