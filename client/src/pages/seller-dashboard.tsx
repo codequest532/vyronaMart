@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   Package, 
   TrendingUp, 
@@ -27,11 +27,28 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
 
 export default function SellerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showAddBookDialog, setShowAddBookDialog] = useState(false);
+  const [newBook, setNewBook] = useState({
+    title: "",
+    author: "",
+    isbn: "",
+    category: "",
+    copies: 1,
+    description: "",
+    publisher: "",
+    publicationYear: "",
+    language: "English"
+  });
 
   const { data: sellerProducts } = useQuery({
     queryKey: ["/api/seller/products"],
@@ -47,6 +64,31 @@ export default function SellerDashboard() {
 
   const handleLogout = () => {
     setLocation("/login");
+  };
+
+  const handleAddBook = () => {
+    // For now, we'll just close the dialog and reset the form
+    // In a real implementation, this would send data to the API
+    console.log("Adding book:", newBook);
+    setShowAddBookDialog(false);
+    setNewBook({
+      title: "",
+      author: "",
+      isbn: "",
+      category: "",
+      copies: 1,
+      description: "",
+      publisher: "",
+      publicationYear: "",
+      language: "English"
+    });
+  };
+
+  const handleInputChange = (field: string, value: string | number) => {
+    setNewBook(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const statCards = [
@@ -419,10 +461,156 @@ export default function SellerDashboard() {
                     <Search className="h-4 w-4 mr-2" />
                     Search Books
                   </Button>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Book
-                  </Button>
+                  <Dialog open={showAddBookDialog} onOpenChange={setShowAddBookDialog}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Book
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Add New Book to Library</DialogTitle>
+                        <DialogDescription>
+                          Add a new book to your VyronaRead library inventory
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="title">Book Title *</Label>
+                          <Input
+                            id="title"
+                            value={newBook.title}
+                            onChange={(e) => handleInputChange("title", e.target.value)}
+                            placeholder="Enter book title"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="author">Author *</Label>
+                          <Input
+                            id="author"
+                            value={newBook.author}
+                            onChange={(e) => handleInputChange("author", e.target.value)}
+                            placeholder="Enter author name"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="isbn">ISBN</Label>
+                          <Input
+                            id="isbn"
+                            value={newBook.isbn}
+                            onChange={(e) => handleInputChange("isbn", e.target.value)}
+                            placeholder="978-0123456789"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="category">Category *</Label>
+                          <Select value={newBook.category} onValueChange={(value) => handleInputChange("category", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="fiction">Fiction</SelectItem>
+                              <SelectItem value="non-fiction">Non-Fiction</SelectItem>
+                              <SelectItem value="business">Business</SelectItem>
+                              <SelectItem value="self-help">Self-Help</SelectItem>
+                              <SelectItem value="technology">Technology</SelectItem>
+                              <SelectItem value="science">Science</SelectItem>
+                              <SelectItem value="history">History</SelectItem>
+                              <SelectItem value="biography">Biography</SelectItem>
+                              <SelectItem value="education">Education</SelectItem>
+                              <SelectItem value="children">Children</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="publisher">Publisher</Label>
+                          <Input
+                            id="publisher"
+                            value={newBook.publisher}
+                            onChange={(e) => handleInputChange("publisher", e.target.value)}
+                            placeholder="Publisher name"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="publicationYear">Publication Year</Label>
+                          <Input
+                            id="publicationYear"
+                            type="number"
+                            value={newBook.publicationYear}
+                            onChange={(e) => handleInputChange("publicationYear", e.target.value)}
+                            placeholder="2023"
+                            min="1000"
+                            max={new Date().getFullYear()}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="copies">Number of Copies *</Label>
+                          <Input
+                            id="copies"
+                            type="number"
+                            value={newBook.copies}
+                            onChange={(e) => handleInputChange("copies", parseInt(e.target.value) || 1)}
+                            placeholder="1"
+                            min="1"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="language">Language</Label>
+                          <Select value={newBook.language} onValueChange={(value) => handleInputChange("language", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="English">English</SelectItem>
+                              <SelectItem value="Hindi">Hindi</SelectItem>
+                              <SelectItem value="Bengali">Bengali</SelectItem>
+                              <SelectItem value="Tamil">Tamil</SelectItem>
+                              <SelectItem value="Telugu">Telugu</SelectItem>
+                              <SelectItem value="Marathi">Marathi</SelectItem>
+                              <SelectItem value="Gujarati">Gujarati</SelectItem>
+                              <SelectItem value="Kannada">Kannada</SelectItem>
+                              <SelectItem value="Malayalam">Malayalam</SelectItem>
+                              <SelectItem value="Punjabi">Punjabi</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="description">Description</Label>
+                          <Textarea
+                            id="description"
+                            value={newBook.description}
+                            onChange={(e) => handleInputChange("description", e.target.value)}
+                            placeholder="Brief description of the book..."
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end gap-2 pt-4">
+                        <Button variant="outline" onClick={() => setShowAddBookDialog(false)}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleAddBook}
+                          disabled={!newBook.title || !newBook.author || !newBook.category}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Book
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
 
