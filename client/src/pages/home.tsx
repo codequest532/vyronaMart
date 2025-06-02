@@ -129,8 +129,25 @@ export default function Home() {
     queryKey: ["/api/stores"],
   });
 
-  const { data: books = [] } = useQuery({
-    queryKey: ["/api/books"],
+  // VyronaRead authentic data sources - connecting to seller-uploaded content
+  const { data: sellerEBooks = [] } = useQuery({
+    queryKey: ["/api/vyronaread/ebooks"],
+    enabled: !!user,
+  });
+
+  const { data: sellerBooks = [] } = useQuery({
+    queryKey: ["/api/vyronaread/seller-books"],
+    enabled: !!user,
+  });
+
+  const { data: libraryBooks = [] } = useQuery({
+    queryKey: ["/api/vyronaread/library-books"],
+    enabled: !!user,
+  });
+
+  const { data: availableLibraries = [] } = useQuery({
+    queryKey: ["/api/vyronaread/libraries"],
+    enabled: !!user,
   });
 
   const { data: libraryRequests = [] } = useQuery({
@@ -350,9 +367,9 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {books && books.length > 0 ? (
+                  {sellerBooks && sellerBooks.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {books.slice(0, 6).map((book: any) => (
+                      {sellerBooks.slice(0, 6).map((book: any) => (
                         <div key={book.id} className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
@@ -1123,48 +1140,48 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-900">Currently Reading</h4>
-                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4">
-                      <div className="flex items-start space-x-4">
-                        <img 
-                          src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100" 
-                          alt="Current book"
-                          className="w-16 h-24 object-cover rounded"
-                        />
-                        <div className="flex-1">
-                          <h5 className="font-medium text-gray-900">The Art of Programming</h5>
-                          <p className="text-sm text-gray-600 mb-2">by Robert Martin</p>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Progress</span>
-                              <span>68%</span>
-                            </div>
-                            <Progress value={68} className="h-2" />
-                            <div className="flex justify-between text-xs text-gray-500">
-                              <span>Page 204 of 300</span>
-                              <span>2h 30m left</span>
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-900">Available E-Books</h4>
+                      <span className="text-sm text-gray-500">{sellerEBooks.length} books</span>
+                    </div>
+                    
+                    {sellerEBooks.length > 0 ? (
+                      <div className="space-y-3">
+                        {sellerEBooks.slice(0, 3).map((ebook: any) => (
+                          <div key={ebook.id} className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4">
+                            <div className="flex items-start space-x-4">
+                              <div className="w-12 h-16 bg-purple-200 rounded flex items-center justify-center">
+                                <Book className="h-6 w-6 text-purple-600" />
+                              </div>
+                              <div className="flex-1">
+                                <h5 className="font-medium text-gray-900 mb-1">{ebook.title}</h5>
+                                <p className="text-sm text-gray-600 mb-2">by {ebook.author}</p>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-semibold text-purple-600">${ebook.price}</span>
+                                  <Button 
+                                    size="sm" 
+                                    onClick={() => {
+                                      setSelectedBook(ebook);
+                                      setActiveTab("read-book");
+                                      showNotification("Opening E-Reader", "Starting VyronaRead experience", "success");
+                                    }}
+                                  >
+                                    <Play className="h-4 w-4 mr-2" />
+                                    Read Now
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <Button 
-                            size="sm" 
-                            className="mt-3 w-full"
-                            onClick={() => {
-                              setActiveTab("read-book");
-                              setSelectedBook({
-                                id: 1,
-                                name: "The Art of Programming",
-                                author: "Robert Martin",
-                                type: "digital"
-                              });
-                              showNotification("Opening E-Reader", "Starting VyronaRead experience", "success");
-                            }}
-                          >
-                            <Play className="h-4 w-4 mr-2" />
-                            Continue Reading
-                          </Button>
-                        </div>
+                        ))}
                       </div>
-                    </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Book className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p>No e-books available yet</p>
+                        <p className="text-sm">Sellers can upload e-books through the seller interface</p>
+                      </div>
+                    )}
 
                     <div className="space-y-2">
                       <h5 className="font-medium text-gray-900">Reading Settings</h5>
