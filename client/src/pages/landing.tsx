@@ -397,7 +397,7 @@ export default function Landing() {
                 onClick={() => setSelectedCategory("electronics")}
                 className={`hover:underline ${selectedCategory === "electronics" ? "underline" : ""}`}
               >
-                VyronaSpace Tech
+                Electronics
               </button>
               <button
                 onClick={() => setSelectedCategory("fashion")}
@@ -411,8 +411,9 @@ export default function Landing() {
               >
                 Home Essentials
               </button>
-              <span className="cursor-pointer hover:underline">VyronaRead</span>
+              <span className="cursor-pointer hover:underline">VyronaSpace</span>
               <span className="cursor-pointer hover:underline">VyronaSocial</span>
+              <span className="cursor-pointer hover:underline">VyronaRead</span>
               <span className="cursor-pointer hover:underline">MallConnect</span>
             </div>
             <div className="text-xs text-blue-200">
@@ -445,7 +446,7 @@ export default function Landing() {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
               <div className="text-3xl mb-2">🚀</div>
               <h3 className="font-semibold text-sm">VyronaSpace</h3>
-              <p className="text-xs opacity-90">Gaming Hub</p>
+              <p className="text-xs opacity-90">Local Store Connect</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
               <div className="text-3xl mb-2">📚</div>
@@ -537,8 +538,8 @@ export default function Landing() {
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
                     📱
                   </div>
-                  <h3 className="font-semibold">VyronaSpace Tech</h3>
-                  <p className="text-xs text-gray-600">Electronics & Gadgets</p>
+                  <h3 className="font-semibold">Electronics</h3>
+                  <p className="text-xs text-gray-600">Tech & Gadgets</p>
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("fashion")}>
                   <div className="bg-gradient-to-r from-pink-500 to-red-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
@@ -556,10 +557,10 @@ export default function Landing() {
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
                   <div className="bg-gradient-to-r from-orange-500 to-yellow-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    📚
+                    🚀
                   </div>
-                  <h3 className="font-semibold">VyronaRead</h3>
-                  <p className="text-xs text-gray-600">Books & Knowledge</p>
+                  <h3 className="font-semibold">VyronaSpace</h3>
+                  <p className="text-xs text-gray-600">Quick Delivery</p>
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
                   <div className="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
@@ -570,10 +571,10 @@ export default function Landing() {
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
                   <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    🏪
+                    📚
                   </div>
-                  <h3 className="font-semibold">MallConnect</h3>
-                  <p className="text-xs text-gray-600">Local Stores</p>
+                  <h3 className="font-semibold">VyronaRead</h3>
+                  <p className="text-xs text-gray-600">Books & Learning</p>
                 </div>
               </div>
             </section>
@@ -646,25 +647,34 @@ export default function Landing() {
               </div>
             </section>
 
-            {/* Local Stores Preview */}
+            {/* MallConnect - Local Stores */}
             {localStores.length > 0 && (
-              <section className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Local Stores Near You</h3>
-                  <Button variant="link" className="text-blue-600">Explore MallConnect →</Button>
+              <section className="mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">MallConnect - Local Stores</h3>
+                    <p className="text-gray-600">Connect with nearby stores for quick delivery via VyronaSpace</p>
+                  </div>
+                  <Button variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white">
+                    Explore All Stores →
+                  </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {localStores.slice(0, 4).map((store) => (
-                    <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleStoreClick(store.id)}>
+                    <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow border-blue-200" onClick={() => handleStoreClick(store.id)}>
                       <CardContent className="p-4">
-                        <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-md mb-2 overflow-hidden flex items-center justify-center">
+                        <div className="aspect-video bg-gradient-to-br from-blue-100 to-green-100 rounded-md mb-3 overflow-hidden flex items-center justify-center">
                           <span className="text-2xl font-bold text-blue-600">{store.name.charAt(0)}</span>
                         </div>
                         <h3 className="font-medium text-sm mb-1">{store.name}</h3>
-                        <p className="text-xs text-gray-600 mb-2 capitalize">{store.type} store</p>
-                        <div className="flex items-center text-xs text-gray-500">
+                        <p className="text-xs text-blue-600 mb-2 capitalize font-medium">{store.type} store</p>
+                        <div className="flex items-center text-xs text-gray-500 mb-2">
                           <MapPin className="h-3 w-3 mr-1" />
                           <span>{store.address || "Local area"}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-green-600 font-medium">🚀 Quick Delivery</span>
+                          <span className="text-xs text-yellow-600">⭐ {(store.rating || 4.5) / 100} rating</span>
                         </div>
                       </CardContent>
                     </Card>
