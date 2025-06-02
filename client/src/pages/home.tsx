@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Gamepad2, 
   Zap, 
@@ -66,6 +67,7 @@ export default function Home() {
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [readingProgress, setReadingProgress] = useState(68);
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   // Sample book content
   const sampleBookContent = [
@@ -905,10 +907,30 @@ export default function Home() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-900">Browse Books</h3>
-                  <div className="flex space-x-2">
-                    <Badge variant="outline" className="text-indigo-700">Purchase</Badge>
-                    <Badge variant="outline" className="text-purple-700">Rent</Badge>
-                    <Badge variant="outline" className="text-green-700">Digital</Badge>
+                  <div className="flex items-center space-x-3">
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Filter by Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="programming">Programming</SelectItem>
+                        <SelectItem value="data-science">Data Science</SelectItem>
+                        <SelectItem value="web-development">Web Development</SelectItem>
+                        <SelectItem value="algorithms">Algorithms</SelectItem>
+                        <SelectItem value="design">Design</SelectItem>
+                        <SelectItem value="business">Business</SelectItem>
+                        <SelectItem value="fiction">Fiction</SelectItem>
+                        <SelectItem value="non-fiction">Non-Fiction</SelectItem>
+                        <SelectItem value="science">Science</SelectItem>
+                        <SelectItem value="technology">Technology</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="flex space-x-2">
+                      <Badge variant="outline" className="text-indigo-700">Purchase</Badge>
+                      <Badge variant="outline" className="text-purple-700">Rent</Badge>
+                      <Badge variant="outline" className="text-green-700">Digital</Badge>
+                    </div>
                   </div>
                 </div>
 
