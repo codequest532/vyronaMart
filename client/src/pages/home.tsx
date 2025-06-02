@@ -1169,10 +1169,64 @@ export default function Home() {
                     <div className="space-y-2">
                       <h5 className="font-medium text-gray-900">Reading Settings</h5>
                       <div className="grid grid-cols-2 gap-2">
-                        <Button size="sm" variant="outline">Font Size</Button>
-                        <Button size="sm" variant="outline">Theme</Button>
-                        <Button size="sm" variant="outline">Bookmarks</Button>
-                        <Button size="sm" variant="outline">Notes</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setActiveTab("read-book");
+                            setSelectedBook({
+                              id: 1,
+                              name: "The Art of Programming",
+                              author: "Robert Martin",
+                              type: "digital"
+                            });
+                            showNotification("Font Settings", "Adjust font size in E-Reader", "success");
+                          }}
+                        >
+                          Font Size
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setDarkMode(!darkMode);
+                            showNotification("Theme Changed", `Switched to ${!darkMode ? 'dark' : 'light'} mode`, "success");
+                          }}
+                        >
+                          Theme
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setActiveTab("read-book");
+                            setSelectedBook({
+                              id: 1,
+                              name: "The Art of Programming",
+                              author: "Robert Martin",
+                              type: "digital"
+                            });
+                            showNotification("Bookmarks", "View bookmarks in E-Reader", "success");
+                          }}
+                        >
+                          Bookmarks ({bookmarks.length})
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setActiveTab("read-book");
+                            setSelectedBook({
+                              id: 1,
+                              name: "The Art of Programming",
+                              author: "Robert Martin",
+                              type: "digital"
+                            });
+                            showNotification("Notes Feature", "Highlight and notes available in E-Reader", "success");
+                          }}
+                        >
+                          Notes
+                        </Button>
                       </div>
                     </div>
                   </div>
