@@ -15,6 +15,12 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNull } from "drizzle-orm";
+import {
+  libraryIntegrationRequests,
+  physicalBooks,
+  eBooks,
+  bookLoans,
+} from "@shared/schema";
 
 export interface IStorage {
   // Users

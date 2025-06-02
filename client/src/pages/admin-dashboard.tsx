@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Users, 
   Store, 
@@ -44,6 +46,38 @@ export default function AdminDashboard() {
 
   const { data: orders } = useQuery({
     queryKey: ["/api/admin/orders"],
+  });
+
+  const { data: libraryRequests } = useQuery({
+    queryKey: ["/api/admin/library-requests"],
+  });
+
+  const { toast } = useToast();
+
+  const updateLibraryRequestMutation = useMutation({
+    mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
+      return await apiRequest(`/api/admin/library-requests/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status, adminNotes }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
+      toast({
+        title: "Request Updated",
+        description: "Library integration request status has been updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update library integration request.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleLogout = () => {
@@ -262,6 +296,117 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Library Integration Requests Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    VyronaRead Library Integration Requests
+                  </CardTitle>
+                  <CardDescription>Review and approve library integration requests from sellers</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {libraryRequests && libraryRequests.length > 0 ? (
+                    <div className="space-y-4">
+                      {libraryRequests.map((request: any) => (
+                        <div key={request.id} className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h4 className="font-semibold">{request.libraryName}</h4>
+                              <Badge variant={request.status === 'pending' ? 'secondary' : request.status === 'approved' ? 'default' : 'destructive'}>
+                                {request.status}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(request.createdAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-3">
+                            <div>
+                              <p className="text-sm font-medium">Type:</p>
+                              <p className="text-sm text-gray-600">{request.libraryType}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Contact:</p>
+                              <p className="text-sm text-gray-600">{request.contactPerson}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="mb-3">
+                            <p className="text-sm font-medium">Address:</p>
+                            <p className="text-sm text-gray-600">{request.address}</p>
+                          </div>
+                          
+                          {request.phone && (
+                            <div className="mb-3">
+                              <p className="text-sm font-medium">Phone:</p>
+                              <p className="text-sm text-gray-600">{request.phone}</p>
+                            </div>
+                          )}
+                          
+                          {request.email && (
+                            <div className="mb-3">
+                              <p className="text-sm font-medium">Email:</p>
+                              <p className="text-sm text-gray-600">{request.email}</p>
+                            </div>
+                          )}
+                          
+                          {request.description && (
+                            <div className="mb-3">
+                              <p className="text-sm font-medium">Description:</p>
+                              <p className="text-sm text-gray-600">{request.description}</p>
+                            </div>
+                          )}
+                          
+                          {request.status === 'pending' && (
+                            <div className="flex gap-2 mt-4">
+                              <Button
+                                size="sm"
+                                onClick={() => updateLibraryRequestMutation.mutate({
+                                  id: request.id,
+                                  status: 'approved',
+                                  adminNotes: 'Approved by admin'
+                                })}
+                                disabled={updateLibraryRequestMutation.isPending}
+                              >
+                                <Check className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => updateLibraryRequestMutation.mutate({
+                                  id: request.id,
+                                  status: 'rejected',
+                                  adminNotes: 'Rejected by admin'
+                                })}
+                                disabled={updateLibraryRequestMutation.isPending}
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {request.adminNotes && (
+                            <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded">
+                              <p className="text-sm font-medium">Admin Notes:</p>
+                              <p className="text-sm text-gray-600">{request.adminNotes}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">No library integration requests found</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
 
