@@ -86,6 +86,10 @@ export default function Home() {
     queryKey: ["/api/stores"],
   });
 
+  const { data: books = [] } = useQuery({
+    queryKey: ["/api/books"],
+  });
+
   const { data: shoppingRooms = [] } = useQuery({
     queryKey: ["/api/shopping-rooms"],
   });
@@ -205,6 +209,25 @@ export default function Home() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* VyronaRead Books Section */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                      <Book className="text-purple-600 h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">VyronaRead Books</h3>
+                      <p className="text-sm text-gray-500">Physical & Digital Library</p>
+                    </div>
+                  </div>
+                  <Button variant="ghost" className="text-purple-600">View All Books</Button>
+                </div>
+                <VyronaReadBooksSection />
+              </CardContent>
+            </Card>
 
             {/* Product Categories */}
             <Card>

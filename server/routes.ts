@@ -562,10 +562,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Library request not found" });
       }
 
+      // If approved, create sample books for the library
+      if (status === 'approved') {
+        await storage.createLibraryBooks(parseInt(id), updatedRequest);
+      }
+
       res.json(updatedRequest);
     } catch (error) {
       console.error("Error updating library request:", error);
       res.status(500).json({ message: "Failed to update library request" });
+    }
+  });
+
+  // VyronaRead Books - Get books for customers
+  app.get("/api/books", async (req, res) => {
+    try {
+      const { type, category } = req.query;
+      let books = [];
+
+      if (type === 'physical') {
+        books = await storage.getPhysicalBooks();
+      } else if (type === 'digital') {
+        books = await storage.getEBooks();
+      } else {
+        // Get all books
+        const physicalBooks = await storage.getPhysicalBooks();
+        const digitalBooks = await storage.getEBooks();
+        books = [...physicalBooks, ...digitalBooks];
+      }
+
+      res.json(books);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+      res.status(500).json({ message: "Failed to fetch books" });
+    }
+  });
+
+  // VyronaRead Books - Purchase/Rent book
+  app.post("/api/books/:id/purchase", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId, action } = req.body; // action: 'buy' or 'rent'
+      
+      const book = await storage.getBookById(parseInt(id));
+      if (!book) {
+        return res.status(404).json({ message: "Book not found" });
+      }
+
+      const order = await storage.createBookOrder({
+        userId,
+        bookId: parseInt(id),
+        action,
+        amount: book.price || 0,
+        status: 'completed'
+      });
+
+      res.json(order);
+    } catch (error) {
+      console.error("Error processing book purchase:", error);
+      res.status(500).json({ message: "Failed to process book purchase" });
     }
   });
 

@@ -136,6 +136,11 @@ export interface IStorage {
   createBookLoan(loan: InsertBookLoan): Promise<BookLoan>;
   getBookLoans(libraryId?: number, borrowerId?: number): Promise<BookLoan[]>;
   returnBook(loanId: number): Promise<BookLoan | undefined>;
+
+  // Book Management - Additional methods
+  createLibraryBooks(requestId: number, libraryData: any): Promise<void>;
+  getBookById(id: number): Promise<any>;
+  createBookOrder(order: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -860,6 +865,103 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bookLoans.id, loanId))
       .returning();
     return returnedLoan || null;
+  }
+
+  async createLibraryBooks(requestId: number, libraryData: any): Promise<void> {
+    // Create sample books for the approved library
+    const sampleBooks = [
+      {
+        title: `${libraryData.libraryName} - The Art of Programming`,
+        isbn: `978-0-${Math.floor(Math.random() * 1000000)}`,
+        author: "Tech Author",
+        publisher: "Tech Publications",
+        publicationYear: 2023,
+        genre: "Technology",
+        language: "English",
+        pages: 350,
+        condition: "New",
+        price: 29.99,
+        isAvailable: true,
+        libraryId: requestId
+      },
+      {
+        title: `${libraryData.libraryName} - Modern Web Development`,
+        isbn: `978-1-${Math.floor(Math.random() * 1000000)}`,
+        author: "Web Developer",
+        publisher: "Web Press",
+        publicationYear: 2023,
+        genre: "Technology",
+        language: "English",
+        pages: 420,
+        condition: "New",
+        price: 34.99,
+        isAvailable: true,
+        libraryId: requestId
+      },
+      {
+        title: `${libraryData.libraryName} - Digital Marketing Guide`,
+        isbn: `978-2-${Math.floor(Math.random() * 1000000)}`,
+        author: "Marketing Expert",
+        publisher: "Business Books",
+        publicationYear: 2024,
+        genre: "Business",
+        language: "English",
+        pages: 280,
+        condition: "New",
+        price: 24.99,
+        isAvailable: true,
+        libraryId: requestId
+      }
+    ];
+
+    // Create physical books
+    for (const book of sampleBooks.slice(0, 2)) {
+      await this.createPhysicalBook(book);
+    }
+
+    // Create digital book
+    const digitalBook = {
+      ...sampleBooks[2],
+      sellerId: 2, // Default seller ID
+      fileUrl: "https://example.com/book.pdf",
+      fileSize: "2.5MB",
+      format: "PDF",
+      downloads: 0
+    };
+    await this.createEBook(digitalBook);
+  }
+
+  async getBookById(id: number): Promise<any> {
+    // Try to find in physical books first
+    const physicalBooks = await this.getPhysicalBooks();
+    const physicalBook = physicalBooks.find((book: any) => book.id === id);
+    if (physicalBook) {
+      return { ...physicalBook, type: 'physical' };
+    }
+
+    // Try to find in e-books
+    const eBooks = await this.getEBooks();
+    const eBook = eBooks.find((book: any) => book.id === id);
+    if (eBook) {
+      return { ...eBook, type: 'digital' };
+    }
+
+    return undefined;
+  }
+
+  async createBookOrder(order: any): Promise<any> {
+    // Create an order for book purchase/rental
+    return await this.createOrder({
+      userId: order.userId,
+      totalAmount: order.amount,
+      status: order.status || 'completed',
+      module: 'vyronaread',
+      metadata: {
+        bookId: order.bookId,
+        action: order.action,
+        type: 'book_order'
+      }
+    });
   }
 
   // Seed initial data when needed
