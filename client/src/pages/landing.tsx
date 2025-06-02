@@ -684,7 +684,7 @@ export default function Landing() {
             <section className="mb-12 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold mb-4">Instagram Store Connect</h2>
-                <p className="text-lg text-gray-600">Seamlessly integrate your Instagram shopping with VyronaSocial</p>
+                <p className="text-lg text-gray-600">Experience Instagram shopping like never before — with VyronaSocial</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -734,36 +734,68 @@ export default function Landing() {
               </div>
             </section>
 
-            {/* Featured Products */}
-            <section className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold">Featured Products</h3>
-                <span className="text-sm text-gray-600">Handpicked for you</span>
+            {/* VyronaRead - Books & Learning */}
+            <section className="mb-12 bg-gradient-to-r from-blue-50 to-green-50 rounded-2xl p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">VyronaRead - Books & Learning</h2>
+                <p className="text-lg text-gray-600">Discover knowledge, earn rewards, and grow with every page</p>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {(products || []).slice(0, 12).map((product) => (
-                  <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleProductClick(product.id)}>
-                    <CardContent className="p-3">
-                      <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden">
-                        <img
-                          src={product.imageUrl || "/api/placeholder/200/200"}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <h3 className="font-medium text-xs mb-1 line-clamp-2">{product.name}</h3>
-                      <div className="flex items-center mb-1">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-500 ml-1">(4.5)</span>
-                      </div>
-                      <p className="text-red-600 font-bold text-sm">₹{product.price}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">📚</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Digital Library</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Extensive collection of e-books</li>
+                    <li>• Academic textbooks & references</li>
+                    <li>• Fiction, non-fiction & biographies</li>
+                    <li>• Multi-language support</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🎓</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Learning Rewards</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Earn coins for reading progress</li>
+                    <li>• Complete reading challenges</li>
+                    <li>• Unlock knowledge achievements</li>
+                    <li>• Reading streak bonuses</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">👥</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Reading Communities</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Join book clubs & discussions</li>
+                    <li>• Share reviews & recommendations</li>
+                    <li>• Reading buddy system</li>
+                    <li>• Author meet & greet events</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🎯</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Smart Features</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Personalized reading suggestions</li>
+                    <li>• Progress tracking & analytics</li>
+                    <li>• Note-taking & highlighting</li>
+                    <li>• Offline reading mode</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="text-center mt-8">
+                <Button className="bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700 text-white px-8 py-3 text-lg">
+                  Start Reading Journey
+                  <BookOpen className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500">Expand your mind while earning rewards - only with VyronaRead</p>
               </div>
             </section>
 
