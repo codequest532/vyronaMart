@@ -168,14 +168,40 @@ export default function SellerDashboard() {
   };
 
   const handleUploadEbook = () => {
-    const title = prompt("Enter e-book title:");
-    const price = prompt("Enter sale price (₹):");
-    const rental = prompt("Enter monthly rental price (₹):");
+    console.log("Opening e-book upload");
     
-    if (title && price && rental) {
-      console.log(`Uploading e-book: ${title} - Sale: ₹${price}, Rental: ₹${rental}`);
-      alert(`E-book Upload Successful!\n\nTitle: ${title}\nSale Price: ₹${price}\nRental Price: ₹${rental}/month\n\nStatus: Ready for sale`);
-    }
+    // Create file input element to trigger system file picker
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.pdf,.epub,.mobi';
+    fileInput.multiple = false;
+    
+    fileInput.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      const fileName = file.name;
+      const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+      const fileType = file.type;
+      
+      alert(`File Selected from System:\n\nName: ${fileName}\nSize: ${fileSize}MB\nType: ${fileType}\n\nProcessing file...`);
+      
+      // Simulate upload progress
+      setTimeout(() => {
+        const title = prompt("Enter book title:");
+        const author = prompt("Enter author name:");
+        const price = prompt("Enter sale price (₹):");
+        const rental = prompt("Enter rental price (₹):");
+        
+        if (title && author && price && rental) {
+          console.log(`E-book uploaded from system: ${fileName} - ${title} by ${author}`);
+          alert(`E-book Upload Successful!\n\nFile: ${fileName}\nTitle: ${title}\nAuthor: ${author}\nSale Price: ₹${price}\nRental: ₹${rental}/month\n\nBook is now available in your e-book store!`);
+        }
+      }, 1500);
+    };
+    
+    // Trigger the file picker
+    fileInput.click();
   };
 
   const handleUploadPdfEpub = () => {
