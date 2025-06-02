@@ -1016,84 +1016,73 @@ export default function Home() {
                 ) : (
                   // Library List View - Shows available libraries
                   <div className="space-y-6">
-                  {[
-                    {
-                      id: 1,
-                      name: "Central City Library",
-                      address: "123 Main Street, Downtown",
-                      totalBooks: 15000,
-                      books: [
-                        { id: "lib1-1", name: "Programming Fundamentals", author: "John Smith", available: true, type: "physical" },
-                        { id: "lib1-2", name: "Data Structures Guide", author: "Jane Doe", available: true, type: "physical" },
-                        { id: "lib1-3", name: "Web Development Basics", author: "Mike Johnson", available: false, type: "digital" }
-                      ]
-                    },
-                    {
-                      id: 2,
-                      name: "University Technical Library",
-                      address: "456 University Ave, Campus",
-                      totalBooks: 25000,
-                      books: [
-                        { id: "lib2-1", name: "Advanced Algorithms", author: "Dr. Sarah Chen", available: true, type: "physical" },
-                        { id: "lib2-2", name: "Machine Learning Basics", author: "Prof. Michael Lee", available: true, type: "digital" }
-                      ]
-                    }
-                  ].map((library) => (
-                    <div key={library.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-900">{library.name}</h4>
-                          <p className="text-sm text-gray-600">{library.address}</p>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Badge variant="secondary">
-                              <BookOpen className="h-3 w-3 mr-1" />
-                              {library.totalBooks.toLocaleString()} Books
-                            </Badge>
-                            <Badge variant="outline" className="text-green-600">
-                              <Heart className="h-3 w-3 mr-1" />
-                              Verified Library
-                            </Badge>
-                          </div>
-                        </div>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedLibrary(library);
-                            showNotification(`Viewing ${library.name}`, "Browse available books", "success");
-                          }}
-                        >
-                          <MapPin className="h-4 w-4 mr-1" />
-                          Visit Library
-                        </Button>
-                      </div>
-
-                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                        {library.books.map((book) => (
-                          <div key={book.id} className="bg-gray-50 rounded-lg p-3">
-                            <h5 className="font-medium text-gray-900 mb-1">{book.name}</h5>
-                            <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
-                            <div className="flex items-center justify-between">
-                              <Badge variant={book.available ? "default" : "destructive"} className="text-xs">
-                                {book.available ? "Available" : "Borrowed"}
+                  {availableLibraries && availableLibraries.length > 0 ? (
+                    availableLibraries.map((library: any) => (
+                      <div key={library.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900">{library.name}</h4>
+                            <p className="text-sm text-gray-600">{library.address}</p>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Badge variant="secondary">
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                {library.totalBooks?.toLocaleString() || 0} Books
                               </Badge>
-                              {book.available && (
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => {
-                                    updateCoins(25);
-                                    showNotification("Book Borrowed!", `Borrowed from ${library.name}. Earned 25 coins!`, "success");
-                                  }}
-                                >
-                                  Borrow
-                                </Button>
-                              )}
+                              <Badge variant="outline" className="text-green-600">
+                                <Heart className="h-3 w-3 mr-1" />
+                                Verified Library
+                              </Badge>
                             </div>
                           </div>
-                        ))}
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedLibrary(library);
+                              showNotification(`Viewing ${library.name}`, "Browse available books", "success");
+                            }}
+                          >
+                            <MapPin className="h-4 w-4 mr-1" />
+                            Visit Library
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                          {library.books && library.books.length > 0 ? (
+                            library.books.map((book: any) => (
+                              <div key={book.id} className="bg-gray-50 rounded-lg p-3">
+                                <h5 className="font-medium text-gray-900 mb-1">{book.name}</h5>
+                                <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
+                                <div className="flex items-center justify-between">
+                                  <Badge variant={book.available ? "default" : "destructive"} className="text-xs">
+                                    {book.available ? "Available" : "Borrowed"}
+                                  </Badge>
+                                  {book.available && (
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => handleLibraryBorrow(book.id, library.id)}
+                                    >
+                                      Borrow
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="col-span-full text-center py-4">
+                              <p className="text-gray-500">No books available in this library</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No libraries integrated</h3>
+                      <p className="text-gray-500">Libraries will appear here after admin approval of integration requests.</p>
                     </div>
-                  ))}
+                  )}
                 </div>
                 )}
               </CardContent>
@@ -1178,14 +1167,7 @@ export default function Home() {
                           size="sm" 
                           variant="outline"
                           onClick={() => {
-                            setActiveTab("read-book");
-                            setSelectedBook({
-                              id: 1,
-                              name: "The Art of Programming",
-                              author: "Robert Martin",
-                              type: "digital"
-                            });
-                            showNotification("Font Settings", "Adjust font size in E-Reader", "success");
+                            showNotification("Font Settings", "Font controls available in E-Reader", "success");
                           }}
                         >
                           Font Size
@@ -1204,14 +1186,7 @@ export default function Home() {
                           size="sm" 
                           variant="outline"
                           onClick={() => {
-                            setActiveTab("read-book");
-                            setSelectedBook({
-                              id: 1,
-                              name: "The Art of Programming",
-                              author: "Robert Martin",
-                              type: "digital"
-                            });
-                            showNotification("Bookmarks", "View bookmarks in E-Reader", "success");
+                            showNotification("Bookmarks", "Bookmark feature available when reading", "success");
                           }}
                         >
                           Bookmarks ({bookmarks.length})
@@ -1220,14 +1195,7 @@ export default function Home() {
                           size="sm" 
                           variant="outline"
                           onClick={() => {
-                            setActiveTab("read-book");
-                            setSelectedBook({
-                              id: 1,
-                              name: "The Art of Programming",
-                              author: "Robert Martin",
-                              type: "digital"
-                            });
-                            showNotification("Notes Feature", "Highlight and notes available in E-Reader", "success");
+                            showNotification("Notes Feature", "Notes and highlights available when reading", "success");
                           }}
                         >
                           Notes
