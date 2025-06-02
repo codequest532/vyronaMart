@@ -515,7 +515,10 @@ export default function Landing() {
           <>
             {/* VyronaHub - Comprehensive Categories */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">VyronaHub - Complete Shopping Universe</h2>
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">VyronaHub - Complete Shopping Universe</h2>
+                <p className="text-lg text-gray-600">Discover everything you need across 10 comprehensive shopping categories</p>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-6">
                 <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="text-2xl mb-3">🔌</div>
