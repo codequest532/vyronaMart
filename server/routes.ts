@@ -89,10 +89,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Verify OTP and reset password
+  // Verify OTP
   app.post("/api/auth/verify-otp", async (req, res) => {
     try {
-      const { email, otp, newPassword } = req.body;
+      const { email, otp } = req.body;
       
       const verification = await storage.getOtpVerification(email, otp, "password_reset");
       
@@ -107,11 +107,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark OTP as verified
       await storage.markOtpAsVerified(verification.id);
 
+      res.json({ message: "OTP verified successfully" });
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      res.status(500).json({ message: "Failed to verify OTP" });
+    }
+  });
+
+  // Reset password after OTP verification
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { email, password, confirmPassword } = req.body;
+      
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+
       // Update user password
-      await storage.updateUserPassword(email, newPassword);
+      await storage.updateUserPassword(email, password);
 
       res.json({ message: "Password reset successfully" });
     } catch (error) {
+      console.error("Password reset error:", error);
       res.status(500).json({ message: "Failed to reset password" });
     }
   });

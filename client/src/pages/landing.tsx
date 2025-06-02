@@ -196,8 +196,8 @@ export default function Landing() {
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        const error = await response.json();
+        throw new Error(error.message || "Failed to reset password");
       }
       return response.json();
     },
