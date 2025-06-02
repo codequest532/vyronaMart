@@ -471,74 +471,14 @@ export default function Landing() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* VyronaSocial Features */}
+        {/* Product Grid */}
         <div className="mb-8">
           {searchQuery || selectedCategory !== "all" ? (
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               {searchQuery ? `Results for "${searchQuery}"` : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Products`} 
               ({filteredProducts.length} items)
             </h2>
-          ) : (
-            <section className="mb-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-4">VyronaSocial - Social Shopping Revolution</h2>
-                <p className="text-lg text-gray-600">Shop together, share experiences, and discover trends with friends</p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="text-3xl mb-4 text-center">👥</div>
-                  <h3 className="font-bold text-lg mb-3 text-center">Social Shopping Rooms</h3>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>• Create shopping rooms with friends</li>
-                    <li>• Real-time product sharing</li>
-                    <li>• Group wishlists and collections</li>
-                    <li>• Live chat while shopping</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="text-3xl mb-4 text-center">🎯</div>
-                  <h3 className="font-bold text-lg mb-3 text-center">Smart Recommendations</h3>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>• AI-powered friend suggestions</li>
-                    <li>• Trending products in your circle</li>
-                    <li>• Personalized style matches</li>
-                    <li>• Social influence insights</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="text-3xl mb-4 text-center">📱</div>
-                  <h3 className="font-bold text-lg mb-3 text-center">Social Feed & Reviews</h3>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>• Share purchase experiences</li>
-                    <li>• Photo & video reviews</li>
-                    <li>• Rate and recommend products</li>
-                    <li>• Follow influencer picks</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="text-3xl mb-4 text-center">🏆</div>
-                  <h3 className="font-bold text-lg mb-3 text-center">Social Rewards</h3>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li>• Earn coins for social activity</li>
-                    <li>• Group purchase discounts</li>
-                    <li>• Referral bonus rewards</li>
-                    <li>• Social leaderboards</li>
-                  </ul>
-                </div>
-              </div>
-              
-              <div className="text-center mt-8">
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
-                  Join VyronaSocial Community
-                  <Users className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
-            </section>
-          )}
+          ) : null}
           
           {(searchQuery || selectedCategory !== "all") && (
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -677,6 +617,67 @@ export default function Landing() {
                     <li>• Leashes, Collars & Carriers</li>
                   </ul>
                 </div>
+              </div>
+            </section>
+
+            {/* VyronaSocial - Social Shopping Revolution */}
+            <section className="mb-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">VyronaSocial - Social Shopping Revolution</h2>
+                <p className="text-lg text-gray-600">Shop together, share experiences, and discover trends with friends</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">👥</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Social Shopping Rooms</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Create shopping rooms with friends</li>
+                    <li>• Real-time product sharing</li>
+                    <li>• Group wishlists and collections</li>
+                    <li>• Live chat while shopping</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🎯</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Smart Recommendations</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• AI-powered friend suggestions</li>
+                    <li>• Trending products in your circle</li>
+                    <li>• Personalized style matches</li>
+                    <li>• Social influence insights</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">📱</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Social Feed & Reviews</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Share purchase experiences</li>
+                    <li>• Photo & video reviews</li>
+                    <li>• Rate and recommend products</li>
+                    <li>• Follow influencer picks</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🏆</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Social Rewards</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Earn coins for social activity</li>
+                    <li>• Group purchase discounts</li>
+                    <li>• Referral bonus rewards</li>
+                    <li>• Social leaderboards</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="text-center mt-8">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
+                  Join VyronaSocial Community
+                  <Users className="ml-2 h-5 w-5" />
+                </Button>
               </div>
             </section>
 
