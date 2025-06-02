@@ -7,6 +7,7 @@ import Home from "@/pages/home";
 import Landing from "@/pages/landing";
 import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
+import VyronaSocial from "@/pages/social";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
@@ -37,6 +38,7 @@ function Router() {
       <Route path="/store/:storeId">
         {(params) => <StoreDetails storeId={params.storeId} />}
       </Route>
+      <Route path="/social" component={VyronaSocial} />
       <Route component={NotFound} />
     </Switch>
   );
