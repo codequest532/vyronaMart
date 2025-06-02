@@ -53,6 +53,18 @@ const productSchema = z.object({
   isActive: z.boolean().default(true),
 });
 
+const sellerSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Valid email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  mobile: z.string().optional(),
+  storeName: z.string().min(1, "Store name is required"),
+  storeDescription: z.string().optional(),
+  businessType: z.string().min(1, "Business type is required"),
+  address: z.string().optional(),
+  isActive: z.boolean().default(true),
+});
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
@@ -74,6 +86,21 @@ export default function AdminDashboard() {
       specifications: "",
       tags: "",
       imageUrl: "",
+      isActive: true,
+    },
+  });
+
+  const sellerForm = useForm<z.infer<typeof sellerSchema>>({
+    resolver: zodResolver(sellerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      mobile: "",
+      storeName: "",
+      storeDescription: "",
+      businessType: "",
+      address: "",
       isActive: true,
     },
   });
@@ -106,8 +133,50 @@ export default function AdminDashboard() {
     },
   });
 
+  const addSellerMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof sellerSchema>) => {
+      const userData = {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        mobile: data.mobile || null,
+        role: "seller",
+        isActive: data.isActive,
+      };
+      
+      const user = await apiRequest("/api/auth/register", "POST", userData);
+      
+      // Create store for the seller
+      const storeData = {
+        name: data.storeName,
+        type: data.businessType,
+        address: data.address || null,
+        isOpen: true,
+        rating: 0,
+        reviewCount: 0,
+      };
+      
+      await apiRequest("/api/stores", "POST", storeData);
+      
+      return user;
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Seller registered successfully!" });
+      sellerForm.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stores"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to register seller. Please try again." });
+    },
+  });
+
   const onSubmit = (data: z.infer<typeof productSchema>) => {
     addProductMutation.mutate(data);
+  };
+
+  const onSellerSubmit = (data: z.infer<typeof sellerSchema>) => {
+    addSellerMutation.mutate(data);
   };
 
   const { data: stats } = useQuery({
@@ -898,10 +967,214 @@ export default function AdminDashboard() {
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Seller Management</h2>
                   <p className="text-gray-600 dark:text-gray-300">Manage seller accounts and store approvals</p>
                 </div>
-                <Button className="bg-green-600 hover:bg-green-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Seller
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-green-600 hover:bg-green-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Seller
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Register New Seller</DialogTitle>
+                      <DialogDescription>
+                        Add a new seller account and create their store profile for the platform.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...sellerForm}>
+                      <form onSubmit={sellerForm.handleSubmit(onSellerSubmit)} className="space-y-6">
+                        <Tabs defaultValue="account" className="w-full">
+                          <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="account">Account Info</TabsTrigger>
+                            <TabsTrigger value="store">Store Details</TabsTrigger>
+                            <TabsTrigger value="business">Business Info</TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="account" className="space-y-4 mt-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField
+                                control={sellerForm.control}
+                                name="username"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Username *</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="Enter username" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={sellerForm.control}
+                                name="email"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Email Address *</FormLabel>
+                                    <FormControl>
+                                      <Input type="email" placeholder="seller@example.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <FormField
+                                control={sellerForm.control}
+                                name="password"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Password *</FormLabel>
+                                    <FormControl>
+                                      <Input type="password" placeholder="Enter secure password" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={sellerForm.control}
+                                name="mobile"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Mobile Number</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="+1 (555) 123-4567" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          </TabsContent>
+
+                          <TabsContent value="store" className="space-y-4 mt-6">
+                            <FormField
+                              control={sellerForm.control}
+                              name="storeName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Store Name *</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="Enter store name" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={sellerForm.control}
+                              name="storeDescription"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Store Description</FormLabel>
+                                  <FormControl>
+                                    <Textarea 
+                                      placeholder="Describe the store and what products they'll sell..."
+                                      className="min-h-[100px]"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={sellerForm.control}
+                              name="businessType"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Business Type *</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select business type" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="retail">Retail Store</SelectItem>
+                                      <SelectItem value="electronics">Electronics Store</SelectItem>
+                                      <SelectItem value="fashion">Fashion & Clothing</SelectItem>
+                                      <SelectItem value="books">Bookstore</SelectItem>
+                                      <SelectItem value="food">Food & Beverages</SelectItem>
+                                      <SelectItem value="home">Home & Garden</SelectItem>
+                                      <SelectItem value="sports">Sports & Outdoors</SelectItem>
+                                      <SelectItem value="beauty">Beauty & Personal Care</SelectItem>
+                                      <SelectItem value="toys">Toys & Games</SelectItem>
+                                      <SelectItem value="automotive">Automotive</SelectItem>
+                                      <SelectItem value="health">Health & Wellness</SelectItem>
+                                      <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TabsContent>
+
+                          <TabsContent value="business" className="space-y-4 mt-6">
+                            <FormField
+                              control={sellerForm.control}
+                              name="address"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Business Address</FormLabel>
+                                  <FormControl>
+                                    <Textarea 
+                                      placeholder="Enter complete business address..."
+                                      className="min-h-[80px]"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg space-y-3">
+                              <h4 className="font-medium text-sm">Account Settings</h4>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-sm font-medium">Account Status</p>
+                                  <p className="text-xs text-gray-500">Enable seller account immediately</p>
+                                </div>
+                                <FormField
+                                  control={sellerForm.control}
+                                  name="isActive"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <input
+                                          type="checkbox"
+                                          checked={field.value}
+                                          onChange={field.onChange}
+                                          className="h-4 w-4 text-blue-600 rounded"
+                                        />
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </TabsContent>
+                        </Tabs>
+                        
+                        <div className="flex gap-4 pt-4">
+                          <Button type="submit" disabled={addSellerMutation.isPending} className="flex-1">
+                            {addSellerMutation.isPending ? "Creating Account..." : "Register Seller"}
+                          </Button>
+                          <Button type="button" variant="outline" onClick={() => sellerForm.reset()}>
+                            Reset Form
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
