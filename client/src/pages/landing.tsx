@@ -647,11 +647,11 @@ export default function Landing() {
               </div>
             </section>
 
-            {/* MallConnect - City Mall Shops */}
+            {/* MallConnect - Premium Stores */}
             <section className="mb-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-2xl font-bold mb-2">MallConnect - City Mall Shops</h3>
+                  <h3 className="text-2xl font-bold mb-2">MallConnect - Premium Stores</h3>
                   <p className="text-gray-600">Premium city mall brands now delivering through VyronaMart e-commerce platform</p>
                 </div>
                 <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white">
