@@ -720,6 +720,85 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            {/* VyronaHub Categories */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">VyronaHub - Shop by Category</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🔌
+                    </div>
+                    <h4 className="font-semibold text-sm">Electronics</h4>
+                    <p className="text-xs text-gray-600">Smartphones & Tech</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-pink-500 to-red-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      👗
+                    </div>
+                    <h4 className="font-semibold text-sm">Fashion & Apparels</h4>
+                    <p className="text-xs text-gray-600">Clothing & Accessories</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🏠
+                    </div>
+                    <h4 className="font-semibold text-sm">Home & Kitchen</h4>
+                    <p className="text-xs text-gray-600">Appliances & Decor</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🧸
+                    </div>
+                    <h4 className="font-semibold text-sm">Kids Corner</h4>
+                    <p className="text-xs text-gray-600">Toys & Baby Care</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🥬
+                    </div>
+                    <h4 className="font-semibold text-sm">Organic Store</h4>
+                    <p className="text-xs text-gray-600">Natural Products</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-red-500 to-pink-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🛒
+                    </div>
+                    <h4 className="font-semibold text-sm">Groceries</h4>
+                    <p className="text-xs text-gray-600">Daily Essentials</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🏡
+                    </div>
+                    <h4 className="font-semibold text-sm">Home Automation</h4>
+                    <p className="text-xs text-gray-600">Smart Home Tech</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-gray-500 to-slate-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🧾
+                    </div>
+                    <h4 className="font-semibold text-sm">Office & Stationery</h4>
+                    <p className="text-xs text-gray-600">Work Essentials</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🧘
+                    </div>
+                    <h4 className="font-semibold text-sm">Health & Wellness</h4>
+                    <p className="text-xs text-gray-600">Fitness & Care</p>
+                  </div>
+                  <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center text-white text-xl">
+                      🐶
+                    </div>
+                    <h4 className="font-semibold text-sm">Pet Care</h4>
+                    <p className="text-xs text-gray-600">Pet Essentials</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Mall Selection */}
             <Card>
               <CardContent className="p-6">
