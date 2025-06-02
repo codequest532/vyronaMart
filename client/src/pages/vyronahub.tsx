@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -33,7 +34,13 @@ import {
   TrendingUp,
   Eye,
   ShoppingCart,
-  Zap
+  Zap,
+  Minus,
+  Plus as PlusIcon,
+  CreditCard,
+  Truck,
+  Shield,
+  CheckCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/mock-data";
@@ -56,6 +63,9 @@ export default function VyronaHub() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
   // Fetch products with filtering
   const { data: products = [], isLoading: productsLoading } = useQuery({
@@ -105,6 +115,47 @@ export default function VyronaHub() {
       });
     },
   });
+
+  // Add to cart mutation
+  const addToCartMutation = useMutation({
+    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
+      return await apiRequest("/api/cart", "POST", {
+        userId: user?.id,
+        productId,
+        quantity,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Added to Cart",
+        description: `${quantity} item(s) added to your cart successfully!`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to Add",
+        description: "Could not add item to cart. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Buy now action
+  const handleBuyNow = (product: any, quantity: number) => {
+    // In a real app, this would initiate the checkout process
+    toast({
+      title: "Redirecting to Checkout",
+      description: `Processing purchase of ${quantity} ${product.name}(s) for ${formatCurrency(product.price * quantity)}`,
+    });
+    // Close the modal
+    setIsProductModalOpen(false);
+  };
+
+  const handleProductClick = (product: any) => {
+    setSelectedProduct(product);
+    setQuantity(1);
+    setIsProductModalOpen(true);
+  };
 
   const form = useForm<z.infer<typeof addProductSchema>>({
     resolver: zodResolver(addProductSchema),
@@ -456,7 +507,7 @@ export default function VyronaHub() {
                   : "space-y-4"
               }>
                 {filteredProducts.map((product: any) => (
-                  <Card key={product.id} className="hover:shadow-lg transition-shadow">
+                  <Card key={product.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleProductClick(product)}>
                     <CardContent className={viewMode === "grid" ? "p-4" : "p-4 flex gap-4"}>
                       <img
                         src={product.imageUrl}
@@ -470,7 +521,7 @@ export default function VyronaHub() {
                       <div className="flex-1">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-semibold text-lg">{product.name}</h3>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
                             <Heart className="h-4 w-4" />
                           </Button>
                         </div>
@@ -493,10 +544,17 @@ export default function VyronaHub() {
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={(e) => e.stopPropagation()}>
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button size="sm">
+                            <Button 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                addToCartMutation.mutate({ productId: product.id, quantity: 1 });
+                              }}
+                              disabled={addToCartMutation.isPending}
+                            >
                               <ShoppingCart className="h-4 w-4" />
                             </Button>
                           </div>
@@ -509,6 +567,169 @@ export default function VyronaHub() {
             )}
           </div>
         </div>
+
+        {/* Product Detail Modal */}
+        <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            {selectedProduct && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold">{selectedProduct.name}</DialogTitle>
+                  <DialogDescription>
+                    Product details and purchase options
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                  {/* Product Image */}
+                  <div className="space-y-4">
+                    <img
+                      src={selectedProduct.imageUrl}
+                      alt={selectedProduct.name}
+                      className="w-full h-96 object-cover rounded-lg border"
+                    />
+                    <div className="grid grid-cols-4 gap-2">
+                      {/* Additional product images would go here */}
+                      <img
+                        src={selectedProduct.imageUrl}
+                        alt="Product view 1"
+                        className="w-full h-20 object-cover rounded border cursor-pointer opacity-60 hover:opacity-100"
+                      />
+                      <img
+                        src={selectedProduct.imageUrl}
+                        alt="Product view 2"
+                        className="w-full h-20 object-cover rounded border cursor-pointer opacity-60 hover:opacity-100"
+                      />
+                      <img
+                        src={selectedProduct.imageUrl}
+                        alt="Product view 3"
+                        className="w-full h-20 object-cover rounded border cursor-pointer opacity-60 hover:opacity-100"
+                      />
+                      <img
+                        src={selectedProduct.imageUrl}
+                        alt="Product view 4"
+                        className="w-full h-20 object-cover rounded border cursor-pointer opacity-60 hover:opacity-100"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline">{selectedProduct.category}</Badge>
+                        <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          4.5 (124 reviews)
+                        </div>
+                      </div>
+                      <p className="text-3xl font-bold text-green-600 mb-4">
+                        {formatCurrency(selectedProduct.price)}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                        {selectedProduct.description}
+                      </p>
+                    </div>
+
+                    <Separator />
+
+                    {/* Product Features */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold">Key Features:</h4>
+                      <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          High quality materials and construction
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          1 year manufacturer warranty
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Fast and reliable delivery
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          30-day return policy
+                        </li>
+                      </ul>
+                    </div>
+
+                    <Separator />
+
+                    {/* Quantity Selection */}
+                    <div className="space-y-3">
+                      <h4 className="font-semibold">Quantity:</h4>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          disabled={quantity <= 1}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-12 text-center font-medium">{quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setQuantity(quantity + 1)}
+                        >
+                          <PlusIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        Total: {formatCurrency(selectedProduct.price * quantity)}
+                      </p>
+                    </div>
+
+                    <Separator />
+
+                    {/* Action Buttons */}
+                    <div className="space-y-3">
+                      <Button
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                        size="lg"
+                        onClick={() => handleBuyNow(selectedProduct, quantity)}
+                      >
+                        <CreditCard className="h-5 w-5 mr-2" />
+                        Buy Now - {formatCurrency(selectedProduct.price * quantity)}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        size="lg"
+                        onClick={() => {
+                          addToCartMutation.mutate({ productId: selectedProduct.id, quantity });
+                          setIsProductModalOpen(false);
+                        }}
+                        disabled={addToCartMutation.isPending}
+                      >
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
+                      </Button>
+                    </div>
+
+                    {/* Delivery Info */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Truck className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium">Free delivery</span>
+                        <span className="text-gray-600 dark:text-gray-400">on orders above ₹499</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Shield className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium">Secure payments</span>
+                        <span className="text-gray-600 dark:text-gray-400">100% secure transactions</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
