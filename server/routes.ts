@@ -1,7 +1,11 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema } from "@shared/schema";
+import { 
+  insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
+  insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
+  insertGroupMessageSchema, insertProductShareSchema
+} from "@shared/schema";
 import { z } from "zod";
 import { sendOTPEmail } from "./email";
 
@@ -331,6 +335,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = parseInt(req.params.userId);
       const scores = await storage.getUserGameScores(userId);
       res.json(scores);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // VyronaSocial - Shopping Groups routes
+  app.post("/api/social/groups", async (req, res) => {
+    try {
+      const groupData = insertShoppingGroupSchema.parse(req.body);
+      const group = await storage.createShoppingGroup(groupData);
+      res.json(group);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/social/groups/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const groups = await storage.getShoppingGroups(userId);
+      res.json(groups);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/social/group/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const group = await storage.getShoppingGroup(id);
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+      res.json(group);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/social/groups/:id/members", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const memberData = insertGroupMemberSchema.parse({ ...req.body, groupId });
+      const member = await storage.addGroupMember(memberData);
+      res.json(member);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/social/groups/:id/members", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const members = await storage.getGroupMembers(groupId);
+      res.json(members);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // VyronaSocial - Group Wishlists routes
+  app.post("/api/social/groups/:id/wishlist", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const wishlistData = insertGroupWishlistSchema.parse({ ...req.body, groupId });
+      const wishlist = await storage.addToGroupWishlist(wishlistData);
+      res.json(wishlist);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/social/groups/:id/wishlist", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const wishlist = await storage.getGroupWishlist(groupId);
+      res.json(wishlist);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // VyronaSocial - Group Messages routes
+  app.post("/api/social/groups/:id/messages", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const messageData = insertGroupMessageSchema.parse({ ...req.body, groupId });
+      const message = await storage.addGroupMessage(messageData);
+      res.json(message);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/social/groups/:id/messages", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const messages = await storage.getGroupMessages(groupId);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // VyronaSocial - Product Shares routes
+  app.post("/api/social/shares", async (req, res) => {
+    try {
+      const shareData = insertProductShareSchema.parse(req.body);
+      const share = await storage.shareProduct(shareData);
+      res.json(share);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/social/shares/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const shares = await storage.getProductShares(userId);
+      res.json(shares);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // VyronaSocial - Notifications routes
+  app.get("/api/social/notifications/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const notifications = await storage.getUserNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/social/notifications/:id/read", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.markNotificationAsRead(id);
+      res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
     }

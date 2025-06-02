@@ -563,6 +563,192 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(gameScores).where(eq(gameScores.userId, userId));
   }
 
+  // VyronaSocial - Shopping Groups
+  async createShoppingGroup(insertGroup: InsertShoppingGroup): Promise<ShoppingGroup> {
+    const [group] = await db
+      .insert(shoppingGroups)
+      .values(insertGroup)
+      .returning();
+    
+    // Add creator as group member
+    await db.insert(groupMembers).values({
+      groupId: group.id,
+      userId: insertGroup.creatorId,
+      role: "creator"
+    });
+    
+    return group;
+  }
+
+  async getShoppingGroups(userId: number): Promise<ShoppingGroup[]> {
+    const result = await db
+      .select({
+        id: shoppingGroups.id,
+        name: shoppingGroups.name,
+        description: shoppingGroups.description,
+        creatorId: shoppingGroups.creatorId,
+        isActive: shoppingGroups.isActive,
+        maxMembers: shoppingGroups.maxMembers,
+        createdAt: shoppingGroups.createdAt,
+      })
+      .from(shoppingGroups)
+      .innerJoin(groupMembers, eq(groupMembers.groupId, shoppingGroups.id))
+      .where(eq(groupMembers.userId, userId));
+    return result;
+  }
+
+  async getShoppingGroup(id: number): Promise<ShoppingGroup | undefined> {
+    const [group] = await db.select().from(shoppingGroups).where(eq(shoppingGroups.id, id));
+    return group;
+  }
+
+  async addGroupMember(insertMember: InsertGroupMember): Promise<GroupMember> {
+    const [member] = await db
+      .insert(groupMembers)
+      .values(insertMember)
+      .returning();
+    return member;
+  }
+
+  async getGroupMembers(groupId: number): Promise<GroupMember[]> {
+    return await db.select().from(groupMembers).where(eq(groupMembers.groupId, groupId));
+  }
+
+  async removeGroupMember(groupId: number, userId: number): Promise<boolean> {
+    const result = await db
+      .delete(groupMembers)
+      .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // VyronaSocial - Group Wishlists
+  async addToGroupWishlist(insertWishlist: InsertGroupWishlist): Promise<GroupWishlist> {
+    const [wishlist] = await db
+      .insert(groupWishlists)
+      .values(insertWishlist)
+      .returning();
+    
+    // Create notification for other group members
+    const members = await this.getGroupMembers(insertWishlist.groupId);
+    for (const member of members) {
+      if (member.userId !== insertWishlist.addedBy) {
+        await this.createNotification({
+          userId: member.userId,
+          type: "wishlist_add",
+          title: "New Item Added to Group Wishlist",
+          message: "A new product was added to your group wishlist",
+          metadata: { groupId: insertWishlist.groupId, productId: insertWishlist.productId }
+        });
+      }
+    }
+    
+    return wishlist;
+  }
+
+  async getGroupWishlist(groupId: number): Promise<GroupWishlist[]> {
+    return await db.select().from(groupWishlists).where(eq(groupWishlists.groupId, groupId));
+  }
+
+  async removeFromGroupWishlist(id: number): Promise<boolean> {
+    const result = await db.delete(groupWishlists).where(eq(groupWishlists.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  // VyronaSocial - Group Messages
+  async addGroupMessage(insertMessage: InsertGroupMessage): Promise<GroupMessage> {
+    const [message] = await db
+      .insert(groupMessages)
+      .values(insertMessage)
+      .returning();
+    
+    // Create notifications for other group members
+    const members = await this.getGroupMembers(insertMessage.groupId);
+    for (const member of members) {
+      if (member.userId !== insertMessage.userId) {
+        await this.createNotification({
+          userId: member.userId,
+          type: "message",
+          title: "New Group Message",
+          message: "You have a new message in your shopping group",
+          metadata: { groupId: insertMessage.groupId, messageId: message.id }
+        });
+      }
+    }
+    
+    return message;
+  }
+
+  async getGroupMessages(groupId: number): Promise<GroupMessage[]> {
+    return await db
+      .select()
+      .from(groupMessages)
+      .where(eq(groupMessages.groupId, groupId))
+      .orderBy(groupMessages.sentAt);
+  }
+
+  // VyronaSocial - Product Shares
+  async shareProduct(insertShare: InsertProductShare): Promise<ProductShare> {
+    const [share] = await db
+      .insert(productShares)
+      .values(insertShare)
+      .returning();
+    
+    // If sharing to a group, create notifications and add message
+    if (insertShare.groupId && insertShare.shareType === "group") {
+      const members = await this.getGroupMembers(insertShare.groupId);
+      for (const member of members) {
+        if (member.userId !== insertShare.sharedBy) {
+          await this.createNotification({
+            userId: member.userId,
+            type: "product_share",
+            title: "Product Shared in Group",
+            message: "A new product was shared in your shopping group",
+            metadata: { groupId: insertShare.groupId, productId: insertShare.productId }
+          });
+        }
+      }
+      
+      // Add system message to group
+      await db.insert(groupMessages).values({
+        groupId: insertShare.groupId,
+        userId: insertShare.sharedBy,
+        message: insertShare.message || "Shared a product",
+        messageType: "product_share",
+        metadata: { productId: insertShare.productId, shareId: share.id }
+      });
+    }
+    
+    return share;
+  }
+
+  async getProductShares(userId: number): Promise<ProductShare[]> {
+    return await db.select().from(productShares).where(eq(productShares.sharedBy, userId));
+  }
+
+  // VyronaSocial - Notifications
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db
+      .insert(notifications)
+      .values(insertNotification)
+      .returning();
+    return notification;
+  }
+
+  async getUserNotifications(userId: number): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(notifications.createdAt);
+  }
+
+  async markNotificationAsRead(id: number): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, id));
+  }
+
   // Seed initial data when needed
   async seedInitialData(): Promise<void> {
     // Check if data already exists
