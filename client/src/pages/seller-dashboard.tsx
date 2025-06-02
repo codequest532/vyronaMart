@@ -100,6 +100,27 @@ export default function SellerDashboard() {
     }
   };
 
+  const handleViewBook = (bookTitle: string) => {
+    console.log(`Viewing details for: ${bookTitle}`);
+    alert(`Book Details:\n\nTitle: ${bookTitle}\nStatus: Available for viewing\nAction: Opening detailed view...`);
+  };
+
+  const handleIssueBook = (bookTitle: string) => {
+    const memberName = prompt(`Issue "${bookTitle}" to which member?\nEnter member name:`);
+    if (memberName) {
+      console.log(`Issuing ${bookTitle} to ${memberName}`);
+      alert(`Success!\n\n"${bookTitle}" has been issued to ${memberName}\nDue date: ${new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString()}`);
+    }
+  };
+
+  const handleFollowUp = (bookTitle: string) => {
+    console.log(`Following up on overdue: ${bookTitle}`);
+    const action = confirm(`"${bookTitle}" is overdue.\n\nSend reminder notification to borrower?`);
+    if (action) {
+      alert(`Reminder sent!\n\nNotification sent to borrower about overdue book "${bookTitle}"`);
+    }
+  };
+
   const statCards = [
     {
       title: "Active Products",
@@ -976,7 +997,11 @@ export default function SellerDashboard() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewBook("The Psychology of Money")}
+                              >
                                 <Eye className="h-4 w-4 mr-1" />
                                 View
                               </Button>
@@ -989,7 +1014,12 @@ export default function SellerDashboard() {
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleIssueBook("The Psychology of Money")}
+                                className="text-green-600 hover:text-green-700 hover:border-green-300"
+                              >
                                 <Book className="h-4 w-4 mr-1" />
                                 Issue
                               </Button>
@@ -1020,7 +1050,11 @@ export default function SellerDashboard() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleViewBook("Atomic Habits")}
+                              >
                                 <Eye className="h-4 w-4 mr-1" />
                                 View
                               </Button>
@@ -1033,7 +1067,12 @@ export default function SellerDashboard() {
                                 <Trash2 className="h-4 w-4 mr-1" />
                                 Delete
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleIssueBook("Atomic Habits")}
+                                className="text-green-600 hover:text-green-700 hover:border-green-300"
+                              >
                                 <Book className="h-4 w-4 mr-1" />
                                 Issue
                               </Button>
@@ -1065,7 +1104,12 @@ export default function SellerDashboard() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button variant="outline" size="sm">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleFollowUp("The Lean Startup")}
+                                className="text-orange-600 hover:text-orange-700 hover:border-orange-300"
+                              >
                                 <AlertCircle className="h-4 w-4 mr-1" />
                                 Follow Up
                               </Button>
