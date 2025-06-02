@@ -922,14 +922,12 @@ export default function Home() {
                         <h3 className="text-lg font-medium text-gray-900 mb-2">No Books Available</h3>
                         <p className="text-gray-500 mb-4">
                           {selectedCategory === "all" 
-                            ? "No books have been uploaded by sellers or integrated from libraries yet."
+                            ? "No books have been uploaded by sellers yet."
                             : `No books found in the "${selectedCategory}" category.`
                           }
                         </p>
                         <div className="space-y-2 text-sm text-gray-600">
-                          <p>• Sellers can upload e-books through the Seller Dashboard</p>
-                          <p>• Libraries can be integrated through Admin approval</p>
-                          <p>• Physical books become available after library integration</p>
+                          <p>• Sellers can upload books for sale/rent through Seller Dashboard</p>
                         </div>
                       </div>
                     );
