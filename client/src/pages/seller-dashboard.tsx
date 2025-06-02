@@ -2103,7 +2103,7 @@ export default function SellerDashboard() {
 
       {/* Add Library Modal */}
       <Dialog open={showAddLibraryDialog} onOpenChange={setShowAddLibraryDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New Library to VyronaMart</DialogTitle>
             <DialogDescription>
@@ -2111,8 +2111,9 @@ export default function SellerDashboard() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            <div className="space-y-2">
+          <div className="overflow-y-auto flex-1 px-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+              <div className="space-y-2">
               <Label htmlFor="libraryName">Library Name *</Label>
               <Input
                 id="libraryName"
@@ -2192,9 +2193,10 @@ export default function SellerDashboard() {
                 rows={3}
               />
             </div>
+            </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-4 border-t bg-white">
             <Button variant="outline" onClick={() => setShowAddLibraryDialog(false)}>
               Cancel
             </Button>
