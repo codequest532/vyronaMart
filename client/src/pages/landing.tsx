@@ -375,49 +375,109 @@ export default function Landing() {
         </div>
       </header>
 
-      {/* Navigation */}
+      {/* VyronaMart Modules Navigation */}
       <nav className="bg-blue-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-8 h-12 text-sm">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedCategory("all")}
-              className={`text-white hover:bg-blue-700 ${selectedCategory === "all" ? "bg-blue-700" : ""}`}
-            >
-              <Menu className="h-4 w-4 mr-2" />
-              All
-            </Button>
-            <button
-              onClick={() => setSelectedCategory("electronics")}
-              className={`hover:underline ${selectedCategory === "electronics" ? "underline" : ""}`}
-            >
-              Electronics
-            </button>
-            <button
-              onClick={() => setSelectedCategory("fashion")}
-              className={`hover:underline ${selectedCategory === "fashion" ? "underline" : ""}`}
-            >
-              Fashion
-            </button>
-            <button
-              onClick={() => setSelectedCategory("home")}
-              className={`hover:underline ${selectedCategory === "home" ? "underline" : ""}`}
-            >
-              Home & Garden
-            </button>
-            <span className="cursor-pointer hover:underline">Books</span>
-            <span className="cursor-pointer hover:underline">Local Stores</span>
-            <span className="cursor-pointer hover:underline">Gaming Zone</span>
+          <div className="flex items-center justify-between h-12 text-sm">
+            <div className="flex items-center space-x-6">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedCategory("all")}
+                className={`text-white hover:bg-blue-700 ${selectedCategory === "all" ? "bg-blue-700" : ""}`}
+              >
+                <Menu className="h-4 w-4 mr-1" />
+                All Products
+              </Button>
+              <button
+                onClick={() => setSelectedCategory("electronics")}
+                className={`hover:underline ${selectedCategory === "electronics" ? "underline" : ""}`}
+              >
+                VyronaSpace Tech
+              </button>
+              <button
+                onClick={() => setSelectedCategory("fashion")}
+                className={`hover:underline ${selectedCategory === "fashion" ? "underline" : ""}`}
+              >
+                Fashion Hub
+              </button>
+              <button
+                onClick={() => setSelectedCategory("home")}
+                className={`hover:underline ${selectedCategory === "home" ? "underline" : ""}`}
+              >
+                Home Essentials
+              </button>
+              <span className="cursor-pointer hover:underline">VyronaRead</span>
+              <span className="cursor-pointer hover:underline">VyronaSocial</span>
+              <span className="cursor-pointer hover:underline">MallConnect</span>
+            </div>
+            <div className="text-xs text-blue-200">
+              🎮 Gamified Shopping • 🏆 Earn Rewards • 🎯 Social Shopping
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-r from-orange-500 to-red-600 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-2">Welcome to VyronaMart</h2>
-          <p className="text-lg">Discover amazing products with our gamified shopping experience</p>
+      {/* Hero Banner - VyronaMart Features */}
+      <section className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl font-bold mb-3">Experience VyronaMart</h2>
+            <p className="text-xl mb-6">India's First Gamified Social Shopping Platform</p>
+          </div>
+          
+          {/* VyronaMart 6 Core Modules */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-3xl mb-2">🏠</div>
+              <h3 className="font-semibold text-sm">Home</h3>
+              <p className="text-xs opacity-90">Your Dashboard</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-3xl mb-2">👥</div>
+              <h3 className="font-semibold text-sm">VyronaSocial</h3>
+              <p className="text-xs opacity-90">Social Shopping</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-3xl mb-2">🚀</div>
+              <h3 className="font-semibold text-sm">VyronaSpace</h3>
+              <p className="text-xs opacity-90">Gaming Hub</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-3xl mb-2">📚</div>
+              <h3 className="font-semibold text-sm">VyronaRead</h3>
+              <p className="text-xs opacity-90">Books & Learning</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-3xl mb-2">🏪</div>
+              <h3 className="font-semibold text-sm">MallConnect</h3>
+              <p className="text-xs opacity-90">Local Stores</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-3xl mb-2">👤</div>
+              <h3 className="font-semibold text-sm">MyVyrona</h3>
+              <p className="text-xs opacity-90">Your Profile</p>
+            </div>
+          </div>
+          
+          {/* Unique Features */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-4xl mb-2">🎮</div>
+              <h3 className="font-bold mb-1">Gamified Shopping</h3>
+              <p className="text-sm opacity-90">Earn coins, XP, and achievements while you shop</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🎯</div>
+              <h3 className="font-bold mb-1">Social Shopping Rooms</h3>
+              <p className="text-sm opacity-90">Shop together with friends in interactive rooms</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-2">🏆</div>
+              <h3 className="font-bold mb-1">Rewards & Levels</h3>
+              <p className="text-sm opacity-90">Level up your shopping experience with rewards</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -462,98 +522,145 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Category Sections (when no search/filter) */}
+        {/* VyronaMart Features Showcase (when no search/filter) */}
         {!searchQuery && selectedCategory === "all" && (
           <>
-            {/* Electronics Section */}
-            {electronicsProducts.length > 0 && (
-              <section className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Electronics & Gadgets</h3>
-                  <Button 
-                    variant="link" 
-                    onClick={() => setSelectedCategory("electronics")}
-                    className="text-blue-600"
-                  >
-                    See all →
-                  </Button>
+            {/* VyronaMart Categories */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">Shop by VyronaMart Categories</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("electronics")}>
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    📱
+                  </div>
+                  <h3 className="font-semibold">VyronaSpace Tech</h3>
+                  <p className="text-xs text-gray-600">Electronics & Gadgets</p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {electronicsProducts.slice(0, 6).map((product) => (
-                    <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleProductClick(product.id)}>
-                      <CardContent className="p-3">
-                        <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden">
-                          <img
-                            src={product.imageUrl || "/api/placeholder/200/200"}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <h3 className="font-medium text-xs mb-1 line-clamp-2">{product.name}</h3>
-                        <p className="text-red-600 font-bold text-sm">₹{product.price}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("fashion")}>
+                  <div className="bg-gradient-to-r from-pink-500 to-red-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    👗
+                  </div>
+                  <h3 className="font-semibold">Fashion Hub</h3>
+                  <p className="text-xs text-gray-600">Style & Apparel</p>
                 </div>
-              </section>
-            )}
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("home")}>
+                  <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🏡
+                  </div>
+                  <h3 className="font-semibold">Home Essentials</h3>
+                  <p className="text-xs text-gray-600">Home & Living</p>
+                </div>
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-gradient-to-r from-orange-500 to-yellow-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    📚
+                  </div>
+                  <h3 className="font-semibold">VyronaRead</h3>
+                  <p className="text-xs text-gray-600">Books & Knowledge</p>
+                </div>
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    👥
+                  </div>
+                  <h3 className="font-semibold">VyronaSocial</h3>
+                  <p className="text-xs text-gray-600">Social Shopping</p>
+                </div>
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🏪
+                  </div>
+                  <h3 className="font-semibold">MallConnect</h3>
+                  <p className="text-xs text-gray-600">Local Stores</p>
+                </div>
+              </div>
+            </section>
 
-            {/* Fashion Section */}
-            {fashionProducts.length > 0 && (
-              <section className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">Fashion & Apparel</h3>
-                  <Button 
-                    variant="link" 
-                    onClick={() => setSelectedCategory("fashion")}
-                    className="text-blue-600"
-                  >
-                    See all →
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  {fashionProducts.slice(0, 6).map((product) => (
-                    <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleProductClick(product.id)}>
-                      <CardContent className="p-3">
-                        <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden">
-                          <img
-                            src={product.imageUrl || "/api/placeholder/200/200"}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                          />
+            {/* Featured Products */}
+            <section className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold">Featured Products</h3>
+                <span className="text-sm text-gray-600">Handpicked for you</span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {(products || []).slice(0, 12).map((product) => (
+                  <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleProductClick(product.id)}>
+                    <CardContent className="p-3">
+                      <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden">
+                        <img
+                          src={product.imageUrl || "/api/placeholder/200/200"}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="font-medium text-xs mb-1 line-clamp-2">{product.name}</h3>
+                      <div className="flex items-center mb-1">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          ))}
                         </div>
-                        <h3 className="font-medium text-xs mb-1 line-clamp-2">{product.name}</h3>
-                        <p className="text-red-600 font-bold text-sm">₹{product.price}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </section>
-            )}
+                        <span className="text-xs text-gray-500 ml-1">(4.5)</span>
+                      </div>
+                      <p className="text-red-600 font-bold text-sm">₹{product.price}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
 
-            {/* Local Stores Section */}
+            {/* VyronaMart Unique Features */}
+            <section className="mb-12 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-8">
+              <h2 className="text-2xl font-bold text-center mb-8">Why Choose VyronaMart?</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🎮
+                  </div>
+                  <h3 className="font-bold mb-2">Gamified Shopping</h3>
+                  <p className="text-sm text-gray-600">Earn coins, XP, and unlock achievements with every purchase</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🎯
+                  </div>
+                  <h3 className="font-bold mb-2">Social Shopping Rooms</h3>
+                  <p className="text-sm text-gray-600">Shop together with friends in interactive multiplayer rooms</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🏆
+                  </div>
+                  <h3 className="font-bold mb-2">Rewards & Levels</h3>
+                  <p className="text-sm text-gray-600">Level up your profile and unlock exclusive rewards</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
+                    🏪
+                  </div>
+                  <h3 className="font-bold mb-2">Local Store Connect</h3>
+                  <p className="text-sm text-gray-600">Connect with nearby stores and support local businesses</p>
+                </div>
+              </div>
+            </section>
+
+            {/* Local Stores Preview */}
             {localStores.length > 0 && (
               <section className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-semibold">Local Stores Near You</h3>
-                  <Button variant="link" className="text-blue-600">See all →</Button>
+                  <Button variant="link" className="text-blue-600">Explore MallConnect →</Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {localStores.slice(0, 4).map((store) => (
                     <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleStoreClick(store.id)}>
                       <CardContent className="p-4">
-                        <div className="aspect-video bg-gray-100 rounded-md mb-2 overflow-hidden">
-                          <img
-                            src={store.imageUrl || "/api/placeholder/300/200"}
-                            alt={store.name}
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-md mb-2 overflow-hidden flex items-center justify-center">
+                          <span className="text-2xl font-bold text-blue-600">{store.name.charAt(0)}</span>
                         </div>
                         <h3 className="font-medium text-sm mb-1">{store.name}</h3>
-                        <p className="text-xs text-gray-600 mb-2">{store.description}</p>
+                        <p className="text-xs text-gray-600 mb-2 capitalize">{store.type} store</p>
                         <div className="flex items-center text-xs text-gray-500">
                           <MapPin className="h-3 w-3 mr-1" />
-                          <span>{store.location}</span>
+                          <span>{store.address || "Local area"}</span>
                         </div>
                       </CardContent>
                     </Card>
