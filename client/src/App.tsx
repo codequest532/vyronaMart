@@ -13,6 +13,7 @@ import VyronaHub from "@/pages/vyronahub";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
+import EbookReader from "@/pages/ebook-reader";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
@@ -58,6 +59,7 @@ function Router() {
       <Route path="/social" component={VyronaSocial} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
+      <Route path="/ebook-reader" component={EbookReader} />
       
       {/* 404 Not Found */}
       <Route component={NotFound} />

@@ -223,7 +223,13 @@ export default function Home() {
                       <p className="text-sm text-gray-500">Physical & Digital Library</p>
                     </div>
                   </div>
-                  <Button variant="ghost" className="text-purple-600">View All Books</Button>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" className="text-purple-600">View All Books</Button>
+                    <Button variant="outline" className="text-purple-600 border-purple-300" onClick={() => setLocation('/ebook-reader')}>
+                      <Book className="h-4 w-4 mr-1" />
+                      E-Reader
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-4">
                   {books && books.length > 0 ? (
