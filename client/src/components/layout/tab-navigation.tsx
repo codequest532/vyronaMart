@@ -1,6 +1,6 @@
-import { Home, Users, MapPin, Book, ShoppingBag, UserCircle } from "lucide-react";
+import { Home, Users, MapPin, Book, ShoppingBag, UserCircle, Instagram } from "lucide-react";
 
-type TabType = "home" | "social" | "space" | "read" | "mall" | "profile";
+type TabType = "home" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
 
 interface TabNavigationProps {
   activeTab: TabType;
@@ -13,6 +13,7 @@ const tabs = [
   { id: "space" as const, label: "VyronaSpace", icon: MapPin },
   { id: "read" as const, label: "VyronaRead", icon: Book },
   { id: "mall" as const, label: "MallConnect", icon: ShoppingBag },
+  { id: "instashop" as const, label: "VyronaInstaShop", icon: Instagram },
   { id: "profile" as const, label: "MyVyrona", icon: UserCircle },
 ];
 

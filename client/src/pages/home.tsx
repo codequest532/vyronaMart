@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import Header from "@/components/layout/header";
 import TabNavigation from "@/components/layout/tab-navigation";
 import CartButton from "@/components/shopping/cart-button";
@@ -52,13 +53,22 @@ import {
   TrendingUp
 } from "lucide-react";
 
-type TabType = "home" | "social" | "space" | "read" | "mall" | "profile";
+type TabType = "home" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
+  const [, setLocation] = useLocation();
   
   const handleTabChange = (tab: TabType) => {
     console.log("Tab clicked:", tab);
+    if (tab === "social") {
+      setLocation("/social");
+      return;
+    }
+    if (tab === "instashop") {
+      setLocation("/instashop");
+      return;
+    }
     setActiveTab(tab);
   };
   const { user, updateCoins } = useUserData();
