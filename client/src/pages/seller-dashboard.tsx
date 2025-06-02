@@ -179,17 +179,65 @@ export default function SellerDashboard() {
 
   const handleUploadPdfEpub = () => {
     console.log("Opening PDF/EPUB upload");
-    alert(`PDF/EPUB Upload\n\nSupported formats:\n• PDF files (.pdf)\n• EPUB files (.epub)\n• MOBI files (.mobi)\n\nMax file size: 50MB\nOpening file picker...`);
+    
+    // Simulate file selection and upload process
+    const fileName = prompt("Enter filename (e.g., 'marketing-guide.pdf'):");
+    if (!fileName) return;
+    
+    const fileSize = Math.floor(Math.random() * 40) + 5; // Random size between 5-45 MB
+    const uploadProgress = [20, 40, 60, 80, 100];
+    
+    alert(`File Selected: ${fileName}\nSize: ${fileSize}MB\nFormat: Supported\n\nStarting upload...`);
+    
+    // Simulate upload progress
+    setTimeout(() => {
+      const title = prompt("Enter book title:");
+      const author = prompt("Enter author name:");
+      const price = prompt("Enter sale price (₹):");
+      const rental = prompt("Enter rental price (₹):");
+      
+      if (title && author && price && rental) {
+        console.log(`Uploaded: ${fileName} - ${title} by ${author}`);
+        alert(`Upload Successful!\n\nFile: ${fileName}\nTitle: ${title}\nAuthor: ${author}\nSale Price: ₹${price}\nRental: ₹${rental}/month\n\nBook is now available in your e-book store!`);
+      }
+    }, 1000);
   };
 
   const handleImportFromLibrary = () => {
     console.log("Importing from physical library");
-    alert(`Import from Physical Library\n\nAvailable books to digitize:\n• The Psychology of Money\n• Atomic Habits\n• Think and Grow Rich\n\nSelect books to create digital versions`);
+    
+    const availableBooks = ["The Psychology of Money", "Atomic Habits", "Think and Grow Rich", "The Lean Startup"];
+    const selectedBook = prompt(`Select book to digitize:\n\n1. ${availableBooks[0]}\n2. ${availableBooks[1]}\n3. ${availableBooks[2]}\n4. ${availableBooks[3]}\n\nEnter number (1-4):`);
+    
+    if (selectedBook && selectedBook >= '1' && selectedBook <= '4') {
+      const bookTitle = availableBooks[parseInt(selectedBook) - 1];
+      const digitalFormat = prompt("Choose digital format:\n\n1. PDF only\n2. EPUB only\n3. Both PDF and EPUB\n\nEnter choice (1-3):");
+      
+      if (digitalFormat) {
+        console.log(`Converting ${bookTitle} to digital format`);
+        alert(`Digital Conversion Started\n\nBook: ${bookTitle}\nFormat: ${digitalFormat === '1' ? 'PDF' : digitalFormat === '2' ? 'EPUB' : 'PDF + EPUB'}\nEstimated time: 2-3 minutes\n\nYou'll be notified when conversion is complete.`);
+      }
+    }
   };
 
   const handleBulkUpload = () => {
     console.log("Opening bulk upload");
-    alert(`Bulk E-book Upload\n\nUpload multiple books at once:\n• Drag and drop files\n• CSV metadata import\n• Batch pricing options\n\nSupports up to 100 files`);
+    
+    const numFiles = prompt("How many e-books do you want to upload? (1-50):");
+    if (!numFiles || isNaN(parseInt(numFiles))) return;
+    
+    const fileCount = parseInt(numFiles);
+    if (fileCount < 1 || fileCount > 50) {
+      alert("Please enter a number between 1 and 50");
+      return;
+    }
+    
+    const uploadMethod = prompt(`Bulk Upload Options:\n\n1. Drag & Drop Files\n2. Select Folder\n3. CSV with Metadata\n\nChoose method (1-3):`);
+    
+    if (uploadMethod) {
+      console.log(`Bulk uploading ${fileCount} files via method ${uploadMethod}`);
+      alert(`Bulk Upload Initiated\n\nFiles: ${fileCount} e-books\nMethod: ${uploadMethod === '1' ? 'Drag & Drop' : uploadMethod === '2' ? 'Folder Selection' : 'CSV Import'}\nEstimated time: ${Math.ceil(fileCount * 0.5)} minutes\n\nUpload queue started - you can monitor progress in the background.`);
+    }
   };
 
   const handleReaderSettings = () => {
