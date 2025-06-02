@@ -628,7 +628,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/vyronahub')}>
+                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setActiveTab('products')}>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -636,7 +636,7 @@ export default function AdminDashboard() {
                       </div>
                       <div>
                         <h3 className="font-semibold mb-1">Product Catalog</h3>
-                        <p className="text-sm text-gray-500">Browse all products</p>
+                        <p className="text-sm text-gray-500">Manage all products</p>
                       </div>
                     </div>
                   </CardContent>
