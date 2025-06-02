@@ -13,7 +13,7 @@ import { queryClient } from "@/lib/queryClient";
 import type { User as UserType } from "@shared/schema";
 
 interface HeaderProps {
-  user: UserType | null;
+  user: UserType;
   onNavigateToProfile?: () => void;
 }
 
@@ -88,13 +88,13 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
             {/* VyronaCoins */}
             <Badge className="bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg px-3 py-1">
               <Coins className="mr-1 h-4 w-4" />
-              <span className="font-bold">{user?.vyronaCoins?.toLocaleString() || '0'}</span>
+              <span className="font-bold">{user.vyronaCoins.toLocaleString()}</span>
             </Badge>
             
             {/* XP Level */}
             <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:from-purple-600 hover:to-pink-700 shadow-lg px-3 py-1">
               <Star className="mr-1 h-4 w-4 fill-current" />
-              <span className="font-bold">Lv.{user?.level || 1}</span>
+              <span className="font-bold">Lv.{user.level}</span>
             </Badge>
 
             {/* Profile Avatar with Dropdown */}
@@ -103,11 +103,11 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
                 <div className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 rounded-lg p-2 transition-colors">
                   <Avatar className="w-10 h-10 ring-2 ring-blue-200 hover:ring-blue-400 transition-all">
                     <AvatarFallback className="vyrona-gradient-profile text-white font-bold">
-                      {user?.username?.charAt(0).toUpperCase() || 'U'}
+                      {user.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden lg:block">
-                    <div className="text-sm font-semibold text-gray-900">{user?.username || 'User'}</div>
+                    <div className="text-sm font-semibold text-gray-900">{user.username}</div>
                     <div className="text-xs text-gray-500">Premium Member</div>
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -229,7 +229,7 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
                   <Label htmlFor="current-mobile">Current Mobile Number</Label>
                   <Input
                     id="current-mobile"
-                    value={user?.mobile || "Not set"}
+                    value={user.mobile || "Not set"}
                     disabled
                     className="bg-gray-50"
                   />
@@ -369,7 +369,7 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="first-name">First Name</Label>
-                        <Input id="first-name" defaultValue={user?.username || ''} />
+                        <Input id="first-name" defaultValue={user.username} />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="last-name">Last Name</Label>
