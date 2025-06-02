@@ -432,36 +432,36 @@ export default function Landing() {
           </div>
           
           {/* VyronaMart 6 Core Modules */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-3xl mb-2">🏠</div>
-              <h3 className="font-semibold text-sm">Home</h3>
-              <p className="text-xs opacity-90">Your Dashboard</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-4xl mb-3">🏠</div>
+              <h3 className="font-semibold text-base mb-1">Home</h3>
+              <p className="text-sm opacity-90">Dashboard</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-3xl mb-2">👥</div>
-              <h3 className="font-semibold text-sm">VyronaSocial</h3>
-              <p className="text-xs opacity-90">Social Shopping</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-4xl mb-3">👥</div>
+              <h3 className="font-semibold text-base mb-1">VyronaSocial</h3>
+              <p className="text-sm opacity-90">Social Shopping</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-3xl mb-2">🚀</div>
-              <h3 className="font-semibold text-sm">VyronaSpace</h3>
-              <p className="text-xs opacity-90">Local Store Connect</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-4xl mb-3">🚀</div>
+              <h3 className="font-semibold text-base mb-1">VyronaSpace</h3>
+              <p className="text-sm opacity-90">Quick Delivery</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-3xl mb-2">📚</div>
-              <h3 className="font-semibold text-sm">VyronaRead</h3>
-              <p className="text-xs opacity-90">Books & Learning</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-4xl mb-3">📚</div>
+              <h3 className="font-semibold text-base mb-1">VyronaRead</h3>
+              <p className="text-sm opacity-90">Books & Learning</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-3xl mb-2">🏪</div>
-              <h3 className="font-semibold text-sm">MallConnect</h3>
-              <p className="text-xs opacity-90">Premium Stores</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-4xl mb-3">🏪</div>
+              <h3 className="font-semibold text-base mb-1">MallConnect</h3>
+              <p className="text-sm opacity-90">Premium Stores</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-3xl mb-2">👤</div>
-              <h3 className="font-semibold text-sm">MyVyrona</h3>
-              <p className="text-xs opacity-90">Your Profile</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
+              <div className="text-4xl mb-3">👤</div>
+              <h3 className="font-semibold text-base mb-1">MyVyrona</h3>
+              <p className="text-sm opacity-90">Your Profile</p>
             </div>
           </div>
           
