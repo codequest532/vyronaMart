@@ -943,6 +943,7 @@ export default function Home() {
                       price: 2999,
                       rentPrice: 599,
                       type: "physical",
+                      category: "programming",
                       imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
                     },
                     {
@@ -952,6 +953,7 @@ export default function Home() {
                       price: 1999,
                       rentPrice: 399,
                       type: "physical",
+                      category: "business",
                       imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
                     },
                     {
@@ -960,6 +962,7 @@ export default function Home() {
                       author: "Alex Thompson",
                       price: 1499,
                       type: "digital",
+                      category: "web-development",
                       imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400"
                     },
                     {
@@ -968,9 +971,49 @@ export default function Home() {
                       author: "Dr. Emily Chen",
                       price: 2499,
                       type: "digital",
+                      category: "data-science",
                       imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400"
+                    },
+                    {
+                      id: 5,
+                      name: "Algorithm Design Manual",
+                      author: "Steven Skiena",
+                      price: 3299,
+                      rentPrice: 699,
+                      type: "digital",
+                      category: "algorithms",
+                      imageUrl: "https://images.unsplash.com/photo-1509475826633-fed577a2c71b?w=400"
+                    },
+                    {
+                      id: 6,
+                      name: "UI/UX Design Principles",
+                      author: "Emma Davis",
+                      price: 1899,
+                      rentPrice: 379,
+                      type: "physical",
+                      category: "design",
+                      imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=400"
+                    },
+                    {
+                      id: 7,
+                      name: "Cloud Computing Guide",
+                      author: "Michael Chen",
+                      price: 2799,
+                      type: "digital",
+                      category: "technology",
+                      imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400"
+                    },
+                    {
+                      id: 8,
+                      name: "Physics of the Universe",
+                      author: "Dr. Brian Cox",
+                      price: 2199,
+                      rentPrice: 449,
+                      type: "physical",
+                      category: "science",
+                      imageUrl: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400"
                     }
-                  ].map((book) => (
+                  ].filter(book => selectedCategory === "all" || book.category === selectedCategory).map((book) => (
                     <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
                       <div className="relative">
                         <img 
