@@ -65,6 +65,7 @@ export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const [bookmarks, setBookmarks] = useState<number[]>([]);
   const [readingProgress, setReadingProgress] = useState(68);
+  const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
 
   // Sample book content
   const sampleBookContent = [
@@ -1024,15 +1025,75 @@ export default function Home() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Library Integration</h3>
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-bold text-gray-900">
+                      {selectedLibrary ? selectedLibrary.name : "Library Integration"}
+                    </h3>
+                    {selectedLibrary && (
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => setSelectedLibrary(null)}
+                        className="text-purple-600"
+                      >
+                        ← Back to Libraries
+                      </Button>
+                    )}
+                  </div>
                   <div className="flex space-x-2">
                     <Badge variant="outline" className="text-green-700">Borrow</Badge>
                     <Badge variant="outline" className="text-blue-700">Return</Badge>
                   </div>
                 </div>
 
-                {/* Sample Libraries for demonstration */}
-                <div className="space-y-6">
+                {selectedLibrary ? (
+                  // Library Detail View - Shows all books from selected library
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900">{selectedLibrary.name}</h4>
+                          <p className="text-sm text-gray-600">{selectedLibrary.address}</p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Badge variant="secondary">
+                              <BookOpen className="h-3 w-3 mr-1" />
+                              {selectedLibrary.totalBooks.toLocaleString()} Books
+                            </Badge>
+                            <Badge variant="outline" className="text-green-600">
+                              <Heart className="h-3 w-3 mr-1" />
+                              Verified Library
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {selectedLibrary.books.map((book: any) => (
+                        <div key={book.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <h5 className="font-medium text-gray-900 mb-1">{book.name}</h5>
+                          <p className="text-sm text-gray-600 mb-3">by {book.author}</p>
+                          <div className="flex items-center justify-between">
+                            <Badge variant={book.available ? "default" : "destructive"} className="text-xs">
+                              {book.available ? "Available" : "Borrowed"}
+                            </Badge>
+                            {book.available && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleLibraryBorrow(book.id, selectedLibrary.id)}
+                                className="text-xs"
+                              >
+                                Borrow
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  // Library List View - Shows available libraries
+                  <div className="space-y-6">
                   {[
                     {
                       id: 1,
@@ -1072,7 +1133,14 @@ export default function Home() {
                             </Badge>
                           </div>
                         </div>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedLibrary(library);
+                            showNotification(`Viewing ${library.name}`, "Browse available books", "success");
+                          }}
+                        >
                           <MapPin className="h-4 w-4 mr-1" />
                           Visit Library
                         </Button>
@@ -1105,6 +1173,7 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+                )}
               </CardContent>
             </Card>
 
