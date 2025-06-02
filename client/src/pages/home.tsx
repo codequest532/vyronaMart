@@ -812,29 +812,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Reading Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { label: "Books Read", value: "12", icon: Book, color: "indigo" },
-                { label: "Currently Rented", value: "3", icon: Play, color: "purple" },
-                { label: "Books Donated", value: "5", icon: Heart, color: "green" },
-                { label: "Reading Score", value: "4.8", icon: Star, color: "yellow" },
-              ].map((stat) => (
-                <Card key={stat.label}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 bg-${stat.color}-100 rounded-lg flex items-center justify-center`}>
-                        <stat.icon className={`text-${stat.color}-500 h-5 w-5`} />
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-gray-900">{stat.value}</div>
-                        <div className="text-xs text-gray-500">{stat.label}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+
 
             {/* Book Categories */}
             <Card>
