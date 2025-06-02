@@ -40,6 +40,7 @@ function Router() {
         {(params) => <StoreDetails storeId={params.storeId} />}
       </Route>
       <Route path="/social" component={VyronaSocial} />
+      <Route path="/instashop" component={VyronaInstaShop} />
       <Route component={NotFound} />
     </Switch>
   );
