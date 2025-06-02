@@ -836,43 +836,66 @@ export default function Landing() {
 
             {/* MallConnect - Premium Stores */}
             <section className="mb-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8">
-              <div className="mb-6">
-                <div>
-                  <h3 className="text-2xl font-bold mb-2">MallConnect - Premium Stores</h3>
-                  <p className="text-gray-600">Premium city mall brands now delivering through VyronaMart e-commerce platform</p>
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">VyronaMallConnect - Premium Stores</h2>
+                <p className="text-lg text-gray-600">Connecting premium city malls with seamless e-commerce delivery</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🏬</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Mall Integration</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Direct partnerships with premium malls</li>
+                    <li>• Seamless inventory synchronization</li>
+                    <li>• Real-time stock availability</li>
+                    <li>• Authentic brand verification</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🚚</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Smart Delivery</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Same-day delivery from malls</li>
+                    <li>• Express pickup services</li>
+                    <li>• Temperature-controlled transport</li>
+                    <li>• Premium packaging options</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">💎</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Premium Experience</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Exclusive mall-only collections</li>
+                    <li>• Personal shopping assistance</li>
+                    <li>• Virtual store walkthroughs</li>
+                    <li>• Priority customer support</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🎁</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Mall Rewards</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Mall loyalty points integration</li>
+                    <li>• Exclusive member discounts</li>
+                    <li>• VIP shopping events access</li>
+                    <li>• Seasonal festival offers</li>
+                  </ul>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { name: "Westside Fashion", category: "Fashion & Lifestyle", mall: "Phoenix Mall" },
-                  { name: "Croma Electronics", category: "Electronics & Gadgets", mall: "Select City Walk" },
-                  { name: "Home Centre", category: "Home & Furniture", mall: "DLF Mall" },
-                  { name: "Lifestyle Store", category: "Fashion & Accessories", mall: "Ambience Mall" }
-                ].map((mallShop, index) => (
-                  <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow border-purple-200">
-                    <CardContent className="p-4">
-                      <div className="aspect-video bg-gradient-to-br from-purple-100 to-indigo-100 rounded-md mb-3 overflow-hidden flex items-center justify-center">
-                        <span className="text-2xl font-bold text-purple-600">{mallShop.name.charAt(0)}</span>
-                      </div>
-                      <h3 className="font-medium text-sm mb-1">{mallShop.name}</h3>
-                      <p className="text-xs text-purple-600 mb-2 font-medium">{mallShop.category}</p>
-                      <div className="flex items-center text-xs text-gray-500 mb-2">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>{mallShop.mall}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-green-600 font-medium">🏬 Mall Brand</span>
-                        <span className="text-xs text-yellow-600">⭐ 4.{index + 6} rating</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600 mb-3">Think Premium brands Think VyronaMall</p>
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+              
+              <div className="text-center mt-8">
+                <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-3 text-lg">
                   Start Shopping
+                  <Building2 className="ml-2 h-5 w-5" />
                 </Button>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500">Think Premium brands Think VyronaMall</p>
               </div>
             </section>
 
