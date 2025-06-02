@@ -680,31 +680,57 @@ export default function Landing() {
               </div>
             </section>
 
-            {/* VyronaMart Other Modules */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">VyronaMart Modules</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
-                  <div className="bg-gradient-to-r from-orange-500 to-yellow-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    🚀
-                  </div>
-                  <h3 className="font-semibold">VyronaSpace</h3>
-                  <p className="text-xs text-gray-600">Quick Delivery</p>
+            {/* Instagram Store Connect - VyronaSocial Feature */}
+            <section className="mb-12 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">Instagram Store Connect</h2>
+                <p className="text-lg text-gray-600">Seamlessly integrate your Instagram shopping with VyronaSocial</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">📸</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Direct Instagram Import</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Import products from Instagram posts</li>
+                    <li>• Sync your Instagram shopping tags</li>
+                    <li>• Auto-create VyronaMart listings</li>
+                    <li>• Maintain product authenticity</li>
+                  </ul>
                 </div>
-                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
-                  <div className="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    👥
-                  </div>
-                  <h3 className="font-semibold">VyronaSocial</h3>
-                  <p className="text-xs text-gray-600">Social Shopping</p>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🛍️</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Social Shopping Bridge</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Share Instagram finds with friends</li>
+                    <li>• Create group wishlists from IG posts</li>
+                    <li>• Vote on Instagram discoveries</li>
+                    <li>• Collaborative Instagram shopping</li>
+                  </ul>
                 </div>
-                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    🏬
-                  </div>
-                  <h3 className="font-semibold">MallConnect</h3>
-                  <p className="text-xs text-gray-600">City Mall Shops</p>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">💫</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Influencer Integration</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Follow influencer product picks</li>
+                    <li>• Get notified of new IG drops</li>
+                    <li>• Direct purchase from posts</li>
+                    <li>• Earn rewards for sharing</li>
+                  </ul>
                 </div>
+              </div>
+              
+              <div className="text-center mt-8">
+                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-3 text-lg">
+                  Connect Instagram Account
+                  <Heart className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500">Part of VyronaSocial - Transform your Instagram shopping experience</p>
               </div>
             </section>
 
