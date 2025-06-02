@@ -619,7 +619,10 @@ export default function SellerDashboard() {
               <div className="border-b border-gray-200 dark:border-gray-800">
                 <nav className="flex space-x-8">
                   <button
-                    onClick={() => setBookSection("overview")}
+                    onClick={() => {
+                      console.log("Switching to overview");
+                      setBookSection("overview");
+                    }}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       bookSection === "overview"
                         ? "border-blue-500 text-blue-600"
@@ -629,7 +632,10 @@ export default function SellerDashboard() {
                     Overview
                   </button>
                   <button
-                    onClick={() => setBookSection("physical")}
+                    onClick={() => {
+                      console.log("Switching to physical");
+                      setBookSection("physical");
+                    }}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       bookSection === "physical"
                         ? "border-blue-500 text-blue-600"
@@ -639,7 +645,10 @@ export default function SellerDashboard() {
                     Physical Library
                   </button>
                   <button
-                    onClick={() => setBookSection("ebooks")}
+                    onClick={() => {
+                      console.log("Switching to ebooks");
+                      setBookSection("ebooks");
+                    }}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       bookSection === "ebooks"
                         ? "border-blue-500 text-blue-600"
@@ -649,7 +658,10 @@ export default function SellerDashboard() {
                     E-Book Store
                   </button>
                   <button
-                    onClick={() => setBookSection("reader")}
+                    onClick={() => {
+                      console.log("Switching to reader");
+                      setBookSection("reader");
+                    }}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       bookSection === "reader"
                         ? "border-blue-500 text-blue-600"
@@ -659,7 +671,10 @@ export default function SellerDashboard() {
                     Digital Reader
                   </button>
                   <button
-                    onClick={() => setBookSection("analytics")}
+                    onClick={() => {
+                      console.log("Switching to analytics");
+                      setBookSection("analytics");
+                    }}
                     className={`py-2 px-1 border-b-2 font-medium text-sm ${
                       bookSection === "analytics"
                         ? "border-blue-500 text-blue-600"
