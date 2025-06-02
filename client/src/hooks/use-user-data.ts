@@ -10,7 +10,6 @@ export function useUserData() {
   
   const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/current-user"],
-    enabled: false, // Only fetch when explicitly enabled
     retry: false,
   });
 
@@ -54,7 +53,7 @@ export function useUserData() {
 
   return {
     user: actualUser,
-    isLoading: false, // We'll manage auth state manually
+    isLoading,
     error,
     updateCoins,
     updateXP,

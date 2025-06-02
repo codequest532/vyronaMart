@@ -166,6 +166,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Current user endpoint for authentication
+  app.get("/api/current-user", async (req, res) => {
+    try {
+      // For now, return null since we don't have session management
+      // In a real app, you'd check the session/JWT here
+      res.json(null);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // User routes
   app.get("/api/user/:id", async (req, res) => {
     try {
