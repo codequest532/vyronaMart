@@ -393,24 +393,7 @@ export default function Landing() {
                 <Menu className="h-4 w-4 mr-1" />
                 All Products
               </Button>
-              <button
-                onClick={() => setSelectedCategory("electronics")}
-                className={`hover:underline ${selectedCategory === "electronics" ? "underline" : ""}`}
-              >
-                Electronics
-              </button>
-              <button
-                onClick={() => setSelectedCategory("fashion")}
-                className={`hover:underline ${selectedCategory === "fashion" ? "underline" : ""}`}
-              >
-                Fashion Hub
-              </button>
-              <button
-                onClick={() => setSelectedCategory("home")}
-                className={`hover:underline ${selectedCategory === "home" ? "underline" : ""}`}
-              >
-                Home Essentials
-              </button>
+              <span className="cursor-pointer hover:underline font-medium">VyronaHub</span>
               <span className="cursor-pointer hover:underline">VyronaSpace</span>
               <span className="cursor-pointer hover:underline">VyronaSocial</span>
               <span className="cursor-pointer hover:underline">VyronaRead</span>
@@ -530,31 +513,117 @@ export default function Landing() {
         {/* VyronaMart Features Showcase (when no search/filter) */}
         {!searchQuery && selectedCategory === "all" && (
           <>
-            {/* VyronaMart Categories */}
+            {/* VyronaHub - Comprehensive Categories */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">Shop by VyronaMart Categories</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("electronics")}>
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    📱
-                  </div>
-                  <h3 className="font-semibold">Electronics</h3>
-                  <p className="text-xs text-gray-600">Tech & Gadgets</p>
+              <h2 className="text-2xl font-bold mb-6">VyronaHub - Complete Shopping Universe</h2>
+              <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-6">
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🔌</div>
+                  <h4 className="font-semibold text-sm mb-2">Electronics</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Smartphones & Accessories</li>
+                    <li>• Laptops & Tablets</li>
+                    <li>• Smart TVs & Monitors</li>
+                    <li>• Wearables & Smart Devices</li>
+                  </ul>
                 </div>
-                <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("fashion")}>
-                  <div className="bg-gradient-to-r from-pink-500 to-red-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    👗
-                  </div>
-                  <h3 className="font-semibold">Fashion Hub</h3>
-                  <p className="text-xs text-gray-600">Style & Apparel</p>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">👗</div>
+                  <h4 className="font-semibold text-sm mb-2">Fashion & Apparels</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Men's, Women's & Kids' Wear</li>
+                    <li>• Footwear & Accessories</li>
+                    <li>• Ethnic & Western Clothing</li>
+                    <li>• Bags, Wallets & Belts</li>
+                  </ul>
                 </div>
-                <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("home")}>
-                  <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    🏡
-                  </div>
-                  <h3 className="font-semibold">Home Essentials</h3>
-                  <p className="text-xs text-gray-600">Home & Living</p>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🏠</div>
+                  <h4 className="font-semibold text-sm mb-2">Home & Kitchen</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Kitchen Appliances & Tools</li>
+                    <li>• Storage & Organization</li>
+                    <li>• Furnishings & Decor</li>
+                    <li>• Lighting & Cleaning</li>
+                  </ul>
                 </div>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🧸</div>
+                  <h4 className="font-semibold text-sm mb-2">Kids Corner</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Toys, Games & Puzzles</li>
+                    <li>• School Supplies & Stationery</li>
+                    <li>• Baby Care Products</li>
+                    <li>• Learning & Educational Kits</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🥬</div>
+                  <h4 className="font-semibold text-sm mb-2">Organic Store</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Organic Fruits & Vegetables</li>
+                    <li>• Herbal Juices & Superfoods</li>
+                    <li>• Ayurvedic & Natural Products</li>
+                    <li>• Organic Skincare & Wellness</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🛒</div>
+                  <h4 className="font-semibold text-sm mb-2">Groceries</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Daily Essentials (Atta, Rice, Pulses)</li>
+                    <li>• Oils, Spices & Condiments</li>
+                    <li>• Beverages & Snacks</li>
+                    <li>• Dairy, Bakery & Frozen Foods</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🏡</div>
+                  <h4 className="font-semibold text-sm mb-2">Home Automation</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Smart Plugs & Switches</li>
+                    <li>• Voice Assistants (Alexa, Google)</li>
+                    <li>• Smart Lights & Sensors</li>
+                    <li>• Home Security & Surveillance</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🧾</div>
+                  <h4 className="font-semibold text-sm mb-2">Office & Stationery</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Office Chairs & Desks</li>
+                    <li>• Files, Folders & Organizers</li>
+                    <li>• Pens, Notebooks & Writing Tools</li>
+                    <li>• Printers & Computer Accessories</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🧘</div>
+                  <h4 className="font-semibold text-sm mb-2">Health & Wellness</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Fitness Equipment (Yoga Mats)</li>
+                    <li>• Health Monitoring Devices</li>
+                    <li>• Nutrition & Supplements</li>
+                    <li>• Skincare & Personal Hygiene</li>
+                  </ul>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="text-2xl mb-3">🐶</div>
+                  <h4 className="font-semibold text-sm mb-2">Pet Care</h4>
+                  <ul className="text-xs text-gray-600 space-y-1">
+                    <li>• Pet Food & Treats</li>
+                    <li>• Grooming Essentials</li>
+                    <li>• Beds, Toys & Accessories</li>
+                    <li>• Leashes, Collars & Carriers</li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+
+            {/* VyronaMart Other Modules */}
+            <section className="mb-12">
+              <h2 className="text-2xl font-bold mb-6">VyronaMart Modules</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
                   <div className="bg-gradient-to-r from-orange-500 to-yellow-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
                     🚀
