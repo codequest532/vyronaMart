@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,19 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2 } from "lucide-react";
+import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2, Menu } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import type { Product, Store } from "@shared/schema";
 
 export default function Landing() {
+  const [, setLocation] = useLocation();
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [otpStep, setOtpStep] = useState<"email" | "otp" | "reset">("email");
   const [resetEmail, setResetEmail] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   // Fetch products and stores to display
   const { data: products } = useQuery<Product[]>({
@@ -29,17 +32,32 @@ export default function Landing() {
     queryKey: ["/api/stores"],
   });
 
-  // Get featured products by category
-  const featuredElectronics = products?.filter(p => p.category === "electronics").slice(0, 6) || [];
-  const featuredFashion = products?.filter(p => p.category === "fashion").slice(0, 6) || [];
-  const featuredBooks = products?.filter(p => p.module === "read").slice(0, 6) || [];
-  const localStores = stores?.filter(s => s.type === "kirana").slice(0, 4) || [];
+  // Get products by category
+  const electronicsProducts = products?.filter(p => p.category === "electronics") || [];
+  const fashionProducts = products?.filter(p => p.category === "fashion") || [];
+  const homeProducts = products?.filter(p => p.category === "home") || [];
+  const booksProducts = products?.filter(p => p.module === "read") || [];
+  const localStores = stores?.filter(s => s.type === "kirana") || [];
 
-  // Filter products based on search
-  const filteredProducts = products?.filter(product => 
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  ).slice(0, 12) || [];
+  // Filter products based on search and category
+  const getFilteredProducts = () => {
+    let filtered = products || [];
+    
+    if (searchQuery) {
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(product => product.category === selectedCategory);
+    }
+    
+    return filtered;
+  };
+
+  const filteredProducts = getFilteredProducts();
 
   const { toast } = useToast();
 
@@ -204,53 +222,105 @@ export default function Landing() {
     setShowAuthModal(true);
   };
 
+  const handleProductClick = (productId: number) => {
+    setLocation(`/product/${productId}`);
+  };
+
+  const handleStoreClick = (storeId: number) => {
+    setLocation(`/store/${storeId}`);
+  };
+
   const formatPrice = (price: number) => {
     return `₹${price.toLocaleString()}`;
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-gray-900 text-white py-3">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-orange-400">VyronaMart</h1>
-            <span className="text-sm text-gray-300">Gamified Shopping Experience</span>
-          </div>
-          
-          {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-8">
-            <div className="relative">
-              <Input
-                type="search"
-                placeholder="Search products, categories, stores..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-4 pr-12 py-2 rounded-md border-0 focus:ring-2 focus:ring-orange-400"
-              />
-              <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+      <header className="bg-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold">VyronaMart</h1>
+              <span className="text-sm text-blue-200">Everything Store</span>
             </div>
-          </div>
+            
+            {/* Search Bar */}
+            <div className="flex-1 max-w-2xl mx-8">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search VyronaMart"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-12 py-3 text-black rounded-md border-0 focus:ring-2 focus:ring-orange-500"
+                />
+                <Button
+                  size="sm"
+                  className="absolute right-1 top-1 bottom-1 bg-orange-500 hover:bg-orange-600 px-4"
+                >
+                  <Search className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
 
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              className="text-white hover:text-orange-400"
-              onClick={handleAuthRequired}
-            >
-              Sign In
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white"
-              onClick={handleAuthRequired}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Cart
-            </Button>
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                onClick={() => setShowAuthModal(true)}
+                className="text-white hover:bg-blue-800"
+              >
+                Hello, Sign in
+              </Button>
+              <Button
+                onClick={() => setShowAuthModal(true)}
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Cart
+              </Button>
+            </div>
           </div>
         </div>
       </header>
+
+      {/* Navigation */}
+      <nav className="bg-blue-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center space-x-8 h-12 text-sm">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedCategory("all")}
+              className={`text-white hover:bg-blue-700 ${selectedCategory === "all" ? "bg-blue-700" : ""}`}
+            >
+              <Menu className="h-4 w-4 mr-2" />
+              All
+            </Button>
+            <button
+              onClick={() => setSelectedCategory("electronics")}
+              className={`hover:underline ${selectedCategory === "electronics" ? "underline" : ""}`}
+            >
+              Electronics
+            </button>
+            <button
+              onClick={() => setSelectedCategory("fashion")}
+              className={`hover:underline ${selectedCategory === "fashion" ? "underline" : ""}`}
+            >
+              Fashion
+            </button>
+            <button
+              onClick={() => setSelectedCategory("home")}
+              className={`hover:underline ${selectedCategory === "home" ? "underline" : ""}`}
+            >
+              Home & Garden
+            </button>
+            <span className="cursor-pointer hover:underline">Books</span>
+            <span className="cursor-pointer hover:underline">Local Stores</span>
+            <span className="cursor-pointer hover:underline">Gaming Zone</span>
+          </div>
+        </div>
+      </nav>
 
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-orange-500 to-red-600 text-white py-12">
