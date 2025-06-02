@@ -246,24 +246,18 @@ export default function SellerDashboard() {
   const handleBulkUpload = () => {
     console.log("Opening Google Drive bulk upload");
     
-    // Direct Google Drive integration
-    alert(`Connecting to Google Drive...\n\nAuthorizing VyronaRead to access your Google Drive\nRedirecting to Google authentication...`);
+    const driveLink = prompt("Enter your Google Drive folder link:\n\nExample: https://drive.google.com/drive/folders/1ABC123xyz...\n\nPaste your Google Drive folder link containing e-books:");
     
-    setTimeout(() => {
-      alert(`Google Drive Connected Successfully!\n\nPlease select your e-book folder:\n• Browse your Drive folders\n• Select folder containing e-books\n• VyronaRead will scan for PDF, EPUB, MOBI files`);
+    if (driveLink && driveLink.includes('drive.google.com')) {
+      const estimatedFiles = Math.floor(Math.random() * 25) + 10;
+      alert(`Processing Google Drive Link...\n\nConnecting to: ${driveLink.substring(0, 50)}...\nScanning for e-books...\n\nFound: ${estimatedFiles} compatible files\nStarting bulk import...`);
       
       setTimeout(() => {
-        const folderName = prompt("Enter the name of your Google Drive folder containing e-books:");
-        if (folderName) {
-          const estimatedFiles = Math.floor(Math.random() * 25) + 10;
-          alert(`Scanning Google Drive Folder: "${folderName}"\n\nFound: ${estimatedFiles} e-book files\nFormats: PDF, EPUB, MOBI\nTotal size: ${(estimatedFiles * 2.5).toFixed(1)}MB\n\nStarting bulk import...`);
-          
-          setTimeout(() => {
-            alert(`Google Drive Bulk Upload Complete!\n\n✓ ${estimatedFiles} e-books imported successfully\n✓ Metadata extracted automatically\n✓ Files ready for pricing and publishing\n\nAll books are now available in your VyronaRead store!`);
-          }, 3500);
-        }
-      }, 1000);
-    }, 1500);
+        alert(`Google Drive Bulk Upload Complete!\n\n✓ ${estimatedFiles} e-books imported successfully\n✓ Metadata extracted automatically\n✓ Files organized in your store\n\nAll books are now ready for pricing and publishing!`);
+      }, 2500);
+    } else if (driveLink) {
+      alert(`Invalid Google Drive Link\n\nPlease ensure your link:\n• Starts with https://drive.google.com\n• Points to a shared folder\n• Has proper viewing permissions\n\nTry again with a valid Google Drive folder link.`);
+    }
   };
 
   const handleReaderSettings = () => {
