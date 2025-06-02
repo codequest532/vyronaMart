@@ -1078,18 +1078,7 @@ export default function Home() {
                               Rent
                             </Button>
                           )}
-                          {book.type === "digital" && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                handleBookPurchase(book.id, 'rent');
-                              }}
-                              className="flex-1"
-                            >
-                              Rent
-                            </Button>
-                          )}
+
                         </div>
                       </div>
                     </div>
