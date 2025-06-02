@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2, Menu, Users } from "lucide-react";
+import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2, Menu, Users, ShoppingBag } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -620,6 +620,13 @@ export default function Landing() {
                     <li>• Leashes, Collars & Carriers</li>
                   </ul>
                 </div>
+              </div>
+              
+              <div className="text-center mt-8">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
+                  Explore VyronaHub
+                  <ShoppingBag className="ml-2 h-5 w-5" />
+                </Button>
               </div>
             </section>
 
