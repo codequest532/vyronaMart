@@ -903,187 +903,100 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    {
-                      id: 1,
-                      name: "Pride and Prejudice",
-                      author: "Jane Austen",
-                      price: 1299,
-                      rentPrice: 299,
-                      type: "physical",
-                      category: "romance",
-                      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
-                    },
-                    {
-                      id: 2,
-                      name: "The Time Machine",
-                      author: "H.G. Wells",
-                      price: 1599,
-                      rentPrice: 349,
-                      type: "digital",
-                      category: "sci-fi",
-                      imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
-                    },
-                    {
-                      id: 3,
-                      name: "The Silent Patient",
-                      author: "Alex Michaelides",
-                      price: 1799,
-                      rentPrice: 399,
-                      type: "physical",
-                      category: "mystery",
-                      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400"
-                    },
-                    {
-                      id: 4,
-                      name: "A Brief History of Time",
-                      author: "Stephen Hawking",
-                      price: 2199,
-                      rentPrice: 499,
-                      type: "digital",
-                      category: "education",
-                      imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400"
-                    },
-                    {
-                      id: 5,
-                      name: "The Lord of the Rings",
-                      author: "J.R.R. Tolkien",
-                      price: 2899,
-                      rentPrice: 699,
-                      type: "physical",
-                      category: "fantasy",
-                      imageUrl: "https://images.unsplash.com/photo-1509475826633-fed577a2c71b?w=400"
-                    },
-                    {
-                      id: 6,
-                      name: "Steve Jobs",
-                      author: "Walter Isaacson",
-                      price: 2299,
-                      rentPrice: 549,
-                      type: "digital",
-                      category: "biography",
-                      imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=400"
-                    },
-                    {
-                      id: 7,
-                      name: "Me Before You",
-                      author: "Jojo Moyes",
-                      price: 1399,
-                      rentPrice: 319,
-                      type: "digital",
-                      category: "romance",
-                      imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400"
-                    },
-                    {
-                      id: 8,
-                      name: "Dune",
-                      author: "Frank Herbert",
-                      price: 2499,
-                      rentPrice: 599,
-                      type: "physical",
-                      category: "sci-fi",
-                      imageUrl: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400"
-                    },
-                    {
-                      id: 9,
-                      name: "Gone Girl",
-                      author: "Gillian Flynn",
-                      price: 1699,
-                      rentPrice: 379,
-                      type: "digital",
-                      category: "mystery",
-                      imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
-                    },
-                    {
-                      id: 10,
-                      name: "The Great Gatsby",
-                      author: "F. Scott Fitzgerald",
-                      price: 1199,
-                      rentPrice: 279,
-                      type: "physical",
-                      category: "education",
-                      imageUrl: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400"
-                    },
-                    {
-                      id: 11,
-                      name: "Harry Potter and the Sorcerer's Stone",
-                      author: "J.K. Rowling",
-                      price: 1899,
-                      rentPrice: 449,
-                      type: "digital",
-                      category: "fantasy",
-                      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
-                    },
-                    {
-                      id: 12,
-                      name: "Becoming",
-                      author: "Michelle Obama",
-                      price: 2599,
-                      rentPrice: 629,
-                      type: "physical",
-                      category: "biography",
-                      imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
-                    }
-                  ].filter(book => selectedCategory === "all" || book.category === selectedCategory).map((book) => (
-                    <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                      <div className="relative">
-                        <img 
-                          src={book.imageUrl} 
-                          alt={book.name}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                        />
-                        <div className="absolute top-2 right-2">
-                          <Badge variant={book.type === "digital" ? "default" : "secondary"} className="text-xs">
-                            {book.type}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">{book.name}</h4>
-                        <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="text-lg font-bold text-indigo-600">
-                            ₹{(book.price / 100).toFixed(0)}
-                          </div>
-                          {book.rentPrice && (
-                            <div className="text-sm text-purple-600">
-                              ₹{(book.rentPrice / 100).toFixed(0)}/week
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button 
-                            size="sm" 
-                            onClick={() => {
-                              const coinReward = Math.floor(book.price / 100);
-                              updateCoins(coinReward);
-                              showNotification("Book Purchased!", `You earned ${coinReward} coins!`, "success");
-                            }}
-                            className="flex-1"
-                          >
-                            Buy
-                          </Button>
-                          {book.rentPrice && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                const coinReward = Math.floor(book.rentPrice / 50);
-                                updateCoins(coinReward);
-                                showNotification("Book Rented!", `You earned ${coinReward} coins!`, "success");
-                              }}
-                              className="flex-1"
-                            >
-                              Rent
-                            </Button>
-                          )}
+                {/* Combine all authentic book sources */}
+                {(() => {
+                  const allBooks = [
+                    ...(Array.isArray(sellerEBooks) ? sellerEBooks : []),
+                    ...(Array.isArray(sellerBooks) ? sellerBooks : []),
+                    ...(Array.isArray(libraryBooks) ? libraryBooks : [])
+                  ];
+                  
+                  const filteredBooks = allBooks.filter(book => 
+                    selectedCategory === "all" || book.category === selectedCategory
+                  );
 
+                  if (filteredBooks.length === 0) {
+                    return (
+                      <div className="col-span-full text-center py-12">
+                        <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No Books Available</h3>
+                        <p className="text-gray-500 mb-4">
+                          {selectedCategory === "all" 
+                            ? "No books have been uploaded by sellers or integrated from libraries yet."
+                            : `No books found in the "${selectedCategory}" category.`
+                          }
+                        </p>
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <p>• Sellers can upload e-books through the Seller Dashboard</p>
+                          <p>• Libraries can be integrated through Admin approval</p>
+                          <p>• Physical books become available after library integration</p>
                         </div>
                       </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      {filteredBooks.map((book) => (
+                        <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                          <div className="relative">
+                            <img 
+                              src={book.imageUrl || book.coverUrl || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"} 
+                              alt={book.title || book.name}
+                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                            />
+                            <div className="absolute top-2 right-2">
+                              <Badge variant={book.type === "digital" ? "default" : "secondary"} className="text-xs">
+                                {book.type || "physical"}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">{book.title || book.name}</h4>
+                            <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="text-lg font-bold text-indigo-600">
+                                ₹{book.price ? (book.price / 100).toFixed(0) : "Free"}
+                              </div>
+                              {book.rentPrice && (
+                                <div className="text-sm text-purple-600">
+                                  ₹{(book.rentPrice / 100).toFixed(0)}/week
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button 
+                                size="sm" 
+                                onClick={() => {
+                                  const coinReward = book.price ? Math.floor(book.price / 100) : 10;
+                                  updateCoins(coinReward);
+                                  showNotification("Book Purchased!", `You earned ${coinReward} coins!`, "success");
+                                }}
+                                className="flex-1"
+                              >
+                                Buy
+                              </Button>
+                              {book.rentPrice && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => {
+                                    const coinReward = Math.floor(book.rentPrice / 50);
+                                    updateCoins(coinReward);
+                                    showNotification("Book Rented!", `You earned ${coinReward} coins!`, "success");
+                                  }}
+                                  className="flex-1"
+                                >
+                                  Rent
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </CardContent>
             </Card>
 
