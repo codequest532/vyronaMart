@@ -1,6 +1,6 @@
 import { Home, Users, MapPin, Book, ShoppingBag, UserCircle, Instagram } from "lucide-react";
 
-type TabType = "home" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
+type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
 
 interface TabNavigationProps {
   activeTab: TabType;
@@ -9,6 +9,7 @@ interface TabNavigationProps {
 
 const tabs = [
   { id: "home" as const, label: "Home", icon: Home },
+  { id: "vyronahub" as const, label: "VyronaHub", icon: ShoppingBag },
   { id: "social" as const, label: "VyronaSocial", icon: Users },
   { id: "space" as const, label: "VyronaSpace", icon: MapPin },
   { id: "read" as const, label: "VyronaRead", icon: Book },

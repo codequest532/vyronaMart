@@ -53,7 +53,7 @@ import {
   TrendingUp
 } from "lucide-react";
 
-type TabType = "home" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
+type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
@@ -61,6 +61,10 @@ export default function Home() {
   
   const handleTabChange = (tab: TabType) => {
     console.log("Tab clicked:", tab);
+    if (tab === "vyronahub") {
+      setLocation("/vyronahub");
+      return;
+    }
     if (tab === "social") {
       setLocation("/social");
       return;

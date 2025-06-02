@@ -9,6 +9,7 @@ import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
 import VyronaInstaShop from "@/pages/instashop";
+import VyronaHub from "@/pages/vyronahub";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
@@ -41,6 +42,7 @@ function Router() {
       </Route>
       <Route path="/social" component={VyronaSocial} />
       <Route path="/instashop" component={VyronaInstaShop} />
+      <Route path="/vyronahub" component={VyronaHub} />
       <Route component={NotFound} />
     </Switch>
   );
