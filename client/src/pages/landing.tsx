@@ -456,7 +456,7 @@ export default function Landing() {
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
               <div className="text-3xl mb-2">🏪</div>
               <h3 className="font-semibold text-sm">MallConnect</h3>
-              <p className="text-xs opacity-90">Local Stores</p>
+              <p className="text-xs opacity-90">Premium Stores</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all cursor-pointer">
               <div className="text-3xl mb-2">👤</div>
