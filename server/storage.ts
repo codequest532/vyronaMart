@@ -134,22 +134,30 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-    // Create default admin account
-    const adminUser: User = {
-      id: this.currentUserId++,
-      username: "admin",
-      email: "mgmags25@gmail.com",
-      mobile: null,
-      password: "admin123",
-      role: "admin",
-      vyronaCoins: 1000,
-      xp: 0,
-      level: 1,
-      isActive: true,
-      isVerified: true,
-      createdAt: new Date(),
-    };
-    this.users.set(adminUser.id, adminUser);
+    // Check if mgmags25@gmail.com already exists, if not create admin account
+    const existingAdmin = Array.from(this.users.values()).find(user => user.email === "mgmags25@gmail.com");
+    
+    if (!existingAdmin) {
+      // Create default admin account only if it doesn't exist
+      const adminUser: User = {
+        id: this.currentUserId++,
+        username: "admin",
+        email: "mgmags25@gmail.com",
+        mobile: null,
+        password: "admin123",
+        role: "admin",
+        vyronaCoins: 1000,
+        xp: 0,
+        level: 1,
+        isActive: true,
+        isVerified: true,
+        createdAt: new Date(),
+      };
+      this.users.set(adminUser.id, adminUser);
+    } else {
+      // If the account exists, ensure it has admin role
+      existingAdmin.role = "admin";
+    }
   }
 
   // User methods

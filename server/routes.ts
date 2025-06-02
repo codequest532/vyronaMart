@@ -10,6 +10,22 @@ import { z } from "zod";
 import { sendOTPEmail } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Debug endpoint to check existing users
+  app.get("/api/debug/users", async (req, res) => {
+    try {
+      // Get all users for debugging (remove passwords for security)
+      const allUsers = Array.from((storage as any).users.values()).map((user: any) => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }));
+      res.json(allUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Debug failed" });
+    }
+  });
+
   // Authentication endpoints
   app.post("/api/auth/login", async (req, res) => {
     try {
