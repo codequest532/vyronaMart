@@ -58,10 +58,16 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
-      return await apiRequest("/api/auth/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
     },
     onSuccess: (data: any) => {
       toast({
@@ -94,10 +100,16 @@ export default function Login() {
   const registerMutation = useMutation({
     mutationFn: async (data: z.infer<typeof registerSchema>) => {
       const { confirmPassword, ...submitData } = data;
-      return await apiRequest("/api/auth/register", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submitData),
       });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
