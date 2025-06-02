@@ -150,6 +150,73 @@ export default function SellerDashboard() {
     alert(`Reservations Overview:\n\n• Pending: 12 reservations\n• Today's pickups: 5\n• Overdue pickups: 2\n\nOpening reservations management...`);
   };
 
+  const handleSearchBooks = () => {
+    const searchTerm = prompt("Search library books by title or author:");
+    if (searchTerm) {
+      console.log(`Searching for: ${searchTerm}`);
+      alert(`Search Results for "${searchTerm}":\n\n• The Psychology of Money - Available\n• Atomic Habits - 3 copies available\n• Think and Grow Rich - 2 copies available\n\nShowing 3 results`);
+    }
+  };
+
+  const handleSearchEbooks = () => {
+    const searchTerm = prompt("Search e-books by title, author, or category:");
+    if (searchTerm) {
+      console.log(`Searching e-books for: ${searchTerm}`);
+      alert(`E-book Search Results for "${searchTerm}":\n\n• Digital Marketing Guide - ₹299\n• Programming Fundamentals - ₹450\n• Business Strategy - ₹350\n\nShowing 3 results`);
+    }
+  };
+
+  const handleUploadEbook = () => {
+    const title = prompt("Enter e-book title:");
+    const price = prompt("Enter sale price (₹):");
+    const rental = prompt("Enter monthly rental price (₹):");
+    
+    if (title && price && rental) {
+      console.log(`Uploading e-book: ${title} - Sale: ₹${price}, Rental: ₹${rental}`);
+      alert(`E-book Upload Successful!\n\nTitle: ${title}\nSale Price: ₹${price}\nRental Price: ₹${rental}/month\n\nStatus: Ready for sale`);
+    }
+  };
+
+  const handleUploadPdfEpub = () => {
+    console.log("Opening PDF/EPUB upload");
+    alert(`PDF/EPUB Upload\n\nSupported formats:\n• PDF files (.pdf)\n• EPUB files (.epub)\n• MOBI files (.mobi)\n\nMax file size: 50MB\nOpening file picker...`);
+  };
+
+  const handleImportFromLibrary = () => {
+    console.log("Importing from physical library");
+    alert(`Import from Physical Library\n\nAvailable books to digitize:\n• The Psychology of Money\n• Atomic Habits\n• Think and Grow Rich\n\nSelect books to create digital versions`);
+  };
+
+  const handleBulkUpload = () => {
+    console.log("Opening bulk upload");
+    alert(`Bulk E-book Upload\n\nUpload multiple books at once:\n• Drag and drop files\n• CSV metadata import\n• Batch pricing options\n\nSupports up to 100 files`);
+  };
+
+  const handleReaderSettings = () => {
+    console.log("Opening reader settings");
+    alert(`Reader Settings\n\nCustomization options:\n• Font families and sizes\n• Color themes (light/dark/sepia)\n• Reading speed settings\n• Accessibility features\n\nSaving preferences...`);
+  };
+
+  const handlePreviewReader = () => {
+    console.log("Opening reader preview");
+    alert(`VyronaRead Digital Reader Preview\n\nFeatures demonstrated:\n• Page turning animations\n• Highlight and note taking\n• Bookmark functionality\n• Progress tracking\n\nLaunching reader demo...`);
+  };
+
+  const handleDateRange = () => {
+    const startDate = prompt("Enter start date (YYYY-MM-DD):");
+    const endDate = prompt("Enter end date (YYYY-MM-DD):");
+    
+    if (startDate && endDate) {
+      console.log(`Setting date range: ${startDate} to ${endDate}`);
+      alert(`Date Range Updated\n\nFrom: ${startDate}\nTo: ${endDate}\n\nRefreshing analytics data...`);
+    }
+  };
+
+  const handleExportReport = () => {
+    console.log("Exporting analytics report");
+    alert(`Export Analytics Report\n\nReport includes:\n• Revenue breakdown\n• Book performance metrics\n• User engagement stats\n• Growth trends\n\nGenerating PDF report...`);
+  };
+
   const statCards = [
     {
       title: "Active Products",
@@ -516,7 +583,7 @@ export default function SellerDashboard() {
                   <p className="text-gray-600 dark:text-gray-300">Manage physical library, sell e-books, and provide digital reading services</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleSearchBooks}>
                     <Search className="h-4 w-4 mr-2" />
                     Search Library
                   </Button>
@@ -1248,11 +1315,11 @@ export default function SellerDashboard() {
                       <p className="text-gray-600">Upload, sell, and rent digital books with VyronaRead</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleSearchEbooks}>
                         <Search className="h-4 w-4 mr-2" />
                         Search E-books
                       </Button>
-                      <Button className="bg-purple-600 hover:bg-purple-700">
+                      <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleUploadEbook}>
                         <Plus className="h-4 w-4 mr-2" />
                         Upload E-book
                       </Button>
@@ -1390,15 +1457,15 @@ export default function SellerDashboard() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                          <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={handleUploadPdfEpub}>
                             <Plus className="h-4 w-4 mr-2" />
                             Upload PDF/EPUB
                           </Button>
-                          <Button variant="outline" className="w-full">
+                          <Button variant="outline" className="w-full" onClick={handleImportFromLibrary}>
                             <BookOpen className="h-4 w-4 mr-2" />
                             Import from Library
                           </Button>
-                          <Button variant="outline" className="w-full">
+                          <Button variant="outline" className="w-full" onClick={handleBulkUpload}>
                             <Eye className="h-4 w-4 mr-2" />
                             Bulk Upload
                           </Button>
@@ -1505,11 +1572,11 @@ export default function SellerDashboard() {
                       <p className="text-gray-600">In-house reading experience similar to Kindle</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleReaderSettings}>
                         <Settings className="h-4 w-4 mr-2" />
                         Reader Settings
                       </Button>
-                      <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Button className="bg-blue-600 hover:bg-blue-700" onClick={handlePreviewReader}>
                         <Eye className="h-4 w-4 mr-2" />
                         Preview Reader
                       </Button>
@@ -1666,11 +1733,11 @@ export default function SellerDashboard() {
                       <p className="text-gray-600">Comprehensive insights across all book services</p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleDateRange}>
                         <Calendar className="h-4 w-4 mr-2" />
                         Date Range
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={handleExportReport}>
                         <TrendingUp className="h-4 w-4 mr-2" />
                         Export Report
                       </Button>
