@@ -37,9 +37,11 @@ function Router() {
       
       {/* Admin Interface */}
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
       
       {/* Seller Interface */}
       <Route path="/seller" component={SellerDashboard} />
+      <Route path="/seller-dashboard" component={SellerDashboard} />
       
       {/* Customer Interface (Default) */}
       {user ? (
