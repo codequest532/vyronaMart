@@ -12,7 +12,17 @@ import {
   Star,
   LogOut,
   DollarSign,
-  AlertCircle
+  AlertCircle,
+  Book,
+  BookOpen,
+  Library,
+  Calendar,
+  UserCheck,
+  Clock,
+  Search,
+  Edit,
+  Trash2,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -132,6 +142,14 @@ export default function SellerDashboard() {
             >
               <TrendingUp className="h-4 w-4 mr-2" />
               Analytics
+            </Button>
+            <Button
+              variant={activeTab === "books" ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setActiveTab("books")}
+            >
+              <Library className="h-4 w-4 mr-2" />
+              VyronaRead Books
             </Button>
             <Button
               variant={activeTab === "customers" ? "default" : "ghost"}
@@ -384,6 +402,328 @@ export default function SellerDashboard() {
                   <Settings className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Settings Panel Coming Soon</h3>
                   <p className="text-gray-500 dark:text-gray-400">Store configuration options will be available soon</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "books" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaRead Library Management</h2>
+                  <p className="text-gray-600 dark:text-gray-300">Manage your physical library inventory and lending system</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline">
+                    <Search className="h-4 w-4 mr-2" />
+                    Search Books
+                  </Button>
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Book
+                  </Button>
+                </div>
+              </div>
+
+              {/* Book Library Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Books</p>
+                        <p className="text-3xl font-bold text-blue-600">250</p>
+                        <p className="text-xs text-blue-500">Physical inventory</p>
+                      </div>
+                      <Library className="h-8 w-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Available</p>
+                        <p className="text-3xl font-bold text-green-600">185</p>
+                        <p className="text-xs text-green-500">Ready to lend</p>
+                      </div>
+                      <BookOpen className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">On Loan</p>
+                        <p className="text-3xl font-bold text-orange-600">65</p>
+                        <p className="text-xs text-orange-500">Currently borrowed</p>
+                      </div>
+                      <UserCheck className="h-8 w-8 text-orange-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Overdue</p>
+                        <p className="text-3xl font-bold text-red-600">8</p>
+                        <p className="text-xs text-red-500">Need attention</p>
+                      </div>
+                      <Clock className="h-8 w-8 text-red-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Quick Library Actions</CardTitle>
+                    <CardDescription>Common library management tasks</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button variant="outline" className="h-16 flex-col">
+                        <Book className="h-6 w-6 mb-2" />
+                        <span className="text-xs">Issue Book</span>
+                      </Button>
+                      <Button variant="outline" className="h-16 flex-col">
+                        <BookOpen className="h-6 w-6 mb-2" />
+                        <span className="text-xs">Return Book</span>
+                      </Button>
+                      <Button variant="outline" className="h-16 flex-col">
+                        <Users className="h-6 w-6 mb-2" />
+                        <span className="text-xs">Add Member</span>
+                      </Button>
+                      <Button variant="outline" className="h-16 flex-col">
+                        <Calendar className="h-6 w-6 mb-2" />
+                        <span className="text-xs">Reservations</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                    <CardDescription>Latest library transactions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">The Great Gatsby returned</p>
+                          <p className="text-xs text-gray-500">Member: John Doe - 2 minutes ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">1984 issued to Sarah Smith</p>
+                          <p className="text-xs text-gray-500">Due: Jan 15, 2025 - 15 minutes ago</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">New book added: Digital Marketing</p>
+                          <p className="text-xs text-gray-500">Added to Business section - 1 hour ago</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Book Inventory Management */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Book Inventory</CardTitle>
+                  <CardDescription>Manage your library collection and availability</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Sample Book Entries */}
+                    <div className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Book className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg mb-1">The Psychology of Money</h3>
+                              <p className="text-sm text-gray-600 mb-2">by Morgan Housel</p>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline">Business</Badge>
+                                <Badge variant="secondary">ISBN: 978-0857197689</Badge>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <span className="text-sm font-medium">Copies: 3</span>
+                                <span className="text-sm text-green-600">Available: 2</span>
+                                <span className="text-sm text-orange-600">On Loan: 1</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Book className="h-4 w-4 mr-1" />
+                                Issue
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Book className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg mb-1">Atomic Habits</h3>
+                              <p className="text-sm text-gray-600 mb-2">by James Clear</p>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline">Self-Help</Badge>
+                                <Badge variant="secondary">ISBN: 978-0735211292</Badge>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <span className="text-sm font-medium">Copies: 5</span>
+                                <span className="text-sm text-green-600">Available: 3</span>
+                                <span className="text-sm text-orange-600">On Loan: 2</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Book className="h-4 w-4 mr-1" />
+                                Issue
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border rounded-lg p-4 hover:shadow-sm transition-shadow border-red-200 bg-red-50 dark:bg-red-900/20">
+                      <div className="flex items-start gap-4">
+                        <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Book className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg mb-1">The Lean Startup</h3>
+                              <p className="text-sm text-gray-600 mb-2">by Eric Ries</p>
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline">Business</Badge>
+                                <Badge variant="secondary">ISBN: 978-0307887894</Badge>
+                                <Badge variant="destructive">Overdue</Badge>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <span className="text-sm font-medium">Copies: 2</span>
+                                <span className="text-sm text-gray-600">Available: 0</span>
+                                <span className="text-sm text-red-600">On Loan: 2 (1 overdue)</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <Button variant="outline" size="sm">
+                                <AlertCircle className="h-4 w-4 mr-1" />
+                                Follow Up
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* VyronaMart Integration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>VyronaMart Integration</CardTitle>
+                  <CardDescription>Connect your library with VyronaMart ecosystem</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold">Digital Services</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <BookOpen className="h-5 w-5 text-blue-600" />
+                            <span className="text-sm font-medium">E-book Lending</span>
+                          </div>
+                          <Badge variant="default">Active</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Users className="h-5 w-5 text-green-600" />
+                            <span className="text-sm font-medium">Member Sync</span>
+                          </div>
+                          <Badge variant="default">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Calendar className="h-5 w-5 text-purple-600" />
+                            <span className="text-sm font-medium">Online Reservations</span>
+                          </div>
+                          <Badge variant="default">Enabled</Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="font-semibold">Revenue Streams</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Membership Fees</span>
+                          <span className="font-bold text-green-600">₹12,500/month</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Late Fees</span>
+                          <span className="font-bold text-orange-600">₹850/month</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Digital Access</span>
+                          <span className="font-bold text-blue-600">₹3,200/month</span>
+                        </div>
+                        <div className="border-t pt-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Total Revenue</span>
+                            <span className="font-bold text-green-600">₹16,550/month</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
