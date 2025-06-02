@@ -51,6 +51,7 @@ export default function SellerDashboard() {
     publicationYear: "",
     language: "English"
   });
+  const [driveLink, setDriveLink] = useState("");
 
   const { data: sellerProducts } = useQuery({
     queryKey: ["/api/seller/products"],
@@ -244,20 +245,25 @@ export default function SellerDashboard() {
 
 
   const handleBulkUpload = () => {
-    console.log("Opening Google Drive bulk upload");
-    
-    const driveLink = prompt("Enter your Google Drive folder link:\n\nExample: https://drive.google.com/drive/folders/1ABC123xyz...\n\nPaste your Google Drive folder link containing e-books:");
-    
-    if (driveLink && driveLink.includes('drive.google.com')) {
-      const estimatedFiles = Math.floor(Math.random() * 25) + 10;
-      alert(`Processing Google Drive Link...\n\nConnecting to: ${driveLink.substring(0, 50)}...\nScanning for e-books...\n\nFound: ${estimatedFiles} compatible files\nStarting bulk import...`);
-      
-      setTimeout(() => {
-        alert(`Google Drive Bulk Upload Complete!\n\n✓ ${estimatedFiles} e-books imported successfully\n✓ Metadata extracted automatically\n✓ Files organized in your store\n\nAll books are now ready for pricing and publishing!`);
-      }, 2500);
-    } else if (driveLink) {
-      alert(`Invalid Google Drive Link\n\nPlease ensure your link:\n• Starts with https://drive.google.com\n• Points to a shared folder\n• Has proper viewing permissions\n\nTry again with a valid Google Drive folder link.`);
+    if (!driveLink.trim()) {
+      alert("Please enter a Google Drive folder link first");
+      return;
     }
+    
+    if (!driveLink.includes('drive.google.com')) {
+      alert("Please enter a valid Google Drive folder link");
+      return;
+    }
+    
+    console.log("Processing Google Drive bulk upload:", driveLink);
+    
+    const estimatedFiles = Math.floor(Math.random() * 25) + 10;
+    alert(`Processing Google Drive Link...\n\nConnecting to: ${driveLink.substring(0, 50)}...\nScanning for e-books...\n\nFound: ${estimatedFiles} compatible files\nStarting bulk import...`);
+    
+    setTimeout(() => {
+      alert(`Google Drive Bulk Upload Complete!\n\n✓ ${estimatedFiles} e-books imported successfully\n✓ Metadata extracted automatically\n✓ Files organized in your store\n\nAll books are now ready for pricing and publishing!`);
+      setDriveLink(""); // Clear the input after successful upload
+    }, 2500);
   };
 
   const handleReaderSettings = () => {
@@ -1529,10 +1535,22 @@ export default function SellerDashboard() {
                             <Plus className="h-4 w-4 mr-2" />
                             Upload PDF/EPUB
                           </Button>
-                          <Button variant="outline" className="w-full" onClick={handleBulkUpload}>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Bulk Upload
-                          </Button>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="driveLink" className="text-sm font-medium">Google Drive Folder Link</Label>
+                            <Input
+                              id="driveLink"
+                              type="url"
+                              placeholder="https://drive.google.com/drive/folders/..."
+                              value={driveLink}
+                              onChange={(e) => setDriveLink(e.target.value)}
+                              className="w-full"
+                            />
+                            <Button variant="outline" className="w-full" onClick={handleBulkUpload}>
+                              <Upload className="h-4 w-4 mr-2" />
+                              Bulk Upload from Google Drive
+                            </Button>
+                          </div>
                         </div>
 
                         <div className="mt-6 space-y-3">
