@@ -40,7 +40,12 @@ import {
   CreditCard,
   Truck,
   Shield,
-  CheckCircle
+  CheckCircle,
+  Upload,
+  X,
+  Image,
+  Video,
+  Cloud
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/mock-data";
@@ -82,6 +87,16 @@ export default function VyronaHub() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    mainImage: File | null;
+    additionalImages: File[];
+    videos: File[];
+  }>({
+    mainImage: null,
+    additionalImages: [],
+    videos: []
+  });
+  const [isUploading, setIsUploading] = useState(false);
 
   // Fetch products with filtering
   const { data: products = [], isLoading: productsLoading } = useQuery({
@@ -171,6 +186,77 @@ export default function VyronaHub() {
     setSelectedProduct(product);
     setQuantity(1);
     setIsProductModalOpen(true);
+  };
+
+  // File upload handlers
+  const handleMainImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setUploadedFiles(prev => ({ ...prev, mainImage: file }));
+      // Create URL for preview
+      const imageUrl = URL.createObjectURL(file);
+      form.setValue('imageUrl', imageUrl);
+    }
+  };
+
+  const handleAdditionalImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (uploadedFiles.additionalImages.length + imageFiles.length > 5) {
+      toast({
+        title: "Upload Limit",
+        description: "You can upload maximum 5 additional images",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setUploadedFiles(prev => ({
+      ...prev,
+      additionalImages: [...prev.additionalImages, ...imageFiles]
+    }));
+  };
+
+  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    const videoFiles = files.filter(file => file.type.startsWith('video/'));
+    
+    if (uploadedFiles.videos.length + videoFiles.length > 2) {
+      toast({
+        title: "Upload Limit",
+        description: "You can upload maximum 2 videos",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setUploadedFiles(prev => ({
+      ...prev,
+      videos: [...prev.videos, ...videoFiles]
+    }));
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setUploadedFiles(prev => ({
+      ...prev,
+      additionalImages: prev.additionalImages.filter((_, i) => i !== index)
+    }));
+  };
+
+  const removeVideo = (index: number) => {
+    setUploadedFiles(prev => ({
+      ...prev,
+      videos: prev.videos.filter((_, i) => i !== index)
+    }));
+  };
+
+  const openGoogleDrivePicker = (type: 'image' | 'video') => {
+    // Google Drive picker implementation
+    toast({
+      title: "Google Drive Integration",
+      description: "Google Drive picker will be implemented with proper API keys",
+    });
   };
 
   const form = useForm<z.infer<typeof addProductSchema>>({
@@ -503,38 +589,193 @@ export default function VyronaHub() {
                       />
                     </TabsContent>
                     
-                    <TabsContent value="images" className="space-y-4 mt-6">
-                      <FormField
-                        control={form.control}
-                        name="imageUrl"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Main Product Image URL *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://example.com/main-image.jpg" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="additionalImages"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Additional Images</FormLabel>
-                            <FormControl>
-                              <textarea 
-                                className="w-full min-h-[80px] p-3 border rounded-md resize-none"
-                                placeholder="Additional image URLs, one per line..." 
-                                {...field} 
+                    <TabsContent value="images" className="space-y-6 mt-6">
+                      {/* Main Product Image Upload */}
+                      <div className="space-y-4">
+                        <FormLabel>Main Product Image *</FormLabel>
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
+                          {uploadedFiles.mainImage ? (
+                            <div className="relative">
+                              <img
+                                src={URL.createObjectURL(uploadedFiles.mainImage)}
+                                alt="Main product"
+                                className="w-full h-48 object-cover rounded-lg"
                               />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => {
+                                  setUploadedFiles(prev => ({ ...prev, mainImage: null }));
+                                  form.setValue('imageUrl', '');
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="text-center">
+                              <Image className="mx-auto h-12 w-12 text-gray-400" />
+                              <div className="mt-4">
+                                <div className="flex justify-center gap-2">
+                                  <Button type="button" variant="outline" className="relative">
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Upload from Device
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={handleMainImageUpload}
+                                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                    />
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => openGoogleDrivePicker('image')}
+                                  >
+                                    <Cloud className="h-4 w-4 mr-2" />
+                                    Google Drive
+                                  </Button>
+                                </div>
+                                <p className="mt-2 text-sm text-gray-500">
+                                  Upload high-quality product images (PNG, JPG, JPEG)
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="imageUrl"
+                          render={({ field }) => (
+                            <FormItem className="hidden">
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      {/* Additional Images Upload */}
+                      <div className="space-y-4">
+                        <FormLabel>Additional Images (Max 5)</FormLabel>
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                            {uploadedFiles.additionalImages.map((file, index) => (
+                              <div key={index} className="relative">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Additional ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded-lg"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute top-1 right-1 h-6 w-6 p-0"
+                                  onClick={() => removeAdditionalImage(index)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {uploadedFiles.additionalImages.length < 5 && (
+                            <div className="text-center">
+                              <div className="flex justify-center gap-2">
+                                <Button type="button" variant="outline" size="sm" className="relative">
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Images
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleAdditionalImageUpload}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                  />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openGoogleDrivePicker('image')}
+                                >
+                                  <Cloud className="h-4 w-4 mr-2" />
+                                  Google Drive
+                                </Button>
+                              </div>
+                              <p className="mt-2 text-xs text-gray-500">
+                                {uploadedFiles.additionalImages.length}/5 images uploaded
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Product Videos Upload */}
+                      <div className="space-y-4">
+                        <FormLabel>Product Videos (Max 2)</FormLabel>
+                        <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            {uploadedFiles.videos.map((file, index) => (
+                              <div key={index} className="relative">
+                                <video
+                                  src={URL.createObjectURL(file)}
+                                  className="w-full h-32 object-cover rounded-lg"
+                                  controls
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute top-1 right-1 h-6 w-6 p-0"
+                                  onClick={() => removeVideo(index)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                                <p className="text-xs text-gray-500 mt-1 truncate">
+                                  {file.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {uploadedFiles.videos.length < 2 && (
+                            <div className="text-center">
+                              <Video className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                              <div className="flex justify-center gap-2">
+                                <Button type="button" variant="outline" size="sm" className="relative">
+                                  <Upload className="h-4 w-4 mr-2" />
+                                  Upload Videos
+                                  <input
+                                    type="file"
+                                    accept="video/*"
+                                    multiple
+                                    onChange={handleVideoUpload}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                  />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => openGoogleDrivePicker('video')}
+                                >
+                                  <Cloud className="h-4 w-4 mr-2" />
+                                  Google Drive
+                                </Button>
+                              </div>
+                              <p className="mt-2 text-xs text-gray-500">
+                                {uploadedFiles.videos.length}/2 videos uploaded • MP4, MOV, AVI supported
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       
                       <FormField
                         control={form.control}
