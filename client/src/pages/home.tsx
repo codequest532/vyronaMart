@@ -899,11 +899,7 @@ export default function Home() {
                         <SelectItem value="biography">Biography</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="flex space-x-2">
-                      <Badge variant="outline" className="text-indigo-700">Purchase</Badge>
-                      <Badge variant="outline" className="text-purple-700">Rent</Badge>
-                      <Badge variant="outline" className="text-green-700">Digital</Badge>
-                    </div>
+
                   </div>
                 </div>
 
