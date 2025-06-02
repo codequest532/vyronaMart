@@ -530,51 +530,79 @@ export default function Landing() {
         {/* VyronaMart Features Showcase (when no search/filter) */}
         {!searchQuery && selectedCategory === "all" && (
           <>
-            {/* VyronaMart Categories */}
+            {/* VyronaHub Categories */}
             <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">Shop by VyronaMart Categories</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              <h2 className="text-2xl font-bold mb-6">VyronaHub - Shop by Category</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("electronics")}>
                   <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    📱
+                    🔌
                   </div>
                   <h3 className="font-semibold">Electronics</h3>
-                  <p className="text-xs text-gray-600">Tech & Gadgets</p>
+                  <p className="text-xs text-gray-600">Smartphones & Tech</p>
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("fashion")}>
                   <div className="bg-gradient-to-r from-pink-500 to-red-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
                     👗
                   </div>
-                  <h3 className="font-semibold">Fashion Hub</h3>
-                  <p className="text-xs text-gray-600">Style & Apparel</p>
+                  <h3 className="font-semibold">Fashion & Apparels</h3>
+                  <p className="text-xs text-gray-600">Clothing & Accessories</p>
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform" onClick={() => setSelectedCategory("home")}>
                   <div className="bg-gradient-to-r from-green-500 to-teal-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🏠
+                  </div>
+                  <h3 className="font-semibold">Home & Kitchen</h3>
+                  <p className="text-xs text-gray-600">Appliances & Decor</p>
+                </div>
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🧸
+                  </div>
+                  <h3 className="font-semibold">Kids Corner</h3>
+                  <p className="text-xs text-gray-600">Toys & Baby Care</p>
+                </div>
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-gradient-to-r from-emerald-500 to-green-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🥬
+                  </div>
+                  <h3 className="font-semibold">Organic Store</h3>
+                  <p className="text-xs text-gray-600">Natural Products</p>
+                </div>
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-gradient-to-r from-red-500 to-pink-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🛒
+                  </div>
+                  <h3 className="font-semibold">Groceries</h3>
+                  <p className="text-xs text-gray-600">Daily Essentials</p>
+                </div>
+                <div className="text-center cursor-pointer hover:scale-105 transition-transform">
+                  <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
                     🏡
                   </div>
-                  <h3 className="font-semibold">Home Essentials</h3>
-                  <p className="text-xs text-gray-600">Home & Living</p>
+                  <h3 className="font-semibold">Home Automation</h3>
+                  <p className="text-xs text-gray-600">Smart Home Tech</p>
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
-                  <div className="bg-gradient-to-r from-orange-500 to-yellow-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    🚀
+                  <div className="bg-gradient-to-r from-gray-500 to-slate-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🧾
                   </div>
-                  <h3 className="font-semibold">VyronaSpace</h3>
-                  <p className="text-xs text-gray-600">Quick Delivery</p>
+                  <h3 className="font-semibold">Office & Stationery</h3>
+                  <p className="text-xs text-gray-600">Work Essentials</p>
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
-                  <div className="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    👥
+                  <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🧘
                   </div>
-                  <h3 className="font-semibold">VyronaSocial</h3>
-                  <p className="text-xs text-gray-600">Social Shopping</p>
+                  <h3 className="font-semibold">Health & Wellness</h3>
+                  <p className="text-xs text-gray-600">Fitness & Care</p>
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    🏬
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
+                    🐶
                   </div>
-                  <h3 className="font-semibold">MallConnect</h3>
-                  <p className="text-xs text-gray-600">City Mall Shops</p>
+                  <h3 className="font-semibold">Pet Care</h3>
+                  <p className="text-xs text-gray-600">Pet Essentials</p>
                 </div>
               </div>
             </section>
