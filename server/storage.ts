@@ -200,87 +200,8 @@ export class MemStorage implements IStorage {
       existingAdmin.role = "admin";
     }
 
-    // Add sample books for VyronaRead
-    if (this.products.size === 0) {
-      // Physical Books
-      const physicalBook1: Product = {
-        id: this.currentProductId++,
-        name: "The Art of Programming",
-        description: "A comprehensive guide to software development",
-        category: "programming",
-        price: 2999, // ₹29.99
-        module: "read",
-        imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
-        storeId: null,
-        metadata: {
-          author: "Robert Martin",
-          type: "physical",
-          pages: 350,
-          isbn: "978-0134685991",
-          rentalPrice: 599 // ₹5.99 per week
-        }
-      };
-
-      const physicalBook2: Product = {
-        id: this.currentProductId++,
-        name: "Digital Marketing Mastery",
-        description: "Complete guide to modern digital marketing",
-        category: "business",
-        price: 1999,
-        module: "read",
-        imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400",
-        storeId: null,
-        metadata: {
-          author: "Sarah Johnson",
-          type: "physical",
-          pages: 280,
-          isbn: "978-1234567890",
-          rentalPrice: 399
-        }
-      };
-
-      // Digital Books
-      const digitalBook1: Product = {
-        id: this.currentProductId++,
-        name: "Modern Web Development",
-        description: "Learn React, Node.js, and modern web technologies",
-        category: "technology",
-        price: 1499,
-        module: "read",
-        imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
-        storeId: null,
-        metadata: {
-          author: "Alex Thompson",
-          type: "digital",
-          pages: 425,
-          format: "PDF, EPUB",
-          fileSize: "15MB"
-        }
-      };
-
-      const digitalBook2: Product = {
-        id: this.currentProductId++,
-        name: "Data Science Fundamentals",
-        description: "Introduction to data analysis and machine learning",
-        category: "technology",
-        price: 2499,
-        module: "read",
-        imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400",
-        storeId: null,
-        metadata: {
-          author: "Dr. Emily Chen",
-          type: "digital",
-          pages: 520,
-          format: "PDF, EPUB",
-          fileSize: "22MB"
-        }
-      };
-
-      this.products.set(physicalBook1.id, physicalBook1);
-      this.products.set(physicalBook2.id, physicalBook2);
-      this.products.set(digitalBook1.id, digitalBook1);
-      this.products.set(digitalBook2.id, digitalBook2);
-    }
+    // VyronaRead products will be populated from authentic sources
+    // No mock book data - ready for real uploads
   }
 
   // User methods
@@ -950,67 +871,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createLibraryBooks(requestId: number, libraryData: any): Promise<void> {
-    // Create sample books for the approved library
-    const sampleBooks = [
-      {
-        title: `${libraryData.libraryName} - The Art of Programming`,
-        isbn: `978-0-${Math.floor(Math.random() * 1000000)}`,
-        author: "Tech Author",
-        publisher: "Tech Publications",
-        publicationYear: 2023,
-        genre: "Technology",
-        language: "English",
-        pages: 350,
-        condition: "New",
-        price: 29.99,
-        isAvailable: true,
-        libraryId: requestId
-      },
-      {
-        title: `${libraryData.libraryName} - Modern Web Development`,
-        isbn: `978-1-${Math.floor(Math.random() * 1000000)}`,
-        author: "Web Developer",
-        publisher: "Web Press",
-        publicationYear: 2023,
-        genre: "Technology",
-        language: "English",
-        pages: 420,
-        condition: "New",
-        price: 34.99,
-        isAvailable: true,
-        libraryId: requestId
-      },
-      {
-        title: `${libraryData.libraryName} - Digital Marketing Guide`,
-        isbn: `978-2-${Math.floor(Math.random() * 1000000)}`,
-        author: "Marketing Expert",
-        publisher: "Business Books",
-        publicationYear: 2024,
-        genre: "Business",
-        language: "English",
-        pages: 280,
-        condition: "New",
-        price: 24.99,
-        isAvailable: true,
-        libraryId: requestId
-      }
-    ];
-
-    // Create physical books
-    for (const book of sampleBooks.slice(0, 2)) {
-      await this.createPhysicalBook(book);
-    }
-
-    // Create digital book
-    const digitalBook = {
-      ...sampleBooks[2],
-      sellerId: 2, // Default seller ID
-      fileUrl: "https://example.com/book.pdf",
-      fileSize: "2.5MB",
-      format: "PDF",
-      downloads: 0
-    };
-    await this.createEBook(digitalBook);
+    // Library books will be populated from authentic library data sources
+    // This method is ready for real book catalog integration
+    console.log(`Library integration approved for: ${libraryData.libraryName}`);
   }
 
   async getBookById(id: number): Promise<any> {
