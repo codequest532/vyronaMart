@@ -616,7 +616,8 @@ export default function SellerDashboard() {
               </div>
 
               {/* VyronaRead Navigation Tabs */}
-              <div className="border-b border-gray-200 dark:border-gray-800">
+              <div className="border-b border-gray-200 dark:border-gray-800 mb-6">
+                <div className="text-xs text-gray-500 mb-2">Current section: {bookSection}</div>
                 <nav className="flex space-x-8">
                   <button
                     onClick={() => {
