@@ -914,16 +914,12 @@ export default function Home() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="programming">Programming</SelectItem>
-                        <SelectItem value="data-science">Data Science</SelectItem>
-                        <SelectItem value="web-development">Web Development</SelectItem>
-                        <SelectItem value="algorithms">Algorithms</SelectItem>
-                        <SelectItem value="design">Design</SelectItem>
-                        <SelectItem value="business">Business</SelectItem>
-                        <SelectItem value="fiction">Fiction</SelectItem>
-                        <SelectItem value="non-fiction">Non-Fiction</SelectItem>
-                        <SelectItem value="science">Science</SelectItem>
-                        <SelectItem value="technology">Technology</SelectItem>
+                        <SelectItem value="romance">Romance</SelectItem>
+                        <SelectItem value="sci-fi">Sci-Fi</SelectItem>
+                        <SelectItem value="mystery">Mystery</SelectItem>
+                        <SelectItem value="education">Education</SelectItem>
+                        <SelectItem value="fantasy">Fantasy</SelectItem>
+                        <SelectItem value="biography">Biography</SelectItem>
                       </SelectContent>
                     </Select>
                     <div className="flex space-x-2">
@@ -938,80 +934,123 @@ export default function Home() {
                   {[
                     {
                       id: 1,
-                      name: "The Art of Programming",
-                      author: "Robert Martin",
-                      price: 2999,
-                      rentPrice: 599,
+                      name: "Pride and Prejudice",
+                      author: "Jane Austen",
+                      price: 1299,
+                      rentPrice: 299,
                       type: "physical",
-                      category: "programming",
+                      category: "romance",
                       imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
                     },
                     {
                       id: 2,
-                      name: "Digital Marketing Mastery",
-                      author: "Sarah Johnson",
-                      price: 1999,
-                      rentPrice: 399,
-                      type: "physical",
-                      category: "business",
+                      name: "The Time Machine",
+                      author: "H.G. Wells",
+                      price: 1599,
+                      rentPrice: 349,
+                      type: "digital",
+                      category: "sci-fi",
                       imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
                     },
                     {
                       id: 3,
-                      name: "Modern Web Development",
-                      author: "Alex Thompson",
-                      price: 1499,
-                      type: "digital",
-                      category: "web-development",
+                      name: "The Silent Patient",
+                      author: "Alex Michaelides",
+                      price: 1799,
+                      rentPrice: 399,
+                      type: "physical",
+                      category: "mystery",
                       imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400"
                     },
                     {
                       id: 4,
-                      name: "Data Science Fundamentals",
-                      author: "Dr. Emily Chen",
-                      price: 2499,
+                      name: "A Brief History of Time",
+                      author: "Stephen Hawking",
+                      price: 2199,
+                      rentPrice: 499,
                       type: "digital",
-                      category: "data-science",
+                      category: "education",
                       imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400"
                     },
                     {
                       id: 5,
-                      name: "Algorithm Design Manual",
-                      author: "Steven Skiena",
-                      price: 3299,
+                      name: "The Lord of the Rings",
+                      author: "J.R.R. Tolkien",
+                      price: 2899,
                       rentPrice: 699,
-                      type: "digital",
-                      category: "algorithms",
+                      type: "physical",
+                      category: "fantasy",
                       imageUrl: "https://images.unsplash.com/photo-1509475826633-fed577a2c71b?w=400"
                     },
                     {
                       id: 6,
-                      name: "UI/UX Design Principles",
-                      author: "Emma Davis",
-                      price: 1899,
-                      rentPrice: 379,
-                      type: "physical",
-                      category: "design",
+                      name: "Steve Jobs",
+                      author: "Walter Isaacson",
+                      price: 2299,
+                      rentPrice: 549,
+                      type: "digital",
+                      category: "biography",
                       imageUrl: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=400"
                     },
                     {
                       id: 7,
-                      name: "Cloud Computing Guide",
-                      author: "Michael Chen",
-                      price: 2799,
+                      name: "Me Before You",
+                      author: "Jojo Moyes",
+                      price: 1399,
+                      rentPrice: 319,
                       type: "digital",
-                      category: "technology",
+                      category: "romance",
                       imageUrl: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400"
                     },
                     {
                       id: 8,
-                      name: "Physics of the Universe",
-                      author: "Dr. Brian Cox",
-                      price: 2199,
-                      rentPrice: 449,
+                      name: "Dune",
+                      author: "Frank Herbert",
+                      price: 2499,
+                      rentPrice: 599,
                       type: "physical",
-                      category: "science",
+                      category: "sci-fi",
                       imageUrl: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400"
+                    },
+                    {
+                      id: 9,
+                      name: "Gone Girl",
+                      author: "Gillian Flynn",
+                      price: 1699,
+                      rentPrice: 379,
+                      type: "digital",
+                      category: "mystery",
+                      imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
+                    },
+                    {
+                      id: 10,
+                      name: "The Great Gatsby",
+                      author: "F. Scott Fitzgerald",
+                      price: 1199,
+                      rentPrice: 279,
+                      type: "physical",
+                      category: "education",
+                      imageUrl: "https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400"
+                    },
+                    {
+                      id: 11,
+                      name: "Harry Potter and the Sorcerer's Stone",
+                      author: "J.K. Rowling",
+                      price: 1899,
+                      rentPrice: 449,
+                      type: "digital",
+                      category: "fantasy",
+                      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
+                    },
+                    {
+                      id: 12,
+                      name: "Becoming",
+                      author: "Michelle Obama",
+                      price: 2599,
+                      rentPrice: 629,
+                      type: "physical",
+                      category: "biography",
+                      imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
                     }
                   ].filter(book => selectedCategory === "all" || book.category === selectedCategory).map((book) => (
                     <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
