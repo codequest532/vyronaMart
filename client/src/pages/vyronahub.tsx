@@ -126,12 +126,15 @@ export default function VyronaHub() {
   const categories = [
     { id: "all", name: "All Products", icon: Package, count: products.length },
     { id: "electronics", name: "Electronics", icon: Smartphone, count: products.filter((p: any) => p.category === "electronics").length },
-    { id: "fashion", name: "Fashion & Clothing", icon: Shirt, count: products.filter((p: any) => p.category === "fashion").length },
-    { id: "home", name: "Home & Living", icon: HomeIcon, count: products.filter((p: any) => p.category === "home").length },
-    { id: "food", name: "Food & Beverages", icon: Utensils, count: products.filter((p: any) => p.category === "food").length },
-    { id: "books", name: "Books & Media", icon: BookOpen, count: products.filter((p: any) => p.category === "books").length },
-    { id: "gaming", name: "Gaming", icon: Gamepad2, count: products.filter((p: any) => p.category === "gaming").length },
-    { id: "automotive", name: "Automotive", icon: Car, count: products.filter((p: any) => p.category === "automotive").length },
+    { id: "fashion", name: "Fashion & Apparels", icon: Shirt, count: products.filter((p: any) => p.category === "fashion").length },
+    { id: "home", name: "Home & Kitchen", icon: HomeIcon, count: products.filter((p: any) => p.category === "home").length },
+    { id: "kids", name: "Kids Corner", icon: Heart, count: products.filter((p: any) => p.category === "kids").length },
+    { id: "organic", name: "Organic Store", icon: Utensils, count: products.filter((p: any) => p.category === "organic").length },
+    { id: "groceries", name: "Groceries", icon: ShoppingBag, count: products.filter((p: any) => p.category === "groceries").length },
+    { id: "automation", name: "Home Automation", icon: Laptop, count: products.filter((p: any) => p.category === "automation").length },
+    { id: "office", name: "Office & Stationery", icon: BookOpen, count: products.filter((p: any) => p.category === "office").length },
+    { id: "health", name: "Health & Wellness", icon: Plus, count: products.filter((p: any) => p.category === "health").length },
+    { id: "pets", name: "Pet Care", icon: Heart, count: products.filter((p: any) => p.category === "pets").length },
   ];
 
   // Filter and sort products
@@ -240,12 +243,15 @@ export default function VyronaHub() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="electronics">Electronics</SelectItem>
-                            <SelectItem value="fashion">Fashion & Clothing</SelectItem>
-                            <SelectItem value="home">Home & Living</SelectItem>
-                            <SelectItem value="food">Food & Beverages</SelectItem>
-                            <SelectItem value="books">Books & Media</SelectItem>
-                            <SelectItem value="gaming">Gaming</SelectItem>
-                            <SelectItem value="automotive">Automotive</SelectItem>
+                            <SelectItem value="fashion">Fashion & Apparels</SelectItem>
+                            <SelectItem value="home">Home & Kitchen</SelectItem>
+                            <SelectItem value="kids">Kids Corner</SelectItem>
+                            <SelectItem value="organic">Organic Store</SelectItem>
+                            <SelectItem value="groceries">Groceries</SelectItem>
+                            <SelectItem value="automation">Home Automation</SelectItem>
+                            <SelectItem value="office">Office & Stationery</SelectItem>
+                            <SelectItem value="health">Health & Wellness</SelectItem>
+                            <SelectItem value="pets">Pet Care</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
