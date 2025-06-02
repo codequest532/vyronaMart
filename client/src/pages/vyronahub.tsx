@@ -48,11 +48,27 @@ import { useUserData } from "@/hooks/use-user-data";
 
 const addProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.number().min(0, "Price must be positive"),
+  originalPrice: z.number().optional(),
   category: z.string().min(1, "Category is required"),
   module: z.string().min(1, "Module is required"),
   imageUrl: z.string().url("Valid image URL is required"),
+  additionalImages: z.string().optional(),
+  brand: z.string().min(1, "Brand is required"),
+  model: z.string().optional(),
+  sku: z.string().min(1, "SKU is required"),
+  stockQuantity: z.number().min(0, "Stock quantity cannot be negative"),
+  weight: z.number().optional(),
+  dimensions: z.string().optional(),
+  color: z.string().optional(),
+  size: z.string().optional(),
+  material: z.string().optional(),
+  warranty: z.string().optional(),
+  features: z.string().optional(),
+  specifications: z.string().optional(),
+  tags: z.string().optional(),
+  isActive: z.boolean().default(true),
 });
 
 export default function VyronaHub() {
@@ -163,9 +179,25 @@ export default function VyronaHub() {
       name: "",
       description: "",
       price: 0,
+      originalPrice: undefined,
       category: "",
       module: "VyronaHub",
       imageUrl: "",
+      additionalImages: "",
+      brand: "",
+      model: "",
+      sku: "",
+      stockQuantity: 0,
+      weight: undefined,
+      dimensions: "",
+      color: "",
+      size: "",
+      material: "",
+      warranty: "",
+      features: "",
+      specifications: "",
+      tags: "",
+      isActive: true,
     },
   });
 
@@ -227,104 +259,382 @@ export default function VyronaHub() {
                 Add Product
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
                 <DialogDescription>
-                  Add a new product to the VyronaHub catalog.
+                  Add comprehensive product details to facilitate customer purchasing decisions.
                 </DialogDescription>
               </DialogHeader>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Product Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter product name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Product description" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price (₹)</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                            placeholder="0" 
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="electronics">Electronics</SelectItem>
-                            <SelectItem value="fashion">Fashion & Apparels</SelectItem>
-                            <SelectItem value="home">Home & Kitchen</SelectItem>
-                            <SelectItem value="kids">Kids Corner</SelectItem>
-                            <SelectItem value="organic">Organic Store</SelectItem>
-                            <SelectItem value="groceries">Groceries</SelectItem>
-                            <SelectItem value="automation">Home Automation</SelectItem>
-                            <SelectItem value="office">Office & Stationery</SelectItem>
-                            <SelectItem value="health">Health & Wellness</SelectItem>
-                            <SelectItem value="pets">Pet Care</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="imageUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Image URL</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://example.com/image.jpg" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={addProductMutation.isPending}>
-                    {addProductMutation.isPending ? "Adding..." : "Add Product"}
-                  </Button>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <Tabs defaultValue="basic" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                      <TabsTrigger value="details">Product Details</TabsTrigger>
+                      <TabsTrigger value="images">Images & Media</TabsTrigger>
+                      <TabsTrigger value="inventory">Inventory & Specs</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="basic" className="space-y-4 mt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Product Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter product name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="brand"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Brand *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter brand name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Product Description *</FormLabel>
+                            <FormControl>
+                              <textarea 
+                                className="w-full min-h-[100px] p-3 border rounded-md resize-none"
+                                placeholder="Detailed product description to help customers understand the product benefits and features..." 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="category"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Category *</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="electronics">Electronics</SelectItem>
+                                  <SelectItem value="fashion">Fashion & Apparels</SelectItem>
+                                  <SelectItem value="home">Home & Kitchen</SelectItem>
+                                  <SelectItem value="kids">Kids Corner</SelectItem>
+                                  <SelectItem value="organic">Organic Store</SelectItem>
+                                  <SelectItem value="groceries">Groceries</SelectItem>
+                                  <SelectItem value="automation">Home Automation</SelectItem>
+                                  <SelectItem value="office">Office & Stationery</SelectItem>
+                                  <SelectItem value="health">Health & Wellness</SelectItem>
+                                  <SelectItem value="pets">Pet Care</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="sku"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>SKU *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Product SKU/Code" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="details" className="space-y-4 mt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="price"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Selling Price (₹) *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="0" 
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="originalPrice"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Original Price (₹)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="0" 
+                                  {...field}
+                                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="model"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Model Number</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Model number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="color"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Color</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Product color" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="size"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Size</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Product size" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="material"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Material</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Material used" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="warranty"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Warranty Information</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., 1 year manufacturer warranty" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="features"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Key Features</FormLabel>
+                            <FormControl>
+                              <textarea 
+                                className="w-full min-h-[80px] p-3 border rounded-md resize-none"
+                                placeholder="List key features separated by commas or new lines..." 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="images" className="space-y-4 mt-6">
+                      <FormField
+                        control={form.control}
+                        name="imageUrl"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Main Product Image URL *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://example.com/main-image.jpg" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="additionalImages"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Additional Images</FormLabel>
+                            <FormControl>
+                              <textarea 
+                                className="w-full min-h-[80px] p-3 border rounded-md resize-none"
+                                placeholder="Additional image URLs, one per line..." 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="tags"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Search Tags</FormLabel>
+                            <FormControl>
+                              <Input placeholder="trending, bestseller, premium, eco-friendly..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="inventory" className="space-y-4 mt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="stockQuantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Stock Quantity *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="0" 
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="weight"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Weight (kg)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  step="0.01"
+                                  placeholder="0.00" 
+                                  {...field}
+                                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <FormField
+                        control={form.control}
+                        name="dimensions"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Dimensions</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Length x Width x Height (cm)" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="specifications"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Technical Specifications</FormLabel>
+                            <FormControl>
+                              <textarea 
+                                className="w-full min-h-[100px] p-3 border rounded-md resize-none"
+                                placeholder="Detailed technical specifications that customers need to know..." 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                  
+                  <div className="flex gap-4 pt-4">
+                    <Button type="submit" disabled={addProductMutation.isPending} className="flex-1">
+                      {addProductMutation.isPending ? "Adding Product..." : "Add Product to Catalog"}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => form.reset()}>
+                      Reset Form
+                    </Button>
+                  </div>
                 </form>
               </Form>
             </DialogContent>
