@@ -899,39 +899,70 @@ export default function Landing() {
               </div>
             </section>
 
-            {/* VyronaSpace - Local Stores */}
-            {localStores.length > 0 && (
-              <section className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-xl font-semibold">VyronaSpace - Local Store Connect</h3>
-                    <p className="text-gray-600 text-sm">Quick delivery from neighborhood stores</p>
-                  </div>
-                  <Button variant="link" className="text-orange-600">Explore Local Stores →</Button>
+            {/* VyronaSpace - Local Store Connect */}
+            <section className="mb-12 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-2xl p-8">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-4">VyronaSpace - Local Store Connect</h2>
+                <p className="text-lg text-gray-600">Connecting you to local neighborhood stores with lightning-fast delivery</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">⚡</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Ultra-Fast Delivery</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• 15-30 minute delivery windows</li>
+                    <li>• Real-time order tracking</li>
+                    <li>• Express delivery options</li>
+                    <li>• Contactless delivery available</li>
+                  </ul>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {localStores.slice(0, 4).map((store) => (
-                    <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleStoreClick(store.id)}>
-                      <CardContent className="p-4">
-                        <div className="aspect-video bg-gradient-to-br from-orange-100 to-yellow-100 rounded-md mb-2 overflow-hidden flex items-center justify-center">
-                          <span className="text-2xl font-bold text-orange-600">{store.name.charAt(0)}</span>
-                        </div>
-                        <h3 className="font-medium text-sm mb-1">{store.name}</h3>
-                        <p className="text-xs text-orange-600 mb-2 capitalize font-medium">{store.type} store</p>
-                        <div className="flex items-center text-xs text-gray-500 mb-2">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          <span>{store.address || "Local area"}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-green-600 font-medium">🚀 Quick Delivery</span>
-                          <span className="text-xs text-yellow-600">⭐ {(store.rating || 450) / 100} rating</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">🏪</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Local Store Network</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Neighborhood grocery stores</li>
+                    <li>• Local pharmacies & chemists</li>
+                    <li>• Fresh produce vendors</li>
+                    <li>• Specialty local shops</li>
+                  </ul>
                 </div>
-              </section>
-            )}
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">📍</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Hyper-Local Focus</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Within 3km radius coverage</li>
+                    <li>• GPS-based store matching</li>
+                    <li>• Local inventory management</li>
+                    <li>• Community-first approach</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-white rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow">
+                  <div className="text-3xl mb-4 text-center">💰</div>
+                  <h3 className="font-bold text-lg mb-3 text-center">Smart Savings</h3>
+                  <ul className="text-sm text-gray-600 space-y-2">
+                    <li>• Local store competitive pricing</li>
+                    <li>• No minimum order value</li>
+                    <li>• Bulk purchase discounts</li>
+                    <li>• Community loyalty rewards</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="text-center mt-8">
+                <Button className="bg-gradient-to-r from-orange-500 to-yellow-600 hover:from-orange-600 hover:to-yellow-700 text-white px-8 py-3 text-lg">
+                  Explore Local Stores
+                  <MapPin className="ml-2 h-5 w-5" />
+                </Button>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-500">Supporting local businesses while serving your neighborhood</p>
+              </div>
+            </section>
           </>
         )}
       </main>
