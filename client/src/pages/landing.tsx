@@ -889,7 +889,7 @@ export default function Landing() {
               
               <div className="text-center mt-8">
                 <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-8 py-3 text-lg">
-                  Start Shopping
+                  Discover Premium Shops
                   <Building2 className="ml-2 h-5 w-5" />
                 </Button>
               </div>
