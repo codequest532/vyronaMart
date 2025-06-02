@@ -637,6 +637,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaRead Data Organization - Authentic seller-uploaded content
+  
+  // E-books uploaded by sellers for VyronaRead E-Reader section
+  app.get("/api/vyronaread/ebooks", async (req, res) => {
+    try {
+      const eBooks = await storage.getEBooks();
+      res.json(eBooks);
+    } catch (error) {
+      console.error("Error fetching seller e-books:", error);
+      res.status(500).json({ message: "Failed to fetch e-books" });
+    }
+  });
+
+  // Physical/digital books uploaded by sellers for Browse Books section (sale/rent)
+  app.get("/api/vyronaread/seller-books", async (req, res) => {
+    try {
+      const books = await storage.getProducts("vyronaread", "books");
+      res.json(books);
+    } catch (error) {
+      console.error("Error fetching seller books:", error);
+      res.status(500).json({ message: "Failed to fetch seller books" });
+    }
+  });
+
+  // Library books from approved integrations for Library Integration section
+  app.get("/api/vyronaread/library-books", async (req, res) => {
+    try {
+      const libraryBooks = await storage.getPhysicalBooks();
+      res.json(libraryBooks);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+      res.status(500).json({ message: "Failed to fetch library books" });
+    }
+  });
+
+  // Get available libraries for "Visit Library" functionality
+  app.get("/api/vyronaread/libraries", async (req, res) => {
+    try {
+      const approvedRequests = await storage.getLibraryIntegrationRequests();
+      const libraries = approvedRequests.filter((req: any) => req.status === 'approved');
+      res.json(libraries);
+    } catch (error) {
+      console.error("Error fetching libraries:", error);
+      res.status(500).json({ message: "Failed to fetch libraries" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
