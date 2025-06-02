@@ -877,31 +877,7 @@ export default function Home() {
 
 
 
-            {/* Book Categories */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Browse Categories</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
-                  {[
-                    { name: "Romance", icon: Heart, color: "red" },
-                    { name: "Sci-Fi", icon: Zap, color: "blue" },
-                    { name: "Mystery", icon: Target, color: "yellow" },
-                    { name: "Education", icon: GraduationCap, color: "green" },
-                    { name: "Fantasy", icon: Sparkles, color: "purple" },
-                    { name: "Biography", icon: User, color: "gray" },
-                  ].map((category) => (
-                    <Button
-                      key={category.name}
-                      variant="outline"
-                      className={`bg-${category.color}-50 border-${category.color}-200 hover:bg-${category.color}-100 h-auto p-3 flex-col`}
-                    >
-                      <category.icon className={`text-${category.color}-500 h-5 w-5 mb-1`} />
-                      <div className="text-sm font-medium">{category.name}</div>
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Browse Books - Purchase/Rent */}
             <Card>
