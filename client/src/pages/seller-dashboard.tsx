@@ -38,6 +38,7 @@ export default function SellerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddBookDialog, setShowAddBookDialog] = useState(false);
+  const [bookSection, setBookSection] = useState("overview");
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -453,13 +454,13 @@ export default function SellerDashboard() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaRead Library Management</h2>
-                  <p className="text-gray-600 dark:text-gray-300">Manage your physical library inventory and lending system</p>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaRead - Complete Book Ecosystem</h2>
+                  <p className="text-gray-600 dark:text-gray-300">Manage physical library, sell e-books, and provide digital reading services</p>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline">
                     <Search className="h-4 w-4 mr-2" />
-                    Search Books
+                    Search Library
                   </Button>
                   <Dialog open={showAddBookDialog} onOpenChange={setShowAddBookDialog}>
                     <DialogTrigger asChild>
@@ -614,7 +615,200 @@ export default function SellerDashboard() {
                 </div>
               </div>
 
-              {/* Book Library Stats */}
+              {/* VyronaRead Navigation Tabs */}
+              <div className="border-b border-gray-200 dark:border-gray-800">
+                <nav className="flex space-x-8">
+                  <button
+                    onClick={() => setBookSection("overview")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "overview"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Overview
+                  </button>
+                  <button
+                    onClick={() => setBookSection("physical")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "physical"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Physical Library
+                  </button>
+                  <button
+                    onClick={() => setBookSection("ebooks")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "ebooks"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    E-Book Store
+                  </button>
+                  <button
+                    onClick={() => setBookSection("reader")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "reader"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Digital Reader
+                  </button>
+                  <button
+                    onClick={() => setBookSection("analytics")}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "analytics"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Analytics
+                  </button>
+                </nav>
+              </div>
+
+              {/* Overview Section */}
+              {bookSection === "overview" && (
+                <div className="space-y-6">
+                  {/* Combined Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Physical Books</p>
+                            <p className="text-3xl font-bold text-blue-600">250</p>
+                            <p className="text-xs text-blue-500">Library inventory</p>
+                          </div>
+                          <Library className="h-8 w-8 text-blue-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">E-Books Listed</p>
+                            <p className="text-3xl font-bold text-purple-600">1,450</p>
+                            <p className="text-xs text-purple-500">Digital catalog</p>
+                          </div>
+                          <BookOpen className="h-8 w-8 text-purple-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Active Readers</p>
+                            <p className="text-3xl font-bold text-green-600">3,280</p>
+                            <p className="text-xs text-green-500">Monthly users</p>
+                          </div>
+                          <Users className="h-8 w-8 text-green-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                            <p className="text-3xl font-bold text-orange-600">₹85,450</p>
+                            <p className="text-xs text-orange-500">This month</p>
+                          </div>
+                          <TrendingUp className="h-8 w-8 text-orange-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Service Overview */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Physical Library Services</CardTitle>
+                        <CardDescription>Traditional library management</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Books on Loan</span>
+                            <span className="font-bold text-orange-600">65</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Membership Revenue</span>
+                            <span className="font-bold text-green-600">₹12,500</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Late Fees</span>
+                            <span className="font-bold text-red-600">₹850</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Digital Book Services</CardTitle>
+                        <CardDescription>E-book sales and rentals</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">E-book Sales</span>
+                            <span className="font-bold text-purple-600">₹45,200</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Rental Revenue</span>
+                            <span className="font-bold text-blue-600">₹18,900</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Subscription Income</span>
+                            <span className="font-bold text-green-600">₹8,000</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Quick Actions Overview */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Quick Actions</CardTitle>
+                      <CardDescription>Common VyronaRead management tasks</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <Button variant="outline" className="h-20 flex-col" onClick={() => setBookSection("physical")}>
+                          <Library className="h-6 w-6 mb-2" />
+                          <span className="text-xs">Manage Library</span>
+                        </Button>
+                        <Button variant="outline" className="h-20 flex-col" onClick={() => setBookSection("ebooks")}>
+                          <BookOpen className="h-6 w-6 mb-2" />
+                          <span className="text-xs">Upload E-book</span>
+                        </Button>
+                        <Button variant="outline" className="h-20 flex-col" onClick={() => setBookSection("reader")}>
+                          <Eye className="h-6 w-6 mb-2" />
+                          <span className="text-xs">Reader Settings</span>
+                        </Button>
+                        <Button variant="outline" className="h-20 flex-col" onClick={() => setBookSection("analytics")}>
+                          <TrendingUp className="h-6 w-6 mb-2" />
+                          <span className="text-xs">View Analytics</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Physical Library Section */}
+              {bookSection === "physical" && (
+                <div className="space-y-6">
+                  {/* Book Library Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <Card>
                   <CardContent className="p-6">
@@ -914,6 +1108,566 @@ export default function SellerDashboard() {
                   </div>
                 </CardContent>
               </Card>
+                </div>
+              )}
+
+              {/* E-Book Store Section */}
+              {bookSection === "ebooks" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold">E-Book Store Management</h3>
+                      <p className="text-gray-600">Upload, sell, and rent digital books with VyronaRead</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline">
+                        <Search className="h-4 w-4 mr-2" />
+                        Search E-books
+                      </Button>
+                      <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Upload E-book
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* E-Book Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Listed E-books</p>
+                            <p className="text-3xl font-bold text-purple-600">1,450</p>
+                            <p className="text-xs text-purple-500">Digital catalog</p>
+                          </div>
+                          <BookOpen className="h-8 w-8 text-purple-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Sales This Month</p>
+                            <p className="text-3xl font-bold text-green-600">285</p>
+                            <p className="text-xs text-green-500">Books sold</p>
+                          </div>
+                          <ShoppingCart className="h-8 w-8 text-green-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Active Rentals</p>
+                            <p className="text-3xl font-bold text-blue-600">156</p>
+                            <p className="text-xs text-blue-500">Currently rented</p>
+                          </div>
+                          <Clock className="h-8 w-8 text-blue-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Revenue</p>
+                            <p className="text-3xl font-bold text-orange-600">₹72,100</p>
+                            <p className="text-xs text-orange-500">This month</p>
+                          </div>
+                          <TrendingUp className="h-8 w-8 text-orange-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* E-Book Management */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Card className="lg:col-span-2">
+                      <CardHeader>
+                        <CardTitle>Popular E-Books</CardTitle>
+                        <CardDescription>Your best-selling digital books</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4 p-4 border rounded-lg">
+                            <div className="w-12 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center flex-shrink-0">
+                              <BookOpen className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold">The Psychology of Money</h4>
+                              <p className="text-sm text-gray-600">by Morgan Housel</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <Badge variant="secondary">Business</Badge>
+                                <span className="text-sm font-medium text-green-600">₹299 Sale</span>
+                                <span className="text-sm font-medium text-blue-600">₹49/month Rent</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-600">Sales: 45</p>
+                              <p className="text-sm text-gray-600">Rentals: 23</p>
+                              <p className="text-sm font-bold text-green-600">₹14,850</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 p-4 border rounded-lg">
+                            <div className="w-12 h-16 bg-gradient-to-br from-blue-500 to-teal-500 rounded flex items-center justify-center flex-shrink-0">
+                              <BookOpen className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold">Atomic Habits</h4>
+                              <p className="text-sm text-gray-600">by James Clear</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <Badge variant="secondary">Self-Help</Badge>
+                                <span className="text-sm font-medium text-green-600">₹349 Sale</span>
+                                <span className="text-sm font-medium text-blue-600">₹59/month Rent</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-600">Sales: 38</p>
+                              <p className="text-sm text-gray-600">Rentals: 19</p>
+                              <p className="text-sm font-bold text-green-600">₹14,383</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 p-4 border rounded-lg">
+                            <div className="w-12 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded flex items-center justify-center flex-shrink-0">
+                              <BookOpen className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold">Think and Grow Rich</h4>
+                              <p className="text-sm text-gray-600">by Napoleon Hill</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <Badge variant="secondary">Business</Badge>
+                                <span className="text-sm font-medium text-green-600">₹249 Sale</span>
+                                <span className="text-sm font-medium text-blue-600">₹39/month Rent</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-600">Sales: 32</p>
+                              <p className="text-sm text-gray-600">Rentals: 15</p>
+                              <p className="text-sm font-bold text-green-600">₹8,553</p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Upload Options</CardTitle>
+                        <CardDescription>Add new e-books to your store</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Upload PDF/EPUB
+                          </Button>
+                          <Button variant="outline" className="w-full">
+                            <BookOpen className="h-4 w-4 mr-2" />
+                            Import from Library
+                          </Button>
+                          <Button variant="outline" className="w-full">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Bulk Upload
+                          </Button>
+                        </div>
+
+                        <div className="mt-6 space-y-3">
+                          <h4 className="font-semibold text-sm">Pricing Options</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span>One-time Sale</span>
+                              <span className="font-medium">₹99 - ₹999</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Monthly Rental</span>
+                              <span className="font-medium">₹29 - ₹199</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Weekly Rental</span>
+                              <span className="font-medium">₹9 - ₹79</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Revenue Breakdown */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>E-Book Revenue Breakdown</CardTitle>
+                      <CardDescription>Digital book sales and rental income</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-4">
+                          <h4 className="font-semibold">Sales Revenue</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm">Book Sales</span>
+                              <span className="font-bold text-green-600">₹45,200</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Platform Fee (15%)</span>
+                              <span className="font-bold text-red-600">-₹6,780</span>
+                            </div>
+                            <div className="border-t pt-2">
+                              <div className="flex justify-between">
+                                <span className="font-medium">Net Sales</span>
+                                <span className="font-bold text-green-600">₹38,420</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <h4 className="font-semibold">Rental Revenue</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm">Monthly Rentals</span>
+                              <span className="font-bold text-blue-600">₹18,900</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Platform Fee (10%)</span>
+                              <span className="font-bold text-red-600">-₹1,890</span>
+                            </div>
+                            <div className="border-t pt-2">
+                              <div className="flex justify-between">
+                                <span className="font-medium">Net Rentals</span>
+                                <span className="font-bold text-blue-600">₹17,010</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <h4 className="font-semibold">Subscription Revenue</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm">Premium Access</span>
+                              <span className="font-bold text-purple-600">₹8,000</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-sm">Platform Share</span>
+                              <span className="font-bold text-green-600">₹8,000</span>
+                            </div>
+                            <div className="border-t pt-2">
+                              <div className="flex justify-between">
+                                <span className="font-medium">Total</span>
+                                <span className="font-bold text-orange-600">₹63,430</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Digital Reader Section */}
+              {bookSection === "reader" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold">VyronaRead Digital Reader</h3>
+                      <p className="text-gray-600">In-house reading experience similar to Kindle</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Reader Settings
+                      </Button>
+                      <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Eye className="h-4 w-4 mr-2" />
+                        Preview Reader
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Reader Features */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Reader Features</CardTitle>
+                        <CardDescription>Built-in digital reading capabilities</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <BookOpen className="h-5 w-5 text-blue-600" />
+                              <span className="text-sm font-medium">Multi-format Support</span>
+                            </div>
+                            <Badge variant="default">PDF, EPUB, MOBI</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Eye className="h-5 w-5 text-green-600" />
+                              <span className="text-sm font-medium">Customizable Reading</span>
+                            </div>
+                            <Badge variant="default">Fonts, Colors, Size</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Users className="h-5 w-5 text-purple-600" />
+                              <span className="text-sm font-medium">Social Features</span>
+                            </div>
+                            <Badge variant="default">Notes, Highlights</Badge>
+                          </div>
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Calendar className="h-5 w-5 text-orange-600" />
+                              <span className="text-sm font-medium">Reading Progress</span>
+                            </div>
+                            <Badge variant="default">Sync Across Devices</Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Reader Analytics</CardTitle>
+                        <CardDescription>Reading behavior and engagement</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Active Readers</span>
+                            <span className="font-bold text-blue-600">3,280</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Daily Reading Time</span>
+                            <span className="font-bold text-green-600">2.5 hrs avg</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Books Completed</span>
+                            <span className="font-bold text-purple-600">1,256 this month</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Engagement Rate</span>
+                            <span className="font-bold text-orange-600">78%</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-6">
+                          <h4 className="font-semibold mb-3">Popular Reading Features</h4>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Night Mode</span>
+                              <span className="font-medium">95% users</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Bookmarks</span>
+                              <span className="font-medium">87% users</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Highlights</span>
+                              <span className="font-medium">65% users</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span>Notes</span>
+                              <span className="font-medium">42% users</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Reader Preview */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Reader Interface Preview</CardTitle>
+                      <CardDescription>VyronaRead in-house reading experience</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 border-2 border-dashed">
+                        <div className="max-w-2xl mx-auto">
+                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+                            <div className="flex items-center justify-between mb-6">
+                              <div className="flex items-center gap-3">
+                                <BookOpen className="h-6 w-6 text-blue-600" />
+                                <span className="font-semibold">The Psychology of Money</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Settings className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="space-y-4 text-sm leading-relaxed">
+                              <p className="text-gray-700 dark:text-gray-300">
+                                "Money is everywhere, it affects all of us, and confuses most of us. Everyone thinks about it a little differently. It offers lessons on things that apply to many areas of life..."
+                              </p>
+                              <p className="text-gray-700 dark:text-gray-300">
+                                "But finance is overwhelmingly taught as a math-based field, where you put data into a formula and the formula tells you what to do..."
+                              </p>
+                            </div>
+                            <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                              <span className="text-xs text-gray-500">Chapter 1 • Page 15 of 245</span>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">←</Button>
+                                <div className="w-32 h-1 bg-gray-200 rounded-full">
+                                  <div className="w-8 h-1 bg-blue-600 rounded-full"></div>
+                                </div>
+                                <Button variant="ghost" size="sm">→</Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Analytics Section */}
+              {bookSection === "analytics" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold">VyronaRead Analytics</h3>
+                      <p className="text-gray-600">Comprehensive insights across all book services</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Date Range
+                      </Button>
+                      <Button variant="outline">
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Export Report
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Performance Overview */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                            <p className="text-3xl font-bold text-green-600">₹85,450</p>
+                            <p className="text-xs text-green-500">+12% from last month</p>
+                          </div>
+                          <TrendingUp className="h-8 w-8 text-green-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Books Sold</p>
+                            <p className="text-3xl font-bold text-purple-600">285</p>
+                            <p className="text-xs text-purple-500">+8% from last month</p>
+                          </div>
+                          <ShoppingCart className="h-8 w-8 text-purple-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Active Rentals</p>
+                            <p className="text-3xl font-bold text-blue-600">156</p>
+                            <p className="text-xs text-blue-500">+15% from last month</p>
+                          </div>
+                          <Clock className="h-8 w-8 text-blue-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Reading Hours</p>
+                            <p className="text-3xl font-bold text-orange-600">8,240</p>
+                            <p className="text-xs text-orange-500">Total this month</p>
+                          </div>
+                          <BookOpen className="h-8 w-8 text-orange-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Revenue Trends */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Revenue Trends</CardTitle>
+                      <CardDescription>Monthly revenue breakdown by service type</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-64 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500">Revenue chart visualization would be displayed here</p>
+                          <p className="text-sm text-gray-400">Physical Library • E-book Sales • Rentals • Subscriptions</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Top Performing Books */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Top Physical Books</CardTitle>
+                        <CardDescription>Most borrowed library books</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">The Psychology of Money</span>
+                            <span className="font-bold text-blue-600">45 loans</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Atomic Habits</span>
+                            <span className="font-bold text-blue-600">38 loans</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Think and Grow Rich</span>
+                            <span className="font-bold text-blue-600">32 loans</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Top Digital Books</CardTitle>
+                        <CardDescription>Best-selling e-books</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">The Psychology of Money</span>
+                            <span className="font-bold text-purple-600">₹14,850</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Atomic Habits</span>
+                            <span className="font-bold text-purple-600">₹14,383</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Think and Grow Rich</span>
+                            <span className="font-bold text-purple-600">₹8,553</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </main>
