@@ -62,7 +62,7 @@ import {
   TrendingUp
 } from "lucide-react";
 
-type TabType = "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
+type TabType = "vyronahub" | "social" | "space" | "read" | "mall" | "instashop" | "profile";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("vyronahub");
@@ -99,7 +99,7 @@ export default function Home() {
     }
   };
 
-  const { user, updateCoins, achievements } = useUserData();
+  const { user, updateCoins } = useUserData();
   const { notification, showNotification, hideNotification } = useToastNotifications();
 
   // Data queries for all modules
@@ -162,7 +162,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Header />
+      <Header user={user} />
       <CartButton />
       
       <NotificationToast
