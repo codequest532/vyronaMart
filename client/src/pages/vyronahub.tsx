@@ -45,11 +45,13 @@ import {
   X,
   Image,
   Video,
-  Cloud
+  Cloud,
+  ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/mock-data";
 import { useUserData } from "@/hooks/use-user-data";
+import { useLocation } from "wouter";
 
 const addProductSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -80,6 +82,7 @@ export default function VyronaHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useUserData();
+  const [location, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -328,12 +331,22 @@ export default function VyronaHub() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <ShoppingBag className="h-10 w-10 text-blue-500" />
-              VyronaHub
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">Your smart shopping destination</p>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/")}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Go Back
+            </Button>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                <ShoppingBag className="h-10 w-10 text-blue-500" />
+                VyronaHub
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-2">Your smart shopping destination</p>
+            </div>
           </div>
           <Dialog>
             <DialogTrigger asChild>
