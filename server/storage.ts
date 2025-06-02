@@ -134,90 +134,7 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-    // Create a demo user
-    const demoUser: User = {
-      id: this.currentUserId++,
-      username: "arjun_krishnan",
-      email: "arjun@example.com",
-      password: "hashed_password",
-      vyronaCoins: 2450,
-      xp: 12340,
-      level: 12,
-      createdAt: new Date(),
-    };
-    this.users.set(demoUser.id, demoUser);
-
-    // Seed stores
-    const storeData = [
-      { name: "Raja Kirana Store", type: "kirana", address: "T. Nagar, Chennai", rating: 480, reviewCount: 120 },
-      { name: "Trendy Fashion Hub", type: "fashion", address: "T. Nagar, Chennai", rating: 420, reviewCount: 85 },
-      { name: "Express Avenue", type: "mall", address: "Chennai", rating: 450, reviewCount: 2500 },
-      { name: "Phoenix MarketCity", type: "mall", address: "Chennai", rating: 470, reviewCount: 3200 },
-      { name: "Central Library", type: "library", address: "Anna Nagar, Chennai", rating: 460, reviewCount: 890 },
-    ];
-
-    storeData.forEach(store => {
-      const newStore: Store = {
-        id: this.currentStoreId++,
-        ...store,
-        latitude: "13.0827",
-        longitude: "80.2707",
-        isOpen: true,
-      };
-      this.stores.set(newStore.id, newStore);
-    });
-
-    // Seed products
-    const productData = [
-      { name: "Gaming Smartphone", price: 2599900, category: "electronics", module: "space", storeId: 1, imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9" },
-      { name: "Trendy Jacket", price: 289900, category: "fashion", module: "space", storeId: 2, imageUrl: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105" },
-      { name: "The Silent Patient", price: 29900, category: "mystery", module: "read", storeId: 5, imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f", metadata: { author: "Alex Michaelides", rentalPrice: 5000 } },
-      { name: "Gaming Headphones", price: 499900, category: "electronics", module: "mall", storeId: 3, imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e" },
-      { name: "Dune Chronicles", price: 49900, category: "sci-fi", module: "read", storeId: 5, imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d", metadata: { author: "Frank Herbert", rentalPrice: 7500 } },
-    ];
-
-    productData.forEach(product => {
-      const newProduct: Product = {
-        id: this.currentProductId++,
-        description: `High quality ${product.name}`,
-        ...product,
-      };
-      this.products.set(newProduct.id, newProduct);
-    });
-
-    // Seed shopping rooms
-    const roomData = [
-      { name: "Fashion Friday Squad", creatorId: 1, currentGame: "ludo", totalCart: 1245000, memberCount: 4 },
-      { name: "Tech Hunters", creatorId: 1, currentGame: "trivia", totalCart: 4590000, memberCount: 2 },
-    ];
-
-    roomData.forEach(room => {
-      const newRoom: ShoppingRoom = {
-        id: this.currentRoomId++,
-        isActive: true,
-        createdAt: new Date(),
-        ...room,
-      };
-      this.shoppingRooms.set(newRoom.id, newRoom);
-    });
-
-    // Seed achievements
-    const achievementData = [
-      { userId: 1, type: "first_purchase" },
-      { userId: 1, type: "social_shopper" },
-      { userId: 1, type: "game_master" },
-      { userId: 1, type: "book_lover" },
-      { userId: 1, type: "local_explorer" },
-    ];
-
-    achievementData.forEach(achievement => {
-      const newAchievement: Achievement = {
-        id: this.currentAchievementId++,
-        earnedAt: new Date(),
-        ...achievement,
-      };
-      this.achievements.set(newAchievement.id, newAchievement);
-    });
+    // No seed data - clean development environment
   }
 
   // User methods
@@ -775,62 +692,7 @@ export class DatabaseStorage implements IStorage {
 
   // Seed initial data when needed
   async seedInitialData(): Promise<void> {
-    // Check if data already exists
-    const existingUsers = await db.select().from(users).limit(1);
-    if (existingUsers.length > 0) {
-      return; // Data already seeded
-    }
-
-    // Create demo user
-    const [demoUser] = await db.insert(users).values({
-      username: "arjun_krishnan",
-      email: "arjun@example.com",
-      password: "hashed_password",
-      vyronaCoins: 2450,
-      xp: 12340,
-      level: 12,
-    }).returning();
-
-    // Seed stores
-    const storeData = [
-      { name: "Raja Kirana Store", type: "kirana", address: "T. Nagar, Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 480, reviewCount: 120 },
-      { name: "Trendy Fashion Hub", type: "fashion", address: "T. Nagar, Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 420, reviewCount: 85 },
-      { name: "Express Avenue", type: "mall", address: "Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 450, reviewCount: 2500 },
-      { name: "Phoenix MarketCity", type: "mall", address: "Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 470, reviewCount: 3200 },
-      { name: "Central Library", type: "library", address: "Anna Nagar, Chennai", latitude: "13.0827", longitude: "80.2707", isOpen: true, rating: 460, reviewCount: 890 },
-    ];
-
-    const createdStores = await db.insert(stores).values(storeData).returning();
-
-    // Seed products
-    const productData = [
-      { name: "Gaming Smartphone", description: "High quality Gaming Smartphone", price: 2599900, category: "electronics", module: "space", storeId: createdStores[0].id, imageUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9", metadata: null },
-      { name: "Trendy Jacket", description: "High quality Trendy Jacket", price: 289900, category: "fashion", module: "space", storeId: createdStores[1].id, imageUrl: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105", metadata: null },
-      { name: "The Silent Patient", description: "High quality The Silent Patient", price: 29900, category: "mystery", module: "read", storeId: createdStores[4].id, imageUrl: "https://images.unsplash.com/photo-1544947950-fa07a98d237f", metadata: { author: "Alex Michaelides", rentalPrice: 5000 } },
-      { name: "Gaming Headphones", description: "High quality Gaming Headphones", price: 499900, category: "electronics", module: "mall", storeId: createdStores[2].id, imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e", metadata: null },
-      { name: "Dune Chronicles", description: "High quality Dune Chronicles", price: 49900, category: "sci-fi", module: "read", storeId: createdStores[4].id, imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d", metadata: { author: "Frank Herbert", rentalPrice: 7500 } },
-    ];
-
-    await db.insert(products).values(productData);
-
-    // Seed shopping rooms
-    const roomData = [
-      { name: "Fashion Friday Squad", creatorId: demoUser.id, currentGame: "ludo", totalCart: 1245000, memberCount: 4, isActive: true },
-      { name: "Tech Hunters", creatorId: demoUser.id, currentGame: "trivia", totalCart: 4590000, memberCount: 2, isActive: true },
-    ];
-
-    await db.insert(shoppingRooms).values(roomData);
-
-    // Seed achievements
-    const achievementData = [
-      { userId: demoUser.id, type: "first_purchase" },
-      { userId: demoUser.id, type: "social_shopper" },
-      { userId: demoUser.id, type: "game_master" },
-      { userId: demoUser.id, type: "book_lover" },
-      { userId: demoUser.id, type: "local_explorer" },
-    ];
-
-    await db.insert(achievements).values(achievementData);
+    // No initial seed data - clean development environment
   }
 }
 
