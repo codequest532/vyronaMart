@@ -22,7 +22,8 @@ import {
   Search,
   Edit,
   Trash2,
-  Eye
+  Eye,
+  Upload
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -180,63 +181,96 @@ export default function SellerDashboard() {
   const handleUploadPdfEpub = () => {
     console.log("Opening PDF/EPUB upload");
     
-    // Simulate file selection and upload process
-    const fileName = prompt("Enter filename (e.g., 'marketing-guide.pdf'):");
-    if (!fileName) return;
+    // Create file input element to trigger system file picker
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.pdf,.epub,.mobi';
+    fileInput.multiple = false;
     
-    const fileSize = Math.floor(Math.random() * 40) + 5; // Random size between 5-45 MB
-    const uploadProgress = [20, 40, 60, 80, 100];
-    
-    alert(`File Selected: ${fileName}\nSize: ${fileSize}MB\nFormat: Supported\n\nStarting upload...`);
-    
-    // Simulate upload progress
-    setTimeout(() => {
-      const title = prompt("Enter book title:");
-      const author = prompt("Enter author name:");
-      const price = prompt("Enter sale price (₹):");
-      const rental = prompt("Enter rental price (₹):");
+    fileInput.onchange = (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
       
-      if (title && author && price && rental) {
-        console.log(`Uploaded: ${fileName} - ${title} by ${author}`);
-        alert(`Upload Successful!\n\nFile: ${fileName}\nTitle: ${title}\nAuthor: ${author}\nSale Price: ₹${price}\nRental: ₹${rental}/month\n\nBook is now available in your e-book store!`);
-      }
-    }, 1000);
+      const fileName = file.name;
+      const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+      const fileType = file.type;
+      
+      alert(`File Selected from System:\n\nName: ${fileName}\nSize: ${fileSize}MB\nType: ${fileType}\n\nProcessing file...`);
+      
+      // Simulate upload progress
+      setTimeout(() => {
+        const title = prompt("Enter book title:");
+        const author = prompt("Enter author name:");
+        const price = prompt("Enter sale price (₹):");
+        const rental = prompt("Enter rental price (₹):");
+        
+        if (title && author && price && rental) {
+          console.log(`Uploaded from system: ${fileName} - ${title} by ${author}`);
+          alert(`System Upload Successful!\n\nFile: ${fileName}\nTitle: ${title}\nAuthor: ${author}\nSale Price: ₹${price}\nRental: ₹${rental}/month\n\nBook is now available in your e-book store!`);
+        }
+      }, 1500);
+    };
+    
+    // Trigger the file picker
+    fileInput.click();
   };
 
-  const handleImportFromLibrary = () => {
-    console.log("Importing from physical library");
-    
-    const availableBooks = ["The Psychology of Money", "Atomic Habits", "Think and Grow Rich", "The Lean Startup"];
-    const selectedBook = prompt(`Select book to digitize:\n\n1. ${availableBooks[0]}\n2. ${availableBooks[1]}\n3. ${availableBooks[2]}\n4. ${availableBooks[3]}\n\nEnter number (1-4):`);
-    
-    if (selectedBook && selectedBook >= '1' && selectedBook <= '4') {
-      const bookTitle = availableBooks[parseInt(selectedBook) - 1];
-      const digitalFormat = prompt("Choose digital format:\n\n1. PDF only\n2. EPUB only\n3. Both PDF and EPUB\n\nEnter choice (1-3):");
-      
-      if (digitalFormat) {
-        console.log(`Converting ${bookTitle} to digital format`);
-        alert(`Digital Conversion Started\n\nBook: ${bookTitle}\nFormat: ${digitalFormat === '1' ? 'PDF' : digitalFormat === '2' ? 'EPUB' : 'PDF + EPUB'}\nEstimated time: 2-3 minutes\n\nYou'll be notified when conversion is complete.`);
-      }
-    }
-  };
+
 
   const handleBulkUpload = () => {
     console.log("Opening bulk upload");
     
-    const numFiles = prompt("How many e-books do you want to upload? (1-50):");
-    if (!numFiles || isNaN(parseInt(numFiles))) return;
+    const uploadSource = prompt(`Bulk Upload Options:\n\n1. Local System Files\n2. Google Drive Integration\n3. Dropbox Integration\n\nChoose source (1-3):`);
     
-    const fileCount = parseInt(numFiles);
-    if (fileCount < 1 || fileCount > 50) {
-      alert("Please enter a number between 1 and 50");
-      return;
-    }
-    
-    const uploadMethod = prompt(`Bulk Upload Options:\n\n1. Drag & Drop Files\n2. Select Folder\n3. CSV with Metadata\n\nChoose method (1-3):`);
-    
-    if (uploadMethod) {
-      console.log(`Bulk uploading ${fileCount} files via method ${uploadMethod}`);
-      alert(`Bulk Upload Initiated\n\nFiles: ${fileCount} e-books\nMethod: ${uploadMethod === '1' ? 'Drag & Drop' : uploadMethod === '2' ? 'Folder Selection' : 'CSV Import'}\nEstimated time: ${Math.ceil(fileCount * 0.5)} minutes\n\nUpload queue started - you can monitor progress in the background.`);
+    if (uploadSource === '1') {
+      // Local system bulk upload
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.pdf,.epub,.mobi';
+      fileInput.multiple = true;
+      
+      fileInput.onchange = (event) => {
+        const files = (event.target as HTMLInputElement).files;
+        if (!files || files.length === 0) return;
+        
+        const fileCount = files.length;
+        const totalSize = Array.from(files).reduce((sum, file) => sum + file.size, 0);
+        const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
+        
+        alert(`System Files Selected:\n\nFiles: ${fileCount} e-books\nTotal Size: ${totalSizeMB}MB\n\nProcessing bulk upload...`);
+        
+        setTimeout(() => {
+          alert(`Bulk Upload Complete!\n\n${fileCount} files uploaded successfully\nAll books ready for metadata entry\nEstimated processing time: ${Math.ceil(fileCount * 0.3)} minutes`);
+        }, 2000);
+      };
+      
+      fileInput.click();
+    } else if (uploadSource === '2') {
+      // Google Drive integration
+      alert(`Google Drive Integration\n\nConnecting to Google Drive...\nPlease authorize VyronaRead to access your Drive\n\nRedirecting to Google authentication...`);
+      
+      setTimeout(() => {
+        const folderPath = prompt("Enter Google Drive folder path or paste folder link:");
+        if (folderPath) {
+          const estimatedFiles = Math.floor(Math.random() * 20) + 5;
+          alert(`Google Drive Sync Initiated\n\nFolder: ${folderPath}\nScanning for e-books...\nFound: ${estimatedFiles} compatible files\n\nDownloading and processing files...`);
+          
+          setTimeout(() => {
+            alert(`Google Drive Upload Complete!\n\n${estimatedFiles} files synced successfully\nAll books imported to your store\nMetadata extraction in progress...`);
+          }, 3000);
+        }
+      }, 1500);
+    } else if (uploadSource === '3') {
+      // Dropbox integration
+      alert(`Dropbox Integration\n\nConnecting to Dropbox...\nPlease authorize VyronaRead access\n\nOpening Dropbox authentication...`);
+      
+      setTimeout(() => {
+        const folderPath = prompt("Enter Dropbox folder path:");
+        if (folderPath) {
+          const estimatedFiles = Math.floor(Math.random() * 15) + 3;
+          alert(`Dropbox Sync Started\n\nFolder: ${folderPath}\nScanning for e-books...\nFound: ${estimatedFiles} files\n\nSyncing to VyronaRead...`);
+        }
+      }, 1500);
     }
   };
 
@@ -1509,12 +1543,8 @@ export default function SellerDashboard() {
                             <Plus className="h-4 w-4 mr-2" />
                             Upload PDF/EPUB
                           </Button>
-                          <Button variant="outline" className="w-full" onClick={handleImportFromLibrary}>
-                            <BookOpen className="h-4 w-4 mr-2" />
-                            Import from Library
-                          </Button>
                           <Button variant="outline" className="w-full" onClick={handleBulkUpload}>
-                            <Eye className="h-4 w-4 mr-2" />
+                            <Upload className="h-4 w-4 mr-2" />
                             Bulk Upload
                           </Button>
                         </div>
