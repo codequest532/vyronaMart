@@ -91,6 +91,10 @@ export default function Home() {
     queryKey: ["/api/books"],
   });
 
+  const { data: libraryRequests = [] } = useQuery({
+    queryKey: ["/api/admin/library-requests"],
+  });
+
   const { data: shoppingRooms = [] } = useQuery({
     queryKey: ["/api/shopping-rooms"],
   });
@@ -828,116 +832,151 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Featured Books */}
+            {/* Integrated Libraries */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Featured Books</h3>
+                  <h3 className="text-lg font-bold text-gray-900">Integrated Libraries</h3>
                   <div className="flex space-x-2">
-                    <Badge variant="outline" className="text-indigo-700">Buy</Badge>
-                    <Badge variant="outline" className="text-purple-700">Rent</Badge>
-                    <Badge variant="outline" className="text-green-700">Borrow</Badge>
+                    <Badge variant="outline" className="text-green-700">Borrow from Library</Badge>
+                    <Badge variant="outline" className="text-blue-700">Digital Reading</Badge>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Sample books for VyronaRead testing */}
-                  {[
-                    {
-                      id: 1,
-                      name: "The Art of Programming",
-                      price: 2999,
-                      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
-                      metadata: { author: "Robert Martin", type: "physical", rentalPrice: 599 }
-                    },
-                    {
-                      id: 2,
-                      name: "Digital Marketing Mastery",
-                      price: 1999,
-                      imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400",
-                      metadata: { author: "Sarah Johnson", type: "physical", rentalPrice: 399 }
-                    },
-                    {
-                      id: 3,
-                      name: "Modern Web Development",
-                      price: 1499,
-                      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
-                      metadata: { author: "Alex Thompson", type: "digital" }
-                    },
-                    {
-                      id: 4,
-                      name: "Data Science Fundamentals",
-                      price: 2499,
-                      imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400",
-                      metadata: { author: "Dr. Emily Chen", type: "digital" }
-                    }
-                  ].map((book) => (
-                    <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                      <div className="relative">
-                        <img 
-                          src={book.imageUrl} 
-                          alt={book.name}
-                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                        />
-                        <div className="absolute top-2 right-2">
-                          <Badge variant="secondary" className="bg-white/90 text-indigo-700">
-                            {book.metadata?.type || "Physical"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-sm mb-1">{book.name}</h4>
-                        <p className="text-xs text-gray-500 mb-3">{book.metadata?.author}</p>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="text-sm font-bold text-indigo-600">₹{(book.price / 100).toLocaleString()}</div>
-                          {book.metadata?.rentalPrice && (
-                            <div className="text-xs text-purple-600">₹{(book.metadata.rentalPrice / 100)}/week</div>
-                          )}
-                        </div>
-                        <div className="flex gap-1 mb-2">
-                          <Button 
-                            size="sm" 
-                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleBookPurchase(book.id, 'buy');
-                            }}
-                          >
-                            Buy
+
+                {/* Library Integration Content */}
+                {Array.isArray(libraryRequests) && libraryRequests.filter((request: any) => request.status === 'approved').length > 0 ? (
+                  <div className="space-y-6">
+                    {libraryRequests.filter((request: any) => request.status === 'approved').map((library: any) => (
+                      <div key={library.id} className="border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900">{library.libraryName}</h4>
+                            <p className="text-sm text-gray-600">{library.address}</p>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <Badge variant="secondary">
+                                <BookOpen className="h-3 w-3 mr-1" />
+                                {library.totalBooks || 0} Books
+                              </Badge>
+                              <Badge variant="outline" className="text-green-600">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Verified Library
+                              </Badge>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            Visit Library
                           </Button>
-                          {book.metadata?.rentalPrice && (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="flex-1 text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBookPurchase(book.id, 'rent');
-                              }}
-                            >
-                              Rent
-                            </Button>
-                          )}
-                          {book.metadata?.type === "digital" && (
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="px-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleReadBook(book);
-                              }}
-                            >
-                              <BookOpen className="h-3 w-3" />
-                            </Button>
-                          )}
                         </div>
-                        <Badge variant="secondary" className="w-full text-center text-green-600 bg-green-50">
-                          +{Math.floor(book.price / 10000)} coins on purchase
-                        </Badge>
+
+                        {/* Library Books */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                          {[
+                            {
+                              id: `${library.id}-1`,
+                              name: "Programming Fundamentals",
+                              author: "John Smith",
+                              available: true,
+                              type: "physical",
+                              imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
+                            },
+                            {
+                              id: `${library.id}-2`,
+                              name: "Data Structures Guide",
+                              author: "Jane Doe",
+                              available: true,
+                              type: "physical",
+                              imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
+                            },
+                            {
+                              id: `${library.id}-3`,
+                              name: "Web Development Basics",
+                              author: "Mike Johnson",
+                              available: false,
+                              type: "digital",
+                              imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400"
+                            }
+                          ].map((book) => (
+                            <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                              <div className="relative">
+                                <img 
+                                  src={book.imageUrl} 
+                                  alt={book.name}
+                                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                                />
+                                <div className="absolute top-2 right-2">
+                                  <Badge variant={book.available ? "default" : "destructive"} className="text-xs">
+                                    {book.available ? "Available" : "Borrowed"}
+                                  </Badge>
+                                </div>
+                                <div className="absolute top-2 left-2">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {book.type}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="p-4">
+                                <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">{book.name}</h4>
+                                <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="text-sm text-gray-500">
+                                    From: {library.libraryName}
+                                  </div>
+                                </div>
+                                <div className="flex space-x-2">
+                                  {book.available ? (
+                                    <>
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => handleLibraryBorrow(book.id, library.id)}
+                                        className="flex-1"
+                                      >
+                                        <BookOpen className="h-4 w-4 mr-1" />
+                                        Borrow
+                                      </Button>
+                                      {book.type === "digital" && (
+                                        <Button 
+                                          size="sm" 
+                                          variant="outline"
+                                          onClick={() => setActiveTab("read-book")}
+                                          className="flex-1"
+                                        >
+                                          <Play className="h-4 w-4 mr-1" />
+                                          Read
+                                        </Button>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline"
+                                      disabled
+                                      className="flex-1"
+                                    >
+                                      Currently Borrowed
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">No Libraries Integrated Yet</h4>
+                    <p className="text-gray-600 mb-4">
+                      Libraries need to submit integration requests through the admin panel to appear here.
+                    </p>
+                    <Button variant="outline" onClick={() => setActiveTab("home")}>
+                      <MapPin className="h-4 w-4 mr-2" />
+                      Find Local Libraries
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
