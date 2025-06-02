@@ -872,7 +872,7 @@ export default function Landing() {
                 ))}
               </div>
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600 mb-3">Join 500+ premium mall brands already on VyronaMart</p>
+                <p className="text-sm text-gray-600 mb-3">Think Premium brands Think VyronaMall</p>
                 <Button className="bg-purple-600 hover:bg-purple-700 text-white">
                   Partner with MallConnect
                 </Button>
