@@ -201,6 +201,121 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            {/* Complete Shopping Universe */}
+            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+              <CardContent className="p-6">
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">🛒 VyronaHub - Complete Shopping Universe</h3>
+                  <p className="text-gray-600">Your one-stop destination for everything awesome - gadgets to groceries!</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[
+                    {
+                      icon: "🔌",
+                      title: "Electronics",
+                      items: ["Smartphones & Accessories", "Laptops & Tablets", "Smart TVs & Monitors", "Wearables & Smart Devices"],
+                      color: "blue"
+                    },
+                    {
+                      icon: "👗",
+                      title: "Fashion & Apparels",
+                      items: ["Men's, Women's & Kids' Wear", "Footwear & Accessories", "Ethnic & Western Clothing", "Bags, Wallets & Belts"],
+                      color: "pink"
+                    },
+                    {
+                      icon: "🏠",
+                      title: "Home & Kitchen",
+                      items: ["Kitchen Appliances & Tools", "Storage & Organization", "Furnishings & Decor", "Lighting & Cleaning"],
+                      color: "green"
+                    },
+                    {
+                      icon: "🧸",
+                      title: "Kids Corner",
+                      items: ["Toys, Games & Puzzles", "School Supplies & Stationery", "Baby Care Products", "Learning & Educational Kits"],
+                      color: "yellow"
+                    },
+                    {
+                      icon: "🥬",
+                      title: "Organic Store",
+                      items: ["Organic Fruits & Vegetables", "Herbal Juices & Superfoods", "Ayurvedic & Natural Products", "Organic Skincare & Wellness"],
+                      color: "emerald"
+                    },
+                    {
+                      icon: "🛒",
+                      title: "Groceries",
+                      items: ["Daily Essentials (Atta, Rice, Pulses)", "Oils, Spices & Condiments", "Beverages & Snacks", "Dairy, Bakery & Frozen Foods"],
+                      color: "orange"
+                    },
+                    {
+                      icon: "🏡",
+                      title: "Home Automation",
+                      items: ["Smart Plugs & Switches", "Voice Assistants (Alexa, Google)", "Smart Lights & Sensors", "Home Security & Surveillance"],
+                      color: "indigo"
+                    },
+                    {
+                      icon: "🧾",
+                      title: "Office & Stationery",
+                      items: ["Office Chairs & Desks", "Files, Folders & Organizers", "Pens, Notebooks & Writing Tools", "Printers & Computer Accessories"],
+                      color: "gray"
+                    },
+                    {
+                      icon: "🧘",
+                      title: "Health & Wellness",
+                      items: ["Fitness Equipment (Yoga Mats)", "Health Monitoring Devices", "Nutrition & Supplements", "Skincare & Personal Hygiene"],
+                      color: "teal"
+                    },
+                    {
+                      icon: "🐶",
+                      title: "Pet Care",
+                      items: ["Pet Food & Treats", "Grooming Essentials", "Beds, Toys & Accessories", "Leashes, Collars & Carriers"],
+                      color: "amber"
+                    }
+                  ].map((category, index) => (
+                    <Card key={index} className={`bg-${category.color}-50 border-${category.color}-200 hover:shadow-lg transition-all duration-300 cursor-pointer group`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <div className="text-2xl">{category.icon}</div>
+                          <h4 className="font-bold text-gray-900">{category.title}</h4>
+                        </div>
+                        <ul className="space-y-1">
+                          {category.items.map((item, itemIndex) => (
+                            <li key={itemIndex} className="text-sm text-gray-600 flex items-start">
+                              <span className="mr-2">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-3 flex items-center justify-between">
+                          <Badge variant="secondary" className={`text-${category.color}-600 bg-${category.color}-50`}>
+                            Shop Now
+                          </Badge>
+                          <span className="text-xs text-gray-500 group-hover:text-gray-700">
+                            View All →
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-2xl">🎯</div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">Shop Smart, Earn More!</h4>
+                        <p className="text-sm text-gray-600">Get VyronaCoins with every purchase and unlock exclusive rewards</p>
+                      </div>
+                    </div>
+                    <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                      Start Shopping
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Game Center */}
             <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-orange-200">
               <CardContent className="p-6">
