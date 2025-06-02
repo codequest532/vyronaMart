@@ -553,6 +553,48 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center">
+                        <Settings className="h-6 w-6 text-teal-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">VyronaSpace</h3>
+                        <p className="text-sm text-gray-500">Virtual spaces & experiences</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <MessageSquare className="h-6 w-6 text-yellow-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">VyronaRead</h3>
+                        <p className="text-sm text-gray-500">Content & learning hub</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+                        <Store className="h-6 w-6 text-indigo-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">VyronaMallConnect</h3>
+                        <p className="text-sm text-gray-500">Mall integration system</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
@@ -575,22 +617,83 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Button variant="outline" className="h-20 flex-col">
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("users")}>
                       <Users className="h-6 w-6 mb-2" />
                       <span className="text-xs">Manage Users</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col">
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("products")}>
                       <Package className="h-6 w-6 mb-2" />
-                      <span className="text-xs">Add Product</span>
+                      <span className="text-xs">Product Control</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col">
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("sellers")}>
                       <Store className="h-6 w-6 mb-2" />
-                      <span className="text-xs">Approve Sellers</span>
+                      <span className="text-xs">Seller Management</span>
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("analytics")}>
+                      <BarChart3 className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Analytics</span>
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/vyronahub')}>
+                      <Package className="h-6 w-6 mb-2" />
+                      <span className="text-xs">VyronaHub</span>
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/social')}>
+                      <Users className="h-6 w-6 mb-2" />
+                      <span className="text-xs">VyronaSocial</span>
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/instashop')}>
+                      <Store className="h-6 w-6 mb-2" />
+                      <span className="text-xs">InstaShop</span>
                     </Button>
                     <Button variant="outline" className="h-20 flex-col">
-                      <BarChart3 className="h-6 w-6 mb-2" />
-                      <span className="text-xs">View Reports</span>
+                      <Settings className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Platform Settings</span>
                     </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>VyronaMart Modules Overview</CardTitle>
+                  <CardDescription>Complete access to all platform features and modules</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Core Modules</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setLocation('/vyronahub')}>
+                          <Package className="h-5 w-5 text-blue-600" />
+                          <span className="text-sm">VyronaHub - Product Catalog</span>
+                        </div>
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setLocation('/social')}>
+                          <Users className="h-5 w-5 text-purple-600" />
+                          <span className="text-sm">VyronaSocial - Social Shopping</span>
+                        </div>
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                          <Settings className="h-5 w-5 text-teal-600" />
+                          <span className="text-sm">VyronaSpace - Virtual Experiences</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Extended Features</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                          <MessageSquare className="h-5 w-5 text-yellow-600" />
+                          <span className="text-sm">VyronaRead - Content Hub</span>
+                        </div>
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                          <Store className="h-5 w-5 text-indigo-600" />
+                          <span className="text-sm">VyronaMallConnect - Mall Integration</span>
+                        </div>
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setLocation('/instashop')}>
+                          <Store className="h-5 w-5 text-pink-600" />
+                          <span className="text-sm">VyronaInstaShop - Instagram Integration</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
