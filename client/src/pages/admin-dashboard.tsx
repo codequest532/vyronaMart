@@ -700,7 +700,351 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Other tabs content would go here */}
+          {activeTab === "orders" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Order Management</h2>
+                  <p className="text-gray-600 dark:text-gray-300">Monitor and manage all customer orders</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Pending Orders
+                  </Button>
+                  <Button>
+                    Export Data
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                        <p className="text-2xl font-bold">{orders?.length || 0}</p>
+                      </div>
+                      <ShoppingCart className="h-8 w-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Pending</p>
+                        <p className="text-2xl font-bold text-orange-600">{orders?.filter((order: any) => order.status === 'pending').length || 0}</p>
+                      </div>
+                      <AlertTriangle className="h-8 w-8 text-orange-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Completed</p>
+                        <p className="text-2xl font-bold text-green-600">{orders?.filter((order: any) => order.status === 'completed').length || 0}</p>
+                      </div>
+                      <Check className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Revenue</p>
+                        <p className="text-2xl font-bold text-green-600">₹{orders?.reduce((sum: number, order: any) => sum + order.totalAmount, 0)?.toLocaleString() || 0}</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Orders</CardTitle>
+                  <CardDescription>Latest customer orders across all modules</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!orders || orders.length === 0 ? (
+                    <div className="text-center py-12">
+                      <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No Orders Yet</h3>
+                      <p className="text-gray-500 dark:text-gray-400">Orders will appear here once customers start purchasing</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders?.slice(0, 10).map((order: any) => (
+                        <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-sm transition-shadow">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                              <ShoppingCart className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Order #{order.id}</p>
+                              <p className="text-sm text-gray-500">Module: {order.module}</p>
+                              <p className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className="font-semibold">₹{order.totalAmount.toLocaleString()}</p>
+                              <Badge variant={order.status === 'completed' ? 'default' : order.status === 'pending' ? 'secondary' : 'destructive'}>
+                                {order.status}
+                              </Badge>
+                            </div>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "support" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Support & Issues</h2>
+                  <p className="text-gray-600 dark:text-gray-300">Manage customer support and platform issues</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline">
+                    <Bell className="h-4 w-4 mr-2" />
+                    New Tickets
+                  </Button>
+                  <Button>
+                    Create Ticket
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      Critical Issues
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="font-medium text-red-800">Payment Gateway Error</p>
+                        <p className="text-sm text-red-600">Multiple users reporting payment failures</p>
+                        <p className="text-xs text-red-500 mt-1">2 hours ago</p>
+                      </div>
+                      <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <p className="font-medium text-orange-800">Seller Account Suspension</p>
+                        <p className="text-sm text-orange-600">Policy violation reported</p>
+                        <p className="text-xs text-orange-500 mt-1">4 hours ago</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-blue-600" />
+                      Customer Support
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="font-medium text-blue-800">Order Tracking Issue</p>
+                        <p className="text-sm text-blue-600">Customer unable to track order #1234</p>
+                        <p className="text-xs text-blue-500 mt-1">30 minutes ago</p>
+                      </div>
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="font-medium text-green-800">Refund Request</p>
+                        <p className="text-sm text-green-600">Product return approved</p>
+                        <p className="text-xs text-green-500 mt-1">1 hour ago</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings className="h-5 w-5 text-purple-600" />
+                      Platform Maintenance
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                        <p className="font-medium text-purple-800">Database Optimization</p>
+                        <p className="text-sm text-purple-600">Scheduled for tonight 2 AM</p>
+                        <p className="text-xs text-purple-500 mt-1">Maintenance window</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <p className="font-medium text-gray-800">API Rate Limiting</p>
+                        <p className="text-sm text-gray-600">Instagram API limits updated</p>
+                        <p className="text-xs text-gray-500 mt-1">Configuration change</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Support Activity</CardTitle>
+                  <CardDescription>Latest customer interactions and issue resolutions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 p-3 border rounded-lg">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <Check className="h-4 w-4 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">Ticket #SP-001 Resolved</p>
+                        <p className="text-sm text-gray-600">Customer login issue fixed by resetting password</p>
+                      </div>
+                      <span className="text-xs text-gray-500">5 minutes ago</span>
+                    </div>
+                    <div className="flex items-center gap-4 p-3 border rounded-lg">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <MessageSquare className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">New Support Request</p>
+                        <p className="text-sm text-gray-600">Seller requesting help with product upload</p>
+                      </div>
+                      <span className="text-xs text-gray-500">15 minutes ago</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "settings" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Platform Settings</h2>
+                <p className="text-gray-600 dark:text-gray-300">Configure platform operations and policies</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Payment Configuration</CardTitle>
+                    <CardDescription>Manage payment gateways and commission rates</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Platform Commission</span>
+                      <span className="font-bold">15%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Payment Gateway</span>
+                      <Badge variant="default">Razorpay Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Minimum Order</span>
+                      <span className="font-bold">₹100</span>
+                    </div>
+                    <Button variant="outline" className="w-full">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Configure Payments
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>User Management</CardTitle>
+                    <CardDescription>Configure user permissions and access</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Auto-approve Sellers</span>
+                      <Badge variant="secondary">Disabled</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Email Verification</span>
+                      <Badge variant="default">Required</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Max Login Attempts</span>
+                      <span className="font-bold">5</span>
+                    </div>
+                    <Button variant="outline" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Manage Permissions
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Platform Features</CardTitle>
+                    <CardDescription>Enable or disable platform modules</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">VyronaSocial</span>
+                      <Badge variant="default">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">VyronaInstaShop</span>
+                      <Badge variant="default">Active</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">VyronaSpace</span>
+                      <Badge variant="secondary">Beta</Badge>
+                    </div>
+                    <Button variant="outline" className="w-full">
+                      <Package className="h-4 w-4 mr-2" />
+                      Module Settings
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Gamification</CardTitle>
+                    <CardDescription>Configure rewards and achievements</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">VyronaCoins per ₹100</span>
+                      <span className="font-bold">10 coins</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">XP for Purchase</span>
+                      <span className="font-bold">50 XP</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Daily Login Bonus</span>
+                      <span className="font-bold">5 coins</span>
+                    </div>
+                    <Button variant="outline" className="w-full">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Reward Settings
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
           {activeTab === "analytics" && (
             <div className="space-y-6">
               <div>
