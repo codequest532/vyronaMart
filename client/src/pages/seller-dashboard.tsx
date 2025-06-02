@@ -65,30 +65,57 @@ export default function SellerDashboard() {
     description: ""
   });
 
+  // Mutation for creating library integration requests
+  const createLibraryRequestMutation = useMutation({
+    mutationFn: async (libraryData: any) => {
+      return await apiRequest("/api/library-integration-requests", {
+        method: "POST",
+        body: JSON.stringify(libraryData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Library Integration Request Submitted",
+        description: "Your request has been sent to admin for review.",
+      });
+      setShowAddLibraryDialog(false);
+      setNewLibrary({
+        name: "",
+        type: "",
+        address: "",
+        contact: "",
+        phone: "",
+        email: "",
+        description: ""
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to submit library integration request.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddLibrary = () => {
     setShowAddLibraryDialog(true);
   };
 
   const handleSubmitLibrary = () => {
     if (!newLibrary.name || !newLibrary.type || !newLibrary.address || !newLibrary.contact) {
-      alert("Please fill in all required fields");
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
 
-    console.log(`Adding new library: ${newLibrary.name}`);
-    alert(`Library Integration Request Sent!\n\nLibrary: ${newLibrary.name}\nType: ${newLibrary.type}\nAddress: ${newLibrary.address}\nContact: ${newLibrary.contact}\n\nIntegration will be processed within 24 hours.`);
-    
-    // Reset form and close dialog
-    setNewLibrary({
-      name: "",
-      type: "",
-      address: "",
-      contact: "",
-      phone: "",
-      email: "",
-      description: ""
-    });
-    setShowAddLibraryDialog(false);
+    createLibraryRequestMutation.mutate(newLibrary);
   };
 
   const handleSearchLibraries = () => {

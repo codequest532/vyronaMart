@@ -150,6 +150,14 @@ export class MemStorage implements IStorage {
   private currentOrderId = 1;
   private currentAchievementId = 1;
   private currentGameScoreId = 1;
+  private libraryIntegrationRequests: Map<number, any> = new Map();
+  private physicalBooks: Map<number, any> = new Map();
+  private eBooks: Map<number, any> = new Map();
+  private bookLoans: Map<number, any> = new Map();
+  private currentLibraryRequestId = 1;
+  private currentPhysicalBookId = 1;
+  private currentEBookId = 1;
+  private currentBookLoanId = 1;
 
   constructor() {
     this.seedData();
@@ -733,6 +741,119 @@ export class DatabaseStorage implements IStorage {
       .update(notifications)
       .set({ isRead: true })
       .where(eq(notifications.id, id));
+  }
+
+  // VyronaRead Books - Library Integration
+  async createLibraryIntegrationRequest(request: any): Promise<any> {
+    const [newRequest] = await db
+      .insert(libraryIntegrationRequests)
+      .values({
+        ...request,
+        status: "pending"
+      })
+      .returning();
+    return newRequest;
+  }
+
+  async getLibraryIntegrationRequests(): Promise<any[]> {
+    return await db.select().from(libraryIntegrationRequests);
+  }
+
+  async updateLibraryIntegrationRequestStatus(id: number, status: string, processedBy: number, adminNotes?: string): Promise<any | null> {
+    const [updatedRequest] = await db
+      .update(libraryIntegrationRequests)
+      .set({
+        status,
+        processedBy,
+        processedAt: new Date(),
+        adminNotes: adminNotes || null
+      })
+      .where(eq(libraryIntegrationRequests.id, id))
+      .returning();
+    return updatedRequest || null;
+  }
+
+  async createPhysicalBook(book: any): Promise<any> {
+    const [newBook] = await db
+      .insert(physicalBooks)
+      .values(book)
+      .returning();
+    return newBook;
+  }
+
+  async getPhysicalBooks(libraryId?: number): Promise<any[]> {
+    if (libraryId) {
+      return await db.select().from(physicalBooks).where(eq(physicalBooks.libraryId, libraryId));
+    }
+    return await db.select().from(physicalBooks);
+  }
+
+  async updatePhysicalBook(id: number, updates: any): Promise<any | null> {
+    const [updatedBook] = await db
+      .update(physicalBooks)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(physicalBooks.id, id))
+      .returning();
+    return updatedBook || null;
+  }
+
+  async createEBook(ebook: any): Promise<any> {
+    const [newEBook] = await db
+      .insert(eBooks)
+      .values({ ...ebook, downloads: 0 })
+      .returning();
+    return newEBook;
+  }
+
+  async getEBooks(sellerId?: number): Promise<any[]> {
+    if (sellerId) {
+      return await db.select().from(eBooks).where(eq(eBooks.sellerId, sellerId));
+    }
+    return await db.select().from(eBooks);
+  }
+
+  async updateEBook(id: number, updates: any): Promise<any | null> {
+    const [updatedEBook] = await db
+      .update(eBooks)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(eBooks.id, id))
+      .returning();
+    return updatedEBook || null;
+  }
+
+  async createBookLoan(loan: any): Promise<any> {
+    const [newLoan] = await db
+      .insert(bookLoans)
+      .values({
+        ...loan,
+        loanDate: new Date(),
+        renewalCount: 0
+      })
+      .returning();
+    return newLoan;
+  }
+
+  async getBookLoans(libraryId?: number, borrowerId?: number): Promise<any[]> {
+    let query = db.select().from(bookLoans);
+    
+    if (libraryId && borrowerId) {
+      return await query.where(and(eq(bookLoans.libraryId, libraryId), eq(bookLoans.borrowerId, borrowerId)));
+    } else if (libraryId) {
+      return await query.where(eq(bookLoans.libraryId, libraryId));
+    } else if (borrowerId) {
+      return await query.where(eq(bookLoans.borrowerId, borrowerId));
+    }
+    
+    return await query;
+  }
+
+  async returnBook(loanId: number): Promise<any | null> {
+    const [returnedLoan] = await db
+      .update(bookLoans)
+      .set({ returnDate: new Date() })
+      .where(eq(bookLoans.id, loanId))
+      .returning();
+    return returnedLoan || null;
   }
 
   // Seed initial data when needed
