@@ -93,6 +93,66 @@ export const gameScores = pgTable("game_scores", {
   playedAt: timestamp("played_at").defaultNow(),
 });
 
+// VyronaSocial Tables
+export const shoppingGroups = pgTable("shopping_groups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  creatorId: integer("creator_id").notNull(),
+  isActive: boolean("is_active").default(true),
+  maxMembers: integer("max_members").default(10),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const groupMembers = pgTable("group_members", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").notNull().default("member"), // 'creator', 'admin', 'member'
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+export const groupWishlists = pgTable("group_wishlists", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  productId: integer("product_id").notNull(),
+  addedBy: integer("added_by").notNull(),
+  priority: integer("priority").default(1), // 1=low, 2=medium, 3=high
+  notes: text("notes"),
+  addedAt: timestamp("added_at").defaultNow(),
+});
+
+export const groupMessages = pgTable("group_messages", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  userId: integer("user_id").notNull(),
+  message: text("message").notNull(),
+  messageType: text("message_type").default("text"), // 'text', 'product_share', 'system'
+  metadata: jsonb("metadata"), // for product shares, system messages
+  sentAt: timestamp("sent_at").defaultNow(),
+});
+
+export const productShares = pgTable("product_shares", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  sharedBy: integer("shared_by").notNull(),
+  groupId: integer("group_id"),
+  shareType: text("share_type").notNull(), // 'group', 'direct', 'public'
+  message: text("message"),
+  sharedAt: timestamp("shared_at").defaultNow(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // 'group_invite', 'wishlist_add', 'product_share', 'message'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  metadata: jsonb("metadata"), // groupId, productId, etc.
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -136,6 +196,37 @@ export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).
   createdAt: true,
 });
 
+// VyronaSocial Insert Schemas
+export const insertShoppingGroupSchema = createInsertSchema(shoppingGroups).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGroupMemberSchema = createInsertSchema(groupMembers).omit({
+  id: true,
+  joinedAt: true,
+});
+
+export const insertGroupWishlistSchema = createInsertSchema(groupWishlists).omit({
+  id: true,
+  addedAt: true,
+});
+
+export const insertGroupMessageSchema = createInsertSchema(groupMessages).omit({
+  id: true,
+  sentAt: true,
+});
+
+export const insertProductShareSchema = createInsertSchema(productShares).omit({
+  id: true,
+  sharedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -155,3 +246,17 @@ export type GameScore = typeof gameScores.$inferSelect;
 export type InsertGameScore = z.infer<typeof insertGameScoreSchema>;
 export type OtpVerification = typeof otpVerifications.$inferSelect;
 export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
+
+// VyronaSocial Types
+export type ShoppingGroup = typeof shoppingGroups.$inferSelect;
+export type InsertShoppingGroup = z.infer<typeof insertShoppingGroupSchema>;
+export type GroupMember = typeof groupMembers.$inferSelect;
+export type InsertGroupMember = z.infer<typeof insertGroupMemberSchema>;
+export type GroupWishlist = typeof groupWishlists.$inferSelect;
+export type InsertGroupWishlist = z.infer<typeof insertGroupWishlistSchema>;
+export type GroupMessage = typeof groupMessages.$inferSelect;
+export type InsertGroupMessage = z.infer<typeof insertGroupMessageSchema>;
+export type ProductShare = typeof productShares.$inferSelect;
+export type InsertProductShare = z.infer<typeof insertProductShareSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;

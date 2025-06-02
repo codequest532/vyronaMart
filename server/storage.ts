@@ -1,10 +1,14 @@
 import { 
   users, products, stores, shoppingRooms, cartItems, orders, achievements, gameScores, otpVerifications,
+  shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
   type Achievement, type InsertAchievement, type GameScore, type InsertGameScore,
-  type OtpVerification, type InsertOtpVerification
+  type OtpVerification, type InsertOtpVerification,
+  type ShoppingGroup, type InsertShoppingGroup, type GroupMember, type InsertGroupMember,
+  type GroupWishlist, type InsertGroupWishlist, type GroupMessage, type InsertGroupMessage,
+  type ProductShare, type InsertProductShare, type Notification, type InsertNotification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNull } from "drizzle-orm";
@@ -54,6 +58,32 @@ export interface IStorage {
   // Game Scores
   addGameScore(score: InsertGameScore): Promise<GameScore>;
   getUserGameScores(userId: number): Promise<GameScore[]>;
+
+  // VyronaSocial - Shopping Groups
+  createShoppingGroup(group: InsertShoppingGroup): Promise<ShoppingGroup>;
+  getShoppingGroups(userId: number): Promise<ShoppingGroup[]>;
+  getShoppingGroup(id: number): Promise<ShoppingGroup | undefined>;
+  addGroupMember(member: InsertGroupMember): Promise<GroupMember>;
+  getGroupMembers(groupId: number): Promise<GroupMember[]>;
+  removeGroupMember(groupId: number, userId: number): Promise<boolean>;
+
+  // VyronaSocial - Group Wishlists
+  addToGroupWishlist(wishlist: InsertGroupWishlist): Promise<GroupWishlist>;
+  getGroupWishlist(groupId: number): Promise<GroupWishlist[]>;
+  removeFromGroupWishlist(id: number): Promise<boolean>;
+
+  // VyronaSocial - Group Messages
+  addGroupMessage(message: InsertGroupMessage): Promise<GroupMessage>;
+  getGroupMessages(groupId: number): Promise<GroupMessage[]>;
+
+  // VyronaSocial - Product Shares
+  shareProduct(share: InsertProductShare): Promise<ProductShare>;
+  getProductShares(userId: number): Promise<ProductShare[]>;
+
+  // VyronaSocial - Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: number): Promise<Notification[]>;
+  markNotificationAsRead(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
