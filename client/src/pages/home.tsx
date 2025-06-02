@@ -907,26 +907,10 @@ export default function Home() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-gray-900">Browse Books</h3>
-                  <div className="flex items-center space-x-3">
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filter by Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="romance">Romance</SelectItem>
-                        <SelectItem value="sci-fi">Sci-Fi</SelectItem>
-                        <SelectItem value="mystery">Mystery</SelectItem>
-                        <SelectItem value="education">Education</SelectItem>
-                        <SelectItem value="fantasy">Fantasy</SelectItem>
-                        <SelectItem value="biography">Biography</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <div className="flex space-x-2">
-                      <Badge variant="outline" className="text-indigo-700">Purchase</Badge>
-                      <Badge variant="outline" className="text-purple-700">Rent</Badge>
-                      <Badge variant="outline" className="text-green-700">Digital</Badge>
-                    </div>
+                  <div className="flex space-x-2">
+                    <Badge variant="outline" className="text-indigo-700">Purchase</Badge>
+                    <Badge variant="outline" className="text-purple-700">Rent</Badge>
+                    <Badge variant="outline" className="text-green-700">Digital</Badge>
                   </div>
                 </div>
 
@@ -1052,7 +1036,7 @@ export default function Home() {
                       category: "biography",
                       imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
                     }
-                  ].filter(book => selectedCategory === "all" || book.category === selectedCategory).map((book) => (
+                  ].map((book) => (
                     <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
                       <div className="relative">
                         <img 
