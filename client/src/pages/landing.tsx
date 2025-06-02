@@ -63,7 +63,7 @@ export default function Landing() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      const response = await fetch("/api/login", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -74,9 +74,10 @@ export default function Landing() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setShowAuthModal(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Store user data in query cache to maintain auth state
+      queryClient.setQueryData(["/api/current-user"], data.user);
       toast({
         title: "Success",
         description: "Logged in successfully!",
@@ -99,7 +100,7 @@ export default function Landing() {
       confirmPassword: string;
       mobile: string;
     }) => {
-      const response = await fetch("/api/signup", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -110,12 +111,15 @@ export default function Landing() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Store user data in query cache after successful signup
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      setShowAuthModal(false);
       toast({
         title: "Account Created",
-        description: "Please check your email for verification instructions.",
+        description: "Welcome to VyronaMart! You've received 500 welcome coins.",
       });
-      setAuthMode("login");
+      setLocation("/");
     },
     onError: (error: Error) => {
       toast({
@@ -128,7 +132,7 @@ export default function Landing() {
 
   const forgotPasswordMutation = useMutation({
     mutationFn: async (data: { email: string }) => {
-      const response = await fetch("/api/forgot-password", {
+      const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -157,7 +161,7 @@ export default function Landing() {
 
   const verifyOtpMutation = useMutation({
     mutationFn: async (data: { email: string; otp: string }) => {
-      const response = await fetch("/api/verify-reset-otp", {
+      const response = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -186,7 +190,7 @@ export default function Landing() {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (data: { email: string; password: string; confirmPassword: string }) => {
-      const response = await fetch("/api/reset-password", {
+      const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
