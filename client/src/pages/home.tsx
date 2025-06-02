@@ -862,151 +862,287 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Integrated Libraries */}
+            {/* Browse Books - Purchase/Rent */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Integrated Libraries</h3>
+                  <h3 className="text-lg font-bold text-gray-900">Browse Books</h3>
                   <div className="flex space-x-2">
-                    <Badge variant="outline" className="text-green-700">Borrow from Library</Badge>
-                    <Badge variant="outline" className="text-blue-700">Digital Reading</Badge>
+                    <Badge variant="outline" className="text-indigo-700">Purchase</Badge>
+                    <Badge variant="outline" className="text-purple-700">Rent</Badge>
+                    <Badge variant="outline" className="text-green-700">Digital</Badge>
                   </div>
                 </div>
 
-                {/* Library Integration Content */}
-                {Array.isArray(libraryRequests) && libraryRequests.filter((request: any) => request.status === 'approved').length > 0 ? (
-                  <div className="space-y-6">
-                    {libraryRequests.filter((request: any) => request.status === 'approved').map((library: any) => (
-                      <div key={library.id} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900">{library.libraryName}</h4>
-                            <p className="text-sm text-gray-600">{library.address}</p>
-                            <div className="flex items-center space-x-2 mt-2">
-                              <Badge variant="secondary">
-                                <BookOpen className="h-3 w-3 mr-1" />
-                                {library.totalBooks || 0} Books
-                              </Badge>
-                              <Badge variant="outline" className="text-green-600">
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Verified Library
-                              </Badge>
-                            </div>
-                          </div>
-                          <Button size="sm" variant="outline">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            Visit Library
-                          </Button>
-                        </div>
-
-                        {/* Library Books */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                          {[
-                            {
-                              id: `${library.id}-1`,
-                              name: "Programming Fundamentals",
-                              author: "John Smith",
-                              available: true,
-                              type: "physical",
-                              imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
-                            },
-                            {
-                              id: `${library.id}-2`,
-                              name: "Data Structures Guide",
-                              author: "Jane Doe",
-                              available: true,
-                              type: "physical",
-                              imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
-                            },
-                            {
-                              id: `${library.id}-3`,
-                              name: "Web Development Basics",
-                              author: "Mike Johnson",
-                              available: false,
-                              type: "digital",
-                              imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400"
-                            }
-                          ].map((book) => (
-                            <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
-                              <div className="relative">
-                                <img 
-                                  src={book.imageUrl} 
-                                  alt={book.name}
-                                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                                />
-                                <div className="absolute top-2 right-2">
-                                  <Badge variant={book.available ? "default" : "destructive"} className="text-xs">
-                                    {book.available ? "Available" : "Borrowed"}
-                                  </Badge>
-                                </div>
-                                <div className="absolute top-2 left-2">
-                                  <Badge variant="secondary" className="text-xs">
-                                    {book.type}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <div className="p-4">
-                                <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">{book.name}</h4>
-                                <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
-                                <div className="flex items-center justify-between mb-3">
-                                  <div className="text-sm text-gray-500">
-                                    From: {library.libraryName}
-                                  </div>
-                                </div>
-                                <div className="flex space-x-2">
-                                  {book.available ? (
-                                    <>
-                                      <Button 
-                                        size="sm" 
-                                        onClick={() => handleLibraryBorrow(book.id, library.id)}
-                                        className="flex-1"
-                                      >
-                                        <BookOpen className="h-4 w-4 mr-1" />
-                                        Borrow
-                                      </Button>
-                                      {book.type === "digital" && (
-                                        <Button 
-                                          size="sm" 
-                                          variant="outline"
-                                          onClick={() => setActiveTab("read-book")}
-                                          className="flex-1"
-                                        >
-                                          <Play className="h-4 w-4 mr-1" />
-                                          Read
-                                        </Button>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <Button 
-                                      size="sm" 
-                                      variant="outline"
-                                      disabled
-                                      className="flex-1"
-                                    >
-                                      Currently Borrowed
-                                    </Button>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    {
+                      id: 1,
+                      name: "The Art of Programming",
+                      author: "Robert Martin",
+                      price: 2999,
+                      rentPrice: 599,
+                      type: "physical",
+                      imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
+                    },
+                    {
+                      id: 2,
+                      name: "Digital Marketing Mastery",
+                      author: "Sarah Johnson",
+                      price: 1999,
+                      rentPrice: 399,
+                      type: "physical",
+                      imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400"
+                    },
+                    {
+                      id: 3,
+                      name: "Modern Web Development",
+                      author: "Alex Thompson",
+                      price: 1499,
+                      type: "digital",
+                      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400"
+                    },
+                    {
+                      id: 4,
+                      name: "Data Science Fundamentals",
+                      author: "Dr. Emily Chen",
+                      price: 2499,
+                      type: "digital",
+                      imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400"
+                    }
+                  ].map((book) => (
+                    <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                      <div className="relative">
+                        <img 
+                          src={book.imageUrl} 
+                          alt={book.name}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Badge variant={book.type === "digital" ? "default" : "secondary"} className="text-xs">
+                            {book.type}
+                          </Badge>
                         </div>
                       </div>
-                    ))}
+                      <div className="p-4">
+                        <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">{book.name}</h4>
+                        <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-lg font-bold text-indigo-600">
+                            ₹{(book.price / 100).toFixed(0)}
+                          </div>
+                          {book.rentPrice && (
+                            <div className="text-sm text-purple-600">
+                              ₹{(book.rentPrice / 100).toFixed(0)}/week
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              const coinReward = Math.floor(book.price / 100);
+                              updateCoins(coinReward);
+                              showNotification("Book Purchased!", `You earned ${coinReward} coins!`, "success");
+                            }}
+                            className="flex-1"
+                          >
+                            Buy
+                          </Button>
+                          {book.rentPrice && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                const coinReward = Math.floor(book.rentPrice / 50);
+                                updateCoins(coinReward);
+                                showNotification("Book Rented!", `You earned ${coinReward} coins!`, "success");
+                              }}
+                              className="flex-1"
+                            >
+                              Rent
+                            </Button>
+                          )}
+                          {book.type === "digital" && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                showNotification("Opening E-Reader", "Starting VyronaRead experience", "success");
+                                // Would navigate to e-reader
+                              }}
+                              className="flex-1"
+                            >
+                              <Play className="h-4 w-4 mr-1" />
+                              Read
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Physical Library Books Lending */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">Library Integration</h3>
+                  <div className="flex space-x-2">
+                    <Badge variant="outline" className="text-green-700">Borrow</Badge>
+                    <Badge variant="outline" className="text-blue-700">Return</Badge>
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">No Libraries Integrated Yet</h4>
-                    <p className="text-gray-600 mb-4">
-                      Libraries need to submit integration requests through the admin panel to appear here.
-                    </p>
-                    <Button variant="outline" onClick={() => setActiveTab("home")}>
-                      <MapPin className="h-4 w-4 mr-2" />
-                      Find Local Libraries
-                    </Button>
+                </div>
+
+                {/* Sample Libraries for demonstration */}
+                <div className="space-y-6">
+                  {[
+                    {
+                      id: 1,
+                      name: "Central City Library",
+                      address: "123 Main Street, Downtown",
+                      totalBooks: 15000,
+                      books: [
+                        { id: "lib1-1", name: "Programming Fundamentals", author: "John Smith", available: true, type: "physical" },
+                        { id: "lib1-2", name: "Data Structures Guide", author: "Jane Doe", available: true, type: "physical" },
+                        { id: "lib1-3", name: "Web Development Basics", author: "Mike Johnson", available: false, type: "digital" }
+                      ]
+                    },
+                    {
+                      id: 2,
+                      name: "University Technical Library",
+                      address: "456 University Ave, Campus",
+                      totalBooks: 25000,
+                      books: [
+                        { id: "lib2-1", name: "Advanced Algorithms", author: "Dr. Sarah Chen", available: true, type: "physical" },
+                        { id: "lib2-2", name: "Machine Learning Basics", author: "Prof. Michael Lee", available: true, type: "digital" }
+                      ]
+                    }
+                  ].map((library) => (
+                    <div key={library.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900">{library.name}</h4>
+                          <p className="text-sm text-gray-600">{library.address}</p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Badge variant="secondary">
+                              <BookOpen className="h-3 w-3 mr-1" />
+                              {library.totalBooks.toLocaleString()} Books
+                            </Badge>
+                            <Badge variant="outline" className="text-green-600">
+                              <Heart className="h-3 w-3 mr-1" />
+                              Verified Library
+                            </Badge>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          Visit Library
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                        {library.books.map((book) => (
+                          <div key={book.id} className="bg-gray-50 rounded-lg p-3">
+                            <h5 className="font-medium text-gray-900 mb-1">{book.name}</h5>
+                            <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
+                            <div className="flex items-center justify-between">
+                              <Badge variant={book.available ? "default" : "destructive"} className="text-xs">
+                                {book.available ? "Available" : "Borrowed"}
+                              </Badge>
+                              {book.available && (
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => {
+                                    updateCoins(25);
+                                    showNotification("Book Borrowed!", `Borrowed from ${library.name}. Earned 25 coins!`, "success");
+                                  }}
+                                >
+                                  Borrow
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* VyronaRead E-Reader */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-gray-900">VyronaRead E-Reader</h3>
+                  <Badge variant="outline" className="text-blue-700">Kindle-like Experience</Badge>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-gray-900">Reading Features</h4>
+                    <div className="space-y-3">
+                      {[
+                        { feature: "Customizable Font Size", icon: "📖" },
+                        { feature: "Night Mode Reading", icon: "🌙" },
+                        { feature: "Bookmark Management", icon: "🔖" },
+                        { feature: "Progress Tracking", icon: "📊" },
+                        { feature: "Highlight & Notes", icon: "✏️" },
+                        { feature: "Offline Reading", icon: "📱" }
+                      ].map((item, index) => (
+                        <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <span className="text-lg">{item.icon}</span>
+                          <span className="text-gray-700">{item.feature}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                )}
+
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-gray-900">Currently Reading</h4>
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4">
+                      <div className="flex items-start space-x-4">
+                        <img 
+                          src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100" 
+                          alt="Current book"
+                          className="w-16 h-24 object-cover rounded"
+                        />
+                        <div className="flex-1">
+                          <h5 className="font-medium text-gray-900">The Art of Programming</h5>
+                          <p className="text-sm text-gray-600 mb-2">by Robert Martin</p>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Progress</span>
+                              <span>68%</span>
+                            </div>
+                            <Progress value={68} className="h-2" />
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <span>Page 204 of 300</span>
+                              <span>2h 30m left</span>
+                            </div>
+                          </div>
+                          <Button size="sm" className="mt-3 w-full">
+                            <Play className="h-4 w-4 mr-2" />
+                            Continue Reading
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <h5 className="font-medium text-gray-900">Reading Settings</h5>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button size="sm" variant="outline">Font Size</Button>
+                        <Button size="sm" variant="outline">Theme</Button>
+                        <Button size="sm" variant="outline">Bookmarks</Button>
+                        <Button size="sm" variant="outline">Notes</Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
