@@ -648,32 +648,75 @@ export default function Landing() {
             </section>
 
             {/* MallConnect - City Mall Shops */}
+            <section className="mb-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">MallConnect - City Mall Shops</h3>
+                  <p className="text-gray-600">Premium city mall brands now delivering through VyronaMart e-commerce platform</p>
+                </div>
+                <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white">
+                  Explore Mall Brands →
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { name: "Westside Fashion", category: "Fashion & Lifestyle", mall: "Phoenix Mall" },
+                  { name: "Croma Electronics", category: "Electronics & Gadgets", mall: "Select City Walk" },
+                  { name: "Home Centre", category: "Home & Furniture", mall: "DLF Mall" },
+                  { name: "Lifestyle Store", category: "Fashion & Accessories", mall: "Ambience Mall" }
+                ].map((mallShop, index) => (
+                  <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow border-purple-200">
+                    <CardContent className="p-4">
+                      <div className="aspect-video bg-gradient-to-br from-purple-100 to-indigo-100 rounded-md mb-3 overflow-hidden flex items-center justify-center">
+                        <span className="text-2xl font-bold text-purple-600">{mallShop.name.charAt(0)}</span>
+                      </div>
+                      <h3 className="font-medium text-sm mb-1">{mallShop.name}</h3>
+                      <p className="text-xs text-purple-600 mb-2 font-medium">{mallShop.category}</p>
+                      <div className="flex items-center text-xs text-gray-500 mb-2">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        <span>{mallShop.mall}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-green-600 font-medium">🏬 Mall Brand</span>
+                        <span className="text-xs text-yellow-600">⭐ 4.{index + 6} rating</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="mt-6 text-center">
+                <p className="text-sm text-gray-600 mb-3">Join 500+ premium mall brands already on VyronaMart</p>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                  Partner with MallConnect
+                </Button>
+              </div>
+            </section>
+
+            {/* VyronaSpace - Local Stores */}
             {localStores.length > 0 && (
-              <section className="mb-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8">
-                <div className="flex items-center justify-between mb-6">
+              <section className="mb-8">
+                <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-2xl font-bold mb-2">MallConnect - City Mall Shops</h3>
-                    <p className="text-gray-600">Premium mall stores now delivering through VyronaMart e-commerce</p>
+                    <h3 className="text-xl font-semibold">VyronaSpace - Local Store Connect</h3>
+                    <p className="text-gray-600 text-sm">Quick delivery from neighborhood stores</p>
                   </div>
-                  <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white">
-                    Explore Mall Stores →
-                  </Button>
+                  <Button variant="link" className="text-orange-600">Explore Local Stores →</Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {localStores.slice(0, 4).map((store) => (
-                    <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow border-purple-200" onClick={() => handleStoreClick(store.id)}>
+                    <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleStoreClick(store.id)}>
                       <CardContent className="p-4">
-                        <div className="aspect-video bg-gradient-to-br from-purple-100 to-indigo-100 rounded-md mb-3 overflow-hidden flex items-center justify-center">
-                          <span className="text-2xl font-bold text-purple-600">{store.name.charAt(0)}</span>
+                        <div className="aspect-video bg-gradient-to-br from-orange-100 to-yellow-100 rounded-md mb-2 overflow-hidden flex items-center justify-center">
+                          <span className="text-2xl font-bold text-orange-600">{store.name.charAt(0)}</span>
                         </div>
                         <h3 className="font-medium text-sm mb-1">{store.name}</h3>
-                        <p className="text-xs text-purple-600 mb-2 capitalize font-medium">Mall {store.type}</p>
+                        <p className="text-xs text-orange-600 mb-2 capitalize font-medium">{store.type} store</p>
                         <div className="flex items-center text-xs text-gray-500 mb-2">
                           <MapPin className="h-3 w-3 mr-1" />
-                          <span>{store.address || "City Mall Location"}</span>
+                          <span>{store.address || "Local area"}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-green-600 font-medium">📦 E-commerce Delivery</span>
+                          <span className="text-xs text-green-600 font-medium">🚀 Quick Delivery</span>
                           <span className="text-xs text-yellow-600">⭐ {(store.rating || 450) / 100} rating</span>
                         </div>
                       </CardContent>
