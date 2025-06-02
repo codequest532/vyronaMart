@@ -70,23 +70,9 @@ export default function Home() {
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
 
 
-  // Sample book content
-  const sampleBookContent = [
-    {
-      page: 1,
-      content: "Chapter 1: The Art of Programming\n\nProgramming is not just about writing code; it's about crafting elegant solutions to complex problems. In this comprehensive guide, we'll explore the fundamental principles that distinguish great programmers from merely competent ones.\n\nThe journey begins with understanding that code is communication. When you write a program, you're not just instructing a computer—you're conveying your thoughts to future developers who will read, maintain, and extend your work.\n\nEvery line of code tells a story. Make sure it's a story worth telling."
-    },
-    {
-      page: 2,
-      content: "Chapter 1 (continued)\n\nThe first principle of great programming is clarity. Your code should read like well-written prose. Variable names should be descriptive, functions should have single responsibilities, and the overall structure should flow logically from one concept to the next.\n\nConsider this example:\n\n```javascript\nfunction calculateTotalPrice(items, taxRate) {\n  const subtotal = items.reduce((sum, item) => sum + item.price, 0);\n  const tax = subtotal * taxRate;\n  return subtotal + tax;\n}\n```\n\nThis function clearly communicates its purpose and implementation."
-    },
-    {
-      page: 3,
-      content: "Chapter 2: Clean Code Principles\n\nClean code is not just a luxury—it's a necessity in professional software development. The cost of maintaining poorly written code far exceeds the initial time investment required to write it correctly.\n\nThe characteristics of clean code include:\n\n• Readability: Code should be self-documenting\n• Simplicity: Avoid unnecessary complexity\n• Consistency: Follow established patterns\n• Testability: Design for easy testing\n• Maintainability: Consider future developers\n\nRemember: You are not just writing code for the computer—you are writing it for humans."
-    }
-  ];
-
-  const totalPages = sampleBookContent.length;
+  // Book content will be loaded from authentic sources when available
+  const bookContent = selectedBook?.content || [];
+  const totalPages = bookContent.length;
 
   const handlePageChange = (direction: 'next' | 'prev') => {
     if (direction === 'next' && currentPage < totalPages) {
@@ -370,77 +356,20 @@ export default function Home() {
                     </Button>
                   </div>
                 </div>
-                <div className="space-y-4">
-                  {sellerBooks && sellerBooks.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {sellerBooks.slice(0, 6).map((book: any) => (
-                        <div key={book.id} className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">{book.title}</h4>
-                              <p className="text-xs text-gray-600 mb-1">{book.author}</p>
-                              <p className="text-xs text-gray-500">{book.genre} • {book.pages} pages</p>
-                            </div>
-                            <Badge variant={book.type === 'physical' ? 'default' : 'secondary'} className="text-xs">
-                              {book.type === 'physical' ? 'Physical' : 'Digital'}
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-lg font-bold text-purple-600">${book.price}</span>
-                              {book.type === 'digital' && (
-                                <span className="text-xs text-gray-500">or rent $2.99</span>
-                              )}
-                            </div>
-                            <div className="flex gap-1">
-                              <Button 
-                                size="sm" 
-                                className="text-xs bg-purple-600 hover:bg-purple-700"
-                                onClick={() => {
-                                  showNotification(`Purchased "${book.title}" successfully! +15 VyronaCoins`, "success");
-                                  updateCoins(15);
-                                }}
-                              >
-                                Buy
-                              </Button>
-                              {book.type === 'digital' && (
-                                <Button 
-                                  size="sm" 
-                                  variant="outline" 
-                                  className="text-xs border-purple-300 text-purple-600"
-                                  onClick={() => {
-                                    showNotification(`Rented "${book.title}" for 30 days! +10 VyronaCoins`, "success");
-                                    updateCoins(10);
-                                  }}
-                                >
-                                  Rent
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="mt-3 pt-3 border-t border-purple-200">
-                            <div className="flex items-center justify-between text-xs text-gray-500">
-                              <span>Library: {book.libraryName || 'VyronaRead'}</span>
-                              <span>{book.condition || 'New'}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Book className="text-purple-600 h-8 w-8" />
-                      </div>
-                      <h4 className="font-semibold text-gray-900 mb-2">No Books Available Yet</h4>
-                      <p className="text-gray-500 text-sm mb-4">Books will appear here once library integrations are approved by admin</p>
-                      <Badge variant="secondary" className="text-purple-600 bg-purple-50">
-                        Library Integration Required
-                      </Badge>
-                    </div>
-                  )}
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Book className="text-purple-600 h-8 w-8" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-2">No Books Available Yet</h4>
+                  <p className="text-gray-500 text-sm mb-4">Books will appear here once sellers upload their inventory and libraries are integrated</p>
+                  <div className="flex gap-2 justify-center">
+                    <Badge variant="secondary" className="text-purple-600 bg-purple-50">
+                      Ready for Real Data
+                    </Badge>
+                    <Badge variant="outline" className="text-gray-600">
+                      Library Integration Available
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1322,15 +1251,9 @@ export default function Home() {
                           size="sm" 
                           variant="outline"
                           onClick={() => {
-                            setActiveTab("read-book");
-                            setSelectedBook({
-                              id: 1,
-                              name: "The Art of Programming",
-                              author: "Robert Martin",
-                              type: "digital"
-                            });
-                            showNotification("Font Settings", "Adjust font size in E-Reader", "success");
+                            showNotification("Font Settings", "Available when reading a book", "success");
                           }}
+                          disabled={!selectedBook}
                         >
                           Font Size
                         </Button>
@@ -1348,15 +1271,9 @@ export default function Home() {
                           size="sm" 
                           variant="outline"
                           onClick={() => {
-                            setActiveTab("read-book");
-                            setSelectedBook({
-                              id: 1,
-                              name: "The Art of Programming",
-                              author: "Robert Martin",
-                              type: "digital"
-                            });
-                            showNotification("Bookmarks", "View bookmarks in E-Reader", "success");
+                            showNotification("Bookmarks", "Available when reading a book", "success");
                           }}
+                          disabled={!selectedBook}
                         >
                           Bookmarks ({bookmarks.length})
                         </Button>
@@ -1364,15 +1281,9 @@ export default function Home() {
                           size="sm" 
                           variant="outline"
                           onClick={() => {
-                            setActiveTab("read-book");
-                            setSelectedBook({
-                              id: 1,
-                              name: "The Art of Programming",
-                              author: "Robert Martin",
-                              type: "digital"
-                            });
-                            showNotification("Notes Feature", "Highlight and notes available in E-Reader", "success");
+                            showNotification("Notes Feature", "Available when reading a book", "success");
                           }}
+                          disabled={!selectedBook}
                         >
                           Notes
                         </Button>
@@ -1692,9 +1603,15 @@ export default function Home() {
                   className="max-w-3xl mx-auto leading-relaxed"
                   style={{ fontSize: `${fontSize}px`, lineHeight: 1.6 }}
                 >
-                  <pre className="whitespace-pre-wrap font-serif">
-                    {sampleBookContent[currentPage - 1]?.content}
-                  </pre>
+                  <div className="whitespace-pre-wrap font-serif">
+                    {bookContent[currentPage - 1]?.content || (
+                      <div className="text-center py-16 text-gray-500">
+                        <Book className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                        <h3 className="text-lg font-semibold mb-2">No Content Available</h3>
+                        <p>Book content will be loaded from authentic sources when available</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
