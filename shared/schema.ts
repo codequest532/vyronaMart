@@ -153,6 +153,71 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// VyronaInstaShop Tables
+export const instagramStores = pgTable("instagram_stores", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  instagramUsername: text("instagram_username").notNull(),
+  instagramUserId: text("instagram_user_id"),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  tokenExpiresAt: timestamp("token_expires_at"),
+  isActive: boolean("is_active").default(true),
+  storeName: text("store_name"),
+  storeDescription: text("store_description"),
+  profilePictureUrl: text("profile_picture_url"),
+  followersCount: integer("followers_count"),
+  connectedAt: timestamp("connected_at").defaultNow(),
+  lastSyncAt: timestamp("last_sync_at"),
+});
+
+export const instagramProducts = pgTable("instagram_products", {
+  id: serial("id").primaryKey(),
+  storeId: integer("store_id").notNull(),
+  instagramMediaId: text("instagram_media_id").notNull(),
+  productName: text("product_name").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(), // in cents
+  currency: text("currency").default("USD"),
+  imageUrl: text("image_url"),
+  productUrl: text("product_url"),
+  isAvailable: boolean("is_available").default(true),
+  categoryTag: text("category_tag"),
+  hashtags: text("hashtags").array(),
+  likesCount: integer("likes_count"),
+  commentsCount: integer("comments_count"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const instagramOrders = pgTable("instagram_orders", {
+  id: serial("id").primaryKey(),
+  buyerId: integer("buyer_id").notNull(),
+  storeId: integer("store_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  totalAmount: integer("total_amount").notNull(), // in cents
+  status: text("status").notNull().default("pending"), // 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled'
+  shippingAddress: jsonb("shipping_address"),
+  contactInfo: jsonb("contact_info"),
+  orderNotes: text("order_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const instagramAnalytics = pgTable("instagram_analytics", {
+  id: serial("id").primaryKey(),
+  storeId: integer("store_id").notNull(),
+  date: timestamp("date").notNull(),
+  impressions: integer("impressions").default(0),
+  reach: integer("reach").default(0),
+  profileViews: integer("profile_views").default(0),
+  websiteClicks: integer("website_clicks").default(0),
+  ordersCount: integer("orders_count").default(0),
+  revenue: integer("revenue").default(0), // in cents
+  topProductId: integer("top_product_id"),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -227,6 +292,28 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+// VyronaInstaShop Insert Schemas
+export const insertInstagramStoreSchema = createInsertSchema(instagramStores).omit({
+  id: true,
+  connectedAt: true,
+});
+
+export const insertInstagramProductSchema = createInsertSchema(instagramProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInstagramOrderSchema = createInsertSchema(instagramOrders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInstagramAnalyticsSchema = createInsertSchema(instagramAnalytics).omit({
+  id: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -260,3 +347,13 @@ export type ProductShare = typeof productShares.$inferSelect;
 export type InsertProductShare = z.infer<typeof insertProductShareSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+// VyronaInstaShop Types
+export type InstagramStore = typeof instagramStores.$inferSelect;
+export type InsertInstagramStore = z.infer<typeof insertInstagramStoreSchema>;
+export type InstagramProduct = typeof instagramProducts.$inferSelect;
+export type InsertInstagramProduct = z.infer<typeof insertInstagramProductSchema>;
+export type InstagramOrder = typeof instagramOrders.$inferSelect;
+export type InsertInstagramOrder = z.infer<typeof insertInstagramOrderSchema>;
+export type InstagramAnalytics = typeof instagramAnalytics.$inferSelect;
+export type InsertInstagramAnalytics = z.infer<typeof insertInstagramAnalyticsSchema>;

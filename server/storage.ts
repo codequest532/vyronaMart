@@ -1,6 +1,7 @@
 import { 
   users, products, stores, shoppingRooms, cartItems, orders, achievements, gameScores, otpVerifications,
   shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
+  instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
@@ -8,7 +9,9 @@ import {
   type OtpVerification, type InsertOtpVerification,
   type ShoppingGroup, type InsertShoppingGroup, type GroupMember, type InsertGroupMember,
   type GroupWishlist, type InsertGroupWishlist, type GroupMessage, type InsertGroupMessage,
-  type ProductShare, type InsertProductShare, type Notification, type InsertNotification
+  type ProductShare, type InsertProductShare, type Notification, type InsertNotification,
+  type InstagramStore, type InsertInstagramStore, type InstagramProduct, type InsertInstagramProduct,
+  type InstagramOrder, type InsertInstagramOrder, type InstagramAnalytics, type InsertInstagramAnalytics
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNull } from "drizzle-orm";
@@ -84,6 +87,27 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   getUserNotifications(userId: number): Promise<Notification[]>;
   markNotificationAsRead(id: number): Promise<void>;
+
+  // VyronaInstaShop - Instagram Store Management
+  connectInstagramStore(store: InsertInstagramStore): Promise<InstagramStore>;
+  getUserInstagramStores(userId: number): Promise<InstagramStore[]>;
+  getInstagramStore(id: number): Promise<InstagramStore | undefined>;
+  updateInstagramStoreTokens(id: number, accessToken: string, refreshToken: string, expiresAt: Date): Promise<void>;
+  disconnectInstagramStore(id: number): Promise<boolean>;
+
+  // VyronaInstaShop - Instagram Products
+  syncInstagramProducts(storeId: number, products: InsertInstagramProduct[]): Promise<InstagramProduct[]>;
+  getInstagramProducts(storeId: number): Promise<InstagramProduct[]>;
+  updateInstagramProduct(id: number, updates: Partial<InsertInstagramProduct>): Promise<InstagramProduct | undefined>;
+
+  // VyronaInstaShop - Instagram Orders
+  createInstagramOrder(order: InsertInstagramOrder): Promise<InstagramOrder>;
+  getInstagramOrders(storeId: number): Promise<InstagramOrder[]>;
+  updateInstagramOrderStatus(id: number, status: string): Promise<InstagramOrder | undefined>;
+
+  // VyronaInstaShop - Analytics
+  recordInstagramAnalytics(analytics: InsertInstagramAnalytics): Promise<InstagramAnalytics>;
+  getInstagramAnalytics(storeId: number, startDate: Date, endDate: Date): Promise<InstagramAnalytics[]>;
 }
 
 export class MemStorage implements IStorage {

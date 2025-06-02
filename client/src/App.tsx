@@ -8,6 +8,7 @@ import Landing from "@/pages/landing";
 import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
+import VyronaInstaShop from "@/pages/instashop";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
