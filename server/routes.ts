@@ -29,12 +29,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/signup", async (req, res) => {
     try {
-      const { username, email, mobile, password } = req.body;
+      const { username, email, mobile, password, role } = req.body;
       
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "User already exists" });
+      }
+      
+      // Determine user role - only mgmags@gmail.com can be admin
+      let userRole = role || "customer";
+      if (email === "mgmags@gmail.com") {
+        userRole = "admin";
+      } else if (userRole === "admin") {
+        // Prevent anyone else from registering as admin
+        userRole = "customer";
       }
       
       // Create new user with bonus coins
@@ -43,6 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email,
         mobile: mobile || null,
         password,
+        role: userRole,
         vyronaCoins: 500, // Welcome bonus
         xp: 0,
         level: 1

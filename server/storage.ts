@@ -134,7 +134,22 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-    // No seed data - clean development environment
+    // Create default admin account
+    const adminUser: User = {
+      id: this.currentUserId++,
+      username: "admin",
+      email: "mgmags@gmail.com",
+      mobile: null,
+      password: "admin123",
+      role: "admin",
+      vyronaCoins: 1000,
+      xp: 0,
+      level: 1,
+      isActive: true,
+      isVerified: true,
+      createdAt: new Date(),
+    };
+    this.users.set(adminUser.id, adminUser);
   }
 
   // User methods

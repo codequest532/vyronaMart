@@ -25,7 +25,7 @@ const registerSchema = z.object({
   mobile: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
-  role: z.enum(["customer", "seller", "admin"]),
+  role: z.enum(["customer", "seller"]),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -127,13 +127,11 @@ export default function Login() {
   const roleIcons = {
     customer: <User className="h-5 w-5" />,
     seller: <Store className="h-5 w-5" />,
-    admin: <Shield className="h-5 w-5" />,
   };
 
   const roleDescriptions = {
     customer: "Shop and explore products across VyronaMart",
     seller: "Manage your store and sell products",
-    admin: "Oversee platform operations and management",
   };
 
   return (
