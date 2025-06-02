@@ -365,13 +365,13 @@ export default function Landing() {
                 onClick={() => setLocation("/login")}
                 className="text-white hover:bg-blue-800"
               >
-                Sign In
+                Log In
               </Button>
               <Button
                 onClick={() => setLocation("/login")}
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                Join VyronaMart
+                Sign Up
               </Button>
             </div>
           </div>
