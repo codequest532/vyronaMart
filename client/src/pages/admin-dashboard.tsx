@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
   Users, 
   Store, 
@@ -26,11 +29,61 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
+
+const productSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  description: z.string().optional(),
+  price: z.string().min(1, "Price is required"),
+  category: z.string().min(1, "Category is required"),
+  module: z.string().min(1, "Module is required"),
+  imageUrl: z.string().optional(),
+});
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof productSchema>>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: "",
+      category: "",
+      module: "",
+      imageUrl: "",
+    },
+  });
+
+  const addProductMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof productSchema>) => {
+      const productData = {
+        ...data,
+        price: parseInt(data.price) * 100, // Convert to cents
+        metadata: {},
+      };
+      return apiRequest("/api/products", "POST", productData);
+    },
+    onSuccess: () => {
+      toast({ title: "Success", description: "Product added successfully!" });
+      form.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add product. Please try again." });
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof productSchema>) => {
+    addProductMutation.mutate(data);
+  };
 
   const { data: stats } = useQuery({
     queryKey: ["/api/admin/stats"],
@@ -51,8 +104,6 @@ export default function AdminDashboard() {
   const { data: libraryRequests } = useQuery({
     queryKey: ["/api/admin/library-requests"],
   });
-
-  const { toast } = useToast();
 
   const updateLibraryRequestMutation = useMutation({
     mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
@@ -469,10 +520,153 @@ export default function AdminDashboard() {
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Product Management</h2>
                   <p className="text-gray-600 dark:text-gray-300">Full control over all platform products</p>
                 </div>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Product
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Product
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Add New Product</DialogTitle>
+                      <DialogDescription>
+                        Create a new product for the platform. This will be visible to all customers.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Product Name *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Enter product name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="price"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Price (USD) *</FormLabel>
+                                <FormControl>
+                                  <Input type="number" placeholder="19.99" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="category"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Category *</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select category" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="electronics">Electronics</SelectItem>
+                                    <SelectItem value="books">Books</SelectItem>
+                                    <SelectItem value="clothing">Clothing</SelectItem>
+                                    <SelectItem value="food">Food & Beverages</SelectItem>
+                                    <SelectItem value="home">Home & Garden</SelectItem>
+                                    <SelectItem value="sports">Sports & Outdoors</SelectItem>
+                                    <SelectItem value="toys">Toys & Games</SelectItem>
+                                    <SelectItem value="beauty">Beauty & Personal Care</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="module"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Module *</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select module" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="vyronamart">VyronaMart</SelectItem>
+                                    <SelectItem value="vyronaread">VyronaRead</SelectItem>
+                                    <SelectItem value="vyronasocial">VyronaSocial</SelectItem>
+                                    <SelectItem value="vyronahub">VyronaHub</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Enter product description..."
+                                  className="resize-none"
+                                  rows={3}
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="imageUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Image URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://example.com/image.jpg" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex gap-3 pt-4">
+                          <Button 
+                            type="submit" 
+                            disabled={addProductMutation.isPending}
+                            className="flex-1"
+                          >
+                            {addProductMutation.isPending ? "Creating..." : "Create Product"}
+                          </Button>
+                          <Button type="button" variant="outline" onClick={() => form.reset()}>
+                            Reset
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <Card>
