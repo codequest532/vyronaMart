@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
+import ProductDetails from "@/pages/product-details";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
@@ -25,7 +26,12 @@ function Router() {
   return (
     <Switch>
       {user ? (
-        <Route path="/" component={Home} />
+        <>
+          <Route path="/" component={Home} />
+          <Route path="/product/:id">
+            {(params) => <ProductDetails productId={params.id} />}
+          </Route>
+        </>
       ) : (
         <Route path="/" component={Landing} />
       )}
