@@ -417,9 +417,9 @@ export default function Landing() {
           {/* VyronaMart 6 Core Modules */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-4xl mb-3">🏠</div>
-              <h3 className="font-semibold text-base mb-1">Home</h3>
-              <p className="text-sm opacity-90">Dashboard</p>
+              <div className="text-4xl mb-3">🛍️</div>
+              <h3 className="font-semibold text-base mb-1">VyronaHub</h3>
+              <p className="text-sm opacity-90">Shop Smart</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
               <div className="text-4xl mb-3">👥</div>
@@ -442,9 +442,9 @@ export default function Landing() {
               <p className="text-sm opacity-90">Premium Stores</p>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
-              <div className="text-4xl mb-3">👤</div>
-              <h3 className="font-semibold text-base mb-1">MyVyrona</h3>
-              <p className="text-sm opacity-90">Your Profile</p>
+              <div className="text-4xl mb-3">📸</div>
+              <h3 className="font-semibold text-base mb-1">InstaStore Connect</h3>
+              <p className="text-sm opacity-90">Instagram Shopping</p>
             </div>
           </div>
           
