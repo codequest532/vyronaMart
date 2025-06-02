@@ -37,9 +37,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User already exists" });
       }
       
-      // Determine user role - only mgmags@gmail.com can be admin
+      // Determine user role - only mgmags25@gmail.com can be admin
       let userRole = role || "customer";
-      if (email === "mgmags@gmail.com") {
+      if (email === "mgmags25@gmail.com") {
         userRole = "admin";
       } else if (userRole === "admin") {
         // Prevent anyone else from registering as admin
