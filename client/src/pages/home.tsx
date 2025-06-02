@@ -1145,7 +1145,20 @@ export default function Home() {
                               <span>2h 30m left</span>
                             </div>
                           </div>
-                          <Button size="sm" className="mt-3 w-full">
+                          <Button 
+                            size="sm" 
+                            className="mt-3 w-full"
+                            onClick={() => {
+                              setActiveTab("read-book");
+                              setSelectedBook({
+                                id: 1,
+                                name: "The Art of Programming",
+                                author: "Robert Martin",
+                                type: "digital"
+                              });
+                              showNotification("Opening E-Reader", "Starting VyronaRead experience", "success");
+                            }}
+                          >
                             <Play className="h-4 w-4 mr-2" />
                             Continue Reading
                           </Button>
