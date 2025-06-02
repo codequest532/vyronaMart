@@ -571,10 +571,10 @@ export default function Landing() {
                 </div>
                 <div className="text-center cursor-pointer hover:scale-105 transition-transform">
                   <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-full w-20 h-20 mx-auto mb-3 flex items-center justify-center text-white text-2xl">
-                    📚
+                    🏬
                   </div>
-                  <h3 className="font-semibold">VyronaRead</h3>
-                  <p className="text-xs text-gray-600">Books & Learning</p>
+                  <h3 className="font-semibold">MallConnect</h3>
+                  <p className="text-xs text-gray-600">City Mall Shops</p>
                 </div>
               </div>
             </section>
@@ -639,42 +639,42 @@ export default function Landing() {
                 </div>
                 <div className="text-center">
                   <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center text-white text-xl">
-                    🏪
+                    🏬
                   </div>
-                  <h3 className="font-bold mb-2">Local Store Connect</h3>
-                  <p className="text-sm text-gray-600">Connect with nearby stores and support local businesses</p>
+                  <h3 className="font-bold mb-2">MallConnect Integration</h3>
+                  <p className="text-sm text-gray-600">City mall shops delivering through our e-commerce platform</p>
                 </div>
               </div>
             </section>
 
-            {/* MallConnect - Local Stores */}
+            {/* MallConnect - City Mall Shops */}
             {localStores.length > 0 && (
-              <section className="mb-12 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-8">
+              <section className="mb-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h3 className="text-2xl font-bold mb-2">MallConnect - Local Stores</h3>
-                    <p className="text-gray-600">Connect with nearby stores for quick delivery via VyronaSpace</p>
+                    <h3 className="text-2xl font-bold mb-2">MallConnect - City Mall Shops</h3>
+                    <p className="text-gray-600">Premium mall stores now delivering through VyronaMart e-commerce</p>
                   </div>
-                  <Button variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white">
-                    Explore All Stores →
+                  <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white">
+                    Explore Mall Stores →
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {localStores.slice(0, 4).map((store) => (
-                    <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow border-blue-200" onClick={() => handleStoreClick(store.id)}>
+                    <Card key={store.id} className="cursor-pointer hover:shadow-md transition-shadow border-purple-200" onClick={() => handleStoreClick(store.id)}>
                       <CardContent className="p-4">
-                        <div className="aspect-video bg-gradient-to-br from-blue-100 to-green-100 rounded-md mb-3 overflow-hidden flex items-center justify-center">
-                          <span className="text-2xl font-bold text-blue-600">{store.name.charAt(0)}</span>
+                        <div className="aspect-video bg-gradient-to-br from-purple-100 to-indigo-100 rounded-md mb-3 overflow-hidden flex items-center justify-center">
+                          <span className="text-2xl font-bold text-purple-600">{store.name.charAt(0)}</span>
                         </div>
                         <h3 className="font-medium text-sm mb-1">{store.name}</h3>
-                        <p className="text-xs text-blue-600 mb-2 capitalize font-medium">{store.type} store</p>
+                        <p className="text-xs text-purple-600 mb-2 capitalize font-medium">Mall {store.type}</p>
                         <div className="flex items-center text-xs text-gray-500 mb-2">
                           <MapPin className="h-3 w-3 mr-1" />
-                          <span>{store.address || "Local area"}</span>
+                          <span>{store.address || "City Mall Location"}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-green-600 font-medium">🚀 Quick Delivery</span>
-                          <span className="text-xs text-yellow-600">⭐ {(store.rating || 4.5) / 100} rating</span>
+                          <span className="text-xs text-green-600 font-medium">📦 E-commerce Delivery</span>
+                          <span className="text-xs text-yellow-600">⭐ {(store.rating || 450) / 100} rating</span>
                         </div>
                       </CardContent>
                     </Card>
