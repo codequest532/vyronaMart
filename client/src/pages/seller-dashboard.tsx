@@ -39,6 +39,7 @@ export default function SellerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddBookDialog, setShowAddBookDialog] = useState(false);
+  const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [bookSection, setBookSection] = useState("overview");
   const [newBook, setNewBook] = useState({
     title: "",
@@ -52,22 +53,40 @@ export default function SellerDashboard() {
     language: "English"
   });
   const [driveLink, setDriveLink] = useState("");
+  const [newLibrary, setNewLibrary] = useState({
+    name: "",
+    type: "",
+    address: "",
+    contact: "",
+    phone: "",
+    email: "",
+    description: ""
+  });
 
   const handleAddLibrary = () => {
-    const libraryName = prompt("Enter library name:");
-    if (!libraryName) return;
+    setShowAddLibraryDialog(true);
+  };
+
+  const handleSubmitLibrary = () => {
+    if (!newLibrary.name || !newLibrary.type || !newLibrary.address || !newLibrary.contact) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    console.log(`Adding new library: ${newLibrary.name}`);
+    alert(`Library Integration Request Sent!\n\nLibrary: ${newLibrary.name}\nType: ${newLibrary.type}\nAddress: ${newLibrary.address}\nContact: ${newLibrary.contact}\n\nIntegration will be processed within 24 hours.`);
     
-    const libraryType = prompt("Library type:\n\n1. Public Library\n2. Academic Library\n3. School Library\n4. Community Center\n5. Private Collection\n\nEnter choice (1-5):");
-    if (!libraryType) return;
-    
-    const address = prompt("Enter library address:");
-    if (!address) return;
-    
-    const contact = prompt("Enter contact person/email:");
-    if (!contact) return;
-    
-    console.log(`Adding new library: ${libraryName}`);
-    alert(`Library Integration Request Sent!\n\nLibrary: ${libraryName}\nType: ${libraryType === '1' ? 'Public Library' : libraryType === '2' ? 'Academic Library' : libraryType === '3' ? 'School Library' : libraryType === '4' ? 'Community Center' : 'Private Collection'}\nAddress: ${address}\nContact: ${contact}\n\nIntegration will be processed within 24 hours.`);
+    // Reset form and close dialog
+    setNewLibrary({
+      name: "",
+      type: "",
+      address: "",
+      contact: "",
+      phone: "",
+      email: "",
+      description: ""
+    });
+    setShowAddLibraryDialog(false);
   };
 
   const handleSearchLibraries = () => {
@@ -2081,6 +2100,110 @@ export default function SellerDashboard() {
           )}
         </main>
       </div>
+
+      {/* Add Library Modal */}
+      <Dialog open={showAddLibraryDialog} onOpenChange={setShowAddLibraryDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add New Library to VyronaMart</DialogTitle>
+            <DialogDescription>
+              Integrate a new physical library into your VyronaMart network
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="libraryName">Library Name *</Label>
+              <Input
+                id="libraryName"
+                placeholder="Central City Library"
+                value={newLibrary.name}
+                onChange={(e) => setNewLibrary({ ...newLibrary, name: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="libraryType">Library Type *</Label>
+              <Select 
+                value={newLibrary.type} 
+                onValueChange={(value) => setNewLibrary({ ...newLibrary, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select library type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Public Library</SelectItem>
+                  <SelectItem value="academic">Academic Library</SelectItem>
+                  <SelectItem value="school">School Library</SelectItem>
+                  <SelectItem value="community">Community Center</SelectItem>
+                  <SelectItem value="private">Private Collection</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="libraryAddress">Address *</Label>
+              <Input
+                id="libraryAddress"
+                placeholder="123 Main Street, City, State, ZIP"
+                value={newLibrary.address}
+                onChange={(e) => setNewLibrary({ ...newLibrary, address: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contactPerson">Contact Person *</Label>
+              <Input
+                id="contactPerson"
+                placeholder="John Smith"
+                value={newLibrary.contact}
+                onChange={(e) => setNewLibrary({ ...newLibrary, contact: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                placeholder="(555) 123-4567"
+                value={newLibrary.phone}
+                onChange={(e) => setNewLibrary({ ...newLibrary, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="library@example.com"
+                value={newLibrary.email}
+                onChange={(e) => setNewLibrary({ ...newLibrary, email: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Brief description of the library and its collection"
+                value={newLibrary.description}
+                onChange={(e) => setNewLibrary({ ...newLibrary, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setShowAddLibraryDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitLibrary} className="bg-blue-600 hover:bg-blue-700">
+              Submit Integration Request
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
