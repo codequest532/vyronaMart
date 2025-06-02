@@ -510,6 +510,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaRead Books - Library Integration Requests
+  app.post("/api/library-integration-requests", async (req, res) => {
+    try {
+      const requestData = {
+        sellerId: 3, // Default seller ID for now
+        libraryName: req.body.name,
+        libraryType: req.body.type,
+        address: req.body.address,
+        contactPerson: req.body.contact,
+        phone: req.body.phone || null,
+        email: req.body.email || null,
+        description: req.body.description || null,
+      };
+
+      // Create the request in the database
+      const newRequest = await storage.createLibraryIntegrationRequest(requestData);
+      res.json(newRequest);
+    } catch (error) {
+      console.error("Error creating library integration request:", error);
+      res.status(500).json({ message: "Failed to create library integration request" });
+    }
+  });
+
+  // Admin - Get Library Integration Requests
+  app.get("/api/admin/library-requests", async (req, res) => {
+    try {
+      const requests = await storage.getLibraryIntegrationRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching library requests:", error);
+      res.status(500).json({ message: "Failed to fetch library requests" });
+    }
+  });
+
+  // Admin - Update Library Integration Request Status
+  app.patch("/api/admin/library-requests/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, adminNotes } = req.body;
+      const processedBy = 2; // Default admin ID
+
+      const updatedRequest = await storage.updateLibraryIntegrationRequestStatus(
+        parseInt(id),
+        status,
+        processedBy,
+        adminNotes
+      );
+
+      if (!updatedRequest) {
+        return res.status(404).json({ message: "Library request not found" });
+      }
+
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error updating library request:", error);
+      res.status(500).json({ message: "Failed to update library request" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
