@@ -362,17 +362,16 @@ export default function Landing() {
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
-                onClick={() => setShowAuthModal(true)}
+                onClick={() => setLocation("/login")}
                 className="text-white hover:bg-blue-800"
               >
-                Hello, Sign in
+                Sign In
               </Button>
               <Button
-                onClick={() => setShowAuthModal(true)}
+                onClick={() => setLocation("/login")}
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Cart
+                Join VyronaMart
               </Button>
             </div>
           </div>
@@ -412,6 +411,36 @@ export default function Landing() {
             <p className="text-xl mb-6">India's First Gamified Social Shopping Platform</p>
           </div>
           
+          {/* Quick Access to Interfaces */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div 
+              onClick={() => setLocation("/login")}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-6 text-center hover:from-green-600 hover:to-emerald-700 transition-all cursor-pointer"
+            >
+              <div className="text-3xl mb-3">👤</div>
+              <h3 className="font-bold text-lg mb-2">Customer Panel</h3>
+              <p className="text-sm opacity-90">Shop, explore, and enjoy gamified shopping experience</p>
+            </div>
+            
+            <div 
+              onClick={() => setLocation("/login")}
+              className="bg-gradient-to-r from-purple-500 to-violet-600 rounded-lg p-6 text-center hover:from-purple-600 hover:to-violet-700 transition-all cursor-pointer"
+            >
+              <div className="text-3xl mb-3">🏪</div>
+              <h3 className="font-bold text-lg mb-2">Seller Panel</h3>
+              <p className="text-sm opacity-90">Manage your store, products, and orders</p>
+            </div>
+            
+            <div 
+              onClick={() => setLocation("/login")}
+              className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 text-center hover:from-orange-600 hover:to-red-700 transition-all cursor-pointer"
+            >
+              <div className="text-3xl mb-3">⚙️</div>
+              <h3 className="font-bold text-lg mb-2">Admin Panel</h3>
+              <p className="text-sm opacity-90">Platform management and oversight</p>
+            </div>
+          </div>
+
           {/* VyronaMart 6 Core Modules */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center hover:bg-white/20 transition-all cursor-pointer">
