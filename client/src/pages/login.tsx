@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ const registerSchema = z.object({
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("login");
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -70,6 +71,9 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data: any) => {
+      // Update the query cache with the logged-in user
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      
       toast({
         title: "Login Successful",
         description: "Welcome back!",
@@ -111,13 +115,27 @@ export default function Login() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
+      // Update the query cache with the new user
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      
       toast({
         title: "Registration Successful",
-        description: "Please login with your credentials",
+        description: "Welcome to VyronaMart!",
       });
-      setActiveTab("login");
-      registerForm.reset();
+      
+      // Route based on user role
+      switch (data.user.role) {
+        case "admin":
+          setLocation("/admin");
+          break;
+        case "seller":
+          setLocation("/seller");
+          break;
+        default:
+          setLocation("/");
+          break;
+      }
     },
     onError: (error: any) => {
       toast({
