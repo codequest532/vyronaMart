@@ -48,6 +48,7 @@ import {
   Camera,
   ThumbsUp,
   MessageCircle,
+  BookOpen,
   Share2,
   Eye,
   TrendingUp
@@ -109,6 +110,47 @@ export default function Home() {
     const coinReward = Math.floor(Math.random() * 50) + 10;
     updateCoins(coinReward);
     showNotification("Product Viewed!", `Earned ${coinReward} coins`, "success");
+  };
+
+  const handleBookPurchase = async (bookId: number, action: 'buy' | 'rent') => {
+    if (!user) {
+      showNotification("Login Required", "Please login to purchase books", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/books/${bookId}/purchase`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, action }),
+      });
+
+      if (response.ok) {
+        const order = await response.json();
+        const coinReward = Math.floor(order.amount / 100);
+        updateCoins(coinReward);
+        showNotification(
+          action === 'buy' ? "Book Purchased!" : "Book Rented!",
+          `Transaction successful! Earned ${coinReward} coins`,
+          "success"
+        );
+        queryClient.invalidateQueries({ queryKey: ["/api/books"] });
+      } else {
+        showNotification("Purchase Failed", "Unable to complete transaction", "error");
+      }
+    } catch (error) {
+      showNotification("Purchase Failed", "Network error occurred", "error");
+    }
+  };
+
+  const handleReadBook = (book: any) => {
+    if (!user) {
+      showNotification("Login Required", "Please login to access reading", "error");
+      return;
+    }
+    
+    // Navigate to e-book reader with book data
+    setLocation(`/ebook-reader?book=${encodeURIComponent(JSON.stringify(book))}`);
   };
 
   if (!user) {
@@ -799,23 +841,70 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                   {products.filter(p => p.module === "read").map((book) => (
-                    <div key={book.id} className="group cursor-pointer" onClick={() => handleProductClick(book.name)}>
-                      <img 
-                        src={book.imageUrl} 
-                        alt={book.name}
-                        className="w-full h-48 object-cover rounded-lg mb-3 group-hover:scale-105 transition-transform"
-                      />
-                      <h4 className="font-semibold text-sm">{book.name}</h4>
-                      <p className="text-xs text-gray-500">{book.metadata?.author}</p>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="text-sm font-bold text-indigo-600">₹{(book.price / 100).toLocaleString()}</div>
-                        {book.metadata?.rentalPrice && (
-                          <div className="text-xs text-purple-600">₹{(book.metadata.rentalPrice / 100)}/week</div>
-                        )}
+                    <div key={book.id} className="group bg-white rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                      <div className="relative">
+                        <img 
+                          src={book.imageUrl} 
+                          alt={book.name}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Badge variant="secondary" className="bg-white/90 text-indigo-700">
+                            {book.metadata?.type || "Physical"}
+                          </Badge>
+                        </div>
                       </div>
-                      <Badge variant="secondary" className="mt-1 text-green-600 bg-green-50">
-                        +{Math.floor(book.price / 10000)} coins on purchase
-                      </Badge>
+                      <div className="p-4">
+                        <h4 className="font-semibold text-sm mb-1">{book.name}</h4>
+                        <p className="text-xs text-gray-500 mb-3">{book.metadata?.author}</p>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="text-sm font-bold text-indigo-600">₹{(book.price / 100).toLocaleString()}</div>
+                          {book.metadata?.rentalPrice && (
+                            <div className="text-xs text-purple-600">₹{(book.metadata.rentalPrice / 100)}/week</div>
+                          )}
+                        </div>
+                        <div className="flex gap-1 mb-2">
+                          <Button 
+                            size="sm" 
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBookPurchase(book.id, 'buy');
+                            }}
+                          >
+                            Buy
+                          </Button>
+                          {book.metadata?.rentalPrice && (
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="flex-1 text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleBookPurchase(book.id, 'rent');
+                              }}
+                            >
+                              Rent
+                            </Button>
+                          )}
+                          {book.metadata?.type === "digital" && (
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="px-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleReadBook(book);
+                              }}
+                            >
+                              <BookOpen className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                        <Badge variant="secondary" className="w-full text-center text-green-600 bg-green-50">
+                          +{Math.floor(book.price / 10000)} coins on purchase
+                        </Badge>
+                      </div>
                     </div>
                   ))}
                 </div>

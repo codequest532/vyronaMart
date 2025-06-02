@@ -38,7 +38,24 @@ export default function EbookReader() {
     queryKey: ["/api/books"],
   });
 
-  const digitalBooks = books.filter((book: any) => book.type === 'digital');
+  const digitalBooks = Array.isArray(books) ? books.filter((book: any) => book.type === 'digital') : [];
+
+  // Check for book passed via URL parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookParam = urlParams.get('book');
+    if (bookParam) {
+      try {
+        const bookData = JSON.parse(decodeURIComponent(bookParam));
+        setSelectedBook(bookData);
+        setIsReading(true);
+        setCurrentPage(1);
+        setReadingProgress(0);
+      } catch (error) {
+        console.error('Error parsing book data from URL:', error);
+      }
+    }
+  }, []);
 
   const sampleContent = `
     Chapter 1: Introduction to Modern Web Development
