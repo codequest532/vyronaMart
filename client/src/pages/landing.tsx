@@ -399,9 +399,7 @@ export default function Landing() {
               <span className="cursor-pointer hover:underline">VyronaRead</span>
               <span className="cursor-pointer hover:underline">MallConnect</span>
             </div>
-            <div className="text-xs text-blue-200">
-              🎮 Gamified Shopping • 🏆 Earn Rewards • 🎯 Social Shopping
-            </div>
+
           </div>
         </div>
       </nav>
