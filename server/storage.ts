@@ -16,7 +16,7 @@ import {
   type GroupBuyProduct, type InsertGroupBuyProduct, type GroupBuyCampaign, type InsertGroupBuyCampaign,
   type GroupBuyParticipant, type InsertGroupBuyParticipant
 } from "@shared/schema";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, and, isNull } from "drizzle-orm";
 import {
   libraryIntegrationRequests,

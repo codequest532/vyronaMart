@@ -1,5 +1,9 @@
 // Direct database test for room creation
-const { Pool } = require('@neondatabase/serverless');
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
+
+// Configure WebSocket for Neon
+neonConfig.webSocketConstructor = ws;
 
 async function testRoomCreation() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
