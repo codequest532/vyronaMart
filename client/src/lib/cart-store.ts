@@ -32,12 +32,12 @@ export const useCartStore = create<CartStore>()(
         
         addItem: (newItem) => {
           const items = get().items;
-          const existingItem = items.find(item => item.productId === newItem.productId);
+          const existingItem = items.find(item => item.productId === newItem.productId && item.isGroupBuy === newItem.isGroupBuy);
           
           if (existingItem) {
             set({
               items: items.map(item =>
-                item.productId === newItem.productId
+                item.productId === newItem.productId && item.isGroupBuy === newItem.isGroupBuy
                   ? { ...item, quantity: item.quantity + newItem.quantity }
                   : item
               )
@@ -88,5 +88,71 @@ export const useCartStore = create<CartStore>()(
         name: 'vyronasocial-cart',
       }
     )
+  )
+);
+
+// Separate store for group buy items
+export const useGroupBuyCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      
+      addItem: (newItem) => {
+        const items = get().items;
+        const existingItem = items.find(item => item.productId === newItem.productId);
+        
+        if (existingItem) {
+          set({
+            items: items.map(item =>
+              item.productId === newItem.productId
+                ? { ...item, quantity: item.quantity + newItem.quantity }
+                : item
+            )
+          });
+        } else {
+          const id = Date.now() + Math.random();
+          set({
+            items: [...items, { ...newItem, id }]
+          });
+        }
+      },
+      
+      removeItem: (id) => {
+        set({
+          items: get().items.filter(item => item.id !== id)
+        });
+      },
+      
+      updateQuantity: (id, quantity) => {
+        if (quantity <= 0) {
+          get().removeItem(id);
+          return;
+        }
+        
+        set({
+          items: get().items.map(item =>
+            item.id === id ? { ...item, quantity } : item
+          )
+        });
+      },
+      
+      clearCart: () => {
+        set({ items: [] });
+      },
+      
+      getTotalItems: () => {
+        return get().items.reduce((total, item) => total + item.quantity, 0);
+      },
+      
+      getTotalPrice: () => {
+        return get().items.reduce((total, item) => {
+          const price = item.discountedPrice || item.price;
+          return total + (price * item.quantity);
+        }, 0);
+      }
+    }),
+    {
+      name: 'vyronasocial-groupbuy-cart',
+    }
   )
 );

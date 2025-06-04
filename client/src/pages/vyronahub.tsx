@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useCartStore } from "@/lib/cart-store";
+import { useCartStore, useGroupBuyCartStore } from "@/lib/cart-store";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -47,6 +47,7 @@ export default function VyronaHub() {
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
   const { addItem, getTotalItems } = useCartStore();
+  const groupBuyCart = useGroupBuyCartStore();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -106,26 +107,39 @@ export default function VyronaHub() {
     }
   };
 
-  const joinGroupBuyMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      // Direct simulation of group buy functionality
-      return { success: true, productId, groupBuyDiscount: 25 };
-    },
-    onSuccess: (data) => {
+  const handleJoinGroupBuy = (product: any) => {
+    try {
+      // Add to separate group buy cart
+      const groupBuyItem = {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        discountedPrice: product.price * 0.75, // 25% group buy discount
+        quantity: 1,
+        imageUrl: product.imageUrl || "/api/placeholder/300/200",
+        isGroupBuy: true,
+        groupBuyDiscount: 25,
+        category: product.category
+      };
+
+      groupBuyCart.addItem(groupBuyItem);
+      
       toast({
         title: "Joined Group Buy!",
-        description: `Product added with ${data.groupBuyDiscount}% group buy discount. Share with friends to maximize savings!`,
+        description: `${product.name} added with 25% group buy discount. Redirecting to VyronaSocial...`,
       });
-    },
-    onError: (error: any) => {
+      
+      // Navigate to VyronaSocial tab for group buy checkout
+      setTimeout(() => setLocation("/social"), 1500);
+    } catch (error) {
       console.error("Group buy error:", error);
       toast({
         title: "Error", 
         description: "Failed to join group buy. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const filteredProducts = (products as any[])
     .filter((product: any) => {
@@ -289,10 +303,9 @@ export default function VyronaHub() {
                     <Button 
                       size="sm" 
                       className="w-full bg-red-500 hover:bg-red-600"
-                      onClick={() => joinGroupBuyMutation.mutate(groupProduct.id)}
-                      disabled={joinGroupBuyMutation.isPending}
+                      onClick={() => handleJoinGroupBuy(groupProduct)}
                     >
-                      {joinGroupBuyMutation.isPending ? "Creating Campaign..." : "Join Group Buy"}
+                      Join Group Buy
                     </Button>
                   </CardContent>
                 </Card>
