@@ -570,13 +570,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const requestData = {
         sellerId: 3, // Default seller ID for now
-        libraryName: req.body.name,
-        libraryType: req.body.type,
+        libraryName: req.body.libraryName || req.body.name,
+        libraryType: req.body.libraryType || req.body.type,
         address: req.body.address,
-        contactPerson: req.body.contact,
+        contactPerson: req.body.contactPerson || req.body.contact,
         phone: req.body.phone || null,
         email: req.body.email || null,
         description: req.body.description || null,
+        booksListCsv: req.body.booksListCsv || null,
       };
 
       // Create the request in the database
