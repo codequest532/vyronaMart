@@ -1944,7 +1944,7 @@ export class DatabaseStorage implements IStorage {
       .from(physicalBooks);
 
     if (libraryId) {
-      query = query.where(eq(physicalBooks.library_id, libraryId));
+      query = query.where(eq(physicalBooks.libraryId, libraryId));
     }
 
     const books = await query.orderBy(physicalBooks.title);

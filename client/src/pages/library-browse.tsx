@@ -87,7 +87,11 @@ export default function LibraryBrowse() {
     queryFn: async (): Promise<any[]> => {
       if (!selectedLibrary?.id) return [];
       const response = await fetch(`/api/library-books?libraryId=${selectedLibrary.id}`);
-      return response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch library books');
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!selectedLibrary?.id
   });
@@ -140,10 +144,10 @@ export default function LibraryBrowse() {
     membershipMutation.mutate(membershipData);
   };
 
-  const filteredBooks = libraryBooks?.filter(book =>
+  const filteredBooks = Array.isArray(libraryBooks) ? libraryBooks.filter(book =>
     book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     book.author?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  ) : [];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
