@@ -94,7 +94,7 @@ export default function VyronaRead() {
     }
   };
 
-  const handleBorrowBook = (book: any) => {
+  const openBorrowModal = (book: any) => {
     setSelectedBookForBorrow(book);
     setShowBorrowModal(true);
   };
@@ -177,27 +177,7 @@ export default function VyronaRead() {
     }
   };
 
-  // Handle book borrowing
-  const handleBorrowBook = async (book: any) => {
-    try {
-      const response = await fetch("/api/book-loans", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          bookId: book.id,
-          libraryId: selectedLibrary?.id,
-          borrowerId: 1, // Default user ID for now
-          dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
-        })
-      });
-      
-      if (response.ok) {
-        alert("Book borrowed successfully!");
-      }
-    } catch (error) {
-      console.error("Error borrowing book:", error);
-    }
-  };
+
 
   const { data: libraryRequests = [] } = useQuery({
     queryKey: ["/api/admin/library-requests"],
@@ -434,7 +414,7 @@ export default function VyronaRead() {
                             <Button 
                               size="sm" 
                               className="w-full bg-green-600 hover:bg-green-700"
-                              onClick={() => handleBorrowBook(book)}
+                              onClick={() => openBorrowModal(book)}
                             >
                               <BookOpen className="mr-1 h-3 w-3" />
                               Borrow Book
@@ -491,6 +471,7 @@ export default function VyronaRead() {
                         <Button 
                           size="sm" 
                           className="w-full bg-blue-600 hover:bg-blue-700"
+                          onClick={() => handleReadEBook(ebook)}
                         >
                           <BookOpen className="mr-1 h-3 w-3" />
                           Read E-Book
@@ -601,6 +582,176 @@ export default function VyronaRead() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Borrow Book Modal */}
+      <Dialog open={showBorrowModal} onOpenChange={setShowBorrowModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Borrow Book Request</DialogTitle>
+          </DialogHeader>
+          
+          {selectedBookForBorrow && (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h4 className="font-semibold text-gray-900">{selectedBookForBorrow.title}</h4>
+                <p className="text-sm text-gray-600">by {selectedBookForBorrow.author || "Unknown Author"}</p>
+                <Badge variant="secondary" className="mt-1">{selectedBookForBorrow.genre || "General"}</Badge>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="borrowerName">Full Name</Label>
+                  <Input id="borrowerName" placeholder="Enter your full name" />
+                </div>
+                
+                <div>
+                  <Label htmlFor="borrowerEmail">Email Address</Label>
+                  <Input id="borrowerEmail" type="email" placeholder="Enter your email" />
+                </div>
+                
+                <div>
+                  <Label htmlFor="borrowerPhone">Phone Number</Label>
+                  <Input id="borrowerPhone" placeholder="Enter your phone number" />
+                </div>
+                
+                <div>
+                  <Label htmlFor="borrowReason">Reason for Borrowing</Label>
+                  <Textarea id="borrowReason" placeholder="Why do you need this book?" />
+                </div>
+              </div>
+              
+              <div className="flex space-x-2 pt-4">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowBorrowModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    const formData = {
+                      borrowerName: (document.getElementById('borrowerName') as HTMLInputElement)?.value,
+                      borrowerEmail: (document.getElementById('borrowerEmail') as HTMLInputElement)?.value,
+                      borrowerPhone: (document.getElementById('borrowerPhone') as HTMLInputElement)?.value,
+                      borrowReason: (document.getElementById('borrowReason') as HTMLTextAreaElement)?.value,
+                    };
+                    submitBorrowRequest(formData);
+                  }}
+                >
+                  Submit Request
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* E-Reader Modal with Sample Pages */}
+      <Dialog open={showEReader} onOpenChange={setShowEReader}>
+        <DialogContent className="sm:max-w-4xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>VyronaRead E-Reader</DialogTitle>
+          </DialogHeader>
+          
+          {selectedEBook && (
+            <div className="flex flex-col h-full">
+              <div className="p-3 bg-gray-50 rounded-lg mb-4">
+                <h4 className="font-semibold text-gray-900">{selectedEBook.title}</h4>
+                <p className="text-sm text-gray-600">by {selectedEBook.author || "Unknown Author"}</p>
+                <Badge variant="secondary" className="mt-1">{selectedEBook.genre || "General"}</Badge>
+              </div>
+              
+              {/* Sample Pages Content */}
+              <div className="flex-1 bg-white border rounded-lg p-6 overflow-y-auto">
+                {currentPage === 1 && (
+                  <div className="space-y-4">
+                    <h1 className="text-2xl font-bold text-center mb-6">{selectedEBook.title}</h1>
+                    <div className="space-y-4 text-justify leading-relaxed">
+                      <p>This is a sample preview of the e-book. You can read the first few pages to get a feel for the content and writing style.</p>
+                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    </div>
+                  </div>
+                )}
+                
+                {currentPage === 2 && (
+                  <div className="space-y-4">
+                    <h2 className="text-xl font-semibold mb-4">Chapter 1: Introduction</h2>
+                    <div className="space-y-4 text-justify leading-relaxed">
+                      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+                      <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+                      <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+                    </div>
+                  </div>
+                )}
+                
+                {currentPage === 3 && (
+                  <div className="space-y-4">
+                    <div className="text-center py-8">
+                      <BookOpen className="mx-auto h-16 w-16 text-blue-600 mb-4" />
+                      <h3 className="text-xl font-semibold mb-2">Continue Reading</h3>
+                      <p className="text-gray-600 mb-6">To access the full e-book, please complete your purchase.</p>
+                      <Button 
+                        size="lg"
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={proceedToEBookCheckout}
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Purchase Full E-Book - ₹{Math.floor((selectedEBook.price || 1999) / 100)}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Navigation Controls */}
+              <div className="flex items-center justify-between pt-4 border-t">
+                <div className="flex items-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={currentPage <= 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of 3 (Sample)
+                  </span>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={currentPage >= 3}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" onClick={() => setShowEReader(false)}>
+                    Close Reader
+                  </Button>
+                  {currentPage < 3 && (
+                    <Button 
+                      className="bg-blue-600 hover:bg-blue-700"
+                      onClick={proceedToEBookCheckout}
+                    >
+                      Purchase Full Access
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
