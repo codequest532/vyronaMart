@@ -1087,7 +1087,7 @@ export class DatabaseStorage implements IStorage {
       ...sampleBooks[2],
       sellerId: 2, // Default seller ID
       fileUrl: "https://example.com/book.pdf",
-      fileSize: "2.5MB",
+      fileSize: 2621440, // 2.5MB in bytes
       format: "PDF",
       downloads: 0
     };
