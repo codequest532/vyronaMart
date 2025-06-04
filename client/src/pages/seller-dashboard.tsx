@@ -99,6 +99,13 @@ export default function SellerDashboard() {
     email: "",
     description: ""
   });
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    mainImage: File | null;
+    additionalMedia: File[];
+  }>({
+    mainImage: null,
+    additionalMedia: [],
+  });
 
   // Form for adding products
   const productForm = useForm<z.infer<typeof productSchema>>({
@@ -124,7 +131,10 @@ export default function SellerDashboard() {
 
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
-      return await apiRequest("/api/products", productData);
+      return await apiRequest("/api/products", {
+        method: "POST",
+        body: JSON.stringify({ ...productData, module: "vyronahub" }),
+      });
     },
     onSuccess: () => {
       toast({
@@ -133,6 +143,7 @@ export default function SellerDashboard() {
       });
       setShowAddProductDialog(false);
       productForm.reset();
+      setUploadedFiles({ mainImage: null, additionalMedia: [] });
       queryClient.invalidateQueries({ queryKey: ["/api/seller/products"] });
     },
     onError: (error: any) => {
@@ -143,6 +154,31 @@ export default function SellerDashboard() {
       });
     },
   });
+
+  const handleFileUpload = (files: FileList | null, type: 'main' | 'additional') => {
+    if (!files) return;
+    
+    if (type === 'main') {
+      setUploadedFiles(prev => ({ ...prev, mainImage: files[0] }));
+    } else {
+      const newFiles = Array.from(files);
+      setUploadedFiles(prev => ({
+        ...prev,
+        additionalMedia: [...prev.additionalMedia, ...newFiles].slice(0, 7)
+      }));
+    }
+  };
+
+  const removeFile = (index: number, type: 'main' | 'additional') => {
+    if (type === 'main') {
+      setUploadedFiles(prev => ({ ...prev, mainImage: null }));
+    } else {
+      setUploadedFiles(prev => ({
+        ...prev,
+        additionalMedia: prev.additionalMedia.filter((_, i) => i !== index)
+      }));
+    }
+  };
 
   const createLibraryRequestMutation = useMutation({
     mutationFn: async (libraryData: any) => {
@@ -2508,16 +2544,105 @@ export default function SellerDashboard() {
                   />
                 </TabsContent>
                 
-                <TabsContent value="images" className="space-y-4 mt-6">
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                    <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Product Images</h3>
-                    <p className="text-gray-600 mb-4">
-                      Add high-quality images to showcase your product
-                    </p>
-                    <Button type="button" variant="outline">
-                      Choose Files
-                    </Button>
+                <TabsContent value="images" className="space-y-6 mt-6">
+                  {/* Main Product Image */}
+                  <div className="space-y-4">
+                    <Label className="text-lg font-medium">Main Product Image</Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                      {uploadedFiles.mainImage ? (
+                        <div className="relative">
+                          <img 
+                            src={URL.createObjectURL(uploadedFiles.mainImage)} 
+                            alt="Main product" 
+                            className="w-32 h-32 object-cover rounded-lg mx-auto"
+                          />
+                          <Button 
+                            type="button"
+                            variant="destructive" 
+                            size="sm"
+                            className="absolute -top-2 -right-2"
+                            onClick={() => removeFile(0, 'main')}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <div className="space-y-2">
+                            <Label htmlFor="main-image" className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 inline-block">
+                              Upload Main Image
+                            </Label>
+                            <Input
+                              id="main-image"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileUpload(e.target.files, 'main')}
+                              className="hidden"
+                            />
+                            <p className="text-sm text-gray-500">JPG, PNG up to 10MB</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Additional Media */}
+                  <div className="space-y-4">
+                    <Label className="text-lg font-medium">Additional Images & Videos (Optional)</Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                      <div className="space-y-4">
+                        {uploadedFiles.additionalMedia.length > 0 && (
+                          <div className="grid grid-cols-3 gap-4">
+                            {uploadedFiles.additionalMedia.map((file, index) => (
+                              <div key={index} className="relative">
+                                {file.type.startsWith('image/') ? (
+                                  <img 
+                                    src={URL.createObjectURL(file)} 
+                                    alt={`Additional ${index + 1}`} 
+                                    className="w-full h-24 object-cover rounded-lg"
+                                  />
+                                ) : (
+                                  <div className="w-full h-24 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <span className="text-sm text-gray-600">Video {index + 1}</span>
+                                  </div>
+                                )}
+                                <Button 
+                                  type="button"
+                                  variant="destructive" 
+                                  size="sm"
+                                  className="absolute -top-2 -right-2"
+                                  onClick={() => removeFile(index, 'additional')}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {uploadedFiles.additionalMedia.length < 7 && (
+                          <div className="text-center">
+                            <div className="space-y-2">
+                              <Label htmlFor="additional-media" className="cursor-pointer bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 inline-block">
+                                Add More Media
+                              </Label>
+                              <Input
+                                id="additional-media"
+                                type="file"
+                                accept="image/*,video/*"
+                                multiple
+                                onChange={(e) => handleFileUpload(e.target.files, 'additional')}
+                                className="hidden"
+                              />
+                              <p className="text-sm text-gray-500">
+                                Up to {7 - uploadedFiles.additionalMedia.length} more files (Images: JPG, PNG | Videos: MP4, MOV up to 50MB each)
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </TabsContent>
                 
