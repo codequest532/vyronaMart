@@ -180,6 +180,70 @@ export default function VyronaSocial() {
     }
   });
 
+  // Delete Room Mutation (Admin Only)
+  const deleteRoomMutation = useMutation({
+    mutationFn: async (roomId: number) => {
+      const response = await fetch(`/api/vyronasocial/rooms/${roomId}`, {
+        method: "DELETE",
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete room");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Room Deleted",
+        description: "The shopping room has been deleted successfully."
+      });
+      setCurrentView("dashboard");
+      setSelectedRoomId(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error Deleting Room",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Exit Room Mutation
+  const exitRoomMutation = useMutation({
+    mutationFn: async (roomId: number) => {
+      const response = await fetch(`/api/vyronasocial/rooms/${roomId}/exit`, {
+        method: "POST",
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to exit room");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Exited Room",
+        description: "You have left the shopping room."
+      });
+      setCurrentView("dashboard");
+      setSelectedRoomId(null);
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error Exiting Room",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
   // Handle pending group buy product from VyronaHub
   useEffect(() => {
     const pendingProduct = localStorage.getItem('pendingGroupBuyProduct');
@@ -489,10 +553,36 @@ export default function VyronaSocial() {
           <div>
             <h2 className="text-2xl font-bold">{roomData?.name || "Shopping Room"}</h2>
             <p className="text-gray-600">Category: {roomData?.category}</p>
+            <p className="text-sm text-gray-500">Room Code: {roomData?.roomCode}</p>
           </div>
-          <Button variant="outline" onClick={handleLeaveRoom}>
-            Leave Room
-          </Button>
+          <div className="flex gap-2">
+            {/* Show Delete Room button only for admin/creator */}
+            {roomData?.creatorId === 1 && (
+              <Button 
+                variant="destructive" 
+                size="sm"
+                onClick={() => deleteRoomMutation.mutate(selectedRoomId!)}
+                disabled={deleteRoomMutation.isPending}
+              >
+                {deleteRoomMutation.isPending ? "Deleting..." : "Delete Room"}
+              </Button>
+            )}
+            
+            {/* Show Exit Room button for non-admin users */}
+            {roomData?.creatorId !== 1 ? (
+              <Button 
+                variant="outline" 
+                onClick={() => exitRoomMutation.mutate(selectedRoomId!)}
+                disabled={exitRoomMutation.isPending}
+              >
+                {exitRoomMutation.isPending ? "Exiting..." : "Exit Room"}
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={handleLeaveRoom}>
+                Leave Room
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Room Interface Grid */}

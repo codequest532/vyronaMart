@@ -182,7 +182,7 @@ export const instagramProducts = pgTable("instagram_products", {
   productName: text("product_name").notNull(),
   description: text("description"),
   price: integer("price").notNull(), // in cents
-  currency: text("currency").default("USD"),
+  currency: text("currency").default("INR"),
   imageUrl: text("image_url"),
   productUrl: text("product_url"),
   isAvailable: boolean("is_available").default(true),

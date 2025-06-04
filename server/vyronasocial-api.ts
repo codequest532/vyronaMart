@@ -147,4 +147,75 @@ export function setupVyronaSocialAPI(app: express.Application) {
       await pool.end();
     }
   });
+
+  // Delete Room (Admin Only)
+  app.delete("/api/vyronasocial/rooms/:id", async (req, res) => {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    try {
+      const roomId = parseInt(req.params.id);
+      const userId = 1; // From session when auth is implemented
+      
+      // Check if user is the creator/admin of the room
+      const roomResult = await pool.query(`
+        SELECT * FROM shopping_groups WHERE id = $1 AND creator_id = $2
+      `, [roomId, userId]);
+      
+      if (roomResult.rows.length === 0) {
+        return res.status(403).json({ error: "Only room admin can delete the room" });
+      }
+      
+      // Delete the room (CASCADE will remove members and messages)
+      await pool.query(`
+        DELETE FROM shopping_groups WHERE id = $1
+      `, [roomId]);
+      
+      res.json({ message: "Room deleted successfully" });
+    } catch (error) {
+      console.error("Delete room error:", error);
+      res.status(500).json({ error: "Failed to delete room" });
+    } finally {
+      await pool.end();
+    }
+  });
+
+  // Exit Room
+  app.post("/api/vyronasocial/rooms/:id/exit", async (req, res) => {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    try {
+      const roomId = parseInt(req.params.id);
+      const userId = 1; // From session when auth is implemented
+      
+      // Check if user is in the room
+      const memberResult = await pool.query(`
+        SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, userId]);
+      
+      if (memberResult.rows.length === 0) {
+        return res.status(400).json({ error: "You are not a member of this room" });
+      }
+      
+      // Check if user is the creator
+      const roomResult = await pool.query(`
+        SELECT creator_id FROM shopping_groups WHERE id = $1
+      `, [roomId]);
+      
+      if (roomResult.rows[0]?.creator_id === userId) {
+        return res.status(400).json({ error: "Room admin cannot exit. Please delete the room instead." });
+      }
+      
+      // Remove user from room
+      await pool.query(`
+        DELETE FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, userId]);
+      
+      res.json({ message: "Exited room successfully" });
+    } catch (error) {
+      console.error("Exit room error:", error);
+      res.status(500).json({ error: "Failed to exit room" });
+    } finally {
+      await pool.end();
+    }
+  });
 }
