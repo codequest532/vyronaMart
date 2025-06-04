@@ -388,9 +388,9 @@ export default function Home() {
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="text-lg font-bold text-purple-600">${book.price}</span>
+                              <span className="text-lg font-bold text-purple-600">₹{book.price}</span>
                               {book.type === 'digital' && (
-                                <span className="text-xs text-gray-500">or rent $2.99</span>
+                                <span className="text-xs text-gray-500">or rent ₹2.99</span>
                               )}
                             </div>
                             <div className="flex gap-1">

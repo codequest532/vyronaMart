@@ -770,16 +770,16 @@ export default function VyronaSocial() {
                   <div className="text-sm">
                     <div className="flex justify-between">
                       <span>Subtotal:</span>
-                      <span>$240.00</span>
+                      <span>₹240.00</span>
                     </div>
                     <div className="flex justify-between text-green-600">
                       <span>Group Discount:</span>
-                      <span>-$36.00</span>
+                      <span>-₹36.00</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-semibold">
                       <span>Total:</span>
-                      <span>$204.00</span>
+                      <span>₹204.00</span>
                     </div>
                   </div>
                   
