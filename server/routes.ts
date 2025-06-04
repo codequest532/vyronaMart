@@ -874,26 +874,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = 1; // From session when auth is implemented
       const groupData = {
-        ...req.body,
+        name: req.body.name,
+        description: req.body.description,
+        category: req.body.category || "general",
+        privacy: req.body.privacy || "public",
         creatorId: userId,
-        isActive: true,
-        memberCount: 1,
-        totalCart: 0,
-        roomCode: Math.random().toString(36).substring(2, 8).toUpperCase()
+        maxMembers: req.body.maxMembers || 10
       };
       
       console.log("Creating shopping group with data:", groupData);
       const group = await storage.createShoppingGroup(groupData);
       console.log("Created group:", group);
-      
-      // Add creator as first member
-      const memberData = {
-        groupId: group.id,
-        userId: userId,
-        role: "creator"
-      };
-      console.log("Adding group member with data:", memberData);
-      await storage.addGroupMember(memberData);
       
       res.json(group);
     } catch (error) {

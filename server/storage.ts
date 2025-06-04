@@ -672,14 +672,20 @@ export class DatabaseStorage implements IStorage {
 
   // VyronaSocial - Shopping Groups
   async createShoppingGroup(insertGroup: InsertShoppingGroup): Promise<ShoppingGroup> {
-    // Create room with only existing schema fields
+    // Create room with required schema fields
+    const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const [group] = await db
       .insert(shoppingGroups)
       .values({
         name: insertGroup.name,
         description: insertGroup.description,
+        category: insertGroup.category || "general",
+        privacy: insertGroup.privacy || "public",
+        roomCode: roomCode,
         creatorId: insertGroup.creatorId,
         isActive: true,
+        memberCount: 1,
+        totalCart: 0,
         maxMembers: insertGroup.maxMembers || 10,
         createdAt: new Date()
       })
