@@ -247,48 +247,43 @@ export default function VyronaRead() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availableLibraries.length > 0 ? availableLibraries.map((library, index) => (
+            {availableLibraries.length > 0 ? availableLibraries.map((library: any, index: number) => (
               <Card key={index} className="border border-gray-200 hover:border-green-300 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
                       <Library className="text-green-600 h-5 w-5" />
-                      <h4 className="font-semibold text-sm">{library.name}</h4>
+                      <h4 className="font-semibold text-sm">{library.name || "Library"}</h4>
                     </div>
-                    <Badge 
-                      variant={library.status === "Connected" ? "default" : "secondary"}
-                      className={library.status === "Connected" ? "bg-green-100 text-green-700" : ""}
-                    >
-                      {library.status}
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                      Available
                     </Badge>
                   </div>
                   
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex justify-between">
-                      <span>Books Available:</span>
-                      <span className="font-medium">{library.books.toLocaleString()}</span>
+                      <span>Status:</span>
+                      <span className="font-medium">{library.name || "Library"}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Distance:</span>
-                      <span className="font-medium">{library.distance}</span>
+                      <span>Type:</span>
+                      <span className="font-medium">{library.type || "Public"}</span>
                     </div>
                   </div>
                   
                   <div className="mt-3">
-                    {library.status === "Connected" ? (
-                      <Button size="sm" className="w-full" variant="outline">
-                        <BookOpen className="mr-1 h-3 w-3" />
-                        Browse Catalog
-                      </Button>
-                    ) : (
-                      <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
-                        Connect Library
-                      </Button>
-                    )}
+                    <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
+                      <BookOpen className="mr-1 h-3 w-3" />
+                      Connect Library
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">No libraries available for connection.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -368,25 +363,25 @@ export default function VyronaRead() {
           <h3 className="text-lg font-bold text-gray-900 mb-4">📖 Currently Reading</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {currentlyReadingBooks.length > 0 ? currentlyReadingBooks.map((order, index) => (
+            {currentlyReadingBooks.length > 0 ? currentlyReadingBooks.map((order: any, index: number) => (
               <Card key={index} className="border border-gray-200">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
-                    <div className="text-3xl">{book.cover}</div>
+                    <div className="text-3xl">📚</div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">{book.title}</h4>
-                      <p className="text-sm text-gray-500 mb-2">by {book.author}</p>
+                      <h4 className="font-semibold text-gray-900 mb-1">Order #{order.id}</h4>
+                      <p className="text-sm text-gray-500 mb-2">Module: {order.module}</p>
                       
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-xs text-gray-600">
                           <span>Progress</span>
-                          <span>{book.progress}%</span>
+                          <span>65%</span>
                         </div>
-                        <Progress value={book.progress} className="h-2" />
+                        <Progress value={65} className="h-2" />
                         
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>Time left: {book.timeLeft}</span>
-                          <span>Last read: {book.lastRead}</span>
+                          <span>Amount: ₹{(order.totalAmount / 100).toFixed(0)}</span>
+                          <span>Status: {order.status}</span>
                         </div>
                       </div>
                       
