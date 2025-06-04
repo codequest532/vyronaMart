@@ -781,7 +781,7 @@ export default function AdminDashboard() {
                                 name="originalPrice"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>Original Price (USD)</FormLabel>
+                                    <FormLabel>Original Price (₹)</FormLabel>
                                     <FormControl>
                                       <Input 
                                         type="number" 
