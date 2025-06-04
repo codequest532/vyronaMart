@@ -1803,42 +1803,60 @@ export default function SellerDashboard() {
                       <CardContent>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm">Active Readers</span>
-                            <span className="font-bold text-blue-600">3,280</span>
+                            <span className="text-sm">Active Orders</span>
+                            <span className="font-bold text-blue-600">
+                              {sellerOrders?.filter((order: any) => order.module === 'vyronaread').length || 0}
+                            </span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm">Daily Reading Time</span>
-                            <span className="font-bold text-green-600">2.5 hrs avg</span>
+                            <span className="text-sm">E-Books Available</span>
+                            <span className="font-bold text-green-600">
+                              {sellerEBooks?.length || 0} titles
+                            </span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm">Books Completed</span>
-                            <span className="font-bold text-purple-600">1,256 this month</span>
+                            <span className="text-sm">Physical Books</span>
+                            <span className="font-bold text-purple-600">
+                              {sellerBooks?.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length || 0} titles
+                            </span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-sm">Engagement Rate</span>
-                            <span className="font-bold text-orange-600">78%</span>
+                            <span className="text-sm">Library Connections</span>
+                            <span className="font-bold text-orange-600">
+                              {libraryBooks?.length || 0} integrated
+                            </span>
                           </div>
                         </div>
 
                         <div className="mt-6">
-                          <h4 className="font-semibold mb-3">Popular Reading Features</h4>
+                          <h4 className="font-semibold mb-3">Order Status Distribution</h4>
                           <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Night Mode</span>
-                              <span className="font-medium">95% users</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span>Bookmarks</span>
-                              <span className="font-medium">87% users</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span>Highlights</span>
-                              <span className="font-medium">65% users</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span>Notes</span>
-                              <span className="font-medium">42% users</span>
-                            </div>
+                            {sellerOrders && sellerOrders.filter((order: any) => order.module === 'vyronaread').length > 0 ? (
+                              <>
+                                <div className="flex justify-between text-sm">
+                                  <span>Completed Orders</span>
+                                  <span className="font-medium">
+                                    {sellerOrders.filter((order: any) => order.module === 'vyronaread' && order.status === 'completed').length}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span>Processing Orders</span>
+                                  <span className="font-medium">
+                                    {sellerOrders.filter((order: any) => order.module === 'vyronaread' && order.status === 'processing').length}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span>Pending Orders</span>
+                                  <span className="font-medium">
+                                    {sellerOrders.filter((order: any) => order.module === 'vyronaread' && order.status === 'pending').length}
+                                  </span>
+                                </div>
+                              </>
+                            ) : (
+                              <div className="text-center py-4 text-gray-500">
+                                <p className="text-sm">No VyronaRead orders yet</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </CardContent>
