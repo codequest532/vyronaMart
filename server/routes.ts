@@ -882,20 +882,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         roomCode: Math.random().toString(36).substring(2, 8).toUpperCase()
       };
       
+      console.log("Creating shopping group with data:", groupData);
       const group = await storage.createShoppingGroup(groupData);
+      console.log("Created group:", group);
       
       // Add creator as first member
-      await storage.addGroupMember({
+      const memberData = {
         groupId: group.id,
         userId: userId,
-        role: "creator",
-        joinedAt: new Date()
-      });
+        role: "creator"
+      };
+      console.log("Adding group member with data:", memberData);
+      await storage.addGroupMember(memberData);
       
       res.json(group);
     } catch (error) {
       console.error("Error creating shopping group:", error);
-      res.status(500).json({ message: "Failed to create shopping group" });
+      console.error("Error details:", error.message);
+      console.error("Stack trace:", error.stack);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
