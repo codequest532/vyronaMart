@@ -247,6 +247,64 @@ export default function SellerDashboard() {
     queryKey: ["/api/seller/products"],
   });
 
+  const { data: vyronaReadBooks = [] } = useQuery({
+    queryKey: ["/api/vyronaread/books"],
+    queryFn: () => apiRequest("/api/products?module=vyronaread"),
+  });
+
+  const addBookMutation = useMutation({
+    mutationFn: async (bookData: any) => {
+      return await apiRequest("/api/vyronaread/books", bookData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Book Added Successfully",
+        description: "Your book has been added to VyronaRead catalog.",
+      });
+      setShowAddBookDialog(false);
+      setNewBook({
+        title: "",
+        author: "",
+        isbn: "",
+        category: "",
+        copies: 1,
+        description: "",
+        publisher: "",
+        publicationYear: "",
+        language: "English"
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/books"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to add book",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddBook = () => {
+    if (!newBook.title || !newBook.author || !newBook.isbn || !newBook.category) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    addBookMutation.mutate({
+      title: newBook.title,
+      author: newBook.author,
+      isbn: newBook.isbn,
+      genre: newBook.category,
+      price: Math.floor(Math.random() * 100000) + 29900,
+      category: "books",
+      format: "physical"
+    });
+  };
+
   const { data: sellerOrders = [] } = useQuery({
     queryKey: ["/api/seller/orders"],
   });
@@ -287,23 +345,7 @@ export default function SellerDashboard() {
     setLocation("/login");
   };
 
-  const handleAddBook = () => {
-    // For now, we'll just close the dialog and reset the form
-    // In a real implementation, this would send data to the API
-    console.log("Adding book:", newBook);
-    setShowAddBookDialog(false);
-    setNewBook({
-      title: "",
-      author: "",
-      isbn: "",
-      category: "",
-      copies: 1,
-      description: "",
-      publisher: "",
-      publicationYear: "",
-      language: "English"
-    });
-  };
+
 
   const handleInputChange = (field: string, value: string | number) => {
     setNewBook(prev => ({

@@ -250,6 +250,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/products", async (req, res) => {
+    try {
+      const product = await storage.createProduct(req.body);
+      res.json(product);
+    } catch (error) {
+      console.error("Error creating product:", error);
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  // VyronaRead - Add book through seller dashboard
+  app.post("/api/vyronaread/books", async (req, res) => {
+    try {
+      const { title, author, isbn, genre, price, category, format, fileUrl } = req.body;
+      
+      const bookProduct = {
+        name: title,
+        description: `${author} - ${genre}`,
+        price: price || Math.floor(Math.random() * 100000) + 29900,
+        category: category || (format === "ebook" ? "ebooks" : "books"),
+        module: "vyronaread",
+        metadata: {
+          author,
+          isbn,
+          genre,
+          format: format || "physical",
+          fileUrl: fileUrl || null
+        }
+      };
+      
+      const product = await storage.createProduct(bookProduct);
+      res.json(product);
+    } catch (error) {
+      console.error("Error adding VyronaRead book:", error);
+      res.status(500).json({ message: "Failed to add book" });
+    }
+  });
+
   // Store routes
   app.get("/api/stores", async (req, res) => {
     try {
