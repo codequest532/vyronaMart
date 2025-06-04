@@ -345,33 +345,61 @@ export default function VyronaRead() {
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">VyronaRead E-Reader</h3>
+            <h3 className="text-lg font-bold text-gray-900">📱 VyronaRead E-Reader</h3>
             <Badge variant="outline" className="text-blue-700">Kindle-like Experience</Badge>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">Reading Features</h4>
-              <div className="space-y-3">
-                {[
-                  { feature: "Customizable Font Size", icon: Type },
-                  { feature: "Night Mode Reading", icon: Moon },
-                  { feature: "Bookmark Management", icon: Bookmark },
-                  { feature: "Progress Tracking", icon: FileText },
-                  { feature: "Highlight & Notes", icon: Edit },
-                  { feature: "Offline Reading", icon: Download }
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <item.icon className="h-5 w-5 text-purple-600" />
-                    <span className="text-gray-700">{item.feature}</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.isArray(sellerEBooks) && sellerEBooks.length > 0 ? sellerEBooks.map((ebook: any, index: number) => (
+              <Card key={index} className="border border-gray-200 hover:border-blue-300 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex space-x-3">
+                    <div className="w-12 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="text-blue-600 h-6 w-6" />
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="mb-2">
+                        <h5 className="font-semibold text-sm text-gray-900 truncate">{ebook.title}</h5>
+                        <p className="text-xs text-gray-500 mb-2">by {ebook.author || "Unknown Author"}</p>
+                        <Badge variant="secondary" className="text-xs">{ebook.genre || "General"}</Badge>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center space-x-1">
+                            <FileText className="text-blue-600 h-3 w-3" />
+                            <span className="text-xs">{ebook.pages || "PDF"}</span>
+                          </div>
+                          <span className="text-xs text-gray-600">{ebook.fileSize || "2.5MB"}</span>
+                        </div>
+                        
+                        <Button 
+                          size="sm" 
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                        >
+                          <BookOpen className="mr-1 h-3 w-3" />
+                          Read E-Book
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                </CardContent>
+              </Card>
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <BookOpen className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                <p className="text-gray-500 mb-2">No e-books available yet</p>
+                <p className="text-sm text-gray-400">E-books uploaded by sellers will appear here</p>
               </div>
-            </div>
+            )}
+          </div>
 
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">Reader Settings</h4>
-              <div className="space-y-4">
+          {/* Reader Settings */}
+          {Array.isArray(sellerEBooks) && sellerEBooks.length > 0 && (
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-semibold text-gray-900 mb-3">Reader Settings</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Reading Mode</span>
                   <div className="flex space-x-2">
@@ -406,7 +434,7 @@ export default function VyronaRead() {
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
