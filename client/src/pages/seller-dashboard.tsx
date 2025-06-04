@@ -343,10 +343,10 @@ export default function SellerDashboard() {
   });
 
   const handleAddBook = () => {
-    if (!newBook.title || !newBook.author || !newBook.isbn || !newBook.category) {
+    if (!newBook.title || !newBook.author || !newBook.category || !newBook.fixedCostPrice || !newBook.rentalPrice) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including pricing",
         variant: "destructive",
       });
       return;
@@ -356,10 +356,14 @@ export default function SellerDashboard() {
       title: newBook.title,
       author: newBook.author,
       isbn: newBook.isbn,
-      genre: newBook.category,
-      price: Math.floor(Math.random() * 100000) + 29900,
-      category: "books",
-      format: "physical"
+      category: newBook.category,
+      copies: newBook.copies,
+      description: newBook.description,
+      publisher: newBook.publisher,
+      publicationYear: newBook.publicationYear,
+      language: newBook.language,
+      fixedCostPrice: newBook.fixedCostPrice,
+      rentalPrice: newBook.rentalPrice
     });
   };
 
