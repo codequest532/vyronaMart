@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupRoomRoutes } from "./simple-rooms";
+import { setupVyronaSocialAPI } from "./vyronasocial-api";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
@@ -885,13 +886,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Creating shopping group with data:", JSON.stringify(groupData, null, 2));
       
-      // Use working room creation API
-      const { createRoom } = require('./room-api');
+      // Direct database implementation with clean schema
+      const { Pool, neonConfig } = await import('@neondatabase/serverless');
+      const ws = await import('ws');
       
-      const group = await createRoom(groupData.name, groupData.description, groupData.creatorId);
-      console.log("Created group:", JSON.stringify(group, null, 2));
+      neonConfig.webSocketConstructor = ws.default;
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL });
       
-      res.json(group);
+      try {
+        // Generate unique room code
+        const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        
+        // Insert room into clean database structure
+        const result = await pool.query(`
+          INSERT INTO shopping_groups (name, description, creator_id, is_active, max_members, room_code, created_at)
+          VALUES ($1, $2, $3, $4, $5, $6, NOW())
+          RETURNING *
+        `, [groupData.name, groupData.description || '', groupData.creatorId, true, groupData.maxMembers, roomCode]);
+        
+        const dbGroup = result.rows[0];
+        
+        // Add creator as member
+        await pool.query(`
+          INSERT INTO group_members (group_id, user_id, role, joined_at)
+          VALUES ($1, $2, $3, NOW())
+        `, [dbGroup.id, groupData.creatorId, 'creator']);
+        
+        // Format response with clean structure
+        const group = {
+          id: dbGroup.id,
+          name: dbGroup.name,
+          description: dbGroup.description,
+          category: "general",
+          privacy: "public",
+          creatorId: dbGroup.creator_id,
+          isActive: dbGroup.is_active,
+          memberCount: 1,
+          totalCart: 0,
+          currentGame: null,
+          roomCode: dbGroup.room_code,
+          scheduledTime: null,
+          maxMembers: dbGroup.max_members,
+          createdAt: dbGroup.created_at
+        };
+        
+        console.log("Created group:", JSON.stringify(group, null, 2));
+        res.json(group);
+      } finally {
+        await pool.end();
+      }
     } catch (error: any) {
       console.error("=== DETAILED ERROR INFORMATION ===");
       console.error("Error creating shopping group:", error);
@@ -1104,6 +1147,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup working room creation routes
   setupRoomRoutes(app);
+  
+  // Setup isolated VyronaSocial API
+  setupVyronaSocialAPI(app);
 
   const httpServer = createServer(app);
   return httpServer;
