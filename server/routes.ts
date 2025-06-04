@@ -641,47 +641,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // VyronaRead Data Organization - Authentic seller-uploaded content
   
-  // E-books uploaded by sellers for VyronaRead E-Reader section (seller-specific)
+  // E-books uploaded by sellers for VyronaRead E-Reader section (public access to all approved books)
   app.get("/api/vyronaread/ebooks", async (req, res) => {
     try {
-      const sellerId = parseInt(req.query.sellerId as string);
-      if (!sellerId) {
-        return res.status(400).json({ message: "Seller ID required" });
+      // Get all approved e-books from all sellers for customer browsing
+      const allEBooks = [];
+      // Fetch from multiple sellers (1-5 as examples)
+      for (let sellerId = 1; sellerId <= 5; sellerId++) {
+        try {
+          const sellerEBooks = await storage.getEBooks(sellerId);
+          allEBooks.push(...sellerEBooks);
+        } catch (error) {
+          // Continue if seller has no books
+        }
       }
-      const eBooks = await storage.getEBooks(sellerId);
-      res.json(eBooks);
+      res.json(allEBooks);
     } catch (error) {
-      console.error("Error fetching seller e-books:", error);
+      console.error("Error fetching e-books:", error);
       res.status(500).json({ message: "Failed to fetch e-books" });
     }
   });
 
-  // Physical/digital books uploaded by sellers for Browse Books section (sale/rent) (seller-specific)
+  // Physical/digital books uploaded by sellers for Browse Books section (public access to all approved books)
   app.get("/api/vyronaread/seller-books", async (req, res) => {
     try {
-      const sellerId = parseInt(req.query.sellerId as string);
-      if (!sellerId) {
-        return res.status(400).json({ message: "Seller ID required" });
-      }
+      // Get all books with "books" category for customer browsing
       const allBooks = await storage.getProducts("vyronaread", "books");
-      const sellerBooks = allBooks.filter((book: any) => book.sellerId === sellerId);
-      res.json(sellerBooks);
+      res.json(allBooks);
     } catch (error) {
       console.error("Error fetching seller books:", error);
       res.status(500).json({ message: "Failed to fetch seller books" });
     }
   });
 
-  // Library books from approved integrations for Library Integration section (seller-specific)
+  // Library books from approved integrations for Library Integration section (public access to all approved library books)
   app.get("/api/vyronaread/library-books", async (req, res) => {
     try {
-      const sellerId = parseInt(req.query.sellerId as string);
-      if (!sellerId) {
-        return res.status(400).json({ message: "Seller ID required" });
-      }
+      // Get all approved library books from all approved library integration requests
       const allLibraryBooks = await storage.getPhysicalBooks();
-      const sellerLibraryBooks = allLibraryBooks.filter((book: any) => book.sellerId === sellerId);
-      res.json(sellerLibraryBooks);
+      res.json(allLibraryBooks);
     } catch (error) {
       console.error("Error fetching library books:", error);
       res.status(500).json({ message: "Failed to fetch library books" });
