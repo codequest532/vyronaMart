@@ -1447,6 +1447,154 @@ export class DatabaseStorage implements IStorage {
           await db.insert(notifications).values(notification);
         }
         console.log("Sample notifications created for VyronaSocial testing");
+
+        // Add VyronaRead sample data for testing
+        
+        // 1. Physical Books for Browse Books section
+        const samplePhysicalBooks = [
+          {
+            title: "The Psychology of Money",
+            author: "Morgan Housel",
+            isbn: "9780857197689",
+            genre: "Finance",
+            condition: "New",
+            price: 89900, // ₹899
+            availability: "Available",
+            sellerId: seller.id
+          },
+          {
+            title: "Atomic Habits",
+            author: "James Clear", 
+            isbn: "9780735211292",
+            genre: "Self-Help",
+            condition: "Like New",
+            price: 79900, // ₹799
+            availability: "Available",
+            sellerId: seller.id
+          },
+          {
+            title: "The Silent Patient",
+            author: "Alex Michaelides",
+            isbn: "9781250301697",
+            genre: "Thriller",
+            condition: "Good",
+            price: 69900, // ₹699
+            availability: "Available", 
+            sellerId: seller.id
+          }
+        ];
+
+        const createdPhysicalBooks = [];
+        for (const book of samplePhysicalBooks) {
+          const [createdBook] = await db.insert(physicalBooks).values(book).returning();
+          createdPhysicalBooks.push(createdBook);
+        }
+        console.log("Sample physical books created for Browse Books section");
+
+        // 2. E-Books for VyronaRead E-Reader section
+        const sampleEBooks = [
+          {
+            title: "Digital Minimalism",
+            author: "Cal Newport",
+            isbn: "9780525536512",
+            genre: "Technology",
+            fileSize: "2.8MB",
+            format: "PDF",
+            price: 59900, // ₹599
+            sellerId: seller.id
+          },
+          {
+            title: "The Lean Startup", 
+            author: "Eric Ries",
+            isbn: "9780307887894",
+            genre: "Business",
+            fileSize: "3.2MB",
+            format: "EPUB",
+            price: 49900, // ₹499
+            sellerId: seller.id
+          },
+          {
+            title: "Sapiens",
+            author: "Yuval Noah Harari",
+            isbn: "9780062316097", 
+            genre: "History",
+            fileSize: "4.1MB",
+            format: "PDF",
+            price: 79900, // ₹799
+            sellerId: seller.id
+          }
+        ];
+
+        const createdEBooks = [];
+        for (const ebook of sampleEBooks) {
+          const [createdEBook] = await db.insert(eBooks).values(ebook).returning();
+          createdEBooks.push(createdEBook);
+        }
+        console.log("Sample e-books created for VyronaRead E-Reader section");
+
+        // 3. Library Integration Requests (approved by admin)
+        const sampleLibraryRequests = [
+          {
+            sellerId: seller.id,
+            libraryName: "City Central Library",
+            libraryAddress: "123 Main Street, Delhi",
+            contactPerson: "Dr. Sarah Johnson",
+            contactEmail: "sarah@citylibrary.org",
+            contactPhone: "+91-9876543210",
+            booksOffered: 150,
+            requestReason: "Expanding digital collection with contemporary fiction and non-fiction titles",
+            status: "approved"
+          },
+          {
+            sellerId: seller.id,
+            libraryName: "University Research Library",
+            libraryAddress: "456 Campus Road, Mumbai", 
+            contactPerson: "Prof. Michael Chen",
+            contactEmail: "mchen@university.edu",
+            contactPhone: "+91-9876543211",
+            booksOffered: 200,
+            requestReason: "Academic collection enhancement for students and researchers",
+            status: "approved"
+          }
+        ];
+
+        const createdLibraryRequests = [];
+        for (const request of sampleLibraryRequests) {
+          const [createdRequest] = await db.insert(libraryIntegrationRequests).values(request).returning();
+          createdLibraryRequests.push(createdRequest);
+        }
+        console.log("Sample library integration requests created and approved");
+
+        // 4. Sample orders for Currently Reading section
+        const sampleOrders = [
+          {
+            userId: adminUser.id,
+            module: "VyronaRead",
+            totalAmount: 89900,
+            status: "completed",
+            metadata: {
+              bookId: createdPhysicalBooks[0].id,
+              bookTitle: "The Psychology of Money",
+              orderType: "buy"
+            }
+          },
+          {
+            userId: adminUser.id, 
+            module: "VyronaRead",
+            totalAmount: 59900,
+            status: "completed",
+            metadata: {
+              bookId: createdEBooks[0].id,
+              bookTitle: "Digital Minimalism", 
+              orderType: "ebook-access"
+            }
+          }
+        ];
+
+        for (const order of sampleOrders) {
+          await db.insert(orders).values(order);
+        }
+        console.log("Sample VyronaRead orders created for Currently Reading section");
       }
     }
   }
