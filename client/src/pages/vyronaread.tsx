@@ -155,53 +155,7 @@ export default function VyronaRead() {
         </CardContent>
       </Card>
 
-      {/* Reading Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Books Read</p>
-                <p className="text-2xl font-bold text-purple-600">24</p>
-              </div>
-              <Book className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Reading Hours</p>
-                <p className="text-2xl font-bold text-blue-600">156h</p>
-              </div>
-              <Clock className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Bookmarks</p>
-                <p className="text-2xl font-bold text-green-600">89</p>
-              </div>
-              <Bookmark className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Achievement</p>
-                <p className="text-2xl font-bold text-amber-600">Level 8</p>
-              </div>
-              <Trophy className="h-8 w-8 text-amber-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+
 
       {/* 1. Browse Books */}
       <Card className="mb-6">
@@ -276,10 +230,6 @@ export default function VyronaRead() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900">📚 Library Integration</h3>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Building className="mr-2 h-4 w-4" />
-              Connect Library
-            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
