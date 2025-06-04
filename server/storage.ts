@@ -1625,6 +1625,60 @@ export class DatabaseStorage implements IStorage {
           await db.insert(orders).values(order);
         }
         console.log("Sample VyronaRead orders created for Currently Reading section");
+
+        // Add library books that customers can borrow through Library Integration
+        const libraryBookProducts = [
+          {
+            name: "Pride and Prejudice",
+            description: "Jane Austen - Classic Romance novel from City Central Library",
+            price: 0, // Free borrowing
+            category: "library-books",
+            module: "vyronaread",
+            metadata: {
+              author: "Jane Austen",
+              isbn: "9780141439518",
+              genre: "Classic Literature",
+              library: "City Central Library",
+              availability: "Available for borrowing",
+              libraryId: 1
+            }
+          },
+          {
+            name: "To Kill a Mockingbird",
+            description: "Harper Lee - Classic American Literature from University Research Library",
+            price: 0,
+            category: "library-books", 
+            module: "vyronaread",
+            metadata: {
+              author: "Harper Lee",
+              isbn: "9780446310789",
+              genre: "Classic Literature",
+              library: "University Research Library",
+              availability: "Available for borrowing",
+              libraryId: 2
+            }
+          },
+          {
+            name: "1984",
+            description: "George Orwell - Dystopian Fiction from City Central Library",
+            price: 0,
+            category: "library-books",
+            module: "vyronaread", 
+            metadata: {
+              author: "George Orwell",
+              isbn: "9780451524935",
+              genre: "Dystopian Fiction",
+              library: "City Central Library",
+              availability: "Available for borrowing",
+              libraryId: 1
+            }
+          }
+        ];
+
+        for (const product of libraryBookProducts) {
+          await db.insert(products).values(product);
+        }
+        console.log("Sample library books added for Library Integration section");
       }
     }
   }

@@ -722,8 +722,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all library books (fallback for general browsing)
   app.get("/api/vyronaread/library-books", async (req, res) => {
     try {
-      const allLibraryBooks = await storage.getPhysicalBooks();
-      res.json(allLibraryBooks);
+      const libraryBooks = await storage.getProducts("vyronaread", "library-books");
+      res.json(libraryBooks);
     } catch (error) {
       console.error("Error fetching library books:", error);
       res.status(500).json({ message: "Failed to fetch library books" });
