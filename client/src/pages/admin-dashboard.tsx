@@ -68,6 +68,10 @@ const sellerSchema = z.object({
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isBookUploadDialogOpen, setIsBookUploadDialogOpen] = useState(false);
+  const [selectedLibraryRequest, setSelectedLibraryRequest] = useState<any>(null);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [parsedCsvData, setParsedCsvData] = useState<any[]>([]);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof productSchema>>({
@@ -200,8 +204,8 @@ export default function AdminDashboard() {
   });
 
   const updateLibraryRequestMutation = useMutation({
-    mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
-      return await apiRequest("PATCH", `/api/admin/library-requests/${id}`, { status, adminNotes });
+    mutationFn: async ({ id, status, adminNotes, booksListCsv }: { id: number; status: string; adminNotes?: string; booksListCsv?: any[] }) => {
+      return await apiRequest("PATCH", `/api/admin/library-requests/${id}`, { status, adminNotes, booksListCsv });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
@@ -209,6 +213,9 @@ export default function AdminDashboard() {
         title: "Request Updated",
         description: "Library integration request status has been updated.",
       });
+      setIsBookUploadDialogOpen(false);
+      setCsvFile(null);
+      setParsedCsvData([]);
     },
     onError: () => {
       toast({
@@ -218,6 +225,70 @@ export default function AdminDashboard() {
       });
     },
   });
+
+  const parseCsvFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',').map(h => h.trim());
+      
+      const expectedHeaders = ['Book Name', 'Author', 'ISBN Number', 'Edition Number', 'Year of Publication'];
+      const isValidFormat = expectedHeaders.every(header => headers.includes(header));
+      
+      if (!isValidFormat) {
+        toast({
+          title: "Invalid CSV Format",
+          description: "CSV must contain columns: Book Name, Author, ISBN Number, Edition Number, Year of Publication",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const data = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim());
+        return {
+          bookName: values[headers.indexOf('Book Name')] || '',
+          author: values[headers.indexOf('Author')] || '',
+          isbn: values[headers.indexOf('ISBN Number')] || '',
+          edition: values[headers.indexOf('Edition Number')] || '',
+          yearOfPublication: values[headers.indexOf('Year of Publication')] || '',
+        };
+      }).filter(book => book.bookName && book.author);
+      
+      setParsedCsvData(data);
+      toast({
+        title: "CSV Parsed Successfully",
+        description: `Found ${data.length} books in the CSV file.`,
+      });
+    };
+    reader.readAsText(file);
+  };
+
+  const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setCsvFile(file);
+      parseCsvFile(file);
+    } else {
+      toast({
+        title: "Invalid File Type",
+        description: "Please select a CSV file.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleApproveWithBooks = () => {
+    if (selectedLibraryRequest && parsedCsvData.length > 0) {
+      updateLibraryRequestMutation.mutate({
+        id: selectedLibraryRequest.id,
+        status: 'approved',
+        adminNotes: `Approved with ${parsedCsvData.length} books uploaded from CSV`,
+        booksListCsv: parsedCsvData
+      });
+    }
+  };
 
   const handleLogout = () => {
     setLocation("/login");
