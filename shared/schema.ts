@@ -254,6 +254,8 @@ export const physicalBooks = pgTable("physical_books", {
   publicationYear: varchar("publication_year", { length: 10 }),
   language: varchar("language", { length: 50 }).default("English"),
   location: varchar("location", { length: 255 }),
+  fixedCostPrice: decimal("fixed_cost_price", { precision: 10, scale: 2 }).default("0.00"),
+  rentalPrice: decimal("rental_price", { precision: 10, scale: 2 }).default("0.00"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

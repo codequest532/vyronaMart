@@ -87,7 +87,9 @@ export default function SellerDashboard() {
     description: "",
     publisher: "",
     publicationYear: "",
-    language: "English"
+    language: "English",
+    fixedCostPrice: 0,
+    rentalPrice: 0
   });
   const [driveLink, setDriveLink] = useState("");
   const [newLibrary, setNewLibrary] = useState({
@@ -325,7 +327,9 @@ export default function SellerDashboard() {
         description: "",
         publisher: "",
         publicationYear: "",
-        language: "English"
+        language: "English",
+        fixedCostPrice: 0,
+        rentalPrice: 0
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/books"] });
     },
@@ -1196,6 +1200,34 @@ export default function SellerDashboard() {
                           </Select>
                         </div>
                         
+                        <div className="space-y-2">
+                          <Label htmlFor="fixedCostPrice">Fixed Cost Price (₹) *</Label>
+                          <Input
+                            id="fixedCostPrice"
+                            type="number"
+                            value={newBook.fixedCostPrice}
+                            onChange={(e) => handleInputChange("fixedCostPrice", parseFloat(e.target.value) || 0)}
+                            placeholder="299.00"
+                            min="0"
+                            step="0.01"
+                          />
+                          <p className="text-xs text-gray-500">Sale price customers pay when they buy the book</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="rentalPrice">Rental Price (₹) - 15 Day Renewal *</Label>
+                          <Input
+                            id="rentalPrice"
+                            type="number"
+                            value={newBook.rentalPrice}
+                            onChange={(e) => handleInputChange("rentalPrice", parseFloat(e.target.value) || 0)}
+                            placeholder="49.00"
+                            min="0"
+                            step="0.01"
+                          />
+                          <p className="text-xs text-gray-500">Auto-renewal price every 15 days for rental subscription</p>
+                        </div>
+                        
                         <div className="space-y-2 md:col-span-2">
                           <Label htmlFor="description">Description</Label>
                           <Textarea
@@ -1214,7 +1246,7 @@ export default function SellerDashboard() {
                         </Button>
                         <Button 
                           onClick={handleAddBook}
-                          disabled={!newBook.title || !newBook.author || !newBook.category}
+                          disabled={!newBook.title || !newBook.author || !newBook.category || !newBook.fixedCostPrice || !newBook.rentalPrice}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
                           <Plus className="h-4 w-4 mr-2" />
