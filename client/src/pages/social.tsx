@@ -526,10 +526,11 @@ export default function VyronaSocial() {
 
   // Room Interface Component
   const RoomInterface = () => {
-    const { data: roomData } = useQuery({
-      queryKey: ["/api/social/groups", selectedRoomId],
-      enabled: !!selectedRoomId
+    const { data: allRooms } = useQuery({
+      queryKey: ["/api/vyronasocial/rooms"]
     });
+
+    const roomData = allRooms?.find((room: any) => room.id === selectedRoomId);
 
     const { data: roomMessages } = useQuery({
       queryKey: ["/api/social/groups", selectedRoomId, "messages"],
