@@ -130,7 +130,7 @@ export default function VyronaHub() {
       });
       
       // Navigate to VyronaSocial tab for group buy checkout
-      setTimeout(() => setLocation("/social"), 1500);
+      setTimeout(() => setLocation("/vyronasocial"), 1500);
     } catch (error) {
       console.error("Group buy error:", error);
       toast({

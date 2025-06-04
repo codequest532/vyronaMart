@@ -59,6 +59,7 @@ function Router() {
         {(params) => <StoreDetails storeId={params.storeId} />}
       </Route>
       <Route path="/social" component={VyronaSocial} />
+      <Route path="/vyronasocial" component={VyronaGroupBuy} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
       <Route path="/cart" component={Cart} />
