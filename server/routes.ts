@@ -688,9 +688,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Library request not found" });
       }
 
-      // If approved, create sample books for the library
+      // If approved, create books for the library from CSV data
       if (status === 'approved') {
-        await storage.createLibraryBooks(parseInt(id), updatedRequest);
+        // Get the full library request data including CSV
+        const fullLibraryData = await storage.getLibraryIntegrationRequestById(parseInt(id));
+        await storage.createLibraryBooks(parseInt(id), fullLibraryData);
       }
 
       res.json(updatedRequest);

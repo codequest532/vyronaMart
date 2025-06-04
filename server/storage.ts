@@ -121,6 +121,7 @@ export interface IStorage {
   // VyronaRead Books - Library Integration Requests
   createLibraryIntegrationRequest(request: InsertLibraryIntegrationRequest): Promise<LibraryIntegrationRequest>;
   getLibraryIntegrationRequests(): Promise<LibraryIntegrationRequest[]>;
+  getLibraryIntegrationRequestById(id: number): Promise<LibraryIntegrationRequest | undefined>;
   updateLibraryIntegrationRequestStatus(id: number, status: string, processedBy: number, adminNotes?: string): Promise<LibraryIntegrationRequest | undefined>;
   deleteLibraryIntegrationRequest(id: number): Promise<boolean>;
   deleteLibraryBooks(libraryId: number): Promise<boolean>;
@@ -1710,6 +1711,14 @@ export class DatabaseStorage implements IStorage {
         console.log("Sample library books added for Library Integration section");
       }
     }
+  }
+
+  async getLibraryIntegrationRequestById(id: number): Promise<any> {
+    const [request] = await db
+      .select()
+      .from(libraryIntegrationRequests)
+      .where(eq(libraryIntegrationRequests.id, id));
+    return request;
   }
 
   // Delete Library Integration Request and associated books
