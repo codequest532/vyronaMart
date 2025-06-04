@@ -199,8 +199,13 @@ export default function VyronaRead() {
         <Button
           variant="outline"
           onClick={() => {
-            console.log("Navigating to home...");
-            window.location.href = "/home";
+            // Force navigation using multiple methods for reliability
+            try {
+              setLocation("/home");
+            } catch (error) {
+              // Fallback to browser navigation if wouter fails
+              window.location.href = "/home";
+            }
           }}
           className="flex items-center gap-2"
         >
