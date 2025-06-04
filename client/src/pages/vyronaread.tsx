@@ -139,16 +139,9 @@ export default function VyronaRead() {
     queryKey: ["/api/vyronaread/libraries"],
   });
 
-  // Handle library click to show books from specific library
-  const handleLibraryClick = async (library: any) => {
-    try {
-      setSelectedLibrary(library);
-      const response = await fetch(`/api/vyronaread/library-books/${library.id}`);
-      const books = await response.json();
-      setSelectedLibraryBooks(books);
-    } catch (error) {
-      console.error("Error fetching library books:", error);
-    }
+  // Handle library click to navigate to library browse page
+  const handleLibraryClick = (library: any) => {
+    setLocation("/library-browse");
   };
 
 
