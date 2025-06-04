@@ -88,6 +88,62 @@ export default function VyronaHub() {
     },
   });
 
+  const joinGroupBuyMutation = useMutation({
+    mutationFn: async (groupBuyProductId: number) => {
+      return await apiRequest("/api/group-buy/campaigns", {
+        method: "POST",
+        body: JSON.stringify({
+          groupBuyProductId,
+          targetQuantity: 10,
+          description: "Group buy campaign for bulk discount"
+        }),
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Group Buy Campaign Created!",
+        description: "Share with friends to reach minimum quantity and unlock discounts.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/group-buy/campaigns"] });
+      
+      // Join the campaign as the first participant
+      participateInCampaignMutation.mutate(data.id);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create group buy campaign. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const participateInCampaignMutation = useMutation({
+    mutationFn: async (campaignId: number) => {
+      return await apiRequest("/api/group-buy/participate", {
+        method: "POST",
+        body: JSON.stringify({
+          campaignId,
+          quantity: 1
+        }),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Joined Campaign!",
+        description: "You're now part of this group buy. Invite friends to unlock better discounts!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/group-buy/campaigns"] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to join campaign. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredProducts = (products as any[])
     .filter((product: any) => {
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
@@ -250,9 +306,10 @@ export default function VyronaHub() {
                     <Button 
                       size="sm" 
                       className="w-full bg-red-500 hover:bg-red-600"
-                      onClick={() => setLocation("/vyronasocial")}
+                      onClick={() => joinGroupBuyMutation.mutate(groupProduct.id)}
+                      disabled={joinGroupBuyMutation.isPending}
                     >
-                      Join Group Buy
+                      {joinGroupBuyMutation.isPending ? "Creating Campaign..." : "Join Group Buy"}
                     </Button>
                   </CardContent>
                 </Card>

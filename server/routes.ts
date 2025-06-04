@@ -803,6 +803,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Join group buy campaign participation
+  app.post("/api/group-buy/participate", async (req, res) => {
+    try {
+      const participantData = req.body;
+      const participant = await storage.joinGroupBuyCampaign(participantData);
+      res.json(participant);
+    } catch (error) {
+      console.error("Error joining group buy campaign:", error);
+      res.status(500).json({ message: "Failed to join campaign" });
+    }
+  });
+
   // Join group buy campaign
   app.post("/api/group-buy/campaigns/:id/join", async (req, res) => {
     try {
