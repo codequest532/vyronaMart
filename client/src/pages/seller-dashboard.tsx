@@ -620,6 +620,14 @@ export default function SellerDashboard() {
               Customers
             </Button>
             <Button
+              variant={activeTab === "vyronasocial" ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setActiveTab("vyronasocial")}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              VyronaSocial
+            </Button>
+            <Button
               variant={activeTab === "settings" ? "default" : "ghost"}
               className="w-full justify-start"
               onClick={() => setActiveTab("settings")}
@@ -846,6 +854,111 @@ export default function SellerDashboard() {
                   <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Customer Data Coming Soon</h3>
                   <p className="text-gray-500 dark:text-gray-400">Customer insights will be available once you start receiving orders</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "vyronasocial" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaSocial Group Buy</h2>
+                <p className="text-gray-600 dark:text-gray-300">Create group buy products with bulk discounts</p>
+              </div>
+
+              {/* Create Group Buy Product Button */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold">Group Buy Products</h3>
+                      <p className="text-sm text-gray-600">Minimum 10 pieces required for single product group buys</p>
+                    </div>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="bg-red-500 hover:bg-red-600">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Group Buy Product
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Create Group Buy Product</DialogTitle>
+                          <DialogDescription>
+                            Set up a product for group buying with minimum quantity and discount pricing
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form className="space-y-4">
+                          <div>
+                            <Label htmlFor="select-product">Select Product</Label>
+                            <Select>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Choose from your products" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(products as any[])?.filter((p: any) => p.module === "social").map((product: any) => (
+                                  <SelectItem key={product.id} value={product.id.toString()}>
+                                    {product.name} - ₹{(product.price / 100).toFixed(2)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="min-quantity">Minimum Quantity</Label>
+                            <Input 
+                              id="min-quantity" 
+                              type="number" 
+                              placeholder="10" 
+                              min="10"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Minimum 10 pieces required</p>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="discount-percent">Discount Percentage</Label>
+                            <Input 
+                              id="discount-percent" 
+                              type="number" 
+                              placeholder="15" 
+                              min="5" 
+                              max="50"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">5% to 50% discount range</p>
+                          </div>
+                          
+                          <div className="flex justify-end gap-2">
+                            <Button type="button" variant="outline">Cancel</Button>
+                            <Button type="submit" className="bg-red-500 hover:bg-red-600">
+                              Create Group Buy
+                            </Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+
+                  {/* Group Buy Products List */}
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-500">
+                      Create group buy products to enable bulk purchasing with discounts. 
+                      Products require admin approval before appearing in VyronaHub.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Instructions */}
+              <Card className="border-red-200 bg-red-50">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-red-800 mb-2">Group Buy Requirements</h3>
+                  <ul className="text-sm text-red-700 space-y-1">
+                    <li>• Minimum 10 pieces for single product group buys</li>
+                    <li>• Alternative: 5+ pieces across multiple sellers</li>
+                    <li>• Products require admin approval</li>
+                    <li>• Discounts enable cost sharing for bulk orders</li>
+                  </ul>
                 </CardContent>
               </Card>
             </div>
