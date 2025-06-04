@@ -68,25 +68,25 @@ export default function LibraryBrowse() {
     }
   });
 
-  // Fetch available libraries
+  // Fetch approved libraries from integration system
   const { data: libraries, isLoading: librariesLoading } = useQuery({
-    queryKey: ["/api/libraries"],
+    queryKey: ["/api/vyronaread/libraries"],
     queryFn: async (): Promise<any[]> => {
-      const response = await fetch("/api/libraries");
+      const response = await fetch("/api/vyronaread/libraries");
       if (!response.ok) {
-        throw new Error('Failed to fetch libraries');
+        throw new Error('Failed to fetch approved libraries');
       }
       const data = await response.json();
       return Array.isArray(data) ? data : [];
     }
   });
 
-  // Fetch library books
+  // Fetch library books from approved integration system
   const { data: libraryBooks, isLoading: booksLoading } = useQuery({
-    queryKey: ["/api/library-books", selectedLibrary?.id],
+    queryKey: ["/api/vyronaread/library-books", selectedLibrary?.id],
     queryFn: async (): Promise<any[]> => {
       if (!selectedLibrary?.id) return [];
-      const response = await fetch(`/api/library-books?libraryId=${selectedLibrary.id}`);
+      const response = await fetch(`/api/vyronaread/library-books/${selectedLibrary.id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch library books');
       }
