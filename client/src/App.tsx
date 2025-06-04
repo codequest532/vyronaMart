@@ -10,6 +10,7 @@ import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";
+import Cart from "@/pages/cart";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/social" component={VyronaSocial} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
+      <Route path="/cart" component={Cart} />
       <Route path="/ebook-reader" component={EbookReader} />
       
       {/* 404 Not Found */}

@@ -20,7 +20,8 @@ import {
   Star,
   Plus,
   Minus,
-  Eye
+  Eye,
+  Bell
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -86,6 +87,8 @@ export default function VyronaHub() {
       });
       setQuantity(1);
       setIsProductModalOpen(false);
+      // Navigate to cart after successful addition
+      setTimeout(() => setLocation("/cart"), 1000);
     },
     onError: (error: any) => {
       console.error("Add to cart error:", error);
@@ -176,7 +179,7 @@ export default function VyronaHub() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => setLocation("/shopping-cart")}
+              onClick={() => setLocation("/cart")}
               className="flex items-center gap-2"
             >
               <ShoppingCart className="h-4 w-4" />
