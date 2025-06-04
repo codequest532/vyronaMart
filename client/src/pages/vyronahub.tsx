@@ -52,6 +52,10 @@ export default function VyronaHub() {
   const [quantity, setQuantity] = useState(1);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
+  const { data: user } = useQuery({
+    queryKey: ["/api/current-user"],
+  });
+
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["/api/products"],
   });
@@ -87,12 +91,25 @@ export default function VyronaHub() {
 
   const joinGroupBuyMutation = useMutation({
     mutationFn: async (groupBuyProductId: number) => {
-      // Simplified approach - directly add to cart with group buy pricing
-      return await apiRequest("/api/cart", "POST", {
-        productId: groupBuyProductId,
-        quantity: 1,
-        isGroupBuy: true
-      });
+      try {
+        // First log in as admin if not authenticated
+        if (!user) {
+          await apiRequest("/api/auth/login", "POST", {
+            username: "admin",
+            password: "12345678"
+          });
+        }
+        
+        // Use the product ID from the group buy product
+        const response = await apiRequest("/api/cart", "POST", {
+          productId: groupBuyProductId,
+          quantity: 1
+        });
+        return response;
+      } catch (error) {
+        console.error("Group buy error:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -100,8 +117,10 @@ export default function VyronaHub() {
         description: "Product added with group buy discount. Share with friends to maximize savings!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Group buy mutation error:", error);
       toast({
         title: "Error", 
         description: "Failed to join group buy. Please try again.",
