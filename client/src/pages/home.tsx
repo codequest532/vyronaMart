@@ -1417,17 +1417,26 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    className="bg-white/20 text-white border-white/30 hover:bg-white/30"
-                    onClick={() => {
-                      // Clear user data and redirect to landing
-                      queryClient.clear();
-                      window.location.href = "/";
-                    }}
-                  >
-                    Logout
-                  </Button>
+                  <div className="space-x-2">
+                    <Button 
+                      variant="outline" 
+                      className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                      onClick={() => setLocation('/myvyrona')}
+                    >
+                      Manage Books
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                      onClick={() => {
+                        // Clear user data and redirect to landing
+                        queryClient.clear();
+                        window.location.href = "/";
+                      }}
+                    >
+                      Logout
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

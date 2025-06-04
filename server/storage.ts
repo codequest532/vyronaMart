@@ -23,6 +23,9 @@ import {
   physicalBooks,
   eBooks,
   bookLoans,
+  bookRentals,
+  rentalBillingHistory,
+  bookReturnRequests,
 } from "@shared/schema";
 
 export interface IStorage {
