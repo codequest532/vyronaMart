@@ -66,10 +66,7 @@ export default function VyronaHub() {
 
   const addToCartMutation = useMutation({
     mutationFn: async (cartData: any) => {
-      return await apiRequest("/api/cart", {
-        method: "POST",
-        body: JSON.stringify(cartData),
-      });
+      return await apiRequest("/api/cart", "POST", cartData);
     },
     onSuccess: () => {
       toast({
@@ -90,16 +87,14 @@ export default function VyronaHub() {
 
   const joinGroupBuyMutation = useMutation({
     mutationFn: async (groupBuyProductId: number) => {
-      return await apiRequest("/api/group-buy/campaigns", {
-        method: "POST",
-        body: JSON.stringify({
-          groupBuyProductId,
-          targetQuantity: 10,
-          description: "Group buy campaign for bulk discount"
-        }),
+      return await apiRequest("/api/group-buy/campaigns", "POST", {
+        groupBuyProductId,
+        title: "Group Buy Campaign",
+        targetQuantity: 10,
+        description: "Group buy campaign for bulk discount"
       });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Group Buy Campaign Created!",
         description: "Share with friends to reach minimum quantity and unlock discounts.",
@@ -107,7 +102,9 @@ export default function VyronaHub() {
       queryClient.invalidateQueries({ queryKey: ["/api/group-buy/campaigns"] });
       
       // Join the campaign as the first participant
-      participateInCampaignMutation.mutate(data.id);
+      if (data && data.id) {
+        participateInCampaignMutation.mutate(data.id);
+      }
     },
     onError: () => {
       toast({
@@ -120,12 +117,9 @@ export default function VyronaHub() {
 
   const participateInCampaignMutation = useMutation({
     mutationFn: async (campaignId: number) => {
-      return await apiRequest("/api/group-buy/participate", {
-        method: "POST",
-        body: JSON.stringify({
-          campaignId,
-          quantity: 1
-        }),
+      return await apiRequest("/api/group-buy/participate", "POST", {
+        campaignId,
+        quantity: 1
       });
     },
     onSuccess: () => {

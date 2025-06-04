@@ -759,7 +759,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create group buy campaign
   app.post("/api/group-buy/campaigns", async (req, res) => {
     try {
-      const campaignData = req.body;
+      const campaignData = {
+        ...req.body,
+        createdBy: req.session?.user?.id || 4 // Use current user or default to test user
+      };
       
       // Validate minimum requirements
       if (campaignData.targetQuantity < 5) {
