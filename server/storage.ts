@@ -164,6 +164,17 @@ export interface IStorage {
   joinGroupBuyCampaign(participant: InsertGroupBuyParticipant): Promise<GroupBuyParticipant>;
   getGroupBuyParticipants(campaignId: number): Promise<GroupBuyParticipant[]>;
   updateParticipantStatus(id: number, status: string): Promise<void>;
+
+  // Book Rental System
+  createBookRental(rental: any): Promise<any>;
+  getUserRentals(userId: number): Promise<any[]>;
+  updateRentalStatus(rentalId: number, status: string): Promise<any>;
+  updateRentalReturnRequest(rentalId: number, returnRequestId: number): Promise<any>;
+  createRentalBilling(billing: any): Promise<any>;
+  createReturnRequest(request: any): Promise<any>;
+  getAllReturnRequests(): Promise<any[]>;
+  getSellerReturnRequests(sellerId: number): Promise<any[]>;
+  updateReturnRequest(requestId: number, updates: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -1748,6 +1759,125 @@ export class DatabaseStorage implements IStorage {
       .where(sql`${products.metadata}->>'libraryId' = ${libraryId.toString()}`);
     
     return (physicalBooksResult.rowCount ?? 0) > 0 || (productsResult.rowCount ?? 0) > 0;
+  }
+
+  // Book Rental System Implementation
+  async createBookRental(rental: any): Promise<any> {
+    const [newRental] = await db.insert(bookRentals).values(rental).returning();
+    return newRental;
+  }
+
+  async getUserRentals(userId: number): Promise<any[]> {
+    const rentals = await db
+      .select({
+        id: bookRentals.id,
+        userId: bookRentals.userId,
+        productId: bookRentals.productId,
+        bookType: bookRentals.bookType,
+        rentalStartDate: bookRentals.rentalStartDate,
+        currentBillingCycle: bookRentals.currentBillingCycle,
+        nextBillingDate: bookRentals.nextBillingDate,
+        rentalPricePerCycle: bookRentals.rentalPricePerCycle,
+        totalAmountPaid: bookRentals.totalAmountPaid,
+        status: bookRentals.status,
+        returnRequestId: bookRentals.returnRequestId,
+        productName: products.name,
+        productImage: products.imageUrl,
+        sellerName: users.username
+      })
+      .from(bookRentals)
+      .leftJoin(products, eq(bookRentals.productId, products.id))
+      .leftJoin(users, eq(bookRentals.sellerId, users.id))
+      .where(eq(bookRentals.userId, userId))
+      .orderBy(desc(bookRentals.createdAt));
+    
+    return rentals;
+  }
+
+  async updateRentalStatus(rentalId: number, status: string): Promise<any> {
+    const [updatedRental] = await db
+      .update(bookRentals)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(bookRentals.id, rentalId))
+      .returning();
+    return updatedRental;
+  }
+
+  async updateRentalReturnRequest(rentalId: number, returnRequestId: number): Promise<any> {
+    const [updatedRental] = await db
+      .update(bookRentals)
+      .set({ returnRequestId, updatedAt: new Date() })
+      .where(eq(bookRentals.id, rentalId))
+      .returning();
+    return updatedRental;
+  }
+
+  async createRentalBilling(billing: any): Promise<any> {
+    const [newBilling] = await db.insert(rentalBillingHistory).values(billing).returning();
+    return newBilling;
+  }
+
+  async createReturnRequest(request: any): Promise<any> {
+    const [newRequest] = await db.insert(bookReturnRequests).values(request).returning();
+    return newRequest;
+  }
+
+  async getAllReturnRequests(): Promise<any[]> {
+    const requests = await db
+      .select({
+        id: bookReturnRequests.id,
+        userId: bookReturnRequests.userId,
+        rentalId: bookReturnRequests.rentalId,
+        loanId: bookReturnRequests.loanId,
+        bookType: bookReturnRequests.bookType,
+        bookTitle: bookReturnRequests.bookTitle,
+        returnReason: bookReturnRequests.returnReason,
+        status: bookReturnRequests.status,
+        requestDate: bookReturnRequests.requestDate,
+        adminNotes: bookReturnRequests.adminNotes,
+        sellerNotes: bookReturnRequests.sellerNotes,
+        processedAt: bookReturnRequests.processedAt,
+        userName: users.username,
+        userEmail: users.email
+      })
+      .from(bookReturnRequests)
+      .leftJoin(users, eq(bookReturnRequests.userId, users.id))
+      .orderBy(desc(bookReturnRequests.requestDate));
+    
+    return requests;
+  }
+
+  async getSellerReturnRequests(sellerId: number): Promise<any[]> {
+    const requests = await db
+      .select({
+        id: bookReturnRequests.id,
+        userId: bookReturnRequests.userId,
+        rentalId: bookReturnRequests.rentalId,
+        bookType: bookReturnRequests.bookType,
+        bookTitle: bookReturnRequests.bookTitle,
+        returnReason: bookReturnRequests.returnReason,
+        status: bookReturnRequests.status,
+        requestDate: bookReturnRequests.requestDate,
+        sellerNotes: bookReturnRequests.sellerNotes,
+        processedAt: bookReturnRequests.processedAt,
+        userName: users.username,
+        userEmail: users.email
+      })
+      .from(bookReturnRequests)
+      .leftJoin(users, eq(bookReturnRequests.userId, users.id))
+      .where(eq(bookReturnRequests.sellerId, sellerId))
+      .orderBy(desc(bookReturnRequests.requestDate));
+    
+    return requests;
+  }
+
+  async updateReturnRequest(requestId: number, updates: any): Promise<any> {
+    const [updatedRequest] = await db
+      .update(bookReturnRequests)
+      .set(updates)
+      .where(eq(bookReturnRequests.id, requestId))
+      .returning();
+    return updatedRequest;
   }
 }
 

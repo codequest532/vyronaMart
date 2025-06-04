@@ -166,10 +166,18 @@ export default function VyronaReadCheckout() {
           break;
           
         case 'rent':
-          endpoint = '/api/vyronaread/rental';
-          payload.duration = parseInt(rentalDuration);
-          payload.amount = calculatePrice();
-          payload.paymentMethod = paymentMethod;
+          endpoint = '/api/rentals/create';
+          payload = {
+            userId: 1, // Get from user context
+            productId: parseInt(bookId!),
+            bookId: parseInt(bookId!),
+            bookType: 'physical',
+            rentalPricePerCycle: calculatePrice() / 100, // Convert to dollars
+            sellerId: bookDetails.sellerId || 1,
+            libraryId: null,
+            customerInfo,
+            paymentMethod
+          };
           break;
           
         case 'borrow':

@@ -13,6 +13,7 @@ import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";
 import VyronaRead from "@/pages/vyronaread";
 import VyronaReadCheckout from "@/pages/vyronaread-checkout";
+import MyVyrona from "@/pages/myvyrona";
 import Cart from "@/pages/cart";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/vyronahub" component={VyronaHub} />
       <Route path="/vyronaread" component={VyronaRead} />
       <Route path="/vyronaread-checkout" component={VyronaReadCheckout} />
+      <Route path="/myvyrona" component={MyVyrona} />
       <Route path="/cart" component={Cart} />
       <Route path="/ebook-reader" component={EbookReader} />
       
