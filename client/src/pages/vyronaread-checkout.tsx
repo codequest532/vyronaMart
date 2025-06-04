@@ -172,7 +172,7 @@ export default function VyronaReadCheckout() {
             productId: parseInt(bookId!),
             bookId: parseInt(bookId!),
             bookType: 'physical',
-            rentalPricePerCycle: calculatePrice() / 100, // Convert to dollars
+            rentalPricePerCycle: calculatePrice(), // Price in paise
             sellerId: bookDetails.sellerId || 1,
             libraryId: null,
             customerInfo,

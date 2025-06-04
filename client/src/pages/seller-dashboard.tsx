@@ -293,6 +293,25 @@ export default function SellerDashboard() {
     queryKey: ["/api/current-user"],
   });
 
+  // Fetch seller rentals and return requests
+  const { data: sellerRentals } = useQuery({
+    queryKey: ["/api/seller/rentals", (currentUser as any)?.id],
+    queryFn: async (): Promise<any[]> => {
+      const response = await fetch(`/api/seller/rentals?sellerId=${(currentUser as any)?.id}`);
+      return response.json();
+    },
+    enabled: !!(currentUser as any)?.id,
+  });
+
+  const { data: sellerReturnRequests } = useQuery({
+    queryKey: ["/api/seller/return-requests", (currentUser as any)?.id],
+    queryFn: async (): Promise<any[]> => {
+      const response = await fetch(`/api/seller/return-requests?sellerId=${(currentUser as any)?.id}`);
+      return response.json();
+    },
+    enabled: !!(currentUser as any)?.id,
+  });
+
   const handleSearchLibraries = () => {
     const searchTerm = prompt("Search libraries by name, type, or location:");
     if (searchTerm) {
@@ -749,6 +768,14 @@ export default function SellerDashboard() {
             >
               <Users className="h-4 w-4 mr-2" />
               VyronaSocial
+            </Button>
+            <Button
+              variant={activeTab === "rentals" ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setActiveTab("rentals")}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Book Rentals
             </Button>
             <Button
               variant={activeTab === "settings" ? "default" : "ghost"}
