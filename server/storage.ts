@@ -1593,23 +1593,23 @@ export class DatabaseStorage implements IStorage {
           {
             sellerId: seller.id,
             libraryName: "City Central Library",
-            libraryAddress: "123 Main Street, Delhi",
+            libraryType: "public",
+            address: "123 Main Street, Delhi",
             contactPerson: "Dr. Sarah Johnson",
-            contactEmail: "sarah@citylibrary.org",
-            contactPhone: "+91-9876543210",
-            booksOffered: 150,
-            requestReason: "Expanding digital collection with contemporary fiction and non-fiction titles",
+            email: "sarah@citylibrary.org",
+            phone: "+91-9876543210",
+            description: "Expanding digital collection with contemporary fiction and non-fiction titles",
             status: "approved"
           },
           {
             sellerId: seller.id,
             libraryName: "University Research Library",
-            libraryAddress: "456 Campus Road, Mumbai", 
+            libraryType: "academic",
+            address: "456 Campus Road, Mumbai", 
             contactPerson: "Prof. Michael Chen",
-            contactEmail: "mchen@university.edu",
-            contactPhone: "+91-9876543211",
-            booksOffered: 200,
-            requestReason: "Academic collection enhancement for students and researchers",
+            email: "mchen@university.edu",
+            phone: "+91-9876543211",
+            description: "Academic collection enhancement for students and researchers",
             status: "approved"
           }
         ];
