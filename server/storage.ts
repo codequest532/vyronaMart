@@ -672,42 +672,42 @@ export class DatabaseStorage implements IStorage {
 
   // VyronaSocial - Shopping Groups
   async createShoppingGroup(insertGroup: InsertShoppingGroup): Promise<ShoppingGroup> {
-    // Create room using the existing shoppingRooms table
-    const [room] = await db
-      .insert(shoppingRooms)
+    // Create group using the actual database shopping_groups table
+    const [group] = await db
+      .insert(shoppingGroups)
       .values({
         name: insertGroup.name,
+        description: insertGroup.description,
         creatorId: insertGroup.creatorId,
         isActive: true,
-        memberCount: 1,
-        totalCart: 0,
+        maxMembers: insertGroup.maxMembers || 10,
         createdAt: new Date()
       })
       .returning();
     
     // Add creator as group member
     await db.insert(groupMembers).values({
-      groupId: room.id,
+      groupId: group.id,
       userId: insertGroup.creatorId,
       role: "creator"
     });
     
-    // Return room as ShoppingGroup format
+    // Return group with all required ShoppingGroup fields
     return {
-      id: room.id,
-      name: room.name,
-      description: insertGroup.description || null,
-      category: "general",
-      privacy: "public",
-      creatorId: room.creatorId,
-      isActive: room.isActive,
-      memberCount: room.memberCount,
-      totalCart: room.totalCart,
-      currentGame: room.currentGame,
-      roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
-      scheduledTime: null,
-      maxMembers: 10,
-      createdAt: room.createdAt
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      category: "general", // Default value since not in database
+      privacy: "public", // Default value since not in database
+      creatorId: group.creatorId,
+      isActive: group.isActive,
+      memberCount: 1, // Default for new group
+      totalCart: 0, // Default for new group
+      currentGame: null, // Default value since not in database
+      roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(), // Generated
+      scheduledTime: null, // Default value since not in database
+      maxMembers: group.maxMembers,
+      createdAt: group.createdAt
     };
   }
 
