@@ -841,6 +841,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VyronaRead Books - Create new book with pricing
   app.post("/api/vyronaread/books", async (req, res) => {
     try {
+      console.log("Creating book with data:", req.body);
+      
       const { 
         title, author, isbn, category, copies, description, 
         publisher, publicationYear, language, fixedCostPrice, rentalPrice 
@@ -863,8 +865,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rentalPrice: rentalPrice?.toString() || "0.00"
       };
 
+      console.log("Creating physical book with data:", bookData);
+      
       // Create physical book record
       const newBook = await storage.createPhysicalBook(bookData);
+      console.log("Physical book created:", newBook);
 
       // Also create as product for Browse Books section
       const productData = {
@@ -886,16 +891,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      await storage.createProduct(productData);
+      console.log("Creating product with data:", productData);
+      const newProduct = await storage.createProduct(productData);
+      console.log("Product created:", newProduct);
 
       res.json({
         success: true,
         book: newBook,
+        product: newProduct,
         message: "Book created successfully with pricing information"
       });
     } catch (error) {
       console.error("Error creating book:", error);
-      res.status(500).json({ message: "Failed to create book" });
+      res.status(500).json({ message: "Failed to create book", error: error.message });
     }
   });
 
