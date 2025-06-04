@@ -1345,197 +1345,100 @@ export default function SellerDashboard() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>Latest library transactions</CardDescription>
+                    <CardTitle>Recent Orders</CardTitle>
+                    <CardDescription>Latest VyronaRead transactions</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">The Great Gatsby returned</p>
-                          <p className="text-xs text-gray-500">Member: John Doe - 2 minutes ago</p>
+                      {sellerOrders && sellerOrders.filter((order: any) => order.module === 'vyronaread').length > 0 ? (
+                        sellerOrders.filter((order: any) => order.module === 'vyronaread').slice(0, 3).map((order: any, index: number) => (
+                          <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <div className={`w-2 h-2 rounded-full ${
+                              order.status === 'completed' ? 'bg-green-500' : 
+                              order.status === 'pending' ? 'bg-blue-500' : 'bg-orange-500'
+                            }`}></div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">Order #{order.id} - {order.status}</p>
+                              <p className="text-xs text-gray-500">Amount: ₹{(order.totalAmount / 100).toFixed(2)} - {new Date(order.createdAt).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-4">
+                          <p className="text-sm text-gray-500">No recent VyronaRead orders</p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">1984 issued to Sarah Smith</p>
-                          <p className="text-xs text-gray-500">Due: Jan 15, 2025 - 15 minutes ago</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <div className="w-2 h-2 rounded-full bg-purple-500"></div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">New book added: Digital Marketing</p>
-                          <p className="text-xs text-gray-500">Added to Business section - 1 hour ago</p>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Book Inventory Management */}
+              {/* Book Inventory Management - Dynamic Data */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Book Inventory</CardTitle>
+                  <CardTitle>Physical Book Inventory</CardTitle>
                   <CardDescription>Manage your library collection and availability</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {/* Sample Book Entries */}
-                    <div className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
-                      <div className="flex items-start gap-4">
-                        <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Book className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-lg mb-1">The Psychology of Money</h3>
-                              <p className="text-sm text-gray-600 mb-2">by Morgan Housel</p>
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="outline">Business</Badge>
-                                <Badge variant="secondary">ISBN: 978-0857197689</Badge>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                <span className="text-sm font-medium">Copies: 3</span>
-                                <span className="text-sm text-green-600">Available: 2</span>
-                                <span className="text-sm text-orange-600">On Loan: 1</span>
-                              </div>
+                    {libraryBooks && libraryBooks.length > 0 ? (
+                      libraryBooks.slice(0, 3).map((book: any, index: number) => (
+                        <div key={index} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                          <div className="flex items-start gap-4">
+                            <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <Book className="h-8 w-8 text-gray-400" />
                             </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleViewBook("The Psychology of Money")}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                View
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleDeleteBook("The Psychology of Money")}
-                                className="text-red-600 hover:text-red-700 hover:border-red-300"
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleIssueBook("The Psychology of Money")}
-                                className="text-green-600 hover:text-green-700 hover:border-green-300"
-                              >
-                                <Book className="h-4 w-4 mr-1" />
-                                Issue
-                              </Button>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h3 className="font-semibold text-lg mb-1">{book.title || 'Untitled Book'}</h3>
+                                  <p className="text-sm text-gray-600 mb-2">by {book.author || 'Unknown Author'}</p>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Badge variant="outline">{book.category || 'General'}</Badge>
+                                    {book.isbn && <Badge variant="secondary">ISBN: {book.isbn}</Badge>}
+                                  </div>
+                                  <div className="flex items-center gap-4">
+                                    <span className="text-sm font-medium">Status: {book.status || 'Available'}</span>
+                                    <span className={`text-sm font-medium ${book.status === 'available' ? 'text-green-600' : 'text-orange-600'}`}>
+                                      {book.status === 'available' ? 'Ready to lend' : 'On loan'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleViewBook(book.title)}
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    View
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleDeleteBook(book.title)}
+                                    className="text-red-600 hover:text-red-700 hover:border-red-300"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Delete
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Library className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-600 mb-2">No Physical Books</h3>
+                        <p className="text-gray-500 mb-4">Connect with libraries or add books to your inventory</p>
+                        <Button onClick={handleAddLibrary} className="bg-blue-600 hover:bg-blue-700">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Library Connection
+                        </Button>
                       </div>
-                    </div>
-
-                    <div className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
-                      <div className="flex items-start gap-4">
-                        <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Book className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-lg mb-1">Atomic Habits</h3>
-                              <p className="text-sm text-gray-600 mb-2">by James Clear</p>
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="outline">Self-Help</Badge>
-                                <Badge variant="secondary">ISBN: 978-0735211292</Badge>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                <span className="text-sm font-medium">Copies: 5</span>
-                                <span className="text-sm text-green-600">Available: 3</span>
-                                <span className="text-sm text-orange-600">On Loan: 2</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleViewBook("Atomic Habits")}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                View
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleDeleteBook("Atomic Habits")}
-                                className="text-red-600 hover:text-red-700 hover:border-red-300"
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleIssueBook("Atomic Habits")}
-                                className="text-green-600 hover:text-green-700 hover:border-green-300"
-                              >
-                                <Book className="h-4 w-4 mr-1" />
-                                Issue
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="border rounded-lg p-4 hover:shadow-sm transition-shadow border-red-200 bg-red-50 dark:bg-red-900/20">
-                      <div className="flex items-start gap-4">
-                        <div className="w-16 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Book className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-lg mb-1">The Lean Startup</h3>
-                              <p className="text-sm text-gray-600 mb-2">by Eric Ries</p>
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="outline">Business</Badge>
-                                <Badge variant="secondary">ISBN: 978-0307887894</Badge>
-                                <Badge variant="destructive">Overdue</Badge>
-                              </div>
-                              <div className="flex items-center gap-4">
-                                <span className="text-sm font-medium">Copies: 2</span>
-                                <span className="text-sm text-gray-600">Available: 0</span>
-                                <span className="text-sm text-red-600">On Loan: 2 (1 overdue)</span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleFollowUp("The Lean Startup")}
-                                className="text-orange-600 hover:text-orange-700 hover:border-orange-300"
-                              >
-                                <AlertCircle className="h-4 w-4 mr-1" />
-                                Follow Up
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleDeleteBook("The Lean Startup")}
-                                className="text-red-600 hover:text-red-700 hover:border-red-300"
-                              >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1731,46 +1634,6 @@ export default function SellerDashboard() {
                               </Button>
                             </div>
                           )}
-
-                          <div className="flex items-center gap-4 p-4 border rounded-lg">
-                            <div className="w-12 h-16 bg-gradient-to-br from-blue-500 to-teal-500 rounded flex items-center justify-center flex-shrink-0">
-                              <BookOpen className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold">Atomic Habits</h4>
-                              <p className="text-sm text-gray-600">by James Clear</p>
-                              <div className="flex items-center gap-4 mt-2">
-                                <Badge variant="secondary">Self-Help</Badge>
-                                <span className="text-sm font-medium text-green-600">₹349 Sale</span>
-                                <span className="text-sm font-medium text-blue-600">₹59/month Rent</span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-600">Sales: 38</p>
-                              <p className="text-sm text-gray-600">Rentals: 19</p>
-                              <p className="text-sm font-bold text-green-600">₹14,383</p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4 p-4 border rounded-lg">
-                            <div className="w-12 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded flex items-center justify-center flex-shrink-0">
-                              <BookOpen className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold">Think and Grow Rich</h4>
-                              <p className="text-sm text-gray-600">by Napoleon Hill</p>
-                              <div className="flex items-center gap-4 mt-2">
-                                <Badge variant="secondary">Business</Badge>
-                                <span className="text-sm font-medium text-green-600">₹249 Sale</span>
-                                <span className="text-sm font-medium text-blue-600">₹39/month Rent</span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-600">Sales: 32</p>
-                              <p className="text-sm text-gray-600">Rentals: 15</p>
-                              <p className="text-sm font-bold text-green-600">₹8,553</p>
-                            </div>
-                          </div>
                         </div>
                       </CardContent>
                     </Card>
