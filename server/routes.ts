@@ -759,9 +759,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create group buy campaign
   app.post("/api/group-buy/campaigns", async (req, res) => {
     try {
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 7); // Campaign runs for 7 days
+      
       const campaignData = {
         ...req.body,
-        createdBy: req.session?.user?.id || 4 // Use current user or default to test user
+        createdBy: req.session?.user?.id || 4, // Use current user or default to test user
+        endDate: endDate
       };
       
       // Validate minimum requirements

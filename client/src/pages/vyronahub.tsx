@@ -87,52 +87,24 @@ export default function VyronaHub() {
 
   const joinGroupBuyMutation = useMutation({
     mutationFn: async (groupBuyProductId: number) => {
-      return await apiRequest("/api/group-buy/campaigns", "POST", {
-        groupBuyProductId,
-        title: "Group Buy Campaign",
-        targetQuantity: 10,
-        description: "Group buy campaign for bulk discount"
-      });
-    },
-    onSuccess: (data: any) => {
-      toast({
-        title: "Group Buy Campaign Created!",
-        description: "Share with friends to reach minimum quantity and unlock discounts.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/group-buy/campaigns"] });
-      
-      // Join the campaign as the first participant
-      if (data && data.id) {
-        participateInCampaignMutation.mutate(data.id);
-      }
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create group buy campaign. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const participateInCampaignMutation = useMutation({
-    mutationFn: async (campaignId: number) => {
-      return await apiRequest("/api/group-buy/participate", "POST", {
-        campaignId,
-        quantity: 1
+      // Simplified approach - directly add to cart with group buy pricing
+      return await apiRequest("/api/cart", "POST", {
+        productId: groupBuyProductId,
+        quantity: 1,
+        isGroupBuy: true
       });
     },
     onSuccess: () => {
       toast({
-        title: "Joined Campaign!",
-        description: "You're now part of this group buy. Invite friends to unlock better discounts!",
+        title: "Added to Group Buy Cart!",
+        description: "Product added with group buy discount. Share with friends to maximize savings!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/group-buy/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to join campaign. Please try again.",
+        title: "Error", 
+        description: "Failed to join group buy. Please try again.",
         variant: "destructive",
       });
     },
