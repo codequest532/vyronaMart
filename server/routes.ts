@@ -546,6 +546,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaRead Books - Book Loan Management
+  app.post("/api/book-loans", async (req, res) => {
+    try {
+      const { bookId, libraryId, borrowerId, dueDate } = req.body;
+      
+      const loan = await storage.createBookLoan({
+        bookId,
+        libraryId,
+        borrowerId,
+        borrowedAt: new Date(),
+        dueDate: new Date(dueDate),
+        status: 'active'
+      });
+      
+      res.json(loan);
+    } catch (error) {
+      console.error("Error creating book loan:", error);
+      res.status(500).json({ message: "Failed to borrow book" });
+    }
+  });
+
+  app.get("/api/book-loans/:borrowerId", async (req, res) => {
+    try {
+      const borrowerId = parseInt(req.params.borrowerId);
+      const loans = await storage.getBookLoans(undefined, borrowerId);
+      res.json(loans);
+    } catch (error) {
+      console.error("Error fetching book loans:", error);
+      res.status(500).json({ message: "Failed to fetch book loans" });
+    }
+  });
+
+  app.patch("/api/book-loans/:loanId/return", async (req, res) => {
+    try {
+      const loanId = parseInt(req.params.loanId);
+      const loan = await storage.returnBook(loanId);
+      res.json(loan);
+    } catch (error) {
+      console.error("Error returning book:", error);
+      res.status(500).json({ message: "Failed to return book" });
+    }
+  });
+
   // Admin - Get Library Integration Requests
   app.get("/api/admin/library-requests", async (req, res) => {
     try {
@@ -674,10 +717,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Library books from approved integrations for Library Integration section (public access to all approved library books)
+  // Library books from specific approved library for Library Integration section
+  app.get("/api/vyronaread/library-books/:libraryId", async (req, res) => {
+    try {
+      const libraryId = parseInt(req.params.libraryId);
+      const libraryBooks = await storage.getPhysicalBooks(libraryId);
+      res.json(libraryBooks);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+      res.status(500).json({ message: "Failed to fetch library books" });
+    }
+  });
+
+  // Get all library books (fallback for general browsing)
   app.get("/api/vyronaread/library-books", async (req, res) => {
     try {
-      // Get all approved library books from all approved library integration requests
       const allLibraryBooks = await storage.getPhysicalBooks();
       res.json(allLibraryBooks);
     } catch (error) {

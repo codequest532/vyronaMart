@@ -40,6 +40,8 @@ export default function VyronaRead() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [readingMode, setReadingMode] = useState("light");
   const [fontSize, setFontSize] = useState("medium");
+  const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
+  const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
 
   // VyronaRead data queries - real-time data from seller dashboard and admin
   const { data: sellerEBooks = [] } = useQuery({
@@ -57,6 +59,40 @@ export default function VyronaRead() {
   const { data: availableLibraries = [] } = useQuery({
     queryKey: ["/api/vyronaread/libraries"],
   });
+
+  // Handle library click to show books from specific library
+  const handleLibraryClick = async (library: any) => {
+    try {
+      setSelectedLibrary(library);
+      const response = await fetch(`/api/vyronaread/library-books/${library.id}`);
+      const books = await response.json();
+      setSelectedLibraryBooks(books);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+    }
+  };
+
+  // Handle book borrowing
+  const handleBorrowBook = async (book: any) => {
+    try {
+      const response = await fetch("/api/book-loans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookId: book.id,
+          libraryId: selectedLibrary?.id,
+          borrowerId: 1, // Default user ID for now
+          dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 2 weeks from now
+        })
+      });
+      
+      if (response.ok) {
+        alert("Book borrowed successfully!");
+      }
+    } catch (error) {
+      console.error("Error borrowing book:", error);
+    }
+  };
 
   const { data: libraryRequests = [] } = useQuery({
     queryKey: ["/api/admin/library-requests"],
@@ -272,9 +308,13 @@ export default function VyronaRead() {
                   </div>
                   
                   <div className="mt-3">
-                    <Button size="sm" className="w-full bg-green-600 hover:bg-green-700">
+                    <Button 
+                      size="sm" 
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      onClick={() => handleLibraryClick(library)}
+                    >
                       <BookOpen className="mr-1 h-3 w-3" />
-                      Connect Library
+                      Visit Library
                     </Button>
                   </div>
                 </CardContent>
@@ -285,6 +325,69 @@ export default function VyronaRead() {
               </div>
             )}
           </div>
+
+          {/* Selected Library Books Display */}
+          {selectedLibrary && (
+            <div className="mt-6 border-t pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-semibold text-gray-900">
+                  📖 Books from {selectedLibrary.libraryName || selectedLibrary.name}
+                </h4>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSelectedLibrary(null)}
+                >
+                  ← Back to Libraries
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {selectedLibraryBooks.length > 0 ? selectedLibraryBooks.map((book: any, index: number) => (
+                  <Card key={index} className="border border-gray-200 hover:border-green-300 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex space-x-3">
+                        <div className="w-12 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded flex items-center justify-center flex-shrink-0">
+                          <Book className="text-green-600 h-6 w-6" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="mb-2">
+                            <h5 className="font-semibold text-sm text-gray-900 truncate">{book.title}</h5>
+                            <p className="text-xs text-gray-500 mb-2">by {book.author || "Unknown Author"}</p>
+                            <Badge variant="secondary" className="text-xs">{book.genre || "General"}</Badge>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <div className="flex items-center space-x-1">
+                                <Clock className="text-green-600 h-3 w-3" />
+                                <span className="text-xs">Available</span>
+                              </div>
+                              <span className="text-xs text-gray-600">Free Borrowing</span>
+                            </div>
+                            
+                            <Button 
+                              size="sm" 
+                              className="w-full bg-green-600 hover:bg-green-700"
+                              onClick={() => handleBorrowBook(book)}
+                            >
+                              <BookOpen className="mr-1 h-3 w-3" />
+                              Borrow Book
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )) : (
+                  <div className="col-span-full text-center py-8">
+                    <p className="text-gray-500">No books available in this library yet.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
