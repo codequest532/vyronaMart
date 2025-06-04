@@ -700,6 +700,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin - Delete Library Integration Request
+  app.delete("/api/admin/library-requests/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const libraryId = parseInt(id);
+
+      // Delete associated physical books first
+      await storage.deleteLibraryBooks(libraryId);
+
+      // Delete the library integration request
+      const deleted = await storage.deleteLibraryIntegrationRequest(libraryId);
+
+      if (!deleted) {
+        return res.status(404).json({ message: "Library request not found" });
+      }
+
+      res.json({ message: "Library integration removed successfully" });
+    } catch (error) {
+      console.error("Error deleting library request:", error);
+      res.status(500).json({ message: "Failed to delete library request" });
+    }
+  });
+
   // VyronaRead Books - Get books for customers
   app.get("/api/books", async (req, res) => {
     try {

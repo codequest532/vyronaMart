@@ -219,6 +219,27 @@ export default function AdminDashboard() {
     },
   });
 
+  const deleteLibraryRequestMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/admin/library-requests/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/libraries"] });
+      toast({
+        title: "Library Removed",
+        description: "Library integration has been permanently removed.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove library integration.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLogout = () => {
     setLocation("/login");
   };
@@ -525,6 +546,20 @@ export default function AdminDashboard() {
                               >
                                 <X className="h-4 w-4 mr-1" />
                                 Reject
+                              </Button>
+                            </div>
+                          )}
+
+                          {request.status === 'approved' && (
+                            <div className="flex gap-2 mt-4">
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => deleteLibraryRequestMutation.mutate(request.id)}
+                                disabled={deleteLibraryRequestMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Remove Library
                               </Button>
                             </div>
                           )}

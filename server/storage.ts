@@ -122,6 +122,8 @@ export interface IStorage {
   createLibraryIntegrationRequest(request: InsertLibraryIntegrationRequest): Promise<LibraryIntegrationRequest>;
   getLibraryIntegrationRequests(): Promise<LibraryIntegrationRequest[]>;
   updateLibraryIntegrationRequestStatus(id: number, status: string, processedBy: number, adminNotes?: string): Promise<LibraryIntegrationRequest | undefined>;
+  deleteLibraryIntegrationRequest(id: number): Promise<boolean>;
+  deleteLibraryBooks(libraryId: number): Promise<boolean>;
 
   // VyronaRead Books - Physical Books
   createPhysicalBook(book: InsertPhysicalBook): Promise<PhysicalBook>;
@@ -1708,6 +1710,28 @@ export class DatabaseStorage implements IStorage {
         console.log("Sample library books added for Library Integration section");
       }
     }
+  }
+
+  // Delete Library Integration Request and associated books
+  async deleteLibraryIntegrationRequest(id: number): Promise<boolean> {
+    const result = await db
+      .delete(libraryIntegrationRequests)
+      .where(eq(libraryIntegrationRequests.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async deleteLibraryBooks(libraryId: number): Promise<boolean> {
+    // Delete from physical books table where libraryId matches
+    const physicalBooksResult = await db
+      .delete(physicalBooks)
+      .where(eq(physicalBooks.libraryId, libraryId));
+    
+    // Delete from products table where metadata contains library info
+    const productsResult = await db
+      .delete(products)
+      .where(sql`${products.metadata}->>'libraryId' = ${libraryId.toString()}`);
+    
+    return (physicalBooksResult.rowCount ?? 0) > 0 || (productsResult.rowCount ?? 0) > 0;
   }
 }
 
