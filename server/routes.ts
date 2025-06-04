@@ -631,6 +631,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create Library Integration Request with CSV Upload
+  app.post("/api/library-integration-requests", async (req, res) => {
+    try {
+      const { 
+        name, type, address, contact, phone, email, description, booksListCsv 
+      } = req.body;
+
+      const libraryRequest = {
+        sellerId: 1, // Default seller ID for now
+        libraryName: name,
+        libraryType: type,
+        address,
+        contactPerson: contact,
+        phone: phone || null,
+        email: email || null,
+        description: description || null,
+        booksListCsv: booksListCsv || null, // Store parsed CSV data
+        status: "pending"
+      };
+
+      const newRequest = await storage.createLibraryIntegrationRequest(libraryRequest);
+      res.json(newRequest);
+    } catch (error) {
+      console.error("Error creating library request:", error);
+      res.status(500).json({ message: "Failed to create library request" });
+    }
+  });
+
   // Admin - Get Library Integration Requests
   app.get("/api/admin/library-requests", async (req, res) => {
     try {

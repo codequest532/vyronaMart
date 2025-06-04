@@ -196,8 +196,10 @@ export default function SellerDashboard() {
         contact: "",
         phone: "",
         email: "",
-        description: ""
+        description: "",
+        booksListCsv: null
       });
+      setCsvBooksList([]);
     },
     onError: (error) => {
       toast({
@@ -216,6 +218,54 @@ export default function SellerDashboard() {
     addProductMutation.mutate(data);
   };
 
+  const handleCsvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setNewLibrary(prev => ({ ...prev, booksListCsv: file }));
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length === 0) {
+        toast({
+          title: "Error",
+          description: "CSV file is empty",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Parse CSV - expecting columns: Book Name, Author, ISBN Number, Edition Number, Year of Publish
+      const headers = lines[0].split(',').map(h => h.trim());
+      const expectedHeaders = ["Book Name", "Author", "ISBN Number", "Edition Number", "Year of Publish"];
+      
+      const books = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length >= 3) { // At least book name, author, ISBN required
+          books.push({
+            bookName: values[0] || "",
+            author: values[1] || "",
+            isbn: values[2] || "",
+            edition: values[3] || "",
+            yearOfPublish: values[4] || ""
+          });
+        }
+      }
+
+      setCsvBooksList(books);
+      toast({
+        title: "CSV Uploaded Successfully",
+        description: `Parsed ${books.length} books from CSV file`,
+      });
+    };
+
+    reader.readAsText(file);
+  };
+
   const handleSubmitLibrary = () => {
     if (!newLibrary.name || !newLibrary.type || !newLibrary.address || !newLibrary.contact) {
       toast({
@@ -226,7 +276,12 @@ export default function SellerDashboard() {
       return;
     }
 
-    createLibraryRequestMutation.mutate(newLibrary);
+    const libraryData = {
+      ...newLibrary,
+      booksListCsv: csvBooksList // Send parsed CSV data
+    };
+
+    createLibraryRequestMutation.mutate(libraryData);
   };
 
   // Get current user for seller-specific data access
@@ -2468,6 +2523,52 @@ export default function SellerDashboard() {
                 onChange={(e) => setNewLibrary({ ...newLibrary, description: e.target.value })}
                 rows={3}
               />
+            </div>
+
+            {/* CSV Upload Section */}
+            <div className="space-y-3 md:col-span-2 border-t pt-4">
+              <div className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-blue-600" />
+                <Label htmlFor="csvUpload" className="text-base font-medium">Bulk Book Upload (CSV)</Label>
+              </div>
+              <p className="text-sm text-gray-600">
+                Upload a CSV file with your book collection. Required columns: Book Name, Author, ISBN Number, Edition Number, Year of Publish
+              </p>
+              <div className="space-y-2">
+                <Input
+                  id="csvUpload"
+                  type="file"
+                  accept=".csv"
+                  onChange={handleCsvUpload}
+                  className="cursor-pointer"
+                />
+                <div className="text-xs text-gray-500">
+                  CSV format: Book Name, Author, ISBN Number, Edition Number, Year of Publish
+                </div>
+              </div>
+              
+              {csvBooksList.length > 0 && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-700">
+                      {csvBooksList.length} books loaded from CSV
+                    </span>
+                  </div>
+                  <div className="max-h-32 overflow-y-auto space-y-1">
+                    {csvBooksList.slice(0, 5).map((book, index) => (
+                      <div key={index} className="text-xs text-green-600">
+                        • {book.bookName} by {book.author} {book.isbn && `(ISBN: ${book.isbn})`}
+                      </div>
+                    ))}
+                    {csvBooksList.length > 5 && (
+                      <div className="text-xs text-green-600">
+                        ... and {csvBooksList.length - 5} more books
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             </div>
           </div>
