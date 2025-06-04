@@ -385,16 +385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Achievement routes
-  app.get("/api/achievements/:userId", async (req, res) => {
-    try {
-      const userId = parseInt(req.params.userId);
-      const achievements = await storage.getUserAchievements(userId);
-      res.json(achievements);
-    } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
+
 
   // Game routes
   app.post("/api/games/score", async (req, res) => {
@@ -423,13 +414,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Achievements endpoint
   app.get("/api/achievements/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
-    const achievements = [
-      { id: 1, title: "First Purchase", description: "Made your first purchase", earned: true },
-      { id: 2, title: "Social Shopper", description: "Joined 5 shopping groups", earned: false },
-      { id: 3, title: "Book Reader", description: "Read 10 books", earned: true }
-    ];
-    res.json(achievements);
+    try {
+      const userId = parseInt(req.params.userId);
+      const achievements = await storage.getUserAchievements ? await storage.getUserAchievements(userId) : [];
+      res.json(achievements);
+    } catch (error) {
+      console.error("Achievements error:", error);
+      res.json([]);
+    }
   });
 
   // VyronaSocial - Shopping Groups routes
