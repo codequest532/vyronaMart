@@ -91,6 +91,8 @@ export default function SellerDashboard() {
     fixedCostPrice: 0,
     rentalPrice: 0
   });
+  
+  const [bookImages, setBookImages] = useState<File[]>([]);
   const [driveLink, setDriveLink] = useState("");
   const [newLibrary, setNewLibrary] = useState({
     name: "",
@@ -414,6 +416,23 @@ export default function SellerDashboard() {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (bookImages.length + files.length > 2) {
+      toast({
+        title: "Too many images",
+        description: "You can upload maximum 2 images per book.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setBookImages(prev => [...prev, ...files]);
+  };
+
+  const removeImage = (index: number) => {
+    setBookImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteBook = (bookTitle: string) => {
