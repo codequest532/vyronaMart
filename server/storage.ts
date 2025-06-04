@@ -1037,67 +1037,62 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createLibraryBooks(requestId: number, libraryData: any): Promise<void> {
-    // Create sample books for the approved library
-    const sampleBooks = [
-      {
-        title: `${libraryData.libraryName} - The Art of Programming`,
-        isbn: `978-0-${Math.floor(Math.random() * 1000000)}`,
-        author: "Tech Author",
-        publisher: "Tech Publications",
-        publicationYear: 2023,
-        genre: "Technology",
-        language: "English",
-        pages: 350,
-        condition: "New",
-        price: 29.99,
-        isAvailable: true,
-        libraryId: requestId
-      },
-      {
-        title: `${libraryData.libraryName} - Modern Web Development`,
-        isbn: `978-1-${Math.floor(Math.random() * 1000000)}`,
-        author: "Web Developer",
-        publisher: "Web Press",
-        publicationYear: 2023,
-        genre: "Technology",
-        language: "English",
-        pages: 420,
-        condition: "New",
-        price: 34.99,
-        isAvailable: true,
-        libraryId: requestId
-      },
-      {
-        title: `${libraryData.libraryName} - Digital Marketing Guide`,
-        isbn: `978-2-${Math.floor(Math.random() * 1000000)}`,
-        author: "Marketing Expert",
-        publisher: "Business Books",
-        publicationYear: 2024,
-        genre: "Business",
-        language: "English",
-        pages: 280,
-        condition: "New",
-        price: 24.99,
-        isAvailable: true,
-        libraryId: requestId
+    // Check if CSV books data exists
+    if (libraryData.booksListCsv && Array.isArray(libraryData.booksListCsv) && libraryData.booksListCsv.length > 0) {
+      console.log(`Creating ${libraryData.booksListCsv.length} books from CSV data for library ${libraryData.libraryName}`);
+      
+      // Create physical books from CSV data
+      for (const csvBook of libraryData.booksListCsv) {
+        const physicalBook = {
+          title: csvBook.bookName || "Unknown Title",
+          author: csvBook.author || "Unknown Author",
+          isbn: csvBook.isbn || "",
+          genre: "General", // Default genre since not in CSV
+          condition: "New",
+          price: 0, // Default price for library books
+          availability: "Available",
+          libraryId: requestId,
+          publisher: "Unknown Publisher",
+          publicationYear: parseInt(csvBook.yearOfPublish) || new Date().getFullYear(),
+          language: "English",
+          pages: 200, // Default page count
+          isAvailable: true,
+          edition: csvBook.edition || "1st Edition"
+        };
+
+        try {
+          await this.createPhysicalBook(physicalBook);
+          console.log(`Created book: ${physicalBook.title} by ${physicalBook.author}`);
+        } catch (error) {
+          console.error(`Error creating book ${physicalBook.title}:`, error);
+        }
       }
-    ];
+    } else {
+      console.log("No CSV books data found, creating sample books for library", libraryData.libraryName);
+      
+      // Fallback: Create sample books if no CSV data
+      const sampleBooks = [
+        {
+          title: `${libraryData.libraryName} - Sample Book 1`,
+          isbn: `978-0-${Math.floor(Math.random() * 1000000)}`,
+          author: "Library Author",
+          publisher: "Library Publications",
+          publicationYear: 2023,
+          genre: "General",
+          language: "English",
+          pages: 200,
+          condition: "New",
+          price: 0,
+          isAvailable: true,
+          libraryId: requestId,
+          availability: "Available"
+        }
+      ];
 
-    // Create physical books
-    for (const book of sampleBooks.slice(0, 2)) {
-      await this.createPhysicalBook(book);
+      for (const book of sampleBooks) {
+        await this.createPhysicalBook(book);
+      }
     }
-
-    // Create digital book
-    const digitalBook = {
-      ...sampleBooks[2],
-      sellerId: 2, // Default seller ID
-      fileUrl: "https://example.com/book.pdf",
-      fileSize: 2621440, // 2.5MB in bytes
-      format: "PDF",
-      downloads: 0
-    };
-    await this.createEBook(digitalBook);
   }
 
   async getBookById(id: number): Promise<any> {
