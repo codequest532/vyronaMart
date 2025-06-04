@@ -1423,7 +1423,7 @@ export default function Home() {
                       className="bg-white/20 text-white border-white/30 hover:bg-white/30"
                       onClick={() => setLocation('/myvyrona')}
                     >
-                      Manage Books
+                      Book Rental Tracking System (BRTS)
                     </Button>
                     <Button 
                       variant="outline" 
