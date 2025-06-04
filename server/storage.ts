@@ -672,33 +672,43 @@ export class DatabaseStorage implements IStorage {
 
   // VyronaSocial - Shopping Groups
   async createShoppingGroup(insertGroup: InsertShoppingGroup): Promise<ShoppingGroup> {
-    // Create room with required schema fields
-    const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const [group] = await db
-      .insert(shoppingGroups)
+    // Create room using the existing shoppingRooms table
+    const [room] = await db
+      .insert(shoppingRooms)
       .values({
         name: insertGroup.name,
-        description: insertGroup.description,
-        category: insertGroup.category || "general",
-        privacy: insertGroup.privacy || "public",
-        roomCode: roomCode,
         creatorId: insertGroup.creatorId,
         isActive: true,
         memberCount: 1,
         totalCart: 0,
-        maxMembers: insertGroup.maxMembers || 10,
         createdAt: new Date()
       })
       .returning();
     
     // Add creator as group member
     await db.insert(groupMembers).values({
-      groupId: group.id,
+      groupId: room.id,
       userId: insertGroup.creatorId,
       role: "creator"
     });
     
-    return group;
+    // Return room as ShoppingGroup format
+    return {
+      id: room.id,
+      name: room.name,
+      description: insertGroup.description || null,
+      category: "general",
+      privacy: "public",
+      creatorId: room.creatorId,
+      isActive: room.isActive,
+      memberCount: room.memberCount,
+      totalCart: room.totalCart,
+      currentGame: room.currentGame,
+      roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+      scheduledTime: null,
+      maxMembers: 10,
+      createdAt: room.createdAt
+    };
   }
 
   async getShoppingGroups(userId: number): Promise<ShoppingGroup[]> {
