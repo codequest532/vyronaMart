@@ -170,6 +170,8 @@ export default function Home() {
   const { data: achievements = [] } = useQuery({
     queryKey: [`/api/achievements/${user?.id}`],
     enabled: !!user?.id,
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const handleGameClick = (gameName: string) => {
