@@ -1211,88 +1211,56 @@ export default function SellerDashboard() {
                       </Button>
                     </div>
 
-                    {/* Libraries List */}
+                    {/* Dynamic Libraries List */}
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Library className="h-6 w-6 text-blue-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold">Central City Library</h4>
-                            <p className="text-sm text-gray-600">Main Branch • 1,250 books</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary">Active</Badge>
-                              <span className="text-xs text-green-600">Synced 2 hours ago</span>
+                      {libraryBooks && libraryBooks.length > 0 ? (
+                        libraryBooks.map((library: any) => (
+                          <div key={library.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <Library className="h-6 w-6 text-blue-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold">{library.title || library.name || 'Library Name'}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {library.location || 'Location'} • {library.quantity || 0} books
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant={library.isAvailable ? "secondary" : "outline"}>
+                                    {library.isAvailable ? "Active" : "Inactive"}
+                                  </Badge>
+                                  <span className="text-xs text-green-600">
+                                    Updated {library.updatedAt ? new Date(library.updatedAt).toLocaleDateString() : 'recently'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button variant="destructive" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                            <Library className="h-6 w-6 text-green-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold">University Library</h4>
-                            <p className="text-sm text-gray-600">Academic Branch • 2,800 books</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary">Active</Badge>
-                              <span className="text-xs text-green-600">Synced 1 hour ago</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4" />
+                        ))
+                      ) : (
+                        <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                          <Library className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">No Libraries Connected</h3>
+                          <p className="text-gray-600 mb-4">
+                            Connect with local libraries to expand your VyronaRead ecosystem
+                          </p>
+                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleAddLibrary}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Your First Library
                           </Button>
                         </div>
-                      </div>
-
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <Library className="h-6 w-6 text-purple-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold">Community Reading Center</h4>
-                            <p className="text-sm text-gray-600">Local Branch • 850 books</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="outline">Pending Sync</Badge>
-                              <span className="text-xs text-orange-600">Last synced 6 hours ago</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
