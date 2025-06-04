@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
-import { Users, MessageCircle, Share2, Heart, Plus, Send, Bell } from "lucide-react";
+import { Users, MessageCircle, Share2, Heart, Plus, Send, Bell, ShoppingCart, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useGroupBuyCartStore } from "@/lib/cart-store";
+import { useLocation } from "wouter";
 
 const createGroupSchema = z.object({
   name: z.string().min(1, "Group name is required"),
@@ -30,11 +32,31 @@ const addMessageSchema = z.object({
 export default function VyronaSocial() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location, setLocation] = useLocation();
+  const { addItem: addToGroupBuyCart } = useGroupBuyCartStore();
   const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
   const [newMessage, setNewMessage] = useState("");
+  const [pendingProduct, setPendingProduct] = useState<any>(null);
+  const [showGroupSelection, setShowGroupSelection] = useState(false);
   
   // Mock user ID for demo - in real app this would come from auth
   const currentUserId = 1;
+
+  // Check for pending group buy product on component mount
+  useEffect(() => {
+    const storedProduct = localStorage.getItem('pendingGroupBuyProduct');
+    if (storedProduct) {
+      try {
+        const product = JSON.parse(storedProduct);
+        setPendingProduct(product);
+        setShowGroupSelection(true);
+        // Clear from localStorage
+        localStorage.removeItem('pendingGroupBuyProduct');
+      } catch (error) {
+        console.error("Failed to parse pending product:", error);
+      }
+    }
+  }, []);
 
   // Fetch user's shopping groups
   const { data: userGroups = [], isLoading: groupsLoading } = useQuery({
@@ -141,9 +163,117 @@ export default function VyronaSocial() {
 
   const unreadNotifications = notifications.filter((n: any) => !n.isRead).length;
 
+  const handleJoinGroupWithProduct = (groupId: number) => {
+    if (pendingProduct) {
+      // Add product to group buy cart
+      addToGroupBuyCart(pendingProduct);
+      
+      toast({
+        title: "Added to Group Buy!",
+        description: `${pendingProduct.name} has been added to your group buy cart. Redirecting to checkout...`,
+      });
+      
+      // Clear pending product and navigate to checkout
+      setPendingProduct(null);
+      setShowGroupSelection(false);
+      setTimeout(() => setLocation("/vyronasocial"), 1500);
+    }
+  };
+
+  const handleCreateNewGroupForProduct = () => {
+    if (pendingProduct) {
+      // For demo, create a group and add product
+      const newGroupId = Date.now(); // Mock group ID
+      handleJoinGroupWithProduct(newGroupId);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
+        {/* Group Selection for Pending Product */}
+        {showGroupSelection && pendingProduct && (
+          <Card className="mb-8 border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <ShoppingCart className="w-5 h-5 mr-2" />
+                Select Group for Group Buy
+              </CardTitle>
+              <CardDescription>
+                Choose a group to buy {pendingProduct.name} with, or create a new group
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
+                <img
+                  src={pendingProduct.imageUrl}
+                  alt={pendingProduct.name}
+                  className="w-16 h-16 object-cover rounded-md"
+                />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">{pendingProduct.name}</h3>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-lg font-bold text-green-600">
+                      ₹{pendingProduct.discountedPrice}
+                    </span>
+                    <span className="text-sm text-gray-500 line-through">
+                      ₹{pendingProduct.price}
+                    </span>
+                    <Badge variant="secondary" className="text-xs">
+                      {pendingProduct.groupBuyDiscount}% OFF
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium">Join existing group:</h4>
+                <div className="grid gap-3">
+                  {(userGroups as any[]).length > 0 ? (userGroups as any[]).map((group: any) => (
+                    <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <div className="font-medium">{group.name}</div>
+                        <div className="text-sm text-gray-500">{group.memberCount || 0} members</div>
+                      </div>
+                      <Button
+                        onClick={() => handleJoinGroupWithProduct(group.id)}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        Join & Buy
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </div>
+                  )) : (
+                    <p className="text-gray-500 text-center py-4">No existing groups found</p>
+                  )}
+                </div>
+
+                <div className="border-t pt-4">
+                  <Button
+                    onClick={handleCreateNewGroupForProduct}
+                    variant="outline"
+                    className="w-full border-purple-500 text-purple-600 hover:bg-purple-50"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Group & Buy
+                  </Button>
+                </div>
+
+                <Button
+                  onClick={() => {
+                    setPendingProduct(null);
+                    setShowGroupSelection(false);
+                  }}
+                  variant="ghost"
+                  className="w-full"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>

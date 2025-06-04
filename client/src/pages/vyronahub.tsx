@@ -109,7 +109,7 @@ export default function VyronaHub() {
 
   const handleJoinGroupBuy = (product: any) => {
     try {
-      // Add to separate group buy cart
+      // Store the product for group selection
       const groupBuyItem = {
         productId: product.id,
         name: product.name,
@@ -122,20 +122,21 @@ export default function VyronaHub() {
         category: product.category
       };
 
-      groupBuyCart.addItem(groupBuyItem);
+      // Store in localStorage for VyronaSocial page to access
+      localStorage.setItem('pendingGroupBuyProduct', JSON.stringify(groupBuyItem));
       
       toast({
-        title: "Joined Group Buy!",
-        description: `${product.name} added with 25% group buy discount. Redirecting to VyronaSocial...`,
+        title: "Redirecting to Group Selection",
+        description: `Select or create a group for ${product.name} in VyronaSocial...`,
       });
       
-      // Navigate to VyronaSocial tab for group buy checkout
-      setTimeout(() => setLocation("/vyronasocial"), 1500);
+      // Navigate to VyronaSocial tab for group selection
+      setTimeout(() => setLocation("/social"), 1500);
     } catch (error) {
       console.error("Group buy error:", error);
       toast({
         title: "Error", 
-        description: "Failed to join group buy. Please try again.",
+        description: "Failed to initiate group buy. Please try again.",
         variant: "destructive",
       });
     }
