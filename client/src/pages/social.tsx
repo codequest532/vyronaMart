@@ -1,580 +1,719 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Users, 
+  MessageCircle, 
+  Share2, 
+  Plus, 
+  ThumbsUp, 
+  ThumbsDown,
+  ShoppingCart,
+  Send,
+  Calendar,
+  Gift,
+  Bell,
+  Settings,
+  Crown,
+  Heart,
+  Star,
+  Filter,
+  Clock,
+  Lock,
+  Globe,
+  TrendingUp,
+  Code,
+  UserPlus,
+  Vote,
+  Package,
+  ArrowRight,
+  CheckCircle,
+  XCircle,
+  Eye
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Users, MessageCircle, Share2, Heart, Plus, Send, Bell, ShoppingCart, ArrowRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { useGroupBuyCartStore } from "@/lib/cart-store";
-import { useLocation } from "wouter";
 
-const createGroupSchema = z.object({
-  name: z.string().min(1, "Group name is required"),
-  description: z.string().optional(),
-  creatorId: z.number(),
-  maxMembers: z.number().min(2).max(20).default(10),
+// Form schemas
+const createRoomSchema = z.object({
+  name: z.string().min(1, "Room name is required"),
+  category: z.string().min(1, "Category is required"),
+  privacy: z.enum(["public", "private"]),
+  scheduledTime: z.string().optional(),
+  description: z.string().optional()
 });
 
-const addMessageSchema = z.object({
-  message: z.string().min(1, "Message cannot be empty"),
-  userId: z.number(),
+const joinRoomSchema = z.object({
+  roomCode: z.string().min(6, "Room code must be at least 6 characters")
 });
+
+const messageSchema = z.object({
+  message: z.string().min(1, "Message cannot be empty")
+});
+
+type CreateRoomForm = z.infer<typeof createRoomSchema>;
+type JoinRoomForm = z.infer<typeof joinRoomSchema>;
+type MessageForm = z.infer<typeof messageSchema>;
 
 export default function VyronaSocial() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [location, setLocation] = useLocation();
-  const { addItem: addToGroupBuyCart } = useGroupBuyCartStore();
-  const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
-  const [newMessage, setNewMessage] = useState("");
-  const [pendingProduct, setPendingProduct] = useState<any>(null);
-  const [showGroupSelection, setShowGroupSelection] = useState(false);
+  const { items: groupBuyItems } = useGroupBuyCartStore();
   
-  // Mock user ID for demo - in real app this would come from auth
-  const currentUserId = 1;
+  const [currentView, setCurrentView] = useState<"dashboard" | "room">("dashboard");
+  const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [showCreateRoom, setShowCreateRoom] = useState(false);
+  const [showJoinRoom, setShowJoinRoom] = useState(false);
 
-  // Check for pending group buy product on component mount
+  // Fetch data
+  const { data: userGroups, isLoading: groupsLoading } = useQuery({
+    queryKey: ["/api/social/groups"],
+  });
+
+  const { data: groupBuyProducts, isLoading: productsLoading } = useQuery({
+    queryKey: ["/api/group-buy/products"],
+  });
+
+  const { data: notifications } = useQuery({
+    queryKey: ["/api/social/notifications"],
+  });
+
+  // Forms
+  const createRoomForm = useForm<CreateRoomForm>({
+    resolver: zodResolver(createRoomSchema),
+    defaultValues: {
+      privacy: "public"
+    }
+  });
+
+  const joinRoomForm = useForm<JoinRoomForm>({
+    resolver: zodResolver(joinRoomSchema)
+  });
+
+  const messageForm = useForm<MessageForm>({
+    resolver: zodResolver(messageSchema)
+  });
+
+  // Mutations
+  const createRoomMutation = useMutation({
+    mutationFn: (data: CreateRoomForm) => apiRequest("/api/social/groups", {
+      method: "POST",
+      body: JSON.stringify(data)
+    }),
+    onSuccess: () => {
+      toast({
+        title: "Shopping Room Created",
+        description: "Your room is ready for shopping together!"
+      });
+      setShowCreateRoom(false);
+      createRoomForm.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+    }
+  });
+
+  const joinRoomMutation = useMutation({
+    mutationFn: (data: JoinRoomForm) => apiRequest("/api/social/groups/join", {
+      method: "POST",
+      body: JSON.stringify(data)
+    }),
+    onSuccess: () => {
+      toast({
+        title: "Joined Room",
+        description: "Welcome to the shopping room!"
+      });
+      setShowJoinRoom(false);
+      joinRoomForm.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+    }
+  });
+
+  // Handle pending group buy product from VyronaHub
   useEffect(() => {
-    const storedProduct = localStorage.getItem('pendingGroupBuyProduct');
-    if (storedProduct) {
-      try {
-        const product = JSON.parse(storedProduct);
-        setPendingProduct(product);
-        setShowGroupSelection(true);
-        // Clear from localStorage
-        localStorage.removeItem('pendingGroupBuyProduct');
-      } catch (error) {
-        console.error("Failed to parse pending product:", error);
-      }
+    const pendingProduct = localStorage.getItem('pendingGroupBuyProduct');
+    if (pendingProduct) {
+      const product = JSON.parse(pendingProduct);
+      toast({
+        title: "Group Buy Product Ready",
+        description: `${product.name} is ready for group purchase. Select or create a room to continue.`
+      });
+      localStorage.removeItem('pendingGroupBuyProduct');
     }
   }, []);
 
-  // Fetch user's shopping groups
-  const { data: userGroups = [], isLoading: groupsLoading } = useQuery({
-    queryKey: ["/api/social/groups", currentUserId],
-  });
-
-  // Fetch notifications
-  const { data: notifications = [] } = useQuery({
-    queryKey: ["/api/social/notifications", currentUserId],
-  });
-
-  // Fetch messages for selected group
-  const { data: groupMessages = [] } = useQuery({
-    queryKey: ["/api/social/groups", selectedGroup, "messages"],
-    enabled: !!selectedGroup,
-  });
-
-  // Fetch group members
-  const { data: groupMembers = [] } = useQuery({
-    queryKey: ["/api/social/groups", selectedGroup, "members"],
-    enabled: !!selectedGroup,
-  });
-
-  // Fetch group wishlist
-  const { data: groupWishlist = [] } = useQuery({
-    queryKey: ["/api/social/groups", selectedGroup, "wishlist"],
-    enabled: !!selectedGroup,
-  });
-
-  // Create group mutation
-  const createGroupMutation = useMutation({
-    mutationFn: async (groupData: z.infer<typeof createGroupSchema>) => {
-      return await apiRequest("/api/social/groups", "POST", groupData);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
-      toast({
-        title: "Success",
-        description: "Shopping group created successfully!",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to create shopping group.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Send message mutation
-  const sendMessageMutation = useMutation({
-    mutationFn: async ({ groupId, message }: { groupId: number; message: string }) => {
-      return await apiRequest(`/api/social/groups/${groupId}/messages`, "POST", {
-        userId: currentUserId,
-        message,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/groups", selectedGroup, "messages"] });
-      setNewMessage("");
-    },
-  });
-
-  // Share product mutation
-  const shareProductMutation = useMutation({
-    mutationFn: async ({ productId, groupId, message }: { productId: number; groupId: number; message?: string }) => {
-      return await apiRequest("/api/social/shares", "POST", {
-        productId,
-        sharedBy: currentUserId,
-        groupId,
-        shareType: "group",
-        message,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/groups", selectedGroup, "messages"] });
-      toast({
-        title: "Success",
-        description: "Product shared with group!",
-      });
-    },
-  });
-
-  const form = useForm<z.infer<typeof createGroupSchema>>({
-    resolver: zodResolver(createGroupSchema),
-    defaultValues: {
-      creatorId: currentUserId,
-      maxMembers: 10,
-    },
-  });
-
-  const onSubmit = (values: z.infer<typeof createGroupSchema>) => {
-    createGroupMutation.mutate(values);
+  const handleEnterRoom = (roomId: number) => {
+    setSelectedRoomId(roomId);
+    setCurrentView("room");
   };
 
-  const handleSendMessage = () => {
-    if (!selectedGroup || !newMessage.trim()) return;
-    sendMessageMutation.mutate({
-      groupId: selectedGroup,
-      message: newMessage,
-    });
+  const handleLeaveRoom = () => {
+    setSelectedRoomId(null);
+    setCurrentView("dashboard");
   };
 
-  const unreadNotifications = notifications.filter((n: any) => !n.isRead).length;
-
-  const handleJoinGroupWithProduct = (groupId: number) => {
-    if (pendingProduct) {
-      // Add product to group buy cart
-      addToGroupBuyCart(pendingProduct);
-      
-      toast({
-        title: "Added to Group Buy!",
-        description: `${pendingProduct.name} has been added to your group buy cart. Redirecting to checkout...`,
-      });
-      
-      // Clear pending product and navigate to checkout
-      setPendingProduct(null);
-      setShowGroupSelection(false);
-      setTimeout(() => setLocation("/vyronasocial"), 1500);
-    }
-  };
-
-  const handleCreateNewGroupForProduct = () => {
-    if (pendingProduct) {
-      // For demo, create a group and add product
-      const newGroupId = Date.now(); // Mock group ID
-      handleJoinGroupWithProduct(newGroupId);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8">
-        {/* Group Selection for Pending Product */}
-        {showGroupSelection && pendingProduct && (
-          <Card className="mb-8 border-2 border-purple-500 bg-purple-50 dark:bg-purple-900/20">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <ShoppingCart className="w-5 h-5 mr-2" />
-                Select Group for Group Buy
-              </CardTitle>
-              <CardDescription>
-                Choose a group to buy {pendingProduct.name} with, or create a new group
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg">
-                <img
-                  src={pendingProduct.imageUrl}
-                  alt={pendingProduct.name}
-                  className="w-16 h-16 object-cover rounded-md"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{pendingProduct.name}</h3>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-lg font-bold text-green-600">
-                      ₹{pendingProduct.discountedPrice}
-                    </span>
-                    <span className="text-sm text-gray-500 line-through">
-                      ₹{pendingProduct.price}
-                    </span>
-                    <Badge variant="secondary" className="text-xs">
-                      {pendingProduct.groupBuyDiscount}% OFF
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="font-medium">Join existing group:</h4>
-                <div className="grid gap-3">
-                  {(userGroups as any[]).length > 0 ? (userGroups as any[]).map((group: any) => (
-                    <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <div className="font-medium">{group.name}</div>
-                        <div className="text-sm text-gray-500">{group.memberCount || 0} members</div>
-                      </div>
-                      <Button
-                        onClick={() => handleJoinGroupWithProduct(group.id)}
-                        className="bg-purple-600 hover:bg-purple-700"
-                      >
-                        Join & Buy
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
-                  )) : (
-                    <p className="text-gray-500 text-center py-4">No existing groups found</p>
-                  )}
-                </div>
-
-                <div className="border-t pt-4">
-                  <Button
-                    onClick={handleCreateNewGroupForProduct}
-                    variant="outline"
-                    className="w-full border-purple-500 text-purple-600 hover:bg-purple-50"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create New Group & Buy
-                  </Button>
-                </div>
-
-                <Button
-                  onClick={() => {
-                    setPendingProduct(null);
-                    setShowGroupSelection(false);
-                  }}
-                  variant="ghost"
-                  className="w-full"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white">VyronaSocial</h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">Shop together, share discoveries, and connect with friends</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" className="relative">
-              <Bell className="h-4 w-4 mr-2" />
-              Notifications
-              {unreadNotifications > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                  {unreadNotifications}
-                </Badge>
-              )}
-            </Button>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Group
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create Shopping Group</DialogTitle>
-                  <DialogDescription>
-                    Create a new group to shop together with friends and family.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Group Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., Family Shopping Squad" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description (Optional)</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="What's this group for?" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="maxMembers"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Max Members</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="2" max="20" {...field} onChange={e => field.onChange(Number(e.target.value))} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full" disabled={createGroupMutation.isPending}>
-                      {createGroupMutation.isPending ? "Creating..." : "Create Group"}
-                    </Button>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
+  // Hero Section Component
+  const HeroSection = () => (
+    <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 text-white p-8 rounded-lg mb-8">
+      <div className="relative z-10">
+        <h1 className="text-4xl font-bold mb-4">Shop Together. Save Together.</h1>
+        <p className="text-lg mb-6 opacity-90">
+          Join shopping rooms, chat with friends, vote on products, and unlock exclusive group discounts.
+        </p>
+        
+        <div className="flex flex-wrap gap-4 mb-6">
+          <Button 
+            onClick={() => setShowCreateRoom(true)}
+            className="bg-white text-purple-600 hover:bg-gray-100"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Shopping Room
+          </Button>
+          
+          <Button 
+            onClick={() => setShowJoinRoom(true)}
+            variant="outline" 
+            className="border-white text-white hover:bg-white hover:text-purple-600"
+          >
+            <Code className="w-4 h-4 mr-2" />
+            Join Room via Code
+          </Button>
         </div>
 
+        {/* Featured Sellers & Trending Rooms */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="w-5 h-5" />
+              <h3 className="font-semibold">Popular Sellers</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary" className="bg-white/20 text-white">Electronics Hub</Badge>
+              <Badge variant="secondary" className="bg-white/20 text-white">Fashion Central</Badge>
+              <Badge variant="secondary" className="bg-white/20 text-white">BookWorld</Badge>
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-5 h-5" />
+              <h3 className="font-semibold">Trending Rooms</h3>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Fashion Friday Deals</span>
+                <Badge variant="secondary" className="bg-white/20 text-white text-xs">12 members</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Tech Enthusiasts</span>
+                <Badge variant="secondary" className="bg-white/20 text-white text-xs">8 members</Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Room Dashboard Component
+  const RoomDashboard = () => (
+    <div className="space-y-6">
+      <Tabs defaultValue="active" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="active">
+            <Users className="w-4 h-4 mr-2" />
+            Active Rooms
+          </TabsTrigger>
+          <TabsTrigger value="scheduled">
+            <Calendar className="w-4 h-4 mr-2" />
+            Scheduled
+          </TabsTrigger>
+          <TabsTrigger value="create">
+            <Plus className="w-4 h-4 mr-2" />
+            Create New
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="active" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groupsLoading ? (
+              <div className="col-span-full text-center py-8">Loading rooms...</div>
+            ) : (userGroups as any[])?.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                No active rooms. Create or join one to start shopping together!
+              </div>
+            ) : (
+              (userGroups as any[])?.map((room: any) => (
+                <Card key={room.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start">
+                      <CardTitle className="text-lg">{room.name}</CardTitle>
+                      <Badge variant={room.privacy === "private" ? "secondary" : "default"}>
+                        {room.privacy === "private" ? <Lock className="w-3 h-3 mr-1" /> : <Globe className="w-3 h-3 mr-1" />}
+                        {room.privacy}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between text-sm text-gray-600">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        {room.memberCount || 1} members
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <ShoppingCart className="w-4 h-4" />
+                        ${room.totalCart || 0}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">{room.category}</Badge>
+                      {room.currentGame && (
+                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
+                          <Gift className="w-3 h-3 mr-1" />
+                          Game Active
+                        </Badge>
+                      )}
+                    </div>
+
+                    <Button 
+                      onClick={() => handleEnterRoom(room.id)}
+                      className="w-full"
+                      size="sm"
+                    >
+                      Enter Room
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="scheduled" className="space-y-4">
+          <div className="text-center py-8 text-gray-500">
+            <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No scheduled rooms yet. Schedule shopping sessions with friends!</p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="create" className="space-y-4">
+          <CreateRoomCard />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+
+  // Create Room Card Component
+  const CreateRoomCard = () => (
+    <Card className="max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Create Shopping Room</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Form {...createRoomForm}>
+          <form onSubmit={createRoomForm.handleSubmit((data) => createRoomMutation.mutate(data))} className="space-y-4">
+            <FormField
+              control={createRoomForm.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Room Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Fashion Friday Deals" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={createRoomForm.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Shopping Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="fashion">Fashion</SelectItem>
+                      <SelectItem value="electronics">Electronics</SelectItem>
+                      <SelectItem value="books">Books</SelectItem>
+                      <SelectItem value="home">Home & Garden</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                      <SelectItem value="beauty">Beauty</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={createRoomForm.control}
+              name="privacy"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Privacy Setting</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="public">
+                        <div className="flex items-center gap-2">
+                          <Globe className="w-4 h-4" />
+                          Public - Anyone can join
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="private">
+                        <div className="flex items-center gap-2">
+                          <Lock className="w-4 h-4" />
+                          Private - Invite only
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={createRoomForm.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="What are you shopping for?" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={createRoomMutation.isPending}>
+              {createRoomMutation.isPending ? "Creating..." : "Create Room"}
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+
+  // Room Interface Component
+  const RoomInterface = () => {
+    const { data: roomData } = useQuery({
+      queryKey: ["/api/social/groups", selectedRoomId],
+      enabled: !!selectedRoomId
+    });
+
+    const { data: roomMessages } = useQuery({
+      queryKey: ["/api/social/groups", selectedRoomId, "messages"],
+      enabled: !!selectedRoomId
+    });
+
+    const { data: roomMembers } = useQuery({
+      queryKey: ["/api/social/groups", selectedRoomId, "members"],
+      enabled: !!selectedRoomId
+    });
+
+    const { data: sharedCart } = useQuery({
+      queryKey: ["/api/cart", selectedRoomId],
+      enabled: !!selectedRoomId
+    });
+
+    return (
+      <div className="space-y-6">
+        {/* Room Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
+          <div>
+            <h2 className="text-2xl font-bold">{roomData?.name || "Shopping Room"}</h2>
+            <p className="text-gray-600">Category: {roomData?.category}</p>
+          </div>
+          <Button variant="outline" onClick={handleLeaveRoom}>
+            Leave Room
+          </Button>
+        </div>
+
+        {/* Room Interface Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Groups Sidebar */}
-          <div className="lg:col-span-1">
+          {/* Left Column - Participants & Chat */}
+          <div className="space-y-6">
+            {/* Room Participants */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  My Shopping Groups
+                  <Users className="w-5 h-5" />
+                  Participants ({(roomMembers as any[])?.length || 0})
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {groupsLoading ? (
-                  <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-                    ))}
-                  </div>
-                ) : userGroups.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No groups yet</p>
-                    <p className="text-sm">Create your first shopping group!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {userGroups.map((group: any) => (
-                      <div
-                        key={group.id}
-                        className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                          selectedGroup === group.id
-                            ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
-                            : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                        }`}
-                        onClick={() => setSelectedGroup(group.id)}
-                      >
-                        <h3 className="font-medium">{group.name}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                          {group.description || "No description"}
+                <div className="space-y-3">
+                  {(roomMembers as any[])?.map((member: any) => (
+                    <div key={member.id} className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={member.avatar} />
+                        <AvatarFallback>{member.username?.[0]?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{member.username}</p>
+                        <p className="text-xs text-gray-500">
+                          {member.isOnline ? "Online" : "Offline"}
                         </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {group.memberCount || 1} members
-                          </Badge>
+                      </div>
+                      {member.isCreator && (
+                        <Crown className="w-4 h-4 text-yellow-500" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Chat Window */}
+            <Card className="h-96">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" />
+                  Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col h-80">
+                <ScrollArea className="flex-1 mb-4">
+                  <div className="space-y-3">
+                    {(roomMessages as any[])?.map((message: any) => (
+                      <div key={message.id} className="flex gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback className="text-xs">{message.username?.[0]?.toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500">{message.username}</p>
+                          <p className="text-sm">{message.content}</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                )}
+                </ScrollArea>
+                
+                <Form {...messageForm}>
+                  <form onSubmit={messageForm.handleSubmit((data) => {
+                    // Send message logic
+                    messageForm.reset();
+                  })} className="flex gap-2">
+                    <FormField
+                      control={messageForm.control}
+                      name="message"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input placeholder="Type a message..." {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" size="sm">
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {selectedGroup ? (
-              <Tabs defaultValue="chat" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="chat" className="flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4" />
-                    Chat
-                  </TabsTrigger>
-                  <TabsTrigger value="wishlist" className="flex items-center gap-2">
-                    <Heart className="h-4 w-4" />
-                    Wishlist
-                  </TabsTrigger>
-                  <TabsTrigger value="members" className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Members
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Chat Tab */}
-                <TabsContent value="chat">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Group Chat</CardTitle>
-                      <CardDescription>Chat with your shopping group members</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {/* Messages */}
-                        <div className="h-64 overflow-y-auto border rounded-lg p-4 space-y-3">
-                          {groupMessages.length === 0 ? (
-                            <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                              <MessageCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                              <p>No messages yet</p>
-                              <p className="text-sm">Start the conversation!</p>
-                            </div>
-                          ) : (
-                            groupMessages.map((message: any) => (
-                              <div key={message.id} className="flex gap-3">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm">User {message.userId}</span>
-                                    <span className="text-xs text-gray-500">
-                                      {new Date(message.sentAt).toLocaleTimeString()}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2">
-                                    {message.message}
-                                  </p>
-                                </div>
-                              </div>
-                            ))
-                          )}
+          {/* Middle Column - Shared Cart */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5" />
+                Shared Cart
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-96">
+                <div className="space-y-4">
+                  {(sharedCart as any[])?.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No items in shared cart yet.</p>
+                      <p className="text-sm">Add products to start shopping together!</p>
+                    </div>
+                  ) : (
+                    (sharedCart as any[])?.map((item: any) => (
+                      <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <img 
+                          src={item.imageUrl || "/api/placeholder/60/60"} 
+                          alt={item.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">{item.name}</h4>
+                          <p className="text-xs text-gray-500">Added by {item.addedBy}</p>
+                          <p className="text-sm font-semibold">${item.price}</p>
                         </div>
-
-                        {/* Message Input */}
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Type your message..."
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                          />
-                          <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                            <Send className="h-4 w-4" />
-                          </Button>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">Qty: {item.quantity}</span>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
 
-                {/* Wishlist Tab */}
-                <TabsContent value="wishlist">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Group Wishlist</CardTitle>
-                      <CardDescription>Products your group wants to buy</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {groupWishlist.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                          <Heart className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                          <p>No items in wishlist</p>
-                          <p className="text-sm">Add products from VyronaHub!</p>
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {groupWishlist.map((item: any) => (
-                            <div key={item.id} className="border rounded-lg p-4">
-                              <h3 className="font-medium">Product {item.productId}</h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                {item.notes || "No notes"}
-                              </p>
-                              <div className="flex items-center justify-between mt-3">
-                                <Badge
-                                  variant={
-                                    item.priority === 3 ? "destructive" :
-                                    item.priority === 2 ? "default" : "secondary"
-                                  }
-                                >
-                                  {item.priority === 3 ? "High" : item.priority === 2 ? "Medium" : "Low"} Priority
-                                </Badge>
-                                <Button variant="outline" size="sm">
-                                  <Share2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+          {/* Right Column - Voting & Final Cart */}
+          <div className="space-y-6">
+            {/* Vote Panel */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Vote className="w-5 h-5" />
+                  Group Voting
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <ThumbsUp className="w-4 h-4 mr-2" />
+                      Approve Cart
+                    </Button>
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <ThumbsDown className="w-4 h-4 mr-2" />
+                      Suggest Changes
+                    </Button>
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">
+                    <p>Current votes:</p>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-green-600">✓ Approve: 3</span>
+                      <span className="text-red-600">✗ Changes: 1</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                {/* Members Tab */}
-                <TabsContent value="members">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Group Members</CardTitle>
-                      <CardDescription>People in this shopping group</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {groupMembers.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                          <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                          <p>No members found</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {groupMembers.map((member: any) => (
-                            <div key={member.id} className="flex items-center justify-between p-3 border rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="h-10 w-10 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-                                  <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                                </div>
-                                <div>
-                                  <p className="font-medium">User {member.userId}</p>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Joined {new Date(member.joinedAt).toLocaleDateString()}
-                                  </p>
-                                </div>
-                              </div>
-                              <Badge variant={member.role === "creator" ? "default" : "secondary"}>
-                                {member.role}
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Users className="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-                  <h3 className="text-lg font-medium mb-2">Select a Shopping Group</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Choose a group from the sidebar to start chatting and shopping together.
+            {/* Final Cart View */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5" />
+                  Final Cart
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="text-sm">
+                    <div className="flex justify-between">
+                      <span>Subtotal:</span>
+                      <span>$240.00</span>
+                    </div>
+                    <div className="flex justify-between text-green-600">
+                      <span>Group Discount:</span>
+                      <span>-$36.00</span>
+                    </div>
+                    <Separator className="my-2" />
+                    <div className="flex justify-between font-semibold">
+                      <span>Total:</span>
+                      <span>$204.00</span>
+                    </div>
+                  </div>
+                  
+                  <Button className="w-full">
+                    Proceed to Group Checkout
+                  </Button>
+                  
+                  <p className="text-xs text-gray-500 text-center">
+                    Everyone will pay their share individually
                   </p>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-6">
+      {currentView === "dashboard" ? (
+        <>
+          <HeroSection />
+          <RoomDashboard />
+        </>
+      ) : (
+        <RoomInterface />
+      )}
+
+      {/* Create Room Dialog */}
+      <Dialog open={showCreateRoom} onOpenChange={setShowCreateRoom}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Shopping Room</DialogTitle>
+            <DialogDescription>
+              Set up a new room for shopping with friends
+            </DialogDescription>
+          </DialogHeader>
+          <CreateRoomCard />
+        </DialogContent>
+      </Dialog>
+
+      {/* Join Room Dialog */}
+      <Dialog open={showJoinRoom} onOpenChange={setShowJoinRoom}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Join Shopping Room</DialogTitle>
+            <DialogDescription>
+              Enter the room code to join an existing shopping session
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...joinRoomForm}>
+            <form onSubmit={joinRoomForm.handleSubmit((data) => joinRoomMutation.mutate(data))} className="space-y-4">
+              <FormField
+                control={joinRoomForm.control}
+                name="roomCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Room Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter 6-digit code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={joinRoomMutation.isPending}>
+                {joinRoomMutation.isPending ? "Joining..." : "Join Room"}
+              </Button>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
