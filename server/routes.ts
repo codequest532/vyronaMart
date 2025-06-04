@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupRoomRoutes } from "./simple-rooms";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
@@ -1100,6 +1101,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to mark notification as read" });
     }
   });
+
+  // Setup working room creation routes
+  setupRoomRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
