@@ -23,6 +23,7 @@ import {
   Utensils, 
   Home as HomeIcon,
   Star,
+  ArrowLeft,
   MapPin,
   Book,
   Shirt,
