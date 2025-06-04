@@ -73,7 +73,11 @@ export default function LibraryBrowse() {
     queryKey: ["/api/libraries"],
     queryFn: async (): Promise<any[]> => {
       const response = await fetch("/api/libraries");
-      return response.json();
+      if (!response.ok) {
+        throw new Error('Failed to fetch libraries');
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
     }
   });
 

@@ -1920,47 +1920,50 @@ export class DatabaseStorage implements IStorage {
   // Library Management Methods
   async getLibraries(): Promise<any[]> {
     const libraries = await db
-      .select({
-        id: libraryIntegrationRequests.id,
-        name: libraryIntegrationRequests.libraryName,
-        type: libraryIntegrationRequests.libraryType,
-        address: libraryIntegrationRequests.libraryAddress,
-        contactEmail: libraryIntegrationRequests.contactEmail,
-        contactPhone: libraryIntegrationRequests.contactPhone,
-        membershipFee: libraryIntegrationRequests.membershipFee,
-        status: libraryIntegrationRequests.status,
-        booksCount: libraryIntegrationRequests.booksUploaded
-      })
+      .select()
       .from(libraryIntegrationRequests)
       .where(eq(libraryIntegrationRequests.status, 'approved'));
     
-    return libraries;
+    // Transform the data to match the expected format
+    return libraries.map(library => ({
+      id: library.id,
+      name: library.library_name,
+      type: library.library_type,
+      address: library.address,
+      contactEmail: library.email,
+      contactPhone: library.phone,
+      membershipFee: library.books_list_csv?.membershipFee || 50000,
+      status: library.status,
+      booksCount: library.books_list_csv?.booksUploaded || 0
+    }));
   }
 
   async getLibraryBooks(libraryId?: number): Promise<any[]> {
     let query = db
-      .select({
-        id: physicalBooks.id,
-        title: physicalBooks.title,
-        author: physicalBooks.author,
-        isbn: physicalBooks.isbn,
-        publisher: physicalBooks.publisher,
-        publicationYear: physicalBooks.publicationYear,
-        genre: physicalBooks.genre,
-        language: physicalBooks.language,
-        available: physicalBooks.availableCopies,
-        totalCopies: physicalBooks.totalCopies,
-        condition: physicalBooks.condition,
-        libraryId: physicalBooks.libraryId
-      })
+      .select()
       .from(physicalBooks);
 
     if (libraryId) {
-      query = query.where(eq(physicalBooks.libraryId, libraryId));
+      query = query.where(eq(physicalBooks.library_id, libraryId));
     }
 
     const books = await query.orderBy(physicalBooks.title);
-    return books;
+    
+    // Transform the data to match the expected format
+    return books.map(book => ({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      isbn: book.isbn,
+      publisher: book.publisher,
+      publicationYear: book.publication_year,
+      category: book.category,
+      language: book.language,
+      available: book.available,
+      totalCopies: book.copies,
+      location: book.location,
+      libraryId: book.library_id
+    }));
   }
 
   async createLibraryMembership(membershipData: any): Promise<any> {
