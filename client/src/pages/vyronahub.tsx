@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useCartStore } from "@/lib/cart-store";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -45,6 +46,7 @@ export default function VyronaHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
+  const { addItem, getTotalItems } = useCartStore();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -52,6 +54,8 @@ export default function VyronaHub() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  
+  const cartItemCount = getTotalItems();
 
   const { data: user } = useQuery({
     queryKey: ["/api/current-user"],
@@ -69,36 +73,38 @@ export default function VyronaHub() {
     queryKey: ["/api/group-buy/campaigns"],
   });
 
-  const addToCartMutation = useMutation({
-    mutationFn: async (cartData: any) => {
-      try {
-        // Simulate cart addition for demo purposes
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return { success: true, ...cartData };
-      } catch (error) {
-        console.error("Cart error:", error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
+  const handleAddToCart = (product: any, isGroupBuy = false) => {
+    try {
+      const cartItem = {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        discountedPrice: isGroupBuy ? product.price * 0.75 : undefined,
+        quantity: quantity,
+        imageUrl: product.imageUrl || "/api/placeholder/300/200",
+        isGroupBuy,
+        groupBuyDiscount: isGroupBuy ? 25 : undefined,
+        category: product.category
+      };
+
+      addItem(cartItem);
+      
       toast({
         title: "Added to Cart",
-        description: "Product has been added to your cart successfully!",
+        description: `${product.name} has been added to your cart successfully!`,
       });
+      
       setQuantity(1);
       setIsProductModalOpen(false);
-      // Navigate to cart after successful addition
-      setTimeout(() => setLocation("/cart"), 1000);
-    },
-    onError: (error: any) => {
+    } catch (error) {
       console.error("Add to cart error:", error);
       toast({
         title: "Error",
         description: "Failed to add product to cart. Please try again.",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   const joinGroupBuyMutation = useMutation({
     mutationFn: async (productId: number) => {
@@ -143,12 +149,7 @@ export default function VyronaHub() {
       }
     });
 
-  const handleAddToCart = (product: any) => {
-    addToCartMutation.mutate({
-      productId: product.id,
-      quantity: quantity,
-    });
-  };
+
 
   const openProductModal = (product: any) => {
     setSelectedProduct(product);
@@ -180,10 +181,15 @@ export default function VyronaHub() {
             <Button
               variant="outline"
               onClick={() => setLocation("/cart")}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 relative"
             >
               <ShoppingCart className="h-4 w-4" />
               Cart
+              {cartItemCount > 0 && (
+                <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                  {cartItemCount}
+                </Badge>
+              )}
             </Button>
           </div>
         </div>
@@ -380,7 +386,6 @@ export default function VyronaHub() {
                       <Button 
                         size="sm" 
                         onClick={() => handleAddToCart(product)}
-                        disabled={addToCartMutation.isPending}
                         className="bg-blue-500 hover:bg-blue-600"
                       >
                         <ShoppingCart className="h-4 w-4 mr-1" />
@@ -442,7 +447,6 @@ export default function VyronaHub() {
                       </div>
                       <Button 
                         onClick={() => handleAddToCart(selectedProduct)}
-                        disabled={addToCartMutation.isPending}
                         className="bg-blue-500 hover:bg-blue-600"
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
