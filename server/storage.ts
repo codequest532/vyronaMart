@@ -1484,12 +1484,27 @@ export class DatabaseStorage implements IStorage {
           }
         ];
 
-        const createdPhysicalBooks = [];
-        for (const book of samplePhysicalBooks) {
-          const [createdBook] = await db.insert(physicalBooks).values(book).returning();
-          createdPhysicalBooks.push(createdBook);
+        // Add to products table for Browse Books section
+        const physicalBookProducts = samplePhysicalBooks.map(book => ({
+          name: book.title,
+          description: `${book.author} - ${book.genre} book in ${book.condition} condition`,
+          price: book.price,
+          category: "books",
+          module: "vyronaread",
+          metadata: {
+            author: book.author,
+            isbn: book.isbn,
+            genre: book.genre,
+            condition: book.condition,
+            availability: book.availability,
+            sellerId: book.sellerId
+          }
+        }));
+
+        for (const product of physicalBookProducts) {
+          await db.insert(products).values(product);
         }
-        console.log("Sample physical books created for Browse Books section");
+        console.log("Sample physical books added to products for Browse Books section");
 
         // 2. E-Books for VyronaRead E-Reader section
         const sampleEBooks = [
@@ -1525,12 +1540,27 @@ export class DatabaseStorage implements IStorage {
           }
         ];
 
-        const createdEBooks = [];
-        for (const ebook of sampleEBooks) {
-          const [createdEBook] = await db.insert(eBooks).values(ebook).returning();
-          createdEBooks.push(createdEBook);
+        // Add e-books to products table for E-Reader section
+        const eBookProducts = sampleEBooks.map(ebook => ({
+          name: ebook.title,
+          description: `${ebook.author} - Digital ${ebook.genre} book in ${ebook.format} format`,
+          price: ebook.price,
+          category: "ebooks",
+          module: "vyronaread",
+          metadata: {
+            author: ebook.author,
+            isbn: ebook.isbn,
+            genre: ebook.genre,
+            fileSize: ebook.fileSize,
+            format: ebook.format,
+            sellerId: ebook.sellerId
+          }
+        }));
+
+        for (const product of eBookProducts) {
+          await db.insert(products).values(product);
         }
-        console.log("Sample e-books created for VyronaRead E-Reader section");
+        console.log("Sample e-books added to products for VyronaRead E-Reader section");
 
         // 3. Library Integration Requests (approved by admin)
         const sampleLibraryRequests = [

@@ -687,18 +687,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // E-books uploaded by sellers for VyronaRead E-Reader section (public access to all approved books)
   app.get("/api/vyronaread/ebooks", async (req, res) => {
     try {
-      // Get all approved e-books from all sellers for customer browsing
-      const allEBooks = [];
-      // Fetch from multiple sellers (1-5 as examples)
-      for (let sellerId = 1; sellerId <= 5; sellerId++) {
-        try {
-          const sellerEBooks = await storage.getEBooks(sellerId);
-          allEBooks.push(...sellerEBooks);
-        } catch (error) {
-          // Continue if seller has no books
-        }
-      }
-      res.json(allEBooks);
+      const ebooks = await storage.getProducts("vyronaread", "ebooks");
+      res.json(ebooks);
     } catch (error) {
       console.error("Error fetching e-books:", error);
       res.status(500).json({ message: "Failed to fetch e-books" });
