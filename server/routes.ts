@@ -910,7 +910,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error creating book:", error);
-      res.status(500).json({ message: "Failed to create book", error: error.message });
+      console.error("Error details:", error.stack);
+      res.status(500).json({ 
+        message: "Failed to create book", 
+        error: error.message,
+        details: error.stack 
+      });
     }
   });
 
