@@ -838,6 +838,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaRead Books - Create new book with pricing
+  app.post("/api/vyronaread/books", async (req, res) => {
+    try {
+      const { 
+        title, author, isbn, category, copies, description, 
+        publisher, publicationYear, language, fixedCostPrice, rentalPrice 
+      } = req.body;
+
+      // Create as both a physical book and a product for browsing
+      const bookData = {
+        libraryId: 1, // Default seller library
+        title,
+        author,
+        isbn: isbn || null,
+        category: category || null,
+        copies: copies || 1,
+        available: copies || 1,
+        publisher: publisher || null,
+        publicationYear: publicationYear || null,
+        language: language || "English",
+        location: null,
+        fixedCostPrice: fixedCostPrice?.toString() || "0.00",
+        rentalPrice: rentalPrice?.toString() || "0.00"
+      };
+
+      // Create physical book record
+      const newBook = await storage.createPhysicalBook(bookData);
+
+      // Also create as product for Browse Books section
+      const productData = {
+        name: title,
+        description: `${author} - ${category || 'Book'}`,
+        price: Math.round((fixedCostPrice || 0) * 100), // Convert to cents
+        category: "books",
+        module: "vyronaread",
+        metadata: {
+          author,
+          isbn: isbn || null,
+          publisher: publisher || null,
+          publicationYear: publicationYear || null,
+          language: language || "English",
+          physicalBookId: newBook.id,
+          fixedCostPrice: fixedCostPrice || 0,
+          rentalPrice: rentalPrice || 0,
+          sellerId: 3 // Default seller ID
+        }
+      };
+
+      await storage.createProduct(productData);
+
+      res.json({
+        success: true,
+        book: newBook,
+        message: "Book created successfully with pricing information"
+      });
+    } catch (error) {
+      console.error("Error creating book:", error);
+      res.status(500).json({ message: "Failed to create book" });
+    }
+  });
+
   // VyronaSocial Group Buy Products - Seller creates group buy products
   app.post("/api/group-buy/products", async (req, res) => {
     try {
