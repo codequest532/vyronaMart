@@ -127,35 +127,44 @@ export default function SellerDashboard() {
     }
   };
 
-  const { data: sellerProducts } = useQuery({
+  const { data: sellerProducts = [] } = useQuery({
     queryKey: ["/api/seller/products"],
   });
 
-  const { data: sellerOrders } = useQuery({
+  const { data: sellerOrders = [] } = useQuery({
     queryKey: ["/api/seller/orders"],
   });
 
-  const { data: analytics } = useQuery({
+  const { data: analytics = [] } = useQuery({
     queryKey: ["/api/seller/analytics"],
   });
 
-  // VyronaRead Data Queries - Seller-specific access
-  const { data: sellerEBooks } = useQuery({
-    queryKey: ["/api/vyronaread/ebooks", currentUser?.id],
-    queryFn: () => apiRequest(`/api/vyronaread/ebooks?sellerId=${currentUser?.id}`),
-    enabled: !!currentUser?.id,
+  // VyronaRead Data Queries - Seller-specific access with proper typing
+  const { data: sellerEBooks = [] } = useQuery({
+    queryKey: ["/api/vyronaread/ebooks", (currentUser as any)?.id],
+    queryFn: async (): Promise<any[]> => {
+      const response = await fetch(`/api/vyronaread/ebooks?sellerId=${(currentUser as any)?.id}`);
+      return response.json();
+    },
+    enabled: !!(currentUser as any)?.id,
   });
 
-  const { data: sellerBooks } = useQuery({
-    queryKey: ["/api/vyronaread/seller-books", currentUser?.id],
-    queryFn: () => apiRequest(`/api/vyronaread/seller-books?sellerId=${currentUser?.id}`),
-    enabled: !!currentUser?.id,
+  const { data: sellerBooks = [] } = useQuery({
+    queryKey: ["/api/vyronaread/seller-books", (currentUser as any)?.id],
+    queryFn: async (): Promise<any[]> => {
+      const response = await fetch(`/api/vyronaread/seller-books?sellerId=${(currentUser as any)?.id}`);
+      return response.json();
+    },
+    enabled: !!(currentUser as any)?.id,
   });
 
-  const { data: libraryBooks } = useQuery({
-    queryKey: ["/api/vyronaread/library-books", currentUser?.id],
-    queryFn: () => apiRequest(`/api/vyronaread/library-books?sellerId=${currentUser?.id}`),
-    enabled: !!currentUser?.id,
+  const { data: libraryBooks = [] } = useQuery({
+    queryKey: ["/api/vyronaread/library-books", (currentUser as any)?.id],
+    queryFn: async (): Promise<any[]> => {
+      const response = await fetch(`/api/vyronaread/library-books?sellerId=${(currentUser as any)?.id}`);
+      return response.json();
+    },
+    enabled: !!(currentUser as any)?.id,
   });
 
   const handleLogout = () => {
