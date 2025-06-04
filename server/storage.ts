@@ -672,43 +672,68 @@ export class DatabaseStorage implements IStorage {
 
   // VyronaSocial - Shopping Groups
   async createShoppingGroup(insertGroup: InsertShoppingGroup): Promise<ShoppingGroup> {
-    // Create group using the actual database shopping_groups table
-    const [group] = await db
-      .insert(shoppingGroups)
-      .values({
-        name: insertGroup.name,
-        description: insertGroup.description,
-        creatorId: insertGroup.creatorId,
-        isActive: true,
-        maxMembers: insertGroup.maxMembers || 10,
-        createdAt: new Date()
-      })
-      .returning();
-    
-    // Add creator as group member
-    await db.insert(groupMembers).values({
-      groupId: group.id,
-      userId: insertGroup.creatorId,
-      role: "creator"
-    });
-    
-    // Return group with all required ShoppingGroup fields
-    return {
-      id: group.id,
-      name: group.name,
-      description: group.description,
-      category: "general", // Default value since not in database
-      privacy: "public", // Default value since not in database
-      creatorId: group.creatorId,
-      isActive: group.isActive,
-      memberCount: 1, // Default for new group
-      totalCart: 0, // Default for new group
-      currentGame: null, // Default value since not in database
-      roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(), // Generated
-      scheduledTime: null, // Default value since not in database
-      maxMembers: group.maxMembers,
-      createdAt: group.createdAt
-    };
+    try {
+      console.log("=== STORAGE: Creating shopping group ===");
+      console.log("Input data:", JSON.stringify(insertGroup, null, 2));
+      
+      // Create group using the actual database shopping_groups table
+      console.log("About to insert into shopping_groups table...");
+      const [group] = await db
+        .insert(shoppingGroups)
+        .values({
+          name: insertGroup.name,
+          description: insertGroup.description,
+          creatorId: insertGroup.creatorId,
+          isActive: true,
+          maxMembers: insertGroup.maxMembers || 10,
+          createdAt: new Date()
+        })
+        .returning();
+      
+      console.log("Group created successfully:", JSON.stringify(group, null, 2));
+      
+      // Add creator as group member
+      console.log("About to add group member...");
+      await db.insert(groupMembers).values({
+        groupId: group.id,
+        userId: insertGroup.creatorId,
+        role: "creator"
+      });
+      
+      console.log("Group member added successfully");
+      
+      // Return group with all required ShoppingGroup fields
+      const result = {
+        id: group.id,
+        name: group.name,
+        description: group.description,
+        category: "general", // Default value since not in database
+        privacy: "public", // Default value since not in database
+        creatorId: group.creatorId,
+        isActive: group.isActive,
+        memberCount: 1, // Default for new group
+        totalCart: 0, // Default for new group
+        currentGame: null, // Default value since not in database
+        roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(), // Generated
+        scheduledTime: null, // Default value since not in database
+        maxMembers: group.maxMembers,
+        createdAt: group.createdAt
+      };
+      
+      console.log("Returning result:", JSON.stringify(result, null, 2));
+      console.log("=== STORAGE: Shopping group creation completed ===");
+      
+      return result;
+    } catch (error: any) {
+      console.error("=== STORAGE ERROR ===");
+      console.error("Error in createShoppingGroup:", error);
+      console.error("Error message:", error?.message);
+      console.error("Error code:", error?.code);
+      console.error("Error details:", error?.detail);
+      console.error("Stack trace:", error?.stack);
+      console.error("=== END STORAGE ERROR ===");
+      throw error;
+    }
   }
 
   async getShoppingGroups(userId: number): Promise<ShoppingGroup[]> {

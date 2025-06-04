@@ -872,26 +872,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new shopping room
   app.post("/api/social/groups", async (req, res) => {
     try {
+      console.log("Request body:", JSON.stringify(req.body, null, 2));
+      
       const userId = 1; // From session when auth is implemented
       const groupData = {
         name: req.body.name,
         description: req.body.description,
-        category: req.body.category || "general",
-        privacy: req.body.privacy || "public",
         creatorId: userId,
         maxMembers: req.body.maxMembers || 10
       };
       
-      console.log("Creating shopping group with data:", groupData);
+      console.log("Creating shopping group with data:", JSON.stringify(groupData, null, 2));
+      
       const group = await storage.createShoppingGroup(groupData);
-      console.log("Created group:", group);
+      console.log("Created group:", JSON.stringify(group, null, 2));
       
       res.json(group);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("=== DETAILED ERROR INFORMATION ===");
       console.error("Error creating shopping group:", error);
-      console.error("Error details:", error.message);
-      console.error("Stack trace:", error.stack);
-      res.status(500).json({ message: "Internal server error" });
+      console.error("Error message:", error?.message || "No message");
+      console.error("Error name:", error?.name || "No name");
+      console.error("Error code:", error?.code || "No code");
+      console.error("Stack trace:", error?.stack || "No stack");
+      console.error("Raw error object:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+      console.error("=== END ERROR INFORMATION ===");
+      res.status(500).json({ 
+        message: "Internal server error",
+        details: error?.message || "Unknown error"
+      });
     }
   });
 
