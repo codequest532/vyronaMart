@@ -253,11 +253,6 @@ export default function VyronaHub() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
               {(groupBuyProducts as any[]).map((groupProduct: any) => (
                 <Card key={groupProduct.id} className="relative overflow-hidden border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:shadow-lg transition-shadow">
-                  <div className="absolute top-2 right-2">
-                    <Badge className="bg-purple-500 text-white text-xs">
-                      Approved
-                    </Badge>
-                  </div>
                   <CardContent className="p-3">
                     <img
                       src={groupProduct.imageUrl || "/api/placeholder/150/150"}
