@@ -1040,11 +1040,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createLibraryBooks(requestId: number, libraryData: any): Promise<void> {
-    // Debug: Log the entire libraryData object
-    console.log("Full libraryData object:", JSON.stringify(libraryData, null, 2));
-    console.log("booksListCsv field:", libraryData.booksListCsv);
-    console.log("Type of booksListCsv:", typeof libraryData.booksListCsv);
-    
     // Check if CSV books data exists
     if (libraryData.booksListCsv && Array.isArray(libraryData.booksListCsv) && libraryData.booksListCsv.length > 0) {
       console.log(`Creating ${libraryData.booksListCsv.length} books from CSV data for library ${libraryData.libraryName}`);
