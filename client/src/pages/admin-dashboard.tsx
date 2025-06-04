@@ -195,8 +195,10 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/orders"],
   });
 
-  const { data: libraryRequests } = useQuery({
+  const { data: libraryRequests, refetch: refetchLibraryRequests } = useQuery({
     queryKey: ["/api/admin/library-requests"],
+    refetchOnWindowFocus: true,
+    refetchInterval: 5000, // Refresh every 5 seconds
   });
 
   const updateLibraryRequestMutation = useMutation({
