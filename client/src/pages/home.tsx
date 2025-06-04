@@ -1111,9 +1111,7 @@ export default function Home() {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => {
-                                showNotification(`Viewing ${library.libraryName}`, "Browse available books", "success");
-                              }}
+                              onClick={() => setLocation("/library-browse")}
                             >
                               <MapPin className="h-4 w-4 mr-1" />
                               Visit Library
