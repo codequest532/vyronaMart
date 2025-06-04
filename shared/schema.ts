@@ -233,6 +233,7 @@ export const libraryIntegrationRequests = pgTable("library_integration_requests"
   phone: varchar("phone", { length: 50 }),
   email: varchar("email", { length: 255 }),
   description: text("description"),
+  booksListCsv: jsonb("books_list_csv"), // Store parsed CSV data as JSON
   status: varchar("status", { length: 50 }).default("pending").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   processedAt: timestamp("processed_at"),
