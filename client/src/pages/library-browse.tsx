@@ -158,11 +158,11 @@ export default function LibraryBrowse() {
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
-                onClick={() => setLocation("/home")}
+                onClick={() => setLocation("/vyronaread")}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back to Home
+                Back to VyronaRead
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Library Browse</h1>
