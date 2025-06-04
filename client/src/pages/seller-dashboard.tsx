@@ -131,10 +131,7 @@ export default function SellerDashboard() {
 
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
-      return await apiRequest("/api/products", {
-        method: "POST",
-        body: JSON.stringify({ ...productData, module: "vyronahub" }),
-      });
+      return await apiRequest("POST", "/api/products", { ...productData, module: "vyronahub" });
     },
     onSuccess: () => {
       toast({
@@ -182,7 +179,7 @@ export default function SellerDashboard() {
 
   const createLibraryRequestMutation = useMutation({
     mutationFn: async (libraryData: any) => {
-      return await apiRequest("/api/library-integration-requests", libraryData);
+      return await apiRequest("POST", "/api/library-integration-requests", libraryData);
     },
     onSuccess: () => {
       toast({
@@ -249,12 +246,12 @@ export default function SellerDashboard() {
 
   const { data: vyronaReadBooks = [] } = useQuery({
     queryKey: ["/api/vyronaread/books"],
-    queryFn: () => apiRequest("/api/products?module=vyronaread"),
+    queryFn: () => apiRequest("GET", "/api/products?module=vyronaread"),
   });
 
   const addBookMutation = useMutation({
     mutationFn: async (bookData: any) => {
-      return await apiRequest("/api/vyronaread/books", bookData);
+      return await apiRequest("POST", "/api/vyronaread/books", bookData);
     },
     onSuccess: () => {
       toast({
