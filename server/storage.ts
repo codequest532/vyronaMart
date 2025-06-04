@@ -179,6 +179,11 @@ export interface IStorage {
   getSellerRentals(sellerId: number): Promise<any[]>;
   getSellerReturnRequests(sellerId: number): Promise<any[]>;
   updateReturnRequest(requestId: number, updates: any): Promise<any>;
+  
+  // Library Management
+  getLibraries(): Promise<any[]>;
+  getLibraryBooks(libraryId?: number): Promise<any[]>;
+  createLibraryMembership(membershipData: any): Promise<any>;
 }
 
 export class MemStorage implements IStorage {
@@ -1910,6 +1915,85 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bookReturnRequests.id, requestId))
       .returning();
     return updatedRequest;
+  }
+
+  // Library Management Methods
+  async getLibraries(): Promise<any[]> {
+    const libraries = await db
+      .select({
+        id: libraryIntegrationRequests.id,
+        name: libraryIntegrationRequests.libraryName,
+        type: libraryIntegrationRequests.libraryType,
+        address: libraryIntegrationRequests.libraryAddress,
+        contactEmail: libraryIntegrationRequests.contactEmail,
+        contactPhone: libraryIntegrationRequests.contactPhone,
+        membershipFee: libraryIntegrationRequests.membershipFee,
+        status: libraryIntegrationRequests.status,
+        booksCount: libraryIntegrationRequests.booksUploaded
+      })
+      .from(libraryIntegrationRequests)
+      .where(eq(libraryIntegrationRequests.status, 'approved'));
+    
+    return libraries;
+  }
+
+  async getLibraryBooks(libraryId?: number): Promise<any[]> {
+    let query = db
+      .select({
+        id: physicalBooks.id,
+        title: physicalBooks.title,
+        author: physicalBooks.author,
+        isbn: physicalBooks.isbn,
+        publisher: physicalBooks.publisher,
+        publicationYear: physicalBooks.publicationYear,
+        genre: physicalBooks.genre,
+        language: physicalBooks.language,
+        available: physicalBooks.availableCopies,
+        totalCopies: physicalBooks.totalCopies,
+        condition: physicalBooks.condition,
+        libraryId: physicalBooks.libraryId
+      })
+      .from(physicalBooks);
+
+    if (libraryId) {
+      query = query.where(eq(physicalBooks.libraryId, libraryId));
+    }
+
+    const books = await query.orderBy(physicalBooks.title);
+    return books;
+  }
+
+  async createLibraryMembership(membershipData: any): Promise<any> {
+    const membership = {
+      fullName: membershipData.fullName,
+      email: membershipData.email,
+      phone: membershipData.phone,
+      address: membershipData.address,
+      idType: membershipData.idType,
+      idNumber: membershipData.idNumber,
+      emergencyContact: membershipData.emergencyContact,
+      libraryId: membershipData.libraryId,
+      bookId: membershipData.bookId,
+      bookTitle: membershipData.bookTitle,
+      membershipFee: membershipData.membershipFee,
+      requestType: membershipData.requestType,
+      status: 'pending',
+      applicationDate: new Date(),
+      userId: 1 // Default user ID, should come from session
+    };
+
+    // For now, we'll store in a notifications-like structure since we don't have a dedicated membership table
+    const [newMembership] = await db.insert(notifications).values({
+      userId: membership.libraryId,
+      type: 'library_membership_request',
+      title: 'New Library Membership Application',
+      message: `Membership application from ${membership.fullName} for "${membership.bookTitle}"`,
+      isRead: false,
+      createdAt: new Date(),
+      metadata: membership
+    }).returning();
+
+    return newMembership;
   }
 }
 

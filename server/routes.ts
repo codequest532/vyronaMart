@@ -1274,6 +1274,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Library Browse API endpoints
+  
+  // Get available libraries
+  app.get("/api/libraries", async (req, res) => {
+    try {
+      const libraries = await storage.getLibraries();
+      res.json(libraries);
+    } catch (error) {
+      console.error("Error fetching libraries:", error);
+      res.status(500).json({ message: "Failed to fetch libraries" });
+    }
+  });
+
+  // Get library books
+  app.get("/api/library-books", async (req, res) => {
+    try {
+      const libraryId = req.query.libraryId ? Number(req.query.libraryId) : undefined;
+      const books = await storage.getLibraryBooks(libraryId);
+      res.json(books);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+      res.status(500).json({ message: "Failed to fetch library books" });
+    }
+  });
+
+  // Create library membership application
+  app.post("/api/library/membership", async (req, res) => {
+    try {
+      const membershipData = req.body;
+      const membership = await storage.createLibraryMembership(membershipData);
+      
+      // Create notification for admin and seller
+      await storage.createNotification({
+        userId: membershipData.libraryId, // Seller/Library ID
+        type: "library_membership_request",
+        title: "New Library Membership Application",
+        message: `New membership application from ${membershipData.fullName} for book "${membershipData.bookTitle}"`,
+        metadata: { membershipId: membership.id, bookId: membershipData.bookId }
+      });
+
+      res.json(membership);
+    } catch (error) {
+      console.error("Error creating library membership:", error);
+      res.status(500).json({ message: "Failed to create library membership" });
+    }
+  });
+
   // Shopping Rooms API endpoints
   
   // Get user's shopping groups/rooms

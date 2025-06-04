@@ -1076,7 +1076,7 @@ export default function Home() {
                             {book.available && (
                               <Button 
                                 size="sm" 
-                                onClick={() => handleLibraryBorrow(book.id, selectedLibrary.id)}
+                                onClick={() => setLocation("/library-browse")}
                                 className="text-xs"
                               >
                                 Borrow
