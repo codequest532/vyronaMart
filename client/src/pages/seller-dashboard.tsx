@@ -651,6 +651,11 @@ export default function SellerDashboard() {
     alert(`Export Analytics Report\n\nReport includes:\n• Revenue breakdown\n• Book performance metrics\n• User engagement stats\n• Growth trends\n\nGenerating PDF report...`);
   };
 
+  // Format price in Indian Rupees
+  const formatPrice = (priceInPaise: number) => {
+    return `₹${(priceInPaise / 100).toFixed(2)}`;
+  };
+
   const statCards = [
     {
       title: "Active Products",
@@ -667,10 +672,10 @@ export default function SellerDashboard() {
       color: "text-green-600"
     },
     {
-      title: "Revenue",
-      value: "₹0",
-      icon: <DollarSign className="h-6 w-6" />,
-      description: "Total earnings",
+      title: "Active Rentals",
+      value: sellerRentals?.filter((rental: any) => rental.status === 'active').length || 0,
+      icon: <Clock className="h-6 w-6" />,
+      description: "Books being rented",
       color: "text-purple-600"
     },
     {
@@ -1094,6 +1099,175 @@ export default function SellerDashboard() {
                     <li>• Products require admin approval</li>
                     <li>• Discounts enable cost sharing for bulk orders</li>
                   </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "rentals" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Book Rental Management</h2>
+                <p className="text-gray-600 dark:text-gray-300">Monitor active rentals, return requests, and rental revenue</p>
+              </div>
+
+              {/* Rental Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Active Rentals</p>
+                        <p className="text-3xl font-bold text-blue-600">
+                          {sellerRentals?.filter((rental: any) => rental.status === 'active').length || 0}
+                        </p>
+                        <p className="text-xs text-blue-500">Currently rented</p>
+                      </div>
+                      <Clock className="h-8 w-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Return Requests</p>
+                        <p className="text-3xl font-bold text-orange-600">
+                          {sellerReturnRequests?.filter((req: any) => req.status === 'pending').length || 0}
+                        </p>
+                        <p className="text-xs text-orange-500">Pending approval</p>
+                      </div>
+                      <AlertCircle className="h-8 w-8 text-orange-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Rental Revenue</p>
+                        <p className="text-3xl font-bold text-green-600">
+                          {formatPrice(sellerRentals?.reduce((sum: number, rental: any) => sum + (rental.totalAmountPaid || 0), 0) || 0)}
+                        </p>
+                        <p className="text-xs text-green-500">Total collected</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Active Rentals */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Active Book Rentals
+                  </CardTitle>
+                  <CardDescription>Monitor ongoing rentals with 15-day billing cycles</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!sellerRentals || sellerRentals.length === 0 ? (
+                    <div className="text-center py-8">
+                      <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No active rentals found</p>
+                      <p className="text-sm text-gray-500">Rentals will appear here when customers rent your books</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {sellerRentals.filter((rental: any) => rental.status === 'active').map((rental: any) => (
+                        <Card key={rental.id} className="border">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div className="flex space-x-4">
+                                {rental.productImage && (
+                                  <img
+                                    src={rental.productImage}
+                                    alt={rental.productName}
+                                    className="w-16 h-20 object-cover rounded"
+                                  />
+                                )}
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-lg">{rental.productName}</h3>
+                                  <p className="text-sm text-gray-600">Rented by: {rental.customerName || 'Customer'}</p>
+                                  <p className="text-sm text-gray-600">Email: {rental.customerEmail || 'N/A'}</p>
+                                  <div className="flex gap-4 mt-2">
+                                    <span className="text-sm">
+                                      <strong>Cycle:</strong> {rental.currentBillingCycle}
+                                    </span>
+                                    <span className="text-sm">
+                                      <strong>Next billing:</strong> {new Date(rental.nextBillingDate).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold text-lg">{formatPrice(rental.rentalPricePerCycle)}/cycle</p>
+                                <p className="text-sm text-gray-600">Total paid: {formatPrice(rental.totalAmountPaid)}</p>
+                                <Badge variant="outline" className="mt-2">
+                                  {rental.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Return Requests */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5" />
+                    Return Requests
+                  </CardTitle>
+                  <CardDescription>Manage customer return requests for rented books</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!sellerReturnRequests || sellerReturnRequests.length === 0 ? (
+                    <div className="text-center py-8">
+                      <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No return requests found</p>
+                      <p className="text-sm text-gray-500">Return requests from customers will appear here</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {sellerReturnRequests.map((request: any) => (
+                        <Card key={request.id} className="border">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h3 className="font-semibold">{request.productName}</h3>
+                                <p className="text-sm text-gray-600">Customer: {request.customerName}</p>
+                                <p className="text-sm text-gray-600">Reason: {request.reason}</p>
+                                <p className="text-sm text-gray-600">Requested: {new Date(request.createdAt).toLocaleDateString()}</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge variant={request.status === 'pending' ? 'outline' : 'default'}>
+                                  {request.status}
+                                </Badge>
+                                {request.status === 'pending' && (
+                                  <div className="flex gap-2">
+                                    <Button size="sm" variant="outline">
+                                      Approve
+                                    </Button>
+                                    <Button size="sm" variant="destructive">
+                                      Reject
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

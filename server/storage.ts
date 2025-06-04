@@ -176,6 +176,7 @@ export interface IStorage {
   createRentalBilling(billing: any): Promise<any>;
   createReturnRequest(request: any): Promise<any>;
   getAllReturnRequests(): Promise<any[]>;
+  getSellerRentals(sellerId: number): Promise<any[]>;
   getSellerReturnRequests(sellerId: number): Promise<any[]>;
   updateReturnRequest(requestId: number, updates: any): Promise<any>;
 }
@@ -1848,6 +1849,34 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(bookReturnRequests.requestDate));
     
     return requests;
+  }
+
+  async getSellerRentals(sellerId: number): Promise<any[]> {
+    const rentals = await db
+      .select({
+        id: bookRentals.id,
+        userId: bookRentals.userId,
+        productId: bookRentals.productId,
+        bookType: bookRentals.bookType,
+        rentalStartDate: bookRentals.rentalStartDate,
+        currentBillingCycle: bookRentals.currentBillingCycle,
+        nextBillingDate: bookRentals.nextBillingDate,
+        rentalPricePerCycle: bookRentals.rentalPricePerCycle,
+        totalAmountPaid: bookRentals.totalAmountPaid,
+        status: bookRentals.status,
+        returnRequestId: bookRentals.returnRequestId,
+        productName: products.name,
+        productImage: products.imageUrl,
+        customerName: users.username,
+        customerEmail: users.email
+      })
+      .from(bookRentals)
+      .leftJoin(products, eq(bookRentals.productId, products.id))
+      .leftJoin(users, eq(bookRentals.userId, users.id))
+      .where(eq(bookRentals.sellerId, sellerId))
+      .orderBy(desc(bookRentals.createdAt));
+    
+    return rentals;
   }
 
   async getSellerReturnRequests(sellerId: number): Promise<any[]> {

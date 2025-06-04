@@ -1084,6 +1084,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get seller's rentals
+  app.get("/api/seller/rentals", async (req: Request, res: Response) => {
+    try {
+      const sellerId = parseInt(req.query.sellerId as string);
+      if (!sellerId) {
+        return res.status(400).json({ error: "Seller ID is required" });
+      }
+      
+      // Get rentals for this seller
+      const rentals = await storage.getSellerRentals(sellerId);
+      res.json(rentals);
+    } catch (error) {
+      console.error("Error fetching seller rentals:", error);
+      res.status(500).json({ error: "Failed to fetch seller rentals" });
+    }
+  });
+
+  // Get seller's return requests
+  app.get("/api/seller/return-requests", async (req: Request, res: Response) => {
+    try {
+      const sellerId = parseInt(req.query.sellerId as string);
+      if (!sellerId) {
+        return res.status(400).json({ error: "Seller ID is required" });
+      }
+      
+      const returnRequests = await storage.getSellerReturnRequests(sellerId);
+      res.json(returnRequests);
+    } catch (error) {
+      console.error("Error fetching seller return requests:", error);
+      res.status(500).json({ error: "Failed to fetch seller return requests" });
+    }
+  });
+
   // VyronaSocial Group Buy Products - Seller creates group buy products
   app.post("/api/group-buy/products", async (req, res) => {
     try {
