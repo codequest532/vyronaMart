@@ -55,10 +55,10 @@ export const shoppingRooms = pgTable("shopping_rooms", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   creatorId: integer("creator_id").notNull(),
-  isActive: boolean("is_active").default(true),
-  currentGame: text("current_game"),
-  totalCart: integer("total_cart").default(0),
+  currentGame: text("current_game"), // 'ludo', 'trivia', '2048', 'spinwheel'
+  totalCart: integer("total_cart").default(0), // in cents
   memberCount: integer("member_count").default(1),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -222,6 +222,146 @@ export const instagramAnalytics = pgTable("instagram_analytics", {
   topProductId: integer("top_product_id"),
 });
 
+// Insert schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProductSchema = createInsertSchema(products).omit({
+  id: true,
+});
+
+export const insertStoreSchema = createInsertSchema(stores).omit({
+  id: true,
+});
+
+export const insertShoppingRoomSchema = createInsertSchema(shoppingRooms).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCartItemSchema = createInsertSchema(cartItems).omit({
+  id: true,
+});
+
+export const insertOrderSchema = createInsertSchema(orders).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  earnedAt: true,
+});
+
+export const insertGameScoreSchema = createInsertSchema(gameScores).omit({
+  id: true,
+  playedAt: true,
+});
+
+export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// VyronaSocial Insert Schemas
+export const insertShoppingGroupSchema = createInsertSchema(shoppingGroups).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGroupMemberSchema = createInsertSchema(groupMembers).omit({
+  id: true,
+  joinedAt: true,
+});
+
+export const insertGroupWishlistSchema = createInsertSchema(groupWishlists).omit({
+  id: true,
+  addedAt: true,
+});
+
+export const insertGroupMessageSchema = createInsertSchema(groupMessages).omit({
+  id: true,
+  sentAt: true,
+});
+
+export const insertProductShareSchema = createInsertSchema(productShares).omit({
+  id: true,
+  sharedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// VyronaInstaShop Insert Schemas
+export const insertInstagramStoreSchema = createInsertSchema(instagramStores).omit({
+  id: true,
+  connectedAt: true,
+});
+
+export const insertInstagramProductSchema = createInsertSchema(instagramProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInstagramOrderSchema = createInsertSchema(instagramOrders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertInstagramAnalyticsSchema = createInsertSchema(instagramAnalytics).omit({
+  id: true,
+});
+
+// Types
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type Store = typeof stores.$inferSelect;
+export type InsertStore = z.infer<typeof insertStoreSchema>;
+export type ShoppingRoom = typeof shoppingRooms.$inferSelect;
+export type InsertShoppingRoom = z.infer<typeof insertShoppingRoomSchema>;
+export type CartItem = typeof cartItems.$inferSelect;
+export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type GameScore = typeof gameScores.$inferSelect;
+export type InsertGameScore = z.infer<typeof insertGameScoreSchema>;
+export type OtpVerification = typeof otpVerifications.$inferSelect;
+export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
+
+// VyronaSocial Types
+export type ShoppingGroup = typeof shoppingGroups.$inferSelect;
+export type InsertShoppingGroup = z.infer<typeof insertShoppingGroupSchema>;
+export type GroupMember = typeof groupMembers.$inferSelect;
+export type InsertGroupMember = z.infer<typeof insertGroupMemberSchema>;
+export type GroupWishlist = typeof groupWishlists.$inferSelect;
+export type InsertGroupWishlist = z.infer<typeof insertGroupWishlistSchema>;
+export type GroupMessage = typeof groupMessages.$inferSelect;
+export type InsertGroupMessage = z.infer<typeof insertGroupMessageSchema>;
+export type ProductShare = typeof productShares.$inferSelect;
+export type InsertProductShare = z.infer<typeof insertProductShareSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+// VyronaInstaShop Types
+export type InstagramStore = typeof instagramStores.$inferSelect;
+export type InsertInstagramStore = z.infer<typeof insertInstagramStoreSchema>;
+export type InstagramProduct = typeof instagramProducts.$inferSelect;
+export type InsertInstagramProduct = z.infer<typeof insertInstagramProductSchema>;
+export type InstagramOrder = typeof instagramOrders.$inferSelect;
+export type InsertInstagramOrder = z.infer<typeof insertInstagramOrderSchema>;
+export type InstagramAnalytics = typeof instagramAnalytics.$inferSelect;
+export type InsertInstagramAnalytics = z.infer<typeof insertInstagramAnalyticsSchema>;
+
 // VyronaRead Books Tables
 export const libraryIntegrationRequests = pgTable("library_integration_requests", {
   id: serial("id").primaryKey(),
@@ -349,112 +489,16 @@ export const groupBuyOrders = pgTable("group_buy_orders", {
   id: serial("id").primaryKey(),
   campaignId: integer("campaign_id").notNull().references(() => groupBuyCampaigns.id),
   userId: integer("user_id").notNull().references(() => users.id),
-  totalAmount: integer("total_amount").notNull(), // in cents
+  productDetails: jsonb("product_details").notNull(), // array of {productId, quantity, price}
+  totalAmount: integer("total_amount").notNull(),
   status: varchar("status", { length: 50 }).default("pending").notNull(),
+  paymentMethod: varchar("payment_method", { length: 50 }),
   shippingAddress: jsonb("shipping_address"),
-  contactInfo: jsonb("contact_info"),
-  orderNotes: text("order_notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
 });
 
-// Insert schemas
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertProductSchema = createInsertSchema(products).omit({
-  id: true,
-});
-
-export const insertStoreSchema = createInsertSchema(stores).omit({
-  id: true,
-});
-
-export const insertShoppingRoomSchema = createInsertSchema(shoppingRooms).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertCartItemSchema = createInsertSchema(cartItems).omit({
-  id: true,
-});
-
-export const insertOrderSchema = createInsertSchema(orders).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertAchievementSchema = createInsertSchema(achievements).omit({
-  id: true,
-  earnedAt: true,
-});
-
-export const insertGameScoreSchema = createInsertSchema(gameScores).omit({
-  id: true,
-  playedAt: true,
-});
-
-export const insertOtpVerificationSchema = createInsertSchema(otpVerifications).omit({
-  id: true,
-  createdAt: true,
-});
-
-// VyronaSocial Insert Schemas
-export const insertShoppingGroupSchema = createInsertSchema(shoppingGroups).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertGroupMemberSchema = createInsertSchema(groupMembers).omit({
-  id: true,
-  joinedAt: true,
-});
-
-export const insertGroupWishlistSchema = createInsertSchema(groupWishlists).omit({
-  id: true,
-  addedAt: true,
-});
-
-export const insertGroupMessageSchema = createInsertSchema(groupMessages).omit({
-  id: true,
-  sentAt: true,
-});
-
-export const insertProductShareSchema = createInsertSchema(productShares).omit({
-  id: true,
-  sharedAt: true,
-});
-
-export const insertNotificationSchema = createInsertSchema(notifications).omit({
-  id: true,
-  createdAt: true,
-});
-
-// VyronaInstaShop Insert Schemas
-export const insertInstagramStoreSchema = createInsertSchema(instagramStores).omit({
-  id: true,
-  connectedAt: true,
-});
-
-export const insertInstagramProductSchema = createInsertSchema(instagramProducts).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertInstagramOrderSchema = createInsertSchema(instagramOrders).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertInstagramAnalyticsSchema = createInsertSchema(instagramAnalytics).omit({
-  id: true,
-});
-
-// VyronaRead Insert Schemas
+// VyronaRead Insert Schemas (placed after table definitions)
 export const insertLibraryIntegrationRequestSchema = createInsertSchema(libraryIntegrationRequests, {
   sellerId: z.number(),
   libraryName: z.string().min(1),
@@ -549,50 +593,6 @@ export const insertGroupBuyOrderSchema = createInsertSchema(groupBuyOrders).omit
   id: true,
   createdAt: true,
 });
-
-// Types
-export type User = typeof users.$inferSelect;
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type Product = typeof products.$inferSelect;
-export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type Store = typeof stores.$inferSelect;
-export type InsertStore = z.infer<typeof insertStoreSchema>;
-export type ShoppingRoom = typeof shoppingRooms.$inferSelect;
-export type InsertShoppingRoom = z.infer<typeof insertShoppingRoomSchema>;
-export type CartItem = typeof cartItems.$inferSelect;
-export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
-export type Order = typeof orders.$inferSelect;
-export type InsertOrder = z.infer<typeof insertOrderSchema>;
-export type Achievement = typeof achievements.$inferSelect;
-export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
-export type GameScore = typeof gameScores.$inferSelect;
-export type InsertGameScore = z.infer<typeof insertGameScoreSchema>;
-export type OtpVerification = typeof otpVerifications.$inferSelect;
-export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
-
-// VyronaSocial Types
-export type ShoppingGroup = typeof shoppingGroups.$inferSelect;
-export type InsertShoppingGroup = z.infer<typeof insertShoppingGroupSchema>;
-export type GroupMember = typeof groupMembers.$inferSelect;
-export type InsertGroupMember = z.infer<typeof insertGroupMemberSchema>;
-export type GroupWishlist = typeof groupWishlists.$inferSelect;
-export type InsertGroupWishlist = z.infer<typeof insertGroupWishlistSchema>;
-export type GroupMessage = typeof groupMessages.$inferSelect;
-export type InsertGroupMessage = z.infer<typeof insertGroupMessageSchema>;
-export type ProductShare = typeof productShares.$inferSelect;
-export type InsertProductShare = z.infer<typeof insertProductShareSchema>;
-export type Notification = typeof notifications.$inferSelect;
-export type InsertNotification = z.infer<typeof insertNotificationSchema>;
-
-// VyronaInstaShop Types
-export type InstagramStore = typeof instagramStores.$inferSelect;
-export type InsertInstagramStore = z.infer<typeof insertInstagramStoreSchema>;
-export type InstagramProduct = typeof instagramProducts.$inferSelect;
-export type InsertInstagramProduct = z.infer<typeof insertInstagramProductSchema>;
-export type InstagramOrder = typeof instagramOrders.$inferSelect;
-export type InsertInstagramOrder = z.infer<typeof insertInstagramOrderSchema>;
-export type InstagramAnalytics = typeof instagramAnalytics.$inferSelect;
-export type InsertInstagramAnalytics = z.infer<typeof insertInstagramAnalyticsSchema>;
 
 // VyronaRead Types
 export type LibraryIntegrationRequest = typeof libraryIntegrationRequests.$inferSelect;
