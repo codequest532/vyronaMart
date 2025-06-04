@@ -17,7 +17,7 @@ import {
   type GroupBuyParticipant, type InsertGroupBuyParticipant
 } from "@shared/schema";
 import { db, pool } from "./db";
-import { eq, and, isNull, sql } from "drizzle-orm";
+import { eq, and, isNull, sql, desc } from "drizzle-orm";
 import {
   libraryIntegrationRequests,
   physicalBooks,
