@@ -41,7 +41,7 @@ export default function VyronaRead() {
   const [readingMode, setReadingMode] = useState("light");
   const [fontSize, setFontSize] = useState("medium");
 
-  // VyronaRead data queries
+  // VyronaRead data queries - real-time data from seller dashboard and admin
   const { data: sellerEBooks = [] } = useQuery({
     queryKey: ["/api/vyronaread/ebooks"],
   });
@@ -61,6 +61,41 @@ export default function VyronaRead() {
   const { data: libraryRequests = [] } = useQuery({
     queryKey: ["/api/admin/library-requests"],
   });
+
+  // Get all products from seller dashboard for Browse Books section
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ["/api/products"],
+  });
+
+  // Filter books from products (books have category like 'books', 'education', etc.)
+  const allBooks = allProducts.filter((product: any) => 
+    product.category && ['books', 'education', 'romance', 'sci-fi', 'mystery', 'fantasy', 'biography'].includes(product.category.toLowerCase())
+  );
+
+  // Apply category filter
+  const filteredBooks = selectedCategory === "all" 
+    ? allBooks 
+    : allBooks.filter((book: any) => book.category?.toLowerCase() === selectedCategory);
+
+  // Combine all book sources for Browse Books section
+  const combinedBooks = [
+    ...filteredBooks,
+    ...sellerEBooks,
+    ...sellerBooks,
+    ...libraryBooks
+  ].filter((book, index, self) => 
+    index === self.findIndex((b) => b.id === book.id)
+  );
+
+  // Get user's orders for Currently Reading
+  const { data: userOrders = [] } = useQuery({
+    queryKey: ["/api/orders"],
+  });
+
+  // Get currently reading books from user's completed orders
+  const currentlyReadingBooks = userOrders
+    .filter((order: any) => order.status === 'completed' && order.module === 'vyronaread')
+    .slice(0, 2);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -160,20 +195,13 @@ export default function VyronaRead() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[
-              { title: "The Midnight Library", author: "Matt Haig", category: "Fiction", price: 299, rating: 4.5, cover: "📚" },
-              { title: "Atomic Habits", author: "James Clear", category: "Self-Help", price: 399, rating: 4.8, cover: "📖" },
-              { title: "Digital Minimalism", author: "Cal Newport", category: "Technology", price: 349, rating: 4.3, cover: "📱" },
-              { title: "The Seven Moons", author: "R.K. Sharma", category: "Fantasy", price: 199, rating: 4.2, cover: "🌙" },
-              { title: "Data Science Handbook", author: "Dr. Sarah Tech", category: "Education", price: 599, rating: 4.6, cover: "📊" },
-              { title: "Mumbai Chronicles", author: "Priya Desai", category: "History", price: 279, rating: 4.4, cover: "🏛️" }
-            ].map((book, index) => (
+            {combinedBooks.length > 0 ? combinedBooks.map((book, index) => (
               <Card key={index} className="border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="text-center mb-3">
-                    <div className="text-4xl mb-2">{book.cover}</div>
-                    <h4 className="font-semibold text-gray-900 text-sm mb-1">{book.title}</h4>
-                    <p className="text-xs text-gray-500 mb-2">by {book.author}</p>
+                    <div className="text-4xl mb-2">📚</div>
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">{book.name || book.title}</h4>
+                    <p className="text-xs text-gray-500 mb-2">by {book.author || "Unknown Author"}</p>
                     <Badge variant="secondary" className="text-xs">{book.category}</Badge>
                   </div>
                   
@@ -181,9 +209,9 @@ export default function VyronaRead() {
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center space-x-1">
                         <Star className="text-amber-400 h-3 w-3 fill-current" />
-                        <span className="font-medium">{book.rating}</span>
+                        <span className="font-medium">4.2</span>
                       </div>
-                      <span className="font-bold text-purple-600">₹{book.price}</span>
+                      <span className="font-bold text-purple-600">₹{(book.price / 100).toFixed(0)}</span>
                     </div>
                     
                     <div className="flex space-x-2">
@@ -198,7 +226,11 @@ export default function VyronaRead() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">No books available in this category.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -215,11 +247,7 @@ export default function VyronaRead() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { name: "Chennai Public Library", books: 15000, distance: "2.3 km", status: "Connected" },
-              { name: "Anna Centenary Library", books: 25000, distance: "5.1 km", status: "Available" },
-              { name: "Connemara Public Library", books: 30000, distance: "7.8 km", status: "Available" }
-            ].map((library, index) => (
+            {availableLibraries.length > 0 ? availableLibraries.map((library, index) => (
               <Card key={index} className="border border-gray-200 hover:border-green-300 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -340,24 +368,7 @@ export default function VyronaRead() {
           <h3 className="text-lg font-bold text-gray-900 mb-4">📖 Currently Reading</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { 
-                title: "The Psychology of Money", 
-                author: "Morgan Housel", 
-                progress: 65, 
-                timeLeft: "2h 30m",
-                lastRead: "Today",
-                cover: "💰"
-              },
-              { 
-                title: "Sapiens", 
-                author: "Yuval Noah Harari", 
-                progress: 32, 
-                timeLeft: "8h 15m",
-                lastRead: "2 days ago",
-                cover: "🦕"
-              }
-            ].map((book, index) => (
+            {currentlyReadingBooks.length > 0 ? currentlyReadingBooks.map((order, index) => (
               <Card key={index} className="border border-gray-200">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
