@@ -884,48 +884,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Creating shopping group with data:", JSON.stringify(groupData, null, 2));
       
-      // Direct database operation to bypass schema issues
-      const { Pool } = require('@neondatabase/serverless');
-      const dbPool = new Pool({ connectionString: process.env.DATABASE_URL });
+      // Use working room creation API
+      const { createRoom } = require('./room-api');
       
-      // Create room code
-      const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      
-      // Insert group directly into database
-      const groupResult = await dbPool.query(`
-        INSERT INTO shopping_groups (name, description, creator_id, is_active, max_members, created_at)
-        VALUES ($1, $2, $3, $4, $5, NOW())
-        RETURNING *
-      `, [groupData.name, groupData.description, groupData.creatorId, true, groupData.maxMembers]);
-      
-      const dbGroup = groupResult.rows[0];
-      console.log("Database group created:", dbGroup);
-      
-      // Add creator as member
-      await dbPool.query(`
-        INSERT INTO group_members (group_id, user_id, role, joined_at)
-        VALUES ($1, $2, $3, NOW())
-      `, [dbGroup.id, groupData.creatorId, 'creator']);
-      
-      // Format response to match expected interface
-      const group = {
-        id: dbGroup.id,
-        name: dbGroup.name,
-        description: dbGroup.description,
-        category: "general",
-        privacy: "public", 
-        creatorId: dbGroup.creator_id,
-        isActive: dbGroup.is_active,
-        memberCount: 1,
-        totalCart: 0,
-        currentGame: null,
-        roomCode: roomCode,
-        scheduledTime: null,
-        maxMembers: dbGroup.max_members,
-        createdAt: dbGroup.created_at
-      };
-      
-      await dbPool.end();
+      const group = await createRoom(groupData.name, groupData.description, groupData.creatorId);
       console.log("Created group:", JSON.stringify(group, null, 2));
       
       res.json(group);
