@@ -518,7 +518,7 @@ export default function SellerDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Button onClick={() => setLocation("/vyronahub")}>
+              <Button onClick={() => setShowAddProductDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
               </Button>
@@ -687,7 +687,7 @@ export default function SellerDashboard() {
                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white">My Products</h2>
                   <p className="text-gray-600 dark:text-gray-300">Manage your product catalog</p>
                 </div>
-                <Button onClick={() => setLocation("/vyronahub")}>
+                <Button onClick={() => setShowAddProductDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Product
                 </Button>
@@ -704,7 +704,7 @@ export default function SellerDashboard() {
                       <Package className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No Products Listed</h3>
                       <p className="text-gray-500 dark:text-gray-400 mb-6">Start by adding your first product to begin selling</p>
-                      <Button onClick={() => setLocation("/vyronahub")}>
+                      <Button onClick={() => setShowAddProductDialog(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Your First Product
                       </Button>
