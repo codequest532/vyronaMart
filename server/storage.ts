@@ -676,29 +676,27 @@ export class DatabaseStorage implements IStorage {
       console.log("=== STORAGE: Creating shopping group ===");
       console.log("Input data:", JSON.stringify(insertGroup, null, 2));
       
-      // Create group using the actual database shopping_groups table
-      console.log("About to insert into shopping_groups table...");
-      const [group] = await db
-        .insert(shoppingGroups)
-        .values({
-          name: insertGroup.name,
-          description: insertGroup.description,
-          creatorId: insertGroup.creatorId,
-          isActive: true,
-          maxMembers: insertGroup.maxMembers || 10,
-          createdAt: new Date()
-        })
-        .returning();
+      // Use direct SQL query to avoid Drizzle schema issues
+      const groupResult = await pool.query(`
+        INSERT INTO shopping_groups (name, description, creator_id, is_active, max_members, created_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+        RETURNING *
+      `, [
+        insertGroup.name,
+        insertGroup.description,
+        insertGroup.creatorId,
+        true,
+        insertGroup.maxMembers || 10
+      ]);
       
+      const group = groupResult.rows[0];
       console.log("Group created successfully:", JSON.stringify(group, null, 2));
       
       // Add creator as group member
-      console.log("About to add group member...");
-      await db.insert(groupMembers).values({
-        groupId: group.id,
-        userId: insertGroup.creatorId,
-        role: "creator"
-      });
+      await pool.query(`
+        INSERT INTO group_members (group_id, user_id, role, joined_at)
+        VALUES ($1, $2, $3, NOW())
+      `, [group.id, insertGroup.creatorId, 'creator']);
       
       console.log("Group member added successfully");
       
@@ -707,17 +705,17 @@ export class DatabaseStorage implements IStorage {
         id: group.id,
         name: group.name,
         description: group.description,
-        category: "general", // Default value since not in database
-        privacy: "public", // Default value since not in database
-        creatorId: group.creatorId,
-        isActive: group.isActive,
-        memberCount: 1, // Default for new group
-        totalCart: 0, // Default for new group
-        currentGame: null, // Default value since not in database
-        roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(), // Generated
-        scheduledTime: null, // Default value since not in database
-        maxMembers: group.maxMembers,
-        createdAt: group.createdAt
+        category: "general",
+        privacy: "public",
+        creatorId: group.creator_id,
+        isActive: group.is_active,
+        memberCount: 1,
+        totalCart: 0,
+        currentGame: null,
+        roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+        scheduledTime: null,
+        maxMembers: group.max_members,
+        createdAt: group.created_at
       };
       
       console.log("Returning result:", JSON.stringify(result, null, 2));

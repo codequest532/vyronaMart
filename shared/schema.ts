@@ -101,15 +101,8 @@ export const shoppingGroups = pgTable("shopping_groups", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  category: text("category").notNull(),
-  privacy: text("privacy").notNull().default("public"), // 'public', 'private'
   creatorId: integer("creator_id").notNull(),
   isActive: boolean("is_active").default(true),
-  memberCount: integer("member_count").default(1),
-  totalCart: integer("total_cart").default(0), // in cents
-  currentGame: text("current_game"), // active game/activity
-  roomCode: text("room_code").notNull(),
-  scheduledTime: timestamp("scheduled_time"),
   maxMembers: integer("max_members").default(10),
   createdAt: timestamp("created_at").defaultNow(),
 });
