@@ -36,7 +36,8 @@ const categories = [
   { value: "automation", label: "Home Automation" },
   { value: "office", label: "Office & Stationery" },
   { value: "health", label: "Health & Wellness" },
-  { value: "pets", label: "Pet Care" }
+  { value: "pets", label: "Pet Care" },
+  { value: "books", label: "Books" }
 ];
 
 export default function VyronaHub() {
