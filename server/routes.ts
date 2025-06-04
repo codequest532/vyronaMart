@@ -868,8 +868,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating physical book with data:", bookData);
       
       // Create physical book record
+      console.log("About to call storage.createPhysicalBook with:", bookData);
       const newBook = await storage.createPhysicalBook(bookData);
-      console.log("Physical book created:", newBook);
+      console.log("Physical book creation result:", newBook);
+      
+      if (!newBook || !newBook.id) {
+        throw new Error("Physical book creation failed - no book returned");
+      }
 
       // Also create as product for Browse Books section
       const productData = {

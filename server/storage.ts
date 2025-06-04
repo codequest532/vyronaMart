@@ -957,11 +957,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPhysicalBook(book: any): Promise<any> {
-    const [newBook] = await db
-      .insert(physicalBooks)
-      .values(book)
-      .returning();
-    return newBook;
+    try {
+      console.log("Database Storage: Creating physical book with data:", book);
+      const [newBook] = await db
+        .insert(physicalBooks)
+        .values(book)
+        .returning();
+      console.log("Database Storage: Physical book created successfully:", newBook);
+      return newBook;
+    } catch (error) {
+      console.error("Database Storage: Error creating physical book:", error);
+      throw error;
+    }
   }
 
   async getPhysicalBooks(libraryId?: number): Promise<any[]> {
