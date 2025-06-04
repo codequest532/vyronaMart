@@ -21,7 +21,8 @@ import {
   Plus,
   Minus,
   Eye,
-  Bell
+  Bell,
+  Users
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -107,40 +108,7 @@ export default function VyronaHub() {
     }
   };
 
-  const handleJoinGroupBuy = (product: any) => {
-    try {
-      // Store the product for group selection
-      const groupBuyItem = {
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        discountedPrice: product.price * 0.75, // 25% group buy discount
-        quantity: 1,
-        imageUrl: product.imageUrl || "/api/placeholder/300/200",
-        isGroupBuy: true,
-        groupBuyDiscount: 25,
-        category: product.category
-      };
 
-      // Store in localStorage for VyronaSocial page to access
-      localStorage.setItem('pendingGroupBuyProduct', JSON.stringify(groupBuyItem));
-      
-      toast({
-        title: "Redirecting to Group Selection",
-        description: `Select or create a group for ${product.name} in VyronaSocial...`,
-      });
-      
-      // Navigate to VyronaSocial tab for group selection
-      setTimeout(() => setLocation("/social"), 1500);
-    } catch (error) {
-      console.error("Group buy error:", error);
-      toast({
-        title: "Error", 
-        description: "Failed to initiate group buy. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const filteredProducts = (products as any[])
     .filter((product: any) => {
@@ -270,56 +238,67 @@ export default function VyronaHub() {
           </CardContent>
         </Card>
 
-        {/* VyronaSocial Group Buy Section */}
+        {/* VyronaSocial Group Purchase Section */}
         {(groupBuyProducts as any[]).length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Heart className="h-6 w-6 text-red-500" />
-                VyronaSocial Group Buy
+          <div className="mb-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                VyronaSocial Group Purchase
               </h2>
-              <Badge variant="default" className="bg-red-500 text-white">
-                Special Discounts Available
-              </Badge>
+              <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Products approved by sellers for group purchasing. Join VyronaSocial circles to unlock exclusive group discounts.
+              </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-              {(groupBuyProducts as any[]).slice(0, 3).map((groupProduct: any) => (
-                <Card key={groupProduct.id} className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-gray-900">Group Buy Product</h3>
-                      <Badge variant="destructive" className="text-xs">
-                        {groupProduct.discountPercentage}% OFF
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      Min Quantity: {groupProduct.minQuantity} pieces
-                    </p>
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <span className="text-lg font-bold text-red-600">₹{groupProduct.groupBuyPrice}</span>
-                        <span className="text-sm text-gray-500 line-through ml-2">₹{groupProduct.originalPrice}</span>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+              {(groupBuyProducts as any[]).map((groupProduct: any) => (
+                <Card key={groupProduct.id} className="relative overflow-hidden border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:shadow-lg transition-shadow">
+                  <div className="absolute top-2 right-2">
+                    <Badge className="bg-purple-500 text-white text-xs">
+                      Approved
+                    </Badge>
+                  </div>
+                  <CardContent className="p-3">
+                    <img
+                      src={groupProduct.imageUrl || "/api/placeholder/150/150"}
+                      alt={groupProduct.name}
+                      className="w-full h-24 object-cover rounded-md mb-2"
+                    />
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1 line-clamp-2 h-8">
+                      {groupProduct.name}
+                    </h3>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">Group:</span>
+                        <span className="text-sm font-bold text-purple-600">₹{groupProduct.groupBuyPrice}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">Regular:</span>
+                        <span className="text-xs text-gray-500 line-through">₹{groupProduct.originalPrice}</span>
+                      </div>
+                      <div className="text-center">
+                        <Badge variant="secondary" className="text-xs">
+                          {Math.round(((groupProduct.originalPrice - groupProduct.groupBuyPrice) / groupProduct.originalPrice) * 100)}% OFF
+                        </Badge>
                       </div>
                     </div>
-                    <Button 
-                      size="sm" 
-                      className="w-full bg-red-500 hover:bg-red-600"
-                      onClick={() => handleJoinGroupBuy(groupProduct)}
-                    >
-                      Join Group Buy
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
+            
             <div className="text-center">
               <Button 
-                variant="outline" 
-                onClick={() => setLocation("/vyronasocial")}
-                className="border-red-500 text-red-600 hover:bg-red-50"
+                size="lg"
+                onClick={() => setLocation("/social")}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all"
               >
-                View All Group Buy Opportunities
+                <Users className="w-6 h-6 mr-3" />
+                Join VyronaSocial Circle
               </Button>
+              <p className="text-sm text-gray-500 mt-3 max-w-md mx-auto">
+                Connect with friends and unlock group discounts on these seller-approved products
+              </p>
             </div>
           </div>
         )}
