@@ -111,10 +111,22 @@ export default function VyronaSocial() {
 
   // Mutations
   const createRoomMutation = useMutation({
-    mutationFn: (data: CreateRoomForm) => apiRequest("/api/social/groups", {
-      method: "POST",
-      body: JSON.stringify(data)
-    }),
+    mutationFn: async (data: CreateRoomForm) => {
+      const response = await fetch("/api/social/groups", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create room");
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Shopping Room Created",
@@ -123,14 +135,33 @@ export default function VyronaSocial() {
       setShowCreateRoom(false);
       createRoomForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error Creating Room",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   });
 
   const joinRoomMutation = useMutation({
-    mutationFn: (data: JoinRoomForm) => apiRequest("/api/social/groups/join", {
-      method: "POST",
-      body: JSON.stringify(data)
-    }),
+    mutationFn: async (data: JoinRoomForm) => {
+      const response = await fetch("/api/social/groups/join", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to join room");
+      }
+      
+      return response.json();
+    },
     onSuccess: () => {
       toast({
         title: "Joined Room",
@@ -139,6 +170,13 @@ export default function VyronaSocial() {
       setShowJoinRoom(false);
       joinRoomForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error Joining Room",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   });
 
