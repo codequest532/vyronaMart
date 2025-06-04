@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
@@ -196,22 +196,15 @@ export default function VyronaRead() {
     <div className="container mx-auto px-4 py-6">
       {/* Back Button */}
       <div className="mb-6">
-        <Button
-          variant="outline"
-          onClick={() => {
-            // Force navigation using multiple methods for reliability
-            try {
-              setLocation("/home");
-            } catch (error) {
-              // Fallback to browser navigation if wouter fails
-              window.location.href = "/home";
-            }
-          }}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Button>
+        <Link href="/home">
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
       </div>
 
       {/* Header */}
