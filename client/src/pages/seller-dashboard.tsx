@@ -1995,27 +1995,35 @@ export default function SellerDashboard() {
                     </CardContent>
                   </Card>
 
-                  {/* Top Performing Books */}
+                  {/* Top Performing Books - Dynamic Data */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <Card>
                       <CardHeader>
                         <CardTitle>Top Physical Books</CardTitle>
-                        <CardDescription>Most borrowed library books</CardDescription>
+                        <CardDescription>Most ordered physical books</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">The Psychology of Money</span>
-                            <span className="font-bold text-blue-600">45 loans</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Atomic Habits</span>
-                            <span className="font-bold text-blue-600">38 loans</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Think and Grow Rich</span>
-                            <span className="font-bold text-blue-600">32 loans</span>
-                          </div>
+                          {sellerBooks && sellerBooks.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length > 0 ? (
+                            sellerBooks
+                              .filter((book: any) => book.category === 'books' && book.module === 'vyronaread')
+                              .slice(0, 3)
+                              .map((book: any, index: number) => (
+                                <div key={book.id} className="flex items-center justify-between">
+                                  <span className="text-sm">{book.title || book.name}</span>
+                                  <span className="font-bold text-blue-600">
+                                    {sellerOrders?.filter((order: any) => 
+                                      order.items?.some((item: any) => item.productId === book.id)
+                                    ).length || 0} orders
+                                  </span>
+                                </div>
+                              ))
+                          ) : (
+                            <div className="text-center py-4 text-gray-500">
+                              <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                              <p className="text-sm">No physical books available</p>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -2027,18 +2035,23 @@ export default function SellerDashboard() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">The Psychology of Money</span>
-                            <span className="font-bold text-purple-600">₹14,850</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Atomic Habits</span>
-                            <span className="font-bold text-purple-600">₹14,383</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Think and Grow Rich</span>
-                            <span className="font-bold text-purple-600">₹8,553</span>
-                          </div>
+                          {sellerEBooks && sellerEBooks.length > 0 ? (
+                            sellerEBooks
+                              .slice(0, 3)
+                              .map((ebook: any, index: number) => (
+                                <div key={ebook.id} className="flex items-center justify-between">
+                                  <span className="text-sm">{ebook.title || ebook.name}</span>
+                                  <span className="font-bold text-purple-600">
+                                    ₹{(ebook.price / 100)?.toLocaleString() || 0}
+                                  </span>
+                                </div>
+                              ))
+                          ) : (
+                            <div className="text-center py-4 text-gray-500">
+                              <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                              <p className="text-sm">No e-books available</p>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
