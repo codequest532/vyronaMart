@@ -1171,6 +1171,82 @@ export class DatabaseStorage implements IStorage {
         .where(eq(users.email, "mgmags25@gmail.com"));
       console.log("Existing account upgraded to admin for mgmags25@gmail.com");
     }
+
+    // Create seller account for VyronaSocial testing
+    const existingSeller = await this.getUserByEmail("seller@test.com");
+    if (!existingSeller) {
+      await this.createUser({
+        username: "testseller",
+        email: "seller@test.com",
+        mobile: null,
+        password: "12345678",
+        role: "seller",
+        vyronaCoins: 500,
+        xp: 0,
+        level: 1,
+        isActive: true,
+        isVerified: true
+      });
+      console.log("Seller account created for VyronaSocial testing");
+    }
+
+    // Add sample products for VyronaSocial testing
+    const existingProducts = await db.select().from(products);
+    if (existingProducts.length === 0) {
+      const sampleProducts = [
+        {
+          name: "Premium Wireless Headphones",
+          description: "High-quality wireless headphones with noise cancellation",
+          price: 2500,
+          category: "electronics",
+          module: "social",
+          imageUrl: null,
+          storeId: null,
+          metadata: {}
+        },
+        {
+          name: "Organic Cotton T-Shirt",
+          description: "Comfortable and sustainable organic cotton t-shirt",
+          price: 1200,
+          category: "fashion",
+          module: "social",
+          imageUrl: null,
+          storeId: null,
+          metadata: {}
+        }
+      ];
+
+      for (const product of sampleProducts) {
+        await db.insert(products).values(product);
+      }
+      console.log("Sample products created for VyronaSocial testing");
+
+      // Create sample group buy products with valid seller ID
+      const productsList = await db.select().from(products);
+      const seller = await this.getUserByEmail("seller@test.com");
+      
+      if (productsList.length > 0 && seller) {
+        const groupBuyData = [
+          {
+            productId: productsList[0].id,
+            sellerId: seller.id,
+            isApproved: true,
+            minQuantity: 10,
+            groupBuyPrice: 1875,
+            originalPrice: 2500,
+            discountPercentage: 25,
+            isActive: true,
+            approvedAt: new Date(),
+            createdAt: new Date()
+          }
+        ];
+
+        for (const groupBuy of groupBuyData) {
+          await db.insert(groupBuyProducts).values(groupBuy);
+        }
+        console.log("Sample group buy products created for VyronaSocial testing");
+      }
+    }
   }
 }
 
