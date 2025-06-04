@@ -68,9 +68,9 @@ export default function VyronaRead() {
   });
 
   // Filter books from products (books have category like 'books', 'education', etc.)
-  const allBooks = allProducts.filter((product: any) => 
+  const allBooks = Array.isArray(allProducts) ? allProducts.filter((product: any) => 
     product.category && ['books', 'education', 'romance', 'sci-fi', 'mystery', 'fantasy', 'biography'].includes(product.category.toLowerCase())
-  );
+  ) : [];
 
   // Apply category filter
   const filteredBooks = selectedCategory === "all" 
@@ -80,9 +80,9 @@ export default function VyronaRead() {
   // Combine all book sources for Browse Books section
   const combinedBooks = [
     ...filteredBooks,
-    ...sellerEBooks,
-    ...sellerBooks,
-    ...libraryBooks
+    ...(Array.isArray(sellerEBooks) ? sellerEBooks : []),
+    ...(Array.isArray(sellerBooks) ? sellerBooks : []),
+    ...(Array.isArray(libraryBooks) ? libraryBooks : [])
   ].filter((book, index, self) => 
     index === self.findIndex((b) => b.id === book.id)
   );
@@ -93,9 +93,9 @@ export default function VyronaRead() {
   });
 
   // Get currently reading books from user's completed orders
-  const currentlyReadingBooks = userOrders
+  const currentlyReadingBooks = Array.isArray(userOrders) ? userOrders
     .filter((order: any) => order.status === 'completed' && order.module === 'vyronaread')
-    .slice(0, 2);
+    .slice(0, 2) : [];
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -247,7 +247,7 @@ export default function VyronaRead() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availableLibraries.length > 0 ? availableLibraries.map((library: any, index: number) => (
+            {Array.isArray(availableLibraries) && availableLibraries.length > 0 ? availableLibraries.map((library: any, index: number) => (
               <Card key={index} className="border border-gray-200 hover:border-green-300 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -363,7 +363,7 @@ export default function VyronaRead() {
           <h3 className="text-lg font-bold text-gray-900 mb-4">📖 Currently Reading</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {currentlyReadingBooks.length > 0 ? currentlyReadingBooks.map((order: any, index: number) => (
+            {Array.isArray(currentlyReadingBooks) && currentlyReadingBooks.length > 0 ? currentlyReadingBooks.map((order: any, index: number) => (
               <Card key={index} className="border border-gray-200">
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-4">
@@ -398,7 +398,11 @@ export default function VyronaRead() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-gray-500">No currently reading books found.</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
