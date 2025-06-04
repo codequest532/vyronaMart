@@ -49,6 +49,7 @@ import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useGroupBuyCartStore } from "@/lib/cart-store";
+import { useLocation } from "wouter";
 
 // Form schemas
 const createRoomSchema = z.object({
@@ -75,6 +76,7 @@ export default function VyronaSocial() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { items: groupBuyItems } = useGroupBuyCartStore();
+  const [location, setLocation] = useLocation();
   
   const [currentView, setCurrentView] = useState<"dashboard" | "room">("dashboard");
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
@@ -801,6 +803,18 @@ export default function VyronaSocial() {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      {/* Back to Dashboard Button */}
+      <div className="mb-6">
+        <Button
+          variant="outline"
+          onClick={() => setLocation("/")}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+
       {currentView === "dashboard" ? (
         <>
           <HeroSection />
