@@ -861,8 +861,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publicationYear: publicationYear || null,
         language: language || "English",
         location: null,
-        fixedCostPrice: fixedCostPrice?.toString() || "0.00",
-        rentalPrice: rentalPrice?.toString() || "0.00"
+        fixedCostPrice: parseFloat(fixedCostPrice) || 0,
+        rentalPrice: parseFloat(rentalPrice) || 0
       };
 
       console.log("Creating physical book with data:", bookData);
@@ -874,20 +874,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Also create as product for Browse Books section
       const productData = {
         name: title,
-        description: `${author} - ${category || 'Book'}`,
-        price: Math.round((fixedCostPrice || 0) * 100), // Convert to cents
+        description: `${author} - ${category || 'General'}`,
+        price: Math.round((parseFloat(fixedCostPrice) || 0) * 100), // Convert to cents
         category: "books",
         module: "vyronaread",
         metadata: {
           author,
           isbn: isbn || null,
+          genre: category || "General",
           publisher: publisher || null,
           publicationYear: publicationYear || null,
           language: language || "English",
+          format: "physical",
           physicalBookId: newBook.id,
-          fixedCostPrice: fixedCostPrice || 0,
-          rentalPrice: rentalPrice || 0,
-          sellerId: 3 // Default seller ID
+          fixedCostPrice: parseFloat(fixedCostPrice) || 0,
+          rentalPrice: parseFloat(rentalPrice) || 0,
+          sellerId: 1 // Default seller ID
         }
       };
 
