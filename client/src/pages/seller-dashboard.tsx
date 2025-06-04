@@ -1863,51 +1863,67 @@ export default function SellerDashboard() {
                     </Card>
                   </div>
 
-                  {/* Reader Preview */}
+                  {/* Functional Digital Reader */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Reader Interface Preview</CardTitle>
-                      <CardDescription>VyronaRead in-house reading experience</CardDescription>
+                      <CardTitle>Digital Reader Interface</CardTitle>
+                      <CardDescription>Read your published e-books with VyronaRead interface</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 border-2 border-dashed">
-                        <div className="max-w-2xl mx-auto">
-                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-                            <div className="flex items-center justify-between mb-6">
-                              <div className="flex items-center gap-3">
-                                <BookOpen className="h-6 w-6 text-blue-600" />
-                                <span className="font-semibold">The Psychology of Money</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">
-                                  <Settings className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="space-y-4 text-sm leading-relaxed">
-                              <p className="text-gray-700 dark:text-gray-300">
-                                "Money is everywhere, it affects all of us, and confuses most of us. Everyone thinks about it a little differently. It offers lessons on things that apply to many areas of life..."
-                              </p>
-                              <p className="text-gray-700 dark:text-gray-300">
-                                "But finance is overwhelmingly taught as a math-based field, where you put data into a formula and the formula tells you what to do..."
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                              <span className="text-xs text-gray-500">Chapter 1 • Page 15 of 245</span>
-                              <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm">←</Button>
-                                <div className="w-32 h-1 bg-gray-200 rounded-full">
-                                  <div className="w-8 h-1 bg-blue-600 rounded-full"></div>
+                      {sellerEBooks && sellerEBooks.length > 0 ? (
+                        <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
+                          <div className="max-w-2xl mx-auto">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+                              <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                  <BookOpen className="h-6 w-6 text-blue-600" />
+                                  <span className="font-semibold">{sellerEBooks[0].title || sellerEBooks[0].name}</span>
                                 </div>
-                                <Button variant="ghost" size="sm">→</Button>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" onClick={handleReaderSettings}>
+                                    <Settings className="h-4 w-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" onClick={handlePreviewReader}>
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="space-y-4 text-sm leading-relaxed">
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  {sellerEBooks[0].description || "This e-book is available in your digital catalog. Preview the reading experience with VyronaRead's interface."}
+                                </p>
+                                <p className="text-gray-700 dark:text-gray-300">
+                                  Price: ₹{(sellerEBooks[0].price / 100)?.toLocaleString() || 0} • Format: Digital • Available: {sellerEBooks[0].isAvailable ? 'Yes' : 'No'}
+                                </p>
+                              </div>
+                              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                                <span className="text-xs text-gray-500">
+                                  Digital Book • {sellerEBooks.length} e-book{sellerEBooks.length !== 1 ? 's' : ''} in catalog
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" disabled={sellerEBooks.length <= 1}>←</Button>
+                                  <div className="w-32 h-1 bg-gray-200 rounded-full">
+                                    <div className="w-4 h-1 bg-blue-600 rounded-full"></div>
+                                  </div>
+                                  <Button variant="ghost" size="sm" disabled={sellerEBooks.length <= 1}>→</Button>
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                          <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">No E-Books Available</h3>
+                          <p className="text-gray-600 mb-4">
+                            Upload your first e-book to test the VyronaRead digital reading experience
+                          </p>
+                          <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleUploadEbook}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Upload E-Book
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
