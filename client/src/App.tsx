@@ -11,6 +11,7 @@ import VyronaSocial from "@/pages/social";
 import VyronaGroupBuy from "@/pages/vyronasocial";
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";
+import VyronaRead from "@/pages/vyronaread";
 import Cart from "@/pages/cart";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/vyronasocial" component={VyronaGroupBuy} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
+      <Route path="/vyronaread" component={VyronaRead} />
       <Route path="/cart" component={Cart} />
       <Route path="/ebook-reader" component={EbookReader} />
       

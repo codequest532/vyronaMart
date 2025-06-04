@@ -117,6 +117,10 @@ export default function Home() {
       setLocation("/social");
       return;
     }
+    if (tab === "read") {
+      setLocation("/vyronaread");
+      return;
+    }
     if (tab === "instashop") {
       setLocation("/instashop");
       return;
