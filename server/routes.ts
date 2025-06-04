@@ -838,6 +838,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Image upload endpoint for books
+  app.post("/api/upload/book-image", async (req: Request, res: Response) => {
+    try {
+      const { imageData, fileName } = req.body;
+      
+      if (!imageData || !fileName) {
+        return res.status(400).json({ error: "Image data and fileName are required" });
+      }
+
+      // In a real implementation, you would save to cloud storage like AWS S3
+      // For this demo, we'll use a placeholder service that generates realistic book covers
+      const imageUrl = `https://picsum.photos/300/400?random=${Date.now()}`;
+      
+      res.json({ success: true, imageUrl });
+    } catch (error) {
+      console.error("Image upload error:", error);
+      res.status(500).json({ error: "Failed to upload image" });
+    }
+  });
+
   // VyronaRead Books - Create new book with pricing
   app.post("/api/vyronaread/books", async (req, res) => {
     try {

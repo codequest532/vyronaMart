@@ -28,7 +28,9 @@ async function testBookWithImageCreation() {
       publisher: 'VyronaTech Publications',
       publicationYear: '2024',
       language: 'English',
-      description: 'A comprehensive guide to mastering VyronaSocial platform features and capabilities.'
+      description: 'A comprehensive guide to mastering VyronaSocial platform features and capabilities.',
+      imageUrl: `https://picsum.photos/300/400?random=${Date.now()}`,
+      additionalImages: [`https://picsum.photos/300/400?random=${Date.now() + 1}`]
     };
 
     console.log('Creating book with data:', bookData);
