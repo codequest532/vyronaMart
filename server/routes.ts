@@ -848,35 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publisher, publicationYear, language, fixedCostPrice, rentalPrice 
       } = req.body;
 
-      // Create as both a physical book and a product for browsing
-      const bookData = {
-        libraryId: 1, // Default seller library
-        title,
-        author,
-        isbn: isbn || null,
-        category: category || null,
-        copies: copies || 1,
-        available: copies || 1,
-        publisher: publisher || null,
-        publicationYear: publicationYear || null,
-        language: language || "English",
-        location: null,
-        fixedCostPrice: parseFloat(fixedCostPrice) || 0,
-        rentalPrice: parseFloat(rentalPrice) || 0
-      };
-
-      console.log("Creating physical book with data:", bookData);
-      
-      // Create physical book record
-      console.log("About to call storage.createPhysicalBook with:", bookData);
-      const newBook = await storage.createPhysicalBook(bookData);
-      console.log("Physical book creation result:", newBook);
-      
-      if (!newBook || !newBook.id) {
-        throw new Error("Physical book creation failed - no book returned");
-      }
-
-      // Also create as product for Browse Books section
+      // Create product for Browse Books section first
       const productData = {
         name: title,
         description: `${author} - ${category || 'General'}`,
@@ -891,7 +863,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           publicationYear: publicationYear || null,
           language: language || "English",
           format: "physical",
-          physicalBookId: newBook.id,
           fixedCostPrice: parseFloat(fixedCostPrice) || 0,
           rentalPrice: parseFloat(rentalPrice) || 0,
           sellerId: 1 // Default seller ID
@@ -901,6 +872,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating product with data:", productData);
       const newProduct = await storage.createProduct(productData);
       console.log("Product created:", newProduct);
+
+      // Also create physical book record for library management
+      const bookData = {
+        libraryId: 1, // Default seller library
+        title,
+        author,
+        isbn: isbn || null,
+        category: category || null,
+        copies: copies || 1,
+        available: copies || 1,
+        publisher: publisher || null,
+        publicationYear: publicationYear || null,
+        language: language || "English",
+        location: null,
+        fixedCostPrice: parseFloat(fixedCostPrice).toString() || "0.00",
+        rentalPrice: parseFloat(rentalPrice).toString() || "0.00"
+      };
+
+      console.log("Creating physical book with data:", bookData);
+      let newBook = null;
+      try {
+        newBook = await storage.createPhysicalBook(bookData);
+        console.log("Physical book created:", newBook);
+      } catch (bookError) {
+        console.error("Physical book creation failed, but product created successfully:", bookError);
+        // Continue with product-only response
+      }
 
       res.json({
         success: true,

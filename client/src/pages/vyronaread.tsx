@@ -164,7 +164,12 @@ export default function VyronaRead() {
 
   // Filter books from products (books have category like 'books', 'education', etc.)
   const allBooks = Array.isArray(allProducts) ? allProducts.filter((product: any) => 
-    product.category && ['books', 'education', 'romance', 'sci-fi', 'mystery', 'fantasy', 'biography'].includes(product.category.toLowerCase())
+    product.category && [
+      'books', 'education', 'romance', 'sci-fi', 'mystery', 'fantasy', 'biography',
+      'self help', 'fiction', 'non-fiction', 'business', 'health', 'technology',
+      'history', 'science', 'philosophy', 'religion', 'cooking', 'travel',
+      'children', 'young adult', 'academic', 'reference'
+    ].includes(product.category.toLowerCase())
   ) : [];
 
   // Apply category filter
