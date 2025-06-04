@@ -1205,6 +1205,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaRead Purchase API
+  app.post("/api/vyronaread/purchase", async (req, res) => {
+    try {
+      const { bookId, customerInfo, amount, paymentMethod } = req.body;
+      
+      // Create order record
+      const order = await storage.createOrder({
+        userId: 1, // Default user for now
+        totalAmount: amount,
+        status: "completed",
+        module: "vyronaread",
+        metadata: {
+          type: "purchase",
+          bookId,
+          customerInfo,
+          paymentMethod,
+          purchaseType: "buy",
+          accessType: "lifetime"
+        }
+      });
+
+      res.json({
+        success: true,
+        orderId: order.id,
+        message: "Book purchased successfully"
+      });
+    } catch (error) {
+      console.error("Purchase error:", error);
+      res.status(500).json({ message: "Failed to process purchase" });
+    }
+  });
+
+  // VyronaRead Rental API
+  app.post("/api/vyronaread/rental", async (req, res) => {
+    try {
+      const { bookId, customerInfo, amount, paymentMethod, duration } = req.body;
+      
+      // Calculate rental expiry date
+      const currentDate = new Date();
+      const expiryDate = new Date(currentDate.getTime() + (duration * 24 * 60 * 60 * 1000));
+      
+      // Create order record
+      const order = await storage.createOrder({
+        userId: 1, // Default user for now
+        totalAmount: amount,
+        status: "completed",
+        module: "vyronaread",
+        metadata: {
+          type: "rental",
+          bookId,
+          customerInfo,
+          paymentMethod,
+          purchaseType: "rent",
+          duration,
+          rentalStart: currentDate.toISOString(),
+          rentalExpiry: expiryDate.toISOString(),
+          accessType: "temporary"
+        }
+      });
+
+      res.json({
+        success: true,
+        orderId: order.id,
+        expiryDate: expiryDate.toISOString(),
+        message: `Book rented successfully for ${duration} days`
+      });
+    } catch (error) {
+      console.error("Rental error:", error);
+      res.status(500).json({ message: "Failed to process rental" });
+    }
+  });
+
+  // VyronaRead Borrowing API
+  app.post("/api/vyronaread/borrow", async (req, res) => {
+    try {
+      const { bookId, customerInfo, borrowingInfo } = req.body;
+      
+      // Create order record for borrowing request
+      const order = await storage.createOrder({
+        userId: 1, // Default user for now
+        totalAmount: 0, // Free borrowing
+        status: "pending",
+        module: "vyronaread",
+        metadata: {
+          type: "borrow",
+          bookId,
+          customerInfo,
+          borrowingInfo,
+          purchaseType: "borrow",
+          accessType: "library_loan",
+          requestDate: new Date().toISOString()
+        }
+      });
+
+      res.json({
+        success: true,
+        orderId: order.id,
+        message: "Borrow request submitted successfully"
+      });
+    } catch (error) {
+      console.error("Borrowing error:", error);
+      res.status(500).json({ message: "Failed to process borrow request" });
+    }
+  });
+
   // Setup working room creation routes
   setupRoomRoutes(app);
   

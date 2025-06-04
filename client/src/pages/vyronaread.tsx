@@ -59,41 +59,13 @@ export default function VyronaRead() {
 
   // Handler functions for buy/rent/borrow operations
   const handleBuyBook = async (book: any) => {
-    try {
-      const response = await apiRequest("POST", "/api/create-payment-intent", {
-        amount: book.price,
-        type: "buy",
-        bookId: book.id,
-        module: "VyronaRead"
-      });
-      const { clientSecret } = await response.json();
-      setLocation(`/checkout?client_secret=${clientSecret}&type=buy&bookId=${book.id}`);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to initiate purchase. Please try again.",
-        variant: "destructive"
-      });
-    }
+    // Navigate to VyronaRead checkout page with buy parameters
+    setLocation(`/vyronaread-checkout?type=buy&bookId=${book.id}`);
   };
 
   const handleRentBook = async (book: any) => {
-    try {
-      const response = await apiRequest("POST", "/api/create-payment-intent", {
-        amount: Math.floor(book.price * 0.3), // Rent at 30% of buy price
-        type: "rent",
-        bookId: book.id,
-        module: "VyronaRead"
-      });
-      const { clientSecret } = await response.json();
-      setLocation(`/checkout?client_secret=${clientSecret}&type=rent&bookId=${book.id}`);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to initiate rental. Please try again.",
-        variant: "destructive"
-      });
-    }
+    // Navigate to VyronaRead checkout page with rent parameters  
+    setLocation(`/vyronaread-checkout?type=rent&bookId=${book.id}`);
   };
 
   const openBorrowModal = (book: any) => {
