@@ -477,7 +477,7 @@ export default function SellerDashboard() {
               onClick={() => setActiveTab("books")}
             >
               <Library className="h-4 w-4 mr-2" />
-              VyronaRead Books
+              Books Management
             </Button>
             <Button
               variant={activeTab === "customers" ? "default" : "ghost"}
