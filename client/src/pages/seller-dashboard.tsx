@@ -1687,63 +1687,72 @@ export default function SellerDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="space-y-4">
-                          <h4 className="font-semibold">Sales Revenue</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-sm">Book Sales</span>
-                              <span className="font-bold text-green-600">₹45,200</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm">Platform Fee (15%)</span>
-                              <span className="font-bold text-red-600">-₹6,780</span>
-                            </div>
-                            <div className="border-t pt-2">
-                              <div className="flex justify-between">
-                                <span className="font-medium">Net Sales</span>
-                                <span className="font-bold text-green-600">₹38,420</span>
+                        {(() => {
+                          const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+                          const bookSales = vyronareadOrders
+                            .filter((order: any) => order.status === 'completed' && !order.metadata?.includes?.('rental'))
+                            .reduce((sum: number, order: any) => sum + (order.total || 0), 0);
+                          const rentalRevenue = vyronareadOrders
+                            .filter((order: any) => order.status === 'completed' && order.metadata?.includes?.('rental'))
+                            .reduce((sum: number, order: any) => sum + (order.total || 0), 0);
+                          const platformFee = Math.round(bookSales * 0.15);
+                          const rentalPlatformFee = Math.round(rentalRevenue * 0.10);
+                          const netSales = bookSales - platformFee;
+                          const netRentals = rentalRevenue - rentalPlatformFee;
+                          const totalRevenue = netSales + netRentals;
+
+                          return (
+                            <>
+                              <div className="space-y-4">
+                                <h4 className="font-semibold">Sales Revenue</h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Book Sales</span>
+                                    <span className="font-bold text-green-600">₹{(bookSales / 100).toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Platform Fee (15%)</span>
+                                    <span className="font-bold text-red-600">-₹{(platformFee / 100).toLocaleString()}</span>
+                                  </div>
+                                  <div className="border-t pt-2">
+                                    <div className="flex justify-between">
+                                      <span className="font-medium">Net Sales</span>
+                                      <span className="font-bold text-green-600">₹{(netSales / 100).toLocaleString()}</span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <h4 className="font-semibold">Rental Revenue</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-sm">Monthly Rentals</span>
-                              <span className="font-bold text-blue-600">₹18,900</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm">Platform Fee (10%)</span>
-                              <span className="font-bold text-red-600">-₹1,890</span>
-                            </div>
-                            <div className="border-t pt-2">
-                              <div className="flex justify-between">
-                                <span className="font-medium">Net Rentals</span>
-                                <span className="font-bold text-blue-600">₹17,010</span>
+                              <div className="space-y-4">
+                                <h4 className="font-semibold">Rental Revenue</h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Monthly Rentals</span>
+                                    <span className="font-bold text-blue-600">₹{(rentalRevenue / 100).toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Platform Fee (10%)</span>
+                                    <span className="font-bold text-red-600">-₹{(rentalPlatformFee / 100).toLocaleString()}</span>
+                                  </div>
+                                  <div className="border-t pt-2">
+                                    <div className="flex justify-between">
+                                      <span className="font-medium">Net Rentals</span>
+                                      <span className="font-bold text-blue-600">₹{(netRentals / 100).toLocaleString()}</span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="space-y-4">
-                          <h4 className="font-semibold">Subscription Revenue</h4>
-                          <div className="space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-sm">Premium Access</span>
-                              <span className="font-bold text-purple-600">₹8,000</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-sm">Platform Share</span>
-                              <span className="font-bold text-green-600">₹8,000</span>
-                            </div>
-                            <div className="border-t pt-2">
-                              <div className="flex justify-between">
-                                <span className="font-medium">Total</span>
-                                <span className="font-bold text-orange-600">₹63,430</span>
+                              <div className="space-y-4">
+                                <h4 className="font-semibold">Total Revenue</h4>
+                                <div className="border-t pt-2">
+                                  <div className="flex justify-between">
+                                    <span className="font-medium">Total Earnings</span>
+                                    <span className="font-bold text-orange-600">₹{(totalRevenue / 100).toLocaleString()}</span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     </CardContent>
                   </Card>
