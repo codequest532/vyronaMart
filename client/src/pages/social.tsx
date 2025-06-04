@@ -37,6 +37,7 @@ import {
   Vote,
   Package,
   ArrowRight,
+  ArrowLeft,
   CheckCircle,
   XCircle,
   Eye
@@ -549,6 +550,16 @@ export default function VyronaSocial() {
 
     return (
       <div className="space-y-6">
+        {/* Back Button */}
+        <Button 
+          variant="ghost" 
+          onClick={handleLeaveRoom}
+          className="mb-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to VyronaSocial
+        </Button>
+
         {/* Room Header */}
         <div className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
           <div>
