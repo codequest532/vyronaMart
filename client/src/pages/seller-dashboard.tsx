@@ -1478,24 +1478,31 @@ export default function SellerDashboard() {
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <h4 className="font-semibold">Revenue Streams</h4>
+                      <h4 className="font-semibold">Revenue Analysis</h4>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Membership Fees</span>
-                          <span className="font-bold text-green-600">₹12,500/month</span>
+                          <span className="text-sm text-gray-600">Physical Book Orders</span>
+                          <span className="font-bold text-green-600">
+                            {sellerOrders?.filter((order: any) => order.module === 'vyronaread' && !order.metadata?.includes?.('ebook')).length || 0}
+                          </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Late Fees</span>
-                          <span className="font-bold text-orange-600">₹850/month</span>
+                          <span className="text-sm text-gray-600">Digital Book Orders</span>
+                          <span className="font-bold text-orange-600">
+                            {sellerOrders?.filter((order: any) => order.metadata && JSON.stringify(order.metadata).includes('ebook')).length || 0}
+                          </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-600">Digital Access</span>
-                          <span className="font-bold text-blue-600">₹3,200/month</span>
+                          <span className="text-sm text-gray-600">Library Books</span>
+                          <span className="font-bold text-blue-600">{libraryBooks?.length || 0}</span>
                         </div>
                         <div className="border-t pt-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium">Total Revenue</span>
-                            <span className="font-bold text-green-600">₹16,550/month</span>
+                            <span className="font-bold text-green-600">
+                              ₹{sellerOrders?.filter((order: any) => order.module === 'vyronaread')
+                                .reduce((total: number, order: any) => total + (order.totalAmount / 100), 0).toLocaleString() || 0}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -1940,15 +1947,18 @@ export default function SellerDashboard() {
                     </div>
                   </div>
 
-                  {/* Performance Overview */}
+                  {/* Performance Overview - Dynamic Data */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <Card>
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                            <p className="text-3xl font-bold text-green-600">₹85,450</p>
-                            <p className="text-xs text-green-500">+12% from last month</p>
+                            <p className="text-3xl font-bold text-green-600">
+                              ₹{sellerOrders?.filter((order: any) => order.module === 'vyronaread')
+                                .reduce((total: number, order: any) => total + (order.totalAmount / 100), 0).toLocaleString() || 0}
+                            </p>
+                            <p className="text-xs text-green-500">VyronaRead orders</p>
                           </div>
                           <TrendingUp className="h-8 w-8 text-green-600" />
                         </div>
@@ -1958,9 +1968,12 @@ export default function SellerDashboard() {
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-gray-600">Books Sold</p>
-                            <p className="text-3xl font-bold text-purple-600">285</p>
-                            <p className="text-xs text-purple-500">+8% from last month</p>
+                            <p className="text-sm font-medium text-gray-600">Books Available</p>
+                            <p className="text-3xl font-bold text-purple-600">
+                              {(sellerBooks?.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length || 0) + 
+                               (sellerEBooks?.length || 0)}
+                            </p>
+                            <p className="text-xs text-purple-500">Physical + Digital</p>
                           </div>
                           <ShoppingCart className="h-8 w-8 text-purple-600" />
                         </div>
@@ -1970,9 +1983,12 @@ export default function SellerDashboard() {
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-gray-600">Active Rentals</p>
-                            <p className="text-3xl font-bold text-blue-600">156</p>
-                            <p className="text-xs text-blue-500">+15% from last month</p>
+                            <p className="text-sm font-medium text-gray-600">Active Orders</p>
+                            <p className="text-3xl font-bold text-blue-600">
+                              {sellerOrders?.filter((order: any) => order.module === 'vyronaread' && 
+                                (order.status === 'pending' || order.status === 'processing')).length || 0}
+                            </p>
+                            <p className="text-xs text-blue-500">Processing orders</p>
                           </div>
                           <Clock className="h-8 w-8 text-blue-600" />
                         </div>
@@ -1982,9 +1998,11 @@ export default function SellerDashboard() {
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-gray-600">Reading Hours</p>
-                            <p className="text-3xl font-bold text-orange-600">8,240</p>
-                            <p className="text-xs text-orange-500">Total this month</p>
+                            <p className="text-sm font-medium text-gray-600">E-Books Listed</p>
+                            <p className="text-3xl font-bold text-orange-600">
+                              {sellerEBooks?.length || 0}
+                            </p>
+                            <p className="text-xs text-orange-500">Digital catalog</p>
                           </div>
                           <BookOpen className="h-8 w-8 text-orange-600" />
                         </div>
