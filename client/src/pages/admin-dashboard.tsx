@@ -201,13 +201,7 @@ export default function AdminDashboard() {
 
   const updateLibraryRequestMutation = useMutation({
     mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
-      return await apiRequest(`/api/admin/library-requests/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status, adminNotes }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return await apiRequest("PATCH", `/api/admin/library-requests/${id}`, { status, adminNotes });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
