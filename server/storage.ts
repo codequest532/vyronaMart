@@ -300,6 +300,32 @@ export class MemStorage implements IStorage {
       this.products.set(physicalBook2.id, physicalBook2);
       this.products.set(digitalBook1.id, digitalBook1);
       this.products.set(digitalBook2.id, digitalBook2);
+
+      // Add sample shopping rooms
+      const room1: ShoppingRoom = {
+        id: this.currentRoomId++,
+        name: "Tech Enthusiasts",
+        creatorId: 1,
+        isActive: true,
+        currentGame: "Quiz Battle",
+        totalCart: 15999,
+        memberCount: 8,
+        createdAt: new Date()
+      };
+
+      const room2: ShoppingRoom = {
+        id: this.currentRoomId++,
+        name: "Book Lovers Club",
+        creatorId: 1,
+        isActive: true,
+        currentGame: "Word Chain",
+        totalCart: 8499,
+        memberCount: 12,
+        createdAt: new Date()
+      };
+
+      this.shoppingRooms.set(room1.id, room1);
+      this.shoppingRooms.set(room2.id, room2);
     }
   }
 
@@ -396,7 +422,7 @@ export class MemStorage implements IStorage {
 
   // Shopping Room methods
   async getShoppingRooms(): Promise<ShoppingRoom[]> {
-    return Array.from(this.shoppingRooms.values()).filter(room => room.isActive);
+    return Array.from(this.shoppingRooms.values()).filter(room => room.isActive !== false);
   }
 
   async getShoppingRoom(id: number): Promise<ShoppingRoom | undefined> {
