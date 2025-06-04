@@ -254,7 +254,22 @@ export default function VyronaRead() {
               <Card key={index} className="border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
                 <CardContent className="p-4">
                   <div className="text-center mb-3">
-                    <div className="text-4xl mb-2">📚</div>
+                    <div className="w-full h-40 mb-3 bg-gray-100 rounded-lg overflow-hidden">
+                      {book.imageUrl ? (
+                        <img 
+                          src={book.imageUrl} 
+                          alt={book.name || book.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className="w-full h-full flex items-center justify-center text-4xl" style={{display: book.imageUrl ? 'none' : 'flex'}}>
+                        📚
+                      </div>
+                    </div>
                     <h4 className="font-semibold text-gray-900 text-sm mb-1">{book.name || book.title}</h4>
                     <p className="text-xs text-gray-500 mb-2">by {book.author || "Unknown Author"}</p>
                     <Badge variant="secondary" className="text-xs">{book.category}</Badge>

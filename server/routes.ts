@@ -845,7 +845,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const { 
         title, author, isbn, category, copies, description, 
-        publisher, publicationYear, language, fixedCostPrice, rentalPrice 
+        publisher, publicationYear, language, fixedCostPrice, rentalPrice,
+        imageUrl, additionalImages
       } = req.body;
 
       // Create product for Browse Books section first
@@ -855,6 +856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         price: Math.round((parseFloat(fixedCostPrice) || 0) * 100), // Convert to cents
         category: "books",
         module: "vyronaread",
+        imageUrl: imageUrl || `https://picsum.photos/300/400?random=${Date.now()}`,
         metadata: {
           author,
           isbn: isbn || null,
@@ -865,7 +867,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           format: "physical",
           fixedCostPrice: parseFloat(fixedCostPrice) || 0,
           rentalPrice: parseFloat(rentalPrice) || 0,
-          sellerId: 1 // Default seller ID
+          sellerId: 1, // Default seller ID
+          bookImages: [`https://picsum.photos/300/400?random=${Date.now()}`, `https://picsum.photos/300/400?random=${Date.now() + 1}`] // Sample book images
         }
       };
 
