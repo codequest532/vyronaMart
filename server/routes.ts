@@ -858,6 +858,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Book Rental System - Create rental with 15-day billing cycle
+  app.post("/api/rentals/create", async (req, res) => {
+    try {
+      const { userId, productId, bookId, bookType, rentalPricePerCycle, sellerId, libraryId } = req.body;
+      
+      // Calculate next billing date (15 days from now)
+      const nextBillingDate = new Date();
+      nextBillingDate.setDate(nextBillingDate.getDate() + 15);
+
+      const rentalData = {
+        userId,
+        productId,
+        bookId,
+        bookType, // 'physical' or 'ebook'
+        rentalStartDate: new Date(),
+        currentBillingCycle: 1,
+        nextBillingDate,
+        rentalPricePerCycle: Math.round(rentalPricePerCycle * 100), // Convert to cents
+        totalAmountPaid: Math.round(rentalPricePerCycle * 100), // First cycle payment
+        status: 'active',
+        autoRenewal: true,
+        sellerId,
+        libraryId,
+        returnRequestId: null
+      };
+
+      const rental = await storage.createBookRental(rentalData);
+      
+      // Create initial billing record
+      const billingData = {
+        rentalId: rental.id,
+        billingCycle: 1,
+        billingDate: new Date(),
+        amount: Math.round(rentalPricePerCycle * 100),
+        paymentStatus: 'paid',
+        paymentMethod: 'default',
+        transactionId: `txn_${Date.now()}`
+      };
+      
+      await storage.createRentalBilling(billingData);
+
+      res.json({ success: true, rental, message: "Book rental created successfully" });
+    } catch (error) {
+      console.error("Rental creation error:", error);
+      res.status(500).json({ error: "Failed to create rental" });
+    }
+  });
+
+  // Get user's rental history with billing details
+  app.get("/api/rentals/user/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const rentals = await storage.getUserRentals(userId);
+      res.json(rentals);
+    } catch (error) {
+      console.error("Error fetching user rentals:", error);
+      res.status(500).json({ error: "Failed to fetch rentals" });
+    }
+  });
+
+  // Create return request for rented or borrowed books
+  app.post("/api/returns/request", async (req, res) => {
+    try {
+      const { userId, rentalId, loanId, bookType, bookTitle, returnReason, sellerId, libraryId } = req.body;
+      
+      const returnRequestData = {
+        userId,
+        rentalId,
+        loanId,
+        bookType, // 'rental' or 'loan'
+        bookTitle,
+        returnReason,
+        requestDate: new Date(),
+        status: 'pending',
+        sellerId,
+        libraryId,
+        adminNotes: null,
+        sellerNotes: null,
+        processedBy: null,
+        processedAt: null
+      };
+
+      const returnRequest = await storage.createReturnRequest(returnRequestData);
+      
+      // Update rental with return request ID if it's a rental
+      if (rentalId) {
+        await storage.updateRentalReturnRequest(rentalId, returnRequest.id);
+      }
+
+      res.json({ success: true, returnRequest, message: "Return request submitted successfully" });
+    } catch (error) {
+      console.error("Return request error:", error);
+      res.status(500).json({ error: "Failed to create return request" });
+    }
+  });
+
+  // Get return requests for admin/seller management
+  app.get("/api/returns/manage/:role/:userId", async (req, res) => {
+    try {
+      const { role, userId } = req.params;
+      let returnRequests;
+      
+      if (role === 'admin') {
+        returnRequests = await storage.getAllReturnRequests();
+      } else if (role === 'seller') {
+        returnRequests = await storage.getSellerReturnRequests(parseInt(userId));
+      } else {
+        return res.status(400).json({ error: "Invalid role" });
+      }
+      
+      res.json(returnRequests);
+    } catch (error) {
+      console.error("Error fetching return requests:", error);
+      res.status(500).json({ error: "Failed to fetch return requests" });
+    }
+  });
+
+  // Process return request (approve/reject)
+  app.post("/api/returns/process/:requestId", async (req, res) => {
+    try {
+      const requestId = parseInt(req.params.requestId);
+      const { status, notes, processedBy, isAdmin } = req.body;
+      
+      const updateData = {
+        status,
+        processedBy,
+        processedAt: new Date(),
+        ...(isAdmin ? { adminNotes: notes } : { sellerNotes: notes })
+      };
+
+      const updatedRequest = await storage.updateReturnRequest(requestId, updateData);
+      
+      // If approved, update rental status to 'returned'
+      if (status === 'approved' && updatedRequest.rentalId) {
+        await storage.updateRentalStatus(updatedRequest.rentalId, 'returned');
+      }
+
+      res.json({ success: true, returnRequest: updatedRequest, message: "Return request processed successfully" });
+    } catch (error) {
+      console.error("Return request processing error:", error);
+      res.status(500).json({ error: "Failed to process return request" });
+    }
+  });
+
   // VyronaRead Books - Create new book with pricing
   app.post("/api/vyronaread/books", async (req, res) => {
     try {

@@ -295,6 +295,60 @@ export const eBooks = pgTable("e_books", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Book Rentals with 15-day billing cycle
+export const bookRentals = pgTable("book_rentals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  productId: integer("product_id").notNull().references(() => products.id),
+  bookId: integer("book_id"), // reference to physical_books or e_books
+  bookType: varchar("book_type", { length: 20 }).notNull(), // 'physical' or 'ebook'
+  rentalStartDate: timestamp("rental_start_date").defaultNow().notNull(),
+  currentBillingCycle: integer("current_billing_cycle").default(1).notNull(),
+  nextBillingDate: timestamp("next_billing_date").notNull(),
+  rentalPricePerCycle: integer("rental_price_per_cycle").notNull(), // in cents, for 15 days
+  totalAmountPaid: integer("total_amount_paid").default(0).notNull(),
+  status: varchar("status", { length: 50 }).default("active").notNull(), // 'active', 'returned', 'overdue'
+  autoRenewal: boolean("auto_renewal").default(true).notNull(),
+  sellerId: integer("seller_id").notNull().references(() => users.id),
+  libraryId: integer("library_id"), // for physical books from libraries
+  returnRequestId: integer("return_request_id"), // link to return request if initiated
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Rental Billing History
+export const rentalBillingHistory = pgTable("rental_billing_history", {
+  id: serial("id").primaryKey(),
+  rentalId: integer("rental_id").notNull().references(() => bookRentals.id),
+  billingCycle: integer("billing_cycle").notNull(),
+  billingDate: timestamp("billing_date").notNull(),
+  amount: integer("amount").notNull(), // in cents
+  paymentStatus: varchar("payment_status", { length: 50 }).default("pending").notNull(), // 'pending', 'paid', 'failed'
+  paymentMethod: varchar("payment_method", { length: 50 }),
+  transactionId: varchar("transaction_id", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Return Requests for rented and borrowed books
+export const bookReturnRequests = pgTable("book_return_requests", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  rentalId: integer("rental_id").references(() => bookRentals.id), // for rented books
+  loanId: integer("loan_id").references(() => bookLoans.id), // for borrowed books
+  bookType: varchar("book_type", { length: 20 }).notNull(), // 'rental' or 'loan'
+  bookTitle: varchar("book_title", { length: 255 }).notNull(),
+  returnReason: text("return_reason"),
+  requestDate: timestamp("request_date").defaultNow().notNull(),
+  status: varchar("status", { length: 50 }).default("pending").notNull(), // 'pending', 'approved', 'completed', 'rejected'
+  sellerId: integer("seller_id").references(() => users.id),
+  libraryId: integer("library_id"),
+  adminNotes: text("admin_notes"),
+  sellerNotes: text("seller_notes"),
+  processedBy: integer("processed_by").references(() => users.id),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Group Buy Tables for VyronaSocial
 export const groupBuyProducts = pgTable("group_buy_products", {
   id: serial("id").primaryKey(),
@@ -431,6 +485,23 @@ export const insertProductShareSchema = createInsertSchema(productShares).omit({
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// VyronaRead Insert Schemas
+export const insertBookRentalSchema = createInsertSchema(bookRentals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertRentalBillingHistorySchema = createInsertSchema(rentalBillingHistory).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertBookReturnRequestSchema = createInsertSchema(bookReturnRequests).omit({
   id: true,
   createdAt: true,
 });
