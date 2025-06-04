@@ -2,6 +2,7 @@ import {
   users, products, stores, shoppingRooms, cartItems, orders, achievements, gameScores, otpVerifications,
   shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
   instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
+  groupBuyProducts, groupBuyCampaigns, groupBuyParticipants,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
@@ -11,7 +12,9 @@ import {
   type GroupWishlist, type InsertGroupWishlist, type GroupMessage, type InsertGroupMessage,
   type ProductShare, type InsertProductShare, type Notification, type InsertNotification,
   type InstagramStore, type InsertInstagramStore, type InstagramProduct, type InsertInstagramProduct,
-  type InstagramOrder, type InsertInstagramOrder, type InstagramAnalytics, type InsertInstagramAnalytics
+  type InstagramOrder, type InsertInstagramOrder, type InstagramAnalytics, type InsertInstagramAnalytics,
+  type GroupBuyProduct, type InsertGroupBuyProduct, type GroupBuyCampaign, type InsertGroupBuyCampaign,
+  type GroupBuyParticipant, type InsertGroupBuyParticipant
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, isNull } from "drizzle-orm";
@@ -1064,6 +1067,83 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Seed initial data when needed
+  // Group Buy Products
+  async createGroupBuyProduct(insertProduct: any): Promise<any> {
+    const [product] = await db
+      .insert(groupBuyProducts)
+      .values(insertProduct)
+      .returning();
+    return product;
+  }
+
+  async getGroupBuyProducts(sellerId?: number): Promise<any[]> {
+    if (sellerId) {
+      return await db.select().from(groupBuyProducts).where(eq(groupBuyProducts.sellerId, sellerId));
+    }
+    return await db.select().from(groupBuyProducts);
+  }
+
+  async approveGroupBuyProduct(id: number, approvedBy: number): Promise<any | undefined> {
+    const [product] = await db
+      .update(groupBuyProducts)
+      .set({ isApproved: true, approvedBy, approvedAt: new Date() })
+      .where(eq(groupBuyProducts.id, id))
+      .returning();
+    return product;
+  }
+
+  async getApprovedGroupBuyProducts(): Promise<any[]> {
+    return await db.select().from(groupBuyProducts).where(eq(groupBuyProducts.isApproved, true));
+  }
+
+  // Group Buy Campaigns
+  async createGroupBuyCampaign(insertCampaign: any): Promise<any> {
+    const [campaign] = await db
+      .insert(groupBuyCampaigns)
+      .values(insertCampaign)
+      .returning();
+    return campaign;
+  }
+
+  async getGroupBuyCampaigns(userId?: number): Promise<any[]> {
+    if (userId) {
+      return await db.select().from(groupBuyCampaigns).where(eq(groupBuyCampaigns.createdBy, userId));
+    }
+    return await db.select().from(groupBuyCampaigns);
+  }
+
+  async getGroupBuyCampaign(id: number): Promise<any | undefined> {
+    const [campaign] = await db.select().from(groupBuyCampaigns).where(eq(groupBuyCampaigns.id, id));
+    return campaign;
+  }
+
+  async updateCampaignQuantity(id: number, quantity: number): Promise<void> {
+    await db
+      .update(groupBuyCampaigns)
+      .set({ currentQuantity: quantity })
+      .where(eq(groupBuyCampaigns.id, id));
+  }
+
+  // Group Buy Participants
+  async joinGroupBuyCampaign(insertParticipant: any): Promise<any> {
+    const [participant] = await db
+      .insert(groupBuyParticipants)
+      .values(insertParticipant)
+      .returning();
+    return participant;
+  }
+
+  async getGroupBuyParticipants(campaignId: number): Promise<any[]> {
+    return await db.select().from(groupBuyParticipants).where(eq(groupBuyParticipants.campaignId, campaignId));
+  }
+
+  async updateParticipantStatus(id: number, status: string): Promise<void> {
+    await db
+      .update(groupBuyParticipants)
+      .set({ status })
+      .where(eq(groupBuyParticipants.id, id));
+  }
+
   async seedInitialData(): Promise<void> {
     // Check if admin account exists, if not create it
     const existingAdmin = await this.getUserByEmail("mgmags25@gmail.com");
