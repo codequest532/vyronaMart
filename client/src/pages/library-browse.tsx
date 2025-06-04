@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useLocation, Link } from "wouter";
+import { useLocation, Link, useRoute } from "wouter";
 import { 
   Book, 
   ArrowLeft, 
@@ -158,7 +158,7 @@ export default function LibraryBrowse() {
             <div className="flex items-center gap-4">
               <Button
                 variant="outline"
-                onClick={() => window.location.href = "/home"}
+                onClick={() => setLocation("/home")}
                 className="flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
