@@ -53,6 +53,7 @@ function Router() {
       ) : (
         <Route path="/" component={Landing} />
       )}
+      <Route path="/home" component={Home} />
       <Route path="/product/:productId">
         {(params) => <ProductDetails productId={params.productId} />}
       </Route>
