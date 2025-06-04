@@ -421,6 +421,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Achievements endpoint
+  app.get("/api/achievements/:userId", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+    const achievements = [
+      { id: 1, title: "First Purchase", description: "Made your first purchase", earned: true },
+      { id: 2, title: "Social Shopper", description: "Joined 5 shopping groups", earned: false },
+      { id: 3, title: "Book Reader", description: "Read 10 books", earned: true }
+    ];
+    res.json(achievements);
+  });
+
   // VyronaSocial - Shopping Groups routes
   app.post("/api/social/groups", async (req, res) => {
     try {
