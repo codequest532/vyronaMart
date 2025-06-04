@@ -112,7 +112,7 @@ export default function VyronaSocial() {
   // Mutations
   const createRoomMutation = useMutation({
     mutationFn: async (data: CreateRoomForm) => {
-      const response = await fetch("/api/social/groups", {
+      const response = await fetch("/api/vyronasocial/rooms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -134,7 +134,7 @@ export default function VyronaSocial() {
       });
       setShowCreateRoom(false);
       createRoomForm.reset();
-      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
     },
     onError: (error: Error) => {
       toast({
@@ -147,7 +147,7 @@ export default function VyronaSocial() {
 
   const joinRoomMutation = useMutation({
     mutationFn: async (data: JoinRoomForm) => {
-      const response = await fetch("/api/social/groups/join", {
+      const response = await fetch("/api/vyronasocial/rooms/join", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -169,7 +169,7 @@ export default function VyronaSocial() {
       });
       setShowJoinRoom(false);
       joinRoomForm.reset();
-      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
     },
     onError: (error: Error) => {
       toast({
