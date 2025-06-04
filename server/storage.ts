@@ -826,7 +826,13 @@ export class DatabaseStorage implements IStorage {
   async addGroupMessage(insertMessage: InsertGroupMessage): Promise<GroupMessage> {
     const [message] = await db
       .insert(groupMessages)
-      .values(insertMessage)
+      .values({
+        userId: insertMessage.userId,
+        groupId: insertMessage.groupId,
+        content: insertMessage.content,
+        messageType: insertMessage.messageType || 'text',
+        metadata: insertMessage.metadata || null
+      })
       .returning();
     
     // Create notifications for other group members
