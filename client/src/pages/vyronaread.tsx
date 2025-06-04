@@ -330,36 +330,47 @@ export default function VyronaRead() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.isArray(availableLibraries) && availableLibraries.length > 0 ? availableLibraries.map((library: any, index: number) => (
-              <Card key={index} className="border border-gray-200 hover:border-green-300 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2">
-                      <Library className="text-green-600 h-5 w-5" />
-                      <h4 className="font-semibold text-sm">{library.name || "Library"}</h4>
+              <Card key={index} className="border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all duration-300">
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <Library className="text-green-600 h-6 w-6" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-base">{library.libraryName || library.name}</h4>
+                        <p className="text-sm text-gray-500 capitalize">{library.libraryType || library.type || "Public"} Library</p>
+                      </div>
                     </div>
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                      Available
+                    <Badge variant="default" className="bg-green-100 text-green-700 border-green-200">
+                      Active
                     </Badge>
                   </div>
                   
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex justify-between">
-                      <span>Status:</span>
-                      <span className="font-medium">{library.name || "Library"}</span>
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Status:</span>
+                      <span className="font-medium text-green-600">Active</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Type:</span>
-                      <span className="font-medium">{library.type || "Public"}</span>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Type:</span>
+                      <span className="font-medium text-gray-900 capitalize">{library.libraryType || library.type || "Public"}</span>
                     </div>
+                    {library.address && (
+                      <div className="text-sm">
+                        <span className="text-gray-600">Location:</span>
+                        <p className="font-medium text-gray-700 mt-1">{library.address}</p>
+                      </div>
+                    )}
                   </div>
                   
-                  <div className="mt-3">
+                  <div className="mt-4">
                     <Button 
                       size="sm" 
-                      className="w-full bg-green-600 hover:bg-green-700"
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
                       onClick={() => handleLibraryClick(library)}
                     >
-                      <BookOpen className="mr-1 h-3 w-3" />
+                      <BookOpen className="mr-2 h-4 w-4" />
                       Visit Library
                     </Button>
                   </div>
