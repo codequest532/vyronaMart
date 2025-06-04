@@ -132,70 +132,7 @@ export default function VyronaRead() {
         </Card>
       </div>
 
-      {/* 1. Currently Reading */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">📖 Currently Reading</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { 
-                title: "The Psychology of Money", 
-                author: "Morgan Housel", 
-                progress: 65, 
-                timeLeft: "2h 30m",
-                lastRead: "Today",
-                cover: "💰"
-              },
-              { 
-                title: "Sapiens", 
-                author: "Yuval Noah Harari", 
-                progress: 32, 
-                timeLeft: "8h 15m",
-                lastRead: "2 days ago",
-                cover: "🦕"
-              }
-            ].map((book, index) => (
-              <Card key={index} className="border border-gray-200">
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="text-3xl">{book.cover}</div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">{book.title}</h4>
-                      <p className="text-sm text-gray-500 mb-2">by {book.author}</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs text-gray-600">
-                          <span>Progress</span>
-                          <span>{book.progress}%</span>
-                        </div>
-                        <Progress value={book.progress} className="h-2" />
-                        
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>Time left: {book.timeLeft}</span>
-                          <span>Last read: {book.lastRead}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex space-x-2 mt-3">
-                        <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700">
-                          <Play className="mr-1 h-3 w-3" />
-                          Continue
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Bookmark className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 2. Browse Books */}
+      {/* 1. Browse Books */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -266,7 +203,7 @@ export default function VyronaRead() {
         </CardContent>
       </Card>
 
-      {/* 3. Library Integration */}
+      {/* 2. Library Integration */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -328,8 +265,8 @@ export default function VyronaRead() {
         </CardContent>
       </Card>
 
-      {/* 4. VyronaRead E-Reader */}
-      <Card>
+      {/* 3. VyronaRead E-Reader */}
+      <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900">VyronaRead E-Reader</h3>
@@ -393,6 +330,69 @@ export default function VyronaRead() {
                 </div>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 4. Currently Reading */}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">📖 Currently Reading</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { 
+                title: "The Psychology of Money", 
+                author: "Morgan Housel", 
+                progress: 65, 
+                timeLeft: "2h 30m",
+                lastRead: "Today",
+                cover: "💰"
+              },
+              { 
+                title: "Sapiens", 
+                author: "Yuval Noah Harari", 
+                progress: 32, 
+                timeLeft: "8h 15m",
+                lastRead: "2 days ago",
+                cover: "🦕"
+              }
+            ].map((book, index) => (
+              <Card key={index} className="border border-gray-200">
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="text-3xl">{book.cover}</div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-1">{book.title}</h4>
+                      <p className="text-sm text-gray-500 mb-2">by {book.author}</p>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs text-gray-600">
+                          <span>Progress</span>
+                          <span>{book.progress}%</span>
+                        </div>
+                        <Progress value={book.progress} className="h-2" />
+                        
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>Time left: {book.timeLeft}</span>
+                          <span>Last read: {book.lastRead}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex space-x-2 mt-3">
+                        <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700">
+                          <Play className="mr-1 h-3 w-3" />
+                          Continue
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Bookmark className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </CardContent>
       </Card>
