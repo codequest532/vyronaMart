@@ -141,6 +141,23 @@ export interface IStorage {
   createLibraryBooks(requestId: number, libraryData: any): Promise<void>;
   getBookById(id: number): Promise<any>;
   createBookOrder(order: any): Promise<any>;
+
+  // VyronaSocial - Group Buy Products
+  createGroupBuyProduct(product: InsertGroupBuyProduct): Promise<GroupBuyProduct>;
+  getGroupBuyProducts(sellerId?: number): Promise<GroupBuyProduct[]>;
+  approveGroupBuyProduct(id: number, approvedBy: number): Promise<GroupBuyProduct | undefined>;
+  getApprovedGroupBuyProducts(): Promise<GroupBuyProduct[]>;
+
+  // VyronaSocial - Group Buy Campaigns
+  createGroupBuyCampaign(campaign: InsertGroupBuyCampaign): Promise<GroupBuyCampaign>;
+  getGroupBuyCampaigns(userId?: number): Promise<GroupBuyCampaign[]>;
+  getGroupBuyCampaign(id: number): Promise<GroupBuyCampaign | undefined>;
+  updateCampaignQuantity(id: number, quantity: number): Promise<void>;
+
+  // VyronaSocial - Group Buy Participation
+  joinGroupBuyCampaign(participant: InsertGroupBuyParticipant): Promise<GroupBuyParticipant>;
+  getGroupBuyParticipants(campaignId: number): Promise<GroupBuyParticipant[]>;
+  updateParticipantStatus(id: number, status: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {

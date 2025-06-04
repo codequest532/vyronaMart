@@ -56,6 +56,14 @@ export default function VyronaHub() {
     queryKey: ["/api/products"],
   });
 
+  const { data: groupBuyProducts = [] } = useQuery({
+    queryKey: ["/api/group-buy/approved-products"],
+  });
+
+  const { data: groupBuyCampaigns = [] } = useQuery({
+    queryKey: ["/api/group-buy/campaigns"],
+  });
+
   const addToCartMutation = useMutation({
     mutationFn: async (cartData: any) => {
       return await apiRequest("/api/cart", {
@@ -208,7 +216,61 @@ export default function VyronaHub() {
           </CardContent>
         </Card>
 
-        {/* Products Grid/List */}
+        {/* VyronaSocial Group Buy Section */}
+        {(groupBuyProducts as any[]).length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Heart className="h-6 w-6 text-red-500" />
+                VyronaSocial Group Buy
+              </h2>
+              <Badge variant="default" className="bg-red-500 text-white">
+                Special Discounts Available
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+              {(groupBuyProducts as any[]).slice(0, 3).map((groupProduct: any) => (
+                <Card key={groupProduct.id} className="border-red-200 bg-gradient-to-br from-red-50 to-pink-50">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-gray-900">Group Buy Product</h3>
+                      <Badge variant="destructive" className="text-xs">
+                        {groupProduct.discountPercentage}% OFF
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Min Quantity: {groupProduct.minQuantity} pieces
+                    </p>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <span className="text-lg font-bold text-red-600">₹{groupProduct.groupBuyPrice}</span>
+                        <span className="text-sm text-gray-500 line-through ml-2">₹{groupProduct.originalPrice}</span>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="w-full bg-red-500 hover:bg-red-600"
+                      onClick={() => setLocation("/vyronasocial")}
+                    >
+                      Join Group Buy
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <div className="text-center">
+              <Button 
+                variant="outline" 
+                onClick={() => setLocation("/vyronasocial")}
+                className="border-red-500 text-red-600 hover:bg-red-50"
+              >
+                View All Group Buy Opportunities
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Regular Products Grid/List */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">

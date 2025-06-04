@@ -431,6 +431,72 @@ export const eBooks = pgTable("e_books", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Group Buy Tables for VyronaSocial
+export const groupBuyProducts = pgTable("group_buy_products", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  sellerId: integer("seller_id").notNull().references(() => users.id),
+  isApproved: boolean("is_approved").notNull().default(false),
+  minQuantity: integer("min_quantity").notNull().default(10), // minimum 10 pieces for single product
+  groupBuyPrice: integer("group_buy_price").notNull(), // discounted price in cents
+  originalPrice: integer("original_price").notNull(), // original price in cents
+  discountPercentage: integer("discount_percentage").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  approvedAt: timestamp("approved_at"),
+  approvedBy: integer("approved_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const groupBuyCampaigns = pgTable("group_buy_campaigns", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  createdBy: integer("created_by").notNull().references(() => users.id),
+  shoppingGroupId: integer("shopping_group_id").references(() => shoppingGroups.id),
+  minParticipants: integer("min_participants").notNull().default(5),
+  maxParticipants: integer("max_participants").notNull().default(100),
+  targetQuantity: integer("target_quantity").notNull(), // total quantity needed across all products
+  currentQuantity: integer("current_quantity").notNull().default(0),
+  status: varchar("status", { length: 50 }).default("active").notNull(), // active, completed, cancelled
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  endDate: timestamp("end_date").notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const groupBuyCampaignProducts = pgTable("group_buy_campaign_products", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => groupBuyCampaigns.id),
+  groupBuyProductId: integer("group_buy_product_id").notNull().references(() => groupBuyProducts.id),
+  targetQuantity: integer("target_quantity").notNull(),
+  currentQuantity: integer("current_quantity").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const groupBuyParticipants = pgTable("group_buy_participants", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => groupBuyCampaigns.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  quantity: integer("quantity").notNull(),
+  totalAmount: integer("total_amount").notNull(), // in cents
+  status: varchar("status", { length: 50 }).default("pending").notNull(), // pending, confirmed, paid, cancelled
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+  confirmedAt: timestamp("confirmed_at"),
+});
+
+export const groupBuyOrders = pgTable("group_buy_orders", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => groupBuyCampaigns.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  productDetails: jsonb("product_details").notNull(), // array of {productId, quantity, price}
+  totalAmount: integer("total_amount").notNull(),
+  status: varchar("status", { length: 50 }).default("pending").notNull(),
+  paymentMethod: varchar("payment_method", { length: 50 }),
+  shippingAddress: jsonb("shipping_address"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+});
+
 // Schema validation for inserts
 export const insertLibraryIntegrationRequestSchema = createInsertSchema(libraryIntegrationRequests, {
   sellerId: z.number(),
@@ -481,6 +547,47 @@ export const insertEBookSchema = createInsertSchema(eBooks, {
   downloads: true,
 });
 
+// Group Buy Schema validation
+export const insertGroupBuyProductSchema = createInsertSchema(groupBuyProducts, {
+  productId: z.number(),
+  sellerId: z.number(),
+  minQuantity: z.number().min(10, "Minimum quantity must be at least 10"),
+  groupBuyPrice: z.number().min(1, "Group buy price must be positive"),
+  originalPrice: z.number().min(1, "Original price must be positive"),
+  discountPercentage: z.number().min(1).max(70, "Discount must be between 1-70%"),
+}).omit({
+  id: true,
+  createdAt: true,
+  isApproved: true,
+  approvedAt: true,
+  approvedBy: true,
+});
+
+export const insertGroupBuyCampaignSchema = createInsertSchema(groupBuyCampaigns, {
+  title: z.string().min(1, "Title is required"),
+  createdBy: z.number(),
+  minParticipants: z.number().min(5, "Minimum 5 participants required"),
+  maxParticipants: z.number().max(100, "Maximum 100 participants allowed"),
+  targetQuantity: z.number().min(5, "Minimum target quantity is 5"),
+  endDate: z.date(),
+}).omit({
+  id: true,
+  createdAt: true,
+  currentQuantity: true,
+  completedAt: true,
+});
+
+export const insertGroupBuyParticipantSchema = createInsertSchema(groupBuyParticipants, {
+  campaignId: z.number(),
+  userId: z.number(),
+  quantity: z.number().min(1, "Quantity must be at least 1"),
+  totalAmount: z.number().min(1, "Total amount must be positive"),
+}).omit({
+  id: true,
+  joinedAt: true,
+  confirmedAt: true,
+});
+
 // Types
 export type LibraryIntegrationRequest = typeof libraryIntegrationRequests.$inferSelect;
 export type InsertLibraryIntegrationRequest = z.infer<typeof insertLibraryIntegrationRequestSchema>;
@@ -490,3 +597,12 @@ export type BookLoan = typeof bookLoans.$inferSelect;
 export type InsertBookLoan = z.infer<typeof insertBookLoanSchema>;
 export type EBook = typeof eBooks.$inferSelect;
 export type InsertEBook = z.infer<typeof insertEBookSchema>;
+
+// Group Buy Types
+export type GroupBuyProduct = typeof groupBuyProducts.$inferSelect;
+export type InsertGroupBuyProduct = z.infer<typeof insertGroupBuyProductSchema>;
+export type GroupBuyCampaign = typeof groupBuyCampaigns.$inferSelect;
+export type InsertGroupBuyCampaign = z.infer<typeof insertGroupBuyCampaignSchema>;
+export type GroupBuyParticipant = typeof groupBuyParticipants.$inferSelect;
+export type InsertGroupBuyParticipant = z.infer<typeof insertGroupBuyParticipantSchema>;
+export type GroupBuyOrder = typeof groupBuyOrders.$inferSelect;

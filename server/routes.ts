@@ -698,6 +698,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaSocial Group Buy Products - Seller creates group buy products
+  app.post("/api/group-buy/products", async (req, res) => {
+    try {
+      const productData = req.body;
+      
+      // Validate minimum quantity requirements
+      if (productData.minQuantity < 10) {
+        return res.status(400).json({ message: "Minimum quantity must be at least 10 pieces" });
+      }
+
+      const groupBuyProduct = await storage.createGroupBuyProduct(productData);
+      res.json(groupBuyProduct);
+    } catch (error) {
+      console.error("Error creating group buy product:", error);
+      res.status(500).json({ message: "Failed to create group buy product" });
+    }
+  });
+
+  // Get group buy products for sellers
+  app.get("/api/group-buy/products", async (req, res) => {
+    try {
+      const sellerId = req.query.sellerId ? Number(req.query.sellerId) : undefined;
+      const products = await storage.getGroupBuyProducts(sellerId);
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching group buy products:", error);
+      res.status(500).json({ message: "Failed to fetch group buy products" });
+    }
+  });
+
+  // Admin approve group buy products
+  app.patch("/api/admin/group-buy/products/:id/approve", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { approvedBy } = req.body;
+      
+      const product = await storage.approveGroupBuyProduct(Number(id), approvedBy);
+      res.json(product);
+    } catch (error) {
+      console.error("Error approving group buy product:", error);
+      res.status(500).json({ message: "Failed to approve group buy product" });
+    }
+  });
+
+  // Get approved group buy products for customers
+  app.get("/api/group-buy/approved-products", async (req, res) => {
+    try {
+      const products = await storage.getApprovedGroupBuyProducts();
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching approved group buy products:", error);
+      res.status(500).json({ message: "Failed to fetch approved group buy products" });
+    }
+  });
+
+  // Create group buy campaign
+  app.post("/api/group-buy/campaigns", async (req, res) => {
+    try {
+      const campaignData = req.body;
+      
+      // Validate minimum requirements
+      if (campaignData.targetQuantity < 5) {
+        return res.status(400).json({ message: "Minimum target quantity is 5 across any seller approved products" });
+      }
+
+      const campaign = await storage.createGroupBuyCampaign(campaignData);
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error creating group buy campaign:", error);
+      res.status(500).json({ message: "Failed to create group buy campaign" });
+    }
+  });
+
+  // Get group buy campaigns
+  app.get("/api/group-buy/campaigns", async (req, res) => {
+    try {
+      const userId = req.query.userId ? Number(req.query.userId) : undefined;
+      const campaigns = await storage.getGroupBuyCampaigns(userId);
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching group buy campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch group buy campaigns" });
+    }
+  });
+
+  // Get specific group buy campaign
+  app.get("/api/group-buy/campaigns/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const campaign = await storage.getGroupBuyCampaign(Number(id));
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error fetching group buy campaign:", error);
+      res.status(500).json({ message: "Failed to fetch group buy campaign" });
+    }
+  });
+
+  // Join group buy campaign
+  app.post("/api/group-buy/campaigns/:id/join", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const participantData = {
+        ...req.body,
+        campaignId: Number(id)
+      };
+
+      const participant = await storage.joinGroupBuyCampaign(participantData);
+      
+      // Update campaign quantity
+      await storage.updateCampaignQuantity(Number(id), participantData.quantity);
+      
+      res.json(participant);
+    } catch (error) {
+      console.error("Error joining group buy campaign:", error);
+      res.status(500).json({ message: "Failed to join group buy campaign" });
+    }
+  });
+
+  // Get campaign participants
+  app.get("/api/group-buy/campaigns/:id/participants", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const participants = await storage.getGroupBuyParticipants(Number(id));
+      res.json(participants);
+    } catch (error) {
+      console.error("Error fetching campaign participants:", error);
+      res.status(500).json({ message: "Failed to fetch campaign participants" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
