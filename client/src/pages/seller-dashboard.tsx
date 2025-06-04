@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
   Package, 
   TrendingUp, 
@@ -35,13 +38,45 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocation } from "wouter";
+
+const categories = [
+  { value: "electronics", label: "Electronics" },
+  { value: "fashion", label: "Fashion & Apparels" },
+  { value: "home", label: "Home & Kitchen" },
+  { value: "kids", label: "Kids Corner" },
+  { value: "organic", label: "Organic Store" },
+  { value: "groceries", label: "Groceries" },
+  { value: "automation", label: "Home Automation" },
+  { value: "office", label: "Office & Stationery" },
+  { value: "health", label: "Health & Wellness" },
+  { value: "pets", label: "Pet Care" },
+  { value: "books", label: "Books" }
+];
+
+const productSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  description: z.string().min(1, "Product description is required"),
+  price: z.number().min(0, "Price must be positive"),
+  category: z.string().min(1, "Category is required"),
+  sku: z.string().min(1, "SKU is required"),
+  originalPrice: z.number().optional(),
+  brand: z.string().optional(),
+  weight: z.string().optional(),
+  dimensions: z.string().optional(),
+  specifications: z.string().optional(),
+  tags: z.string().optional(),
+  isActive: z.boolean().default(true),
+});
 
 export default function SellerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddBookDialog, setShowAddBookDialog] = useState(false);
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
+  const [showAddProductDialog, setShowAddProductDialog] = useState(false);
   const [bookSection, setBookSection] = useState("overview");
   const [newBook, setNewBook] = useState({
     title: "",
@@ -65,8 +100,49 @@ export default function SellerDashboard() {
     description: ""
   });
 
+  // Form for adding products
+  const productForm = useForm<z.infer<typeof productSchema>>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      price: 0,
+      category: "",
+      sku: "",
+      originalPrice: 0,
+      brand: "",
+      weight: "",
+      dimensions: "",
+      specifications: "",
+      tags: "",
+      isActive: true,
+    },
+  });
+
   // Mutation for creating library integration requests
   const { toast } = useToast();
+
+  const addProductMutation = useMutation({
+    mutationFn: async (productData: z.infer<typeof productSchema>) => {
+      return await apiRequest("/api/products", productData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Product Added Successfully",
+        description: "Your product has been added to the catalog.",
+      });
+      setShowAddProductDialog(false);
+      productForm.reset();
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/products"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Adding Product",
+        description: error.message || "Failed to add product. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const createLibraryRequestMutation = useMutation({
     mutationFn: async (libraryData: any) => {
@@ -553,7 +629,7 @@ export default function SellerDashboard() {
                   <CardContent className="space-y-3">
                     <Button 
                       className="w-full justify-start" 
-                      onClick={() => setLocation("/vyronahub")}
+                      onClick={() => setShowAddProductDialog(true)}
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add New Product
