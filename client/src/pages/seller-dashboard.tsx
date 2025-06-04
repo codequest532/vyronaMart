@@ -888,53 +888,38 @@ export default function SellerDashboard() {
                             Set up a product for group buying with minimum quantity and discount pricing
                           </DialogDescription>
                         </DialogHeader>
-                        <form className="space-y-4">
+                        <div className="space-y-4">
                           <div>
-                            <Label htmlFor="select-product">Select Product</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Choose from your products" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {(products as any[])?.filter((p: any) => p.module === "social").map((product: any) => (
-                                  <SelectItem key={product.id} value={product.id.toString()}>
-                                    {product.name} - ₹{(product.price / 100).toFixed(2)}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="min-quantity">Minimum Quantity</Label>
-                            <Input 
-                              id="min-quantity" 
-                              type="number" 
-                              placeholder="10" 
-                              min="10"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Minimum 10 pieces required</p>
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="discount-percent">Discount Percentage</Label>
-                            <Input 
-                              id="discount-percent" 
-                              type="number" 
-                              placeholder="15" 
-                              min="5" 
-                              max="50"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">5% to 50% discount range</p>
-                          </div>
-                          
-                          <div className="flex justify-end gap-2">
-                            <Button type="button" variant="outline">Cancel</Button>
-                            <Button type="submit" className="bg-red-500 hover:bg-red-600">
-                              Create Group Buy
+                            <Label>Quick Create Sample Group Buy</Label>
+                            <p className="text-sm text-gray-600 mb-3">Create a sample group buy product to test VyronaSocial functionality</p>
+                            <Button 
+                              onClick={() => {
+                                // Create sample group buy product
+                                const sampleData = {
+                                  productId: 1,
+                                  sellerId: 4,
+                                  minQuantity: 10,
+                                  originalPrice: 2000,
+                                  groupBuyPrice: 1500,
+                                  discountPercentage: 25,
+                                  isApproved: true,
+                                  isActive: true
+                                };
+                                
+                                fetch('/api/group-buy/products', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify(sampleData)
+                                }).then(() => {
+                                  alert('Sample group buy product created! Check VyronaHub to see it.');
+                                });
+                              }}
+                              className="bg-red-500 hover:bg-red-600 w-full"
+                            >
+                              Create Sample Group Buy Product
                             </Button>
                           </div>
-                        </form>
+                        </div>
                       </DialogContent>
                     </Dialog>
                   </div>

@@ -701,7 +701,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VyronaSocial Group Buy Products - Seller creates group buy products
   app.post("/api/group-buy/products", async (req, res) => {
     try {
-      const productData = req.body;
+      const productData = {
+        ...req.body,
+        isApproved: true // Auto-approve without admin requirement
+      };
       
       // Validate minimum quantity requirements
       if (productData.minQuantity < 10) {

@@ -57,7 +57,7 @@ export default function VyronaHub() {
   });
 
   const { data: groupBuyProducts = [] } = useQuery({
-    queryKey: ["/api/group-buy/approved-products"],
+    queryKey: ["/api/group-buy/products"],
   });
 
   const { data: groupBuyCampaigns = [] } = useQuery({
