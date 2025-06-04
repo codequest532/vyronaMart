@@ -1684,34 +1684,53 @@ export default function SellerDashboard() {
                     </Card>
                   </div>
 
-                  {/* E-Book Management */}
+                  {/* E-Book Management - Dynamic Data */}
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <Card className="lg:col-span-2">
                       <CardHeader>
-                        <CardTitle>Popular E-Books</CardTitle>
-                        <CardDescription>Your best-selling digital books</CardDescription>
+                        <CardTitle>E-Book Catalog</CardTitle>
+                        <CardDescription>Your digital book inventory</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-4">
-                          <div className="flex items-center gap-4 p-4 border rounded-lg">
-                            <div className="w-12 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center flex-shrink-0">
-                              <BookOpen className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-semibold">The Psychology of Money</h4>
-                              <p className="text-sm text-gray-600">by Morgan Housel</p>
-                              <div className="flex items-center gap-4 mt-2">
-                                <Badge variant="secondary">Business</Badge>
-                                <span className="text-sm font-medium text-green-600">₹299 Sale</span>
-                                <span className="text-sm font-medium text-blue-600">₹49/month Rent</span>
+                          {sellerEBooks && sellerEBooks.length > 0 ? (
+                            sellerEBooks.map((ebook: any, index: number) => (
+                              <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+                                <div className="w-12 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center flex-shrink-0">
+                                  <BookOpen className="h-6 w-6 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold">{ebook.title || 'Untitled E-Book'}</h4>
+                                  <p className="text-sm text-gray-600">by {ebook.author || 'Unknown Author'}</p>
+                                  <div className="flex items-center gap-4 mt-2">
+                                    <Badge variant="secondary">{ebook.category || 'General'}</Badge>
+                                    <span className="text-sm font-medium text-green-600">₹{ebook.price || 0} Sale</span>
+                                    {ebook.metadata?.rentPrice && (
+                                      <span className="text-sm font-medium text-blue-600">₹{ebook.metadata.rentPrice}/month Rent</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm text-gray-600">Status: {ebook.status || 'Available'}</p>
+                                  <p className="text-sm text-gray-600">Format: {ebook.metadata?.format || 'PDF'}</p>
+                                  <Button variant="outline" size="sm" className="mt-2">
+                                    <Edit className="h-4 w-4 mr-1" />
+                                    Edit
+                                  </Button>
+                                </div>
                               </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8">
+                              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-600 mb-2">No E-Books Listed</h3>
+                              <p className="text-gray-500 mb-4">Start building your digital catalog by uploading your first e-book</p>
+                              <Button onClick={handleUploadEbook} className="bg-purple-600 hover:bg-purple-700">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Upload First E-Book
+                              </Button>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-600">Sales: 45</p>
-                              <p className="text-sm text-gray-600">Rentals: 23</p>
-                              <p className="text-sm font-bold text-green-600">₹14,850</p>
-                            </div>
-                          </div>
+                          )}
 
                           <div className="flex items-center gap-4 p-4 border rounded-lg">
                             <div className="w-12 h-16 bg-gradient-to-br from-blue-500 to-teal-500 rounded flex items-center justify-center flex-shrink-0">
