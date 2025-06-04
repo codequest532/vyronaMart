@@ -868,6 +868,18 @@ export default function Home() {
         {/* VyronaRead Tab */}
         {activeTab === "read" && (
           <div className="space-y-6">
+            {/* Back Button */}
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                onClick={() => window.history.back()}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Go Back
+              </Button>
+            </div>
+
             <Card className="vyrona-gradient-read text-white">
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-2">VyronaRead</h2>
