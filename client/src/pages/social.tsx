@@ -82,7 +82,7 @@ export default function VyronaSocial() {
 
   // Fetch data
   const { data: userGroups, isLoading: groupsLoading } = useQuery({
-    queryKey: ["/api/social/groups"],
+    queryKey: ["/api/vyronasocial/rooms"],
   });
 
   const { data: groupBuyProducts, isLoading: productsLoading } = useQuery({
