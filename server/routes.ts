@@ -855,6 +855,244 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shopping Rooms API endpoints
+  
+  // Get user's shopping groups/rooms
+  app.get("/api/social/groups", async (req, res) => {
+    try {
+      const userId = 1; // From session when auth is implemented
+      const groups = await storage.getShoppingGroups(userId);
+      res.json(groups);
+    } catch (error) {
+      console.error("Error fetching shopping groups:", error);
+      res.status(500).json({ message: "Failed to fetch shopping groups" });
+    }
+  });
+
+  // Create new shopping room
+  app.post("/api/social/groups", async (req, res) => {
+    try {
+      const userId = 1; // From session when auth is implemented
+      const groupData = {
+        ...req.body,
+        creatorId: userId,
+        isActive: true,
+        memberCount: 1,
+        totalCart: 0,
+        roomCode: Math.random().toString(36).substring(2, 8).toUpperCase()
+      };
+      
+      const group = await storage.createShoppingGroup(groupData);
+      
+      // Add creator as first member
+      await storage.addGroupMember({
+        groupId: group.id,
+        userId: userId,
+        role: "creator",
+        joinedAt: new Date()
+      });
+      
+      res.json(group);
+    } catch (error) {
+      console.error("Error creating shopping group:", error);
+      res.status(500).json({ message: "Failed to create shopping group" });
+    }
+  });
+
+  // Join room via code
+  app.post("/api/social/groups/join", async (req, res) => {
+    try {
+      const userId = 1; // From session when auth is implemented
+      const { roomCode } = req.body;
+      
+      // Find group by room code
+      const groups = await storage.getShoppingGroups(0); // Get all groups
+      const targetGroup = (groups as any[]).find(g => g.roomCode === roomCode);
+      
+      if (!targetGroup) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+      
+      // Add user as member
+      await storage.addGroupMember({
+        groupId: targetGroup.id,
+        userId: userId,
+        role: "member",
+        joinedAt: new Date()
+      });
+      
+      res.json({ message: "Joined room successfully", group: targetGroup });
+    } catch (error) {
+      console.error("Error joining room:", error);
+      res.status(500).json({ message: "Failed to join room" });
+    }
+  });
+
+  // Get specific room details
+  app.get("/api/social/groups/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const group = await storage.getShoppingGroup(Number(id));
+      
+      if (!group) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+      
+      res.json(group);
+    } catch (error) {
+      console.error("Error fetching room details:", error);
+      res.status(500).json({ message: "Failed to fetch room details" });
+    }
+  });
+
+  // Get room members
+  app.get("/api/social/groups/:id/members", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const members = await storage.getGroupMembers(Number(id));
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching room members:", error);
+      res.status(500).json({ message: "Failed to fetch room members" });
+    }
+  });
+
+  // Get room messages
+  app.get("/api/social/groups/:id/messages", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const messages = await storage.getGroupMessages(Number(id));
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching room messages:", error);
+      res.status(500).json({ message: "Failed to fetch room messages" });
+    }
+  });
+
+  // Send message to room
+  app.post("/api/social/groups/:id/messages", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = 1; // From session when auth is implemented
+      const messageData = {
+        ...req.body,
+        groupId: Number(id),
+        userId: userId,
+        sentAt: new Date()
+      };
+      
+      const message = await storage.addGroupMessage(messageData);
+      res.json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // Get shared cart for room
+  app.get("/api/cart/:roomId", async (req, res) => {
+    try {
+      const { roomId } = req.params;
+      const cartItems = await storage.getCartItems(0, Number(roomId)); // Room-specific cart
+      res.json(cartItems);
+    } catch (error) {
+      console.error("Error fetching shared cart:", error);
+      res.status(500).json({ message: "Failed to fetch shared cart" });
+    }
+  });
+
+  // Add item to shared cart
+  app.post("/api/cart/:roomId/add", async (req, res) => {
+    try {
+      const { roomId } = req.params;
+      const userId = 1; // From session when auth is implemented
+      const itemData = {
+        ...req.body,
+        userId: userId,
+        roomId: Number(roomId)
+      };
+      
+      const cartItem = await storage.addCartItem(itemData);
+      res.json(cartItem);
+    } catch (error) {
+      console.error("Error adding item to shared cart:", error);
+      res.status(500).json({ message: "Failed to add item to shared cart" });
+    }
+  });
+
+  // Remove item from shared cart
+  app.delete("/api/cart/:roomId/items/:itemId", async (req, res) => {
+    try {
+      const { itemId } = req.params;
+      const success = await storage.removeCartItem(Number(itemId));
+      
+      if (success) {
+        res.json({ message: "Item removed from cart" });
+      } else {
+        res.status(404).json({ message: "Item not found" });
+      }
+    } catch (error) {
+      console.error("Error removing item from shared cart:", error);
+      res.status(500).json({ message: "Failed to remove item from shared cart" });
+    }
+  });
+
+  // Get room wishlist
+  app.get("/api/social/groups/:id/wishlist", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const wishlist = await storage.getGroupWishlist(Number(id));
+      res.json(wishlist);
+    } catch (error) {
+      console.error("Error fetching group wishlist:", error);
+      res.status(500).json({ message: "Failed to fetch group wishlist" });
+    }
+  });
+
+  // Add item to group wishlist
+  app.post("/api/social/groups/:id/wishlist", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = 1; // From session when auth is implemented
+      const wishlistData = {
+        ...req.body,
+        groupId: Number(id),
+        addedBy: userId,
+        addedAt: new Date()
+      };
+      
+      const wishlistItem = await storage.addToGroupWishlist(wishlistData);
+      res.json(wishlistItem);
+    } catch (error) {
+      console.error("Error adding to group wishlist:", error);
+      res.status(500).json({ message: "Failed to add to group wishlist" });
+    }
+  });
+
+  // User notifications
+  app.get("/api/social/notifications", async (req, res) => {
+    try {
+      const userId = 1; // From session when auth is implemented
+      const notifications = await storage.getUserNotifications(userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.patch("/api/social/notifications/:id/read", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.markNotificationAsRead(Number(id));
+      res.json({ message: "Notification marked as read" });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

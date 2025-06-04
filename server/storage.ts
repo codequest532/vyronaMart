@@ -1246,6 +1246,173 @@ export class DatabaseStorage implements IStorage {
         }
         console.log("Sample group buy products created for VyronaSocial testing");
       }
+
+      // Create sample shopping groups/rooms
+      const sampleGroups = [
+        {
+          name: "Fashion Friday Deals",
+          description: "Weekly fashion shopping with friends",
+          category: "fashion",
+          privacy: "public",
+          creatorId: adminUser.id,
+          isActive: true,
+          memberCount: 4,
+          totalCart: 150,
+          currentGame: null,
+          roomCode: "FF2024",
+          createdAt: new Date()
+        },
+        {
+          name: "Tech Enthusiasts",
+          description: "Latest gadgets and electronics",
+          category: "electronics", 
+          privacy: "public",
+          creatorId: adminUser.id,
+          isActive: true,
+          memberCount: 6,
+          totalCart: 850,
+          currentGame: "product_voting",
+          roomCode: "TECH99",
+          createdAt: new Date()
+        },
+        {
+          name: "Book Club Picks",
+          description: "Monthly book selections",
+          category: "books",
+          privacy: "private",
+          creatorId: adminUser.id,
+          isActive: true,
+          memberCount: 3,
+          totalCart: 75,
+          currentGame: null,
+          roomCode: "BOOK88",
+          createdAt: new Date()
+        }
+      ];
+
+      for (const group of sampleGroups) {
+        await db.insert(shoppingGroups).values(group);
+      }
+      console.log("Sample shopping groups created for VyronaSocial testing");
+
+      // Get created groups to add members and messages
+      const createdGroups = await db.select().from(shoppingGroups);
+      
+      if (createdGroups.length > 0) {
+        // Add group members
+        const sampleMembers = [
+          {
+            groupId: createdGroups[0].id,
+            userId: adminUser.id,
+            role: "creator",
+            joinedAt: new Date()
+          },
+          {
+            groupId: createdGroups[0].id,
+            userId: seller.id,
+            role: "member", 
+            joinedAt: new Date()
+          },
+          {
+            groupId: createdGroups[1].id,
+            userId: adminUser.id,
+            role: "creator",
+            joinedAt: new Date()
+          },
+          {
+            groupId: createdGroups[1].id,
+            userId: seller.id,
+            role: "member",
+            joinedAt: new Date()
+          }
+        ];
+
+        for (const member of sampleMembers) {
+          await db.insert(groupMembers).values(member);
+        }
+        console.log("Sample group members created for VyronaSocial testing");
+
+        // Add group messages
+        const sampleMessages = [
+          {
+            groupId: createdGroups[0].id,
+            userId: adminUser.id,
+            content: "Welcome to Fashion Friday Deals! Let's find some great fashion items together.",
+            sentAt: new Date(Date.now() - 3600000) // 1 hour ago
+          },
+          {
+            groupId: createdGroups[0].id,
+            userId: seller.id,
+            content: "I found some amazing organic cotton t-shirts. What do you think?",
+            sentAt: new Date(Date.now() - 1800000) // 30 minutes ago
+          },
+          {
+            groupId: createdGroups[1].id,
+            userId: adminUser.id,
+            content: "Tech Enthusiasts assemble! Looking for premium wireless headphones.",
+            sentAt: new Date(Date.now() - 7200000) // 2 hours ago
+          },
+          {
+            groupId: createdGroups[1].id,
+            userId: seller.id,
+            content: "I have the perfect headphones in stock with group discounts available!",
+            sentAt: new Date(Date.now() - 3600000) // 1 hour ago
+          }
+        ];
+
+        for (const message of sampleMessages) {
+          await db.insert(groupMessages).values(message);
+        }
+        console.log("Sample group messages created for VyronaSocial testing");
+
+        // Add some cart items for rooms
+        if (productsList.length > 0) {
+          const sampleCartItems = [
+            {
+              productId: productsList[1].id, // Organic Cotton T-Shirt
+              userId: adminUser.id,
+              quantity: 2,
+              roomId: createdGroups[0].id
+            },
+            {
+              productId: productsList[0].id, // Premium Wireless Headphones
+              userId: seller.id,
+              quantity: 1,
+              roomId: createdGroups[1].id
+            }
+          ];
+
+          for (const cartItem of sampleCartItems) {
+            await db.insert(cartItems).values(cartItem);
+          }
+          console.log("Sample cart items created for VyronaSocial testing");
+        }
+
+        // Add sample notifications
+        const sampleNotifications = [
+          {
+            userId: adminUser.id,
+            type: "group_invite",
+            title: "New Room Invitation",
+            content: "You've been invited to join 'Weekend Shopping Spree'",
+            isRead: false,
+            createdAt: new Date(Date.now() - 1800000) // 30 minutes ago
+          },
+          {
+            userId: adminUser.id,
+            type: "group_message",
+            title: "New Message in Tech Enthusiasts",
+            content: "Someone added a product to the shared cart",
+            isRead: false,
+            createdAt: new Date(Date.now() - 900000) // 15 minutes ago
+          }
+        ];
+
+        for (const notification of sampleNotifications) {
+          await db.insert(notifications).values(notification);
+        }
+        console.log("Sample notifications created for VyronaSocial testing");
+      }
     }
   }
 }
