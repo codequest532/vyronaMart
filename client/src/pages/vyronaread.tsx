@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   ArrowLeft,
   Book,
@@ -41,7 +47,106 @@ export default function VyronaRead() {
   const [readingMode, setReadingMode] = useState("light");
   const [fontSize, setFontSize] = useState("medium");
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
+  const [selectedEBook, setSelectedEBook] = useState<any>(null);
+  const [showBorrowModal, setShowBorrowModal] = useState(false);
+  const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showEReader, setShowEReader] = useState(false);
+  const { toast } = useToast();
   const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
+
+  // Handler functions for buy/rent/borrow operations
+  const handleBuyBook = async (book: any) => {
+    try {
+      const response = await apiRequest("POST", "/api/create-payment-intent", {
+        amount: book.price,
+        type: "buy",
+        bookId: book.id,
+        module: "VyronaRead"
+      });
+      const { clientSecret } = await response.json();
+      setLocation(`/checkout?client_secret=${clientSecret}&type=buy&bookId=${book.id}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to initiate purchase. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRentBook = async (book: any) => {
+    try {
+      const response = await apiRequest("POST", "/api/create-payment-intent", {
+        amount: Math.floor(book.price * 0.3), // Rent at 30% of buy price
+        type: "rent",
+        bookId: book.id,
+        module: "VyronaRead"
+      });
+      const { clientSecret } = await response.json();
+      setLocation(`/checkout?client_secret=${clientSecret}&type=rent&bookId=${book.id}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to initiate rental. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleBorrowBook = (book: any) => {
+    setSelectedBookForBorrow(book);
+    setShowBorrowModal(true);
+  };
+
+  const handleReadEBook = (ebook: any) => {
+    setSelectedEBook(ebook);
+    setShowEReader(true);
+    setCurrentPage(1);
+  };
+
+  const submitBorrowRequest = async (formData: any) => {
+    try {
+      await apiRequest("POST", "/api/book-loans", {
+        bookId: selectedBookForBorrow.id,
+        ...formData,
+        module: "VyronaRead"
+      });
+      
+      toast({
+        title: "Borrow Request Submitted",
+        description: "Your request has been sent to the library for approval.",
+      });
+      
+      setShowBorrowModal(false);
+      setSelectedBookForBorrow(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit borrow request. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const proceedToEBookCheckout = async () => {
+    try {
+      const response = await apiRequest("POST", "/api/create-payment-intent", {
+        amount: selectedEBook.price || 1999, // Default price for e-book access
+        type: "ebook-access",
+        bookId: selectedEBook.id,
+        module: "VyronaRead"
+      });
+      const { clientSecret } = await response.json();
+      setLocation(`/checkout?client_secret=${clientSecret}&type=ebook&bookId=${selectedEBook.id}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to initiate e-book purchase. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // VyronaRead data queries - real-time data from seller dashboard and admin
   const { data: sellerEBooks = [] } = useQuery({
@@ -205,12 +310,21 @@ export default function VyronaRead() {
                     </div>
                     
                     <div className="flex space-x-2">
-                      <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700">
+                      <Button 
+                        size="sm" 
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        onClick={() => handleBuyBook(book)}
+                      >
                         <BookOpen className="mr-1 h-3 w-3" />
-                        Read
+                        Buy
                       </Button>
-                      <Button size="sm" variant="outline">
-                        <Heart className="h-3 w-3" />
+                      <Button 
+                        size="sm" 
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        onClick={() => handleRentBook(book)}
+                      >
+                        <Clock className="mr-1 h-3 w-3" />
+                        Rent
                       </Button>
                     </div>
                   </div>
