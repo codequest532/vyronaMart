@@ -639,10 +639,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // VyronaRead Data Organization - Authentic seller-uploaded content
   
-  // E-books uploaded by sellers for VyronaRead E-Reader section
+  // E-books uploaded by sellers for VyronaRead E-Reader section (seller-specific)
   app.get("/api/vyronaread/ebooks", async (req, res) => {
     try {
-      const eBooks = await storage.getEBooks();
+      const sellerId = parseInt(req.query.sellerId as string);
+      if (!sellerId) {
+        return res.status(400).json({ message: "Seller ID required" });
+      }
+      const eBooks = await storage.getEBooks(sellerId);
       res.json(eBooks);
     } catch (error) {
       console.error("Error fetching seller e-books:", error);
@@ -650,22 +654,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Physical/digital books uploaded by sellers for Browse Books section (sale/rent)
+  // Physical/digital books uploaded by sellers for Browse Books section (sale/rent) (seller-specific)
   app.get("/api/vyronaread/seller-books", async (req, res) => {
     try {
-      const books = await storage.getProducts("vyronaread", "books");
-      res.json(books);
+      const sellerId = parseInt(req.query.sellerId as string);
+      if (!sellerId) {
+        return res.status(400).json({ message: "Seller ID required" });
+      }
+      const allBooks = await storage.getProducts("vyronaread", "books");
+      const sellerBooks = allBooks.filter((book: any) => book.sellerId === sellerId);
+      res.json(sellerBooks);
     } catch (error) {
       console.error("Error fetching seller books:", error);
       res.status(500).json({ message: "Failed to fetch seller books" });
     }
   });
 
-  // Library books from approved integrations for Library Integration section
+  // Library books from approved integrations for Library Integration section (seller-specific)
   app.get("/api/vyronaread/library-books", async (req, res) => {
     try {
-      const libraryBooks = await storage.getPhysicalBooks();
-      res.json(libraryBooks);
+      const sellerId = parseInt(req.query.sellerId as string);
+      if (!sellerId) {
+        return res.status(400).json({ message: "Seller ID required" });
+      }
+      const allLibraryBooks = await storage.getPhysicalBooks();
+      const sellerLibraryBooks = allLibraryBooks.filter((book: any) => book.sellerId === sellerId);
+      res.json(sellerLibraryBooks);
     } catch (error) {
       console.error("Error fetching library books:", error);
       res.status(500).json({ message: "Failed to fetch library books" });

@@ -66,15 +66,11 @@ export default function SellerDashboard() {
   });
 
   // Mutation for creating library integration requests
+  const { toast } = useToast();
+
   const createLibraryRequestMutation = useMutation({
     mutationFn: async (libraryData: any) => {
-      return await apiRequest("/api/library-integration-requests", {
-        method: "POST",
-        body: JSON.stringify(libraryData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      return await apiRequest("/api/library-integration-requests", libraryData);
     },
     onSuccess: () => {
       toast({
@@ -118,6 +114,11 @@ export default function SellerDashboard() {
     createLibraryRequestMutation.mutate(newLibrary);
   };
 
+  // Get current user for seller-specific data access
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/current-user"],
+  });
+
   const handleSearchLibraries = () => {
     const searchTerm = prompt("Search libraries by name, type, or location:");
     if (searchTerm) {
@@ -138,17 +139,23 @@ export default function SellerDashboard() {
     queryKey: ["/api/seller/analytics"],
   });
 
-  // VyronaRead Data Queries
+  // VyronaRead Data Queries - Seller-specific access
   const { data: sellerEBooks } = useQuery({
-    queryKey: ["/api/vyronaread/ebooks"],
+    queryKey: ["/api/vyronaread/ebooks", currentUser?.id],
+    queryFn: () => apiRequest(`/api/vyronaread/ebooks?sellerId=${currentUser?.id}`),
+    enabled: !!currentUser?.id,
   });
 
   const { data: sellerBooks } = useQuery({
-    queryKey: ["/api/vyronaread/seller-books"],
+    queryKey: ["/api/vyronaread/seller-books", currentUser?.id],
+    queryFn: () => apiRequest(`/api/vyronaread/seller-books?sellerId=${currentUser?.id}`),
+    enabled: !!currentUser?.id,
   });
 
   const { data: libraryBooks } = useQuery({
-    queryKey: ["/api/vyronaread/library-books"],
+    queryKey: ["/api/vyronaread/library-books", currentUser?.id],
+    queryFn: () => apiRequest(`/api/vyronaread/library-books?sellerId=${currentUser?.id}`),
+    enabled: !!currentUser?.id,
   });
 
   const handleLogout = () => {
