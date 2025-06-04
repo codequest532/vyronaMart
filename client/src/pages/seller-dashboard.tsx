@@ -1252,6 +1252,46 @@ export default function SellerDashboard() {
                         </div>
                         
                         <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="images">Book Images (Max 2)</Label>
+                          <div className="space-y-3">
+                            <Input
+                              id="images"
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              onChange={handleImageUpload}
+                              className="cursor-pointer"
+                            />
+                            <p className="text-xs text-gray-500">Upload up to 2 images of the book cover and back</p>
+                            
+                            {/* Display uploaded images */}
+                            {bookImages.length > 0 && (
+                              <div className="grid grid-cols-2 gap-2">
+                                {bookImages.map((file, index) => (
+                                  <div key={index} className="relative border rounded-lg p-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm truncate">{file.name}</span>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => removeImage(index)}
+                                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                                      >
+                                        ×
+                                      </Button>
+                                    </div>
+                                    <p className="text-xs text-gray-400">
+                                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2 md:col-span-2">
                           <Label htmlFor="description">Description</Label>
                           <Textarea
                             id="description"
