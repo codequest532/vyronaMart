@@ -132,76 +132,70 @@ export default function VyronaRead() {
         </Card>
       </div>
 
-      {/* E-Reader Features */}
+      {/* 1. Currently Reading */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">VyronaRead E-Reader</h3>
-            <Badge variant="outline" className="text-blue-700">Kindle-like Experience</Badge>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">Reading Features</h4>
-              <div className="space-y-3">
-                {[
-                  { feature: "Customizable Font Size", icon: Type },
-                  { feature: "Night Mode Reading", icon: Moon },
-                  { feature: "Bookmark Management", icon: Bookmark },
-                  { feature: "Progress Tracking", icon: FileText },
-                  { feature: "Highlight & Notes", icon: Edit },
-                  { feature: "Offline Reading", icon: Download }
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <item.icon className="h-5 w-5 text-purple-600" />
-                    <span className="text-gray-700">{item.feature}</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-4">📖 Currently Reading</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { 
+                title: "The Psychology of Money", 
+                author: "Morgan Housel", 
+                progress: 65, 
+                timeLeft: "2h 30m",
+                lastRead: "Today",
+                cover: "💰"
+              },
+              { 
+                title: "Sapiens", 
+                author: "Yuval Noah Harari", 
+                progress: 32, 
+                timeLeft: "8h 15m",
+                lastRead: "2 days ago",
+                cover: "🦕"
+              }
+            ].map((book, index) => (
+              <Card key={index} className="border border-gray-200">
+                <CardContent className="p-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="text-3xl">{book.cover}</div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-1">{book.title}</h4>
+                      <p className="text-sm text-gray-500 mb-2">by {book.author}</p>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs text-gray-600">
+                          <span>Progress</span>
+                          <span>{book.progress}%</span>
+                        </div>
+                        <Progress value={book.progress} className="h-2" />
+                        
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>Time left: {book.timeLeft}</span>
+                          <span>Last read: {book.lastRead}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex space-x-2 mt-3">
+                        <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700">
+                          <Play className="mr-1 h-3 w-3" />
+                          Continue
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <Bookmark className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">Reader Settings</h4>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Reading Mode</span>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant={readingMode === "light" ? "default" : "outline"}
-                      onClick={() => setReadingMode("light")}
-                    >
-                      <Sun className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={readingMode === "dark" ? "default" : "outline"}
-                      onClick={() => setReadingMode("dark")}
-                    >
-                      <Moon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Font Size</span>
-                  <Select value={fontSize} onValueChange={setFontSize}>
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="small">Small</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="large">Large</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Browse Books */}
+      {/* 2. Browse Books */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -272,7 +266,7 @@ export default function VyronaRead() {
         </CardContent>
       </Card>
 
-      {/* Library Integration */}
+      {/* 3. Library Integration */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -334,65 +328,71 @@ export default function VyronaRead() {
         </CardContent>
       </Card>
 
-      {/* Currently Reading */}
+      {/* 4. VyronaRead E-Reader */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">📖 Currently Reading</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { 
-                title: "The Psychology of Money", 
-                author: "Morgan Housel", 
-                progress: 65, 
-                timeLeft: "2h 30m",
-                lastRead: "Today",
-                cover: "💰"
-              },
-              { 
-                title: "Sapiens", 
-                author: "Yuval Noah Harari", 
-                progress: 32, 
-                timeLeft: "8h 15m",
-                lastRead: "2 days ago",
-                cover: "🦕"
-              }
-            ].map((book, index) => (
-              <Card key={index} className="border border-gray-200">
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-4">
-                    <div className="text-3xl">{book.cover}</div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-1">{book.title}</h4>
-                      <p className="text-sm text-gray-500 mb-2">by {book.author}</p>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs text-gray-600">
-                          <span>Progress</span>
-                          <span>{book.progress}%</span>
-                        </div>
-                        <Progress value={book.progress} className="h-2" />
-                        
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>Time left: {book.timeLeft}</span>
-                          <span>Last read: {book.lastRead}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex space-x-2 mt-3">
-                        <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700">
-                          <Play className="mr-1 h-3 w-3" />
-                          Continue
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Bookmark className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">VyronaRead E-Reader</h3>
+            <Badge variant="outline" className="text-blue-700">Kindle-like Experience</Badge>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900">Reading Features</h4>
+              <div className="space-y-3">
+                {[
+                  { feature: "Customizable Font Size", icon: Type },
+                  { feature: "Night Mode Reading", icon: Moon },
+                  { feature: "Bookmark Management", icon: Bookmark },
+                  { feature: "Progress Tracking", icon: FileText },
+                  { feature: "Highlight & Notes", icon: Edit },
+                  { feature: "Offline Reading", icon: Download }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <item.icon className="h-5 w-5 text-purple-600" />
+                    <span className="text-gray-700">{item.feature}</span>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900">Reader Settings</h4>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Reading Mode</span>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant={readingMode === "light" ? "default" : "outline"}
+                      onClick={() => setReadingMode("light")}
+                    >
+                      <Sun className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={readingMode === "dark" ? "default" : "outline"}
+                      onClick={() => setReadingMode("dark")}
+                    >
+                      <Moon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Font Size</span>
+                  <Select value={fontSize} onValueChange={setFontSize}>
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="large">Large</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
