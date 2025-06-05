@@ -299,6 +299,55 @@ export const bookLoans = pgTable("book_loans", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// VyronaSocial Group Checkout Tables
+export const vyronaSocialWallet = pgTable("vyrona_social_wallet", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  balance: integer("balance").notNull().default(0), // in cents
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const groupOrders = pgTable("group_orders", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id").notNull().references(() => shoppingRooms.id),
+  productId: integer("product_id").notNull().references(() => products.id),
+  totalAmount: integer("total_amount").notNull(), // in cents
+  requiredAmount: integer("required_amount").notNull(), // in cents
+  contributedAmount: integer("contributed_amount").notNull().default(0), // in cents
+  quantity: integer("quantity").notNull().default(1),
+  status: varchar("status", { length: 50 }).default("collecting").notNull(), // 'collecting', 'ready', 'ordered', 'shipped', 'delivered', 'cancelled'
+  orderedBy: integer("ordered_by").references(() => users.id),
+  shippingAddresses: jsonb("shipping_addresses"), // Array of delivery addresses for different contributors
+  orderNotes: text("order_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  orderedAt: timestamp("ordered_at"),
+});
+
+export const groupOrderContributions = pgTable("group_order_contributions", {
+  id: serial("id").primaryKey(),
+  groupOrderId: integer("group_order_id").notNull().references(() => groupOrders.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  contributionAmount: integer("contribution_amount").notNull(), // in cents
+  deliveryAddress: jsonb("delivery_address"),
+  sharePercentage: decimal("share_percentage", { precision: 5, scale: 2 }), // e.g., 25.50 for 25.5%
+  status: varchar("status", { length: 50 }).default("pending").notNull(), // 'pending', 'paid', 'refunded'
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  amount: integer("amount").notNull(), // in cents, positive for credit, negative for debit
+  type: varchar("type", { length: 50 }).notNull(), // 'contribution', 'refund', 'topup', 'withdraw'
+  referenceId: integer("reference_id"), // group_order_id or other reference
+  referenceType: varchar("reference_type", { length: 50 }), // 'group_order', 'refund', etc.
+  description: text("description"),
+  balanceAfter: integer("balance_after").notNull(), // wallet balance after this transaction
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Book Rentals with 15-day billing cycle
 export const bookRentals = pgTable("book_rentals", {
   id: serial("id").primaryKey(),

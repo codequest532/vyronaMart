@@ -41,7 +41,10 @@ import {
   ArrowLeft,
   CheckCircle,
   XCircle,
-  Eye
+  Eye,
+  Wallet,
+  MapPin,
+  CreditCard
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -731,13 +734,15 @@ export default function VyronaSocial() {
                   </ScrollArea>
                 </div>
 
-                {/* Checkout Summary */}
+                {/* Group Checkout with Contribution Tracking */}
                 <div className="space-y-4">
                   <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-3">Order Summary</h4>
-                    <div className="space-y-2 text-sm">
+                    <h4 className="font-semibold mb-3">Group Checkout</h4>
+                    
+                    {/* Order Summary */}
+                    <div className="space-y-2 text-sm mb-4">
                       <div className="flex justify-between">
-                        <span>Subtotal:</span>
+                        <span>Product Total:</span>
                         <span>₹240.00</span>
                       </div>
                       <div className="flex justify-between text-green-600">
@@ -746,20 +751,173 @@ export default function VyronaSocial() {
                       </div>
                       <Separator className="my-2" />
                       <div className="flex justify-between font-semibold">
-                        <span>Total:</span>
+                        <span>Required Amount:</span>
                         <span>₹204.00</span>
                       </div>
                     </div>
+
+                    {/* Contribution Progress */}
+                    <div className="space-y-3 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span>Collected:</span>
+                        <span className="font-semibold text-green-600">₹150.00</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '73%' }}></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>73% funded</span>
+                        <span>₹54.00 remaining</span>
+                      </div>
+                    </div>
+
+                    {/* Member Contributions */}
+                    <div className="space-y-2 mb-4">
+                      <h5 className="font-medium text-sm">Member Contributions:</h5>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span>You (35%)</span>
+                          <span className="text-green-600">₹71.40 ✓</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Alice (25%)</span>
+                          <span className="text-green-600">₹51.00 ✓</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Bob (20%)</span>
+                          <span className="text-orange-600">₹40.80 pending</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Carol (20%)</span>
+                          <span className="text-gray-500">₹40.80 not set</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* VyronaWallet Balance */}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Wallet className="w-4 h-4 text-blue-600" />
+                          <span className="text-sm font-medium">VyronaWallet</span>
+                        </div>
+                        <span className="font-semibold text-blue-600">₹125.00</span>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="space-y-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button className="w-full" variant="outline">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Your Contribution
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <CreditCard className="w-5 h-5" />
+                              Add Contribution
+                            </DialogTitle>
+                          </DialogHeader>
+                          
+                          <div className="space-y-4">
+                            {/* Contribution Amount */}
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Contribution Amount</label>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                                <Input 
+                                  placeholder="0.00" 
+                                  className="pl-8"
+                                  type="number"
+                                />
+                              </div>
+                              <p className="text-xs text-gray-500">
+                                Suggested: ₹51.00 (25% share)
+                              </p>
+                            </div>
+
+                            {/* VyronaWallet Balance */}
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                              <div className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Wallet className="w-4 h-4 text-blue-600" />
+                                  <span>Available Balance</span>
+                                </div>
+                                <span className="font-semibold text-blue-600">₹125.00</span>
+                              </div>
+                            </div>
+
+                            {/* Delivery Address */}
+                            <div className="space-y-3">
+                              <label className="text-sm font-medium flex items-center gap-2">
+                                <MapPin className="w-4 h-4" />
+                                Delivery Address
+                              </label>
+                              
+                              <div className="space-y-2">
+                                <Input placeholder="Full Name" />
+                                <Textarea 
+                                  placeholder="Street Address, Apartment/Suite" 
+                                  rows={2}
+                                />
+                                <div className="grid grid-cols-2 gap-2">
+                                  <Input placeholder="City" />
+                                  <Input placeholder="Postal Code" />
+                                </div>
+                                <Input placeholder="State/Province" />
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <input type="checkbox" id="same-address" className="rounded" />
+                                <label htmlFor="same-address" className="text-xs text-gray-600">
+                                  Use my default address
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Payment Method */}
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Payment Method</label>
+                              <Select>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select payment method" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="wallet">VyronaWallet</SelectItem>
+                                  <SelectItem value="upi">UPI</SelectItem>
+                                  <SelectItem value="card">Credit/Debit Card</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="space-y-2 pt-2">
+                              <Button className="w-full">
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Confirm Contribution
+                              </Button>
+                              
+                              <p className="text-xs text-center text-gray-500">
+                                Funds will be held securely until order is placed
+                              </p>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      
+                      <Button className="w-full" disabled>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Place Group Order
+                      </Button>
+                      
+                      <p className="text-xs text-gray-500 text-center">
+                        Order can be placed when 100% funded
+                      </p>
+                    </div>
                   </div>
-                  
-                  <Button className="w-full">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Proceed to Group Checkout
-                  </Button>
-                  
-                  <p className="text-xs text-gray-500 text-center">
-                    Everyone will pay their share individually
-                  </p>
                 </div>
               </div>
             </CardContent>
