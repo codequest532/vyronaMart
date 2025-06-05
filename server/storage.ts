@@ -1998,6 +1998,27 @@ export class DatabaseStorage implements IStorage {
 
     return newMembership;
   }
+
+  // VyronaRead Books - Required methods for authentic data
+  async getAllEBooks(): Promise<any[]> {
+    const ebooks = await db.select().from(eBooks).where(eq(eBooks.isActive, true));
+    return ebooks;
+  }
+
+  async getAllPhysicalBooks(): Promise<any[]> {
+    const books = await db.select().from(physicalBooks);
+    return books;
+  }
+
+  async getPhysicalBooksByLibrary(libraryId: number): Promise<any[]> {
+    const books = await db.select().from(physicalBooks).where(eq(physicalBooks.libraryId, libraryId));
+    return books;
+  }
+
+  async getAllLibraryRequests(): Promise<any[]> {
+    const requests = await db.select().from(libraryIntegrationRequests);
+    return requests;
+  }
 }
 
 // Use DatabaseStorage instead of MemStorage

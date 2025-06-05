@@ -12,6 +12,60 @@ import { z } from "zod";
 import { sendOTPEmail } from "./email";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // VyronaRead API endpoints for authentic book data
+  app.get("/api/vyronaread/ebooks", async (req, res) => {
+    try {
+      const ebooks = await storage.getAllEBooks();
+      res.json(ebooks);
+    } catch (error) {
+      console.error("Error fetching e-books:", error);
+      res.status(500).json({ message: "Failed to fetch e-books" });
+    }
+  });
+
+  app.get("/api/vyronaread/seller-books", async (req, res) => {
+    try {
+      const physicalBooks = await storage.getAllPhysicalBooks();
+      res.json(physicalBooks);
+    } catch (error) {
+      console.error("Error fetching seller books:", error);
+      res.status(500).json({ message: "Failed to fetch seller books" });
+    }
+  });
+
+  app.get("/api/vyronaread/library-books", async (req, res) => {
+    try {
+      const libraryBooks = await storage.getAllPhysicalBooks();
+      res.json(libraryBooks);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+      res.status(500).json({ message: "Failed to fetch library books" });
+    }
+  });
+
+  app.get("/api/vyronaread/library-books/:libraryId", async (req, res) => {
+    try {
+      const libraryId = parseInt(req.params.libraryId);
+      const libraryBooks = await storage.getPhysicalBooksByLibrary(libraryId);
+      res.json(libraryBooks);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+      res.status(500).json({ message: "Failed to fetch library books" });
+    }
+  });
+
+  app.get("/api/vyronaread/libraries", async (req, res) => {
+    try {
+      const libraries = await storage.getAllLibraryRequests();
+      // Filter only approved libraries
+      const approvedLibraries = libraries.filter((lib: any) => lib.status === 'approved');
+      res.json(approvedLibraries);
+    } catch (error) {
+      console.error("Error fetching libraries:", error);
+      res.status(500).json({ message: "Failed to fetch libraries" });
+    }
+  });
+
   // Debug endpoint to check existing users
   app.get("/api/debug/users", async (req, res) => {
     try {
