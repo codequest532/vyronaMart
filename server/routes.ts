@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Product routes - VyronaHub (individual buy only)
+  // Product routes - VyronaHub (individual buy enabled products)
   app.get("/api/products", async (req, res) => {
     try {
       const { module, category } = req.query;
@@ -311,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         module as string,
         category as string
       );
-      // Filter products based on enableIndividualBuy flag for VyronaHub
+      // Filter products that have individual buy enabled (including those with both enabled)
       const individualBuyProducts = products.filter(product => 
         product.enableIndividualBuy !== false
       );

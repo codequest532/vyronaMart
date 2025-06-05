@@ -386,21 +386,48 @@ export default function VyronaHub() {
                         <span className="text-xs text-gray-600">4.5</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-lg font-bold text-blue-600">₹{product.price}</span>
-                        {product.originalPrice && product.originalPrice > product.price && (
-                          <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
-                        )}
+                    <div className="space-y-3">
+                      {/* Individual Buy Price */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-lg font-bold text-blue-600">₹{(product.price / 100).toLocaleString()}</span>
+                          <span className="text-xs text-gray-500">Individual Buy</span>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleAddToCart(product)}
+                          className="bg-blue-500 hover:bg-blue-600"
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-1" />
+                          Add to Cart
+                        </Button>
                       </div>
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleAddToCart(product)}
-                        className="bg-blue-500 hover:bg-blue-600"
-                      >
-                        <ShoppingCart className="h-4 w-4 mr-1" />
-                        Add to Cart
-                      </Button>
+
+                      {/* Group Buy Option (if enabled) */}
+                      {product.enableGroupBuy && (
+                        <div className="border-t pt-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex flex-col">
+                              <span className="text-lg font-bold text-purple-600">
+                                ₹{Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)).toLocaleString()}
+                              </span>
+                              <span className="text-xs text-purple-500">Group Buy ({product.groupBuyDiscount || 10}% OFF)</span>
+                              <span className="text-xs text-gray-500">Min: {product.groupBuyMinQuantity || 4} items</span>
+                            </div>
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                // Navigate to VyronaSocial for group buy
+                                window.location.href = '/social';
+                              }}
+                              className="bg-purple-500 hover:bg-purple-600"
+                            >
+                              <Users className="h-4 w-4 mr-1" />
+                              Group Buy
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
