@@ -1267,8 +1267,8 @@ export default function SellerDashboard() {
                 <CardContent className="p-6">
                   <h3 className="font-semibold text-green-800 mb-2">Group Buy Requirements</h3>
                   <ul className="text-sm text-green-700 space-y-1">
-                    <li>• Minimum 4 pieces for single product group buys</li>
-                    <li>• Alternative: 4+ pieces across multiple sellers</li>
+                    <li>• Single Product: 4+ pieces of the same product from one seller</li>
+                    <li>• Multi-Product: 4+ pieces across different products (same or different sellers)</li>
                     <li>• Products are automatically approved and active</li>
                     <li>• Discounts enable cost sharing for bulk orders</li>
                   </ul>
