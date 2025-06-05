@@ -108,20 +108,24 @@ export default function LibraryBrowse() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bookId })
       });
-      if (!response.ok) throw new Error("Failed to borrow book");
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to borrow book");
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const dueDate = new Date(data.dueDate).toLocaleDateString();
       toast({
-        title: "Book Borrowed",
-        description: "Book has been successfully borrowed!",
+        title: "Book Borrowed Successfully",
+        description: `Book has been borrowed! Due date: ${dueDate}`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/library-books"] });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to borrow book",
+        title: "Borrowing Failed",
+        description: error.message || "Failed to borrow book. Please try again.",
         variant: "destructive"
       });
     }

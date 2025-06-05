@@ -1299,6 +1299,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Borrow book endpoint for library browse
+  app.post("/api/borrow-book", async (req, res) => {
+    try {
+      const { bookId } = req.body;
+      
+      if (!bookId) {
+        return res.status(400).json({ message: "Book ID is required" });
+      }
+
+      // Create book loan record
+      const loan = await storage.createBookLoan({
+        bookId: bookId,
+        borrowerId: 1, // Default user ID for now
+        libraryId: 1, // Default library ID
+        borrowedAt: new Date(),
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        status: 'active'
+      });
+
+      res.json({
+        success: true,
+        loanId: loan.id,
+        message: "Book borrowed successfully",
+        dueDate: loan.dueDate
+      });
+    } catch (error) {
+      console.error("Error borrowing book:", error);
+      res.status(500).json({ message: "Failed to borrow book" });
+    }
+  });
+
   // Create library membership application
   app.post("/api/library/membership", async (req, res) => {
     try {
