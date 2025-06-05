@@ -1754,7 +1754,7 @@ export default function SellerDashboard() {
                           <div>
                             <p className="text-sm font-medium text-gray-600">Physical Books</p>
                             <p className="text-3xl font-bold text-blue-600">
-                              {sellerBooks?.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length || 0}
+                              {Array.isArray(sellerBooks) ? sellerBooks.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length : 0}
                             </p>
                             <p className="text-xs text-blue-500">Library inventory</p>
                           </div>
@@ -1818,7 +1818,7 @@ export default function SellerDashboard() {
                           <div className="flex items-center justify-between">
                             <span className="text-sm">Books Available</span>
                             <span className="font-bold text-orange-600">
-                              {sellerBooks?.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length || 0}
+                              {Array.isArray(sellerBooks) ? sellerBooks.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length : 0}
                             </span>
                           </div>
                           <div className="flex items-center justify-between">
