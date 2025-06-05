@@ -729,40 +729,8 @@ export default function VyronaSocial() {
             </CardContent>
           </Card>
 
-          {/* Right Column - Voting & Final Cart */}
+          {/* Right Column - Final Cart */}
           <div className="space-y-6">
-            {/* Vote Panel */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Vote className="w-5 h-5" />
-                  Group Voting
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <ThumbsUp className="w-4 h-4 mr-2" />
-                      Approve Cart
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex-1">
-                      <ThumbsDown className="w-4 h-4 mr-2" />
-                      Suggest Changes
-                    </Button>
-                  </div>
-                  
-                  <div className="text-sm text-gray-600">
-                    <p>Current votes:</p>
-                    <div className="flex justify-between mt-1">
-                      <span className="text-green-600">✓ Approve: 3</span>
-                      <span className="text-red-600">✗ Changes: 1</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Final Cart View */}
             <Card>
               <CardHeader>
