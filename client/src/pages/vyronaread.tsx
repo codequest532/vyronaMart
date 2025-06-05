@@ -303,145 +303,355 @@ export default function VyronaRead() {
 
 
       {/* 1. Browse Books */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">Browse Books</h3>
-            <div className="flex items-center space-x-3">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filter by Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="romance">Romance</SelectItem>
-                  <SelectItem value="sci-fi">Sci-Fi</SelectItem>
-                  <SelectItem value="mystery">Mystery</SelectItem>
-                  <SelectItem value="education">Education</SelectItem>
-                  <SelectItem value="fantasy">Fantasy</SelectItem>
-                  <SelectItem value="biography">Biography</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" size="sm">
-                <Search className="h-4 w-4 mr-2" />
-                Search
-              </Button>
+      <Card className="mb-8">
+        <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white p-6 rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-2xl font-bold mb-2">📖 Discover Amazing Books</h3>
+              <p className="text-purple-100">Explore thousands of books from sellers, libraries, and digital collections</p>
+            </div>
+            <Badge className="bg-white/20 text-white border-white/30 px-3 py-1">
+              Multi-Source Discovery
+            </Badge>
+          </div>
+        </div>
+
+        <CardContent className="p-6 space-y-8">
+          {/* Search and Filter Bar */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input 
+                placeholder="Search for books, authors, or topics..." 
+                className="pl-10 py-2 border-gray-300 focus:border-blue-500"
+              />
+            </div>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full md:w-64">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="romance">Romance</SelectItem>
+                <SelectItem value="sci-fi">Sci-Fi</SelectItem>
+                <SelectItem value="mystery">Mystery</SelectItem>
+                <SelectItem value="education">Education</SelectItem>
+                <SelectItem value="fantasy">Fantasy</SelectItem>
+                <SelectItem value="biography">Biography</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Advanced Filters
+            </Button>
+          </div>
+
+          {/* Featured Collections */}
+          <div>
+            <h4 className="text-xl font-bold text-gray-900 mb-6">🌟 Featured Collections</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {[
+                { title: "Bestsellers", desc: "Most popular books", icon: "📈", color: "from-orange-400 to-red-500" },
+                { title: "New Arrivals", desc: "Latest additions", icon: "✨", color: "from-green-400 to-blue-500" },
+                { title: "Staff Picks", desc: "Curated by experts", icon: "🎯", color: "from-purple-400 to-pink-500" }
+              ].map((collection, index) => (
+                <Card key={index} className="group hover:shadow-lg transition-all cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className={`w-12 h-12 bg-gradient-to-r ${collection.color} rounded-lg flex items-center justify-center mb-4`}>
+                      <span className="text-2xl">{collection.icon}</span>
+                    </div>
+                    <h5 className="font-bold text-lg mb-2">{collection.title}</h5>
+                    <p className="text-gray-600 text-sm mb-4">{collection.desc}</p>
+                    <Button variant="outline" size="sm" className="group-hover:bg-gray-50">
+                      Explore Collection
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {combinedBooks.length > 0 ? combinedBooks.map((book, index) => (
-              <Card key={index} className="border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="text-center mb-3">
-                    <div className="w-full h-40 mb-3 bg-gray-100 rounded-lg overflow-hidden">
+          {/* All Available Books */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h4 className="text-xl font-bold text-gray-900">🔍 All Books</h4>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">Sort by:</span>
+                <Select defaultValue="popular">
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="popular">Popular</SelectItem>
+                    <SelectItem value="newest">Newest</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    <SelectItem value="rating">Rating</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {combinedBooks.length > 0 ? combinedBooks.map((book, index) => (
+                <Card key={index} className="group border-2 border-gray-200 hover:border-purple-300 transition-all hover:shadow-lg">
+                  <div className="relative">
+                    {/* Book Cover */}
+                    <div className="h-48 bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 relative overflow-hidden rounded-t-lg">
+                      <div className="absolute inset-0 bg-black/20"></div>
                       {book.imageUrl ? (
                         <img 
                           src={book.imageUrl} 
                           alt={book.name || book.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
                           }}
                         />
                       ) : null}
-                      <div className="w-full h-full flex items-center justify-center text-4xl" style={{display: book.imageUrl ? 'none' : 'flex'}}>
-                        📚
+                      <div className={`absolute inset-0 flex items-center justify-center text-white ${book.imageUrl ? 'hidden' : 'flex'}`}>
+                        <div className="text-center p-4">
+                          <Book className="h-12 w-12 mx-auto mb-2 opacity-90" />
+                          <h4 className="font-bold text-sm leading-tight">{book.name || book.title}</h4>
+                        </div>
                       </div>
-                    </div>
-                    <h4 className="font-semibold text-gray-900 text-sm mb-1">{book.name || book.title}</h4>
-                    <p className="text-xs text-gray-500 mb-2">by {book.author || "Unknown Author"}</p>
-                    <Badge variant="secondary" className="text-xs">{book.category}</Badge>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center space-x-1">
-                        <Star className="text-amber-400 h-3 w-3 fill-current" />
-                        <span className="font-medium">4.2</span>
-                      </div>
-                      <span className="font-bold text-purple-600">₹{(book.price / 100).toFixed(0)}</span>
+                      {/* Popularity Badge */}
+                      {index < 3 && (
+                        <div className="absolute top-3 right-3">
+                          <Badge className="bg-yellow-500 text-yellow-900">Popular</Badge>
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="flex space-x-2">
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-blue-600 hover:bg-blue-700"
-                        onClick={() => handleBuyBook(book)}
-                      >
-                        <BookOpen className="mr-1 h-3 w-3" />
-                        Buy
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-green-600 hover:bg-green-700"
-                        onClick={() => handleRentBook(book)}
-                      >
-                        <Clock className="mr-1 h-3 w-3" />
-                        Rent
-                      </Button>
-                    </div>
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        {/* Book Info */}
+                        <div>
+                          <h5 className="font-bold text-gray-900 text-sm leading-tight mb-1">{book.name || book.title}</h5>
+                          <p className="text-xs text-gray-600 mb-2">by {book.author || "Unknown Author"}</p>
+                          <div className="flex items-center justify-between">
+                            <Badge variant="secondary" className="text-xs">{book.category || "General"}</Badge>
+                            <div className="flex items-center space-x-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs text-gray-600">4.{Math.floor(Math.random() * 5) + 3}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Pricing */}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="text-lg font-bold text-purple-600">₹{Math.floor((book.price || 299) / 100)}</span>
+                            <span className="text-xs text-gray-500 ml-1">to buy</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-gray-500">or rent</div>
+                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) / 500)}/week</div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="space-y-2">
+                          <Button 
+                            size="sm" 
+                            className="w-full bg-purple-600 hover:bg-purple-700"
+                            onClick={() => handleBuyBook(book)}
+                          >
+                            <ShoppingCart className="mr-2 h-4 w-4" />
+                            Buy Now
+                          </Button>
+                          <div className="flex space-x-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="flex-1"
+                              onClick={() => handleRentBook(book)}
+                            >
+                              <Clock className="mr-1 h-3 w-3" />
+                              Rent
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="flex-1"
+                            >
+                              <Eye className="mr-1 h-3 w-3" />
+                              Preview
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
                   </div>
-                </CardContent>
-              </Card>
-            )) : (
-              <div className="col-span-full text-center py-8">
-                <p className="text-gray-500">No books available in this category.</p>
-              </div>
-            )}
+                </Card>
+              )) : (
+                <div className="col-span-full">
+                  <Card className="border-2 border-dashed border-gray-300">
+                    <CardContent className="text-center py-16">
+                      <Search className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                      <h4 className="text-xl font-semibold text-gray-700 mb-2">No Books Found</h4>
+                      <p className="text-gray-500 mb-4">Try adjusting your search or category filter</p>
+                      <Button variant="outline">Clear Filters</Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* 2. Library Integration */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">📚 Library Integration</h3>
+      <Card className="mb-8">
+        <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white p-6 rounded-t-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-2xl font-bold mb-2">📚 Partner Libraries</h3>
+              <p className="text-green-100">Borrow books from verified libraries with digital membership</p>
+            </div>
+            <Badge className="bg-white/20 text-white border-white/30 px-3 py-1">
+              Free Borrowing
+            </Badge>
           </div>
+        </div>
 
+        <CardContent className="p-6">
           <div className="space-y-8">
-            {Array.isArray(availableLibraries) && availableLibraries.length > 0 ? availableLibraries.map((library: any, index: number) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white hover:shadow-lg transition-shadow">
-                {/* Library Header */}
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <Library className="text-green-600 h-6 w-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900 text-lg">{library.libraryName || library.name}</h4>
-                      <p className="text-sm text-gray-500 capitalize">{library.libraryType || library.type || "Public"} Library</p>
-                      {library.address && (
-                        <p className="text-xs text-gray-400 mt-1">{library.address}</p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="default" className="bg-green-100 text-green-700 border-green-200">
-                      Active
-                    </Badge>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => setLocation('/library-browse')}
-                      className="text-green-600 border-green-200 hover:bg-green-50"
-                    >
-                      Browse All Books
-                    </Button>
-                  </div>
+            {Array.isArray(availableLibraries) && availableLibraries.length > 0 ? (
+              <>
+                {/* Library Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                  <Card className="border border-green-200 bg-green-50">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-green-700">{availableLibraries.length}</div>
+                      <div className="text-sm text-green-600">Partner Libraries</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border border-blue-200 bg-blue-50">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-blue-700">2,500+</div>
+                      <div className="text-sm text-blue-600">Available Books</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border border-purple-200 bg-purple-50">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-purple-700">Free</div>
+                      <div className="text-sm text-purple-600">Borrowing Cost</div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border border-orange-200 bg-orange-50">
+                    <CardContent className="p-4 text-center">
+                      <div className="text-2xl font-bold text-orange-700">14 Days</div>
+                      <div className="text-sm text-orange-600">Borrow Period</div>
+                    </CardContent>
+                  </Card>
                 </div>
 
-                {/* Featured Books from Library */}
-                <LibraryBooksSection libraryId={library.id} libraryName={library.libraryName || library.name} />
-              </div>
-            )) : (
-              <div className="text-center py-12">
-                <Library className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">No approved libraries available</p>
-                <p className="text-gray-400 text-sm">Check back later for library partnerships</p>
-              </div>
+                {/* Partner Libraries */}
+                <div className="space-y-6">
+                  {availableLibraries.map((library: any, index: number) => (
+                    <Card key={index} className="border-2 border-green-200 hover:border-green-300 transition-all hover:shadow-xl">
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-green-100">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                              <Library className="text-white h-8 w-8" />
+                            </div>
+                            <div>
+                              <h4 className="text-xl font-bold text-gray-900">{library.libraryName || library.name}</h4>
+                              <p className="text-green-700 font-medium capitalize">{library.libraryType || library.type || "Public"} Library</p>
+                              {library.address && (
+                                <p className="text-sm text-gray-600 mt-1 flex items-center">
+                                  <Building className="h-4 w-4 mr-1" />
+                                  {library.address}
+                                </p>
+                              )}
+                              <div className="flex items-center space-x-4 mt-2">
+                                <Badge className="bg-green-600 text-white">Verified Partner</Badge>
+                                <div className="flex items-center space-x-1 text-sm text-gray-600">
+                                  <Users className="h-4 w-4" />
+                                  <span>1,200+ members</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right space-y-2">
+                            <Button 
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => setLocation('/library-browse')}
+                            >
+                              <BookOpen className="mr-2 h-4 w-4" />
+                              Browse Collection
+                            </Button>
+                            <div className="text-xs text-gray-500">Free borrowing available</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <CardContent className="p-6">
+                        {/* Library Features */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                          <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                            <Clock className="h-5 w-5 text-green-600" />
+                            <div>
+                              <div className="font-medium text-sm">14-Day Loans</div>
+                              <div className="text-xs text-gray-600">Standard borrowing period</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
+                            <Download className="h-5 w-5 text-blue-600" />
+                            <div>
+                              <div className="font-medium text-sm">Digital Access</div>
+                              <div className="text-xs text-gray-600">Read on any device</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
+                            <Heart className="h-5 w-5 text-purple-600" />
+                            <div>
+                              <div className="font-medium text-sm">No Late Fees</div>
+                              <div className="text-xs text-gray-600">Auto-return system</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Featured Books from Library */}
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <h5 className="font-semibold text-gray-900">Featured Books</h5>
+                            <Button variant="ghost" size="sm" className="text-green-600">
+                              View All Books
+                            </Button>
+                          </div>
+                          <LibraryBooksSection libraryId={library.id} libraryName={library.libraryName || library.name} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <Card className="border-2 border-dashed border-gray-300">
+                <CardContent className="text-center py-16">
+                  <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Library className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <h4 className="text-xl font-semibold text-gray-700 mb-2">No Partner Libraries Yet</h4>
+                  <p className="text-gray-500 mb-6">We're working on partnerships with local libraries to bring you free borrowing options</p>
+                  <div className="space-y-4">
+                    <Button variant="outline">
+                      <Building className="mr-2 h-4 w-4" />
+                      Suggest a Library
+                    </Button>
+                    <div className="text-sm text-gray-500">
+                      Check back soon for library partnerships in your area
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </div>
 
