@@ -32,6 +32,8 @@ export default function VyronaReadCheckout() {
   const urlParams = new URLSearchParams(window.location.search);
   const checkoutType = urlParams.get('type'); // 'buy', 'rent', or 'borrow'
   const bookId = urlParams.get('bookId');
+  const bookName = urlParams.get('bookName');
+  const author = urlParams.get('author');
   const clientSecret = urlParams.get('client_secret');
   
   // State management
@@ -66,7 +68,19 @@ export default function VyronaReadCheckout() {
   const fetchBookDetails = async () => {
     try {
       setLoading(true);
-      // Try different endpoints based on checkout type
+      
+      // For borrow type, use URL parameters instead of API call
+      if (checkoutType === 'borrow' && bookName && author) {
+        setBookDetails({
+          id: bookId,
+          name: decodeURIComponent(bookName),
+          author: decodeURIComponent(author),
+          price: 0 // Borrowing is free (membership fee handled separately)
+        });
+        return;
+      }
+      
+      // For other types, try API endpoints
       let response;
       if (checkoutType === 'borrow') {
         response = await fetch(`/api/vyronaread/library-books/${bookId}`);

@@ -100,36 +100,7 @@ export default function LibraryBrowse() {
     }
   });
 
-  // Book borrowing mutation
-  const borrowMutation = useMutation({
-    mutationFn: async (bookId: number) => {
-      const response = await fetch("/api/borrow-book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookId })
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to borrow book");
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      const dueDate = new Date(data.dueDate).toLocaleDateString();
-      toast({
-        title: "Book Borrowed Successfully",
-        description: `Book has been borrowed! Due date: ${dueDate}`,
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/library-books"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Borrowing Failed",
-        description: error.message || "Failed to borrow book. Please try again.",
-        variant: "destructive"
-      });
-    }
-  });
+
 
   // Filter books based on search term
   const filteredBooks = useMemo(() => {
@@ -391,9 +362,8 @@ export default function LibraryBrowse() {
                       className="w-full" 
                       size="sm"
                       onClick={() => handleBorrowBook(book)}
-                      disabled={borrowMutation.isPending}
                     >
-                      {borrowMutation.isPending ? "Borrowing..." : "Borrow Book"}
+                      Borrow Book
                     </Button>
                   </CardContent>
                 </Card>
