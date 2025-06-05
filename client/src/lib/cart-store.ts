@@ -10,8 +10,10 @@ export interface CartItem {
   quantity: number;
   imageUrl: string;
   isGroupBuy?: boolean;
+  groupBuyType?: "single_product" | "multi_product";
   groupBuyDiscount?: number;
   category: string;
+  minQuantity?: number;
 }
 
 interface CartStore {
@@ -22,6 +24,12 @@ interface CartStore {
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  getGroupBuyStatus: () => { 
+    isEligible: boolean; 
+    singleProductCount: number; 
+    multiProductCount: number;
+    type: "single_product" | "multi_product" | "mixed" | "none";
+  };
 }
 
 export const useCartStore = create<CartStore>()(

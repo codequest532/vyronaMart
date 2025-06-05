@@ -246,14 +246,31 @@ export default function VyronaHub() {
                 VyronaSocial Group Purchase
               </h2>
               <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Products approved by sellers for group purchasing. Join VyronaSocial circles to unlock exclusive group discounts.
+                Two ways to save: Single Product (4+ same items) or Multi-Product (4+ different items). Join VyronaSocial circles to unlock exclusive group discounts.
               </p>
+              
+              {/* Group Buy Type Tabs */}
+              <div className="flex justify-center gap-4 mt-6">
+                <Badge variant="outline" className="px-4 py-2">
+                  <Users className="w-4 h-4 mr-2" />
+                  Single Product: 4+ Same Items
+                </Badge>
+                <Badge variant="outline" className="px-4 py-2">
+                  <ShoppingBag className="w-4 h-4 mr-2" />
+                  Multi-Product: 4+ Different Items
+                </Badge>
+              </div>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
               {(groupBuyProducts as any[]).map((groupProduct: any) => (
                 <Card key={groupProduct.id} className="relative overflow-hidden border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:shadow-lg transition-shadow">
                   <CardContent className="p-3">
+                    <div className="absolute top-2 left-2 z-10">
+                      <Badge variant="outline" className="text-xs bg-white/80">
+                        {groupProduct.type === "single_product" ? "Single" : "Multi"}
+                      </Badge>
+                    </div>
                     <img
                       src={groupProduct.imageUrl || "/api/placeholder/150/150"}
                       alt={groupProduct.name}
@@ -275,6 +292,11 @@ export default function VyronaHub() {
                         <Badge variant="secondary" className="text-xs">
                           {Math.round(((groupProduct.originalPrice - groupProduct.groupBuyPrice) / groupProduct.originalPrice) * 100)}% OFF
                         </Badge>
+                      </div>
+                      <div className="text-center mt-2">
+                        <p className="text-xs text-gray-500">
+                          Min: {groupProduct.minQuantity || 4} {groupProduct.type === "single_product" ? "same items" : "total items"}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
