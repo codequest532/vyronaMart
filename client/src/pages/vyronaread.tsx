@@ -47,10 +47,15 @@ import {
 function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; libraryName: string }) {
   const [location, setLocation] = useLocation();
   
-  const { data: libraryBooks = [], isLoading } = useQuery({
+  const { data: rawLibraryBooks, isLoading } = useQuery({
     queryKey: ["/api/vyronaread/library-books", libraryId],
-    queryFn: () => apiRequest("GET", `/api/vyronaread/library-books/${libraryId}`),
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/vyronaread/library-books/${libraryId}`);
+      return response.json();
+    },
   });
+
+  const libraryBooks = Array.isArray(rawLibraryBooks) ? rawLibraryBooks : [];
 
   const handleBorrowBook = (book: any) => {
     const params = new URLSearchParams({
@@ -76,7 +81,7 @@ function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; li
     );
   }
 
-  const displayBooks = Array.isArray(libraryBooks) ? libraryBooks.slice(0, 6) : []; // Show first 6 books
+  const displayBooks = libraryBooks.slice(0, 6); // Show first 6 books
 
   return (
     <div>
