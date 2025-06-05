@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Building2,
   User,
+  Users,
   Mail,
   Phone
 } from "lucide-react";
@@ -43,6 +44,7 @@ export default function VyronaReadCheckout() {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [rentalDuration, setRentalDuration] = useState('15'); // 15 days default
   const [agreementAccepted, setAgreementAccepted] = useState(false);
+  const [userType, setUserType] = useState<'new' | 'existing' | null>(null);
   
   // Customer information
   const [customerInfo, setCustomerInfo] = useState({
@@ -189,13 +191,24 @@ export default function VyronaReadCheckout() {
       return false;
     }
 
-    if (checkoutType === 'borrow' && hasMembership && !borrowingInfo.libraryCardNumber) {
-      toast({
-        title: "Validation Error", 
-        description: "Library card number is required for existing members",
-        variant: "destructive"
-      });
-      return false;
+    if (checkoutType === 'borrow') {
+      if (!userType) {
+        toast({
+          title: "Validation Error", 
+          description: "Please select whether you are a new user or existing member",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      if (userType === 'existing' && !borrowingInfo.libraryCardNumber) {
+        toast({
+          title: "Validation Error", 
+          description: "Library card number is required for existing members",
+          variant: "destructive"
+        });
+        return false;
+      }
     }
 
     if (!agreementAccepted) {
@@ -245,8 +258,8 @@ export default function VyronaReadCheckout() {
           break;
           
         case 'borrow':
-          // For borrowing, first handle membership payment if needed
-          if (!hasMembership) {
+          if (userType === 'new') {
+            // New user: process membership payment + borrowing request
             endpoint = '/api/library/membership';
             payload = {
               fullName: customerInfo.name,
@@ -255,10 +268,11 @@ export default function VyronaReadCheckout() {
               membershipType: "annual",
               fee: 2000,
               bookId: bookId,
-              bookTitle: bookDetails?.name || 'Unknown Book'
+              bookTitle: bookDetails?.name || 'Unknown Book',
+              borrowingInfo: borrowingInfo
             };
           } else {
-            // Process borrowing order directly
+            // Existing member: process borrowing order directly
             endpoint = '/api/process-borrow-order';
             payload.borrowingInfo = borrowingInfo;
           }
@@ -483,8 +497,53 @@ export default function VyronaReadCheckout() {
             </CardContent>
           </Card>
 
-          {/* Library Borrowing Information */}
+          {/* User Type Selection for Borrowing */}
           {checkoutType === 'borrow' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Member Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Are you a new user or existing library member?</Label>
+                  <RadioGroup 
+                    value={userType || ''} 
+                    onValueChange={(value) => setUserType(value as 'new' | 'existing')}
+                    className="mt-2"
+                  >
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border">
+                      <RadioGroupItem value="new" id="new-user" />
+                      <Label htmlFor="new-user" className="flex-1 cursor-pointer">
+                        <div>
+                          <span className="font-medium">New User</span>
+                          <p className="text-sm text-gray-600">
+                            First time using our library system. Includes ₹2000 annual membership fee.
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-3 rounded-lg border">
+                      <RadioGroupItem value="existing" id="existing-member" />
+                      <Label htmlFor="existing-member" className="flex-1 cursor-pointer">
+                        <div>
+                          <span className="font-medium">Existing Member</span>
+                          <p className="text-sm text-gray-600">
+                            Already have an active library membership and card.
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Library Borrowing Information */}
+          {checkoutType === 'borrow' && userType && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -493,7 +552,7 @@ export default function VyronaReadCheckout() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {hasMembership ? (
+                {userType === 'existing' ? (
                   <div>
                     <Label htmlFor="libraryCard">Library Card Number *</Label>
                     <Input
@@ -506,8 +565,8 @@ export default function VyronaReadCheckout() {
                 ) : (
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="text-sm text-blue-800">
-                      <strong>New to our library system?</strong><br />
-                      No library card needed! After your membership payment, we'll create your library account and card.
+                      <strong>New User Setup</strong><br />
+                      No library card needed! After your membership payment, we'll create your library account and issue your card.
                     </p>
                   </div>
                 )}
