@@ -189,10 +189,10 @@ export default function VyronaReadCheckout() {
       return false;
     }
 
-    if (checkoutType === 'borrow' && !borrowingInfo.libraryCardNumber) {
+    if (checkoutType === 'borrow' && hasMembership && !borrowingInfo.libraryCardNumber) {
       toast({
         title: "Validation Error", 
-        description: "Library card number is required for borrowing",
+        description: "Library card number is required for existing members",
         variant: "destructive"
       });
       return false;
@@ -493,15 +493,24 @@ export default function VyronaReadCheckout() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="libraryCard">Library Card Number *</Label>
-                  <Input
-                    id="libraryCard"
-                    value={borrowingInfo.libraryCardNumber}
-                    onChange={(e) => handleBorrowingInfoChange('libraryCardNumber', e.target.value)}
-                    placeholder="Enter your library card number"
-                  />
-                </div>
+                {hasMembership ? (
+                  <div>
+                    <Label htmlFor="libraryCard">Library Card Number *</Label>
+                    <Input
+                      id="libraryCard"
+                      value={borrowingInfo.libraryCardNumber}
+                      onChange={(e) => handleBorrowingInfoChange('libraryCardNumber', e.target.value)}
+                      placeholder="Enter your library card number"
+                    />
+                  </div>
+                ) : (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-blue-800">
+                      <strong>New to our library system?</strong><br />
+                      No library card needed! After your membership payment, we'll create your library account and card.
+                    </p>
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="purpose">Purpose of Borrowing</Label>
                   <RadioGroup 
