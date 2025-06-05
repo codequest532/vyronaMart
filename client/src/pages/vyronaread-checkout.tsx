@@ -650,7 +650,29 @@ export default function VyronaReadCheckout() {
               <Separator />
 
               <div className="space-y-2">
-                {checkoutType !== 'borrow' ? (
+                {checkoutType === 'borrow' ? (
+                  userType === 'new' ? (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Annual Membership:</span>
+                        <span className="font-bold">₹2,000</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-gray-600">
+                        <span>Book Borrowing:</span>
+                        <span>FREE</span>
+                      </div>
+                    </>
+                  ) : userType === 'existing' ? (
+                    <div className="flex justify-between">
+                      <span>Borrowing Fee:</span>
+                      <span className="font-bold">FREE</span>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      Please select user type to see pricing
+                    </div>
+                  )
+                ) : (
                   <>
                     <div className="flex justify-between">
                       <span>Amount:</span>
@@ -666,14 +688,16 @@ export default function VyronaReadCheckout() {
                       <span>₹{Math.floor(calculatePrice() / 100)}</span>
                     </div>
                   </>
-                ) : (
-                  <div className="text-center py-4">
-                    <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
-                    <p className="text-green-600 font-medium">Free Library Service</p>
-                    <p className="text-sm text-gray-500">No payment required</p>
-                  </div>
                 )}
               </div>
+
+              {checkoutType === 'borrow' && userType === 'existing' && (
+                <div className="text-center py-4">
+                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-2" />
+                  <p className="text-green-600 font-medium">Free Library Service</p>
+                  <p className="text-sm text-gray-500">No payment required</p>
+                </div>
+              )}
 
               <Separator />
 
