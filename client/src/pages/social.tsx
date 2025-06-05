@@ -47,6 +47,8 @@ import {
   CreditCard,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -645,16 +647,7 @@ export default function VyronaSocial() {
               </CardContent>
             </Card>
 
-            {/* Chat Toggle Button */}
-            <Button
-              onClick={() => setIsChatMinimized(!isChatMinimized)}
-              variant="outline"
-              className="w-full flex items-center gap-2"
-            >
-              <MessageCircle className="w-4 h-4" />
-              {isChatMinimized ? "Show Chat" : "Hide Chat"}
-              {isChatMinimized ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            </Button>
+
           </div>
 
           {/* Middle Column - Product Browser */}
@@ -963,13 +956,15 @@ export default function VyronaSocial() {
             </CardContent>
           </Card>
 
-          {/* Chat Sidebar - Minimizable */}
-          <div className={`fixed top-0 right-0 h-full bg-white dark:bg-gray-900 shadow-xl transition-transform duration-300 ease-in-out z-50 ${
-            isChatMinimized ? 'translate-x-full' : 'translate-x-0'
-          }`} style={{ width: '320px' }}>
+          {/* Chat Sidebar - Always visible, minimizable to header only */}
+          <div className="fixed top-0 right-0 bg-white dark:bg-gray-900 shadow-xl transition-all duration-300 ease-in-out z-50" 
+               style={{ 
+                 width: '320px',
+                 height: isChatMinimized ? '60px' : '100vh'
+               }}>
             <div className="flex flex-col h-full">
               {/* Chat Header */}
-              <div className="p-4 border-b flex items-center justify-between">
+              <div className="p-4 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-800">
                 <div className="flex items-center gap-2">
                   <MessageCircle className="w-5 h-5" />
                   <h3 className="font-semibold">Room Chat</h3>
@@ -977,62 +972,68 @@ export default function VyronaSocial() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsChatMinimized(true)}
+                  onClick={() => setIsChatMinimized(!isChatMinimized)}
+                  title={isChatMinimized ? "Expand Chat" : "Minimize Chat"}
                 >
-                  <X className="w-4 h-4" />
+                  {isChatMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </Button>
               </div>
 
-              {/* Chat Messages */}
-              <div className="flex-1 p-4">
-                <ScrollArea className="h-full">
-                  <div className="space-y-3">
-                    {(roomMessages as any[])?.map((message: any) => (
-                      <div key={message.id} className="flex gap-2">
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="text-xs">{message.username?.[0]?.toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-500">{message.username}</p>
-                          <p className="text-sm">{message.content}</p>
-                        </div>
+              {/* Chat Content - Only visible when not minimized */}
+              {!isChatMinimized && (
+                <>
+                  {/* Chat Messages */}
+                  <div className="flex-1 p-4 overflow-hidden">
+                    <ScrollArea className="h-full">
+                      <div className="space-y-3">
+                        {(roomMessages as any[])?.map((message: any) => (
+                          <div key={message.id} className="flex gap-2">
+                            <Avatar className="w-6 h-6">
+                              <AvatarFallback className="text-xs">{message.username?.[0]?.toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="text-xs text-gray-500">{message.username}</p>
+                              <p className="text-sm">{message.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {(roomMessages as any[])?.length === 0 && (
+                          <div className="text-center py-8 text-gray-500">
+                            <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">No messages yet</p>
+                            <p className="text-xs">Start the conversation!</p>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                    {(roomMessages as any[])?.length === 0 && (
-                      <div className="text-center py-8 text-gray-500">
-                        <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">No messages yet</p>
-                        <p className="text-xs">Start the conversation!</p>
-                      </div>
-                    )}
+                    </ScrollArea>
                   </div>
-                </ScrollArea>
-              </div>
 
-              {/* Chat Input */}
-              <div className="p-4 border-t">
-                <Form {...messageForm}>
-                  <form onSubmit={messageForm.handleSubmit((data) => {
-                    // Send message logic
-                    messageForm.reset();
-                  })} className="flex gap-2">
-                    <FormField
-                      control={messageForm.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input placeholder="Type a message..." {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" size="sm">
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </form>
-                </Form>
-              </div>
+                  {/* Chat Input */}
+                  <div className="p-4 border-t">
+                    <Form {...messageForm}>
+                      <form onSubmit={messageForm.handleSubmit((data) => {
+                        // Send message logic
+                        messageForm.reset();
+                      })} className="flex gap-2">
+                        <FormField
+                          control={messageForm.control}
+                          name="message"
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormControl>
+                                <Input placeholder="Type a message..." {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <Button type="submit" size="sm">
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </form>
+                    </Form>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
