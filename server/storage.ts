@@ -2001,19 +2001,13 @@ export class DatabaseStorage implements IStorage {
 
   // VyronaRead Books - Required methods for authentic data
   async getAllEBooks(): Promise<any[]> {
-    const ebooks = await db.select({
-      id: eBooks.id,
-      title: eBooks.title,
-      author: eBooks.author,
-      sellerId: eBooks.sellerId,
-      format: eBooks.format,
-      fileUrl: eBooks.fileUrl,
-      salePrice: eBooks.salePrice,
-      rentalPrice: eBooks.rentalPrice,
-      isActive: eBooks.isActive,
-      createdAt: eBooks.createdAt
-    }).from(eBooks).where(eq(eBooks.isActive, true));
-    return ebooks;
+    try {
+      const ebooks = await db.select().from(eBooks).where(eq(eBooks.isActive, true));
+      return ebooks || [];
+    } catch (error) {
+      console.error("Error fetching e-books:", error);
+      return [];
+    }
   }
 
   async getAllPhysicalBooks(): Promise<any[]> {
@@ -2050,6 +2044,16 @@ export class DatabaseStorage implements IStorage {
       createdAt: physicalBooks.createdAt
     }).from(physicalBooks).where(eq(physicalBooks.libraryId, libraryId));
     return books;
+  }
+
+  async deletePhysicalBook(bookId: number): Promise<boolean> {
+    try {
+      const result = await db.delete(physicalBooks).where(eq(physicalBooks.id, bookId));
+      return result.count > 0;
+    } catch (error) {
+      console.error("Error deleting physical book:", error);
+      return false;
+    }
   }
 
   async getAllLibraryRequests(): Promise<any[]> {

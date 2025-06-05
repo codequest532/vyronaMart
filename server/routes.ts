@@ -43,6 +43,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete book route
+  app.delete("/api/vyronaread/books/:bookId", async (req, res) => {
+    try {
+      const bookId = parseInt(req.params.bookId);
+      if (isNaN(bookId)) {
+        return res.status(400).json({ message: "Invalid book ID" });
+      }
+      
+      const success = await storage.deletePhysicalBook(bookId);
+      if (success) {
+        res.json({ message: "Book deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Book not found" });
+      }
+    } catch (error) {
+      console.error("Error deleting book:", error);
+      res.status(500).json({ message: "Failed to delete book" });
+    }
+  });
+
   app.get("/api/vyronaread/library-books/:libraryId", async (req, res) => {
     try {
       const libraryId = parseInt(req.params.libraryId);

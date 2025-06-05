@@ -450,11 +450,30 @@ export default function SellerDashboard() {
     setBookImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleDeleteBook = (bookTitle: string) => {
-    if (confirm(`Are you sure you want to delete "${bookTitle}" from your library?`)) {
-      // In a real implementation, this would call an API to delete the book
-      console.log(`Deleting book: ${bookTitle}`);
-      // Show success message or update state
+  const deleteBookMutation = useMutation({
+    mutationFn: async (bookId: number) => {
+      return await apiRequest("DELETE", `/api/vyronaread/books/${bookId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Book Deleted Successfully",
+        description: "The book has been removed from your catalog.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/seller-books"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/library-books"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to delete book",
+        description: error.message || "Unable to delete book. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteBook = (book: any) => {
+    if (confirm(`Are you sure you want to delete "${book.title || book.name}" from your library?`)) {
+      deleteBookMutation.mutate(book.id);
     }
   };
 
@@ -2008,11 +2027,12 @@ export default function SellerDashboard() {
                                   <Button 
                                     variant="outline" 
                                     size="sm"
-                                    onClick={() => handleDeleteBook(book.title)}
+                                    onClick={() => handleDeleteBook(book)}
+                                    disabled={deleteBookMutation.isPending}
                                     className="text-red-600 hover:text-red-700 hover:border-red-300"
                                   >
                                     <Trash2 className="h-4 w-4 mr-1" />
-                                    Delete
+                                    {deleteBookMutation.isPending ? "Deleting..." : "Delete"}
                                   </Button>
                                 </div>
                               </div>
