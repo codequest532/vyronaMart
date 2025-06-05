@@ -325,30 +325,8 @@ export default function VyronaRead() {
     queryKey: ["/api/admin/library-requests"],
   });
 
-  // Get all products from seller dashboard for Browse Books section
-  const { data: allProducts = [] } = useQuery({
-    queryKey: ["/api/products"],
-  });
-
-  // Filter books from products (books have category like 'books', 'education', etc.)
-  const allBooks = Array.isArray(allProducts) ? allProducts.filter((product: any) => 
-    product.category && [
-      'books', 'education', 'romance', 'sci-fi', 'mystery', 'fantasy', 'biography',
-      'self help', 'fiction', 'non-fiction', 'business', 'health', 'technology',
-      'history', 'science', 'philosophy', 'religion', 'cooking', 'travel',
-      'children', 'young adult', 'academic', 'reference'
-    ].includes(product.category.toLowerCase())
-  ) : [];
-
-  // Apply category filter
-  const filteredBooks = selectedCategory === "all" 
-    ? allBooks 
-    : allBooks.filter((book: any) => book.category?.toLowerCase() === selectedCategory);
-
-  // Combine all book sources for Browse Books section
+  // Combine all authentic book sources for Browse Books section
   const combinedBooks = [
-    ...filteredBooks,
-    ...(Array.isArray(sellerEBooks) ? sellerEBooks : []),
     ...(Array.isArray(sellerBooks) ? sellerBooks : []),
     ...(Array.isArray(libraryBooks) ? libraryBooks : [])
   ].filter((book, index, self) => 
@@ -833,12 +811,12 @@ export default function VyronaRead() {
         </CardContent>
       </Card>
 
-      {/* 3. VyronaRead E-Reader */}
+      {/* 3. E-Books */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900">📱 VyronaRead E-Reader</h3>
+              <h3 className="text-2xl font-bold text-gray-900">📱 E-Books</h3>
               <p className="text-gray-600 mt-1">Premium digital reading experience with instant access</p>
             </div>
             <Badge variant="outline" className="text-blue-700 px-3 py-1">Kindle-like Experience</Badge>
@@ -869,14 +847,20 @@ export default function VyronaRead() {
                       {/* Book Info */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <Badge variant="secondary" className="text-xs">{ebook.metadata?.genre || ebook.genre || "Digital Book"}</Badge>
-                          <span className="text-xs text-gray-500">{ebook.metadata?.fileSize || "2.5MB"}</span>
+                          {(ebook.metadata?.genre || ebook.genre) && (
+                            <Badge variant="secondary" className="text-xs">{ebook.metadata?.genre || ebook.genre}</Badge>
+                          )}
+                          {ebook.metadata?.fileSize && (
+                            <span className="text-xs text-gray-500">{ebook.metadata.fileSize}</span>
+                          )}
                         </div>
                         <div className="flex items-center space-x-4 text-xs text-gray-600">
-                          <div className="flex items-center space-x-1">
-                            <FileText className="h-3 w-3" />
-                            <span>{ebook.metadata?.format || "PDF"}</span>
-                          </div>
+                          {ebook.metadata?.format && (
+                            <div className="flex items-center space-x-1">
+                              <FileText className="h-3 w-3" />
+                              <span>{ebook.metadata.format}</span>
+                            </div>
+                          )}
                           <div className="flex items-center space-x-1">
                             <Eye className="h-3 w-3" />
                             <span>Preview Available</span>
@@ -887,7 +871,7 @@ export default function VyronaRead() {
                       {/* Pricing */}
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-2xl font-bold text-blue-600">₹{Math.floor((ebook.price || 1999) / 100)}</span>
+                          <span className="text-2xl font-bold text-blue-600">₹{ebook.price || 0}</span>
                           <span className="text-sm text-gray-500 ml-1">one-time</span>
                         </div>
                         <div className="text-right">
