@@ -1343,13 +1343,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check user membership status
   app.get("/api/user/membership-status", async (req, res) => {
     try {
-      // For now, return default status - can be enhanced later with actual membership tracking
+      // Check if user has active membership in database
+      // For now, return default status showing no membership
       res.json({ 
-        hasActiveMembership: false, // Default to false to show membership payment flow
+        hasActiveMembership: false,
         membershipType: null,
         expiryDate: null
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error checking membership status:", error);
       res.status(500).json({ message: "Failed to check membership status" });
     }
@@ -1374,6 +1375,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating library membership:", error);
       res.status(500).json({ message: "Failed to create library membership" });
+    }
+  });
+
+  // Process borrowing order after membership payment/verification
+  app.post("/api/process-borrow-order", async (req, res) => {
+    try {
+      const { bookId, customerInfo, borrowingInfo } = req.body;
+      
+      // Create borrowing order in database
+      const borrowOrder = {
+        bookId: parseInt(bookId),
+        customerName: customerInfo.name,
+        customerEmail: customerInfo.email,
+        customerPhone: customerInfo.phone,
+        borrowDate: new Date().toISOString(),
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
+        status: "pending_approval",
+        libraryCardNumber: borrowingInfo.libraryCardNumber,
+        purpose: borrowingInfo.purpose,
+        deliveryAddress: borrowingInfo.deliveryAddress
+      };
+
+      // Create notification for seller/admin to review borrowing request
+      await storage.createNotification({
+        userId: 1, // Admin user ID
+        type: "borrow_request",
+        title: "New Book Borrowing Request",
+        message: `${customerInfo.name} requested to borrow book ID ${bookId}. Contact: ${customerInfo.email}`,
+        metadata: borrowOrder
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Borrowing request submitted successfully. You will be contacted within 24 hours.",
+        orderId: Date.now(), // Temporary order ID
+        dueDate: borrowOrder.dueDate
+      });
+    } catch (error: any) {
+      console.error("Error processing borrow order:", error);
+      res.status(500).json({ message: "Failed to process borrowing request" });
     }
   });
 

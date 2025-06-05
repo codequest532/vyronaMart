@@ -245,8 +245,23 @@ export default function VyronaReadCheckout() {
           break;
           
         case 'borrow':
-          endpoint = '/api/vyronaread/borrow';
-          payload.borrowingInfo = borrowingInfo;
+          // For borrowing, first handle membership payment if needed
+          if (!hasMembership) {
+            endpoint = '/api/library/membership';
+            payload = {
+              fullName: customerInfo.name,
+              email: customerInfo.email,
+              phone: customerInfo.phone,
+              membershipType: "annual",
+              fee: 2000,
+              bookId: bookId,
+              bookTitle: bookDetails?.name || 'Unknown Book'
+            };
+          } else {
+            // Process borrowing order directly
+            endpoint = '/api/process-borrow-order';
+            payload.borrowingInfo = borrowingInfo;
+          }
           break;
       }
 
