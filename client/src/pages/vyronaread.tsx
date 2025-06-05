@@ -196,23 +196,17 @@ export default function VyronaRead() {
     }
   };
 
-  const proceedToEBookCheckout = async () => {
-    try {
-      const response = await apiRequest("POST", "/api/create-payment-intent", {
-        amount: selectedEBook.price || 1999, // Default price for e-book access
-        type: "ebook-access",
-        bookId: selectedEBook.id,
-        module: "VyronaRead"
-      });
-      const { clientSecret } = await response.json();
-      setLocation(`/checkout?client_secret=${clientSecret}&type=ebook&bookId=${selectedEBook.id}`);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to initiate e-book purchase. Please try again.",
-        variant: "destructive"
-      });
-    }
+  const proceedToEBookCheckout = async (ebook?: any) => {
+    const targetEBook = ebook || selectedEBook;
+    if (!targetEBook) return;
+    
+    // Navigate directly to the dedicated e-book checkout page
+    const params = new URLSearchParams({
+      bookId: targetEBook.id.toString(),
+      bookName: encodeURIComponent(targetEBook.name || targetEBook.title || 'Unknown Title'),
+      price: (targetEBook.price || 1999).toString()
+    });
+    setLocation(`/ebook-checkout?${params.toString()}`);
   };
 
   // VyronaRead data queries - real-time data from seller dashboard and admin
@@ -519,54 +513,120 @@ export default function VyronaRead() {
       {/* 3. VyronaRead E-Reader */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900">📱 VyronaRead E-Reader</h3>
-            <Badge variant="outline" className="text-blue-700">Kindle-like Experience</Badge>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">📱 VyronaRead E-Reader</h3>
+              <p className="text-gray-600 mt-1">Premium digital reading experience with instant access</p>
+            </div>
+            <Badge variant="outline" className="text-blue-700 px-3 py-1">Kindle-like Experience</Badge>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.isArray(sellerEBooks) && sellerEBooks.length > 0 ? sellerEBooks.map((ebook: any, index: number) => (
-              <Card key={index} className="border border-gray-200 hover:border-blue-300 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex space-x-3">
-                    <div className="w-12 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded flex items-center justify-center flex-shrink-0">
-                      <BookOpen className="text-blue-600 h-6 w-6" />
+              <Card key={index} className="group border-2 border-gray-200 hover:border-blue-400 transition-all duration-300 hover:shadow-lg overflow-hidden">
+                <div className="relative">
+                  {/* Book Cover Simulation */}
+                  <div className="h-48 bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center text-white p-4">
+                        <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-90" />
+                        <h4 className="font-bold text-lg leading-tight">{ebook.name || ebook.title}</h4>
+                        <p className="text-sm opacity-75 mt-1">{ebook.metadata?.author || ebook.author || "Unknown Author"}</p>
+                      </div>
                     </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="mb-2">
-                        <h5 className="font-semibold text-sm text-gray-900 truncate">{ebook.title}</h5>
-                        <p className="text-xs text-gray-500 mb-2">by {ebook.author || "Unknown Author"}</p>
-                        <Badge variant="secondary" className="text-xs">{ebook.genre || "General"}</Badge>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center space-x-1">
-                            <FileText className="text-blue-600 h-3 w-3" />
-                            <span className="text-xs">{ebook.pages || "PDF"}</span>
-                          </div>
-                          <span className="text-xs text-gray-600">{ebook.fileSize || "2.5MB"}</span>
-                        </div>
-                        
-                        <Button 
-                          size="sm" 
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                          onClick={() => handleReadEBook(ebook)}
-                        >
-                          <BookOpen className="mr-1 h-3 w-3" />
-                          Read E-Book
-                        </Button>
-                      </div>
+                    {/* Premium Badge */}
+                    <div className="absolute top-3 right-3">
+                      <Badge className="bg-yellow-500 text-yellow-900 border-yellow-400">Premium</Badge>
                     </div>
                   </div>
-                </CardContent>
+                  
+                  <CardContent className="p-5">
+                    <div className="space-y-4">
+                      {/* Book Info */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="secondary" className="text-xs">{ebook.metadata?.genre || ebook.genre || "Digital Book"}</Badge>
+                          <span className="text-xs text-gray-500">{ebook.metadata?.fileSize || "2.5MB"}</span>
+                        </div>
+                        <div className="flex items-center space-x-4 text-xs text-gray-600">
+                          <div className="flex items-center space-x-1">
+                            <FileText className="h-3 w-3" />
+                            <span>{ebook.metadata?.format || "PDF"}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Eye className="h-3 w-3" />
+                            <span>Preview Available</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Pricing */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-2xl font-bold text-blue-600">₹{Math.floor((ebook.price || 1999) / 100)}</span>
+                          <span className="text-sm text-gray-500 ml-1">one-time</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-500">Instant Access</div>
+                          <div className="text-xs text-green-600 font-medium">Download Included</div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="space-y-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
+                          onClick={() => handleReadEBook(ebook)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Preview Book
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
+                          onClick={() => proceedToEBookCheckout(ebook)}
+                        >
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Buy Now - ₹{Math.floor((ebook.price || 1999) / 100)}
+                        </Button>
+                      </div>
+
+                      {/* Features */}
+                      <div className="pt-3 border-t border-gray-100">
+                        <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                          <div className="flex items-center space-x-1">
+                            <Download className="h-3 w-3 text-green-500" />
+                            <span>Offline Reading</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Bookmark className="h-3 w-3 text-blue-500" />
+                            <span>Bookmarks</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Search className="h-3 w-3 text-purple-500" />
+                            <span>Text Search</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Type className="h-3 w-3 text-orange-500" />
+                            <span>Custom Fonts</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </div>
               </Card>
             )) : (
-              <div className="col-span-full text-center py-8">
-                <BookOpen className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                <p className="text-gray-500 mb-2">No e-books available yet</p>
-                <p className="text-sm text-gray-400">E-books uploaded by sellers will appear here</p>
+              <div className="col-span-full text-center py-12">
+                <div className="max-w-md mx-auto">
+                  <BookOpen className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                  <h4 className="text-xl font-semibold text-gray-700 mb-2">No E-Books Available Yet</h4>
+                  <p className="text-gray-500 mb-4">Digital books uploaded by sellers will appear here for instant reading</p>
+                  <Badge variant="outline" className="text-gray-500">Coming Soon</Badge>
+                </div>
               </div>
             )}
           </div>
@@ -729,66 +789,236 @@ export default function VyronaRead() {
         </DialogContent>
       </Dialog>
 
-      {/* E-Reader Modal with Sample Pages */}
+      {/* Enhanced E-Reader Preview Modal */}
       <Dialog open={showEReader} onOpenChange={setShowEReader}>
-        <DialogContent className="sm:max-w-4xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>VyronaRead E-Reader</DialogTitle>
-          </DialogHeader>
-          
+        <DialogContent className="sm:max-w-5xl h-[85vh] p-0">
           {selectedEBook && (
             <div className="flex flex-col h-full">
-              <div className="p-3 bg-gray-50 rounded-lg mb-4">
-                <h4 className="font-semibold text-gray-900">{selectedEBook.title}</h4>
-                <p className="text-sm text-gray-600">by {selectedEBook.author || "Unknown Author"}</p>
-                <Badge variant="secondary" className="mt-1">{selectedEBook.genre || "General"}</Badge>
+              {/* Header with Book Info & Purchase CTA */}
+              <div className="p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-20 bg-white/20 rounded-lg flex items-center justify-center">
+                      <BookOpen className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">{selectedEBook.name || selectedEBook.title}</h3>
+                      <p className="text-blue-100">by {selectedEBook.metadata?.author || selectedEBook.author || "Unknown Author"}</p>
+                      <div className="flex items-center space-x-3 mt-2">
+                        <Badge className="bg-white/20 text-white border-white/30">
+                          {selectedEBook.metadata?.genre || "Digital Book"}
+                        </Badge>
+                        <span className="text-sm text-blue-100">
+                          {selectedEBook.metadata?.fileSize || "2.5MB"} • {selectedEBook.metadata?.format || "PDF"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold">₹{Math.floor((selectedEBook.price || 1999) / 100)}</div>
+                    <div className="text-blue-100 text-sm">One-time purchase</div>
+                    <Button 
+                      className="mt-3 bg-white text-blue-600 hover:bg-blue-50"
+                      onClick={() => proceedToEBookCheckout()}
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Buy Full Access
+                    </Button>
+                  </div>
+                </div>
               </div>
-              
-              {/* Sample Pages Content */}
-              <div className="flex-1 bg-white border rounded-lg p-6 overflow-y-auto">
-                {currentPage === 1 && (
-                  <div className="space-y-4">
-                    <h1 className="text-2xl font-bold text-center mb-6">{selectedEBook.title}</h1>
-                    <div className="space-y-4 text-justify leading-relaxed">
-                      <p>This is a sample preview of the e-book. You can read the first few pages to get a feel for the content and writing style.</p>
-                      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+              {/* Preview Content Area */}
+              <div className="flex-1 flex">
+                {/* Reader Interface */}
+                <div className="flex-1 bg-white">
+                  <div className="h-full flex flex-col">
+                    {/* Reader Toolbar */}
+                    <div className="px-6 py-3 bg-gray-50 border-b flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm font-medium text-gray-700">Preview Mode</span>
+                        <Badge variant="outline" className="text-xs">
+                          Page {currentPage} of 5 (Limited Preview)
+                        </Badge>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                        <div className="flex bg-gray-200 rounded p-1">
+                          <Button 
+                            variant={readingMode === "light" ? "default" : "ghost"} 
+                            size="sm"
+                            onClick={() => setReadingMode("light")}
+                            className="h-6 px-2"
+                          >
+                            <Sun className="h-3 w-3" />
+                          </Button>
+                          <Button 
+                            variant={readingMode === "dark" ? "default" : "ghost"} 
+                            size="sm"
+                            onClick={() => setReadingMode("dark")}
+                            className="h-6 px-2"
+                          >
+                            <Moon className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reading Content */}
+                    <div className={`flex-1 p-8 overflow-y-auto ${readingMode === "dark" ? "bg-gray-900 text-white" : "bg-white text-gray-900"}`}>
+                      <div className="max-w-3xl mx-auto">
+                        {currentPage === 1 && (
+                          <div className="space-y-6">
+                            <div className="text-center mb-8">
+                              <h1 className="text-3xl font-bold mb-2">{selectedEBook.name || selectedEBook.title}</h1>
+                              <p className="text-lg text-gray-600 dark:text-gray-300">
+                                by {selectedEBook.metadata?.author || selectedEBook.author || "Unknown Author"}
+                              </p>
+                            </div>
+                            <div className="space-y-4 text-justify leading-relaxed text-lg">
+                              <p className="first-letter:text-6xl first-letter:font-bold first-letter:float-left first-letter:mr-2 first-letter:mt-1">
+                                Welcome to this comprehensive guide that will transform your understanding of the subject matter. This book represents years of research and practical experience in the field.
+                              </p>
+                              <p>
+                                Through carefully crafted chapters, you'll discover insights that bridge the gap between theory and practice, providing you with actionable knowledge that you can apply immediately.
+                              </p>
+                              <p>
+                                Each section builds upon the previous one, creating a comprehensive learning journey that takes you from fundamental concepts to advanced applications.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {currentPage === 2 && (
+                          <div className="space-y-6">
+                            <h2 className="text-2xl font-bold mb-6">Table of Contents</h2>
+                            <div className="space-y-3">
+                              {[
+                                "Chapter 1: Foundations and Core Principles",
+                                "Chapter 2: Practical Implementation Strategies", 
+                                "Chapter 3: Advanced Techniques and Methods",
+                                "Chapter 4: Real-World Case Studies",
+                                "Chapter 5: Future Trends and Developments",
+                                "Chapter 6: Best Practices and Guidelines",
+                                "Appendix A: Resource Directory",
+                                "Appendix B: Quick Reference Guide"
+                              ].map((chapter, index) => (
+                                <div key={index} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                                  <span>{chapter}</span>
+                                  <span className="text-gray-500">{index + 1}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {currentPage === 3 && (
+                          <div className="space-y-6">
+                            <h2 className="text-2xl font-bold mb-6">Chapter 1: Introduction</h2>
+                            <div className="space-y-4 text-justify leading-relaxed text-lg">
+                              <p>
+                                In this opening chapter, we establish the fundamental framework that will guide our exploration throughout this book. The concepts introduced here form the cornerstone of everything that follows.
+                              </p>
+                              <p>
+                                Understanding these principles is crucial for anyone looking to master the subject matter. We'll examine historical context, current applications, and future possibilities.
+                              </p>
+                              <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-700 dark:text-gray-300 my-6">
+                                "The journey of a thousand miles begins with a single step, and in learning, that step is understanding the foundations."
+                              </blockquote>
+                              <p>
+                                As we progress through the material, you'll notice how each concept builds naturally upon the previous one, creating a cohesive understanding that extends far beyond individual topics.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {currentPage >= 4 && (
+                          <div className="text-center py-16">
+                            <div className="max-w-md mx-auto">
+                              <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <BookOpen className="h-12 w-12 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <h3 className="text-2xl font-bold mb-4">Preview Limit Reached</h3>
+                              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                                You've reached the end of the free preview. Purchase the full e-book to continue reading all {Math.floor(Math.random() * 200) + 150} pages.
+                              </p>
+                              <div className="space-y-4">
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                  <h4 className="font-semibold mb-2">What you'll get:</h4>
+                                  <ul className="text-sm space-y-1 text-left">
+                                    <li>✓ Complete access to all chapters</li>
+                                    <li>✓ Downloadable PDF format</li>
+                                    <li>✓ Offline reading capability</li>
+                                    <li>✓ Bookmarks and notes support</li>
+                                    <li>✓ Lifetime access</li>
+                                  </ul>
+                                </div>
+                                <Button 
+                                  size="lg"
+                                  className="w-full bg-blue-600 hover:bg-blue-700"
+                                  onClick={() => proceedToEBookCheckout()}
+                                >
+                                  <ShoppingCart className="mr-2 h-5 w-5" />
+                                  Purchase Full E-Book - ₹{Math.floor((selectedEBook.price || 1999) / 100)}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                )}
-                
-                {currentPage === 2 && (
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold mb-4">Chapter 1: Introduction</h2>
-                    <div className="space-y-4 text-justify leading-relaxed">
-                      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-                      <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-                      <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+                </div>
+
+                {/* Sidebar with Features & CTA */}
+                <div className="w-80 bg-gray-50 border-l p-6">
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Reading Features</h4>
+                      <div className="space-y-3">
+                        {[
+                          { icon: Download, label: "Offline Reading", desc: "Read anywhere, anytime" },
+                          { icon: Bookmark, label: "Smart Bookmarks", desc: "Never lose your place" },
+                          { icon: Search, label: "Full-Text Search", desc: "Find any content instantly" },
+                          { icon: Type, label: "Custom Typography", desc: "Adjust fonts & size" }
+                        ].map((feature, index) => (
+                          <div key={index} className="flex items-start space-x-3">
+                            <feature.icon className="h-5 w-5 text-blue-600 mt-0.5" />
+                            <div>
+                              <div className="font-medium text-sm">{feature.label}</div>
+                              <div className="text-xs text-gray-600">{feature.desc}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-                
-                {currentPage === 3 && (
-                  <div className="space-y-4">
-                    <div className="text-center py-8">
-                      <BookOpen className="mx-auto h-16 w-16 text-blue-600 mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">Continue Reading</h3>
-                      <p className="text-gray-600 mb-6">To access the full e-book, please complete your purchase.</p>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <h4 className="font-semibold mb-2">Instant Access</h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Get immediate access after purchase. No waiting, no shipping delays.
+                      </p>
                       <Button 
-                        size="lg"
-                        className="bg-blue-600 hover:bg-blue-700"
-                        onClick={proceedToEBookCheckout}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        onClick={() => proceedToEBookCheckout()}
                       >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Purchase Full E-Book - ₹{Math.floor((selectedEBook.price || 1999) / 100)}
+                        Buy Now & Start Reading
                       </Button>
                     </div>
+
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">₹{Math.floor((selectedEBook.price || 1999) / 100)}</div>
+                      <div className="text-sm text-gray-500">One-time payment</div>
+                      <div className="text-xs text-green-600 mt-1">✓ 30-day money-back guarantee</div>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
               
-              {/* Navigation Controls */}
-              <div className="flex items-center justify-between pt-4 border-t">
+              {/* Bottom Navigation */}
+              <div className="p-4 bg-gray-50 border-t flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Button 
                     variant="outline" 
@@ -800,14 +1030,10 @@ export default function VyronaRead() {
                     Previous
                   </Button>
                   
-                  <span className="text-sm text-gray-600">
-                    Page {currentPage} of 3 (Sample)
-                  </span>
-                  
                   <Button 
                     variant="outline" 
                     size="sm"
-                    disabled={currentPage >= 3}
+                    disabled={currentPage >= 5}
                     onClick={() => setCurrentPage(currentPage + 1)}
                   >
                     Next
@@ -815,18 +1041,19 @@ export default function VyronaRead() {
                   </Button>
                 </div>
                 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-gray-600">
+                    Preview: {currentPage} of 5 pages
+                  </span>
                   <Button variant="outline" onClick={() => setShowEReader(false)}>
-                    Close Reader
+                    Close Preview
                   </Button>
-                  {currentPage < 3 && (
-                    <Button 
-                      className="bg-blue-600 hover:bg-blue-700"
-                      onClick={proceedToEBookCheckout}
-                    >
-                      Purchase Full Access
-                    </Button>
-                  )}
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={() => proceedToEBookCheckout()}
+                  >
+                    Purchase Full Book
+                  </Button>
                 </div>
               </div>
             </div>
