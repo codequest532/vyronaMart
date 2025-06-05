@@ -28,7 +28,9 @@ import {
   Edit,
   Trash2,
   Eye,
-  Upload
+  Upload,
+  Download,
+  CheckCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
