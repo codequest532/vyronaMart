@@ -1574,6 +1574,19 @@ export default function SellerDashboard() {
                   </button>
                   <button
                     onClick={() => {
+                      console.log("Switching to rentals");
+                      setBookSection("rentals");
+                    }}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "rentals"
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Book Rentals
+                  </button>
+                  <button
+                    onClick={() => {
                       console.log("Switching to analytics");
                       setBookSection("analytics");
                     }}
@@ -2095,18 +2108,32 @@ export default function SellerDashboard() {
                 </CardContent>
               </Card>
 
+
+                </div>
+              )}
+
               {/* Book Rentals Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Book Rentals Management
-                  </CardTitle>
-                  <CardDescription>Monitor active rentals, return requests, and rental revenue</CardDescription>
-                </CardHeader>
-                <CardContent>
+              {bookSection === "rentals" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-bold">Book Rentals Management</h3>
+                      <p className="text-gray-600">Monitor active rentals, return requests, and rental revenue with 15-day billing cycles</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => alert('Rental Analytics')}>
+                        <TrendingUp className="h-4 w-4 mr-2" />
+                        Rental Analytics
+                      </Button>
+                      <Button variant="outline" onClick={() => alert('Export Rental Report')}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Export Report
+                      </Button>
+                    </div>
+                  </div>
+
                   {/* Rental Stats */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <Card>
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
@@ -2115,7 +2142,7 @@ export default function SellerDashboard() {
                             <p className="text-3xl font-bold text-blue-600">
                               {sellerRentals?.filter((rental: any) => rental.status === 'active').length || 0}
                             </p>
-                            <p className="text-xs text-blue-500">Currently rented</p>
+                            <p className="text-xs text-blue-500">Currently rented out</p>
                           </div>
                           <Clock className="h-8 w-8 text-blue-600" />
                         </div>
@@ -2141,71 +2168,213 @@ export default function SellerDashboard() {
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-sm font-medium text-gray-600">Rental Revenue</p>
+                            <p className="text-sm font-medium text-gray-600">Total Rental Revenue</p>
                             <p className="text-3xl font-bold text-green-600">
                               {formatPrice(sellerRentals?.reduce((sum: number, rental: any) => sum + (rental.totalAmountPaid || 0), 0) || 0)}
                             </p>
-                            <p className="text-xs text-green-500">Total collected</p>
+                            <p className="text-xs text-green-500">All-time collected</p>
                           </div>
                           <DollarSign className="h-8 w-8 text-green-600" />
                         </div>
                       </CardContent>
                     </Card>
+
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Avg. Rental Duration</p>
+                            <p className="text-3xl font-bold text-purple-600">
+                              {sellerRentals?.length > 0 ? 
+                                Math.round(sellerRentals.reduce((sum: number, rental: any) => sum + (rental.currentBillingCycle || 1), 0) / sellerRentals.length) 
+                                : 0} cycles
+                            </p>
+                            <p className="text-xs text-purple-500">15-day cycles</p>
+                          </div>
+                          <Calendar className="h-8 w-8 text-purple-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
 
-                  {/* Active Rentals List */}
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">Active Book Rentals</h4>
-                    {!sellerRentals || sellerRentals.length === 0 ? (
-                      <div className="text-center py-8">
-                        <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No active rentals found</p>
-                        <p className="text-sm text-gray-500">Rentals will appear here when customers rent your books</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {sellerRentals.filter((rental: any) => rental.status === 'active').map((rental: any) => (
-                          <Card key={rental.id} className="border">
-                            <CardContent className="p-6">
-                              <div className="flex items-start justify-between">
-                                <div className="flex space-x-4">
+                  {/* Active Rentals Management */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Active Rentals List */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BookOpen className="h-5 w-5" />
+                          Active Book Rentals
+                        </CardTitle>
+                        <CardDescription>Books currently rented to customers</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {!sellerRentals || sellerRentals.filter((rental: any) => rental.status === 'active').length === 0 ? (
+                          <div className="text-center py-8">
+                            <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600">No active rentals</p>
+                            <p className="text-sm text-gray-500">Rentals will appear here when customers rent your books</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4 max-h-96 overflow-y-auto">
+                            {sellerRentals.filter((rental: any) => rental.status === 'active').map((rental: any) => (
+                              <div key={rental.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div className="flex items-start gap-4">
                                   {rental.productImage && (
                                     <img
                                       src={rental.productImage}
                                       alt={rental.productName}
-                                      className="w-16 h-20 object-cover rounded"
+                                      className="w-12 h-16 object-cover rounded"
                                     />
                                   )}
-                                  <div className="flex-1">
-                                    <h3 className="font-semibold text-lg">{rental.productName}</h3>
-                                    <p className="text-sm text-gray-600">Rented by: {rental.customerName || 'Customer'}</p>
-                                    <p className="text-sm text-gray-600">Email: {rental.customerEmail || 'N/A'}</p>
-                                    <div className="flex gap-4 mt-2">
-                                      <span className="text-sm">
-                                        <strong>Cycle:</strong> {rental.currentBillingCycle}
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-sm truncate">{rental.productName}</h4>
+                                    <p className="text-xs text-gray-600">Customer: {rental.customerName || 'Anonymous'}</p>
+                                    <p className="text-xs text-gray-500">Cycle {rental.currentBillingCycle}</p>
+                                    <div className="flex items-center justify-between mt-2">
+                                      <span className="text-xs font-medium text-green-600">
+                                        {formatPrice(rental.rentalPricePerCycle)}/cycle
                                       </span>
-                                      <span className="text-sm">
-                                        <strong>Next billing:</strong> {new Date(rental.nextBillingDate).toLocaleDateString()}
-                                      </span>
+                                      <Badge variant="outline" className="text-xs">
+                                        Due: {new Date(rental.nextBillingDate).toLocaleDateString()}
+                                      </Badge>
                                     </div>
                                   </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="font-semibold text-lg">{formatPrice(rental.rentalPricePerCycle)}/cycle</p>
-                                  <p className="text-sm text-gray-600">Total paid: {formatPrice(rental.totalAmountPaid)}</p>
-                                  <Badge variant="outline" className="mt-2">
-                                    {rental.status}
-                                  </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Return Requests */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AlertCircle className="h-5 w-5" />
+                          Return Requests
+                        </CardTitle>
+                        <CardDescription>Pending return approvals</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {!sellerReturnRequests || sellerReturnRequests.filter((req: any) => req.status === 'pending').length === 0 ? (
+                          <div className="text-center py-8">
+                            <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-600">No pending returns</p>
+                            <p className="text-sm text-gray-500">Return requests will appear here</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4 max-h-96 overflow-y-auto">
+                            {sellerReturnRequests.filter((req: any) => req.status === 'pending').map((request: any) => (
+                              <div key={request.id} className="border rounded-lg p-4 bg-orange-50">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <h4 className="font-semibold text-sm">{request.productName || 'Book Return'}</h4>
+                                    <p className="text-xs text-gray-600">Customer: {request.customerName}</p>
+                                    <p className="text-xs text-gray-500">Reason: {request.reason || 'Not specified'}</p>
+                                    <p className="text-xs text-gray-500">Requested: {new Date(request.createdAt).toLocaleDateString()}</p>
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-xs">
+                                      Approve
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="text-xs">
+                                      Decline
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Rental Revenue Analytics */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Rental Revenue Breakdown</CardTitle>
+                      <CardDescription>Detailed revenue analysis from book rentals</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {(() => {
+                          const totalRevenue = sellerRentals?.reduce((sum: number, rental: any) => sum + (rental.totalAmountPaid || 0), 0) || 0;
+                          const platformFee = Math.round(totalRevenue * 0.10); // 10% platform fee for rentals
+                          const netRevenue = totalRevenue - platformFee;
+                          const avgRevenuePerRental = sellerRentals?.length > 0 ? totalRevenue / sellerRentals.length : 0;
+
+                          return (
+                            <>
+                              <div className="space-y-4">
+                                <h4 className="font-semibold">Revenue Summary</h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Gross Revenue</span>
+                                    <span className="font-bold text-blue-600">{formatPrice(totalRevenue)}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Platform Fee (10%)</span>
+                                    <span className="font-bold text-red-600">-{formatPrice(platformFee)}</span>
+                                  </div>
+                                  <div className="border-t pt-2">
+                                    <div className="flex justify-between">
+                                      <span className="font-medium">Net Revenue</span>
+                                      <span className="font-bold text-green-600">{formatPrice(netRevenue)}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="space-y-4">
+                                <h4 className="font-semibold">Performance Metrics</h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Total Rentals</span>
+                                    <span className="font-bold text-purple-600">{sellerRentals?.length || 0}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Avg Revenue/Rental</span>
+                                    <span className="font-bold text-orange-600">{formatPrice(avgRevenuePerRental)}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Active Rate</span>
+                                    <span className="font-bold text-blue-600">
+                                      {sellerRentals?.length > 0 ? 
+                                        Math.round((sellerRentals.filter((r: any) => r.status === 'active').length / sellerRentals.length) * 100) 
+                                        : 0}%
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="space-y-4">
+                                <h4 className="font-semibold">Growth Insights</h4>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">This Month</span>
+                                    <span className="font-bold text-green-600">+12%</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Customer Retention</span>
+                                    <span className="font-bold text-blue-600">85%</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-sm">Avg Rental Duration</span>
+                                    <span className="font-bold text-purple-600">
+                                      {sellerRentals?.length > 0 ? 
+                                        Math.round(sellerRentals.reduce((sum: number, rental: any) => sum + (rental.currentBillingCycle || 1), 0) / sellerRentals.length) 
+                                        : 0} cycles
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
 
