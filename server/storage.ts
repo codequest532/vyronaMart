@@ -2056,6 +2056,33 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getPhysicalBooksBySeller(sellerId: number): Promise<any[]> {
+    try {
+      const books = await db.select({
+        id: physicalBooks.id,
+        libraryId: physicalBooks.libraryId,
+        title: physicalBooks.title,
+        author: physicalBooks.author,
+        isbn: physicalBooks.isbn,
+        category: physicalBooks.category,
+        copies: physicalBooks.copies,
+        available: physicalBooks.available,
+        publisher: physicalBooks.publisher,
+        publicationYear: physicalBooks.publicationYear,
+        language: physicalBooks.language,
+        createdAt: physicalBooks.createdAt
+      })
+      .from(physicalBooks)
+      .innerJoin(libraryIntegrationRequests, eq(physicalBooks.libraryId, libraryIntegrationRequests.id))
+      .where(eq(libraryIntegrationRequests.sellerId, sellerId));
+      
+      return books;
+    } catch (error) {
+      console.error("Error fetching books by seller:", error);
+      return [];
+    }
+  }
+
   async getAllLibraryRequests(): Promise<any[]> {
     const requests = await db.select().from(libraryIntegrationRequests);
     return requests;

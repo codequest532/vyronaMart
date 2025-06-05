@@ -406,7 +406,11 @@ export default function SellerDashboard() {
   });
 
   const { data: rawSellerBooks } = useQuery({
-    queryKey: ["/api/vyronaread/seller-books"],
+    queryKey: ["/api/vyronaread/seller-books", (currentUser as any)?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/vyronaread/seller-books?sellerId=${(currentUser as any)?.id}`);
+      return response.json();
+    },
     enabled: !!(currentUser as any)?.id,
   });
 

@@ -25,8 +25,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/vyronaread/seller-books", async (req, res) => {
     try {
-      const physicalBooks = await storage.getAllPhysicalBooks();
-      res.json(physicalBooks);
+      const sellerId = req.query.sellerId;
+      if (sellerId) {
+        const sellerBooks = await storage.getPhysicalBooksBySeller(parseInt(sellerId as string));
+        res.json(sellerBooks);
+      } else {
+        const physicalBooks = await storage.getAllPhysicalBooks();
+        res.json(physicalBooks);
+      }
     } catch (error) {
       console.error("Error fetching seller books:", error);
       res.status(500).json({ message: "Failed to fetch seller books" });
