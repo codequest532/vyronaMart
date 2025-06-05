@@ -1163,7 +1163,7 @@ export default function SellerDashboard() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold">Group Buy Products</h3>
-                      <p className="text-sm text-gray-600">Minimum 4 pieces required for single product group buys</p>
+                      <p className="text-sm text-gray-600">Create group buys: Single product (4+ pieces) or Multi-product (4+ pieces across different products)</p>
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
@@ -1174,28 +1174,32 @@ export default function SellerDashboard() {
                       </DialogTrigger>
                       <DialogContent className="max-w-md">
                         <DialogHeader>
-                          <DialogTitle>Create Group Buy Product</DialogTitle>
+                          <DialogTitle>Create Group Buy Campaign</DialogTitle>
                           <DialogDescription>
-                            Set up a product for group buying with minimum quantity and discount pricing
+                            Choose between single product or multi-product group buy campaigns
                           </DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4">
                           <div>
-                            <Label>Quick Create Sample Group Buy</Label>
-                            <p className="text-sm text-gray-600 mb-3">Create a sample group buy product to test VyronaSocial functionality</p>
-                            <Button 
-                              onClick={() => {
-                                // Create sample group buy product
-                                const sampleData = {
-                                  productId: 1,
-                                  sellerId: 4,
-                                  minQuantity: 4,
-                                  originalPrice: 2000,
-                                  groupBuyPrice: 1500,
-                                  discountPercentage: 25,
-                                  isApproved: true,
-                                  isActive: true
-                                };
+                            <Label className="text-base font-semibold">Group Buy Type</Label>
+                            <div className="space-y-3 mt-2">
+                              <div className="border rounded-lg p-4 hover:bg-gray-50">
+                                <h4 className="font-medium text-sm">Single Product Group Buy</h4>
+                                <p className="text-xs text-gray-600 mb-3">4+ pieces of the same product from your store</p>
+                                <Button 
+                                  size="sm"
+                                  onClick={() => {
+                                    const sampleData = {
+                                      type: "single_product",
+                                      productId: 6, // Premium Wireless Headphones
+                                      sellerId: 3,
+                                      minQuantity: 4,
+                                      originalPrice: 2999,
+                                      groupBuyPrice: 2399,
+                                      discountPercentage: 20,
+                                      isApproved: true,
+                                      isActive: true
+                                    };
                                 
                                 fetch('/api/group-buy/products', {
                                   method: 'POST',
@@ -1207,8 +1211,41 @@ export default function SellerDashboard() {
                               }}
                               className="bg-red-500 hover:bg-red-600 w-full"
                             >
-                              Create Sample Group Buy Product
+                              Create Single Product Group Buy
                             </Button>
+                              </div>
+                              
+                              <div className="border rounded-lg p-4 hover:bg-gray-50">
+                                <h4 className="font-medium text-sm">Multi-Product Group Buy</h4>
+                                <p className="text-xs text-gray-600 mb-3">4+ pieces across different products (same or different sellers)</p>
+                                <Button 
+                                  size="sm"
+                                  onClick={() => {
+                                    const campaignData = {
+                                      type: "multi_product",
+                                      name: "Electronics Bundle Deal",
+                                      description: "Mix and match electronics for bulk savings",
+                                      minTotalQuantity: 4,
+                                      discountPercentage: 15,
+                                      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                                      isActive: true,
+                                      allowMultipleSellers: true
+                                    };
+                                
+                                    fetch('/api/group-buy/campaigns', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify(campaignData)
+                                    }).then(() => {
+                                      alert('Multi-product group buy campaign created! Users can now combine different products to reach the 4+ minimum.');
+                                    });
+                                  }}
+                                  className="bg-blue-500 hover:bg-blue-600 w-full"
+                                >
+                                  Create Multi-Product Campaign
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </DialogContent>
