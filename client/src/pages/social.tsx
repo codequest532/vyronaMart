@@ -688,76 +688,72 @@ export default function VyronaSocial() {
             </Card>
           </div>
 
-          {/* Middle Column - Shared Cart */}
-          <Card>
+          {/* Middle Column - Group Cart with Checkout */}
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5" />
-                Shared Cart
+                Group Cart
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-96">
-                <div className="space-y-4">
-                  {(sharedCart as any[])?.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                      <p>No items in shared cart yet.</p>
-                      <p className="text-sm">Add products to start shopping together!</p>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Cart Items */}
+                <div className="lg:col-span-2">
+                  <ScrollArea className="h-96">
+                    <div className="space-y-4">
+                      {(sharedCart as any[])?.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                          <p>No items in group cart yet.</p>
+                          <p className="text-sm">Add products to start shopping together!</p>
+                        </div>
+                      ) : (
+                        (sharedCart as any[])?.map((item: any) => (
+                          <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <img 
+                              src={item.imageUrl || "/api/placeholder/60/60"} 
+                              alt={item.name}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm">{item.name}</h4>
+                              <p className="text-xs text-gray-500">Added by {item.addedBy}</p>
+                              <p className="text-sm font-semibold">₹{item.price}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">Qty: {item.quantity}</span>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                  ) : (
-                    (sharedCart as any[])?.map((item: any) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <img 
-                          src={item.imageUrl || "/api/placeholder/60/60"} 
-                          alt={item.name}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">{item.name}</h4>
-                          <p className="text-xs text-gray-500">Added by {item.addedBy}</p>
-                          <p className="text-sm font-semibold">${item.price}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">Qty: {item.quantity}</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
+                  </ScrollArea>
                 </div>
-              </ScrollArea>
-            </CardContent>
-          </Card>
 
-          {/* Right Column - Final Cart */}
-          <div className="space-y-6">
-            {/* Final Cart View */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5" />
-                  Final Cart
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-sm">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span>₹240.00</span>
-                    </div>
-                    <div className="flex justify-between text-green-600">
-                      <span>Group Discount:</span>
-                      <span>-₹36.00</span>
-                    </div>
-                    <Separator className="my-2" />
-                    <div className="flex justify-between font-semibold">
-                      <span>Total:</span>
-                      <span>₹204.00</span>
+                {/* Checkout Summary */}
+                <div className="space-y-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-3">Order Summary</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>₹240.00</span>
+                      </div>
+                      <div className="flex justify-between text-green-600">
+                        <span>Group Discount:</span>
+                        <span>-₹36.00</span>
+                      </div>
+                      <Separator className="my-2" />
+                      <div className="flex justify-between font-semibold">
+                        <span>Total:</span>
+                        <span>₹204.00</span>
+                      </div>
                     </div>
                   </div>
                   
                   <Button className="w-full">
+                    <CheckCircle className="w-4 h-4 mr-2" />
                     Proceed to Group Checkout
                   </Button>
                   
@@ -765,9 +761,9 @@ export default function VyronaSocial() {
                     Everyone will pay their share individually
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
