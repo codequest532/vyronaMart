@@ -1207,8 +1207,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Validate minimum quantity requirements
-      if (productData.minQuantity < 10) {
-        return res.status(400).json({ message: "Minimum quantity must be at least 10 pieces" });
+      if (productData.minQuantity < 4) {
+        return res.status(400).json({ message: "Minimum quantity must be at least 4 pieces" });
       }
 
       const groupBuyProduct = await storage.createGroupBuyProduct(productData);
