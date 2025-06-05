@@ -37,6 +37,10 @@ export const products = pgTable("products", {
   imageUrl: text("image_url"),
   storeId: integer("store_id"),
   metadata: jsonb("metadata"), // for flexible data like book authors, rental periods, etc.
+  enableIndividualBuy: boolean("enable_individual_buy").default(true),
+  enableGroupBuy: boolean("enable_group_buy").default(false),
+  groupBuyMinQuantity: integer("group_buy_min_quantity").default(4),
+  groupBuyDiscount: integer("group_buy_discount").default(0), // percentage discount for group buy
 });
 
 export const stores = pgTable("stores", {
