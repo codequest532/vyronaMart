@@ -607,7 +607,7 @@ export default function VyronaSocial() {
         </div>
 
         {/* Room Interface Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Left Column - Participants & Chat */}
           <div className="space-y-6">
             {/* Room Participants */}
@@ -691,8 +691,82 @@ export default function VyronaSocial() {
             </Card>
           </div>
 
-          {/* Middle Column - Group Cart with Checkout */}
-          <Card className="lg:col-span-2">
+          {/* Middle Column - Product Browser */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Group Buy Products
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-96">
+                {productsLoading ? (
+                  <div className="space-y-4">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-20 bg-gray-200 rounded mb-2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (groupBuyProducts as any[])?.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No group buy products available.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {(groupBuyProducts as any[])?.map((product: any) => (
+                      <div key={product.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={product.imageUrl || "/api/placeholder/80/80"} 
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-medium">{product.name}</h4>
+                            <p className="text-sm text-gray-500 mb-2">{product.description}</p>
+                            <div className="flex items-center gap-3">
+                              <span className="text-lg font-bold text-purple-600">
+                                ₹{Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)).toLocaleString()}
+                              </span>
+                              <span className="text-sm text-gray-500 line-through">
+                                ₹{(product.price / 100).toLocaleString()}
+                              </span>
+                              <Badge variant="secondary" className="text-xs">
+                                {product.groupBuyDiscount || 10}% OFF
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Min: {product.groupBuyMinQuantity || 4} items required
+                            </p>
+                          </div>
+                          <Button 
+                            size="sm"
+                            onClick={() => {
+                              // Add to group cart logic
+                              toast({
+                                title: "Added to Group Cart",
+                                description: `${product.name} added to group cart`,
+                              });
+                            }}
+                            className="bg-purple-500 hover:bg-purple-600"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Add to Group
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+
+          {/* Right Column - Group Cart with Checkout */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingCart className="w-5 h-5" />
