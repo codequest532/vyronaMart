@@ -493,6 +493,8 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+
+
 // VyronaInstaShop Insert Schemas
 export const insertInstagramStoreSchema = createInsertSchema(instagramStores).omit({
   id: true,
@@ -552,18 +554,7 @@ export const insertBookLoanSchema = createInsertSchema(bookLoans, {
   loanDate: true,
 });
 
-export const insertEBookSchema = createInsertSchema(eBooks, {
-  sellerId: z.number(),
-  title: z.string().min(1),
-  author: z.string().min(1),
-  format: z.string().min(1),
-  fileUrl: z.string().min(1),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  downloads: true,
-});
+
 
 // Group Buy Insert Schemas
 export const insertGroupBuyProductSchema = createInsertSchema(groupBuyProducts, {
