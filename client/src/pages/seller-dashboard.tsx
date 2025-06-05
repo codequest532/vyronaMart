@@ -242,9 +242,9 @@ export default function SellerDashboard() {
         return;
       }
 
-      // Parse CSV - expecting columns: Book Name, Author, ISBN Number, Edition Number, Year of Publish
+      // Parse CSV - expecting columns: Book Name, Author, ISBN Number, Edition Number, Year of Publish, Image URL
       const headers = lines[0].split(',').map(h => h.trim());
-      const expectedHeaders = ["Book Name", "Author", "ISBN Number", "Edition Number", "Year of Publish"];
+      const expectedHeaders = ["Book Name", "Author", "ISBN Number", "Edition Number", "Year of Publish", "Image URL"];
       
       const books = [];
       for (let i = 1; i < lines.length; i++) {
@@ -255,7 +255,8 @@ export default function SellerDashboard() {
             author: values[1] || "",
             isbn: values[2] || "",
             edition: values[3] || "",
-            yearOfPublish: values[4] || ""
+            yearOfPublish: values[4] || "",
+            imageUrl: values[5] || "" // Google Drive image URL
           });
         }
       }
@@ -2828,7 +2829,7 @@ export default function SellerDashboard() {
                 <Label htmlFor="csvUpload" className="text-base font-medium">Bulk Book Upload (CSV)</Label>
               </div>
               <p className="text-sm text-gray-600">
-                Upload a CSV file with your book collection. Required columns: Book Name, Author, ISBN Number, Edition Number, Year of Publish
+                Upload a CSV file with your book collection. Required columns: Book Name, Author, ISBN Number, Edition Number, Year of Publish, Image URL (Google Drive)
               </p>
               <div className="space-y-2">
                 <Input
@@ -2838,8 +2839,14 @@ export default function SellerDashboard() {
                   onChange={handleCsvUpload}
                   className="cursor-pointer"
                 />
-                <div className="text-xs text-gray-500">
-                  CSV format: Book Name, Author, ISBN Number, Edition Number, Year of Publish
+                <div className="text-xs text-gray-500 space-y-1">
+                  <div>CSV format: Book Name, Author, ISBN Number, Edition Number, Year of Publish, Image URL</div>
+                  <div className="text-blue-600 font-medium">
+                    📸 Image URL: Provide Google Drive shareable links for book cover images
+                  </div>
+                  <div className="text-amber-600">
+                    💡 Tip: Make sure Google Drive links are set to "Anyone with the link can view"
+                  </div>
                 </div>
               </div>
               
@@ -2853,8 +2860,11 @@ export default function SellerDashboard() {
                   </div>
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {csvBooksList.slice(0, 5).map((book, index) => (
-                      <div key={index} className="text-xs text-green-600">
-                        • {book.bookName} by {book.author} {book.isbn && `(ISBN: ${book.isbn})`}
+                      <div key={index} className="text-xs text-green-600 flex items-center gap-2">
+                        <span>• {book.bookName} by {book.author} {book.isbn && `(ISBN: ${book.isbn})`}</span>
+                        {book.imageUrl && (
+                          <span className="bg-blue-100 text-blue-700 px-1 rounded text-xs">📸 Image</span>
+                        )}
                       </div>
                     ))}
                     {csvBooksList.length > 5 && (
