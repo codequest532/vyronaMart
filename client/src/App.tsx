@@ -8,7 +8,7 @@ import Landing from "@/pages/landing";
 import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
-import VyronaGroupBuy from "@/pages/vyronasocial";
+
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";
 import VyronaRead from "@/pages/vyronaread";
@@ -65,7 +65,6 @@ function Router() {
         {(params) => <StoreDetails storeId={params.storeId} />}
       </Route>
       <Route path="/social" component={VyronaSocial} />
-      <Route path="/vyronasocial" component={VyronaGroupBuy} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
       <Route path="/vyronaread" component={VyronaRead} />
