@@ -92,7 +92,7 @@ export default function VyronaSocial() {
   });
 
   const { data: groupBuyProducts, isLoading: productsLoading } = useQuery({
-    queryKey: ["/api/group-buy/products"],
+    queryKey: ["/api/social/products"],
   });
 
   const { data: notifications } = useQuery({

@@ -630,6 +630,30 @@ export class DatabaseStorage implements IStorage {
     return product;
   }
 
+  async updateProductListing(id: number, listing: {
+    enableIndividualBuy?: boolean;
+    enableGroupBuy?: boolean;
+    groupBuyMinQuantity?: number;
+    groupBuyDiscount?: number;
+  }): Promise<Product> {
+    const [updatedProduct] = await db
+      .update(products)
+      .set({
+        enableIndividualBuy: listing.enableIndividualBuy,
+        enableGroupBuy: listing.enableGroupBuy,
+        groupBuyMinQuantity: listing.groupBuyMinQuantity,
+        groupBuyDiscount: listing.groupBuyDiscount
+      })
+      .where(eq(products.id, id))
+      .returning();
+    
+    if (!updatedProduct) {
+      throw new Error("Product not found");
+    }
+    
+    return updatedProduct;
+  }
+
   async getStores(type?: string): Promise<Store[]> {
     if (type) {
       return await db.select().from(stores).where(eq(stores.type, type));
