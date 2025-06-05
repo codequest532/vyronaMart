@@ -46,6 +46,12 @@ export interface IStorage {
   getProducts(module?: string, category?: string): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
   createProduct(product: InsertProduct): Promise<Product>;
+  updateProductListing(id: number, listing: {
+    enableIndividualBuy?: boolean;
+    enableGroupBuy?: boolean;
+    groupBuyMinQuantity?: number;
+    groupBuyDiscount?: number;
+  }): Promise<Product>;
 
   // Stores
   getStores(type?: string): Promise<Store[]>;

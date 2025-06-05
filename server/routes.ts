@@ -303,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Product routes
+  // Product routes - VyronaHub (individual buy only)
   app.get("/api/products", async (req, res) => {
     try {
       const { module, category } = req.query;
@@ -311,9 +311,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         module as string,
         category as string
       );
-      res.json(products);
+      // Filter products based on enableIndividualBuy flag for VyronaHub
+      const individualBuyProducts = products.filter(product => 
+        product.enableIndividualBuy !== false
+      );
+      res.json(individualBuyProducts);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Products for VyronaSocial (group buy only)
+  app.get("/api/social/products", async (req, res) => {
+    try {
+      const products = await storage.getProducts();
+      // Filter products based on enableGroupBuy flag for VyronaSocial
+      const groupBuyProducts = products.filter(product => 
+        product.enableGroupBuy === true
+      );
+      res.json(groupBuyProducts);
+    } catch (error) {
+      console.error("Error fetching social products:", error);
+      res.status(500).json({ error: "Failed to fetch social products" });
+    }
+  });
+
+  // Update product listing preferences
+  app.patch("/api/products/:id/listing", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const { enableIndividualBuy, enableGroupBuy, groupBuyMinQuantity, groupBuyDiscount } = req.body;
+      
+      const updatedProduct = await storage.updateProductListing(productId, {
+        enableIndividualBuy,
+        enableGroupBuy,
+        groupBuyMinQuantity,
+        groupBuyDiscount
+      });
+      
+      res.json(updatedProduct);
+    } catch (error) {
+      console.error("Error updating product listing:", error);
+      res.status(500).json({ error: "Failed to update product listing" });
     }
   });
 
