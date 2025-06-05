@@ -627,109 +627,163 @@ export default function VyronaSocial() {
           Back to VyronaSocial
         </Button>
 
-        {/* Room Header */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
-          <div>
-            <h2 className="text-2xl font-bold">{roomData?.name || "Shopping Room"}</h2>
-            <p className="text-gray-600">Category: {roomData?.category}</p>
-            <p className="text-sm text-gray-500">Room Code: {roomData?.roomCode}</p>
-          </div>
-          <div className="flex gap-2">
-            {/* Show Delete Room button only for admin/creator */}
-            {roomData?.creatorId === 1 && (
-              <Button 
-                variant="destructive" 
-                size="sm"
-                onClick={() => deleteRoomMutation.mutate(selectedRoomId!)}
-                disabled={deleteRoomMutation.isPending}
-              >
-                {deleteRoomMutation.isPending ? "Deleting..." : "Delete Room"}
-              </Button>
-            )}
+        {/* Modern Room Header */}
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 mb-6 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg">
+                <Users className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  {roomData?.name || "Shopping Room"}
+                </h1>
+                <div className="flex items-center gap-3 mt-2">
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                    Live Session
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    <Users className="w-3 h-3 mr-1" />
+                    {(roomMembers as any[])?.length || 1} members
+                  </Badge>
+                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                    {roomData?.category || "General"}
+                  </Badge>
+                  {roomData?.roomCode && (
+                    <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200 font-mono">
+                      Code: {roomData.roomCode}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
             
-            {/* Show Exit Room button for non-admin users */}
-            {roomData?.creatorId !== 1 ? (
-              <Button 
-                variant="outline" 
-                onClick={() => exitRoomMutation.mutate(selectedRoomId!)}
-                disabled={exitRoomMutation.isPending}
-              >
-                {exitRoomMutation.isPending ? "Exiting..." : "Exit Room"}
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" className="gap-2 hover:bg-purple-50 hover:border-purple-300">
+                <Share className="w-4 h-4" />
+                Invite Friends
               </Button>
-            ) : (
-              <Button variant="outline" onClick={handleLeaveRoom}>
-                Leave Room
-              </Button>
-            )}
+              
+              {roomData?.creatorId === 1 ? (
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={() => deleteRoomMutation.mutate(selectedRoomId!)}
+                  disabled={deleteRoomMutation.isPending}
+                  className="gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {deleteRoomMutation.isPending ? "Deleting..." : "Delete"}
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => exitRoomMutation.mutate(selectedRoomId!)}
+                  disabled={exitRoomMutation.isPending}
+                  className="gap-2"
+                >
+                  {exitRoomMutation.isPending ? "Exiting..." : "Exit Room"}
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Room Interface Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
 
-          {/* Middle Column - Product Browser */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
-                Group Buy Products
+          {/* Product Browser */}
+          <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300" />
+            
+            <CardHeader className="relative pb-4">
+              <CardTitle className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                  <Package className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Group Buy Products
+                </span>
               </CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Discover exclusive group discounts and vote with your team
+              </p>
             </CardHeader>
-            <CardContent>
+            
+            <CardContent className="relative">
               <ScrollArea className="h-96">
                 {productsLoading ? (
                   <div className="space-y-4">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="h-20 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl"></div>
                       </div>
                     ))}
                   </div>
                 ) : (groupBuyProducts as any[])?.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No group buy products available.</p>
+                  <div className="text-center py-12">
+                    <div className="p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl w-fit mx-auto mb-4">
+                      <Package className="w-12 h-12 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">No group buy products available</p>
+                    <p className="text-sm text-gray-500 mt-1">Check back later for exclusive deals</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {(groupBuyProducts as any[])?.map((product: any) => (
-                      <div key={product.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={product.imageUrl || "/api/placeholder/80/80"} 
-                            alt={product.name}
-                            className="w-16 h-16 object-cover rounded"
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-medium">{product.name}</h4>
-                            <p className="text-sm text-gray-500 mb-2">{product.description}</p>
-                            <div className="flex items-center gap-3">
-                              <span className="text-lg font-bold text-purple-600">
+                      <div key={product.id} className="group/item border border-gray-200 dark:border-gray-700 rounded-2xl p-4 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <img 
+                              src={product.imageUrl || "/api/placeholder/80/80"} 
+                              alt={product.name}
+                              className="w-20 h-20 object-cover rounded-xl shadow-md"
+                            />
+                            <div className="absolute -top-2 -right-2">
+                              <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs">
+                                {product.groupBuyDiscount || 10}% OFF
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-lg mb-1 truncate">{product.name}</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{product.description}</p>
+                            
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                                 ₹{Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)).toLocaleString()}
                               </span>
                               <span className="text-sm text-gray-500 line-through">
                                 ₹{(product.price / 100).toLocaleString()}
                               </span>
-                              <Badge variant="secondary" className="text-xs">
-                                {product.groupBuyDiscount || 10}% OFF
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                <Users className="w-3 h-3 mr-1" />
+                                Min {product.groupBuyMinQuantity || 4} orders
+                              </Badge>
+                              <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                                <TrendingUp className="w-3 h-3 mr-1" />
+                                Group Deal
                               </Badge>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                              Min: {product.groupBuyMinQuantity || 4} items required
-                            </p>
                           </div>
+                          
                           <Button 
                             size="sm"
                             onClick={() => {
-                              // Add to group cart logic
                               toast({
                                 title: "Added to Group Cart",
                                 description: `${product.name} added to group cart`,
                               });
                             }}
-                            className="bg-purple-500 hover:bg-purple-600"
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 group-hover/item:scale-105"
                           >
-                            <Plus className="w-4 h-4 mr-1" />
+                            <Plus className="w-4 h-4 mr-2" />
                             Add to Group
                           </Button>
                         </div>
