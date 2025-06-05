@@ -450,7 +450,12 @@ export default function VyronaRead() {
                     </div>
                     <h5 className="font-bold text-lg mb-2">{collection.title}</h5>
                     <p className="text-gray-600 text-sm mb-4">{collection.desc}</p>
-                    <Button variant="outline" size="sm" className="group-hover:bg-gray-50">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="group-hover:bg-gray-50"
+                      onClick={() => handleExploreCollection(collection.title.toLowerCase().replace(' ', '-'))}
+                    >
                       Explore Collection
                     </Button>
                   </CardContent>
@@ -459,10 +464,51 @@ export default function VyronaRead() {
             </div>
           </div>
 
+          {/* Active Filters Display */}
+          {(selectedCollection || selectedCategory !== "all" || filters.format !== "all" || filters.availability !== "all" || filters.rating > 0) && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <h5 className="font-semibold text-blue-900">Active Filters</h5>
+                <Button variant="ghost" size="sm" onClick={resetFilters} className="text-blue-600 hover:text-blue-800">
+                  Clear All
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedCollection && (
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                    Collection: {selectedCollection.replace('-', ' ')}
+                  </Badge>
+                )}
+                {selectedCategory !== "all" && (
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    Category: {selectedCategory}
+                  </Badge>
+                )}
+                {filters.format !== "all" && (
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                    Format: {filters.format}
+                  </Badge>
+                )}
+                {filters.availability !== "all" && (
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">
+                    Status: {filters.availability}
+                  </Badge>
+                )}
+                {filters.rating > 0 && (
+                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                    Rating: {filters.rating}+ stars
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* All Available Books */}
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h4 className="text-xl font-bold text-gray-900">🔍 All Books</h4>
+              <h4 className="text-xl font-bold text-gray-900">
+                🔍 {selectedCollection ? `${selectedCollection.replace('-', ' ')} Collection` : 'All Books'}
+              </h4>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Sort by:</span>
                 <Select defaultValue="popular">
@@ -481,7 +527,7 @@ export default function VyronaRead() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {combinedBooks.length > 0 ? combinedBooks.map((book, index) => (
+              {getFilteredBooks().map((book, index) => (
                 <Card key={index} className="group border-2 border-gray-200 hover:border-purple-300 transition-all hover:shadow-lg">
                   <div className="relative">
                     {/* Book Cover */}
@@ -575,18 +621,7 @@ export default function VyronaRead() {
                     </CardContent>
                   </div>
                 </Card>
-              )) : (
-                <div className="col-span-full">
-                  <Card className="border-2 border-dashed border-gray-300">
-                    <CardContent className="text-center py-16">
-                      <Search className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                      <h4 className="text-xl font-semibold text-gray-700 mb-2">No Books Found</h4>
-                      <p className="text-gray-500 mb-4">Try adjusting your search or category filter</p>
-                      <Button variant="outline">Clear Filters</Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
+              ))}
             </div>
           </div>
         </CardContent>
@@ -1356,6 +1391,84 @@ export default function VyronaRead() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Advanced Filter Dialog */}
+      <Dialog open={showAdvancedFilters} onOpenChange={setShowAdvancedFilters}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Advanced Filters</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Format</Label>
+              <Select value={filters.format} onValueChange={(value) => setFilters({...filters, format: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Formats</SelectItem>
+                  <SelectItem value="physical">Physical Books</SelectItem>
+                  <SelectItem value="digital">Digital Books</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <Label>Availability</Label>
+              <Select value={filters.availability} onValueChange={(value) => setFilters({...filters, availability: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Books</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="borrowed">Currently Borrowed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Language</Label>
+              <Select value={filters.language} onValueChange={(value) => setFilters({...filters, language: value})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Languages</SelectItem>
+                  <SelectItem value="english">English</SelectItem>
+                  <SelectItem value="hindi">Hindi</SelectItem>
+                  <SelectItem value="spanish">Spanish</SelectItem>
+                  <SelectItem value="french">French</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Minimum Rating</Label>
+              <Select value={filters.rating.toString()} onValueChange={(value) => setFilters({...filters, rating: parseInt(value)})}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Any Rating</SelectItem>
+                  <SelectItem value="3">3+ Stars</SelectItem>
+                  <SelectItem value="4">4+ Stars</SelectItem>
+                  <SelectItem value="5">5 Stars Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" onClick={() => setShowAdvancedFilters(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={() => setShowAdvancedFilters(false)} className="flex-1">
+                Apply Filters
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
