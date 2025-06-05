@@ -1340,6 +1340,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check user membership status
+  app.get("/api/user/membership-status", async (req, res) => {
+    try {
+      // For now, return default status - can be enhanced later with actual membership tracking
+      res.json({ 
+        hasActiveMembership: false, // Default to false to show membership payment flow
+        membershipType: null,
+        expiryDate: null
+      });
+    } catch (error) {
+      console.error("Error checking membership status:", error);
+      res.status(500).json({ message: "Failed to check membership status" });
+    }
+  });
+
   // Create library membership application
   app.post("/api/library/membership", async (req, res) => {
     try {

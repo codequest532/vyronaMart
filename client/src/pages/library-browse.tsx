@@ -151,7 +151,8 @@ export default function LibraryBrowse() {
   };
 
   const handleBorrowBook = (book: any) => {
-    borrowMutation.mutate(book.id);
+    // Navigate to checkout page for membership/borrowing process
+    setLocation(`/vyronaread-checkout?type=borrow&bookId=${book.id}&bookName=${encodeURIComponent(book.name)}&author=${encodeURIComponent(book.author || 'Unknown Author')}`);
   };
 
   return (

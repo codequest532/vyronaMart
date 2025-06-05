@@ -90,6 +90,28 @@ export default function VyronaReadCheckout() {
     }
   };
 
+  // Check if user has active membership
+  const [hasMembership, setHasMembership] = useState(false);
+  const [membershipLoading, setMembershipLoading] = useState(true);
+
+  useEffect(() => {
+    checkMembershipStatus();
+  }, []);
+
+  const checkMembershipStatus = async () => {
+    try {
+      const response = await fetch('/api/user/membership-status');
+      if (response.ok) {
+        const data = await response.json();
+        setHasMembership(data.hasActiveMembership);
+      }
+    } catch (error) {
+      console.error('Error checking membership:', error);
+    } finally {
+      setMembershipLoading(false);
+    }
+  };
+
   const calculatePrice = () => {
     if (!bookDetails) return 0;
     
@@ -98,12 +120,40 @@ export default function VyronaReadCheckout() {
         return bookDetails.price || bookDetails.buyPrice || 0;
       case 'rent':
         const baseDailyRate = (bookDetails.rentPrice || bookDetails.price * 0.1) / 100; // 10% of buy price per day
-        const days = parseInt(rentalDuration);
-        return Math.round(baseDailyRate * days * 100); // Convert back to paise
+        return Math.round(baseDailyRate * parseInt(rentalDuration));
       case 'borrow':
-        return 0; // Library borrowing is free
+        // If user doesn't have membership, charge membership fee
+        return hasMembership ? 0 : 2000; // ₹2000 annual membership
       default:
         return 0;
+    }
+  };
+
+  const getPriceLabel = () => {
+    switch (checkoutType) {
+      case 'buy':
+        return 'Purchase Price';
+      case 'rent':
+        return `Rental Fee (${rentalDuration} days)`;
+      case 'borrow':
+        return hasMembership ? 'Borrowing Fee' : 'Annual Membership Fee';
+      default:
+        return 'Total Price';
+    }
+  };
+
+  const getProcessButtonText = () => {
+    if (processing) return 'Processing...';
+    
+    switch (checkoutType) {
+      case 'buy':
+        return 'Complete Purchase';
+      case 'rent':
+        return 'Start Rental';
+      case 'borrow':
+        return hasMembership ? 'Place Borrow Order' : 'Pay Membership & Borrow';
+      default:
+        return 'Complete Order';
     }
   };
 
