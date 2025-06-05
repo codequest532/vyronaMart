@@ -85,19 +85,6 @@ function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; li
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h5 className="font-semibold text-gray-800">Featured Books</h5>
-        {libraryBooks.length > 6 && (
-          <Button 
-            size="sm" 
-            variant="ghost"
-            onClick={() => setLocation('/library-browse')}
-            className="text-green-600 hover:text-green-700"
-          >
-            View All ({libraryBooks.length})
-          </Button>
-        )}
-      </div>
       
       {displayBooks.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
