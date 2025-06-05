@@ -1269,8 +1269,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Validate minimum requirements
-      if (campaignData.targetQuantity < 5) {
-        return res.status(400).json({ message: "Minimum target quantity is 5 across any seller approved products" });
+      if (campaignData.targetQuantity < 4) {
+        return res.status(400).json({ message: "Minimum target quantity is 4 across any seller products" });
       }
 
       const campaign = await storage.createGroupBuyCampaign(campaignData);

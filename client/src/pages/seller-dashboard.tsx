@@ -1163,7 +1163,7 @@ export default function SellerDashboard() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-semibold">Group Buy Products</h3>
-                      <p className="text-sm text-gray-600">Minimum 10 pieces required for single product group buys</p>
+                      <p className="text-sm text-gray-600">Minimum 4 pieces required for single product group buys</p>
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
@@ -1189,7 +1189,7 @@ export default function SellerDashboard() {
                                 const sampleData = {
                                   productId: 1,
                                   sellerId: 4,
-                                  minQuantity: 10,
+                                  minQuantity: 4,
                                   originalPrice: 2000,
                                   groupBuyPrice: 1500,
                                   discountPercentage: 25,
@@ -1219,20 +1219,20 @@ export default function SellerDashboard() {
                   <div className="space-y-4">
                     <p className="text-sm text-gray-500">
                       Create group buy products to enable bulk purchasing with discounts. 
-                      Products require admin approval before appearing in VyronaHub.
+                      Products are automatically active and available in VyronaHub.
                     </p>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Instructions */}
-              <Card className="border-red-200 bg-red-50">
+              <Card className="border-green-200 bg-green-50">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold text-red-800 mb-2">Group Buy Requirements</h3>
-                  <ul className="text-sm text-red-700 space-y-1">
-                    <li>• Minimum 10 pieces for single product group buys</li>
-                    <li>• Alternative: 5+ pieces across multiple sellers</li>
-                    <li>• Products require admin approval</li>
+                  <h3 className="font-semibold text-green-800 mb-2">Group Buy Requirements</h3>
+                  <ul className="text-sm text-green-700 space-y-1">
+                    <li>• Minimum 4 pieces for single product group buys</li>
+                    <li>• Alternative: 4+ pieces across multiple sellers</li>
+                    <li>• Products are automatically approved and active</li>
                     <li>• Discounts enable cost sharing for bulk orders</li>
                   </ul>
                 </CardContent>

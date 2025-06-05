@@ -609,7 +609,7 @@ export const insertBookLoanSchema = createInsertSchema(bookLoans, {
 export const insertGroupBuyProductSchema = createInsertSchema(groupBuyProducts, {
   productId: z.number(),
   sellerId: z.number(),
-  minQuantity: z.number().min(10, "Minimum quantity must be at least 10"),
+  minQuantity: z.number().min(4, "Minimum quantity must be at least 4"),
   groupBuyPrice: z.number().min(1, "Group buy price must be positive"),
   originalPrice: z.number().min(1, "Original price must be positive"),
   discountPercentage: z.number().min(1).max(70, "Discount must be between 1-70%"),
@@ -624,9 +624,9 @@ export const insertGroupBuyProductSchema = createInsertSchema(groupBuyProducts, 
 export const insertGroupBuyCampaignSchema = createInsertSchema(groupBuyCampaigns, {
   title: z.string().min(1, "Title is required"),
   createdBy: z.number(),
-  minParticipants: z.number().min(5, "Minimum 5 participants required"),
+  minParticipants: z.number().min(4, "Minimum 4 participants required"),
   maxParticipants: z.number().max(100, "Maximum 100 participants allowed"),
-  targetQuantity: z.number().min(5, "Minimum target quantity is 5"),
+  targetQuantity: z.number().min(4, "Minimum target quantity is 4"),
   endDate: z.date(),
 }).omit({
   id: true,
