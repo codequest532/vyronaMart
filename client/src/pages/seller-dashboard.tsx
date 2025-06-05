@@ -400,32 +400,25 @@ export default function SellerDashboard() {
   });
 
   // VyronaRead Data Queries - Seller-specific access with proper typing
-  const { data: sellerEBooks = [] } = useQuery({
-    queryKey: ["/api/vyronaread/ebooks", (currentUser as any)?.id],
-    queryFn: async (): Promise<any[]> => {
-      const response = await fetch(`/api/vyronaread/ebooks?sellerId=${(currentUser as any)?.id}`);
-      return response.json();
-    },
+  const { data: rawSellerEBooks } = useQuery({
+    queryKey: ["/api/vyronaread/ebooks"],
     enabled: !!(currentUser as any)?.id,
   });
 
-  const { data: sellerBooks = [] } = useQuery({
-    queryKey: ["/api/vyronaread/seller-books", (currentUser as any)?.id],
-    queryFn: async (): Promise<any[]> => {
-      const response = await fetch(`/api/vyronaread/seller-books?sellerId=${(currentUser as any)?.id}`);
-      return response.json();
-    },
+  const { data: rawSellerBooks } = useQuery({
+    queryKey: ["/api/vyronaread/seller-books"],
     enabled: !!(currentUser as any)?.id,
   });
 
-  const { data: libraryBooks = [] } = useQuery({
-    queryKey: ["/api/vyronaread/library-books", (currentUser as any)?.id],
-    queryFn: async (): Promise<any[]> => {
-      const response = await fetch(`/api/vyronaread/library-books?sellerId=${(currentUser as any)?.id}`);
-      return response.json();
-    },
+  const { data: rawLibraryBooks } = useQuery({
+    queryKey: ["/api/vyronaread/library-books"],
     enabled: !!(currentUser as any)?.id,
   });
+
+  // Ensure arrays for filtering operations
+  const sellerEBooks = Array.isArray(rawSellerEBooks) ? rawSellerEBooks : [];
+  const sellerBooks = Array.isArray(rawSellerBooks) ? rawSellerBooks : [];
+  const libraryBooks = Array.isArray(rawLibraryBooks) ? rawLibraryBooks : [];
 
   const handleLogout = () => {
     setLocation("/login");

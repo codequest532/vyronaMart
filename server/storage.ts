@@ -2001,17 +2001,54 @@ export class DatabaseStorage implements IStorage {
 
   // VyronaRead Books - Required methods for authentic data
   async getAllEBooks(): Promise<any[]> {
-    const ebooks = await db.select().from(eBooks).where(eq(eBooks.isActive, true));
+    const ebooks = await db.select({
+      id: eBooks.id,
+      title: eBooks.title,
+      author: eBooks.author,
+      sellerId: eBooks.sellerId,
+      format: eBooks.format,
+      fileUrl: eBooks.fileUrl,
+      salePrice: eBooks.salePrice,
+      rentalPrice: eBooks.rentalPrice,
+      isActive: eBooks.isActive,
+      createdAt: eBooks.createdAt
+    }).from(eBooks).where(eq(eBooks.isActive, true));
     return ebooks;
   }
 
   async getAllPhysicalBooks(): Promise<any[]> {
-    const books = await db.select().from(physicalBooks);
+    const books = await db.select({
+      id: physicalBooks.id,
+      libraryId: physicalBooks.libraryId,
+      title: physicalBooks.title,
+      author: physicalBooks.author,
+      isbn: physicalBooks.isbn,
+      category: physicalBooks.category,
+      copies: physicalBooks.copies,
+      available: physicalBooks.available,
+      publisher: physicalBooks.publisher,
+      publicationYear: physicalBooks.publicationYear,
+      language: physicalBooks.language,
+      createdAt: physicalBooks.createdAt
+    }).from(physicalBooks);
     return books;
   }
 
   async getPhysicalBooksByLibrary(libraryId: number): Promise<any[]> {
-    const books = await db.select().from(physicalBooks).where(eq(physicalBooks.libraryId, libraryId));
+    const books = await db.select({
+      id: physicalBooks.id,
+      libraryId: physicalBooks.libraryId,
+      title: physicalBooks.title,
+      author: physicalBooks.author,
+      isbn: physicalBooks.isbn,
+      category: physicalBooks.category,
+      copies: physicalBooks.copies,
+      available: physicalBooks.available,
+      publisher: physicalBooks.publisher,
+      publicationYear: physicalBooks.publicationYear,
+      language: physicalBooks.language,
+      createdAt: physicalBooks.createdAt
+    }).from(physicalBooks).where(eq(physicalBooks.libraryId, libraryId));
     return books;
   }
 
