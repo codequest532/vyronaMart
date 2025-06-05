@@ -897,14 +897,25 @@ export default function VyronaRead() {
                       </div>
 
                       {/* Action Buttons */}
-                      <Button 
-                        size="sm" 
-                        className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
-                        onClick={() => proceedToEBookCheckout(ebook)}
-                      >
-                        <ShoppingCart className="mr-2 h-4 w-4" />
-                        Buy Now - ₹{Math.floor((ebook.price || 1999) / 100)}
-                      </Button>
+                      <div className="space-y-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
+                          onClick={() => handleReadEBook(ebook)}
+                        >
+                          <Eye className="mr-2 h-4 w-4" />
+                          Preview E-Reader
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
+                          onClick={() => proceedToEBookCheckout(ebook)}
+                        >
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Buy Now - ₹{Math.floor((ebook.price || 1999) / 100)}
+                        </Button>
+                      </div>
 
                       {/* Features */}
                       <div className="pt-3 border-t border-gray-100">
