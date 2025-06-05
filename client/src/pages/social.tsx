@@ -613,42 +613,7 @@ export default function VyronaSocial() {
         </div>
 
         {/* Room Interface Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative">
-          {/* Left Column - Participants */}
-          <div className="space-y-6">
-            {/* Room Participants */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Participants ({(roomMembers as any[])?.length || 0})
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {(roomMembers as any[])?.map((member: any) => (
-                    <div key={member.id} className="flex items-center gap-3">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={member.avatar} />
-                        <AvatarFallback>{member.username?.[0]?.toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{member.username}</p>
-                        <p className="text-xs text-gray-500">
-                          {member.isOnline ? "Online" : "Offline"}
-                        </p>
-                      </div>
-                      {member.isCreator && (
-                        <Crown className="w-4 h-4 text-yellow-500" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
 
           {/* Middle Column - Product Browser */}
           <Card>
@@ -982,6 +947,36 @@ export default function VyronaSocial() {
               {/* Chat Content - Only visible when not minimized */}
               {!isChatMinimized && (
                 <>
+                  {/* Participants Section */}
+                  <div className="p-4 border-b bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="w-4 h-4" />
+                      <h4 className="font-medium text-sm">Participants ({(roomMembers as any[])?.length || 0})</h4>
+                    </div>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {(roomMembers as any[])?.map((member: any) => (
+                        <div key={member.id} className="flex items-center gap-2">
+                          <Avatar className="w-6 h-6">
+                            <AvatarImage src={member.avatar} />
+                            <AvatarFallback className="text-xs">{member.username?.[0]?.toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{member.username}</p>
+                            <div className="flex items-center gap-1">
+                              <div className={`w-2 h-2 rounded-full ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
+                              <p className="text-xs text-gray-500">
+                                {member.isOnline ? "Online" : "Offline"}
+                              </p>
+                            </div>
+                          </div>
+                          {member.isCreator && (
+                            <Crown className="w-3 h-3 text-yellow-500" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Chat Messages */}
                   <div className="flex-1 p-4 overflow-hidden">
                     <ScrollArea className="h-full">
