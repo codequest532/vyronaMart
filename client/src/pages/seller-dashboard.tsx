@@ -959,10 +959,134 @@ export default function SellerDashboard() {
                 <p className="text-gray-600 dark:text-gray-300">Track and manage customer orders</p>
               </div>
 
+              {/* VyronaSocial Group Orders */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
-                  <CardDescription>Latest orders from your customers</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    VyronaSocial Group Orders
+                  </CardTitle>
+                  <CardDescription>Collaborative orders with multiple contributors and delivery addresses</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Sample Group Order */}
+                    <Card className="border">
+                      <CardContent className="p-6">
+                        <div className="space-y-4">
+                          {/* Order Header */}
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="font-semibold text-lg">Premium Wireless Headphones</h3>
+                              <p className="text-sm text-gray-600">Group Order #GRP-001 • Family Room</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <Badge variant="default" className="bg-green-100 text-green-800">
+                                  Fully Funded
+                                </Badge>
+                                <span className="text-sm text-gray-600">4 Contributors</span>
+                                <span className="text-sm text-gray-600">Total: ₹204.00</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">Quantity: 1</p>
+                              <p className="text-sm text-gray-600">Ordered: 2 hours ago</p>
+                            </div>
+                          </div>
+
+                          {/* Contributors and Delivery Info */}
+                          <div className="border-t pt-4">
+                            <h4 className="font-medium mb-3">Delivery Information</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Contributor 1 */}
+                              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium">John Doe (35%)</span>
+                                  <span className="text-sm text-green-600">₹71.40</span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <p>123 Main Street, Apt 4B</p>
+                                  <p>Mumbai, Maharashtra 400001</p>
+                                  <p>Phone: +91 98765 43210</p>
+                                </div>
+                              </div>
+
+                              {/* Contributor 2 */}
+                              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium">Alice Smith (25%)</span>
+                                  <span className="text-sm text-green-600">₹51.00</span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <p>456 Park Avenue</p>
+                                  <p>Delhi, Delhi 110001</p>
+                                  <p>Phone: +91 87654 32109</p>
+                                </div>
+                              </div>
+
+                              {/* Contributor 3 */}
+                              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium">Bob Johnson (20%)</span>
+                                  <span className="text-sm text-green-600">₹40.80</span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <p>789 Tech Park, Building C</p>
+                                  <p>Bangalore, Karnataka 560001</p>
+                                  <p>Phone: +91 76543 21098</p>
+                                </div>
+                              </div>
+
+                              {/* Contributor 4 */}
+                              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="font-medium">Carol Wilson (20%)</span>
+                                  <span className="text-sm text-green-600">₹40.80</span>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <p>321 Garden Street</p>
+                                  <p>Pune, Maharashtra 411001</p>
+                                  <p>Phone: +91 65432 10987</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Order Actions */}
+                          <div className="border-t pt-4 flex items-center justify-between">
+                            <div className="text-sm text-gray-600">
+                              <p>Payment Status: All contributions received via VyronaWallet</p>
+                              <p>Delivery Required: 4 separate addresses</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                <Package className="w-4 h-4 mr-2" />
+                                Process Order
+                              </Button>
+                              <Button size="sm">
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Arrange Delivery
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* No Group Orders State */}
+                    <div className="text-center py-8 text-gray-500">
+                      <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No active group orders</p>
+                      <p className="text-sm">Group orders from VyronaSocial will appear here</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Regular Individual Orders */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Individual Orders</CardTitle>
+                  <CardDescription>Regular orders from individual customers</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {sellerOrders?.length === 0 ? (
