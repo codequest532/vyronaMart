@@ -380,7 +380,7 @@ export default function VyronaSocial() {
                       </span>
                       <span className="flex items-center gap-1">
                         <ShoppingCart className="w-4 h-4" />
-                        ${room.totalCart || 0}
+                        ₹{room.totalCart || 0}
                       </span>
                     </div>
                     
