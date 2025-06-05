@@ -136,6 +136,15 @@ export default function VyronaRead() {
   const [showEReader, setShowEReader] = useState(false);
   const { toast } = useToast();
   const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+  const [filters, setFilters] = useState({
+    priceRange: [0, 5000],
+    availability: "all",
+    format: "all",
+    language: "all",
+    rating: 0
+  });
 
   // Handler functions for buy/rent/borrow operations
   const handleBuyBook = async (book: any) => {
@@ -194,6 +203,98 @@ export default function VyronaRead() {
       price: (targetEBook.price || 1999).toString()
     });
     setLocation(`/ebook-checkout?${params.toString()}`);
+  };
+
+  // Filter and collection handlers
+  const handleAdvancedFilters = () => {
+    setShowAdvancedFilters(true);
+  };
+
+  const handleExploreCollection = (collectionType: string) => {
+    setSelectedCollection(collectionType);
+    setSelectedCategory("all"); // Reset category filter when exploring collections
+  };
+
+  const applyFilters = (newFilters: any) => {
+    setFilters(newFilters);
+    setShowAdvancedFilters(false);
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      priceRange: [0, 5000],
+      availability: "all",
+      format: "all",
+      language: "all",
+      rating: 0
+    });
+    setSelectedCollection(null);
+    setSelectedCategory("all");
+  };
+
+  // Filter books based on selected criteria
+  const getFilteredBooks = () => {
+    let allBooks = [...(Array.isArray(sellerBooks) ? sellerBooks : [])];
+    
+    // Add library books to the pool
+    if (Array.isArray(libraryBooks)) {
+      allBooks = [...allBooks, ...libraryBooks];
+    }
+
+    // Collection-based filtering
+    if (selectedCollection) {
+      switch (selectedCollection) {
+        case "bestsellers":
+          allBooks = allBooks.filter(book => book.rating >= 4 || book.popular);
+          break;
+        case "new-arrivals":
+          allBooks = allBooks.filter(book => {
+            const bookDate = new Date(book.createdAt || book.dateAdded || Date.now());
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            return bookDate > thirtyDaysAgo;
+          });
+          break;
+        case "staff-picks":
+          allBooks = allBooks.filter(book => book.featured || book.staffPick);
+          break;
+      }
+    }
+
+    // Category filtering
+    if (selectedCategory !== "all") {
+      allBooks = allBooks.filter(book => 
+        book.category?.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
+    // Advanced filters
+    if (filters.format !== "all") {
+      allBooks = allBooks.filter(book => {
+        if (filters.format === "physical") return !book.isEbook;
+        if (filters.format === "digital") return book.isEbook;
+        return true;
+      });
+    }
+
+    if (filters.availability !== "all") {
+      allBooks = allBooks.filter(book => {
+        if (filters.availability === "available") return book.isAvailable || book.copies > 0;
+        if (filters.availability === "borrowed") return !book.isAvailable && book.copies === 0;
+        return true;
+      });
+    }
+
+    if (filters.rating > 0) {
+      allBooks = allBooks.filter(book => (book.rating || 0) >= filters.rating);
+    }
+
+    if (filters.language !== "all") {
+      allBooks = allBooks.filter(book => 
+        book.language?.toLowerCase() === filters.language.toLowerCase()
+      );
+    }
+
+    return allBooks;
   };
 
   // VyronaRead data queries - real-time data from seller dashboard and admin
@@ -327,7 +428,7 @@ export default function VyronaRead() {
                 <SelectItem value="biography">Biography</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={handleAdvancedFilters}>
               <Filter className="h-4 w-4" />
               Advanced Filters
             </Button>
