@@ -597,25 +597,15 @@ export default function VyronaRead() {
                             <ShoppingCart className="mr-2 h-4 w-4" />
                             Buy Now
                           </Button>
-                          <div className="flex space-x-2">
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="flex-1"
-                              onClick={() => handleRentBook(book)}
-                            >
-                              <Clock className="mr-1 h-3 w-3" />
-                              Rent
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="flex-1"
-                            >
-                              <Eye className="mr-1 h-3 w-3" />
-                              Preview
-                            </Button>
-                          </div>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => handleRentBook(book)}
+                          >
+                            <Clock className="mr-1 h-3 w-3" />
+                            Rent
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -907,25 +897,14 @@ export default function VyronaRead() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="space-y-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
-                          onClick={() => handleReadEBook(ebook)}
-                        >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Preview Book
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
-                          onClick={() => proceedToEBookCheckout(ebook)}
-                        >
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          Buy Now - ₹{Math.floor((ebook.price || 1999) / 100)}
-                        </Button>
-                      </div>
+                      <Button 
+                        size="sm" 
+                        className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
+                        onClick={() => proceedToEBookCheckout(ebook)}
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Buy Now - ₹{Math.floor((ebook.price || 1999) / 100)}
+                      </Button>
 
                       {/* Features */}
                       <div className="pt-3 border-t border-gray-100">
