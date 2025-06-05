@@ -1308,10 +1308,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Book ID is required" });
       }
 
+      // Check if user is authenticated
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ message: "Please log in to borrow books" });
+      }
+
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
       // Create book loan record
       const loan = await storage.createBookLoan({
         bookId: bookId,
-        borrowerId: 1, // Default user ID for now
+        borrowerId: userId,
         libraryId: 1, // Default library ID
         borrowedAt: new Date(),
         dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
