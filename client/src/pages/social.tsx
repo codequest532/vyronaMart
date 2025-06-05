@@ -49,8 +49,12 @@ import {
   ChevronRight,
   ChevronUp,
   ChevronDown,
-  X
+  X,
+  MoreVertical,
+  Share,
+  Trash2
 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,6 +95,8 @@ export default function VyronaSocial() {
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showJoinRoom, setShowJoinRoom] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [selectedRoomForInvite, setSelectedRoomForInvite] = useState<number | null>(null);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
 
   // Fetch data
   const { data: userGroups, isLoading: groupsLoading } = useQuery({
