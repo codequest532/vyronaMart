@@ -43,6 +43,94 @@ import {
   Edit
 } from "lucide-react";
 
+// Component to display featured books from a specific library
+function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; libraryName: string }) {
+  const [location, setLocation] = useLocation();
+  
+  const { data: libraryBooks = [], isLoading } = useQuery({
+    queryKey: ["/api/vyronaread/library-books", libraryId],
+    queryFn: () => apiRequest("GET", `/api/vyronaread/library-books/${libraryId}`),
+  });
+
+  const handleBorrowBook = (book: any) => {
+    const params = new URLSearchParams({
+      type: 'borrow',
+      bookId: book.id.toString(),
+      bookName: encodeURIComponent(book.name || book.title || 'Unknown Title'),
+      author: encodeURIComponent(book.author || 'Unknown Author')
+    });
+    setLocation(`/vyronaread-checkout?${params.toString()}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="bg-gray-200 h-32 rounded-lg mb-2"></div>
+            <div className="bg-gray-200 h-4 rounded mb-1"></div>
+            <div className="bg-gray-200 h-3 rounded w-3/4"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  const displayBooks = Array.isArray(libraryBooks) ? libraryBooks.slice(0, 6) : []; // Show first 6 books
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h5 className="font-semibold text-gray-800">Featured Books</h5>
+        {libraryBooks.length > 6 && (
+          <Button 
+            size="sm" 
+            variant="ghost"
+            onClick={() => setLocation('/library-browse')}
+            className="text-green-600 hover:text-green-700"
+          >
+            View All ({libraryBooks.length})
+          </Button>
+        )}
+      </div>
+      
+      {displayBooks.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {displayBooks.map((book: any, index: number) => (
+            <div key={index} className="group cursor-pointer">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 mb-2 h-32 flex items-center justify-center group-hover:shadow-md transition-shadow">
+                {book.imageUrl ? (
+                  <img 
+                    src={book.imageUrl} 
+                    alt={book.name || book.title}
+                    className="w-full h-full object-cover rounded"
+                  />
+                ) : (
+                  <BookOpen className="h-8 w-8 text-green-600" />
+                )}
+              </div>
+              <h6 className="font-medium text-sm text-gray-900 mb-1 truncate">{book.name || book.title}</h6>
+              <p className="text-xs text-gray-500 mb-2 truncate">by {book.author || "Unknown Author"}</p>
+              <Button 
+                size="sm" 
+                className="w-full h-7 text-xs bg-green-600 hover:bg-green-700"
+                onClick={() => handleBorrowBook(book)}
+              >
+                Borrow
+              </Button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+          <p className="text-gray-500 text-sm">No books available in this library</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function VyronaRead() {
   const [location, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -314,57 +402,46 @@ export default function VyronaRead() {
             <h3 className="text-lg font-bold text-gray-900">📚 Library Integration</h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-8">
             {Array.isArray(availableLibraries) && availableLibraries.length > 0 ? availableLibraries.map((library: any, index: number) => (
-              <Card key={index} className="border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <Library className="text-green-600 h-6 w-6" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 text-base">{library.libraryName || library.name}</h4>
-                        <p className="text-sm text-gray-500 capitalize">{library.libraryType || library.type || "Public"} Library</p>
-                      </div>
+              <div key={index} className="border border-gray-200 rounded-lg p-6 bg-white hover:shadow-lg transition-shadow">
+                {/* Library Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                      <Library className="text-green-600 h-6 w-6" />
                     </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-lg">{library.libraryName || library.name}</h4>
+                      <p className="text-sm text-gray-500 capitalize">{library.libraryType || library.type || "Public"} Library</p>
+                      {library.address && (
+                        <p className="text-xs text-gray-400 mt-1">{library.address}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
                     <Badge variant="default" className="bg-green-100 text-green-700 border-green-200">
                       Active
                     </Badge>
-                  </div>
-                  
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Status:</span>
-                      <span className="font-medium text-green-600">Active</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Type:</span>
-                      <span className="font-medium text-gray-900 capitalize">{library.libraryType || library.type || "Public"}</span>
-                    </div>
-                    {library.address && (
-                      <div className="text-sm">
-                        <span className="text-gray-600">Location:</span>
-                        <p className="font-medium text-gray-700 mt-1">{library.address}</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-4">
                     <Button 
                       size="sm" 
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
-                      onClick={() => handleLibraryClick(library)}
+                      variant="outline"
+                      onClick={() => setLocation('/library-browse')}
+                      className="text-green-600 border-green-200 hover:bg-green-50"
                     >
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      Visit Library
+                      Browse All Books
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+
+                {/* Featured Books from Library */}
+                <LibraryBooksSection libraryId={library.id} libraryName={library.libraryName || library.name} />
+              </div>
             )) : (
-              <div className="col-span-full text-center py-8">
-                <p className="text-gray-500">No libraries available for connection.</p>
+              <div className="text-center py-12">
+                <Library className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">No approved libraries available</p>
+                <p className="text-gray-400 text-sm">Check back later for library partnerships</p>
               </div>
             )}
           </div>
