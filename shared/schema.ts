@@ -248,29 +248,16 @@ export const physicalBooks = pgTable("physical_books", {
   author: varchar("author", { length: 255 }).notNull(),
   isbn: varchar("isbn", { length: 50 }),
   category: varchar("category", { length: 100 }),
-  copies: integer("copies").default(1).notNull(),
-  available: integer("available").default(1).notNull(),
+  copies: integer("copies").notNull().default(1),
+  available: integer("available").notNull().default(1),
   publisher: varchar("publisher", { length: 255 }),
-  publicationYear: varchar("publication_year", { length: 10 }),
+  publicationYear: varchar("publication_year", { length: 4 }),
+  description: text("description"),
+  condition: varchar("condition", { length: 50 }).default("good"),
   language: varchar("language", { length: 50 }).default("English"),
-  location: varchar("location", { length: 255 }),
-  fixedCostPrice: decimal("fixed_cost_price", { precision: 10, scale: 2 }).default("0.00"),
-  rentalPrice: decimal("rental_price", { precision: 10, scale: 2 }).default("0.00"),
+  pageCount: integer("page_count"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const bookLoans = pgTable("book_loans", {
-  id: serial("id").primaryKey(),
-  bookId: integer("book_id").notNull().references(() => physicalBooks.id),
-  borrowerId: integer("borrower_id").notNull().references(() => users.id),
-  libraryId: integer("library_id").notNull(),
-  loanDate: timestamp("loan_date").defaultNow().notNull(),
-  dueDate: timestamp("due_date").notNull(),
-  returnDate: timestamp("return_date"),
-  status: varchar("status", { length: 50 }).default("active").notNull(),
-  renewalCount: integer("renewal_count").default(0),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const eBooks = pgTable("e_books", {
@@ -280,19 +267,36 @@ export const eBooks = pgTable("e_books", {
   author: varchar("author", { length: 255 }).notNull(),
   isbn: varchar("isbn", { length: 50 }),
   category: varchar("category", { length: 100 }),
-  format: varchar("format", { length: 50 }).notNull(), // PDF, EPUB, MOBI
-  fileUrl: text("file_url").notNull(),
-  fileSize: integer("file_size"), // in bytes
-  salePrice: decimal("sale_price", { precision: 10, scale: 2 }),
-  rentalPrice: decimal("rental_price", { precision: 10, scale: 2 }),
-  description: text("description"),
   publisher: varchar("publisher", { length: 255 }),
-  publicationYear: varchar("publication_year", { length: 10 }),
+  publicationYear: varchar("publication_year", { length: 4 }),
+  description: text("description"),
   language: varchar("language", { length: 50 }).default("English"),
-  status: varchar("status", { length: 50 }).default("active").notNull(),
-  downloads: integer("downloads").default(0),
+  pageCount: integer("page_count"),
+  fileFormat: varchar("file_format", { length: 20 }).notNull(), // PDF, EPUB, MOBI
+  fileSize: varchar("file_size", { length: 20 }),
+  price: integer("price").notNull(), // in cents
+  previewUrl: text("preview_url"),
+  downloadUrl: text("download_url"),
+  coverImageUrl: text("cover_image_url"),
+  metadata: jsonb("metadata"),
+  isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const bookLoans = pgTable("book_loans", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  bookId: integer("book_id").notNull(),
+  bookType: varchar("book_type", { length: 20 }).notNull(), // 'physical' or 'ebook'
+  loanDate: timestamp("loan_date").defaultNow().notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  returnDate: timestamp("return_date"),
+  status: varchar("status", { length: 20 }).default("active").notNull(), // 'active', 'returned', 'overdue'
+  renewalCount: integer("renewal_count").default(0),
+  fineAmount: integer("fine_amount").default(0), // in cents
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Book Rentals with 15-day billing cycle
@@ -485,23 +489,6 @@ export const insertProductShareSchema = createInsertSchema(productShares).omit({
 });
 
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
-  id: true,
-  createdAt: true,
-});
-
-// VyronaRead Insert Schemas
-export const insertBookRentalSchema = createInsertSchema(bookRentals).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertRentalBillingHistorySchema = createInsertSchema(rentalBillingHistory).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertBookReturnRequestSchema = createInsertSchema(bookReturnRequests).omit({
   id: true,
   createdAt: true,
 });
