@@ -270,6 +270,10 @@ export default function VyronaSocial() {
     setCurrentView("dashboard");
   };
 
+  const handleBackToDashboard = () => {
+    setLocation("/home");
+  };
+
   // Hero Section Component
   const HeroSection = () => (
     <div className="relative bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 text-white p-8 rounded-lg mb-8">
@@ -807,7 +811,7 @@ export default function VyronaSocial() {
       <div className="mb-6">
         <Button
           variant="outline"
-          onClick={() => window.history.back()}
+          onClick={handleBackToDashboard}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
