@@ -12,7 +12,7 @@ export function setupVyronaSocialAPI(app: express.Application) {
     const pool = new Pool({ connectionString: process.env.DATABASE_URL });
     
     try {
-      const { name, description } = req.body;
+      const { name, description, addMembers = [] } = req.body;
       
       if (!name) {
         return res.status(400).json({ error: "Room name is required" });
@@ -36,6 +36,40 @@ export function setupVyronaSocialAPI(app: express.Application) {
         VALUES ($1, $2, $3, NOW())
       `, [dbRoom.id, 1, 'creator']);
       
+      let memberCount = 1; // Start with creator
+      
+      // Add selected members to the group
+      if (addMembers && addMembers.length > 0) {
+        for (const userIdentifier of addMembers) {
+          try {
+            // Find user by username or email
+            const userResult = await pool.query(`
+              SELECT id FROM users WHERE username = $1 OR email = $1 LIMIT 1
+            `, [userIdentifier]);
+            
+            if (userResult.rows.length > 0) {
+              const userId = userResult.rows[0].id;
+              
+              // Check if user is not already a member (avoid duplicates)
+              const existingMember = await pool.query(`
+                SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2
+              `, [dbRoom.id, userId]);
+              
+              if (existingMember.rows.length === 0) {
+                await pool.query(`
+                  INSERT INTO group_members (group_id, user_id, role, joined_at)
+                  VALUES ($1, $2, $3, NOW())
+                `, [dbRoom.id, userId, 'member']);
+                memberCount++;
+              }
+            }
+          } catch (memberError) {
+            console.warn(`Failed to add member ${userIdentifier}:`, memberError);
+            // Continue with other members even if one fails
+          }
+        }
+      }
+      
       const room = {
         id: dbRoom.id,
         name: dbRoom.name,
@@ -44,7 +78,7 @@ export function setupVyronaSocialAPI(app: express.Application) {
         privacy: "public",
         creatorId: dbRoom.creator_id,
         isActive: dbRoom.is_active,
-        memberCount: 1,
+        memberCount: memberCount,
         totalCart: 0,
         currentGame: null,
         roomCode: dbRoom.room_code,

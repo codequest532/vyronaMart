@@ -76,7 +76,7 @@ const createRoomSchema = z.object({
   privacy: z.enum(["public", "private"]),
   scheduledTime: z.string().optional(),
   description: z.string().optional(),
-  inviteUsers: z.array(z.string()).optional()
+  addMembers: z.array(z.string()).optional()
 });
 
 const joinRoomSchema = z.object({
@@ -203,7 +203,7 @@ export default function VyronaSocial() {
     mutationFn: async (data: CreateRoomForm) => {
       const requestData = {
         ...data,
-        inviteUsers: selectedUsers
+        addMembers: selectedUsers
       };
       
       const response = await fetch("/api/vyronasocial/rooms", {
@@ -225,7 +225,7 @@ export default function VyronaSocial() {
       toast({
         title: "Shopping Room Created",
         description: selectedUsers.length > 0 
-          ? `Room created and ${selectedUsers.length} users invited!`
+          ? `Room created with ${selectedUsers.length} members added!`
           : "Your room is ready for shopping together!"
       });
       setShowCreateRoom(false);
@@ -826,9 +826,9 @@ export default function VyronaSocial() {
               )}
             />
 
-            {/* Invite Users Section */}
+            {/* Add Users Section */}
             <div className="space-y-3">
-              <FormLabel>Invite Friends (Optional)</FormLabel>
+              <FormLabel>Add Members (Optional)</FormLabel>
               
               {/* User Search */}
               <div className="relative">
