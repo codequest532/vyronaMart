@@ -258,19 +258,28 @@ export default function VyronaSocial() {
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to join room");
+        throw new Error(error.error || "Failed to join room");
       }
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const isAlreadyMember = data.alreadyMember;
       toast({
-        title: "Joined Room",
-        description: "Welcome to the shopping room!"
+        title: isAlreadyMember ? "Already a Member" : "Joined Room",
+        description: isAlreadyMember 
+          ? `You are already a member of ${data.roomName || 'this room'}`
+          : `Welcome to ${data.roomName || 'the shopping room'}!`
       });
       setShowJoinRoom(false);
       joinRoomForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
+      
+      // If successfully joined or already a member, navigate to the room
+      if (data.roomId) {
+        setSelectedRoomId(data.roomId);
+        setShowRoomInterface(true);
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -920,7 +929,6 @@ export default function VyronaSocial() {
                       <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <h4 className="font-semibold text-gray-800 dark:text-gray-200">Ready to Place Order?</h4>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                               {(sharedCart as any[])?.length} items • ₹{(sharedCart as any[])?.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)} total
                             </p>

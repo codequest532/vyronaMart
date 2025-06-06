@@ -205,13 +205,17 @@ export function setupVyronaSocialAPI(app: express.Application) {
         return res.status(400).json({ error: "Room code is required" });
       }
 
-      // Find room by code
+      console.log("Attempting to join room with code:", roomCode);
+
+      // Find room by code (case insensitive)
       const roomResult = await pool.query(`
-        SELECT * FROM shopping_groups WHERE room_code = $1 AND is_active = true
+        SELECT * FROM shopping_groups WHERE UPPER(room_code) = UPPER($1) AND is_active = true
       `, [roomCode]);
       
+      console.log("Room search result:", roomResult.rows);
+      
       if (roomResult.rows.length === 0) {
-        return res.status(404).json({ error: "Room not found" });
+        return res.status(404).json({ error: "Room not found or inactive" });
       }
       
       const room = roomResult.rows[0];
@@ -221,8 +225,27 @@ export function setupVyronaSocialAPI(app: express.Application) {
         SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2
       `, [room.id, 1]);
       
+      console.log("Member check result:", memberCheck.rows);
+      
       if (memberCheck.rows.length > 0) {
-        return res.status(400).json({ error: "Already in room" });
+        // If already a member, just return success with room info
+        return res.json({ 
+          message: "You are already a member of this room", 
+          roomId: room.id,
+          alreadyMember: true 
+        });
+      }
+      
+      // Check room capacity
+      const memberCount = await pool.query(`
+        SELECT COUNT(*) as count FROM group_members WHERE group_id = $1
+      `, [room.id]);
+      
+      const currentMembers = parseInt(memberCount.rows[0].count);
+      const maxMembers = room.max_members || 10;
+      
+      if (currentMembers >= maxMembers) {
+        return res.status(400).json({ error: "Room is full" });
       }
       
       // Add member
@@ -231,7 +254,13 @@ export function setupVyronaSocialAPI(app: express.Application) {
         VALUES ($1, $2, $3, NOW())
       `, [room.id, 1, 'member']);
       
-      res.json({ message: "Joined room successfully", roomId: room.id });
+      console.log("Successfully added user to room");
+      
+      res.json({ 
+        message: "Joined room successfully", 
+        roomId: room.id,
+        roomName: room.name
+      });
     } catch (error) {
       console.error("Join room error:", error);
       res.status(500).json({ error: "Failed to join room" });
