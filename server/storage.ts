@@ -689,7 +689,35 @@ export class DatabaseStorage implements IStorage {
       .insert(cartItems)
       .values(insertItem)
       .returning();
+    
+    // Update room's total cart value if item is added to a room
+    if (insertItem.roomId) {
+      await this.updateRoomCartTotal(insertItem.roomId);
+    }
+    
     return item;
+  }
+
+  async updateRoomCartTotal(roomId: number): Promise<void> {
+    // Calculate total cart value for the room
+    const cartItemsWithProducts = await db
+      .select({
+        quantity: cartItems.quantity,
+        price: products.price
+      })
+      .from(cartItems)
+      .leftJoin(products, eq(cartItems.productId, products.id))
+      .where(eq(cartItems.roomId, roomId));
+
+    const totalCart = cartItemsWithProducts.reduce((total, item) => {
+      return total + (item.quantity * (item.price || 0));
+    }, 0);
+
+    // Update the shopping room's total cart value
+    await db
+      .update(shoppingRooms)
+      .set({ totalCart })
+      .where(eq(shoppingRooms.id, roomId));
   }
 
   async removeCartItem(id: number): Promise<boolean> {
