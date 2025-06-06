@@ -2,7 +2,7 @@ import {
   users, products, stores, shoppingRooms, cartItems, orders, achievements, gameScores, otpVerifications,
   shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
   instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
-  groupBuyProducts, groupBuyCampaigns, groupBuyParticipants,
+  groupBuyProducts, groupBuyCampaigns, groupBuyParticipants, groupCarts, groupCartContributions,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
@@ -11,6 +11,7 @@ import {
   type ShoppingGroup, type InsertShoppingGroup, type GroupMember, type InsertGroupMember,
   type GroupWishlist, type InsertGroupWishlist, type GroupMessage, type InsertGroupMessage,
   type ProductShare, type InsertProductShare, type Notification, type InsertNotification,
+  type GroupCart, type InsertGroupCart, type GroupCartContribution, type InsertGroupCartContribution,
   type InstagramStore, type InsertInstagramStore, type InstagramProduct, type InsertInstagramProduct,
   type InstagramOrder, type InsertInstagramOrder, type InstagramAnalytics, type InsertInstagramAnalytics,
   type GroupBuyProduct, type InsertGroupBuyProduct, type GroupBuyCampaign, type InsertGroupBuyCampaign,
@@ -100,6 +101,12 @@ export interface IStorage {
   // VyronaSocial - Product Shares
   shareProduct(share: InsertProductShare): Promise<ProductShare>;
   getProductShares(userId: number): Promise<ProductShare[]>;
+
+  // VyronaSocial - Group Carts
+  createGroupCart(groupCart: InsertGroupCart): Promise<GroupCart>;
+  getActiveGroupCartsByProduct(productId: number): Promise<GroupCart[]>;
+  joinGroupCart(contribution: InsertGroupCartContribution): Promise<GroupCartContribution>;
+  getGroupCartContributions(groupCartId: number): Promise<GroupCartContribution[]>;
 
   // VyronaSocial - Notifications
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -950,6 +957,60 @@ export class DatabaseStorage implements IStorage {
 
   async getProductShares(userId: number): Promise<ProductShare[]> {
     return await db.select().from(productShares).where(eq(productShares.sharedBy, userId));
+  }
+
+  // VyronaSocial - Group Carts
+  async createGroupCart(groupCartData: InsertGroupCart): Promise<GroupCart> {
+    const [groupCart] = await db
+      .insert(groupCarts)
+      .values({
+        ...groupCartData,
+        totalQuantity: 0,
+        currentPrice: groupCartData.targetPrice || 0,
+        isActive: true,
+        createdAt: new Date(),
+        expiresAt: new Date(Date.now() + (groupCartData.expiresIn || 7) * 24 * 60 * 60 * 1000) // Default 7 days
+      })
+      .returning();
+    return groupCart;
+  }
+
+  async getActiveGroupCartsByProduct(productId: number): Promise<GroupCart[]> {
+    return await db
+      .select()
+      .from(groupCarts)
+      .where(and(
+        eq(groupCarts.productId, productId),
+        eq(groupCarts.isActive, true)
+      ));
+  }
+
+  async joinGroupCart(contributionData: InsertGroupCartContribution): Promise<GroupCartContribution> {
+    const [contribution] = await db
+      .insert(groupCartContributions)
+      .values({
+        ...contributionData,
+        joinedAt: new Date(),
+        status: 'active'
+      })
+      .returning();
+
+    // Update group cart total quantity
+    await db
+      .update(groupCarts)
+      .set({ 
+        totalQuantity: sql`${groupCarts.totalQuantity} + ${contributionData.quantity}` 
+      })
+      .where(eq(groupCarts.id, contributionData.groupCartId));
+
+    return contribution;
+  }
+
+  async getGroupCartContributions(groupCartId: number): Promise<GroupCartContribution[]> {
+    return await db
+      .select()
+      .from(groupCartContributions)
+      .where(eq(groupCartContributions.groupCartId, groupCartId));
   }
 
   // VyronaSocial - Notifications
