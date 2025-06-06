@@ -106,9 +106,38 @@ export default function PlaceOrder() {
     }
   });
 
+  // Initialize address system based on room member count
+  useEffect(() => {
+    if (room?.memberCount) {
+      const memberCount = parseInt(room.memberCount.toString());
+      const initialAddresses: DeliveryAddress[] = [];
+      
+      // Create address entries based on member count
+      for (let i = 0; i < memberCount; i++) {
+        initialAddresses.push({
+          id: `member-${i + 1}`,
+          memberName: i === 0 ? 'You' : `Member ${i + 1}`,
+          fullName: '',
+          phone: '',
+          addressLine1: '',
+          addressLine2: '',
+          city: '',
+          state: '',
+          pincode: '',
+          isDefault: i === 0
+        });
+      }
+      
+      setDeliveryMode({
+        type: memberCount === 1 ? 'single' : 'multiple',
+        addresses: initialAddresses
+      });
+    }
+  }, [room?.memberCount]);
+
   // Calculate total
   const orderTotal = cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = 50;
+  const deliveryFee = deliveryMode.type === 'single' ? 50 : deliveryMode.addresses.length * 50;
   const finalTotal = orderTotal + deliveryFee;
 
   // Process order mutation
@@ -169,6 +198,9 @@ export default function PlaceOrder() {
         })),
         totalAmount: finalTotal,
         paymentMethod: selectedPayment,
+        deliveryAddresses: deliveryMode.addresses.filter(addr => 
+          addr.fullName && addr.phone && addr.addressLine1 && addr.city && addr.state && addr.pincode
+        ),
       };
 
       // Process checkout through VyronaWallet API
@@ -184,6 +216,27 @@ export default function PlaceOrder() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // Address management functions
+  const updateAddress = (addressId: string, field: keyof DeliveryAddress, value: string) => {
+    setDeliveryMode(prev => ({
+      ...prev,
+      addresses: prev.addresses.map(addr =>
+        addr.id === addressId ? { ...addr, [field]: value } : addr
+      )
+    }));
+  };
+
+  const validateAddresses = () => {
+    const requiredFields = ['fullName', 'phone', 'addressLine1', 'city', 'state', 'pincode'];
+    return deliveryMode.addresses.every(addr =>
+      requiredFields.every(field => addr[field as keyof DeliveryAddress])
+    );
+  };
+
+  const canProceedToPayment = () => {
+    return validateAddresses() && cartItems.length > 0;
   };
 
   if (!match || !roomId) {
@@ -224,39 +277,164 @@ export default function PlaceOrder() {
           onClick={() => setLocation("/social")}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back
+          Back to Rooms
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Place Order</h1>
-          <p className="text-muted-foreground">Complete your group purchase</p>
+          <p className="text-muted-foreground">Complete your group purchase with delivery addresses</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Order Summary */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Room Details */}
-          {room && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Shopping Room
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{room.name}</h3>
-                    <p className="text-sm text-muted-foreground">Room Code: {room.roomCode}</p>
+      {/* Room Info */}
+      {room && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              {room.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <Badge variant="outline">{room.memberCount} members</Badge>
+              <span>•</span>
+              <span>Room ID: {roomId}</span>
+              <span>•</span>
+              <span>Delivery Mode: {deliveryMode.type === 'single' ? 'Single Address' : 'Multiple Addresses'}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step-based Checkout */}
+      <Tabs value={currentStep} onValueChange={(value) => setCurrentStep(value as any)}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="address" className="gap-2">
+            <MapPin className="h-4 w-4" />
+            Delivery Address
+          </TabsTrigger>
+          <TabsTrigger value="payment" disabled={!canProceedToPayment()}>
+            <Wallet className="h-4 w-4" />
+            Payment
+          </TabsTrigger>
+          <TabsTrigger value="review" disabled={!canProceedToPayment()}>
+            <Package className="h-4 w-4" />
+            Review Order
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Address Step */}
+        <TabsContent value="address" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Delivery Addresses
+                <Badge variant="secondary">
+                  {deliveryMode.addresses.length} {deliveryMode.addresses.length === 1 ? 'Address' : 'Addresses'}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {deliveryMode.addresses.map((address, index) => (
+                <div key={address.id} className="border rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      {address.memberName}
+                      {address.isDefault && <Badge variant="outline">Primary</Badge>}
+                    </h4>
                   </div>
-                  <Badge variant="secondary">
-                    {room.memberCount} member{room.memberCount !== 1 ? 's' : ''}
-                  </Badge>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor={`fullName-${address.id}`}>Full Name *</Label>
+                      <Input
+                        id={`fullName-${address.id}`}
+                        placeholder="Enter full name"
+                        value={address.fullName}
+                        onChange={(e) => updateAddress(address.id, 'fullName', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`phone-${address.id}`}>Phone Number *</Label>
+                      <Input
+                        id={`phone-${address.id}`}
+                        placeholder="Enter phone number"
+                        value={address.phone}
+                        onChange={(e) => updateAddress(address.id, 'phone', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor={`addressLine1-${address.id}`}>Address Line 1 *</Label>
+                    <Input
+                      id={`addressLine1-${address.id}`}
+                      placeholder="House no, Building name, Street"
+                      value={address.addressLine1}
+                      onChange={(e) => updateAddress(address.id, 'addressLine1', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor={`addressLine2-${address.id}`}>Address Line 2</Label>
+                    <Input
+                      id={`addressLine2-${address.id}`}
+                      placeholder="Area, Locality"
+                      value={address.addressLine2 || ''}
+                      onChange={(e) => updateAddress(address.id, 'addressLine2', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor={`city-${address.id}`}>City *</Label>
+                      <Input
+                        id={`city-${address.id}`}
+                        placeholder="Enter city"
+                        value={address.city}
+                        onChange={(e) => updateAddress(address.id, 'city', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`state-${address.id}`}>State *</Label>
+                      <Input
+                        id={`state-${address.id}`}
+                        placeholder="Enter state"
+                        value={address.state}
+                        onChange={(e) => updateAddress(address.id, 'state', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`pincode-${address.id}`}>Pincode *</Label>
+                      <Input
+                        id={`pincode-${address.id}`}
+                        placeholder="Enter pincode"
+                        value={address.pincode}
+                        onChange={(e) => updateAddress(address.id, 'pincode', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ))}
+              
+              <div className="flex justify-end">
+                <Button 
+                  onClick={() => setCurrentStep('payment')} 
+                  disabled={!canProceedToPayment()}
+                  className="gap-2"
+                >
+                  Continue to Payment
+                  <ArrowLeft className="h-4 w-4 rotate-180" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Payment Step */}
+        <TabsContent value="payment" className="space-y-4">
 
           {/* Order Items */}
           <Card>
@@ -364,59 +542,118 @@ export default function PlaceOrder() {
               </div>
             </CardContent>
           </Card>
-        </div>
+          
+          <div className="flex justify-between mt-6">
+            <Button variant="outline" onClick={() => setCurrentStep('address')}>
+              Back to Address
+            </Button>
+            <Button onClick={() => setCurrentStep('review')} className="gap-2">
+              Review Order
+              <ArrowLeft className="h-4 w-4 rotate-180" />
+            </Button>
+          </div>
+        </TabsContent>
 
-        {/* Order Total */}
-        <div>
-          <Card className="sticky top-4">
+        {/* Review Step */}
+        <TabsContent value="review" className="space-y-4">
+          {/* Cart Items */}
+          <Card>
             <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Order Summary
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>₹{orderTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Delivery Fee</span>
-                  <span>₹{deliveryFee.toFixed(2)}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span>₹{finalTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <Button
-                onClick={handlePlaceOrder}
-                disabled={isProcessing || cartItems.length === 0}
-                className="w-full"
-                size="lg"
-              >
-                {isProcessing ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Processing...
+            <CardContent>
+              {cartItems.length === 0 ? (
+                <p className="text-muted-foreground">No items in cart</p>
+              ) : (
+                <div className="space-y-4">
+                  {cartItems.map((item: any) => (
+                    <div key={item.id} className="flex justify-between items-center py-2 border-b">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{item.name}</h4>
+                        <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground">₹{item.price.toFixed(2)} each</p>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>Subtotal:</span>
+                      <span>₹{orderTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Delivery Fee ({deliveryMode.addresses.length} {deliveryMode.addresses.length === 1 ? 'address' : 'addresses'}):</span>
+                      <span>₹{deliveryFee.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Total:</span>
+                      <span>₹{finalTotal.toFixed(2)}</span>
+                    </div>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4" />
-                    Place Order
-                  </div>
-                )}
-              </Button>
-
-              {selectedPayment === "wallet" && walletData?.balance < finalTotal && (
-                <p className="text-sm text-destructive text-center">
-                  Insufficient wallet balance. Please add funds or choose another payment method.
-                </p>
+                </div>
               )}
             </CardContent>
           </Card>
-        </div>
-      </div>
+
+          {/* Delivery Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Delivery Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {deliveryMode.addresses.filter(addr => 
+                  addr.fullName && addr.phone && addr.addressLine1 && addr.city && addr.state && addr.pincode
+                ).map((address) => (
+                  <div key={address.id} className="border rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="h-4 w-4" />
+                      <span className="font-medium">{address.memberName}</span>
+                      {address.isDefault && <Badge variant="outline">Primary</Badge>}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <p>{address.fullName} • {address.phone}</p>
+                      <p>{address.addressLine1}{address.addressLine2 ? `, ${address.addressLine2}` : ''}</p>
+                      <p>{address.city}, {address.state} - {address.pincode}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Final Actions */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setCurrentStep('payment')}>
+                  Back to Payment
+                </Button>
+                <Button 
+                  onClick={handlePlaceOrder} 
+                  disabled={cartItems.length === 0 || isProcessing || !validateAddresses()}
+                  size="lg"
+                  className="gap-2"
+                >
+                  {isProcessing ? "Processing..." : `Place Order - ₹${finalTotal.toFixed(2)}`}
+                  <CheckCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
