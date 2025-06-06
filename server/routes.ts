@@ -969,24 +969,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Shopping rooms for checkout selection (maps to VyronaSocial rooms)
   app.get("/api/shopping-rooms", async (req, res) => {
+    const { Pool } = require('@neondatabase/serverless');
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
     try {
-      const rooms = await storage.getShoppingGroups(0);
+      const result = await pool.query(`
+        SELECT sg.*, COUNT(gm.id) as member_count
+        FROM shopping_groups sg
+        LEFT JOIN group_members gm ON sg.id = gm.group_id
+        WHERE sg.is_active = true
+        GROUP BY sg.id
+        ORDER BY sg.created_at DESC
+      `);
       
-      // Format rooms for checkout selection
-      const formattedRooms = (rooms as any[]).map(room => ({
-        id: room.id,
-        name: room.name,
-        description: room.description,
-        memberCount: room.memberCount || 0,
-        isActive: room.isActive,
-        creatorId: room.creatorId,
-        createdAt: room.createdAt
+      const rooms = result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        memberCount: parseInt(row.member_count) || 0,
+        isActive: row.is_active,
+        creatorId: row.creator_id,
+        createdAt: row.created_at
       }));
       
-      res.json(formattedRooms);
+      res.json(rooms);
     } catch (error) {
       console.error("Error fetching shopping rooms:", error);
       res.status(500).json({ message: "Failed to fetch shopping rooms" });
+    } finally {
+      await pool.end();
     }
   });
 
