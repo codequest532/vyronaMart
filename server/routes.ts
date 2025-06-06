@@ -824,6 +824,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add item to cart (for GroupCartModal)
+  app.post("/api/cart-items", async (req, res) => {
+    try {
+      const { roomId, productId, quantity } = req.body;
+      const userId = 1; // Default user ID for now
+      
+      const cartItemData = {
+        userId: userId,
+        productId: productId,
+        quantity: quantity || 1,
+        roomId: roomId
+      };
+      
+      const cartItem = await storage.addCartItem(cartItemData);
+      res.json(cartItem);
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      res.status(500).json({ message: "Failed to add item to cart" });
+    }
+  });
+
   // VyronaWallet Checkout API
   app.post("/api/wallet/checkout", async (req, res) => {
     try {
