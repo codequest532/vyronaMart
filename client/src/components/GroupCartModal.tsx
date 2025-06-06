@@ -117,12 +117,10 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
   // Add product to room mutation
   const addToRoomMutation = useMutation({
     mutationFn: async (data: { roomId: number; productId: number; quantity: number }) => {
-      const response = await apiRequest("POST", `/api/cart/${data.roomId}/add`, {
+      const response = await apiRequest("POST", `/api/shopping-rooms/${data.roomId}/add-cart-item`, {
         productId: data.productId,
         quantity: data.quantity,
-        name: product?.name,
-        price: product?.price,
-        imageUrl: product?.imageUrl
+        addedAt: new Date().toISOString()
       });
       if (!response.ok) {
         throw new Error("Failed to add product to room");
