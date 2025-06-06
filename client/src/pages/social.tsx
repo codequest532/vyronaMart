@@ -278,14 +278,14 @@ export default function VyronaSocial() {
     }
   });
 
-  // Ensure we have an array for cart data
+  // Ensure we have an array for cart data with proper null safety
   const sharedCart = Array.isArray(rawCartData) ? rawCartData : [];
   
   // Debug cart processing
   console.log('CART DATA PROCESSING:', {
     rawCartData,
     sharedCart,
-    sharedCartLength: sharedCart.length,
+    sharedCartLength: sharedCart?.length || 0,
     selectedRoomId,
     cartLoading
   });
@@ -1072,7 +1072,7 @@ export default function VyronaSocial() {
                           <div>
                             <h3 className="font-medium text-blue-900">Room {selectedRoomId}</h3>
                             <p className="text-sm text-blue-600">
-                              {sharedCart.length} items in cart
+                              {(sharedCart?.length || 0)} items in cart
                             </p>
                           </div>
                         </div>
