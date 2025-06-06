@@ -78,12 +78,17 @@ const joinRoomSchema = z.object({
   roomCode: z.string().min(6, "Room code must be 6 characters").max(6, "Room code must be 6 characters")
 });
 
+const inviteEmailSchema = z.object({
+  email: z.string().email("Invalid email address")
+});
+
 const messageSchema = z.object({
   content: z.string().min(1, "Message cannot be empty").max(500, "Message too long")
 });
 
 type CreateRoomForm = z.infer<typeof createRoomSchema>;
 type JoinRoomForm = z.infer<typeof joinRoomSchema>;
+type InviteEmailForm = z.infer<typeof inviteEmailSchema>;
 type MessageForm = z.infer<typeof messageSchema>;
 
 export default function VyronaSocial() {
@@ -147,6 +152,13 @@ export default function VyronaSocial() {
     resolver: zodResolver(joinRoomSchema),
     defaultValues: {
       roomCode: ""
+    }
+  });
+
+  const inviteEmailForm = useForm<InviteEmailForm>({
+    resolver: zodResolver(inviteEmailSchema),
+    defaultValues: {
+      email: ""
     }
   });
 

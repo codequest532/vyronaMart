@@ -691,11 +691,131 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createShoppingRoom(insertRoom: InsertShoppingRoom): Promise<ShoppingRoom> {
+    // Generate unique invite code
+    const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    
     const [room] = await db
       .insert(shoppingRooms)
-      .values(insertRoom)
+      .values({
+        ...insertRoom,
+        inviteCode
+      })
       .returning();
     return room;
+  }
+
+  async getShoppingRoomByInviteCode(code: string): Promise<ShoppingRoom | undefined> {
+    const [room] = await db.select().from(shoppingRooms).where(eq(shoppingRooms.inviteCode, code));
+    return room || undefined;
+  }
+
+  async updateShoppingRoom(id: number, updates: Partial<ShoppingRoom>): Promise<ShoppingRoom | undefined> {
+    const [room] = await db
+      .update(shoppingRooms)
+      .set(updates)
+      .where(eq(shoppingRooms.id, id))
+      .returning();
+    return room || undefined;
+  }
+
+  async deleteShoppingRoom(id: number): Promise<boolean> {
+    const result = await db
+      .update(shoppingRooms)
+      .set({ isActive: false })
+      .where(eq(shoppingRooms.id, id));
+    return result.rowCount > 0;
+  }
+
+  // Room Members
+  async getRoomMembers(roomId: number): Promise<RoomMember[]> {
+    return await db.select().from(roomMembers).where(eq(roomMembers.roomId, roomId));
+  }
+
+  async getRoomMember(roomId: number, userId: number): Promise<RoomMember | undefined> {
+    const [member] = await db
+      .select()
+      .from(roomMembers)
+      .where(and(eq(roomMembers.roomId, roomId), eq(roomMembers.userId, userId)));
+    return member || undefined;
+  }
+
+  async addRoomMember(member: InsertRoomMember): Promise<RoomMember> {
+    const [newMember] = await db
+      .insert(roomMembers)
+      .values(member)
+      .returning();
+    
+    // Update room member count
+    await db
+      .update(shoppingRooms)
+      .set({ memberCount: sql`${shoppingRooms.memberCount} + 1` })
+      .where(eq(shoppingRooms.id, member.roomId));
+    
+    return newMember;
+  }
+
+  async removeRoomMember(roomId: number, userId: number): Promise<boolean> {
+    const result = await db
+      .delete(roomMembers)
+      .where(and(eq(roomMembers.roomId, roomId), eq(roomMembers.userId, userId)));
+    
+    if (result.rowCount > 0) {
+      // Update room member count
+      await db
+        .update(shoppingRooms)
+        .set({ memberCount: sql`${shoppingRooms.memberCount} - 1` })
+        .where(eq(shoppingRooms.id, roomId));
+      return true;
+    }
+    return false;
+  }
+
+  async updateRoomMemberRole(roomId: number, userId: number, role: string): Promise<RoomMember | undefined> {
+    const [member] = await db
+      .update(roomMembers)
+      .set({ role })
+      .where(and(eq(roomMembers.roomId, roomId), eq(roomMembers.userId, userId)))
+      .returning();
+    return member || undefined;
+  }
+
+  // Room Invitations
+  async createRoomInvitation(invitation: InsertRoomInvitation): Promise<RoomInvitation> {
+    // Generate unique invite token
+    const inviteToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    const [newInvitation] = await db
+      .insert(roomInvitations)
+      .values({
+        ...invitation,
+        inviteToken
+      })
+      .returning();
+    return newInvitation;
+  }
+
+  async getRoomInvitation(token: string): Promise<RoomInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(roomInvitations)
+      .where(eq(roomInvitations.inviteToken, token));
+    return invitation || undefined;
+  }
+
+  async updateInvitationStatus(id: number, status: string): Promise<RoomInvitation | undefined> {
+    const [invitation] = await db
+      .update(roomInvitations)
+      .set({ 
+        status,
+        acceptedAt: status === 'accepted' ? new Date() : null
+      })
+      .where(eq(roomInvitations.id, id))
+      .returning();
+    return invitation || undefined;
+  }
+
+  async getRoomInvitations(roomId: number): Promise<RoomInvitation[]> {
+    return await db.select().from(roomInvitations).where(eq(roomInvitations.roomId, roomId));
   }
 
   async getCartItems(userId: number, roomId?: number): Promise<CartItem[]> {
