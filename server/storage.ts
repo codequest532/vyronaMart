@@ -714,6 +714,8 @@ export class DatabaseStorage implements IStorage {
 
   // Shared Cart - Room-specific operations
   async getSharedCartItems(roomId: number): Promise<CartItem[]> {
+    console.log(`=== GETTING SHARED CART ITEMS FOR ROOM ${roomId} ===`);
+    
     const items = await db.select({
       id: cartItems.id,
       userId: cartItems.userId,
@@ -731,8 +733,9 @@ export class DatabaseStorage implements IStorage {
     .where(eq(cartItems.roomId, roomId));
 
     console.log(`=== SHARED CART ITEMS QUERY RESULT FOR ROOM ${roomId} ===`, items);
+    console.log(`Found ${items.length} cart items for room ${roomId}`);
 
-    return items.map(item => ({
+    const mappedItems = items.map(item => ({
       id: item.id,
       userId: item.userId,
       productId: item.productId,
@@ -747,6 +750,9 @@ export class DatabaseStorage implements IStorage {
         description: item.productDescription || null
       }
     }));
+
+    console.log(`=== MAPPED CART ITEMS ===`, JSON.stringify(mappedItems, null, 2));
+    return mappedItems;
   }
 
   async addSharedCartItem(item: InsertCartItem): Promise<CartItem> {
