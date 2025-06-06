@@ -6,6 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Wallet, 
@@ -14,7 +18,10 @@ import {
   ArrowLeft,
   CheckCircle,
   Users,
-  Package
+  Package,
+  MapPin,
+  Plus,
+  Trash2
 } from "lucide-react";
 
 interface OrderItem {
@@ -32,6 +39,24 @@ interface ShoppingRoom {
   memberCount: number;
 }
 
+interface DeliveryAddress {
+  id: string;
+  memberName: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault?: boolean;
+}
+
+interface DeliveryMode {
+  type: 'single' | 'multiple';
+  addresses: DeliveryAddress[];
+}
+
 export default function PlaceOrder() {
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/place-order/:roomId");
@@ -40,6 +65,11 @@ export default function PlaceOrder() {
   
   const [selectedPayment, setSelectedPayment] = useState("wallet");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>({
+    type: 'single',
+    addresses: []
+  });
+  const [currentStep, setCurrentStep] = useState<'address' | 'payment' | 'review'>('address');
 
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
