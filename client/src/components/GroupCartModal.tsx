@@ -6,13 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Users, ShoppingCart, MessageCircle, Wallet, MapPin, Clock } from "lucide-react";
+import { Users, ShoppingCart, MessageCircle, Wallet, Plus, Clock } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { Product, GroupCart, GroupCartContribution } from "@shared/schema";
+import type { Product, ShoppingRoom, CartItem } from "@shared/schema";
 
 interface GroupCartModalProps {
   isOpen: boolean;
@@ -21,413 +20,304 @@ interface GroupCartModalProps {
   onSuccess?: () => void;
 }
 
-interface DeliveryAddress {
-  fullName: string;
-  address: string;
-  city: string;
-  zipCode: string;
-  phone: string;
+interface CreateRoomData {
+  name: string;
+  description: string;
 }
 
 export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCartModalProps) {
-  const [selectedGroupCart, setSelectedGroupCart] = useState<GroupCart | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<ShoppingRoom | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>({
-    fullName: "",
-    address: "",
-    city: "",
-    zipCode: "",
-    phone: ""
-  });
-  const [notes, setNotes] = useState("");
   const [showCreateNew, setShowCreateNew] = useState(false);
-  const [newGroupSettings, setNewGroupSettings] = useState({
-    minThreshold: 4,
-    maxCapacity: 50,
-    targetPrice: product ? Math.floor(product.price * 0.85) : 0, // 15% group discount
-    expiresIn: 7 // days
+  const [newRoomData, setNewRoomData] = useState<CreateRoomData>({
+    name: "",
+    description: ""
   });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch existing group carts for this product
-  const { data: groupCarts = [], isLoading } = useQuery({
-    queryKey: ["/api/group-carts/product", product?.id],
-    enabled: isOpen && !!product?.id,
+  // Fetch existing shopping rooms
+  const { data: shoppingRooms, isLoading: loadingRooms } = useQuery({
+    queryKey: ["/api/shopping-rooms"],
+    enabled: isOpen,
   });
 
-  // Fetch contributions for selected group cart
-  const { data: contributions = [] } = useQuery({
-    queryKey: ["/api/group-carts", selectedGroupCart?.id, "contributions"],
-    enabled: !!selectedGroupCart?.id,
-  });
-
-  // Create new group cart mutation
-  const createGroupCartMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/group-carts", data);
+  // Create new room mutation
+  const createRoomMutation = useMutation({
+    mutationFn: async (data: CreateRoomData) => {
+      const response = await apiRequest("POST", "/api/shopping-rooms", data);
+      if (!response.ok) {
+        throw new Error("Failed to create room");
+      }
       return response.json();
     },
-    onSuccess: (newGroupCart) => {
-      setSelectedGroupCart(newGroupCart);
+    onSuccess: (newRoom) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
       setShowCreateNew(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/group-carts/product", product.id] });
+      setSelectedRoom(newRoom);
       toast({
-        title: "Group Cart Created!",
-        description: "Your new group cart is ready for others to join."
+        title: "Success",
+        description: "Shopping room created successfully!",
       });
-    }
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create shopping room. Please try again.",
+      });
+    },
   });
 
-  // Join group cart mutation
-  const joinGroupCartMutation = useMutation({
-    mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", `/api/group-carts/${selectedGroupCart?.id}/join`, data);
+  // Add product to room mutation
+  const addToRoomMutation = useMutation({
+    mutationFn: async (data: { roomId: number; productId: number; quantity: number }) => {
+      const response = await apiRequest("POST", "/api/cart-items", data);
+      if (!response.ok) {
+        throw new Error("Failed to add product to room");
+      }
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/group-carts", selectedGroupCart?.id, "contributions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
       toast({
-        title: "Successfully Joined!",
-        description: "You've joined the group cart. Track progress in your dashboard."
+        title: "Success",
+        description: "Product added to shopping room!",
       });
       onSuccess?.();
       onClose();
-    }
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add product to room. Please try again.",
+      });
+    },
   });
 
-  const handleCreateGroupCart = () => {
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + newGroupSettings.expiresIn);
-
-    createGroupCartMutation.mutate({
-      groupId: 1, // Default group for now
-      productId: product.id,
-      minThreshold: newGroupSettings.minThreshold,
-      maxCapacity: newGroupSettings.maxCapacity,
-      targetPrice: newGroupSettings.targetPrice * 100, // Convert to cents
-      currentPrice: product.price * 100,
-      createdBy: 1, // Current user ID
-      expiresAt: expiryDate.toISOString()
-    });
-  };
-
-  const handleJoinGroupCart = () => {
-    if (!selectedGroupCart || !deliveryAddress.fullName || !deliveryAddress.address) {
+  const handleCreateRoom = async () => {
+    if (!newRoomData.name.trim()) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in your delivery address.",
-        variant: "destructive"
+        title: "Error",
+        description: "Please enter a room name.",
       });
       return;
     }
 
-    const contributionAmount = Math.floor((selectedGroupCart.targetPrice || selectedGroupCart.currentPrice) * quantity);
+    await createRoomMutation.mutateAsync(newRoomData);
+  };
 
-    joinGroupCartMutation.mutate({
-      userId: 1, // Current user ID
+  const handleAddToRoom = async () => {
+    if (!selectedRoom || !product) return;
+
+    await addToRoomMutation.mutateAsync({
+      roomId: selectedRoom.id,
+      productId: product.id,
       quantity,
-      contributionAmount,
-      deliveryAddress,
-      notes
     });
   };
 
-  const getProgressPercentage = (groupCart: GroupCart) => {
-    return Math.min((groupCart.totalQuantity / groupCart.minThreshold) * 100, 100);
+  const resetModal = () => {
+    setSelectedRoom(null);
+    setQuantity(1);
+    setShowCreateNew(false);
+    setNewRoomData({
+      name: "",
+      description: ""
+    });
   };
 
-  const getTimeRemaining = (expiresAt: string | null) => {
-    if (!expiresAt) return "No expiry";
-    const now = new Date();
-    const expiry = new Date(expiresAt);
-    const diff = expiry.getTime() - now.getTime();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    return days > 0 ? `${days} days left` : "Expired";
-  };
+  useEffect(() => {
+    if (!isOpen) {
+      resetModal();
+    }
+  }, [isOpen]);
 
-  // Don't render if product is null
-  if (!product) {
-    return null;
-  }
+  if (!isOpen || !product) return null;
+
+  const rooms = Array.isArray(shoppingRooms) ? shoppingRooms : [];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+        <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Add to Group Cart - {product.name}
+            Add to Shopping Room - {product.name}
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 pb-6">
-            {/* Left Panel - Group Cart Selection */}
-            <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-h-[70vh] overflow-hidden">
+          {/* Left Panel: Product Info */}
+          <div className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <ShoppingCart className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{product.name}</h3>
+                  <p className="text-muted-foreground">${(product.price / 100).toFixed(2)}</p>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">{product.description}</p>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Quantity</label>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                >
+                  -
+                </Button>
+                <Input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20 text-center"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setQuantity(quantity + 1)}
+                >
+                  +
+                </Button>
+              </div>
+            </div>
+
+            {selectedRoom && (
+              <div className="space-y-3">
+                <h4 className="font-medium">Selected Room</h4>
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="font-medium">{selectedRoom.name}</h5>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedRoom.memberCount} members • ${((selectedRoom.totalCart || 0) / 100).toFixed(2)} total
+                      </p>
+                    </div>
+                    <Badge variant="secondary">
+                      <Users className="h-3 w-3 mr-1" />
+                      {selectedRoom.memberCount}
+                    </Badge>
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleAddToRoom} 
+                  className="w-full"
+                  disabled={addToRoomMutation.isPending}
+                >
+                  <Wallet className="h-4 w-4 mr-2" />
+                  {addToRoomMutation.isPending ? "Adding..." : "Add to Room & Checkout with VyronaWallet"}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel: Room Selection */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Available Group Carts</h3>
+              <h3 className="font-semibold">Choose Shopping Room</h3>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowCreateNew(!showCreateNew)}
               >
-                Create New
+                <Plus className="h-4 w-4 mr-2" />
+                Create New Room
               </Button>
             </div>
 
-            {isLoading ? (
-              <div className="text-center py-8">Loading group carts...</div>
-            ) : (
-              <ScrollArea className="h-60">
-                <div className="space-y-3">
-                  {groupCarts.map((groupCart: GroupCart) => (
-                    <div
-                      key={groupCart.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                        selectedGroupCart?.id === groupCart.id
-                          ? "border-purple-500 bg-purple-50 dark:bg-purple-950"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                      onClick={() => setSelectedGroupCart(groupCart)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary" className="bg-green-100 text-green-800">
-                          {groupCart.totalQuantity}/{groupCart.minThreshold} joined
-                        </Badge>
-                        <span className="text-sm text-gray-500">
-                          <Clock className="h-4 w-4 inline mr-1" />
-                          {getTimeRemaining(groupCart.expiresAt)}
-                        </span>
-                      </div>
-                      
-                      <Progress 
-                        value={getProgressPercentage(groupCart)} 
-                        className="mb-2 h-2"
-                      />
-                      
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium">
-                          ₹{(groupCart.targetPrice || groupCart.currentPrice) / 100}
-                        </span>
-                        <span className="text-gray-500">
-                          {groupCart.maxCapacity - groupCart.totalQuantity} spots left
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-
-                  {groupCarts.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
-                      No active group carts. Create the first one!
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            )}
-
-            {/* Create New Group Cart */}
             {showCreateNew && (
-              <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-900">
-                <h4 className="font-medium mb-3">Create New Group Cart</h4>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-sm font-medium">Min. People</label>
-                      <Input
-                        type="number"
-                        value={newGroupSettings.minThreshold}
-                        onChange={(e) => setNewGroupSettings(prev => ({
-                          ...prev,
-                          minThreshold: parseInt(e.target.value) || 4
-                        }))}
-                        min="2"
-                        max="20"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium">Max. Capacity</label>
-                      <Input
-                        type="number"
-                        value={newGroupSettings.maxCapacity}
-                        onChange={(e) => setNewGroupSettings(prev => ({
-                          ...prev,
-                          maxCapacity: parseInt(e.target.value) || 50
-                        }))}
-                        min="10"
-                        max="100"
-                      />
-                    </div>
+              <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                <h4 className="font-medium">Create New Shopping Room</h4>
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Room name"
+                    value={newRoomData.name}
+                    onChange={(e) => setNewRoomData({ ...newRoomData, name: e.target.value })}
+                  />
+                  <Textarea
+                    placeholder="Room description (optional)"
+                    value={newRoomData.description}
+                    onChange={(e) => setNewRoomData({ ...newRoomData, description: e.target.value })}
+                    rows={2}
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={handleCreateRoom}
+                      disabled={createRoomMutation.isPending || !newRoomData.name.trim()}
+                    >
+                      {createRoomMutation.isPending ? "Creating..." : "Create Room"}
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowCreateNew(false)}>
+                      Cancel
+                    </Button>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium">Target Price (₹)</label>
-                    <Input
-                      type="number"
-                      value={newGroupSettings.targetPrice}
-                      onChange={(e) => setNewGroupSettings(prev => ({
-                        ...prev,
-                        targetPrice: parseInt(e.target.value) || 0
-                      }))}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Original: ₹{product.price} | Savings: ₹{product.price - newGroupSettings.targetPrice}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={handleCreateGroupCart}
-                    disabled={createGroupCartMutation.isPending}
-                    className="w-full"
-                  >
-                    {createGroupCartMutation.isPending ? "Creating..." : "Create Group Cart"}
-                  </Button>
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Right Panel - Join Details */}
-          <div className="space-y-4">
-            {selectedGroupCart ? (
-              <>
-                <div className="p-4 border rounded-lg bg-blue-50 dark:bg-blue-950">
-                  <h4 className="font-medium mb-2">Selected Group Cart</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Group Price:</span>
-                      <span className="font-medium">₹{(selectedGroupCart.targetPrice || selectedGroupCart.currentPrice) / 100}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Progress:</span>
-                      <span>{selectedGroupCart.totalQuantity}/{selectedGroupCart.minThreshold} joined</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Your Savings:</span>
-                      <span className="text-green-600 font-medium">
-                        ₹{((product.price * 100) - (selectedGroupCart.targetPrice || selectedGroupCart.currentPrice)) / 100}
-                      </span>
-                    </div>
+            <ScrollArea className="h-[300px]">
+              <div className="space-y-3">
+                {loadingRooms ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Loading rooms...
                   </div>
-                </div>
-
-                {/* Current Participants */}
-                {contributions.length > 0 && (
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-medium mb-3 flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Current Participants ({contributions.length})
-                    </h4>
-                    <div className="space-y-2">
-                      {contributions.slice(0, 3).map((contribution: GroupCartContribution, index: number) => (
-                        <div key={contribution.id} className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>U{index + 1}</AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">User {contribution.userId}</p>
-                            <p className="text-xs text-gray-500">
-                              Qty: {contribution.quantity} • ₹{contribution.contributionAmount / 100}
-                            </p>
+                ) : rooms.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No shopping rooms available</p>
+                    <p className="text-sm">Create a new room to start shopping together!</p>
+                  </div>
+                ) : (
+                  rooms.map((room: any) => (
+                    <div
+                      key={room.id}
+                      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                        selectedRoom?.id === room.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => setSelectedRoom(room)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{room.name}</h4>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {room.memberCount} members
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <ShoppingCart className="h-3 w-3" />
+                              ${((room.totalCart || 0) / 100).toFixed(2)}
+                            </span>
+                            {room.currentGame && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {room.currentGame}
+                              </span>
+                            )}
                           </div>
                         </div>
-                      ))}
-                      {contributions.length > 3 && (
-                        <p className="text-xs text-gray-500">+{contributions.length - 3} more participants</p>
-                      )}
+                        <div className="flex items-center gap-2">
+                          <Badge variant={room.isActive ? "default" : "secondary"}>
+                            {room.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))
                 )}
-
-                <Separator />
-
-                {/* Join Form */}
-                <div className="space-y-4">
-                  <h4 className="font-medium">Join This Group Cart</h4>
-                  
-                  <div>
-                    <label className="text-sm font-medium">Quantity</label>
-                    <Input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                      min="1"
-                      max="5"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Delivery Address
-                    </label>
-                    <Input
-                      placeholder="Full Name"
-                      value={deliveryAddress.fullName}
-                      onChange={(e) => setDeliveryAddress(prev => ({ ...prev, fullName: e.target.value }))}
-                    />
-                    <Input
-                      placeholder="Address"
-                      value={deliveryAddress.address}
-                      onChange={(e) => setDeliveryAddress(prev => ({ ...prev, address: e.target.value }))}
-                    />
-                    <div className="grid grid-cols-2 gap-2">
-                      <Input
-                        placeholder="City"
-                        value={deliveryAddress.city}
-                        onChange={(e) => setDeliveryAddress(prev => ({ ...prev, city: e.target.value }))}
-                      />
-                      <Input
-                        placeholder="ZIP Code"
-                        value={deliveryAddress.zipCode}
-                        onChange={(e) => setDeliveryAddress(prev => ({ ...prev, zipCode: e.target.value }))}
-                      />
-                    </div>
-                    <Input
-                      placeholder="Phone Number"
-                      value={deliveryAddress.phone}
-                      onChange={(e) => setDeliveryAddress(prev => ({ ...prev, phone: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Notes (Optional)</label>
-                    <Textarea
-                      placeholder="Any special instructions..."
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Your Total:</span>
-                      <span className="font-bold text-lg">
-                        ₹{((selectedGroupCart.targetPrice || selectedGroupCart.currentPrice) * quantity) / 100}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-600 mt-1">
-                      Payment via VyronaWallet at checkout
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={handleJoinGroupCart}
-                    disabled={joinGroupCartMutation.isPending}
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  >
-                    {joinGroupCartMutation.isPending ? "Joining..." : `Join Group Cart - ₹${((selectedGroupCart.targetPrice || selectedGroupCart.currentPrice) * quantity) / 100}`}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                Select a group cart to continue
               </div>
-            )}
+            </ScrollArea>
           </div>
-          </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

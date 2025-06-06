@@ -668,11 +668,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Group Cart Workflow API Routes
   app.post("/api/group-carts", async (req, res) => {
     try {
+      console.log("Creating group cart with data:", req.body);
       const groupCartData = insertGroupCartSchema.parse(req.body);
+      console.log("Parsed group cart data:", groupCartData);
       const groupCart = await storage.createGroupCart(groupCartData);
+      console.log("Created group cart:", groupCart);
       res.json(groupCart);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create group cart" });
+      console.error("Group cart creation error:", error);
+      res.status(500).json({ message: "Failed to create group cart", error: error.message });
     }
   });
 
