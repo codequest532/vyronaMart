@@ -517,19 +517,27 @@ export default function VyronaSocial() {
                 </div>
               ))}
             </div>
-          ) : (groupBuyProducts as any[])?.length === 0 ? (
+          ) : filteredAndSortedProducts.length === 0 ? (
             <div className="text-center py-12">
               <div className="p-6 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl w-fit mx-auto mb-4">
                 <Package className="w-16 h-16 text-orange-600 dark:text-orange-400" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No Products Available</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                {searchQuery || selectedCategory !== "all" ? "No Products Found" : "No Products Available"}
+              </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Check back later for exclusive group buy deals
+                {searchQuery || selectedCategory !== "all" 
+                  ? "Try adjusting your search or filter criteria" 
+                  : "Check back later for exclusive group buy deals"
+                }
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {(groupBuyProducts as any[])?.slice(0, 10).map((product: any) => (
+            <div className={viewMode === "grid" 
+              ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" 
+              : "space-y-4"
+            }>
+              {filteredAndSortedProducts.slice(0, 20).map((product: any) => (
                 <Card 
                   key={product.id} 
                   className="group cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-orange-50/30 dark:from-gray-800 dark:to-orange-900/20 overflow-hidden"
