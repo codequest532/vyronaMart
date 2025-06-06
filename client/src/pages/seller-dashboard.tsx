@@ -2861,7 +2861,7 @@ export default function SellerDashboard() {
                           name="groupBuyMinQuantity"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="text-purple-800">Minimum Group Quantity</FormLabel>
+                              <FormLabel className="text-purple-800">Target Group Size (Optional)</FormLabel>
                               <FormControl>
                                 <Input 
                                   type="number" 
@@ -2871,6 +2871,7 @@ export default function SellerDashboard() {
                                   className="border-purple-300 focus:border-purple-500"
                                 />
                               </FormControl>
+                              <p className="text-xs text-purple-600">For analytics only - customers can purchase any quantity</p>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -2891,6 +2892,7 @@ export default function SellerDashboard() {
                                   className="border-purple-300 focus:border-purple-500"
                                 />
                               </FormControl>
+                              <p className="text-xs text-purple-600">Discount applied to all VyronaSocial purchases</p>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -2908,7 +2910,7 @@ export default function SellerDashboard() {
                         <>
                           • <strong>VyronaSocial:</strong> Product available for collaborative group shopping rooms
                           <br />
-                          • Requires minimum quantity and group discount settings
+                          • Customers can purchase any quantity, group settings are for seller configuration only
                         </>
                       ) : (
                         <>
