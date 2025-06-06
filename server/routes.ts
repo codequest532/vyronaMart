@@ -972,30 +972,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Shopping rooms for checkout selection (maps to VyronaSocial rooms)
   app.get("/api/shopping-rooms", async (req, res) => {
+    console.log("=== SHOPPING ROOMS ENDPOINT HIT ===");
+    
     try {
-      console.log("Fetching shopping rooms...");
-      const rooms = await db
-        .select({
-          id: shoppingGroups.id,
-          name: shoppingGroups.name,
-          description: shoppingGroups.description,
-          creatorId: shoppingGroups.creatorId,
-          isActive: shoppingGroups.isActive,
-          maxMembers: shoppingGroups.maxMembers,
-          roomCode: shoppingGroups.roomCode,
-          createdAt: shoppingGroups.createdAt,
-          memberCount: sql<number>`COALESCE(COUNT(${groupMembers.id}), 0)`.as('memberCount')
-        })
-        .from(shoppingGroups)
-        .leftJoin(groupMembers, eq(shoppingGroups.id, groupMembers.groupId))
-        .where(eq(shoppingGroups.isActive, true))
-        .groupBy(shoppingGroups.id)
-        .orderBy(desc(shoppingGroups.createdAt));
-
-      console.log("Found rooms:", rooms);
-      res.json(rooms);
+      // Use the existing VyronaSocial storage method that we know works
+      const rooms = await storage.getShoppingGroups(0);
+      console.log("Shopping rooms from storage:", rooms);
+      
+      // Transform to match expected format
+      const transformedRooms = rooms.map(room => ({
+        id: room.id,
+        name: room.name,
+        description: room.description || '',
+        creatorId: room.creatorId,
+        isActive: room.isActive,
+        memberCount: room.memberCount || 1,
+        roomCode: room.roomCode,
+        createdAt: room.createdAt
+      }));
+      
+      console.log("Transformed rooms:", transformedRooms);
+      res.json(transformedRooms);
     } catch (error) {
+      console.error("=== SHOPPING ROOMS ERROR ===");
       console.error("Error fetching shopping rooms:", error);
+      console.error("Error stack:", error.stack);
+      console.error("=== SHOPPING ROOMS ERROR END ===");
       res.status(500).json({ message: "Failed to fetch shopping rooms" });
     }
   });
