@@ -967,6 +967,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Shopping rooms for checkout selection (maps to VyronaSocial rooms)
+  app.get("/api/shopping-rooms", async (req, res) => {
+    try {
+      const rooms = await storage.getShoppingGroups(0);
+      
+      // Format rooms for checkout selection
+      const formattedRooms = (rooms as any[]).map(room => ({
+        id: room.id,
+        name: room.name,
+        description: room.description,
+        memberCount: room.memberCount || 0,
+        isActive: room.isActive,
+        creatorId: room.creatorId,
+        createdAt: room.createdAt
+      }));
+      
+      res.json(formattedRooms);
+    } catch (error) {
+      console.error("Error fetching shopping rooms:", error);
+      res.status(500).json({ message: "Failed to fetch shopping rooms" });
+    }
+  });
+
   // VyronaRead Books - Get books for customers
   app.get("/api/books", async (req, res) => {
     try {

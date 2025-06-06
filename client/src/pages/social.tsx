@@ -233,7 +233,9 @@ export default function VyronaSocial() {
       createRoomForm.reset();
       setSelectedUsers([]);
       setUserSearchQuery("");
+      // Invalidate both VyronaSocial rooms and shopping rooms for checkout
       queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
     },
     onError: (error: Error) => {
       toast({

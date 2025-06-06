@@ -81,7 +81,9 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
       return response.json();
     },
     onSuccess: (newRoom) => {
+      // Invalidate both shopping rooms and VyronaSocial rooms
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
       setShowCreateNew(false);
       setSelectedRoom(newRoom);
       setNewRoomData({ name: "", description: "" });
