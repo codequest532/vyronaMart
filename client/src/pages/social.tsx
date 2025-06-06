@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -103,6 +103,12 @@ export default function VyronaSocial() {
   const [selectedRoomForInvite, setSelectedRoomForInvite] = useState<number | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  
+  // Filter and search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Fetch data
   const { data: userGroups, isLoading: groupsLoading } = useQuery({
@@ -116,6 +122,50 @@ export default function VyronaSocial() {
   const { data: notifications } = useQuery({
     queryKey: ["/api/social/notifications"],
   });
+
+  // Filter and sort products
+  const filteredAndSortedProducts = React.useMemo(() => {
+    if (!groupBuyProducts) return [];
+    
+    let filtered = [...(groupBuyProducts as any[])];
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply category filter
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(product =>
+        product.category?.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
+    // Apply sorting
+    switch (sortBy) {
+      case "price-low":
+        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+        break;
+      case "price-high":
+        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        break;
+      case "discount":
+        filtered.sort((a, b) => (b.groupBuyDiscount || 0) - (a.groupBuyDiscount || 0));
+        break;
+      case "popular":
+        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+        break;
+      case "newest":
+      default:
+        filtered.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+        break;
+    }
+
+    return filtered;
+  }, [groupBuyProducts, searchQuery, selectedCategory, sortBy]);
 
   // Forms
   const createRoomForm = useForm<CreateRoomForm>({
@@ -371,7 +421,7 @@ export default function VyronaSocial() {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Category Filter */}
             <div className="flex-1 max-w-xs">
-              <Select defaultValue="all">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
@@ -393,6 +443,8 @@ export default function VyronaSocial() {
                 <Input
                   type="text"
                   placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
                 />
               </div>
@@ -400,7 +452,7 @@ export default function VyronaSocial() {
 
             {/* Sort Filter */}
             <div className="flex-1 max-w-xs">
-              <Select defaultValue="newest">
+              <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
                   <SelectValue placeholder="Newest First" />
                 </SelectTrigger>
@@ -417,16 +469,18 @@ export default function VyronaSocial() {
             {/* View Toggle */}
             <div className="flex gap-2">
               <Button
-                variant="outline"
+                variant={viewMode === "grid" ? "default" : "outline"}
                 size="sm"
                 className="p-2 border-gray-300 dark:border-gray-600"
+                onClick={() => setViewMode("grid")}
               >
                 <LayoutGrid className="w-4 h-4" />
               </Button>
               <Button
-                variant="outline"
+                variant={viewMode === "list" ? "default" : "outline"}
                 size="sm"
                 className="p-2 border-gray-300 dark:border-gray-600"
+                onClick={() => setViewMode("list")}
               >
                 <List className="w-4 h-4" />
               </Button>
