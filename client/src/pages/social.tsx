@@ -953,6 +953,16 @@ export default function VyronaSocial() {
               <div className="space-y-6">
                 {/* Cart Items Display */}
                 <div className="space-y-4">
+                  {(() => {
+                    console.log("CART DEBUG:", {
+                      sharedCart,
+                      isArray: Array.isArray(sharedCart),
+                      length: sharedCart?.length,
+                      selectedRoomId,
+                      cartLoading
+                    });
+                    return null;
+                  })()}
                   {!Array.isArray(sharedCart) || sharedCart.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
