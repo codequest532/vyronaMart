@@ -1033,7 +1033,6 @@ export class DatabaseStorage implements IStorage {
         productId: cartItems.productId,
         quantity: cartItems.quantity,
         userId: cartItems.userId,
-        addedAt: cartItems.addedAt,
         name: products.name,
         price: products.price,
         imageUrl: products.imageUrl,

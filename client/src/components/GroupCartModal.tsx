@@ -420,6 +420,61 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                 )}
               </div>
             </div>
+
+            {/* Footer with checkout button */}
+            <div className="border-t p-4 mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Quantity:</span>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                    >
+                      -
+                    </Button>
+                    <span className="w-8 text-center">{quantity}</span>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setQuantity(quantity + 1)}
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground">Total</div>
+                  <div className="font-semibold">${((product.price / 100) * quantity).toFixed(2)}</div>
+                </div>
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  className="flex-1" 
+                  disabled={!selectedRoom || addToRoomMutation.isPending}
+                  onClick={handleAddToRoom}
+                >
+                  {addToRoomMutation.isPending ? "Adding..." : "Add to Room"}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="flex-1" 
+                  disabled={!selectedRoom}
+                  onClick={() => {
+                    if (selectedRoom) {
+                      setLocation(`/place-order/${selectedRoom.id}`);
+                      onClose();
+                    }
+                  }}
+                >
+                  <Wallet className="w-4 h-4 mr-2" />
+                  Checkout
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </DialogContent>
