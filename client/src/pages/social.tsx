@@ -1608,7 +1608,7 @@ export default function VyronaSocial() {
                           </span>
                         </div>
                         
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-1">
                             <Users className="w-3 h-3 text-blue-600" />
                             <span className="text-xs text-blue-600 font-medium">
@@ -1619,6 +1619,19 @@ export default function VyronaSocial() {
                             Group
                           </Badge>
                         </div>
+                        
+                        <Button 
+                          size="sm" 
+                          className="w-full text-xs h-7 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Add to group cart logic here
+                            console.log('Adding to group cart:', product.name);
+                          }}
+                        >
+                          <ShoppingCart className="w-3 h-3 mr-1" />
+                          Add to Group Cart
+                        </Button>
                       </CardContent>
                     </Card>
                   ))}
