@@ -436,11 +436,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Shopping room routes
+  // Shopping room routes (maps to VyronaSocial rooms for checkout)
   app.get("/api/shopping-rooms", async (req, res) => {
     try {
-      const rooms = await storage.getShoppingRooms();
-      res.json(rooms);
+      console.log("=== SHOPPING ROOMS ENDPOINT HIT (FIRST ONE) ===");
+      
+      // Use the VyronaSocial shopping groups data
+      const rooms = await storage.getShoppingGroups(0);
+      console.log("Shopping rooms from storage:", rooms);
+      
+      // Transform to match expected format for checkout
+      const transformedRooms = rooms.map(room => ({
+        id: room.id,
+        name: room.name,
+        description: room.description || '',
+        creatorId: room.creatorId,
+        isActive: room.isActive,
+        memberCount: room.memberCount || 1,
+        roomCode: room.roomCode,
+        createdAt: room.createdAt
+      }));
+      
+      console.log("Transformed rooms for checkout:", transformedRooms);
+      res.json(transformedRooms);
     } catch (error) {
       console.error("Shopping rooms error:", error);
       res.status(500).json({ message: "Internal server error", error: error.message });
