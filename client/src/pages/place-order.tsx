@@ -121,12 +121,7 @@ export default function PlaceOrder() {
   useEffect(() => {
     if (!room?.memberCount) return; // Wait for room data to load
     
-    console.log('Room data:', room);
-    console.log('Room memberCount:', room.memberCount, typeof room.memberCount);
-    
     const memberCount = parseInt(room.memberCount.toString());
-    console.log('Parsed memberCount:', memberCount);
-    
     const initialAddresses: DeliveryAddress[] = [];
     
     // Create address entries based on member count

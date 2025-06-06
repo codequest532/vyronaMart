@@ -143,6 +143,57 @@ export function setupVyronaSocialAPI(app: express.Application) {
     }
   });
 
+  // Get Single Room by ID
+  app.get("/api/vyronasocial/rooms/:id", async (req, res) => {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    try {
+      const roomId = parseInt(req.params.id);
+      
+      // Get room data with member count and cart total
+      const result = await pool.query(`
+        SELECT sg.*, 
+               COUNT(DISTINCT gm.id) as member_count,
+               COALESCE(SUM(ci.quantity * p.price), 0) as total_cart
+        FROM shopping_groups sg
+        LEFT JOIN group_members gm ON sg.id = gm.group_id
+        LEFT JOIN cart_items ci ON sg.id = ci.room_id
+        LEFT JOIN products p ON ci.product_id = p.id
+        WHERE sg.id = $1
+        GROUP BY sg.id
+      `, [roomId]);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Room not found" });
+      }
+      
+      const row = result.rows[0];
+      const room = {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        category: "general",
+        privacy: "public",
+        creatorId: row.creator_id,
+        isActive: row.is_active,
+        memberCount: parseInt(row.member_count) || 0,
+        totalCart: row.total_cart || 0,
+        currentGame: null,
+        roomCode: row.room_code || Math.random().toString(36).substring(2, 8).toUpperCase(),
+        scheduledTime: null,
+        maxMembers: row.max_members,
+        createdAt: row.created_at
+      };
+      
+      res.json(room);
+    } catch (error) {
+      console.error("Get single room error:", error);
+      res.status(500).json({ error: "Failed to get room" });
+    } finally {
+      await pool.end();
+    }
+  });
+
   // Join Room
   app.post("/api/vyronasocial/rooms/join", async (req, res) => {
     const pool = new Pool({ connectionString: process.env.DATABASE_URL });
