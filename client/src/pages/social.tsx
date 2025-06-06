@@ -56,7 +56,8 @@ import {
   ShoppingBag,
   Search,
   LayoutGrid,
-  List
+  List,
+  DoorOpen
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -99,6 +100,8 @@ export default function VyronaSocial() {
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
   const [showJoinRoom, setShowJoinRoom] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showJoinDialog, setShowJoinDialog] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [selectedRoomForInvite, setSelectedRoomForInvite] = useState<number | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -114,6 +117,10 @@ export default function VyronaSocial() {
   const { data: userGroups, isLoading: groupsLoading } = useQuery({
     queryKey: ["/api/vyronasocial/rooms"],
   });
+
+  // Use correct variable names for rooms
+  const rooms = userGroups;
+  const roomsLoading = groupsLoading;
 
   const { data: groupBuyProducts, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/social/products"],
@@ -1375,26 +1382,244 @@ export default function VyronaSocial() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Back to Dashboard Button */}
-      <div className="mb-6">
-        <Button
-          variant="outline"
-          onClick={handleBackToDashboard}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/20">
+      {/* Header */}
+      <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-30">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="outline"
+              onClick={handleBackToDashboard}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                VyronaSocial
+              </h1>
+            </div>
+          </div>
+        </div>
       </div>
 
       {currentView === "dashboard" ? (
-        <>
-          <HeroSection />
-          <RoomDashboard />
-        </>
+        <div className="flex">
+          {/* Active Rooms Sidebar */}
+          <div className="w-80 bg-white dark:bg-gray-900 border-r min-h-screen p-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="font-bold text-lg">Active Rooms</h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Join or create shopping rooms</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Create Room Button */}
+              <Button 
+                onClick={() => setShowCreateDialog(true)}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Room
+              </Button>
+
+              {/* Join Room Button */}
+              <Button 
+                onClick={() => setShowJoinDialog(true)}
+                variant="outline"
+                className="w-full border-purple-200 hover:bg-purple-50 dark:border-purple-800 dark:hover:bg-purple-900/20"
+              >
+                <DoorOpen className="w-4 h-4 mr-2" />
+                Join Room
+              </Button>
+
+              {/* Active Rooms List */}
+              <div className="space-y-3">
+                {roomsLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="h-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (rooms as any[])?.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl w-fit mx-auto mb-3">
+                      <Users className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium">No active rooms</p>
+                    <p className="text-sm text-gray-500 mt-1">Create one to start shopping together</p>
+                  </div>
+                ) : (
+                  (rooms as any[])?.map((room: any) => (
+                    <Card 
+                      key={room.id} 
+                      className="group cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/20"
+                      onClick={() => {
+                        setSelectedRoomId(room.id);
+                        setCurrentView("room");
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm mb-1 truncate group-hover:text-purple-600 transition-colors">
+                              {room.name}
+                            </h4>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                              {room.description || "No description"}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="flex-shrink-0 p-1 h-7 w-7"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRoomForInvite(room.id);
+                              setShowInviteDialog(true);
+                            }}
+                          >
+                            <UserPlus className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <Users className="w-3 h-3 text-blue-600" />
+                              <span className="text-blue-600 font-medium">{room.memberCount || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <ShoppingCart className="w-3 h-3 text-green-600" />
+                              <span className="text-green-600 font-medium">₹{(room.totalCart || 0).toLocaleString()}</span>
+                            </div>
+                          </div>
+                          <Badge 
+                            variant={room.isActive ? "default" : "secondary"} 
+                            className={`text-xs px-2 py-0 ${room.isActive ? 'bg-green-100 text-green-700 border-green-200' : ''}`}
+                          >
+                            {room.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 p-6">
+            <HeroSection />
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                    <Package className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      Featured Products
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Discover trending items and group buy deals
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Grid */}
+              {productsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="h-64 bg-gradient-to-r from-gray-200 to-gray-300 rounded-2xl"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (groupBuyProducts as any[])?.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="p-6 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl w-fit mx-auto mb-4">
+                    <Package className="w-16 h-16 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium text-lg">No products available</p>
+                  <p className="text-sm text-gray-500 mt-2">Check back later for exclusive deals</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {(groupBuyProducts as any[])?.map((product: any) => (
+                    <Card 
+                      key={product.id} 
+                      className="group cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/20 overflow-hidden"
+                      onClick={() => setSelectedProduct(product)}
+                    >
+                      <div className="relative">
+                        <img 
+                          src={product.imageUrl || "/api/placeholder/300/200"} 
+                          alt={product.name}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="absolute top-3 left-3">
+                          <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold">
+                            {product.groupBuyDiscount || 10}% OFF
+                          </Badge>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                          {product.name}
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                          {product.description}
+                        </p>
+                        
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            ₹{Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)).toLocaleString()}
+                          </span>
+                          <span className="text-sm text-gray-500 line-through">
+                            ₹{(product.price / 100).toLocaleString()}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1">
+                            <Users className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm text-blue-600 font-medium">
+                              Min {product.groupBuyMinQuantity || 4}
+                            </span>
+                          </div>
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            Group Deal
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       ) : (
-        <RoomInterface />
+        <div className="container mx-auto px-4 py-6">
+          <RoomInterface />
+        </div>
       )}
 
       {/* Create Room Dialog */}
