@@ -713,11 +713,13 @@ export class DatabaseStorage implements IStorage {
       return total + (item.quantity * (item.price || 0));
     }, 0);
 
-    // Update the shopping room's total cart value
+    console.log(`=== UPDATING ROOM ${roomId} CART TOTAL TO ${totalCart} ===`);
+
+    // Update the shopping group's total cart value (using correct table)
     await db
-      .update(shoppingRooms)
+      .update(shoppingGroups)
       .set({ totalCart })
-      .where(eq(shoppingRooms.id, roomId));
+      .where(eq(shoppingGroups.id, roomId));
   }
 
   async removeCartItem(id: number): Promise<boolean> {
