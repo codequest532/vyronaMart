@@ -797,8 +797,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getShoppingGroups(userId: number): Promise<ShoppingGroup[]> {
-    // Return empty array for now until schema is properly updated
-    return [];
+    try {
+      const groups = await db
+        .select({
+          id: shoppingGroups.id,
+          name: shoppingGroups.name,
+          description: shoppingGroups.description,
+          creatorId: shoppingGroups.creatorId,
+          isActive: shoppingGroups.isActive,
+          maxMembers: shoppingGroups.maxMembers,
+          roomCode: shoppingGroups.roomCode,
+          createdAt: shoppingGroups.createdAt,
+          memberCount: sql<number>`COALESCE(COUNT(${groupMembers.id}), 0)`.as('memberCount')
+        })
+        .from(shoppingGroups)
+        .leftJoin(groupMembers, eq(shoppingGroups.id, groupMembers.groupId))
+        .where(eq(shoppingGroups.isActive, true))
+        .groupBy(shoppingGroups.id)
+        .orderBy(desc(shoppingGroups.createdAt));
+
+      return groups.map(group => ({
+        id: group.id,
+        name: group.name,
+        description: group.description || '',
+        category: 'general',
+        privacy: 'public',
+        creatorId: group.creatorId,
+        isActive: group.isActive,
+        memberCount: group.memberCount,
+        totalCart: 0,
+        currentGame: null,
+        roomCode: group.roomCode || Math.random().toString(36).substring(2, 8).toUpperCase(),
+        scheduledTime: null,
+        maxMembers: group.maxMembers,
+        createdAt: group.createdAt
+      }));
+    } catch (error) {
+      console.error("Error in getShoppingGroups:", error);
+      return [];
+    }
   }
 
   async getShoppingGroup(id: number): Promise<ShoppingGroup | undefined> {
