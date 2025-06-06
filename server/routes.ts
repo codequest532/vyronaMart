@@ -2122,7 +2122,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/cart/:roomId", async (req, res) => {
     try {
       const { roomId } = req.params;
+      console.log("Fetching cart items for room:", roomId);
       const cartItems = await storage.getCartItems(0, Number(roomId)); // Room-specific cart
+      console.log("Cart items found:", cartItems);
       res.json(cartItems);
     } catch (error) {
       console.error("Error fetching shared cart:", error);

@@ -683,9 +683,11 @@ export class DatabaseStorage implements IStorage {
 
   async getCartItems(userId: number, roomId?: number): Promise<CartItem[]> {
     if (roomId !== undefined) {
+      // For room carts, return all items in the room (shared cart)
       return await db.select().from(cartItems)
-        .where(and(eq(cartItems.userId, userId), eq(cartItems.roomId, roomId)));
+        .where(eq(cartItems.roomId, roomId));
     }
+    // For personal carts, filter by user ID
     return await db.select().from(cartItems)
       .where(and(eq(cartItems.userId, userId), isNull(cartItems.roomId)));
   }
