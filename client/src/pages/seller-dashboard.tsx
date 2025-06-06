@@ -2855,48 +2855,75 @@ export default function SellerDashboard() {
                     </div>
 
                     {productForm.watch("enableGroupBuy") && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-3 bg-purple-100 rounded-lg">
-                        <FormField
-                          control={productForm.control}
-                          name="groupBuyMinQuantity"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-purple-800">Target Group Size (Optional)</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="number" 
-                                  placeholder="2" 
-                                  {...field}
-                                  onChange={(e) => field.onChange(Number(e.target.value))}
-                                  className="border-purple-300 focus:border-purple-500"
-                                />
-                              </FormControl>
-                              <p className="text-xs text-purple-600">For analytics only - customers can purchase any quantity</p>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={productForm.control}
-                          name="groupBuyDiscount"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-purple-800">Group Discount (%)</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  type="number" 
-                                  placeholder="10" 
-                                  {...field}
-                                  onChange={(e) => field.onChange(Number(e.target.value))}
-                                  className="border-purple-300 focus:border-purple-500"
-                                />
-                              </FormControl>
-                              <p className="text-xs text-purple-600">Discount applied to all VyronaSocial purchases</p>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <div className="mt-4 p-4 bg-purple-100 rounded-lg space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={productForm.control}
+                            name="groupBuyMinQuantity"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-purple-800">Target Group Size (Optional)</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    placeholder="2" 
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    className="border-purple-300 focus:border-purple-500"
+                                  />
+                                </FormControl>
+                                <p className="text-xs text-purple-600">For analytics only - customers can purchase any quantity</p>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={productForm.control}
+                            name="groupBuyDiscount"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-purple-800">Base Group Discount (%)</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    placeholder="10" 
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    className="border-purple-300 focus:border-purple-500"
+                                  />
+                                </FormControl>
+                                <p className="text-xs text-purple-600">Starting discount - increases with quantity purchased</p>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Tiered Discount System */}
+                        <div className="border-t border-purple-200 pt-4">
+                          <h5 className="font-medium text-purple-800 mb-3">Quantity-Based Discount Tiers</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                            <div className="bg-white p-3 rounded border border-purple-200">
+                              <strong className="text-purple-700">Quantity 1-2:</strong>
+                              <br />
+                              <span className="text-gray-600">Base discount ({productForm.watch("groupBuyDiscount") || 10}%)</span>
+                            </div>
+                            <div className="bg-white p-3 rounded border border-purple-200">
+                              <strong className="text-purple-700">Quantity 3-5:</strong>
+                              <br />
+                              <span className="text-gray-600">Base + 5% = {(productForm.watch("groupBuyDiscount") || 10) + 5}%</span>
+                            </div>
+                            <div className="bg-white p-3 rounded border border-purple-200">
+                              <strong className="text-purple-700">Quantity 6+:</strong>
+                              <br />
+                              <span className="text-gray-600">Base + 10% = {(productForm.watch("groupBuyDiscount") || 10) + 10}%</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-purple-600 mt-2">
+                            Higher quantities automatically receive better discounts to encourage bulk purchases
+                          </p>
+                        </div>
                       </div>
                     )}
 
@@ -2910,7 +2937,7 @@ export default function SellerDashboard() {
                         <>
                           • <strong>VyronaSocial:</strong> Product available for collaborative group shopping rooms
                           <br />
-                          • Customers can purchase any quantity, group settings are for seller configuration only
+                          • Customers get progressive discounts: higher quantities = better prices automatically
                         </>
                       ) : (
                         <>
