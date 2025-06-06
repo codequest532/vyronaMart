@@ -47,9 +47,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check database for customer/seller users
-      const users = await storage.getUsers();
-      const user = users.find(u => u.email === email && u.password === password);
+      // Check database for customer/seller users with retry logic
+      let user;
+      try {
+        user = await storage.getUserByEmail(email);
+        if (user && user.password !== password) {
+          user = undefined; // Password mismatch
+        }
+      } catch (dbError) {
+        console.error("Database connection error during login:", dbError);
+        // Fallback: retry once after a brief delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+          user = await storage.getUserByEmail(email);
+          if (user && user.password !== password) {
+            user = undefined; // Password mismatch
+          }
+        } catch (retryError) {
+          console.error("Database retry failed:", retryError);
+          throw retryError;
+        }
+      }
       
       if (user) {
         req.session.user = {
