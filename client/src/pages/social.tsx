@@ -174,7 +174,8 @@ export default function VyronaSocial() {
   // Fetch shared cart for selected room
   const { data: sharedCart, isLoading: cartLoading } = useQuery({
     queryKey: [`/api/shopping-rooms/${selectedRoomId}/cart`],
-    enabled: !!selectedRoomId && currentView === "room",
+    enabled: !!selectedRoomId,
+    staleTime: 0, // Always fetch fresh data
   });
 
   // Filter and sort products
