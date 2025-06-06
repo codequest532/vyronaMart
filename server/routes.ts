@@ -444,6 +444,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/shopping-rooms", async (req, res) => {
+    try {
+      const { name, description } = req.body;
+      
+      if (!name || !name.trim()) {
+        return res.status(400).json({ message: "Room name is required" });
+      }
+
+      const roomData = {
+        name: name.trim(),
+        creatorId: 1, // Default user ID for now
+        isActive: true,
+        currentGame: null,
+        totalCart: 0,
+        memberCount: 1
+      };
+
+      const newRoom = await storage.createShoppingRoom(roomData);
+      res.json(newRoom);
+    } catch (error) {
+      console.error("Create shopping room error:", error);
+      res.status(500).json({ message: "Failed to create shopping room", error: error.message });
+    }
+  });
+
   app.get("/api/shopping-rooms/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
