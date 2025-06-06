@@ -181,15 +181,8 @@ export default function VyronaSocial() {
     gcTime: 0, // Don't cache the data
   });
 
-  // Ensure sharedCart is always an array
-  const sharedCart = React.useMemo(() => {
-    console.log("Processing cart data:", rawCartData);
-    if (Array.isArray(rawCartData)) return rawCartData;
-    if (rawCartData && typeof rawCartData === 'object' && Array.isArray((rawCartData as any).data)) {
-      return (rawCartData as any).data;
-    }
-    return [];
-  }, [rawCartData]);
+  // Ensure we have an array for cart data
+  const sharedCart = Array.isArray(rawCartData) ? rawCartData : [];
 
 
 
@@ -964,94 +957,74 @@ export default function VyronaSocial() {
               <div className="space-y-6">
                 {/* Cart Items Display */}
                 <div className="space-y-4">
-                  {(() => {
-                    console.log("CART DEBUG:", {
-                      sharedCart,
-                      isArray: Array.isArray(sharedCart),
-                      length: Array.isArray(sharedCart) ? sharedCart.length : 'not array',
-                      selectedRoomId,
-                      cartLoading
-                    });
-                    return null;
-                  })()}
-                  {!sharedCart || !Array.isArray(sharedCart) || sharedCart.length === 0 ? (
+                  {Array.isArray(sharedCart) && sharedCart.length > 0 ? (
+                    <div className="space-y-3">
+                      {sharedCart.map((item: any) => (
+                        <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <img 
+                              src={item.imageUrl || "/api/placeholder/60/60"} 
+                              alt={item.name}
+                              className="w-12 h-12 object-cover rounded"
+                            />
+                            <div>
+                              <h4 className="font-medium text-gray-900">{item.name}</h4>
+                              <p className="text-sm text-gray-500">{item.description}</p>
+                              <p className="text-sm font-medium text-blue-600">₹{item.price}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  const response = await fetch(`/api/shopping-rooms/${selectedRoomId}/remove-cart-item`, {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ productId: item.productId })
+                                  });
+                                  if (response.ok) {
+                                    refetchCart();
+                                  }
+                                } catch (error) {
+                                  console.error('Error removing item:', error);
+                                }
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
                     <div className="text-center py-12 text-gray-500">
                       <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
                       <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
                       <p className="text-sm">Add products to start shopping together!</p>
                       <p className="text-xs mt-2">Products added by any room member will appear here</p>
                     </div>
-                  ) : (
-                    <div className="grid gap-4">
-                      <div className="flex items-center justify-between border-b pb-2">
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          Group Cart ({sharedCart.length} items)
-                        </h3>
-                        <div className="text-sm text-gray-600">
-                          Total: ₹{sharedCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)}
-                        </div>
+                  )}
+
+                  {/* Cart Summary */}
+                  {Array.isArray(sharedCart) && sharedCart.length > 0 && (
+                    <div className="mt-6 p-4 bg-blue-50 rounded-lg border">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium text-gray-700">Cart Summary</span>
+                        <span className="text-lg font-semibold text-blue-600">
+                          ₹{sharedCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0)}
+                        </span>
                       </div>
-                      
-                      <ScrollArea className="max-h-80">
-                        <div className="space-y-3">
-                          {sharedCart.map((item: any) => (
-                            <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                              <img 
-                                src={item.imageUrl || "/api/placeholder/80/80"} 
-                                alt={item.name}
-                                className="w-16 h-16 object-cover rounded-lg border"
-                              />
-                              <div className="flex-1">
-                                <h4 className="font-medium text-gray-900 dark:text-gray-100">{item.name}</h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Added by {item.addedBy || 'Unknown Member'}</p>
-                                <div className="flex items-center gap-3 mt-1">
-                                  <span className="text-lg font-semibold text-green-600">₹{item.price}</span>
-                                  <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-sm font-medium text-gray-700">
-                                  Subtotal: ₹{(item.price * item.quantity).toFixed(2)}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                      
-                      {/* Place Order Section */}
-                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {(sharedCart as any[])?.length} items • ₹{(sharedCart as any[])?.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)} total
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <Button 
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
-                          size="lg"
-                          disabled={(roomData?.memberCount || 0) < 2 || (sharedCart as any[])?.length === 0}
-                        >
-                          <ShoppingCart className="w-5 h-5 mr-2" />
-                          Place Group Order
-                        </Button>
-                        
-                        {(roomData?.memberCount || 0) < 2 || (sharedCart as any[])?.length === 0 ? (
-                          <p className="text-xs text-center text-orange-600 mt-2">
-                            {(roomData?.memberCount || 0) < 2 ? 
-                              `Need ${2 - (roomData?.memberCount || 0)} more member${2 - (roomData?.memberCount || 0) === 1 ? '' : 's'} to enable group ordering` :
-                              'Add items to cart to enable ordering'
-                            }
-                          </p>
-                        ) : (
-                          <p className="text-xs text-center text-gray-500 mt-2">
-                            Proceed to delivery details and payment
-                          </p>
-                        )}
-                      </div>
+                      <Button 
+                        className="w-full mt-3"
+                        onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
+                        disabled={sharedCart.length === 0}
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Place Group Order ({sharedCart.length} items)
+                      </Button>
                     </div>
                   )}
                 </div>
