@@ -95,6 +95,36 @@ export default function VyronaSocial() {
   const { items: groupBuyItems, addItem: addGroupBuyItem } = useGroupBuyCartStore();
   const [location, setLocation] = useLocation();
   
+  // Authentication check
+  const { data: authUser, isLoading: userLoading } = useQuery({
+    queryKey: ["/api/current-user"],
+    retry: false,
+  });
+  
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!userLoading && !authUser) {
+      setLocation("/login");
+    }
+  }, [authUser, userLoading, setLocation]);
+  
+  // Show loading while checking authentication
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Don't render if not authenticated
+  if (!currentUser) {
+    return null;
+  }
+  
   const [currentView, setCurrentView] = useState<"dashboard" | "room">("dashboard");
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [showCreateRoom, setShowCreateRoom] = useState(false);
@@ -139,10 +169,7 @@ export default function VyronaSocial() {
     queryKey: ["/api/users"],
   });
 
-  // Fetch current user
-  const { data: currentUser } = useQuery({
-    queryKey: ["/api/current-user"],
-  });
+
 
   // Fetch shared cart for selected room
   const { data: sharedCart, isLoading: cartLoading } = useQuery({
