@@ -69,6 +69,12 @@ export interface IStorage {
   getCartItems(userId: number, roomId?: number): Promise<CartItem[]>;
   addCartItem(item: InsertCartItem): Promise<CartItem>;
   removeCartItem(id: number): Promise<boolean>;
+  
+  // Shared Cart - Room-specific cart operations
+  getSharedCartItems(roomId: number): Promise<CartItem[]>;
+  addSharedCartItem(item: InsertCartItem): Promise<CartItem>;
+  removeSharedCartItem(roomId: number, itemId: number): Promise<boolean>;
+  isUserRoomMember(userId: number, roomId: number): Promise<boolean>;
 
   // Orders
   getOrders(userId: number): Promise<Order[]>;
@@ -698,9 +704,56 @@ export class DatabaseStorage implements IStorage {
       .values(insertItem)
       .returning();
     
-    // Cart totals are now calculated dynamically, no need to update
-    
     return item;
+  }
+
+  // Shared Cart - Room-specific operations
+  async getSharedCartItems(roomId: number): Promise<CartItem[]> {
+    return await db.select().from(cartItems)
+      .where(eq(cartItems.roomId, roomId));
+  }
+
+  async addSharedCartItem(item: InsertCartItem): Promise<CartItem> {
+    const [cartItem] = await db
+      .insert(cartItems)
+      .values(item)
+      .returning();
+    
+    // Update room total cart value
+    if (item.roomId) {
+      await this.updateRoomCartTotal(item.roomId);
+    }
+    
+    return cartItem;
+  }
+
+  async removeSharedCartItem(roomId: number, itemId: number): Promise<boolean> {
+    const result = await db
+      .delete(cartItems)
+      .where(and(eq(cartItems.id, itemId), eq(cartItems.roomId, roomId)));
+    
+    // Update room total cart value
+    await this.updateRoomCartTotal(roomId);
+    
+    return true;
+  }
+
+  async isUserRoomMember(userId: number, roomId: number): Promise<boolean> {
+    // Check if user is room creator
+    const room = await db.select().from(shoppingGroups)
+      .where(eq(shoppingGroups.id, roomId))
+      .limit(1);
+    
+    if (room.length > 0 && room[0].creatorId === userId) {
+      return true;
+    }
+    
+    // Check if user is added as member
+    const membership = await db.select().from(groupMembers)
+      .where(and(eq(groupMembers.groupId, roomId), eq(groupMembers.userId, userId)))
+      .limit(1);
+    
+    return membership.length > 0;
   }
 
   async updateRoomCartTotal(roomId: number): Promise<void> {

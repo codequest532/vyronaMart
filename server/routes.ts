@@ -2118,13 +2118,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get shared cart for room
+  // Get shared cart for room - accessible by all room members
   app.get("/api/cart/:roomId", async (req, res) => {
     try {
       const { roomId } = req.params;
-      console.log("Fetching cart items for room:", roomId);
-      const cartItems = await storage.getCartItems(0, Number(roomId)); // Room-specific cart
-      console.log("Cart items found:", cartItems);
+      const userId = req.session?.user?.id || 1;
+      
+      console.log("Fetching shared cart for room:", roomId, "by user:", userId);
+      
+      // Verify user is member of the room
+      const isMember = await storage.isUserRoomMember(userId, Number(roomId));
+      if (!isMember) {
+        return res.status(403).json({ message: "Access denied: Not a member of this room" });
+      }
+      
+      // Get all cart items for the room (shared cart)
+      const cartItems = await storage.getSharedCartItems(Number(roomId));
+      console.log("Shared cart items found:", cartItems);
       res.json(cartItems);
     } catch (error) {
       console.error("Error fetching shared cart:", error);
@@ -2132,20 +2142,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add item to shared cart
+  // Add item to shared cart - only room members can add
   app.post("/api/cart/:roomId/add", async (req, res) => {
     try {
       const { roomId } = req.params;
-      const userId = req.session?.user?.id || 1; // Use authenticated user ID
+      const userId = req.session?.user?.id || 1;
+      const userRole = req.session?.user?.role || 'customer';
+      
+      console.log("Adding item to shared cart:", { roomId, userId, userRole, body: req.body });
+      
+      // Verify user is member of the room
+      const isMember = await storage.isUserRoomMember(userId, Number(roomId));
+      if (!isMember) {
+        return res.status(403).json({ message: "Access denied: Not a member of this room" });
+      }
+      
       const itemData = {
         ...req.body,
         userId: userId,
         roomId: Number(roomId)
       };
       
-      console.log("Adding item to shared cart:", { roomId, userId, itemData });
-      const cartItem = await storage.addCartItem(itemData);
-      console.log("Cart item added successfully:", cartItem);
+      const cartItem = await storage.addSharedCartItem(itemData);
+      console.log("Shared cart item added successfully:", cartItem);
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding item to shared cart:", error);
