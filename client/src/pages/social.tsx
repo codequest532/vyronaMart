@@ -1410,64 +1410,62 @@ export default function VyronaSocial() {
       {currentView === "dashboard" ? (
         <div className="flex">
           {/* Active Rooms Sidebar */}
-          <div className="w-80 bg-white dark:bg-gray-900 border-r min-h-screen p-6">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl">
-                    <Users className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-lg">Active Rooms</h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Join or create shopping rooms</p>
-                  </div>
+          <div className="w-64 bg-white dark:bg-gray-900 border-r min-h-screen p-4">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg">
+                  <Users className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-base">Active Rooms</h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Shopping rooms</p>
                 </div>
               </div>
 
 
 
               {/* Active Rooms List */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {roomsLoading ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="h-24 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl"></div>
+                        <div className="h-16 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg"></div>
                       </div>
                     ))}
                   </div>
                 ) : (rooms as any[])?.length === 0 ? (
-                  <div className="text-center py-8">
-                    <div className="p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl w-fit mx-auto mb-3">
-                      <Users className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                  <div className="text-center py-6">
+                    <div className="p-3 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg w-fit mx-auto mb-2">
+                      <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
-                    <p className="text-gray-600 dark:text-gray-400 font-medium">No active rooms</p>
-                    <p className="text-sm text-gray-500 mt-1">Create one to start shopping together</p>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium text-sm">No active rooms</p>
+                    <p className="text-xs text-gray-500 mt-1">Create one to start shopping</p>
                   </div>
                 ) : (
                   (rooms as any[])?.map((room: any) => (
                     <Card 
                       key={room.id} 
-                      className="group cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/20"
+                      className="group cursor-pointer hover:shadow-md hover:scale-[1.01] transition-all duration-200 border-0 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/20"
                       onClick={() => {
                         setSelectedRoomId(room.id);
                         setCurrentView("room");
                       }}
                     >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
+                      <CardContent className="p-3">
+                        <div className="flex items-start justify-between mb-2">
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-sm mb-1 truncate group-hover:text-purple-600 transition-colors">
+                            <h4 className="font-medium text-sm mb-0.5 truncate group-hover:text-purple-600 transition-colors">
                               {room.name}
                             </h4>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                               {room.description || "No description"}
                             </p>
                           </div>
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="flex-shrink-0 p-1 h-7 w-7"
+                            className="flex-shrink-0 p-1 h-6 w-6"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedRoomForInvite(room.id);
@@ -1479,19 +1477,19 @@ export default function VyronaSocial() {
                         </div>
                         
                         <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-2">
-                            <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-0.5">
                               <Users className="w-3 h-3 text-blue-600" />
                               <span className="text-blue-600 font-medium">{room.memberCount || 0}</span>
                             </div>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-0.5">
                               <ShoppingCart className="w-3 h-3 text-green-600" />
                               <span className="text-green-600 font-medium">₹{(room.totalCart || 0).toLocaleString()}</span>
                             </div>
                           </div>
                           <Badge 
                             variant={room.isActive ? "default" : "secondary"} 
-                            className={`text-xs px-2 py-0 ${room.isActive ? 'bg-green-100 text-green-700 border-green-200' : ''}`}
+                            className={`text-xs px-1.5 py-0 ${room.isActive ? 'bg-green-100 text-green-700 border-green-200' : ''}`}
                           >
                             {room.isActive ? 'Active' : 'Inactive'}
                           </Badge>
