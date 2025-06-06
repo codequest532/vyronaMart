@@ -2032,7 +2032,27 @@ export class DatabaseStorage implements IStorage {
   // VyronaRead Books - Required methods for authentic data
   async getAllEBooks(): Promise<any[]> {
     try {
-      const ebooks = await db.select().from(eBooks).where(eq(eBooks.isActive, true));
+      const ebooks = await db.select({
+        id: eBooks.id,
+        sellerId: eBooks.sellerId,
+        title: eBooks.title,
+        author: eBooks.author,
+        isbn: eBooks.isbn,
+        category: eBooks.category,
+        format: eBooks.format,
+        fileUrl: eBooks.fileUrl,
+        fileSize: eBooks.fileSize,
+        salePrice: eBooks.salePrice,
+        rentalPrice: eBooks.rentalPrice,
+        description: eBooks.description,
+        publisher: eBooks.publisher,
+        publicationYear: eBooks.publicationYear,
+        language: eBooks.language,
+        status: eBooks.status,
+        downloads: eBooks.downloads,
+        createdAt: eBooks.createdAt,
+        updatedAt: eBooks.updatedAt
+      }).from(eBooks).where(eq(eBooks.isActive, true));
       return ebooks || [];
     } catch (error) {
       console.error("Error fetching e-books:", error);
