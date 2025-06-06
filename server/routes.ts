@@ -1029,7 +1029,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { productId, quantity } = req.body;
       const userId = req.session?.user?.id;
 
+      console.log("=== ADDING ITEM TO SHOPPING ROOM CART ===");
+      console.log("Room ID:", roomId);
+      console.log("Product ID:", productId);
+      console.log("Quantity:", quantity);
+      console.log("User ID:", userId);
+      console.log("Session:", req.session?.user);
+
       if (!userId) {
+        console.log("Authentication required - no user ID");
         return res.status(401).json({ message: "Authentication required" });
       }
 
@@ -1037,10 +1045,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: userId,
         productId: productId,
         quantity: quantity || 1,
-        roomId: roomId
+        roomId: roomId,
+        addedAt: new Date()
       };
 
+      console.log("Cart item data:", cartItemData);
       const cartItem = await storage.addCartItem(cartItemData);
+      console.log("Cart item added successfully:", cartItem);
+      
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding item to shopping room cart:", error);
