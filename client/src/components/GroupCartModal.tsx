@@ -402,44 +402,62 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                     <p className="text-sm">Create a new room to start shopping together!</p>
                   </div>
                 ) : (
-                  rooms.map((room: any) => (
-                    <div
-                      key={room.id}
-                      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                        selectedRoom?.id === room.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                      onClick={() => setSelectedRoom(room)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{room.name}</h4>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {room.memberCount} members
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <ShoppingCart className="h-3 w-3" />
-                              ${((room.totalCart || 0) / 100).toFixed(2)}
-                            </span>
-                            {room.currentGame && (
+                  rooms.map((room: any) => {
+                    const hasMinimumMembers = (room.memberCount || 0) >= 2;
+                    return (
+                      <div
+                        key={room.id}
+                        className={`border rounded-lg p-4 transition-colors ${
+                          hasMinimumMembers 
+                            ? `cursor-pointer ${selectedRoom?.id === room.id
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/50"
+                              }`
+                            : "cursor-not-allowed border-gray-200 bg-gray-50 opacity-60"
+                        }`}
+                        onClick={() => hasMinimumMembers && setSelectedRoom(room)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{room.name}</h4>
+                              {!hasMinimumMembers && (
+                                <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                                  Need {2 - (room.memberCount || 0)} more
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {room.currentGame}
+                                <Users className="h-3 w-3" />
+                                {room.memberCount} members
                               </span>
+                              <span className="flex items-center gap-1">
+                                <ShoppingCart className="h-3 w-3" />
+                                ${((room.totalCart || 0) / 100).toFixed(2)}
+                              </span>
+                              {room.currentGame && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {room.currentGame}
+                                </span>
+                              )}
+                            </div>
+                            {!hasMinimumMembers && (
+                              <p className="text-xs text-orange-600 mt-1">
+                                Cost sharing requires minimum 2 members
+                              </p>
                             )}
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={room.isActive ? "default" : "secondary"}>
-                            {room.isActive ? "Active" : "Inactive"}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={room.isActive ? "default" : "secondary"}>
+                              {room.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>
