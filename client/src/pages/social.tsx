@@ -345,44 +345,141 @@ export default function VyronaSocial() {
     setLocation("/home");
   };
 
-  // Hero Section Component
+  // Hero Section Component with Active Rooms
   const HeroSection = () => (
-    <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white p-6 rounded-2xl mb-6 shadow-lg">
-      <div className="relative z-10">
-        <div className="flex items-center justify-center mb-3">
-          <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
-            <Users className="w-6 h-6 text-white" />
+    <div className="space-y-4">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white p-6 rounded-2xl shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-3">
+            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          
+          <h1 className="text-2xl font-bold text-center mb-2 tracking-tight">
+            VyronaSocial
+          </h1>
+          <p className="text-sm text-center mb-4 opacity-90">
+            Shop Together. Save Together.
+          </p>
+          
+          <div className="flex justify-center gap-3">
+            <Button 
+              onClick={() => setShowCreateRoom(true)}
+              size="sm"
+              className="bg-white text-purple-600 hover:bg-gray-100 font-medium px-4 py-2 rounded-lg"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Create Room
+            </Button>
+            
+            <Button 
+              onClick={() => setShowJoinRoom(true)}
+              size="sm"
+              variant="outline"
+              className="border border-white text-white hover:bg-white hover:text-purple-600 font-medium px-4 py-2 rounded-lg backdrop-blur-sm bg-white/10"
+            >
+              <UserPlus className="w-4 h-4 mr-1" />
+              Join Room
+            </Button>
           </div>
         </div>
-        
-        <h1 className="text-2xl font-bold text-center mb-2 tracking-tight">
-          VyronaSocial
-        </h1>
-        <p className="text-sm text-center mb-4 opacity-90">
-          Shop Together. Save Together.
-        </p>
-        
-        <div className="flex justify-center gap-3">
-          <Button 
-            onClick={() => setShowCreateRoom(true)}
-            size="sm"
-            className="bg-white text-purple-600 hover:bg-gray-100 font-medium px-4 py-2 rounded-lg"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Create Room
-          </Button>
-          
-          <Button 
-            onClick={() => setShowJoinRoom(true)}
-            size="sm"
-            variant="outline"
-            className="border border-white text-white hover:bg-white hover:text-purple-600 font-medium px-4 py-2 rounded-lg backdrop-blur-sm bg-white/10"
-          >
-            <UserPlus className="w-4 h-4 mr-1" />
-            Join Room
-          </Button>
-        </div>
       </div>
+
+      {/* Active Rooms Section */}
+      <Card className="border-0 bg-white dark:bg-gray-800 shadow-lg">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-purple-600" />
+            <CardTitle className="text-lg font-semibold">Active Rooms</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {groupsLoading ? (
+              <div className="col-span-full text-center py-6">Loading rooms...</div>
+            ) : (userGroups as any[])?.length === 0 ? (
+              <div className="col-span-full text-center py-6 text-gray-500">
+                No active rooms. Create or join one to start shopping together!
+              </div>
+            ) : (
+              (userGroups as any[])?.map((room: any) => (
+                <Card key={room.id} className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border border-gray-200 dark:border-gray-700">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <CardTitle className="text-lg font-bold text-purple-600">
+                        {room.name}
+                      </CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setSelectedRoomForInvite(room.id)}>
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            Invite Members
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => exitRoomMutation.mutate(room.id)}
+                            className="text-red-600"
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Exit Room
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <Badge variant={room.privacy === "public" ? "default" : "secondary"} className="text-xs">
+                        {room.privacy === "public" ? "Public" : "Private"}
+                      </Badge>
+                      <span>{room.category}</span>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <Users className="w-5 h-5 mx-auto mb-1 text-blue-600" />
+                        <div className="text-lg font-bold text-blue-600">1</div>
+                        <div className="text-xs text-gray-600">Members</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <ShoppingCart className="w-5 h-5 mx-auto mb-1 text-green-600" />
+                        <div className="text-lg font-bold text-green-600">₹0</div>
+                        <div className="text-xs text-gray-600">Total Cart</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => handleEnterRoom(room.id)}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                        size="sm"
+                      >
+                        Enter Room
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedRoomForInvite(room.id)}
+                        className="p-2"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -603,132 +700,7 @@ export default function VyronaSocial() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="active" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="active">
-            <Users className="w-4 h-4 mr-2" />
-            Active Rooms
-          </TabsTrigger>
-          <TabsTrigger value="scheduled">
-            <Calendar className="w-4 h-4 mr-2" />
-            Scheduled
-          </TabsTrigger>
-          <TabsTrigger value="create">
-            <Plus className="w-4 h-4 mr-2" />
-            Create New
-          </TabsTrigger>
-        </TabsList>
 
-        <TabsContent value="active" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {groupsLoading ? (
-              <div className="col-span-full text-center py-8">Loading rooms...</div>
-            ) : (userGroups as any[])?.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                No active rooms. Create or join one to start shopping together!
-              </div>
-            ) : (
-              (userGroups as any[])?.map((room: any) => (
-                <Card key={room.id} className="group hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 group-hover:from-purple-500/10 group-hover:to-pink-500/10 transition-all duration-300" />
-                  
-                  <CardHeader className="relative pb-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <CardTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        {room.name}
-                      </CardTitle>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setSelectedRoomForInvite(room.id)}>
-                            <UserPlus className="w-4 h-4 mr-2" />
-                            Invite Members
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Share className="w-4 h-4 mr-2" />
-                            Share Room
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Leave Room
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Badge variant={room.privacy === "private" ? "secondary" : "default"} className="text-xs">
-                        {room.privacy === "private" ? <Lock className="w-3 h-3 mr-1" /> : <Globe className="w-3 h-3 mr-1" />}
-                        {room.privacy}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
-                        {room.category}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="relative space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                        <Users className="w-5 h-5 mx-auto mb-1 text-blue-600" />
-                        <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">{room.memberCount || 1}</p>
-                        <p className="text-xs text-blue-600">Members</p>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                        <ShoppingCart className="w-5 h-5 mx-auto mb-1 text-green-600" />
-                        <p className="text-sm font-semibold text-green-900 dark:text-green-300">₹{room.totalCart || 0}</p>
-                        <p className="text-xs text-green-600">Total Cart</p>
-                      </div>
-                    </div>
-                    
-                    {room.currentGame && (
-                      <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-r from-orange-100 to-yellow-100 dark:from-orange-900/20 dark:to-yellow-900/20 rounded-lg">
-                        <Gift className="w-4 h-4 text-orange-600" />
-                        <span className="text-sm font-medium text-orange-800 dark:text-orange-300">Game Active</span>
-                      </div>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Button 
-                        onClick={() => handleEnterRoom(room.id)}
-                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                        size="sm"
-                      >
-                        Enter Room
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedRoomForInvite(room.id)}
-                        className="px-3 rounded-xl border-purple-200 hover:bg-purple-50"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="scheduled" className="space-y-4">
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>No scheduled rooms yet. Schedule shopping sessions with friends!</p>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="create" className="space-y-4">
-          <CreateRoomCard />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 
