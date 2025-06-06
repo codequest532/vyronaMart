@@ -832,43 +832,44 @@ export class DatabaseStorage implements IStorage {
 
   async getShoppingGroups(userId: number): Promise<ShoppingGroup[]> {
     try {
-      const groups = await db
-        .select({
-          id: shoppingGroups.id,
-          name: shoppingGroups.name,
-          description: shoppingGroups.description,
-          creatorId: shoppingGroups.creatorId,
-          isActive: shoppingGroups.isActive,
-          maxMembers: shoppingGroups.maxMembers,
-          roomCode: shoppingGroups.roomCode,
-          createdAt: shoppingGroups.createdAt,
-          memberCount: sql<number>`COALESCE(COUNT(DISTINCT ${groupMembers.id}), 0)`.as('memberCount'),
-          totalCart: sql<number>`COALESCE(SUM(${cartItems.quantity} * ${products.price}), 0)`.as('totalCart')
-        })
-        .from(shoppingGroups)
-        .leftJoin(groupMembers, eq(shoppingGroups.id, groupMembers.groupId))
-        .leftJoin(cartItems, eq(shoppingGroups.id, cartItems.roomId))
-        .leftJoin(products, eq(cartItems.productId, products.id))
-        .where(eq(shoppingGroups.isActive, true))
-        .groupBy(shoppingGroups.id)
-        .orderBy(desc(shoppingGroups.createdAt));
-
-      return groups.map(group => ({
-        id: group.id,
-        name: group.name,
-        description: group.description || '',
+      console.log("=== STORAGE: getShoppingGroups called ===");
+      console.log("User ID:", userId);
+      
+      // Use direct SQL query to ensure accurate member counts
+      const result = await pool.query(`
+        SELECT sg.*, 
+               COUNT(DISTINCT gm.id) as member_count,
+               COALESCE(SUM(ci.quantity * p.price), 0) as total_cart
+        FROM shopping_groups sg
+        LEFT JOIN group_members gm ON sg.id = gm.group_id
+        LEFT JOIN cart_items ci ON sg.id = ci.room_id
+        LEFT JOIN products p ON ci.product_id = p.id
+        WHERE sg.is_active = true
+        GROUP BY sg.id
+        ORDER BY sg.created_at DESC
+      `);
+      
+      console.log("SQL Query result:", result.rows);
+      
+      const groups = result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        description: row.description || '',
         category: 'general',
         privacy: 'public',
-        creatorId: group.creatorId,
-        isActive: group.isActive,
-        memberCount: group.memberCount,
-        totalCart: Number(group.totalCart) || 0,
+        creatorId: row.creator_id,
+        isActive: row.is_active,
+        memberCount: parseInt(row.member_count) || 0,
+        totalCart: Number(row.total_cart) || 0,
         currentGame: null,
-        roomCode: group.roomCode || Math.random().toString(36).substring(2, 8).toUpperCase(),
+        roomCode: row.room_code || Math.random().toString(36).substring(2, 8).toUpperCase(),
         scheduledTime: null,
-        maxMembers: group.maxMembers,
-        createdAt: group.createdAt
+        maxMembers: row.max_members,
+        createdAt: row.created_at
       }));
+      
+      console.log("Transformed groups:", groups);
+      return groups;
     } catch (error) {
       console.error("Error in getShoppingGroups:", error);
       return [];
