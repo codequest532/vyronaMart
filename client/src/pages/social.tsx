@@ -539,208 +539,380 @@ export default function VyronaSocial() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Groups Tab */}
-          <TabsContent value="groups" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Shopping Groups
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">Join groups and shop together with exclusive deals</p>
-              </div>
-              <div className="flex gap-3">
-                <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 gap-2">
-                      <Plus className="h-4 w-4" />
-                      Create Group
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-indigo-600" />
-                        Create Shopping Group
-                      </DialogTitle>
-                      <DialogDescription>
-                        Start a new group for collaborative shopping with exclusive discounts
-                      </DialogDescription>
-                    </DialogHeader>
-                    <Form {...createGroupForm}>
-                      <form onSubmit={createGroupForm.handleSubmit((data) => createGroupMutation.mutate(data))} className="space-y-4">
-                        <FormField
-                          control={createGroupForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Group Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Weekend Electronics Deal..." {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createGroupForm.control}
-                          name="description"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Description</FormLabel>
-                              <FormControl>
-                                <Textarea placeholder="What kind of products are you looking to buy together?" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="submit" disabled={createGroupMutation.isPending} className="w-full">
-                          {createGroupMutation.isPending ? "Creating..." : "Create Group"}
-                        </Button>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
-
-                <Dialog open={isJoinGroupOpen} onOpenChange={setIsJoinGroupOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      Join Group
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2">
-                        <UserPlus className="h-5 w-5 text-green-600" />
-                        Join Shopping Group
-                      </DialogTitle>
-                      <DialogDescription>
-                        Enter a group code to join an existing shopping group
-                      </DialogDescription>
-                    </DialogHeader>
-                    <Form {...joinGroupForm}>
-                      <form onSubmit={joinGroupForm.handleSubmit((data) => joinGroupMutation.mutate(data))} className="space-y-4">
-                        <FormField
-                          control={joinGroupForm.control}
-                          name="code"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Group Code</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter 6-digit group code..." {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <Button type="submit" disabled={joinGroupMutation.isPending} className="w-full">
-                          {joinGroupMutation.isPending ? "Joining..." : "Join Group"}
-                        </Button>
-                      </form>
-                    </Form>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-
-            {/* Groups Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {groupsLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="p-6">
-                    <div className="animate-pulse space-y-4">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                      <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  </Card>
-                ))
-              ) : userGroups.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <div className="p-4 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl inline-block mb-4">
-                    <Users className="w-12 h-12 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">No groups yet</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">Create your first shopping group or join an existing one</p>
-                  <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2">
-                    <Plus className="h-4 w-4" />
-                    Create Your First Group
-                  </Button>
-                </div>
-              ) : (
-                userGroups.map((group: any) => (
-                  <Card 
-                    key={group.id} 
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
-                      selectedGroupId === group.id 
-                        ? 'ring-2 ring-indigo-500 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20' 
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
-                    onClick={() => setSelectedGroupId(group.id)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{group.name}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{group.description}</p>
-                        </div>
-                        {group.creatorId === (authUser as any)?.id && (
-                          <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Owner
-                          </Badge>
-                        )}
-                      </div>
+          {/* Groups Tab - WhatsApp Style */}
+          <TabsContent value="groups" className="space-y-0">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 h-[calc(100vh-200px)]">
+              
+              {/* Groups List - WhatsApp Style Sidebar */}
+              <div className="lg:col-span-1 border-r bg-white dark:bg-gray-900 flex flex-col">
+                {/* Header */}
+                <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-semibold text-green-800 dark:text-green-200">Shopping Groups</h2>
+                    <div className="flex gap-2">
+                      <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white rounded-full w-8 h-8 p-0">
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <Users className="h-5 w-5 text-green-600" />
+                              Create New Group
+                            </DialogTitle>
+                          </DialogHeader>
+                          <Form {...createGroupForm}>
+                            <form onSubmit={createGroupForm.handleSubmit((data) => createGroupMutation.mutate(data))} className="space-y-4">
+                              <FormField
+                                control={createGroupForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Group Name</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="Enter group name..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={createGroupForm.control}
+                                name="description"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Group Description</FormLabel>
+                                    <FormControl>
+                                      <Textarea placeholder="What's this group about?" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <Button type="submit" disabled={createGroupMutation.isPending} className="w-full bg-green-500 hover:bg-green-600">
+                                {createGroupMutation.isPending ? "Creating..." : "Create Group"}
+                              </Button>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
                       
-                      <div className="flex items-center justify-between text-sm mb-4">
-                        <div className="flex items-center gap-4">
-                          <span className="flex items-center gap-1">
-                            <Users className="w-4 h-4 text-gray-500" />
-                            {group.memberCount || 0} members
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <ShoppingCart className="w-4 h-4 text-gray-500" />
-                            ₹{group.totalCart || 0}
-                          </span>
-                        </div>
-                        {group.roomCode && (
-                          <Badge variant="outline" className="text-xs font-mono">
-                            {group.roomCode}
-                          </Badge>
-                        )}
-                      </div>
+                      <Dialog open={isJoinGroupOpen} onOpenChange={setIsJoinGroupOpen}>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="rounded-full w-8 h-8 p-0 border-green-300">
+                            <UserPlus className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                              <UserPlus className="h-5 w-5 text-blue-600" />
+                              Join Group
+                            </DialogTitle>
+                          </DialogHeader>
+                          <Form {...joinGroupForm}>
+                            <form onSubmit={joinGroupForm.handleSubmit((data) => joinGroupMutation.mutate(data))} className="space-y-4">
+                              <FormField
+                                control={joinGroupForm.control}
+                                name="code"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Group Code</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="Enter group code..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <Button type="submit" disabled={joinGroupMutation.isPending} className="w-full">
+                                {joinGroupMutation.isPending ? "Joining..." : "Join Group"}
+                              </Button>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
+                  
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search groups..."
+                      className="pl-10 bg-white dark:bg-gray-700 border-green-300 dark:border-green-700 focus:border-green-500"
+                    />
+                  </div>
+                </div>
 
+                {/* Groups List */}
+                <ScrollArea className="flex-1">
+                  <div className="divide-y">
+                    {groupsLoading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="p-4 animate-pulse">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                            <div className="flex-1">
+                              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : userGroups.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">
+                        <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p className="text-sm mb-2">No groups yet</p>
+                        <p className="text-xs opacity-75">Create your first group!</p>
+                      </div>
+                    ) : (
+                      userGroups.map((group: any) => (
+                        <div
+                          key={group.id}
+                          className={`p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                            selectedGroupId === group.id ? 'bg-green-50 dark:bg-green-900/20 border-r-4 border-green-500' : ''
+                          }`}
+                          onClick={() => setSelectedGroupId(group.id)}
+                        >
+                          <div className="flex items-center gap-3">
+                            {/* Group Avatar */}
+                            <div className="relative">
+                              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
+                                {group.name.charAt(0).toUpperCase()}
+                              </div>
+                              {group.totalCart > 0 && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                                  <ShoppingCart className="w-3 h-3 text-white" />
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <h3 className="font-medium truncate">{group.name}</h3>
+                                <div className="flex items-center gap-1">
+                                  {group.creatorId === (authUser as any)?.id && (
+                                    <Crown className="w-3 h-3 text-yellow-500" />
+                                  )}
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(group.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center justify-between">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                  {group.description || "Shopping together"}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  <Users className="w-3 h-3" />
+                                  <span>{group.memberCount}</span>
+                                  {group.totalCart > 0 && (
+                                    <Badge variant="secondary" className="text-xs ml-1">
+                                      ₹{group.totalCart}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              {/* Status indicator */}
+                              <div className="flex items-center justify-between mt-2">
+                                <p className="text-xs text-green-600 dark:text-green-400">
+                                  Active shopping session
+                                </p>
+                                {group.roomCode && (
+                                  <Badge variant="outline" className="text-xs font-mono">
+                                    {group.roomCode}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* Chat/Group Details Area */}
+              <div className="lg:col-span-2 flex flex-col bg-gray-50 dark:bg-gray-900">
+                {selectedGroup ? (
+                  <>
+                    {/* Group Header */}
+                    <div className="p-4 bg-white dark:bg-gray-800 border-b shadow-sm">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            {selectedGroup.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold">{selectedGroup.name}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {selectedGroup.memberCount} members • Code: {selectedGroup.roomCode}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            onClick={handleJoinVideoCall}
+                            className={`gap-2 ${isVideoCallActive 
+                              ? 'bg-red-500 hover:bg-red-600' 
+                              : 'bg-green-500 hover:bg-green-600'}`}
+                          >
+                            {isVideoCallActive ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+                            {isVideoCallActive ? 'End Call' : 'Video Call'}
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setIsGroupCartOpen(true)}
+                            className="gap-2 border-green-300"
+                          >
+                            <ShoppingCart className="h-4 w-4" />
+                            Cart ({cartItems.length})
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Messages/Activity Area */}
+                    <div className="flex-1 p-4 overflow-y-auto">
+                      <div className="space-y-4">
+                        {/* Welcome Message */}
+                        <div className="text-center">
+                          <div className="inline-block p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-200">
+                            🛍️ Welcome to {selectedGroup.name}! Start shopping together.
+                          </div>
+                        </div>
+
+                        {/* Group Info Message */}
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                              <Users className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="font-medium text-blue-600">Group Info</span>
+                                <span className="text-xs text-gray-500">System</span>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <Users className="w-4 h-4 text-gray-500" />
+                                  <span>{selectedGroup.memberCount} members</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <ShoppingCart className="w-4 h-4 text-gray-500" />
+                                  <span>Group Cart: ₹{selectedGroup.totalCart}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Crown className="w-4 h-4 text-yellow-500" />
+                                  <span>
+                                    Created by {selectedGroup.creatorId === (authUser as any)?.id ? 'You' : 'Admin'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Activity Messages */}
+                        {cartItems.length > 0 && (
+                          <div className="space-y-3">
+                            {cartItems.map((item) => (
+                              <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+                                <div className="flex items-start gap-3">
+                                  <Avatar className="w-8 h-8">
+                                    <AvatarFallback className="bg-green-100 text-green-600 text-xs">
+                                      {(authUser as any)?.username?.[0]?.toUpperCase() || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-medium">You</span>
+                                      <span className="text-xs text-gray-500">
+                                        {new Date(item.addedAt || Date.now()).toLocaleTimeString()}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                      <ShoppingBag className="w-4 h-4 text-green-600" />
+                                      <span>Added <strong>{item.name}</strong> to cart</span>
+                                    </div>
+                                    <div className="mt-2 text-xs text-gray-500">
+                                      Quantity: {item.quantity} • Price: ₹{item.price}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Placeholder for more activity */}
+                        <div className="text-center">
+                          <div className="inline-block p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-gray-500">
+                            Start shopping to see group activity here
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Actions Bar */}
+                    <div className="p-4 bg-white dark:bg-gray-800 border-t">
                       <div className="flex items-center gap-2">
                         <Button 
+                          variant="outline" 
                           size="sm" 
-                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedGroupId(group.id);
-                          }}
+                          className="gap-2 border-green-300 hover:bg-green-50"
                         >
-                          Select Group
+                          <Package className="w-4 h-4" />
+                          Browse Products
                         </Button>
-                        {selectedGroupId === group.id && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleJoinVideoCall();
-                            }}
-                            className="gap-1"
-                          >
-                            <Video className="w-4 h-4" />
-                            Call
-                          </Button>
-                        )}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="gap-2 border-green-300 hover:bg-green-50"
+                          onClick={() => setIsGroupCartOpen(true)}
+                        >
+                          <ShoppingCart className="w-4 h-4" />
+                          View Cart ({cartItems.length})
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="gap-2 border-green-300 hover:bg-green-50"
+                        >
+                          <Users className="w-4 h-4" />
+                          Invite Members
+                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-10 h-10 text-green-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">Select a Group</h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Choose a shopping group to start collaborating
+                      </p>
+                      <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2 bg-green-500 hover:bg-green-600">
+                        <Plus className="w-4 h-4" />
+                        Create New Group
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
 
