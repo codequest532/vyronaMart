@@ -268,6 +268,13 @@ export default function VyronaSocial() {
 
   // Ensure we have an array for cart data
   const sharedCart = Array.isArray(rawCartData) ? rawCartData : [];
+  
+  // Debug cart data flow
+  console.log('DEBUG CART FLOW:');
+  console.log('selectedRoomId:', selectedRoomId);
+  console.log('rawCartData:', rawCartData);
+  console.log('sharedCart:', sharedCart);
+  console.log('cartLoading:', cartLoading);
 
 
 
