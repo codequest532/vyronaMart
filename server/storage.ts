@@ -690,10 +690,7 @@ export class DatabaseStorage implements IStorage {
       .values(insertItem)
       .returning();
     
-    // Update room's total cart value if item is added to a room
-    if (insertItem.roomId) {
-      await this.updateRoomCartTotal(insertItem.roomId);
-    }
+    // Cart totals are now calculated dynamically, no need to update
     
     return item;
   }

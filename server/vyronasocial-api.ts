@@ -102,11 +102,15 @@ export function setupVyronaSocialAPI(app: express.Application) {
     
     try {
       const result = await pool.query(`
-        SELECT sg.*, COUNT(gm.id) as member_count
+        SELECT sg.*, 
+               COUNT(DISTINCT gm.id) as member_count,
+               COALESCE(SUM(ci.quantity * p.price), 0) as total_cart
         FROM shopping_groups sg
         LEFT JOIN group_members gm ON sg.id = gm.group_id
+        LEFT JOIN cart_items ci ON sg.id = ci.room_id
+        LEFT JOIN products p ON ci.product_id = p.id
         WHERE sg.is_active = true
-        GROUP BY sg.id, sg.total_cart
+        GROUP BY sg.id
         ORDER BY sg.created_at DESC
       `);
       
@@ -202,7 +206,17 @@ export function setupVyronaSocialAPI(app: express.Application) {
         return res.status(403).json({ error: "Only room admin can delete the room" });
       }
       
-      // Delete the room (CASCADE will remove members and messages)
+      // First delete cart items associated with this room
+      await pool.query(`
+        DELETE FROM cart_items WHERE room_id = $1
+      `, [roomId]);
+      
+      // Delete group members
+      await pool.query(`
+        DELETE FROM group_members WHERE group_id = $1
+      `, [roomId]);
+      
+      // Delete the room
       await pool.query(`
         DELETE FROM shopping_groups WHERE id = $1
       `, [roomId]);
