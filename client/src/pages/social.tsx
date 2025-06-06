@@ -371,10 +371,10 @@ export default function VyronaSocial() {
               </div>
               <div>
                 <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                  Featured Group Buy Products
+                  VyronaSocial Exclusive
                 </CardTitle>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  Discover amazing products with exclusive group discounts
+                  Products available for group buying with exclusive discounts
                 </p>
               </div>
             </div>
