@@ -139,6 +139,11 @@ export default function VyronaSocial() {
     queryKey: ["/api/users"],
   });
 
+  // Fetch current user
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/current-user"],
+  });
+
   // Fetch shared cart for selected room
   const { data: sharedCart, isLoading: cartLoading } = useQuery({
     queryKey: [`/api/cart/${selectedRoomId}`],
@@ -847,7 +852,7 @@ export default function VyronaSocial() {
                 Invite Friends
               </Button>
               
-              {roomData?.creatorId === 1 ? (
+              {roomData?.creatorId === currentUser?.id ? (
                 <Button 
                   variant="destructive" 
                   size="sm"
