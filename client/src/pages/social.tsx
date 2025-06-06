@@ -1061,15 +1061,28 @@ export default function VyronaSocial() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* Cart Items Display */}
+                {/* Enhanced Cart Items Display */}
                 <div className="space-y-4">
                   {selectedRoomId ? (
                     <div className="space-y-4">
-                      {/* Direct cart display without separate component */}
-                      <div className="p-2 bg-yellow-100 text-xs">
-                        DEBUG: Room {selectedRoomId}, Cart items: {sharedCart?.length || 0}, Loading: {cartLoading ? 'Yes' : 'No'}
+                      {/* Room Info Header */}
+                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <ShoppingCart className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <h3 className="font-medium text-blue-900">Room {selectedRoomId}</h3>
+                            <p className="text-sm text-blue-600">
+                              {sharedCart.length} items in cart
+                            </p>
+                          </div>
+                        </div>
+                        {cartLoading && (
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                        )}
                       </div>
-                      {Array.isArray(sharedCart) && sharedCart.length > 0 ? (
+                      
+                      {/* Force display cart items regardless of conditions */}
+                      {sharedCart.length > 0 ? (
                         <div className="space-y-3">
                           {sharedCart.map((item: any) => (
                             <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
