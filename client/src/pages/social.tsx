@@ -123,11 +123,13 @@ export default function VyronaSocial() {
   // Mutations
   const createGroupMutation = useMutation({
     mutationFn: async (data: CreateGroupForm) => {
-      return apiRequest("/api/shopping-rooms", {
+      const response = await fetch("/api/shopping-rooms", {
         method: "POST",
-        body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
+      if (!response.ok) throw new Error('Failed to create group');
+      return response.json();
     },
     onSuccess: () => {
       toast({ title: "Group created successfully!" });
@@ -142,11 +144,13 @@ export default function VyronaSocial() {
 
   const joinGroupMutation = useMutation({
     mutationFn: async (data: JoinGroupForm) => {
-      return apiRequest("/api/shopping-rooms/join", {
+      const response = await fetch("/api/shopping-rooms/join", {
         method: "POST",
-        body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
+      if (!response.ok) throw new Error('Failed to join group');
+      return response.json();
     },
     onSuccess: () => {
       toast({ title: "Joined group successfully!" });
@@ -161,11 +165,13 @@ export default function VyronaSocial() {
 
   const addToGroupCartMutation = useMutation({
     mutationFn: async ({ productId, groupId }: { productId: number; groupId: number }) => {
-      return apiRequest("/api/room-cart/add", {
+      const response = await fetch("/api/room-cart/add", {
         method: "POST",
-        body: JSON.stringify({ productId, roomId: groupId, quantity: 1 }),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, roomId: groupId, quantity: 1 }),
       });
+      if (!response.ok) throw new Error('Failed to add to cart');
+      return response.json();
     },
     onSuccess: () => {
       toast({ title: "Added to group cart!" });
@@ -178,11 +184,13 @@ export default function VyronaSocial() {
 
   const updateCartQuantityMutation = useMutation({
     mutationFn: async ({ cartItemId, quantity }: { cartItemId: number; quantity: number }) => {
-      return apiRequest("/api/room-cart/update", {
+      const response = await fetch("/api/room-cart/update", {
         method: "POST",
-        body: JSON.stringify({ cartItemId, quantity }),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItemId, quantity }),
       });
+      if (!response.ok) throw new Error('Failed to update quantity');
+      return response.json();
     },
     onSuccess: () => {
       refetchCart();
@@ -194,11 +202,13 @@ export default function VyronaSocial() {
 
   const removeFromCartMutation = useMutation({
     mutationFn: async (cartItemId: number) => {
-      return apiRequest("/api/room-cart/remove", {
+      const response = await fetch("/api/room-cart/remove", {
         method: "POST",
-        body: JSON.stringify({ cartItemId }),
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartItemId }),
       });
+      if (!response.ok) throw new Error('Failed to remove from cart');
+      return response.json();
     },
     onSuccess: () => {
       toast({ title: "Removed from cart" });
