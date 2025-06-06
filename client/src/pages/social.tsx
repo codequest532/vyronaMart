@@ -1027,24 +1027,27 @@ export default function VyronaSocial() {
             </CardContent>
           </Card>
 
-          {/* Chat Sidebar - Always visible, minimizable to header only */}
-          <div className="fixed top-0 right-0 bg-white dark:bg-gray-900 shadow-xl transition-all duration-300 ease-in-out z-50" 
+          {/* Chat Sidebar - Compact design */}
+          <div className="fixed bottom-0 right-4 bg-white dark:bg-gray-900 shadow-2xl rounded-t-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out z-50" 
                style={{ 
-                 width: '320px',
-                 height: isChatMinimized ? '60px' : '100vh'
+                 width: '280px',
+                 height: isChatMinimized ? '48px' : '400px'
                }}>
             <div className="flex flex-col h-full">
               {/* Chat Header */}
-              <div className="p-4 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+              <div className="p-3 border-b flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-t-2xl">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5" />
-                  <h3 className="font-semibold">Room Chat</h3>
+                  <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                    <MessageCircle className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Group Chat</h3>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsChatMinimized(!isChatMinimized)}
                   title={isChatMinimized ? "Expand Chat" : "Minimize Chat"}
+                  className="h-8 w-8 p-0"
                 >
                   {isChatMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </Button>
@@ -1053,56 +1056,53 @@ export default function VyronaSocial() {
               {/* Chat Content - Only visible when not minimized */}
               {!isChatMinimized && (
                 <>
-                  {/* Participants Section */}
-                  <div className="p-4 border-b bg-gray-50 dark:bg-gray-800">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Users className="w-4 h-4" />
-                      <h4 className="font-medium text-sm">Participants ({(roomMembers as any[])?.length || 0})</h4>
-                    </div>
-                    <div className="space-y-2 max-h-32 overflow-y-auto">
-                      {(roomMembers as any[])?.map((member: any) => (
-                        <div key={member.id} className="flex items-center gap-2">
-                          <Avatar className="w-6 h-6">
+                  {/* Participants Section - Compact */}
+                  <div className="px-3 py-2 border-b bg-gray-50/50 dark:bg-gray-800/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        <h4 className="font-medium text-xs">Members ({(roomMembers as any[])?.length || 0})</h4>
+                      </div>
+                      <div className="flex -space-x-1">
+                        {(roomMembers as any[])?.slice(0, 3).map((member: any) => (
+                          <Avatar key={member.id} className="w-5 h-5 border border-white">
                             <AvatarImage src={member.avatar} />
-                            <AvatarFallback className="text-xs">{member.username?.[0]?.toUpperCase()}</AvatarFallback>
+                            <AvatarFallback className="text-xs bg-purple-100 text-purple-700">{member.username?.[0]?.toUpperCase()}</AvatarFallback>
                           </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium truncate">{member.username}</p>
-                            <div className="flex items-center gap-1">
-                              <div className={`w-2 h-2 rounded-full ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`} />
-                              <p className="text-xs text-gray-500">
-                                {member.isOnline ? "Online" : "Offline"}
-                              </p>
-                            </div>
+                        ))}
+                        {(roomMembers as any[])?.length > 3 && (
+                          <div className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center text-xs font-medium border border-white">
+                            +{(roomMembers as any[]).length - 3}
                           </div>
-                          {member.isCreator && (
-                            <Crown className="w-3 h-3 text-yellow-500" />
-                          )}
-                        </div>
-                      ))}
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Chat Messages */}
-                  <div className="flex-1 p-4 overflow-hidden">
+                  {/* Chat Messages - Compact */}
+                  <div className="flex-1 px-3 py-2 overflow-hidden">
                     <ScrollArea className="h-full">
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {(roomMessages as any[])?.map((message: any) => (
-                          <div key={message.id} className="flex gap-2">
-                            <Avatar className="w-6 h-6">
-                              <AvatarFallback className="text-xs">{message.username?.[0]?.toUpperCase()}</AvatarFallback>
+                          <div key={message.id} className="flex gap-2 text-xs">
+                            <Avatar className="w-5 h-5 flex-shrink-0">
+                              <AvatarFallback className="text-xs bg-purple-100 text-purple-700">{message.username?.[0]?.toUpperCase()}</AvatarFallback>
                             </Avatar>
-                            <div className="flex-1">
-                              <p className="text-xs text-gray-500">{message.username}</p>
-                              <p className="text-sm">{message.content}</p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1">
+                                <p className="font-medium text-xs truncate">{message.username}</p>
+                                <p className="text-xs text-gray-400">•</p>
+                                <p className="text-xs text-gray-400">now</p>
+                              </div>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5">{message.content}</p>
                             </div>
                           </div>
                         ))}
                         {(roomMessages as any[])?.length === 0 && (
-                          <div className="text-center py-8 text-gray-500">
-                            <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">No messages yet</p>
-                            <p className="text-xs">Start the conversation!</p>
+                          <div className="text-center py-6 text-gray-500">
+                            <MessageCircle className="w-6 h-6 mx-auto mb-2 opacity-50" />
+                            <p className="text-xs">No messages yet</p>
+                            <p className="text-xs opacity-75">Start chatting!</p>
                           </div>
                         )}
                       </div>
