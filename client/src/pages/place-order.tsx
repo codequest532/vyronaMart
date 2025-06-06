@@ -219,13 +219,19 @@ export default function PlaceOrder() {
       return;
     }
 
-    if (selectedPayment === "wallet" && walletData?.balance < finalTotal) {
-      toast({
-        title: "Insufficient Balance",
-        description: "Please add funds to your VyronaWallet or choose a different payment method.",
-        variant: "destructive",
-      });
-      return;
+    // Check wallet balance - for group payments, only check user's contribution
+    if (selectedPayment === "wallet") {
+      const requiredAmount = room?.memberCount > 1 ? finalTotal / room.memberCount : finalTotal;
+      if (walletData?.balance < requiredAmount) {
+        toast({
+          title: "Insufficient Balance",
+          description: room?.memberCount > 1 
+            ? `You need ₹${requiredAmount.toFixed(2)} for your contribution. Please add funds to your VyronaWallet.`
+            : "Please add funds to your VyronaWallet or choose a different payment method.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setIsProcessing(true);
@@ -245,6 +251,10 @@ export default function PlaceOrder() {
         deliveryAddresses: deliveryMode.addresses.filter(addr => 
           addr.fullName && addr.phone && addr.addressLine1 && addr.city && addr.state && addr.pincode
         ),
+        isGroupPayment: room?.memberCount > 1 && (selectedPayment === "wallet" || selectedPayment === "upi"),
+        memberCount: room?.memberCount || 1,
+        contributionPerMember: room?.memberCount > 1 ? finalTotal / room.memberCount : finalTotal,
+        useSingleDelivery: deliveryMode.useSingleAddress
       };
 
       // Process checkout through VyronaWallet API
@@ -596,6 +606,19 @@ export default function PlaceOrder() {
               <CardTitle>Payment Method</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Group Payment Notice */}
+              {room?.memberCount > 1 && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-blue-600" />
+                    <h4 className="font-medium text-blue-900">Group Payment</h4>
+                  </div>
+                  <p className="text-sm text-blue-700 mt-1">
+                    This room has {room.memberCount} members. Group contributions are available with VyronaWallet and UPI only.
+                  </p>
+                </div>
+              )}
+
               <div className="space-y-3">
                 <div 
                   className={`border rounded-lg p-4 cursor-pointer transition-colors ${
@@ -606,9 +629,13 @@ export default function PlaceOrder() {
                   <div className="flex items-center gap-3">
                     <Wallet className="h-5 w-5" />
                     <div className="flex-1">
-                      <h4 className="font-medium">VyronaWallet</h4>
+                      <h4 className="font-medium flex items-center gap-2">
+                        VyronaWallet
+                        {room?.memberCount > 1 && <Badge variant="secondary" className="text-xs">Group Compatible</Badge>}
+                      </h4>
                       <p className="text-sm text-muted-foreground">
                         Balance: ₹{walletData?.balance?.toFixed(2) || "0.00"}
+                        {room?.memberCount > 1 && " • Supports member contributions"}
                       </p>
                     </div>
                     {selectedPayment === "wallet" && <CheckCircle className="h-5 w-5 text-primary" />}
@@ -616,18 +643,30 @@ export default function PlaceOrder() {
                 </div>
                 
                 <div 
-                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                    selectedPayment === "card" ? "border-primary bg-primary/5" : "border-border"
+                  className={`border rounded-lg p-4 transition-colors ${
+                    room?.memberCount > 1 
+                      ? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-60" 
+                      : selectedPayment === "card" 
+                        ? "border-primary bg-primary/5 cursor-pointer" 
+                        : "border-border cursor-pointer"
                   }`}
-                  onClick={() => setSelectedPayment("card")}
+                  onClick={() => room?.memberCount === 1 && setSelectedPayment("card")}
                 >
                   <div className="flex items-center gap-3">
                     <CreditCard className="h-5 w-5" />
                     <div className="flex-1">
-                      <h4 className="font-medium">Credit/Debit Card</h4>
-                      <p className="text-sm text-muted-foreground">Visa, MasterCard, RuPay</p>
+                      <h4 className="font-medium flex items-center gap-2">
+                        Credit/Debit Card
+                        {room?.memberCount > 1 && <Badge variant="destructive" className="text-xs">Not Available</Badge>}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {room?.memberCount > 1 
+                          ? "Not available for group payments" 
+                          : "Visa, MasterCard, RuPay"
+                        }
+                      </p>
                     </div>
-                    {selectedPayment === "card" && <CheckCircle className="h-5 w-5 text-primary" />}
+                    {selectedPayment === "card" && room?.memberCount === 1 && <CheckCircle className="h-5 w-5 text-primary" />}
                   </div>
                 </div>
                 
@@ -640,13 +679,46 @@ export default function PlaceOrder() {
                   <div className="flex items-center gap-3">
                     <Smartphone className="h-5 w-5" />
                     <div className="flex-1">
-                      <h4 className="font-medium">UPI</h4>
-                      <p className="text-sm text-muted-foreground">Pay using your UPI app</p>
+                      <h4 className="font-medium flex items-center gap-2">
+                        UPI
+                        {room?.memberCount > 1 && <Badge variant="secondary" className="text-xs">Group Compatible</Badge>}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        Pay using your UPI app
+                        {room?.memberCount > 1 && " • Supports member contributions"}
+                      </p>
                     </div>
                     {selectedPayment === "upi" && <CheckCircle className="h-5 w-5 text-primary" />}
                   </div>
                 </div>
               </div>
+
+              {/* Group Contribution Section */}
+              {room?.memberCount > 1 && (selectedPayment === "wallet" || selectedPayment === "upi") && (
+                <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Member Contributions
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Total Amount:</span>
+                      <span className="font-medium">₹{finalTotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span>Split Among {room.memberCount} Members:</span>
+                      <span className="font-medium">₹{(finalTotal / room.memberCount).toFixed(2)} each</span>
+                    </div>
+                    <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+                      <p className="text-blue-800">
+                        <strong>How it works:</strong> Each member will be notified to contribute their share 
+                        ({selectedPayment === "wallet" ? "via VyronaWallet" : "via UPI"}). 
+                        The order will be processed once all contributions are received.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
           

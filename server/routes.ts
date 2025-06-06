@@ -857,54 +857,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VyronaWallet Checkout API
   app.post("/api/wallet/checkout", async (req, res) => {
     try {
-      const { userId, roomId, items, totalAmount, paymentMethod } = req.body;
+      const { 
+        userId, roomId, items, totalAmount, paymentMethod, 
+        isGroupPayment, memberCount, contributionPerMember, 
+        deliveryAddresses, useSingleDelivery 
+      } = req.body;
       
       // Get user's wallet
       const wallet = await storage.getOrCreateVyronaWallet(userId);
       
+      // For group payments, only check user's contribution amount
+      const requiredAmount = isGroupPayment ? contributionPerMember : totalAmount;
+      
       // Check if wallet has sufficient balance
-      if (wallet.balance < totalAmount) {
+      if (wallet.balance < requiredAmount) {
         return res.status(400).json({ 
           success: false, 
-          message: "Insufficient VyronaWallet balance",
+          message: isGroupPayment 
+            ? `Insufficient balance for your contribution of ₹${contributionPerMember.toFixed(2)}`
+            : "Insufficient VyronaWallet balance",
           balance: wallet.balance,
-          required: totalAmount
+          required: requiredAmount
         });
       }
+
+      // Update wallet balance - deduct only the required amount
+      const updatedWallet = await storage.updateVyronaWalletBalance(userId, -requiredAmount);
 
       // Create transaction record
       const transaction = await storage.createWalletTransaction({
         userId: userId,
-        amount: -totalAmount, // Negative for debit
+        amount: -requiredAmount, // Negative for debit
         type: "payment",
-        description: `Group purchase from room ${roomId}`,
+        description: isGroupPayment 
+          ? `Group contribution for room ${roomId} (${requiredAmount.toFixed(2)} of ${totalAmount.toFixed(2)})`
+          : `Purchase from room ${roomId}`,
         metadata: {
           roomId,
           items,
-          paymentMethod
+          paymentMethod,
+          isGroupPayment,
+          memberCount,
+          contributionPerMember,
+          totalAmount,
+          deliveryAddresses,
+          useSingleDelivery
         }
       });
 
       // Create order record
       const order = await storage.createOrder({
         userId: userId,
-        totalAmount: totalAmount,
-        status: "completed",
+        totalAmount: isGroupPayment ? contributionPerMember : totalAmount,
+        status: isGroupPayment ? "pending_contributions" : "completed",
         module: "vyronasocial",
         metadata: {
           roomId,
           items,
           transactionId: transaction.id,
-          paymentMethod: "vyronawallet"
+          paymentMethod: "vyronawallet",
+          isGroupPayment,
+          memberCount,
+          totalOrderAmount: totalAmount,
+          deliveryAddresses,
+          useSingleDelivery
         }
       });
 
       res.json({
         success: true,
-        message: "Payment successful",
+        message: isGroupPayment 
+          ? "Your contribution has been processed. Waiting for other members to contribute."
+          : "Payment successful",
         orderId: order.id,
         transactionId: transaction.id,
-        remainingBalance: wallet.balance - totalAmount
+        remainingBalance: updatedWallet.balance,
+        isGroupPayment,
+        contributionAmount: requiredAmount
       });
     } catch (error) {
       console.error("Checkout error:", error);
