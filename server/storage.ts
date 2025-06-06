@@ -839,12 +839,13 @@ export class DatabaseStorage implements IStorage {
           maxMembers: shoppingGroups.maxMembers,
           roomCode: shoppingGroups.roomCode,
           createdAt: shoppingGroups.createdAt,
+          totalCart: shoppingGroups.totalCart,
           memberCount: sql<number>`COALESCE(COUNT(${groupMembers.id}), 0)`.as('memberCount')
         })
         .from(shoppingGroups)
         .leftJoin(groupMembers, eq(shoppingGroups.id, groupMembers.groupId))
         .where(eq(shoppingGroups.isActive, true))
-        .groupBy(shoppingGroups.id)
+        .groupBy(shoppingGroups.id, shoppingGroups.totalCart)
         .orderBy(desc(shoppingGroups.createdAt));
 
       return groups.map(group => ({
@@ -856,7 +857,7 @@ export class DatabaseStorage implements IStorage {
         creatorId: group.creatorId,
         isActive: group.isActive,
         memberCount: group.memberCount,
-        totalCart: 0,
+        totalCart: group.totalCart || 0,
         currentGame: null,
         roomCode: group.roomCode || Math.random().toString(36).substring(2, 8).toUpperCase(),
         scheduledTime: null,
