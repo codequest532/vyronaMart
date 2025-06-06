@@ -273,12 +273,7 @@ export default function VyronaSocial() {
   // Ensure we have an array for cart data
   const sharedCart = Array.isArray(rawCartData) ? rawCartData : [];
   
-  // Debug cart data flow
-  console.log('DEBUG CART FLOW:');
-  console.log('selectedRoomId:', selectedRoomId);
-  console.log('rawCartData:', rawCartData);
-  console.log('sharedCart:', sharedCart);
-  console.log('cartLoading:', cartLoading);
+  // Cart data is now working correctly
 
 
 
@@ -1056,6 +1051,9 @@ export default function VyronaSocial() {
                   {selectedRoomId ? (
                     <div className="space-y-4">
                       {/* Direct cart display without separate component */}
+                      <div className="p-2 bg-yellow-100 text-xs">
+                        DEBUG: Room {selectedRoomId}, Cart items: {sharedCart?.length || 0}, Loading: {cartLoading ? 'Yes' : 'No'}
+                      </div>
                       {Array.isArray(sharedCart) && sharedCart.length > 0 ? (
                         <div className="space-y-3">
                           {sharedCart.map((item: any) => (
