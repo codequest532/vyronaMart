@@ -1051,121 +1051,109 @@ export default function VyronaSocial() {
           </div>
         </div>
 
-        {/* Room Interface - Group Cart */}
-        <div className="flex justify-center">
-          {/* Group Cart with Checkout */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                Group Cart
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {/* Enhanced Cart Items Display */}
-                <div className="space-y-4">
-                  {selectedRoomId ? (
-                    <div className="space-y-4">
-                      {/* Room Info Header */}
-                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <ShoppingCart className="w-5 h-5 text-blue-600" />
+        {/* Redesigned Room-Specific Group Cart */}
+        {selectedRoomId && (
+          <div className="mt-8">
+            <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                      <ShoppingCart className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-800">Room Group Cart</h3>
+                      <p className="text-sm text-gray-600">
+                        {rooms?.find(r => r.id === selectedRoomId)?.name || `Room ${selectedRoomId}`}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800">
+                    {Array.isArray(rawCartData) ? rawCartData.length : 0} items
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {Array.isArray(rawCartData) && rawCartData.length > 0 ? (
+                  <div className="space-y-4">
+                    {rawCartData.map((item: CartItem) => (
+                      <div key={item.id} className="flex items-center justify-between p-4 bg-white rounded-lg border border-purple-100 shadow-sm">
+                        <div className="flex items-center space-x-4">
+                          <img 
+                            src={item.imageUrl || "/api/placeholder/60/60"} 
+                            alt={item.name}
+                            className="w-16 h-16 object-cover rounded-lg border-2 border-purple-100"
+                          />
                           <div>
-                            <h3 className="font-medium text-blue-900">Room {selectedRoomId}</h3>
-                            <p className="text-sm text-blue-600">
-                              {Array.isArray(sharedCart) ? sharedCart.length : 0} items in cart
-                            </p>
+                            <h4 className="font-semibold text-gray-900">{item.name}</h4>
+                            <p className="text-sm text-gray-600">{item.description}</p>
+                            <p className="text-lg font-bold text-purple-600">₹{item.price}</p>
                           </div>
                         </div>
-                        {cartLoading && (
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                        )}
+                        <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-500">Qty:</span>
+                            <Badge variant="outline" className="px-2 py-1">{item.quantity}</Badge>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={async () => {
+                              try {
+                                const response = await fetch(`/api/shopping-rooms/${selectedRoomId}/remove-cart-item`, {
+                                  method: 'DELETE',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ productId: item.productId })
+                                });
+                                if (response.ok) {
+                                  refetchCart();
+                                }
+                              } catch (error) {
+                                console.error('Error removing item:', error);
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                      
-                      {/* Cart Items Display */}
-                      {Array.isArray(sharedCart) && sharedCart.length > 0 ? (
-                        <div className="space-y-3">
-                          {sharedCart.map((item: any) => (
-                            <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                              <div className="flex items-center space-x-4">
-                                <img 
-                                  src={item.imageUrl || "/api/placeholder/60/60"} 
-                                  alt={item.name}
-                                  className="w-12 h-12 object-cover rounded"
-                                />
-                                <div>
-                                  <h4 className="font-medium text-gray-900">{item.name}</h4>
-                                  <p className="text-sm text-gray-500">{item.description}</p>
-                                  <p className="text-sm font-medium text-blue-600">₹{item.price}</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={async () => {
-                                    try {
-                                      const response = await fetch(`/api/shopping-rooms/${selectedRoomId}/remove-cart-item`, {
-                                        method: 'DELETE',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ productId: item.productId })
-                                      });
-                                      if (response.ok) {
-                                        refetchCart();
-                                      }
-                                    } catch (error) {
-                                      console.error('Error removing item:', error);
-                                    }
-                                  }}
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                          
-                          {/* Cart Summary */}
-                          <div className="mt-6 p-4 bg-blue-50 rounded-lg border">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="font-medium text-gray-700">Cart Summary</span>
-                              <span className="text-lg font-semibold text-blue-600">
-                                ₹{Array.isArray(sharedCart) ? sharedCart.reduce((total: number, item: any) => total + ((item.price || 0) * (item.quantity || 1)), 0) : 0}
-                              </span>
-                            </div>
-                            <Button 
-                              className="w-full mt-3"
-                              onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
-                              disabled={!Array.isArray(sharedCart) || sharedCart.length === 0}
-                            >
-                              <ShoppingCart className="w-4 h-4 mr-2" />
-                              Place Group Order ({Array.isArray(sharedCart) ? sharedCart.length : 0} items)
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center py-12 text-gray-500">
-                          <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                          <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
-                          <p className="text-sm">Add products to start shopping together!</p>
-                          <p className="text-xs mt-2">Products added by any room member will appear here</p>
-                        </div>
-                      )}
+                    ))}
+                    
+                    {/* Cart Summary */}
+                    <div className="mt-6 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg border border-purple-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-lg font-semibold text-gray-800">Cart Summary</span>
+                        <span className="text-2xl font-bold text-purple-600">
+                          ₹{rawCartData.reduce((total: number, item: CartItem) => total + (item.price * item.quantity), 0)}
+                        </span>
+                      </div>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-3"
+                        onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
+                      >
+                        <ShoppingCart className="w-5 h-5 mr-2" />
+                        Place Group Order ({rawCartData.length} items)
+                      </Button>
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                      <p>Join a room to view the group cart</p>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="mx-auto w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-4">
+                      <ShoppingCart className="w-12 h-12 text-purple-400" />
                     </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Room Cart is Empty</h3>
+                    <p className="text-gray-500 mb-4">Add products using the "Add to Group Cart" button</p>
+                    <p className="text-sm text-gray-400">Products added by room members will appear here</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-          {/* Chat Sidebar - Compact design */}
-          <div className="fixed bottom-0 right-4 bg-white dark:bg-gray-900 shadow-2xl rounded-t-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out z-50" 
+        {/* Chat Sidebar - Compact design */}
+        <div className="fixed bottom-0 right-4 bg-white dark:bg-gray-900 shadow-2xl rounded-t-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out z-50" 
                style={{ 
                  width: '280px',
                  height: isChatMinimized ? '48px' : '400px'
@@ -1283,9 +1271,6 @@ export default function VyronaSocial() {
             />
           )}
         </div>
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/20">
