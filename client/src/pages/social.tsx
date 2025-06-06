@@ -172,11 +172,21 @@ export default function VyronaSocial() {
 
 
   // Fetch shared cart for selected room
-  const { data: sharedCart, isLoading: cartLoading } = useQuery({
+  const { data: sharedCart, isLoading: cartLoading, refetch: refetchCart } = useQuery({
     queryKey: [`/api/shopping-rooms/${selectedRoomId}/cart`],
     enabled: !!selectedRoomId,
     staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
+
+  // Debug cart data
+  React.useEffect(() => {
+    console.log("Cart Debug - selectedRoomId:", selectedRoomId);
+    console.log("Cart Debug - sharedCart:", sharedCart);
+    console.log("Cart Debug - cartLoading:", cartLoading);
+    console.log("Cart Debug - query enabled:", !!selectedRoomId);
+  }, [selectedRoomId, sharedCart, cartLoading]);
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
@@ -949,7 +959,6 @@ export default function VyronaSocial() {
               <div className="space-y-6">
                 {/* Cart Items Display */}
                 <div className="space-y-4">
-                  {console.log("SharedCart data:", sharedCart, "Length:", (sharedCart as any[])?.length)}
                   {!sharedCart || (sharedCart as any[])?.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
