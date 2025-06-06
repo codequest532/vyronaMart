@@ -107,6 +107,7 @@ export interface IStorage {
   getActiveGroupCartsByProduct(productId: number): Promise<GroupCart[]>;
   joinGroupCart(contribution: InsertGroupCartContribution): Promise<GroupCartContribution>;
   getGroupCartContributions(groupCartId: number): Promise<GroupCartContribution[]>;
+  getShoppingRoomCartItems(roomId: number): Promise<any[]>;
 
   // VyronaSocial - Notifications
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -1023,6 +1024,26 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(groupCartContributions)
       .where(eq(groupCartContributions.groupCartId, groupCartId));
+  }
+
+  async getShoppingRoomCartItems(roomId: number): Promise<any[]> {
+    const items = await db
+      .select({
+        id: cartItems.id,
+        productId: cartItems.productId,
+        quantity: cartItems.quantity,
+        userId: cartItems.userId,
+        addedAt: cartItems.addedAt,
+        name: products.name,
+        price: products.price,
+        imageUrl: products.imageUrl,
+        description: products.description
+      })
+      .from(cartItems)
+      .leftJoin(products, eq(cartItems.productId, products.id))
+      .where(eq(cartItems.roomId, roomId));
+    
+    return items;
   }
 
   // VyronaSocial - Notifications

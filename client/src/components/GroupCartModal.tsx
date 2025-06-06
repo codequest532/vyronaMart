@@ -8,9 +8,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Users, ShoppingCart, MessageCircle, Wallet, Plus, Clock } from "lucide-react";
+import { Users, ShoppingCart, MessageCircle, Wallet, Plus, Clock, X } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 import type { Product, ShoppingRoom, CartItem } from "@shared/schema";
 
 interface GroupCartModalProps {
@@ -26,6 +27,7 @@ interface CreateRoomData {
 }
 
 export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCartModalProps) {
+  const [, setLocation] = useLocation();
   const [selectedRoom, setSelectedRoom] = useState<ShoppingRoom | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [showCreateNew, setShowCreateNew] = useState(false);

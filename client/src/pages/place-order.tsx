@@ -44,11 +44,16 @@ export default function PlaceOrder() {
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
   // Fetch cart items for the room
-  const { data: cartItems = [], isLoading: cartLoading } = useQuery({
+  const { data: cartItemsResponse, isLoading: cartLoading } = useQuery({
     queryKey: ["/api/shopping-rooms", roomId, "cart"],
-    queryFn: () => apiRequest("GET", `/api/shopping-rooms/${roomId}/cart`),
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/shopping-rooms/${roomId}/cart`);
+      return response.json();
+    },
     enabled: !!roomId
   });
+
+  const cartItems = Array.isArray(cartItemsResponse) ? cartItemsResponse : [];
 
   // Fetch room details
   const { data: room, isLoading: roomLoading } = useQuery({
