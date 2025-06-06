@@ -105,8 +105,11 @@ export function setupVyronaSocialAPI(app: express.Application) {
     
     try {
       // Get current user ID from session (fallback to user 1 for demo)
-      const userId = (req as any).session?.user?.id || 1;
+      const session = (req as any).session;
+      const userId = session?.user?.id || 1;
       
+      console.log("VyronaSocial rooms endpoint - Session:", session);
+      console.log("VyronaSocial rooms endpoint - Session user:", session?.user);
       console.log("VyronaSocial rooms endpoint - Current user ID:", userId);
       
       const result = await pool.query(`

@@ -186,6 +186,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         level: 1
       });
       
+      // Store user information in session
+      (req as any).session.user = {
+        id: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+        role: newUser.role
+      };
+      
       res.json({ user: { ...newUser, password: undefined } });
     } catch (error) {
       res.status(500).json({ message: "Signup failed" });
