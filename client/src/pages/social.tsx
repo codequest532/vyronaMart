@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { GroupCartModal } from "@/components/GroupCartModal";
 import { useGroupBuyCartStore } from "@/lib/cart-store";
 import { 
   Users, 
@@ -106,6 +107,8 @@ export default function VyronaSocial() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [groupCartModalOpen, setGroupCartModalOpen] = useState(false);
+  const [selectedProductForGroupCart, setSelectedProductForGroupCart] = useState<any>(null);
   
   // Filter and search states
   const [searchQuery, setSearchQuery] = useState("");
@@ -1529,8 +1532,8 @@ export default function VyronaSocial() {
                           className="w-full text-xs h-7 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Add to group cart logic here
-                            console.log('Adding to group cart:', product.name);
+                            setSelectedProductForGroupCart(product);
+                            setGroupCartModalOpen(true);
                           }}
                         >
                           <ShoppingCart className="w-3 h-3 mr-1" />
@@ -1755,10 +1758,8 @@ export default function VyronaSocial() {
                   <Button 
                     className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                     onClick={() => {
-                      toast({
-                        title: "Added to Group Cart",
-                        description: `${selectedProduct.name} added to group cart`,
-                      });
+                      setSelectedProductForGroupCart(selectedProduct);
+                      setGroupCartModalOpen(true);
                       setSelectedProduct(null);
                     }}
                   >
