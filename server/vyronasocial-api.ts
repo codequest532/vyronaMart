@@ -107,6 +107,8 @@ export function setupVyronaSocialAPI(app: express.Application) {
       // Get current user ID from session (fallback to user 1 for demo)
       const userId = (req as any).session?.user?.id || 1;
       
+      console.log("VyronaSocial rooms endpoint - Current user ID:", userId);
+      
       const result = await pool.query(`
         SELECT sg.*, 
                COUNT(DISTINCT gm_all.id) as member_count,
@@ -120,6 +122,8 @@ export function setupVyronaSocialAPI(app: express.Application) {
         GROUP BY sg.id
         ORDER BY sg.created_at DESC
       `, [userId]);
+      
+      console.log("VyronaSocial rooms query result:", result.rows);
       
       const rooms = result.rows.map(row => ({
         id: row.id,
