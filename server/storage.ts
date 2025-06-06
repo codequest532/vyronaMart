@@ -2270,19 +2270,17 @@ export class DatabaseStorage implements IStorage {
   // Seller Order Management Implementation
   async getSellerOrders(): Promise<any[]> {
     try {
-      const orders = await db
+      // Get all orders with 'paid' status from VyronaSocial module
+      const ordersList = await db
         .select()
         .from(orders)
-        .where(eq(orders.status, 'paid'))
+        .where(and(
+          eq(orders.status, 'paid'),
+          eq(orders.module, 'vyronasocial')
+        ))
         .orderBy(desc(orders.createdAt));
 
-      return orders.map(order => ({
-        ...order,
-        deliveryAddress: order.metadata?.deliveryAddress || null,
-        customerName: order.metadata?.customerName || 'N/A',
-        customerPhone: order.metadata?.customerPhone || 'N/A',
-        products: order.metadata?.products || []
-      }));
+      return ordersList;
     } catch (error) {
       console.error("Error in getSellerOrders:", error);
       return [];
