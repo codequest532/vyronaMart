@@ -106,7 +106,7 @@ export function setupVyronaSocialAPI(app: express.Application) {
         FROM shopping_groups sg
         LEFT JOIN group_members gm ON sg.id = gm.group_id
         WHERE sg.is_active = true
-        GROUP BY sg.id
+        GROUP BY sg.id, sg.total_cart
         ORDER BY sg.created_at DESC
       `);
       
@@ -119,7 +119,7 @@ export function setupVyronaSocialAPI(app: express.Application) {
         creatorId: row.creator_id,
         isActive: row.is_active,
         memberCount: parseInt(row.member_count) || 0,
-        totalCart: 0,
+        totalCart: row.total_cart || 0,
         currentGame: null,
         roomCode: row.room_code || Math.random().toString(36).substring(2, 8).toUpperCase(),
         scheduledTime: null,
@@ -127,6 +127,9 @@ export function setupVyronaSocialAPI(app: express.Application) {
         createdAt: row.created_at
       }));
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.json(rooms);
     } catch (error) {
       console.error("Get VyronaSocial rooms error:", error);
