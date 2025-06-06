@@ -53,7 +53,10 @@ import {
   MoreVertical,
   Share,
   Trash2,
-  ShoppingBag
+  ShoppingBag,
+  Search,
+  LayoutGrid,
+  List
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -362,6 +365,76 @@ export default function VyronaSocial() {
   // Room Dashboard Component
   const RoomDashboard = () => (
     <div className="space-y-8">
+      {/* Search and Filter Section */}
+      <Card className="border-0 bg-white dark:bg-gray-800 shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+            {/* Category Filter */}
+            <div className="flex-1 max-w-xs">
+              <Select defaultValue="all">
+                <SelectTrigger className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="electronics">Electronics</SelectItem>
+                  <SelectItem value="fashion">Fashion</SelectItem>
+                  <SelectItem value="home">Home & Garden</SelectItem>
+                  <SelectItem value="sports">Sports</SelectItem>
+                  <SelectItem value="books">Books</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex-1 max-w-md relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search products..."
+                  className="pl-10 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700"
+                />
+              </div>
+            </div>
+
+            {/* Sort Filter */}
+            <div className="flex-1 max-w-xs">
+              <Select defaultValue="newest">
+                <SelectTrigger className="w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+                  <SelectValue placeholder="Newest First" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="discount">Highest Discount</SelectItem>
+                  <SelectItem value="popular">Most Popular</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* View Toggle */}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="p-2 border-gray-300 dark:border-gray-600"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="p-2 border-gray-300 dark:border-gray-600"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Featured Group Buy Products */}
       <Card className="border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-xl">
         <CardHeader className="pb-4">
