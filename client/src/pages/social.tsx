@@ -467,7 +467,10 @@ export default function VyronaSocial() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setSelectedRoomForInvite(room.id)}
+                        onClick={() => {
+                          setSelectedRoomForInvite(room.id);
+                          setShowInviteDialog(true);
+                        }}
                         className="p-2"
                       >
                         <UserPlus className="w-4 h-4" />
@@ -1630,6 +1633,73 @@ export default function VyronaSocial() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Invite Members Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5" />
+              Invite Members
+            </DialogTitle>
+            <DialogDescription>
+              Share this room code with friends to invite them
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Room Code Display */}
+            <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Room Code</div>
+              <div className="text-2xl font-bold font-mono tracking-wider text-purple-600">
+                {selectedRoomForInvite ? `ROOM${selectedRoomForInvite}` : "ROOM001"}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  navigator.clipboard.writeText(`ROOM${selectedRoomForInvite || 1}`);
+                  toast({
+                    title: "Copied!",
+                    description: "Room code copied to clipboard",
+                  });
+                }}
+              >
+                <Share className="w-4 h-4 mr-2" />
+                Copy Code
+              </Button>
+            </div>
+
+            {/* Quick Share Options */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Quick Share</div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1">
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  WhatsApp
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Link
+                </Button>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              <div className="text-sm text-blue-800 dark:text-blue-200">
+                <div className="font-medium mb-1">How to join:</div>
+                <ol className="text-xs space-y-1 list-decimal list-inside">
+                  <li>Share the room code with friends</li>
+                  <li>They can use "Join Room" to enter</li>
+                  <li>Start shopping together!</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
