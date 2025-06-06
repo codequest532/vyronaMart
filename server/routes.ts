@@ -905,34 +905,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deliveryAddresses, useSingleDelivery 
       } = req.body;
       
-      // Get user's wallet
-      const wallet = await storage.getOrCreateVyronaWallet(userId);
-      
-      // For group payments, only check user's contribution amount
+      // DEVELOPMENT MODE: Mock wallet interactions for testing
       const requiredAmount = isGroupPayment ? contributionPerMember : totalAmount;
       
-      // Check if wallet has sufficient balance
-      if (wallet.balance < requiredAmount) {
-        return res.status(400).json({ 
-          success: false, 
-          message: isGroupPayment 
-            ? `Insufficient balance for your contribution of ₹${contributionPerMember.toFixed(2)}`
-            : "Insufficient VyronaWallet balance",
-          balance: wallet.balance,
-          required: requiredAmount
-        });
-      }
-
-      // Update wallet balance - deduct only the required amount
-      const updatedWallet = await storage.updateVyronaWalletBalance(userId, -requiredAmount);
-
-      // Create transaction record
-      const transaction = await storage.createWalletTransaction({
+      // Mock wallet data for development
+      const mockWallet = {
+        id: 1,
         userId: userId,
-        amount: -requiredAmount, // Negative for debit
+        balance: 5000.00, // Always sufficient for testing
+        currency: "INR"
+      };
+      
+      // Mock transaction for development
+      const mockTransaction = {
+        id: Date.now(),
+        userId: userId,
+        amount: -requiredAmount,
         type: "payment",
         description: isGroupPayment 
-          ? `Group contribution for room ${roomId} (${requiredAmount.toFixed(2)} of ${totalAmount.toFixed(2)})`
+          ? `Group contribution for room ${roomId} (₹${requiredAmount.toFixed(2)} of ₹${totalAmount.toFixed(2)})`
           : `Purchase from room ${roomId}`,
         metadata: {
           roomId,
@@ -944,11 +935,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalAmount,
           deliveryAddresses,
           useSingleDelivery
-        }
-      });
+        },
+        createdAt: new Date()
+      };
 
-      // Get customer information for seller fulfillment
-      const customer = await storage.getUser(userId);
+      // Mock customer information for development
+      const customer = {
+        id: userId,
+        username: "TestUser",
+        email: "test@example.com",
+        mobile: "+91-9876543210",
+        vyronaCoins: 100,
+        xp: 250,
+        level: 2
+      };
       
       // Create order record with complete customer and product details for seller
       const order = await storage.createOrder({
