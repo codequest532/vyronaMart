@@ -696,84 +696,92 @@ export default function PlaceOrder() {
                 </div>
               </div>
 
-              {/* Group Contribution Section */}
+              {/* Group Checkout Section */}
               {room?.memberCount > 1 && (selectedPayment === "wallet" || selectedPayment === "upi") && (
-                <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-                  <h4 className="font-medium mb-3 flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Group Checkout
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center text-sm">
-                      <span>Product Total:</span>
+                <div className="mt-6 p-6 border rounded-lg bg-white shadow-sm">
+                  <h3 className="text-xl font-semibold mb-6 text-center">Group Checkout</h3>
+                  
+                  {/* Pricing Summary */}
+                  <div className="space-y-3 mb-6">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-700">Product Total:</span>
                       <span className="font-medium">₹{orderTotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm text-green-600">
+                    <div className="flex justify-between items-center text-green-600">
                       <span>Group Discount:</span>
                       <span className="font-medium">-₹{(orderTotal * 0.15).toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between items-center font-medium">
+                    <Separator />
+                    <div className="flex justify-between items-center text-lg font-bold">
                       <span>Required Amount:</span>
                       <span>₹{(orderTotal * 0.85).toFixed(2)}</span>
                     </div>
-                    
-                    {/* Progress Bar */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Collected:</span>
-                        <span className="text-green-600 font-medium">₹{(orderTotal * 0.85 * 0.73).toFixed(2)}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '73%' }}></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>73% funded</span>
-                        <span>₹{(orderTotal * 0.85 * 0.27).toFixed(2)} remaining</span>
-                      </div>
-                    </div>
-
-                    {/* Member Contributions */}
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">Member Contributions:</p>
-                      <div className="text-xs space-y-1">
-                        <div className="flex justify-between">
-                          <span>You (35%)</span>
-                          <span className="text-green-600">₹{(orderTotal * 0.85 * 0.35).toFixed(2)} ✓</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Alice (25%)</span>
-                          <span className="text-green-600">₹{(orderTotal * 0.85 * 0.25).toFixed(2)} ✓</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Bob (20%)</span>
-                          <span className="text-orange-600">₹{(orderTotal * 0.85 * 0.20).toFixed(2)} pending</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Carol (20%)</span>
-                          <span className="text-gray-500">₹{(orderTotal * 0.85 * 0.20).toFixed(2)} not set</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* VyronaWallet Balance */}
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
-                      <div className="flex items-center gap-2">
-                        <Wallet className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium">VyronaWallet</span>
-                      </div>
-                      <span className="text-lg font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</span>
-                    </div>
-
-                    {/* Add Contribution Button */}
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={() => setShowContributionModal(true)}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Your Contribution
-                    </Button>
                   </div>
+
+                  {/* Collection Progress */}
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">Collected:</span>
+                      <span className="text-green-600 font-bold text-lg">₹{(orderTotal * 0.85 * 0.73).toFixed(2)}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
+                      <div className="bg-green-500 h-3 rounded-full transition-all duration-300" style={{ width: '73%' }}></div>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <span>73% funded</span>
+                      <span>₹{(orderTotal * 0.85 * 0.27).toFixed(2)} remaining</span>
+                    </div>
+                  </div>
+
+                  {/* Member Contributions */}
+                  <div className="mb-6">
+                    <p className="font-medium mb-3">Member Contributions:</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center py-2 px-3 bg-green-50 rounded">
+                        <span>You (35%)</span>
+                        <span className="text-green-600 font-semibold">₹{(orderTotal * 0.85 * 0.35).toFixed(2)} ✓</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 px-3 bg-green-50 rounded">
+                        <span>Alice (25%)</span>
+                        <span className="text-green-600 font-semibold">₹{(orderTotal * 0.85 * 0.25).toFixed(2)} ✓</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 px-3 bg-orange-50 rounded">
+                        <span>Bob (20%)</span>
+                        <span className="text-orange-600 font-semibold">₹{(orderTotal * 0.85 * 0.20).toFixed(2)} pending</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
+                        <span>Carol (20%)</span>
+                        <span className="text-gray-500">₹{(orderTotal * 0.85 * 0.20).toFixed(2)} not set</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* VyronaWallet Balance */}
+                  <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg mb-6">
+                    <div className="flex items-center gap-3">
+                      <Wallet className="h-6 w-6 text-blue-600" />
+                      <span className="font-semibold text-blue-900">VyronaWallet</span>
+                    </div>
+                    <span className="text-2xl font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</span>
+                  </div>
+
+                  {/* Add Contribution Button */}
+                  <Button 
+                    className="w-full h-12 text-lg font-semibold mb-4"
+                    onClick={() => setShowContributionModal(true)}
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Add Your Contribution
+                  </Button>
+
+                  {/* Place Group Order Button */}
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-12 text-lg font-semibold bg-purple-100 hover:bg-purple-200 text-purple-700 border-purple-300"
+                  >
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    Place Group Order
+                  </Button>
                 </div>
               )}
             </CardContent>

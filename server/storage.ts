@@ -2315,6 +2315,13 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async updateWalletBalance(userId: number, newBalance: number): Promise<void> {
+    await db
+      .update(vyronaWallets)
+      .set({ balance: newBalance })
+      .where(eq(vyronaWallets.userId, userId));
+  }
+
   async getWalletTransactions(userId: number): Promise<any[]> {
     try {
       const transactions = await db
