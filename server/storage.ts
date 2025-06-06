@@ -730,6 +730,8 @@ export class DatabaseStorage implements IStorage {
     .leftJoin(products, eq(cartItems.productId, products.id))
     .where(eq(cartItems.roomId, roomId));
 
+    console.log(`=== SHARED CART ITEMS QUERY RESULT FOR ROOM ${roomId} ===`, items);
+
     return items.map(item => ({
       id: item.id,
       userId: item.userId,
