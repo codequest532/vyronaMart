@@ -114,6 +114,11 @@ export interface IStorage {
   getUserNotifications(userId: number): Promise<Notification[]>;
   markNotificationAsRead(id: number): Promise<void>;
 
+  // VyronaWallet - Wallet Management
+  getOrCreateVyronaWallet(userId: number): Promise<any>;
+  createWalletTransaction(transaction: any): Promise<any>;
+  getWalletTransactions(userId: number): Promise<any[]>;
+
   // VyronaInstaShop - Instagram Store Management
   connectInstagramStore(store: InsertInstagramStore): Promise<InstagramStore>;
   getUserInstagramStores(userId: number): Promise<InstagramStore[]>;
@@ -2259,6 +2264,84 @@ export class DatabaseStorage implements IStorage {
   async getAllLibraryRequests(): Promise<any[]> {
     const requests = await db.select().from(libraryIntegrationRequests);
     return requests;
+  }
+
+  // VyronaWallet - Wallet Management Implementation
+  async getOrCreateVyronaWallet(userId: number): Promise<any> {
+    try {
+      // First try to get existing wallet
+      const existingWallet = await db
+        .select()
+        .from(vyronaWallets)
+        .where(eq(vyronaWallets.userId, userId))
+        .limit(1);
+
+      if (existingWallet.length > 0) {
+        return existingWallet[0];
+      }
+
+      // Create new wallet if doesn't exist
+      const [newWallet] = await db
+        .insert(vyronaWallets)
+        .values({
+          userId: userId,
+          balance: 1000.00, // Default balance for new users
+          currency: 'INR',
+          isActive: true,
+          createdAt: new Date()
+        })
+        .returning();
+
+      return newWallet;
+    } catch (error) {
+      console.error("Error in getOrCreateVyronaWallet:", error);
+      throw error;
+    }
+  }
+
+  async createWalletTransaction(transaction: any): Promise<any> {
+    try {
+      const [newTransaction] = await db
+        .insert(walletTransactions)
+        .values({
+          userId: transaction.userId,
+          amount: transaction.amount,
+          type: transaction.type || 'payment',
+          description: transaction.description,
+          status: 'completed',
+          metadata: transaction.metadata || {},
+          createdAt: new Date()
+        })
+        .returning();
+
+      // Update wallet balance
+      await db
+        .update(vyronaWallets)
+        .set({
+          balance: sql`${vyronaWallets.balance} + ${transaction.amount}`
+        })
+        .where(eq(vyronaWallets.userId, transaction.userId));
+
+      return newTransaction;
+    } catch (error) {
+      console.error("Error in createWalletTransaction:", error);
+      throw error;
+    }
+  }
+
+  async getWalletTransactions(userId: number): Promise<any[]> {
+    try {
+      const transactions = await db
+        .select()
+        .from(walletTransactions)
+        .where(eq(walletTransactions.userId, userId))
+        .orderBy(desc(walletTransactions.createdAt));
+
+      return transactions;
+    } catch (error) {
+      console.error("Error in getWalletTransactions:", error);
+      throw error;
+    }
   }
 }
 

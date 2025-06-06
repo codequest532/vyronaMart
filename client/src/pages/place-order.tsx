@@ -435,110 +435,61 @@ export default function PlaceOrder() {
 
         {/* Payment Step */}
         <TabsContent value="payment" className="space-y-4">
-
-          {/* Order Items */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
-                Order Items
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {cartItems.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No items in cart</p>
-              ) : (
-                <div className="space-y-4">
-                  {cartItems.map((item: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between py-2">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                          <Package className="w-6 h-6 text-muted-foreground" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{item.name || "Product"}</p>
-                          <p className="text-sm text-muted-foreground">Qty: {item.quantity || 1}</p>
-                        </div>
-                      </div>
-                      <p className="font-semibold">₹{((item.price || 0) * (item.quantity || 1)).toFixed(2)}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Payment Method */}
           <Card>
             <CardHeader>
               <CardTitle>Payment Method</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-3">
-                <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-lg hover:bg-muted">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="wallet"
-                    checked={selectedPayment === "wallet"}
-                    onChange={(e) => setSelectedPayment(e.target.value)}
-                    className="sr-only"
-                  />
-                  <div className={`w-4 h-4 border-2 rounded-full ${selectedPayment === "wallet" ? "border-primary bg-primary" : "border-muted-foreground"}`}>
-                    {selectedPayment === "wallet" && (
-                      <div className="w-full h-full bg-white rounded-full scale-50"></div>
-                    )}
+            <CardContent>
+              <div className="space-y-3">
+                <div 
+                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    selectedPayment === "wallet" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                  onClick={() => setSelectedPayment("wallet")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Wallet className="h-5 w-5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium">VyronaWallet</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Balance: ₹{walletData?.balance?.toFixed(2) || "0.00"}
+                      </p>
+                    </div>
+                    {selectedPayment === "wallet" && <CheckCircle className="h-5 w-5 text-primary" />}
                   </div>
-                  <Wallet className="w-5 h-5 text-blue-600" />
-                  <div className="flex-1">
-                    <p className="font-medium">VyronaWallet</p>
-                    <p className="text-sm text-muted-foreground">
-                      Balance: ₹{walletData?.balance?.toFixed(2) || "0.00"}
-                    </p>
+                </div>
+                
+                <div 
+                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    selectedPayment === "card" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                  onClick={() => setSelectedPayment("card")}
+                >
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-5 w-5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium">Credit/Debit Card</h4>
+                      <p className="text-sm text-muted-foreground">Visa, MasterCard, RuPay</p>
+                    </div>
+                    {selectedPayment === "card" && <CheckCircle className="h-5 w-5 text-primary" />}
                   </div>
-                </label>
-
-                <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-lg hover:bg-muted">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="upi"
-                    checked={selectedPayment === "upi"}
-                    onChange={(e) => setSelectedPayment(e.target.value)}
-                    className="sr-only"
-                  />
-                  <div className={`w-4 h-4 border-2 rounded-full ${selectedPayment === "upi" ? "border-primary bg-primary" : "border-muted-foreground"}`}>
-                    {selectedPayment === "upi" && (
-                      <div className="w-full h-full bg-white rounded-full scale-50"></div>
-                    )}
+                </div>
+                
+                <div 
+                  className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    selectedPayment === "upi" ? "border-primary bg-primary/5" : "border-border"
+                  }`}
+                  onClick={() => setSelectedPayment("upi")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="h-5 w-5" />
+                    <div className="flex-1">
+                      <h4 className="font-medium">UPI</h4>
+                      <p className="text-sm text-muted-foreground">Pay using your UPI app</p>
+                    </div>
+                    {selectedPayment === "upi" && <CheckCircle className="h-5 w-5 text-primary" />}
                   </div>
-                  <Smartphone className="w-5 h-5 text-green-600" />
-                  <div>
-                    <p className="font-medium">UPI Payment</p>
-                    <p className="text-sm text-muted-foreground">Pay using UPI apps</p>
-                  </div>
-                </label>
-
-                <label className="flex items-center space-x-3 cursor-pointer p-3 border rounded-lg hover:bg-muted">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="card"
-                    checked={selectedPayment === "card"}
-                    onChange={(e) => setSelectedPayment(e.target.value)}
-                    className="sr-only"
-                  />
-                  <div className={`w-4 h-4 border-2 rounded-full ${selectedPayment === "card" ? "border-primary bg-primary" : "border-muted-foreground"}`}>
-                    {selectedPayment === "card" && (
-                      <div className="w-full h-full bg-white rounded-full scale-50"></div>
-                    )}
-                  </div>
-                  <CreditCard className="w-5 h-5 text-purple-600" />
-                  <div>
-                    <p className="font-medium">Credit/Debit Card</p>
-                    <p className="text-sm text-muted-foreground">Pay using cards</p>
-                  </div>
-                </label>
+                </div>
               </div>
             </CardContent>
           </Card>
