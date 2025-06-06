@@ -458,6 +458,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
       
       console.log("Transformed rooms for checkout:", transformedRooms);
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.json(transformedRooms);
     } catch (error) {
       console.error("Shopping rooms error:", error);
@@ -838,6 +841,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const cartItem = await storage.addCartItem(cartItemData);
+      
+      // Add cache invalidation headers to force frontend refresh
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding item to cart:", error);
@@ -1821,6 +1829,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = 1; // From session when auth is implemented
       const groups = await storage.getShoppingGroups(userId);
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.json(groups);
     } catch (error) {
       console.error("Error fetching shopping groups:", error);

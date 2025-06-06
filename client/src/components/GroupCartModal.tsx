@@ -124,7 +124,15 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate all related caches
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      
+      // Force refetch of rooms data
+      refetchRooms();
+      
       toast({
         title: "Success",
         description: "Product added to shopping room!",
