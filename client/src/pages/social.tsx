@@ -769,7 +769,7 @@ export default function VyronaSocial() {
                         </span>
                       </div>
                       
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4 text-blue-600" />
                           <span className="text-xs text-blue-600 font-medium">
@@ -780,6 +780,20 @@ export default function VyronaSocial() {
                           Group Deal
                         </Badge>
                       </div>
+
+                      <Button 
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast({
+                            title: "Added to Group Cart",
+                            description: `${product.name} added to group cart`,
+                          });
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add to Group
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
