@@ -1074,7 +1074,7 @@ export default function VyronaSocial() {
                           <div>
                             <h3 className="font-medium text-blue-900">Room {selectedRoomId}</h3>
                             <p className="text-sm text-blue-600">
-                              {(sharedCart?.length || 0)} items in cart
+                              {Array.isArray(sharedCart) ? sharedCart.length : 0} items in cart
                             </p>
                           </div>
                         </div>
@@ -1083,8 +1083,8 @@ export default function VyronaSocial() {
                         )}
                       </div>
                       
-                      {/* Force display cart items regardless of conditions */}
-                      {sharedCart.length > 0 ? (
+                      {/* Cart Items Display */}
+                      {Array.isArray(sharedCart) && sharedCart.length > 0 ? (
                         <div className="space-y-3">
                           {sharedCart.map((item: any) => (
                             <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -1131,16 +1131,16 @@ export default function VyronaSocial() {
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-medium text-gray-700">Cart Summary</span>
                               <span className="text-lg font-semibold text-blue-600">
-                                ₹{sharedCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0)}
+                                ₹{Array.isArray(sharedCart) ? sharedCart.reduce((total: number, item: any) => total + ((item.price || 0) * (item.quantity || 1)), 0) : 0}
                               </span>
                             </div>
                             <Button 
                               className="w-full mt-3"
                               onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
-                              disabled={sharedCart.length === 0}
+                              disabled={!Array.isArray(sharedCart) || sharedCart.length === 0}
                             >
                               <ShoppingCart className="w-4 h-4 mr-2" />
-                              Place Group Order ({sharedCart.length} items)
+                              Place Group Order ({Array.isArray(sharedCart) ? sharedCart.length : 0} items)
                             </Button>
                           </div>
                         </div>
