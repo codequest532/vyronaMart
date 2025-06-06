@@ -268,6 +268,14 @@ export default function VyronaSocial() {
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     gcTime: 0, // Don't cache the data
+    queryFn: async () => {
+      if (!selectedRoomId) return [];
+      const response = await fetch(`/api/shopping-rooms/${selectedRoomId}/cart`);
+      if (!response.ok) throw new Error('Failed to fetch cart');
+      const data = await response.json();
+      console.log('CART QUERY RESPONSE:', data);
+      return Array.isArray(data) ? data : [];
+    }
   });
 
   // Ensure we have an array for cart data
