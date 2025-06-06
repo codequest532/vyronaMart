@@ -180,13 +180,7 @@ export default function VyronaSocial() {
     refetchOnWindowFocus: true,
   });
 
-  // Debug cart data
-  React.useEffect(() => {
-    console.log("Cart Debug - selectedRoomId:", selectedRoomId);
-    console.log("Cart Debug - sharedCart:", sharedCart);
-    console.log("Cart Debug - cartLoading:", cartLoading);
-    console.log("Cart Debug - query enabled:", !!selectedRoomId);
-  }, [selectedRoomId, sharedCart, cartLoading]);
+
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
@@ -959,7 +953,7 @@ export default function VyronaSocial() {
               <div className="space-y-6">
                 {/* Cart Items Display */}
                 <div className="space-y-4">
-                  {!sharedCart || (sharedCart as any[])?.length === 0 ? (
+                  {!Array.isArray(sharedCart) || sharedCart.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
                       <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
@@ -970,16 +964,16 @@ export default function VyronaSocial() {
                     <div className="grid gap-4">
                       <div className="flex items-center justify-between border-b pb-2">
                         <h3 className="text-lg font-semibold text-gray-800">
-                          Group Cart ({(sharedCart as any[])?.length} items)
+                          Group Cart ({sharedCart.length} items)
                         </h3>
                         <div className="text-sm text-gray-600">
-                          Total: ₹{(sharedCart as any[])?.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)}
+                          Total: ₹{sharedCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)}
                         </div>
                       </div>
                       
                       <ScrollArea className="max-h-80">
                         <div className="space-y-3">
-                          {(sharedCart as any[])?.map((item: any) => (
+                          {sharedCart.map((item: any) => (
                             <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                               <img 
                                 src={item.imageUrl || "/api/placeholder/80/80"} 
