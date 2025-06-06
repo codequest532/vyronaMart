@@ -868,41 +868,81 @@ export default function VyronaSocial() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Cart Items */}
-                <div className="lg:col-span-2">
-                  <ScrollArea className="h-96">
-                    <div className="space-y-4">
-                      {(sharedCart as any[])?.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No items in group cart yet.</p>
-                          <p className="text-sm">Add products to start shopping together!</p>
-                        </div>
-                      ) : (
-                        (sharedCart as any[])?.map((item: any) => (
-                          <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <img 
-                              src={item.imageUrl || "/api/placeholder/60/60"} 
-                              alt={item.name}
-                              className="w-12 h-12 object-cover rounded"
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-sm">{item.name}</h4>
-                              <p className="text-xs text-gray-500">Added by {item.addedBy}</p>
-                              <p className="text-sm font-semibold">₹{item.price}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">Qty: {item.quantity}</span>
-                            </div>
-                          </div>
-                        ))
-                      )}
+              <div className="space-y-6">
+                {/* Cart Items Display */}
+                <div className="space-y-4">
+                  {(sharedCart as any[])?.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
+                      <p className="text-sm">Add products to start shopping together!</p>
+                      <p className="text-xs mt-2">Products added by any room member will appear here</p>
                     </div>
-                  </ScrollArea>
+                  ) : (
+                    <div className="grid gap-4">
+                      <div className="flex items-center justify-between border-b pb-2">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Group Cart ({(sharedCart as any[])?.length} items)
+                        </h3>
+                        <div className="text-sm text-gray-600">
+                          Total: ₹{(sharedCart as any[])?.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)}
+                        </div>
+                      </div>
+                      
+                      <ScrollArea className="max-h-80">
+                        <div className="space-y-3">
+                          {(sharedCart as any[])?.map((item: any) => (
+                            <div key={item.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                              <img 
+                                src={item.imageUrl || "/api/placeholder/80/80"} 
+                                alt={item.name}
+                                className="w-16 h-16 object-cover rounded-lg border"
+                              />
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900 dark:text-gray-100">{item.name}</h4>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Added by {item.addedBy || 'Unknown Member'}</p>
+                                <div className="flex items-center gap-3 mt-1">
+                                  <span className="text-lg font-semibold text-green-600">₹{item.price}</span>
+                                  <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-medium text-gray-700">
+                                  Subtotal: ₹{(item.price * item.quantity).toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                      
+                      {/* Place Order Section */}
+                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200">Ready to Place Order?</h4>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {(sharedCart as any[])?.length} items • ₹{(sharedCart as any[])?.reduce((total: number, item: any) => total + (item.price * item.quantity), 0).toFixed(2)} total
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <Button 
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+                          onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
+                          size="lg"
+                        >
+                          <ShoppingCart className="w-5 h-5 mr-2" />
+                          Place Group Order
+                        </Button>
+                        
+                        <p className="text-xs text-center text-gray-500 mt-2">
+                          Proceed to delivery details and payment
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-
               </div>
             </CardContent>
           </Card>
