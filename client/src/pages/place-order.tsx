@@ -76,6 +76,7 @@ export default function PlaceOrder() {
   const [currentStep, setCurrentStep] = useState<'address' | 'payment' | 'review'>('address');
   const [showContributionModal, setShowContributionModal] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('');
+  const [contributionPaymentMethod, setContributionPaymentMethod] = useState('upi');
 
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
@@ -927,38 +928,18 @@ export default function PlaceOrder() {
             <div className="space-y-3">
               <Label className="text-sm font-medium">Payment Method</Label>
               <div className="grid grid-cols-1 gap-3">
-                {/* VyronaWallet Option */}
-                <div 
-                  className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    selectedPayment === "wallet" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
-                  }`}
-                  onClick={() => setSelectedPayment("wallet")}
-                >
-                  <div className="flex items-center gap-3">
-                    <Wallet className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <p className="font-medium">VyronaWallet</p>
-                      <p className="text-sm text-green-600">✓ Group compatible</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</p>
-                    <p className="text-xs text-gray-500">Current Balance</p>
-                  </div>
-                </div>
-
                 {/* UPI Option */}
                 <div 
                   className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    selectedPayment === "upi" ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-gray-300"
+                    contributionPaymentMethod === "upi" ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-gray-300"
                   }`}
-                  onClick={() => setSelectedPayment("upi")}
+                  onClick={() => setContributionPaymentMethod("upi")}
                 >
                   <div className="flex items-center gap-3">
                     <Smartphone className="h-5 w-5 text-purple-600" />
                     <div>
                       <p className="font-medium">UPI Payment</p>
-                      <p className="text-sm text-green-600">✓ Group compatible</p>
+                      <p className="text-sm text-gray-600">Pay directly via UPI</p>
                     </div>
                   </div>
                   <Badge variant="secondary" className="bg-purple-100 text-purple-700">
@@ -966,20 +947,34 @@ export default function PlaceOrder() {
                   </Badge>
                 </div>
 
-                {/* Card Option (Disabled for Group) */}
-                <div className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg opacity-50 cursor-not-allowed">
+                {/* Card Option */}
+                <div 
+                  className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    contributionPaymentMethod === "card" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setContributionPaymentMethod("card")}
+                >
                   <div className="flex items-center gap-3">
-                    <CreditCard className="h-5 w-5 text-gray-400" />
+                    <CreditCard className="h-5 w-5 text-green-600" />
                     <div>
-                      <p className="font-medium text-gray-500">Credit/Debit Card</p>
-                      <p className="text-sm text-red-500">✗ Not available for group contributions</p>
+                      <p className="font-medium">Credit/Debit Card</p>
+                      <p className="text-sm text-gray-600">Secure card payment</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-gray-500 border-gray-300">
-                    Disabled
+                  <Badge variant="secondary" className="bg-green-100 text-green-700">
+                    Secure
                   </Badge>
                 </div>
               </div>
+            </div>
+
+            {/* Current VyronaWallet Balance Display */}
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Wallet className="h-5 w-5 text-blue-600" />
+                <span className="font-medium text-blue-900">Current VyronaWallet Balance</span>
+              </div>
+              <span className="text-lg font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</span>
             </div>
 
             <div className="flex gap-3">
@@ -999,12 +994,12 @@ export default function PlaceOrder() {
                         roomId: roomId,
                         amount: parseFloat(contributionAmount),
                         userId: 1,
-                        paymentMethod: selectedPayment
+                        paymentMethod: contributionPaymentMethod
                       });
                       
                       toast({
                         title: "Contribution Added",
-                        description: `₹${contributionAmount} has been contributed via ${selectedPayment === 'wallet' ? 'VyronaWallet' : 'UPI'}.`,
+                        description: `₹${contributionAmount} has been contributed via ${contributionPaymentMethod === 'upi' ? 'UPI' : 'Card'}.`,
                       });
                       
                       setContributionAmount('');
@@ -1021,7 +1016,7 @@ export default function PlaceOrder() {
                     }
                   }
                 }}
-                disabled={!contributionAmount || parseFloat(contributionAmount) <= 0 || selectedPayment === "card"}
+                disabled={!contributionAmount || parseFloat(contributionAmount) <= 0}
               >
                 Add Contribution
               </Button>
