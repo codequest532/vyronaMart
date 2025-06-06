@@ -40,10 +40,18 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
   const queryClient = useQueryClient();
 
   // Fetch existing shopping rooms
-  const { data: shoppingRooms, isLoading: loadingRooms } = useQuery({
+  const { data: shoppingRooms, isLoading: loadingRooms, refetch: refetchRooms } = useQuery({
     queryKey: ["/api/shopping-rooms"],
     enabled: isOpen,
+    staleTime: 0, // Always fetch fresh data
   });
+
+  // Refetch rooms when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      refetchRooms();
+    }
+  }, [isOpen, refetchRooms]);
 
   // Fetch users for member selection
   const { data: users } = useQuery({

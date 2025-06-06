@@ -969,7 +969,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Shopping rooms for checkout selection (maps to VyronaSocial rooms)
   app.get("/api/shopping-rooms", async (req, res) => {
-    const { Pool } = require('@neondatabase/serverless');
+    const { Pool, neonConfig } = require('@neondatabase/serverless');
+    const ws = require('ws');
+    
+    // Configure WebSocket for Neon
+    neonConfig.webSocketConstructor = ws;
+    
     const pool = new Pool({ connectionString: process.env.DATABASE_URL });
     
     try {
@@ -985,7 +990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rooms = result.rows.map(row => ({
         id: row.id,
         name: row.name,
-        description: row.description,
+        description: row.description || '',
         memberCount: parseInt(row.member_count) || 0,
         isActive: row.is_active,
         creatorId: row.creator_id,
