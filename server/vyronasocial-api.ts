@@ -21,12 +21,15 @@ export function setupVyronaSocialAPI(app: express.Application) {
       // Generate unique room code
       const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
+      // Get current user ID from session (fallback to user 1 for demo)
+      const userId = (req as any).session?.user?.id || 1;
+      
       // Insert room into database
       const result = await pool.query(`
         INSERT INTO shopping_groups (name, description, creator_id, is_active, max_members, room_code, created_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW())
         RETURNING *
-      `, [name, description || '', 1, true, 10, roomCode]);
+      `, [name, description || '', userId, true, 10, roomCode]);
       
       const dbRoom = result.rows[0];
       
@@ -34,7 +37,7 @@ export function setupVyronaSocialAPI(app: express.Application) {
       await pool.query(`
         INSERT INTO group_members (group_id, user_id, role, joined_at)
         VALUES ($1, $2, $3, NOW())
-      `, [dbRoom.id, 1, 'admin']);
+      `, [dbRoom.id, userId, 'admin']);
       
       let memberCount = 1; // Start with creator
       
@@ -96,23 +99,27 @@ export function setupVyronaSocialAPI(app: express.Application) {
     }
   });
 
-  // Get All Rooms
+  // Get User's Rooms (only rooms where user is a member)
   app.get("/api/vyronasocial/rooms", async (req, res) => {
     const pool = new Pool({ connectionString: process.env.DATABASE_URL });
     
     try {
+      // Get current user ID from session (fallback to user 1 for demo)
+      const userId = (req as any).session?.user?.id || 1;
+      
       const result = await pool.query(`
         SELECT sg.*, 
-               COUNT(DISTINCT gm.id) as member_count,
+               COUNT(DISTINCT gm_all.id) as member_count,
                COALESCE(SUM(ci.quantity * p.price), 0) as total_cart
         FROM shopping_groups sg
-        LEFT JOIN group_members gm ON sg.id = gm.group_id
+        INNER JOIN group_members gm_user ON sg.id = gm_user.group_id AND gm_user.user_id = $1
+        LEFT JOIN group_members gm_all ON sg.id = gm_all.group_id
         LEFT JOIN cart_items ci ON sg.id = ci.room_id
         LEFT JOIN products p ON ci.product_id = p.id
         WHERE sg.is_active = true
         GROUP BY sg.id
         ORDER BY sg.created_at DESC
-      `);
+      `, [userId]);
       
       const rooms = result.rows.map(row => ({
         id: row.id,
@@ -220,10 +227,13 @@ export function setupVyronaSocialAPI(app: express.Application) {
       
       const room = roomResult.rows[0];
       
+      // Get current user ID from session (fallback to user 1 for demo)
+      const userId = (req as any).session?.user?.id || 1;
+      
       // Check if user already in room
       const memberCheck = await pool.query(`
         SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2
-      `, [room.id, 1]);
+      `, [room.id, userId]);
       
       console.log("Member check result:", memberCheck.rows);
       
@@ -252,7 +262,7 @@ export function setupVyronaSocialAPI(app: express.Application) {
       await pool.query(`
         INSERT INTO group_members (group_id, user_id, role, joined_at)
         VALUES ($1, $2, $3, NOW())
-      `, [room.id, 1, 'member']);
+      `, [room.id, userId, 'member']);
       
       console.log("Successfully added user to room");
       
