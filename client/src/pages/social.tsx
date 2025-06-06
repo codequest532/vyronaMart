@@ -70,6 +70,91 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 
+// Cart Display Component
+const CartDisplay = ({ cartData, selectedRoomId, refetchCart, setLocation }: any) => {
+  console.log('CartDisplay - cartData:', cartData);
+  console.log('CartDisplay - typeof cartData:', typeof cartData);
+  console.log('CartDisplay - Array.isArray(cartData):', Array.isArray(cartData));
+  
+  const cartItems = Array.isArray(cartData) ? cartData : [];
+  
+  if (cartItems.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
+        <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
+        <p className="text-sm">Add products to start shopping together!</p>
+        <p className="text-xs mt-2">Products added by any room member will appear here</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Cart Items */}
+      <div className="space-y-3">
+        {cartItems.map((item: any) => (
+          <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center space-x-4">
+              <img 
+                src={item.imageUrl || "/api/placeholder/60/60"} 
+                alt={item.name}
+                className="w-12 h-12 object-cover rounded"
+              />
+              <div>
+                <h4 className="font-medium text-gray-900">{item.name}</h4>
+                <p className="text-sm text-gray-500">{item.description}</p>
+                <p className="text-sm font-medium text-blue-600">₹{item.price}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const response = await fetch(`/api/shopping-rooms/${selectedRoomId}/remove-cart-item`, {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ productId: item.productId })
+                    });
+                    if (response.ok) {
+                      refetchCart();
+                    }
+                  } catch (error) {
+                    console.error('Error removing item:', error);
+                  }
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Cart Summary */}
+      <div className="mt-6 p-4 bg-blue-50 rounded-lg border">
+        <div className="flex items-center justify-between mb-2">
+          <span className="font-medium text-gray-700">Cart Summary</span>
+          <span className="text-lg font-semibold text-blue-600">
+            ₹{cartItems.reduce((total: number, item: any) => total + (item.price * item.quantity), 0)}
+          </span>
+        </div>
+        <Button 
+          className="w-full mt-3"
+          onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
+          disabled={cartItems.length === 0}
+        >
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          Place Group Order ({cartItems.length} items)
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 // Form schemas
 const createRoomSchema = z.object({
   name: z.string().min(1, "Room name is required"),
@@ -957,76 +1042,12 @@ export default function VyronaSocial() {
               <div className="space-y-6">
                 {/* Cart Items Display */}
                 <div className="space-y-4">
-                  {Array.isArray(sharedCart) && sharedCart.length > 0 ? (
-                    <div className="space-y-3">
-                      {sharedCart.map((item: any) => (
-                        <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <img 
-                              src={item.imageUrl || "/api/placeholder/60/60"} 
-                              alt={item.name}
-                              className="w-12 h-12 object-cover rounded"
-                            />
-                            <div>
-                              <h4 className="font-medium text-gray-900">{item.name}</h4>
-                              <p className="text-sm text-gray-500">{item.description}</p>
-                              <p className="text-sm font-medium text-blue-600">₹{item.price}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-500">Qty: {item.quantity}</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={async () => {
-                                try {
-                                  const response = await fetch(`/api/shopping-rooms/${selectedRoomId}/remove-cart-item`, {
-                                    method: 'DELETE',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ productId: item.productId })
-                                  });
-                                  if (response.ok) {
-                                    refetchCart();
-                                  }
-                                } catch (error) {
-                                  console.error('Error removing item:', error);
-                                }
-                              }}
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-gray-500">
-                      <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                      <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
-                      <p className="text-sm">Add products to start shopping together!</p>
-                      <p className="text-xs mt-2">Products added by any room member will appear here</p>
-                    </div>
-                  )}
-
-                  {/* Cart Summary */}
-                  {Array.isArray(sharedCart) && sharedCart.length > 0 && (
-                    <div className="mt-6 p-4 bg-blue-50 rounded-lg border">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-gray-700">Cart Summary</span>
-                        <span className="text-lg font-semibold text-blue-600">
-                          ₹{sharedCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0)}
-                        </span>
-                      </div>
-                      <Button 
-                        className="w-full mt-3"
-                        onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
-                        disabled={sharedCart.length === 0}
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Place Group Order ({sharedCart.length} items)
-                      </Button>
-                    </div>
-                  )}
+                  <CartDisplay 
+                    cartData={sharedCart} 
+                    selectedRoomId={selectedRoomId} 
+                    refetchCart={refetchCart}
+                    setLocation={setLocation}
+                  />
                 </div>
               </div>
             </CardContent>
