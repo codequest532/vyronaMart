@@ -1409,11 +1409,11 @@ export default function Home() {
                       <div className="flex items-center space-x-4 mt-2">
                         <div className="flex items-center space-x-1">
                           <Coins className="text-amber-300 h-4 w-4" />
-                          <span className="font-semibold">{user.vyronaCoins.toLocaleString()}</span>
+                          <span className="font-semibold">{(user.vyronaCoins || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Star className="text-yellow-300 h-4 w-4" />
-                          <span className="font-semibold">{user.xp.toLocaleString()} XP</span>
+                          <span className="font-semibold">{(user.xp || 0).toLocaleString()} XP</span>
                         </div>
                       </div>
                     </div>
