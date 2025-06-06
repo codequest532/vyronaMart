@@ -2209,17 +2209,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { roomId } = req.params;
       const userId = req.session?.user?.id || 1;
       
+      console.log("=== SHARED CART ENDPOINT ===");
       console.log("Fetching shared cart for room:", roomId, "by user:", userId);
+      console.log("Session:", req.session);
       
       // Verify user is member of the room
       const isMember = await storage.isUserRoomMember(userId, Number(roomId));
+      console.log("User membership check result:", isMember);
+      
       if (!isMember) {
+        console.log("Access denied: User not a member of room");
         return res.status(403).json({ message: "Access denied: Not a member of this room" });
       }
       
       // Get all cart items for the room (shared cart)
       const cartItems = await storage.getSharedCartItems(Number(roomId));
-      console.log("Shared cart items found:", cartItems);
+      console.log("=== SHARED CART ITEMS RETURNED ===", cartItems);
       res.json(cartItems);
     } catch (error) {
       console.error("Error fetching shared cart:", error);
