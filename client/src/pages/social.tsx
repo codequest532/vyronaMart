@@ -101,6 +101,7 @@ export default function VyronaSocial() {
   const [showJoinRoom, setShowJoinRoom] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showJoinDialog, setShowJoinDialog] = useState(false);
+  const [showRoomInterface, setShowRoomInterface] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [selectedRoomForInvite, setSelectedRoomForInvite] = useState<number | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -1606,19 +1607,25 @@ export default function VyronaSocial() {
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
               <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">Room Code</div>
               <div className="text-2xl font-bold font-mono tracking-wider text-purple-600">
-                {selectedRoomForInvite ? `ROOM${String(selectedRoomForInvite).padStart(3, '0')}` : "ROOM001"}
+                {(() => {
+                  const room = Array.isArray(rooms) ? rooms.find((r: any) => r.id === selectedRoomForInvite) : null;
+                  return room?.roomCode || "LOADING...";
+                })()}
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-2"
                 onClick={() => {
-                  const roomCode = selectedRoomForInvite ? `ROOM${String(selectedRoomForInvite).padStart(3, '0')}` : "ROOM001";
-                  navigator.clipboard.writeText(roomCode);
-                  toast({
-                    title: "Copied!",
-                    description: "Room code copied to clipboard",
-                  });
+                  const room = Array.isArray(rooms) ? rooms.find((r: any) => r.id === selectedRoomForInvite) : null;
+                  const roomCode = room?.roomCode || "";
+                  if (roomCode) {
+                    navigator.clipboard.writeText(roomCode);
+                    toast({
+                      title: "Copied!",
+                      description: "Room code copied to clipboard",
+                    });
+                  }
                 }}
               >
                 <Share className="w-4 h-4 mr-2" />
