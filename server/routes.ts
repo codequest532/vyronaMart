@@ -3,15 +3,18 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupRoomRoutes } from "./simple-rooms";
 import { setupVyronaSocialAPI } from "./vyronasocial-api";
+import { db } from "./db";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
-  insertGroupOrderSchema, insertGroupOrderContributionSchema
+  insertGroupOrderSchema, insertGroupOrderContributionSchema,
+  shoppingGroups, groupMembers
 } from "@shared/schema";
 import { z } from "zod";
 import { sendOTPEmail } from "./email";
+import { eq, desc, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // VyronaRead API endpoints for authentic book data
@@ -969,40 +972,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Shopping rooms for checkout selection (maps to VyronaSocial rooms)
   app.get("/api/shopping-rooms", async (req, res) => {
-    const { Pool, neonConfig } = require('@neondatabase/serverless');
-    const ws = require('ws');
-    
-    // Configure WebSocket for Neon
-    neonConfig.webSocketConstructor = ws;
-    
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    
     try {
-      const result = await pool.query(`
-        SELECT sg.*, COUNT(gm.id) as member_count
-        FROM shopping_groups sg
-        LEFT JOIN group_members gm ON sg.id = gm.group_id
-        WHERE sg.is_active = true
-        GROUP BY sg.id
-        ORDER BY sg.created_at DESC
-      `);
-      
-      const rooms = result.rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        description: row.description || '',
-        memberCount: parseInt(row.member_count) || 0,
-        isActive: row.is_active,
-        creatorId: row.creator_id,
-        createdAt: row.created_at
-      }));
-      
+      const rooms = await db
+        .select({
+          id: shoppingGroups.id,
+          name: shoppingGroups.name,
+          description: shoppingGroups.description,
+          creatorId: shoppingGroups.creatorId,
+          isActive: shoppingGroups.isActive,
+          maxMembers: shoppingGroups.maxMembers,
+          roomCode: shoppingGroups.roomCode,
+          createdAt: shoppingGroups.createdAt,
+          memberCount: sql<number>`COALESCE(COUNT(${groupMembers.id}), 0)`.as('memberCount')
+        })
+        .from(shoppingGroups)
+        .leftJoin(groupMembers, eq(shoppingGroups.id, groupMembers.groupId))
+        .where(eq(shoppingGroups.isActive, true))
+        .groupBy(shoppingGroups.id)
+        .orderBy(desc(shoppingGroups.createdAt));
+
       res.json(rooms);
     } catch (error) {
       console.error("Error fetching shopping rooms:", error);
       res.status(500).json({ message: "Failed to fetch shopping rooms" });
-    } finally {
-      await pool.end();
     }
   });
 
