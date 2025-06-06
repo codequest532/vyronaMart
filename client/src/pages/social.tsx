@@ -75,7 +75,8 @@ const createRoomSchema = z.object({
   category: z.string().min(1, "Category is required"),
   privacy: z.enum(["public", "private"]),
   scheduledTime: z.string().optional(),
-  description: z.string().optional()
+  description: z.string().optional(),
+  inviteUsers: z.array(z.string()).optional()
 });
 
 const joinRoomSchema = z.object({
@@ -106,6 +107,8 @@ export default function VyronaSocial() {
   const [selectedRoomForInvite, setSelectedRoomForInvite] = useState<number | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
   
   // Filter and search states
   const [searchQuery, setSearchQuery] = useState("");
@@ -128,6 +131,11 @@ export default function VyronaSocial() {
 
   const { data: notifications } = useQuery({
     queryKey: ["/api/social/notifications"],
+  });
+
+  // Fetch available users for invitations
+  const { data: availableUsers } = useQuery({
+    queryKey: ["/api/users"],
   });
 
   // Filter and sort products
@@ -193,12 +201,17 @@ export default function VyronaSocial() {
   // Mutations
   const createRoomMutation = useMutation({
     mutationFn: async (data: CreateRoomForm) => {
+      const requestData = {
+        ...data,
+        inviteUsers: selectedUsers
+      };
+      
       const response = await fetch("/api/vyronasocial/rooms", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(requestData)
       });
       
       if (!response.ok) {
@@ -808,6 +821,78 @@ export default function VyronaSocial() {
                 </FormItem>
               )}
             />
+
+            {/* Invite Users Section */}
+            <div className="space-y-3">
+              <FormLabel>Invite Friends (Optional)</FormLabel>
+              
+              {/* User Search */}
+              <div className="relative">
+                <Input
+                  placeholder="Search users by username or email..."
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  className="pr-10"
+                />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              </div>
+
+              {/* Available Users List */}
+              {userSearchQuery && (
+                <div className="max-h-32 overflow-y-auto border rounded-lg bg-white dark:bg-gray-800">
+                  {(availableUsers as any[])?.filter((user: any) => 
+                    user.username?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+                    user.email?.toLowerCase().includes(userSearchQuery.toLowerCase())
+                  ).slice(0, 5).map((user: any) => (
+                    <div
+                      key={user.id}
+                      className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      onClick={() => {
+                        if (!selectedUsers.includes(user.username)) {
+                          setSelectedUsers([...selectedUsers, user.username]);
+                        }
+                        setUserSearchQuery("");
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                          {user.username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium">{user.username}</div>
+                          <div className="text-xs text-gray-500">{user.email}</div>
+                        </div>
+                      </div>
+                      <Plus className="w-4 h-4 text-gray-400" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Selected Users */}
+              {selectedUsers.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Selected Users ({selectedUsers.length})</div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUsers.map((username) => (
+                      <div
+                        key={username}
+                        className="flex items-center gap-1 bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 px-2 py-1 rounded-lg text-sm"
+                      >
+                        <span>{username}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUsers(selectedUsers.filter(u => u !== username))}
+                          className="text-purple-500 hover:text-purple-700"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <Button type="submit" className="w-full" disabled={createRoomMutation.isPending}>
               {createRoomMutation.isPending ? "Creating..." : "Create Room"}
