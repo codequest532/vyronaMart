@@ -1855,6 +1855,21 @@ export default function VyronaSocial() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Group Cart Modal */}
+      <GroupCartModal
+        isOpen={groupCartModalOpen}
+        onClose={() => {
+          setGroupCartModalOpen(false);
+          setSelectedProductForGroupCart(null);
+        }}
+        product={selectedProductForGroupCart}
+        onSuccess={() => {
+          // Optionally refresh data or show success message
+          setGroupCartModalOpen(false);
+          setSelectedProductForGroupCart(null);
+        }}
+      />
     </div>
   );
 }
