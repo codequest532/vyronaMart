@@ -68,6 +68,9 @@ const productSchema = z.object({
   dimensions: z.string().optional(),
   specifications: z.string().optional(),
   tags: z.string().optional(),
+  enableGroupBuy: z.boolean().default(false),
+  groupBuyMinQuantity: z.number().min(1).optional(),
+  groupBuyDiscount: z.number().min(0).max(100).optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -124,6 +127,9 @@ export default function SellerDashboard() {
       dimensions: "",
       specifications: "",
       tags: "",
+      enableGroupBuy: false,
+      groupBuyMinQuantity: 5,
+      groupBuyDiscount: 10,
       isActive: true,
     },
   });
@@ -2799,6 +2805,89 @@ export default function SellerDashboard() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Group Purchase Configuration */}
+                  <div className="border rounded-lg p-4 space-y-4 bg-blue-50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-blue-900">Group Purchase Options</h4>
+                        <p className="text-sm text-blue-700">Enable group buying to list product in VyronaSocial collaborative shopping rooms</p>
+                      </div>
+                      <FormField
+                        control={productForm.control}
+                        name="enableGroupBuy"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id="enableGroupBuy"
+                                  checked={field.value}
+                                  onChange={field.onChange}
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                />
+                                <Label htmlFor="enableGroupBuy" className="text-sm font-medium">
+                                  Enable Group Purchase
+                                </Label>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {productForm.watch("enableGroupBuy") && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <FormField
+                          control={productForm.control}
+                          name="groupBuyMinQuantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Minimum Group Quantity</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="5" 
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={productForm.control}
+                          name="groupBuyDiscount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Group Discount (%)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="10" 
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+
+                    <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
+                      <strong>Product Visibility:</strong>
+                      <br />
+                      • <strong>Group Purchase Disabled:</strong> Product appears only in VyronaHub (individual shopping)
+                      <br />
+                      • <strong>Group Purchase Enabled:</strong> Product appears in both VyronaHub and VyronaSocial (collaborative shopping rooms)
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
               
