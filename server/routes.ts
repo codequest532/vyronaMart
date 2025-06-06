@@ -792,10 +792,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/wallet/contribute", async (req, res) => {
     try {
-      const { roomId, amount, userId } = req.body;
+      const { roomId, amount, userId, paymentMethod } = req.body;
       
-      if (!roomId || !amount || !userId) {
-        return res.status(400).json({ message: "Room ID, amount, and user ID are required" });
+      if (!roomId || !amount || !userId || !paymentMethod) {
+        return res.status(400).json({ message: "Room ID, amount, user ID, and payment method are required" });
       }
 
       if (amount <= 0) {
@@ -805,21 +805,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user's wallet
       const wallet = await storage.getOrCreateVyronaWallet(userId);
       
-      if (wallet.balance < amount) {
-        return res.status(400).json({ message: "Insufficient wallet balance" });
-      }
-
-      // Update wallet balance
-      const newBalance = wallet.balance - amount;
+      // Add the contribution amount to wallet balance (since this is payment TO wallet)
+      const newBalance = wallet.balance + amount;
       await storage.updateWalletBalance(userId, newBalance);
 
-      // Create transaction record
+      // Create transaction record for wallet credit
       const transactionData = {
         userId: userId,
-        type: "group_contribution",
-        amount: amount,
-        description: `Group contribution for room ${roomId}`,
-        metadata: { roomId: roomId }
+        type: "wallet_topup",
+        amount: amount, // Positive amount for credit
+        description: `Wallet top-up via ${paymentMethod} for room ${roomId}`,
+        metadata: { roomId: roomId, paymentMethod: paymentMethod, source: "group_contribution" }
       };
       
       const transaction = await storage.createWalletTransaction(transactionData);
@@ -828,7 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true,
         transaction,
         newBalance,
-        message: `Successfully contributed ₹${amount} to group order`
+        message: `Successfully added ₹${amount} to VyronaWallet via ${paymentMethod}`
       });
     } catch (error) {
       console.error("Wallet contribution error:", error);
