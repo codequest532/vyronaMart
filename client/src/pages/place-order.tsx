@@ -45,7 +45,8 @@ export default function PlaceOrder() {
 
   // Fetch cart items for the room
   const { data: cartItems = [], isLoading: cartLoading } = useQuery({
-    queryKey: ["/api/cart"],
+    queryKey: ["/api/shopping-rooms", roomId, "cart"],
+    queryFn: () => apiRequest("GET", `/api/shopping-rooms/${roomId}/cart`),
     enabled: !!roomId
   });
 
@@ -77,23 +78,24 @@ export default function PlaceOrder() {
 
   // Process order mutation
   const processOrderMutation = useMutation({
-    mutationFn: async (orderData: any) => {
-      return apiRequest("POST", "/api/orders", orderData);
+    mutationFn: async (checkoutData: any) => {
+      return apiRequest("POST", "/api/wallet/checkout", checkoutData);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast({
-        title: "Order Placed Successfully",
-        description: "Your group order has been placed and payment processed.",
+        title: "Payment Successful",
+        description: `Your group order has been placed. Order ID: ${response.orderId}`,
       });
       
       // Clear cart and redirect
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      setLocation("/social?tab=orders");
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms", roomId, "cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
+      setLocation("/social");
     },
     onError: (error: any) => {
       toast({
-        title: "Order Failed",
-        description: error.message || "Failed to place order. Please try again.",
+        title: "Payment Failed",
+        description: error.message || "Payment processing failed. Please try again.",
         variant: "destructive",
       });
     }
@@ -121,36 +123,21 @@ export default function PlaceOrder() {
     setIsProcessing(true);
 
     try {
-      const orderData = {
+      const checkoutData = {
         userId: 1, // Default user ID
-        module: "vyronasocial",
+        roomId: roomId,
+        items: cartItems.map((item: any) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+          name: item.name
+        })),
         totalAmount: finalTotal,
-        status: "pending",
-        metadata: {
-          roomId: roomId,
-          roomCode: room?.roomCode,
-          paymentMethod: selectedPayment,
-          items: cartItems.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price
-          })),
-          deliveryFee: deliveryFee
-        }
+        paymentMethod: selectedPayment,
       };
 
-      // Process payment first if using wallet
-      if (selectedPayment === "wallet") {
-        await apiRequest("POST", "/api/wallet/1/transactions", {
-          type: "debit",
-          amount: finalTotal,
-          description: `Group order payment for room ${room?.name}`,
-          metadata: { orderId: "pending", roomId: roomId }
-        });
-      }
-
-      // Create the order
-      await processOrderMutation.mutateAsync(orderData);
+      // Process checkout through VyronaWallet API
+      await processOrderMutation.mutateAsync(checkoutData);
 
     } catch (error: any) {
       console.error("Order processing error:", error);
