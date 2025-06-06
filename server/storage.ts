@@ -856,7 +856,7 @@ export class DatabaseStorage implements IStorage {
         creatorId: group.creatorId,
         isActive: group.isActive,
         memberCount: group.memberCount,
-        totalCart: group.totalCart || 0,
+        totalCart: Number(group.totalCart) || 0,
         currentGame: null,
         roomCode: group.roomCode || Math.random().toString(36).substring(2, 8).toUpperCase(),
         scheduledTime: null,
