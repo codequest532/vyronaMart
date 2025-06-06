@@ -33,6 +33,8 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
     name: "",
     description: ""
   });
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -43,22 +45,53 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
     enabled: isOpen,
   });
 
+  // Fetch users for member selection
+  const { data: users } = useQuery({
+    queryKey: ["/api/users"],
+    enabled: showCreateNew,
+  });
+
+  // Filter users based on search query
+  const filteredUsers = Array.isArray(users) ? users.filter((user: any) =>
+    user.username.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(userSearchQuery.toLowerCase())
+  ) : [];
+
   // Create new room mutation
   const createRoomMutation = useMutation({
     mutationFn: async (data: CreateRoomData) => {
-      const response = await apiRequest("POST", "/api/shopping-rooms", data);
+      const requestData = {
+        ...data,
+        addMembers: selectedUsers
+      };
+      
+      const response = await fetch("/api/vyronasocial/rooms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData)
+      });
+      
       if (!response.ok) {
-        throw new Error("Failed to create room");
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create room");
       }
+      
       return response.json();
     },
     onSuccess: (newRoom) => {
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
       setShowCreateNew(false);
       setSelectedRoom(newRoom);
+      setNewRoomData({ name: "", description: "" });
+      setSelectedUsers([]);
+      setUserSearchQuery("");
       toast({
-        title: "Success",
-        description: "Shopping room created successfully!",
+        title: "Shopping Room Created",
+        description: selectedUsers.length > 0 
+          ? `Room created with ${selectedUsers.length} members added!`
+          : "Your room is ready for shopping together!"
       });
     },
     onError: () => {
@@ -235,7 +268,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
             {showCreateNew && (
               <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                 <h4 className="font-medium">Create New Shopping Room</h4>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Input
                     placeholder="Room name"
                     value={newRoomData.name}
@@ -247,6 +280,65 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                     onChange={(e) => setNewRoomData({ ...newRoomData, description: e.target.value })}
                     rows={2}
                   />
+                  
+                  {/* Member Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Add Members (Optional)</label>
+                    <Input
+                      placeholder="Search users by username or email..."
+                      value={userSearchQuery}
+                      onChange={(e) => setUserSearchQuery(e.target.value)}
+                    />
+                    
+                    {/* Selected Users */}
+                    {selectedUsers.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {selectedUsers.map((userIdentifier) => (
+                          <Badge key={userIdentifier} variant="secondary" className="flex items-center gap-1">
+                            {userIdentifier}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => setSelectedUsers(prev => prev.filter(u => u !== userIdentifier))}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* User Search Results */}
+                    {userSearchQuery && filteredUsers.length > 0 && (
+                      <div className="border rounded-md max-h-32 overflow-y-auto">
+                        {filteredUsers.slice(0, 5).map((user: any) => (
+                          <div
+                            key={user.id}
+                            className="p-2 hover:bg-muted cursor-pointer border-b last:border-b-0"
+                            onClick={() => {
+                              const userIdentifier = user.username || user.email;
+                              if (!selectedUsers.includes(userIdentifier)) {
+                                setSelectedUsers(prev => [...prev, userIdentifier]);
+                              }
+                              setUserSearchQuery("");
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                                <Users className="h-3 w-3" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{user.username}</p>
+                                <p className="text-xs text-muted-foreground">{user.email}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="flex gap-2">
                     <Button 
                       onClick={handleCreateRoom}
