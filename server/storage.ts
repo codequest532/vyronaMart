@@ -715,11 +715,11 @@ export class DatabaseStorage implements IStorage {
 
     console.log(`=== UPDATING ROOM ${roomId} CART TOTAL TO ${totalCart} ===`);
 
-    // Update the shopping group's total cart value (using correct table)
-    await db
-      .update(shoppingGroups)
-      .set({ totalCart })
-      .where(eq(shoppingGroups.id, roomId));
+    // Update the shopping group's total cart value using direct SQL
+    await pool.query(
+      'UPDATE shopping_groups SET total_cart = $1 WHERE id = $2',
+      [totalCart, roomId]
+    );
   }
 
   async removeCartItem(id: number): Promise<boolean> {

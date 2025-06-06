@@ -190,6 +190,7 @@ export const shoppingGroups = pgTable("shopping_groups", {
   isActive: boolean("is_active").default(true),
   maxMembers: integer("max_members").default(10),
   roomCode: text("room_code").unique(),
+  totalCart: integer("total_cart").default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
