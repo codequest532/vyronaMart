@@ -58,37 +58,12 @@ export const stores = pgTable("stores", {
 export const shoppingRooms = pgTable("shopping_rooms", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  description: text("description"),
   creatorId: integer("creator_id").notNull(),
-  inviteCode: text("invite_code").notNull().unique(),
-  privacy: text("privacy").notNull().default("public"), // 'public', 'private'
-  maxMembers: integer("max_members").default(10),
   isActive: boolean("is_active").default(true),
   currentGame: text("current_game"),
   totalCart: integer("total_cart").default(0),
   memberCount: integer("member_count").default(1),
   createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const roomMembers = pgTable("room_members", {
-  id: serial("id").primaryKey(),
-  roomId: integer("room_id").notNull(),
-  userId: integer("user_id").notNull(),
-  role: text("role").notNull().default("member"), // 'admin', 'member'
-  joinedAt: timestamp("joined_at").defaultNow(),
-  invitedBy: integer("invited_by"), // who invited this member
-});
-
-export const roomInvitations = pgTable("room_invitations", {
-  id: serial("id").primaryKey(),
-  roomId: integer("room_id").notNull(),
-  email: text("email").notNull(),
-  invitedBy: integer("invited_by").notNull(),
-  status: text("status").notNull().default("pending"), // 'pending', 'accepted', 'declined', 'expired'
-  inviteToken: text("invite_token").notNull().unique(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  acceptedAt: timestamp("accepted_at"),
 });
 
 export const cartItems = pgTable("cart_items", {
@@ -556,20 +531,7 @@ export const insertStoreSchema = createInsertSchema(stores).omit({
 
 export const insertShoppingRoomSchema = createInsertSchema(shoppingRooms).omit({
   id: true,
-  inviteCode: true,
   createdAt: true,
-});
-
-export const insertRoomMemberSchema = createInsertSchema(roomMembers).omit({
-  id: true,
-  joinedAt: true,
-});
-
-export const insertRoomInvitationSchema = createInsertSchema(roomInvitations).omit({
-  id: true,
-  inviteToken: true,
-  createdAt: true,
-  acceptedAt: true,
 });
 
 export const insertCartItemSchema = createInsertSchema(cartItems).omit({
@@ -778,10 +740,6 @@ export type Store = typeof stores.$inferSelect;
 export type InsertStore = z.infer<typeof insertStoreSchema>;
 export type ShoppingRoom = typeof shoppingRooms.$inferSelect;
 export type InsertShoppingRoom = z.infer<typeof insertShoppingRoomSchema>;
-export type RoomMember = typeof roomMembers.$inferSelect;
-export type InsertRoomMember = z.infer<typeof insertRoomMemberSchema>;
-export type RoomInvitation = typeof roomInvitations.$inferSelect;
-export type InsertRoomInvitation = z.infer<typeof insertRoomInvitationSchema>;
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
 
