@@ -453,6 +453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         creatorId: room.creatorId,
         isActive: room.isActive,
         memberCount: room.memberCount || 1,
+        totalCart: room.totalCart || 0,
         roomCode: room.roomCode,
         createdAt: room.createdAt
       }));
