@@ -1424,24 +1424,7 @@ export default function VyronaSocial() {
                 </div>
               </div>
 
-              {/* Create Room Button */}
-              <Button 
-                onClick={() => setShowCreateDialog(true)}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Room
-              </Button>
 
-              {/* Join Room Button */}
-              <Button 
-                onClick={() => setShowJoinDialog(true)}
-                variant="outline"
-                className="w-full border-purple-200 hover:bg-purple-50 dark:border-purple-800 dark:hover:bg-purple-900/20"
-              >
-                <DoorOpen className="w-4 h-4 mr-2" />
-                Join Room
-              </Button>
 
               {/* Active Rooms List */}
               <div className="space-y-3">
