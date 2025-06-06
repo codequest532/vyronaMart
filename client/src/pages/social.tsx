@@ -1223,6 +1223,78 @@ export default function VyronaSocial() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Product Detail Modal */}
+      {selectedProduct && (
+        <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold">{selectedProduct.name}</DialogTitle>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="relative">
+                  <img 
+                    src={selectedProduct.imageUrl || "/api/placeholder/400/300"} 
+                    alt={selectedProduct.name}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold">
+                      {selectedProduct.groupBuyDiscount || 10}% OFF
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">{selectedProduct.name}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedProduct.description}</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      ₹{Math.round((selectedProduct.price / 100) * (1 - (selectedProduct.groupBuyDiscount || 10) / 100)).toLocaleString()}
+                    </span>
+                    <span className="text-lg text-gray-500 line-through">
+                      ₹{(selectedProduct.price / 100).toLocaleString()}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
+                      <Users className="w-4 h-4 mr-1" />
+                      Min {selectedProduct.groupBuyMinQuantity || 4} orders
+                    </Badge>
+                    <Badge variant="outline" className="text-sm bg-green-50 text-green-700 border-green-200">
+                      Group Deal
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="pt-4">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                    onClick={() => {
+                      toast({
+                        title: "Added to Group Cart",
+                        description: `${selectedProduct.name} added to group cart`,
+                      });
+                      setSelectedProduct(null);
+                    }}
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Add to Group
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
