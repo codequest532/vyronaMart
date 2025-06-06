@@ -2134,14 +2134,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/cart/:roomId/add", async (req, res) => {
     try {
       const { roomId } = req.params;
-      const userId = 1; // From session when auth is implemented
+      const userId = req.session?.user?.id || 1; // Use authenticated user ID
       const itemData = {
         ...req.body,
         userId: userId,
         roomId: Number(roomId)
       };
       
+      console.log("Adding item to shared cart:", { roomId, userId, itemData });
       const cartItem = await storage.addCartItem(itemData);
+      console.log("Cart item added successfully:", cartItem);
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding item to shared cart:", error);
