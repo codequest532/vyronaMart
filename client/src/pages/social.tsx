@@ -121,7 +121,7 @@ export default function VyronaSocial() {
   }
   
   // Don't render if not authenticated
-  if (!currentUser) {
+  if (!authUser) {
     return null;
   }
   
@@ -908,7 +908,7 @@ export default function VyronaSocial() {
                 Invite Friends
               </Button>
               
-              {roomData?.creatorId === currentUser?.id ? (
+              {roomData?.creatorId === authUser?.id ? (
                 <Button 
                   variant="destructive" 
                   size="sm"
