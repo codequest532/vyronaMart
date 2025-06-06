@@ -258,6 +258,79 @@ export default function VyronaSocial() {
     }
   });
 
+  const addMemberMutation = useMutation({
+    mutationFn: async (username: string) => {
+      const response = await apiRequest("POST", "/api/vyronasocial/add-member", {
+        roomId: selectedRoomId,
+        username
+      });
+      if (!response.ok) throw new Error("Failed to add member");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/social/groups", selectedRoomId, "members"] });
+      toast({
+        title: "Member Added",
+        description: "Successfully added member to room",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add member",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const response = await apiRequest("POST", "/api/vyronasocial/remove-member", {
+        roomId: selectedRoomId,
+        userId
+      });
+      if (!response.ok) throw new Error("Failed to remove member");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/social/groups", selectedRoomId, "members"] });
+      toast({
+        title: "Member Removed",
+        description: "Successfully removed member from room",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to remove member",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const deleteRoomMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", `/api/vyronasocial/rooms/${selectedRoomId}`);
+      if (!response.ok) throw new Error("Failed to delete room");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
+      setSelectedRoomId(null);
+      toast({
+        title: "Room Deleted",
+        description: "Room has been permanently deleted",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete room",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Event handlers
   const handleCreateRoom = (data: CreateRoomForm) => {
     createRoomMutation.mutate(data);
@@ -281,6 +354,28 @@ export default function VyronaSocial() {
   const handleJoinRoomFromList = (roomId: number) => {
     setSelectedRoomId(roomId);
   };
+
+  const handleAddMember = (username: string) => {
+    addMemberMutation.mutate(username);
+  };
+
+  const handleRemoveMember = (userId: number) => {
+    removeMemberMutation.mutate(userId);
+  };
+
+  const handleDeleteRoom = () => {
+    if (confirm("Are you sure you want to delete this room? This action cannot be undone.")) {
+      deleteRoomMutation.mutate();
+    }
+  };
+
+  // State for member management
+  const [newMemberUsername, setNewMemberUsername] = useState("");
+  const [showMemberManagement, setShowMemberManagement] = useState(false);
+  const [showInviteCode, setShowInviteCode] = useState(false);
+
+  // Check if current user is room admin
+  const isRoomAdmin = roomData && user && roomData.creatorId === user.id;
 
   // Room interface for when user is in a room
   if (selectedRoomId) {
@@ -314,16 +409,155 @@ export default function VyronaSocial() {
                 </div>
               </div>
 
-              {user && roomData?.creatorId !== user.id && (
-                <Button 
-                  variant="outline" 
-                  onClick={() => exitRoomMutation.mutate()}
-                  disabled={exitRoomMutation.isPending}
-                  className="gap-2"
-                >
-                  {exitRoomMutation.isPending ? "Exiting..." : "Exit Room"}
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {/* Room Management Buttons */}
+                {isRoomAdmin && (
+                  <>
+                    <Dialog open={showMemberManagement} onOpenChange={setShowMemberManagement}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <UserPlus className="w-4 h-4" />
+                          Manage Members
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Room Management</DialogTitle>
+                          <DialogDescription>
+                            Add or remove members from your room
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <Tabs defaultValue="add" className="w-full">
+                          <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="add">Add Member</TabsTrigger>
+                            <TabsTrigger value="members">Manage Members</TabsTrigger>
+                          </TabsList>
+                          
+                          <TabsContent value="add" className="space-y-4">
+                            <div className="space-y-2">
+                              <label className="text-sm font-medium">Username</label>
+                              <Input
+                                placeholder="Enter username to add"
+                                value={newMemberUsername}
+                                onChange={(e) => setNewMemberUsername(e.target.value)}
+                              />
+                            </div>
+                            <Button
+                              onClick={() => {
+                                if (newMemberUsername.trim()) {
+                                  handleAddMember(newMemberUsername.trim());
+                                  setNewMemberUsername("");
+                                }
+                              }}
+                              disabled={!newMemberUsername.trim() || addMemberMutation.isPending}
+                              className="w-full"
+                            >
+                              {addMemberMutation.isPending ? "Adding..." : "Add Member"}
+                            </Button>
+                          </TabsContent>
+                          
+                          <TabsContent value="members" className="space-y-4">
+                            <ScrollArea className="h-48">
+                              {Array.isArray(roomMembers) && roomMembers.length > 0 ? (
+                                roomMembers.map((member: any) => (
+                                  <div key={member.id} className="flex items-center justify-between p-2 border-b">
+                                    <div className="flex items-center gap-2">
+                                      <Avatar className="h-8 w-8">
+                                        <AvatarFallback>{member.username?.[0]?.toUpperCase()}</AvatarFallback>
+                                      </Avatar>
+                                      <span className="text-sm">{member.username}</span>
+                                      {member.userId === roomData?.creatorId && (
+                                        <Badge variant="secondary" className="text-xs">Admin</Badge>
+                                      )}
+                                    </div>
+                                    {member.userId !== roomData?.creatorId && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleRemoveMember(member.userId)}
+                                        disabled={removeMemberMutation.isPending}
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-sm text-gray-500 text-center py-4">No members found</p>
+                              )}
+                            </ScrollArea>
+                          </TabsContent>
+                        </Tabs>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Dialog open={showInviteCode} onOpenChange={setShowInviteCode}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <Code className="w-4 h-4" />
+                          Invite Code
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Room Invite Code</DialogTitle>
+                          <DialogDescription>
+                            Share this code with others to invite them to your room
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="space-y-4">
+                          <div className="text-center">
+                            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed">
+                              <div className="text-2xl font-mono font-bold tracking-wider">
+                                {roomData?.inviteCode || 'ROOM01'}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <Button
+                            onClick={() => {
+                              navigator.clipboard.writeText(roomData?.inviteCode || 'ROOM01');
+                              toast({
+                                title: "Copied!",
+                                description: "Invite code copied to clipboard",
+                              });
+                            }}
+                            className="w-full gap-2"
+                          >
+                            <Copy className="w-4 h-4" />
+                            Copy Code
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleDeleteRoom}
+                      disabled={deleteRoomMutation.isPending}
+                      className="gap-2"
+                    >
+                      <X className="w-4 h-4" />
+                      {deleteRoomMutation.isPending ? "Deleting..." : "Delete Room"}
+                    </Button>
+                  </>
+                )}
+
+                {user && roomData?.creatorId !== user.id && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => exitRoomMutation.mutate()}
+                    disabled={exitRoomMutation.isPending}
+                    className="gap-2"
+                  >
+                    {exitRoomMutation.isPending ? "Exiting..." : "Exit Room"}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 

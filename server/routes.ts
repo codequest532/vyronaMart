@@ -15,6 +15,7 @@ import {
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail } from "./email";
+import { sendEmail, generateRoomInvitationEmail } from "./brevo-email";
 import { eq, desc, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
