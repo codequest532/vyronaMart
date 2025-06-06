@@ -347,130 +347,139 @@ export default function VyronaSocial() {
 
   // Hero Section Component with Active Rooms
   const HeroSection = () => (
-    <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white p-6 rounded-2xl shadow-lg mb-6">
-      <div className="relative z-10">
-        <div className="flex items-center justify-center mb-3">
-          <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
-            <Users className="w-6 h-6 text-white" />
+    <div className="space-y-4">
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white p-6 rounded-2xl shadow-lg">
+        <div className="relative z-10">
+          <div className="flex items-center justify-center mb-3">
+            <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
+              <Users className="w-6 h-6 text-white" />
+            </div>
+          </div>
+          
+          <h1 className="text-2xl font-bold text-center mb-2 tracking-tight">
+            VyronaSocial
+          </h1>
+          <p className="text-sm text-center mb-4 opacity-90">
+            Shop Together. Save Together.
+          </p>
+          
+          <div className="flex justify-center gap-3">
+            <Button 
+              onClick={() => setShowCreateRoom(true)}
+              size="sm"
+              className="bg-white text-purple-600 hover:bg-gray-100 font-medium px-4 py-2 rounded-lg"
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Create Room
+            </Button>
+            
+            <Button 
+              onClick={() => setShowJoinRoom(true)}
+              size="sm"
+              variant="outline"
+              className="border border-white text-white hover:bg-white hover:text-purple-600 font-medium px-4 py-2 rounded-lg backdrop-blur-sm bg-white/10"
+            >
+              <UserPlus className="w-4 h-4 mr-1" />
+              Join Room
+            </Button>
           </div>
         </div>
-        
-        <h1 className="text-2xl font-bold text-center mb-2 tracking-tight">
-          VyronaSocial
-        </h1>
-        <p className="text-sm text-center mb-4 opacity-90">
-          Shop Together. Save Together.
-        </p>
-        
-        <div className="flex justify-center gap-3 mb-6">
-          <Button 
-            onClick={() => setShowCreateRoom(true)}
-            size="sm"
-            className="bg-white text-purple-600 hover:bg-gray-100 font-medium px-4 py-2 rounded-lg"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Create Room
-          </Button>
-          
-          <Button 
-            onClick={() => setShowJoinRoom(true)}
-            size="sm"
-            variant="outline"
-            className="border border-white text-white hover:bg-white hover:text-purple-600 font-medium px-4 py-2 rounded-lg backdrop-blur-sm bg-white/10"
-          >
-            <UserPlus className="w-4 h-4 mr-1" />
-            Join Room
-          </Button>
-        </div>
+      </div>
 
-        {/* Active Rooms inside hero */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Users className="w-4 h-4 text-white" />
-            <h2 className="text-lg font-semibold text-white">Active Rooms</h2>
+      {/* Active Rooms Section */}
+      <Card className="border-0 bg-white dark:bg-gray-800 shadow-lg">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-purple-600" />
+            <CardTitle className="text-lg font-semibold">Active Rooms</CardTitle>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {groupsLoading ? (
-              <div className="col-span-full text-center py-4 text-white/80">Loading rooms...</div>
+              <div className="col-span-full text-center py-6">Loading rooms...</div>
             ) : (userGroups as any[])?.length === 0 ? (
-              <div className="col-span-full text-center py-4 text-white/80">
+              <div className="col-span-full text-center py-6 text-gray-500">
                 No active rooms. Create or join one to start shopping together!
               </div>
             ) : (
               (userGroups as any[])?.map((room: any) => (
-                <div key={room.id} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/15 transition-all duration-300">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-bold text-white text-lg">
-                      {room.name}
-                    </h3>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-white hover:bg-white/20">
-                          <MoreVertical className="w-3 h-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setSelectedRoomForInvite(room.id)}>
-                          <UserPlus className="w-4 h-4 mr-2" />
-                          Invite Members
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          onClick={() => exitRoomMutation.mutate(room.id)}
-                          className="text-red-600"
-                        >
-                          <X className="w-4 h-4 mr-2" />
-                          Exit Room
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
-                      {room.privacy === "public" ? "public" : "private"}
-                    </Badge>
-                    <span className="text-xs text-white/80">{room.category || "general"}</span>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div className="text-center p-2 bg-white/10 rounded-lg">
-                      <Users className="w-4 h-4 mx-auto mb-1 text-white" />
-                      <div className="text-sm font-bold text-white">1</div>
-                      <div className="text-xs text-white/70">Members</div>
+                <Card key={room.id} className="group hover:shadow-lg hover:scale-[1.02] transition-all duration-300 border border-gray-200 dark:border-gray-700">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-start mb-2">
+                      <CardTitle className="text-lg font-bold text-purple-600">
+                        {room.name}
+                      </CardTitle>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setSelectedRoomForInvite(room.id)}>
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            Invite Members
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => exitRoomMutation.mutate(room.id)}
+                            className="text-red-600"
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Exit Room
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                    <div className="text-center p-2 bg-white/10 rounded-lg">
-                      <ShoppingCart className="w-4 h-4 mx-auto mb-1 text-white" />
-                      <div className="text-sm font-bold text-white">₹0</div>
-                      <div className="text-xs text-white/70">Total Cart</div>
+                    
+                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                      <Badge variant={room.privacy === "public" ? "default" : "secondary"} className="text-xs">
+                        {room.privacy === "public" ? "Public" : "Private"}
+                      </Badge>
+                      <span>{room.category}</span>
                     </div>
-                  </div>
+                  </CardHeader>
                   
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => handleEnterRoom(room.id)}
-                      className="flex-1 bg-white text-purple-600 hover:bg-gray-100 font-medium"
-                      size="sm"
-                    >
-                      Enter Room
-                      <ArrowRight className="w-3 h-3 ml-1" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedRoomForInvite(room.id)}
-                      className="p-2 border-white/30 text-white hover:bg-white/20"
-                    >
-                      <UserPlus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <Users className="w-5 h-5 mx-auto mb-1 text-blue-600" />
+                        <div className="text-lg font-bold text-blue-600">1</div>
+                        <div className="text-xs text-gray-600">Members</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <ShoppingCart className="w-5 h-5 mx-auto mb-1 text-green-600" />
+                        <div className="text-lg font-bold text-green-600">₹0</div>
+                        <div className="text-xs text-gray-600">Total Cart</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        onClick={() => handleEnterRoom(room.id)}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                        size="sm"
+                      >
+                        Enter Room
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedRoomForInvite(room.id)}
+                        className="p-2"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               ))
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 
