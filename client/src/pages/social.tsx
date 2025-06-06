@@ -172,21 +172,24 @@ export default function VyronaSocial() {
 
 
   // Fetch shared cart for selected room
-  const { data: sharedCart, isLoading: cartLoading, refetch: refetchCart } = useQuery({
+  const { data: rawCartData, isLoading: cartLoading, refetch: refetchCart } = useQuery({
     queryKey: [`/api/shopping-rooms/${selectedRoomId}/cart`],
     enabled: !!selectedRoomId,
     staleTime: 0, // Always fetch fresh data
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     gcTime: 0, // Don't cache the data
-    select: (data) => {
-      console.log("Query select - raw data:", data);
-      // Ensure data is always an array
-      if (Array.isArray(data)) return data;
-      if (data && typeof data === 'object' && Array.isArray((data as any).data)) return (data as any).data;
-      return [];
-    }
   });
+
+  // Ensure sharedCart is always an array
+  const sharedCart = React.useMemo(() => {
+    console.log("Processing cart data:", rawCartData);
+    if (Array.isArray(rawCartData)) return rawCartData;
+    if (rawCartData && typeof rawCartData === 'object' && Array.isArray((rawCartData as any).data)) {
+      return (rawCartData as any).data;
+    }
+    return [];
+  }, [rawCartData]);
 
 
 
