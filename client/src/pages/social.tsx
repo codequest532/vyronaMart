@@ -1227,57 +1227,162 @@ export default function VyronaSocial() {
       {/* Product Detail Modal */}
       {selectedProduct && (
         <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">{selectedProduct.name}</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">{selectedProduct.name}</DialogTitle>
+              <DialogDescription>
+                Complete product details and group buying information
+              </DialogDescription>
             </DialogHeader>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Product Images */}
               <div className="space-y-4">
                 <div className="relative">
                   <img 
-                    src={selectedProduct.imageUrl || "/api/placeholder/400/300"} 
+                    src={selectedProduct.imageUrl || "/api/placeholder/500/400"} 
                     alt={selectedProduct.name}
-                    className="w-full h-64 object-cover rounded-lg"
+                    className="w-full h-80 object-cover rounded-xl shadow-lg"
                   />
-                  <div className="absolute top-3 left-3">
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold">
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg px-3 py-1">
                       {selectedProduct.groupBuyDiscount || 10}% OFF
                     </Badge>
                   </div>
                 </div>
+                
+                {/* Additional product images could go here */}
+                <div className="grid grid-cols-4 gap-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <img 
+                      key={i}
+                      src={selectedProduct.imageUrl || `/api/placeholder/100/100`} 
+                      alt={`${selectedProduct.name} view ${i}`}
+                      className="w-full h-20 object-cover rounded-lg border-2 border-gray-200 hover:border-purple-400 cursor-pointer transition-colors"
+                    />
+                  ))}
+                </div>
               </div>
               
-              <div className="space-y-4">
+              {/* Product Information */}
+              <div className="space-y-6">
                 <div>
-                  <h3 className="font-semibold text-lg mb-2">{selectedProduct.name}</h3>
-                  <p className="text-gray-600 dark:text-gray-400">{selectedProduct.description}</p>
+                  <h3 className="text-2xl font-bold mb-3">{selectedProduct.name}</h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="flex text-yellow-400">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span key={star}>★</span>
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600">(4.5/5) · 127 reviews</span>
+                  </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                {/* Pricing */}
+                <div className="space-y-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl">
+                  <div className="flex items-center gap-4">
+                    <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       ₹{Math.round((selectedProduct.price / 100) * (1 - (selectedProduct.groupBuyDiscount || 10) / 100)).toLocaleString()}
                     </span>
-                    <span className="text-lg text-gray-500 line-through">
+                    <span className="text-xl text-gray-500 line-through">
                       ₹{(selectedProduct.price / 100).toLocaleString()}
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                       <Users className="w-4 h-4 mr-1" />
                       Min {selectedProduct.groupBuyMinQuantity || 4} orders
                     </Badge>
-                    <Badge variant="outline" className="text-sm bg-green-50 text-green-700 border-green-200">
-                      Group Deal
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <TrendingUp className="w-4 h-4 mr-1" />
+                      Group Deal Active
                     </Badge>
+                  </div>
+                  
+                  <p className="text-sm text-green-700 font-medium">
+                    Save ₹{Math.round((selectedProduct.price / 100) * (selectedProduct.groupBuyDiscount || 10) / 100).toLocaleString()} with group buying!
+                  </p>
+                </div>
+
+                {/* Product Description */}
+                <div className="space-y-3">
+                  <h4 className="text-lg font-semibold">About this product</h4>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {selectedProduct.description}
+                  </p>
+                </div>
+
+                {/* Key Features */}
+                <div className="space-y-3">
+                  <h4 className="text-lg font-semibold">Key Features</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Premium quality materials and construction</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Advanced technology for superior performance</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">Ergonomic design for maximum comfort</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 dark:text-gray-300">1-year manufacturer warranty included</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Product Specifications */}
+                <div className="space-y-3">
+                  <h4 className="text-lg font-semibold">Specifications</h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                      <span className="font-medium text-gray-500">Brand</span>
+                      <p className="font-semibold">{selectedProduct.category || 'Premium Brand'}</p>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                      <span className="font-medium text-gray-500">Model</span>
+                      <p className="font-semibold">Pro Series</p>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                      <span className="font-medium text-gray-500">Warranty</span>
+                      <p className="font-semibold">1 Year</p>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                      <span className="font-medium text-gray-500">Category</span>
+                      <p className="font-semibold">{selectedProduct.category}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Group Buy Progress */}
+                <div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <h4 className="text-lg font-semibold flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Group Buy Progress
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Current orders: 2 of {selectedProduct.groupBuyMinQuantity || 4}</span>
+                      <span className="font-medium">50% complete</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style={{ width: '50%' }}></div>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {(selectedProduct.groupBuyMinQuantity || 4) - 2} more orders needed to activate group discount
+                    </p>
                   </div>
                 </div>
                 
+                {/* Add to Group Button */}
                 <div className="pt-4">
                   <Button 
-                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                     onClick={() => {
                       toast({
                         title: "Added to Group Cart",
@@ -1287,8 +1392,23 @@ export default function VyronaSocial() {
                     }}
                   >
                     <Plus className="w-5 h-5 mr-2" />
-                    Add to Group
+                    Add to Group Cart
                   </Button>
+                  
+                  <div className="flex items-center justify-center gap-4 mt-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Free shipping</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Easy returns</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Secure payment</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
