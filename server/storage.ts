@@ -1,10 +1,11 @@
 import { 
-  users, products, stores, shoppingRooms, cartItems, orders, achievements, gameScores, otpVerifications,
+  users, products, stores, shoppingRooms, roomMembers, roomInvitations, cartItems, orders, achievements, gameScores, otpVerifications,
   shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
   instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
   groupBuyProducts, groupBuyCampaigns, groupBuyParticipants, groupCarts, groupCartContributions,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
+  type RoomMember, type InsertRoomMember, type RoomInvitation, type InsertRoomInvitation,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
   type Achievement, type InsertAchievement, type GameScore, type InsertGameScore,
   type OtpVerification, type InsertOtpVerification,
@@ -63,7 +64,23 @@ export interface IStorage {
   // Shopping Rooms
   getShoppingRooms(): Promise<ShoppingRoom[]>;
   getShoppingRoom(id: number): Promise<ShoppingRoom | undefined>;
+  getShoppingRoomByInviteCode(code: string): Promise<ShoppingRoom | undefined>;
   createShoppingRoom(room: InsertShoppingRoom): Promise<ShoppingRoom>;
+  updateShoppingRoom(id: number, updates: Partial<ShoppingRoom>): Promise<ShoppingRoom | undefined>;
+  deleteShoppingRoom(id: number): Promise<boolean>;
+
+  // Room Members
+  getRoomMembers(roomId: number): Promise<RoomMember[]>;
+  getRoomMember(roomId: number, userId: number): Promise<RoomMember | undefined>;
+  addRoomMember(member: InsertRoomMember): Promise<RoomMember>;
+  removeRoomMember(roomId: number, userId: number): Promise<boolean>;
+  updateRoomMemberRole(roomId: number, userId: number, role: string): Promise<RoomMember | undefined>;
+
+  // Room Invitations
+  createRoomInvitation(invitation: InsertRoomInvitation): Promise<RoomInvitation>;
+  getRoomInvitation(token: string): Promise<RoomInvitation | undefined>;
+  updateInvitationStatus(id: number, status: string): Promise<RoomInvitation | undefined>;
+  getRoomInvitations(roomId: number): Promise<RoomInvitation[]>;
 
   // Cart
   getCartItems(userId: number, roomId?: number): Promise<CartItem[]>;
