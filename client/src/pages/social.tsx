@@ -139,6 +139,13 @@ export default function VyronaSocial() {
     queryKey: ["/api/users"],
   });
 
+  // Fetch shared cart for selected room
+  const { data: sharedCart, isLoading: cartLoading } = useQuery({
+    queryKey: ["/api/cart", selectedRoomId],
+    queryFn: () => selectedRoomId ? fetch(`/api/cart/${selectedRoomId}`).then(res => res.json()) : [],
+    enabled: !!selectedRoomId && currentView === "room",
+  });
+
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
     if (!groupBuyProducts) return [];
@@ -1672,7 +1679,9 @@ export default function VyronaSocial() {
         }}
         product={selectedProductForGroupCart}
         onSuccess={() => {
-          // Optionally refresh data or show success message
+          // Invalidate cart cache to refresh shared cart display
+          queryClient.invalidateQueries({ queryKey: ["/api/cart", selectedRoomId] });
+          queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
           setGroupCartModalOpen(false);
           setSelectedProductForGroupCart(null);
         }}
