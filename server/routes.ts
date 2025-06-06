@@ -16,7 +16,92 @@ import { z } from "zod";
 import { sendOTPEmail } from "./email";
 import { eq, desc, sql } from "drizzle-orm";
 
+// Admin credentials (fixed)
+const ADMIN_CREDENTIALS = {
+  email: 'mgmags25@gmail.com',
+  password: '12345678',
+  id: 1,
+  username: 'admin',
+  role: 'admin' as const
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication endpoints
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Check admin credentials first
+      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+        req.session.user = {
+          id: ADMIN_CREDENTIALS.id,
+          email: ADMIN_CREDENTIALS.email,
+          username: ADMIN_CREDENTIALS.username,
+          role: ADMIN_CREDENTIALS.role
+        };
+        
+        return res.json({
+          success: true,
+          user: req.session.user,
+          message: "Admin login successful"
+        });
+      }
+      
+      // Check database for customer/seller users
+      const users = await storage.getUsers();
+      const user = users.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        req.session.user = {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          role: user.role as 'customer' | 'seller' | 'admin'
+        };
+        
+        res.json({
+          success: true,
+          user: req.session.user,
+          message: "Login successful"
+        });
+      } else {
+        res.status(401).json({
+          success: false,
+          message: "Invalid email or password"
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Login failed"
+      });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: "Logout failed" });
+      }
+      res.json({ success: true, message: "Logout successful" });
+    });
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    if (req.session?.user) {
+      res.json({
+        success: true,
+        user: req.session.user
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "Not authenticated"
+      });
+    }
+  });
+
   // VyronaRead API endpoints for authentic book data
   app.get("/api/vyronaread/ebooks", async (req, res) => {
     try {
