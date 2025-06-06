@@ -44,7 +44,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
   const [newGroupSettings, setNewGroupSettings] = useState({
     minThreshold: 4,
     maxCapacity: 50,
-    targetPrice: Math.floor(product.price * 0.85), // 15% group discount
+    targetPrice: product ? Math.floor(product.price * 0.85) : 0, // 15% group discount
     expiresIn: 7 // days
   });
 
@@ -53,8 +53,8 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
 
   // Fetch existing group carts for this product
   const { data: groupCarts = [], isLoading } = useQuery({
-    queryKey: ["/api/group-carts/product", product.id],
-    enabled: isOpen && !!product.id,
+    queryKey: ["/api/group-carts/product", product?.id],
+    enabled: isOpen && !!product?.id,
   });
 
   // Fetch contributions for selected group cart
@@ -146,6 +146,11 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
     const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
     return days > 0 ? `${days} days left` : "Expired";
   };
+
+  // Don't render if product is null
+  if (!product) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
