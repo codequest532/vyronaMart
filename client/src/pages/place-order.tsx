@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Wallet, 
@@ -73,6 +74,8 @@ export default function PlaceOrder() {
     useSingleAddress: false
   });
   const [currentStep, setCurrentStep] = useState<'address' | 'payment' | 'review'>('address');
+  const [showContributionModal, setShowContributionModal] = useState(false);
+  const [contributionAmount, setContributionAmount] = useState('');
 
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
@@ -698,24 +701,78 @@ export default function PlaceOrder() {
                 <div className="mt-6 p-4 border rounded-lg bg-gray-50">
                   <h4 className="font-medium mb-3 flex items-center gap-2">
                     <Users className="h-4 w-4" />
-                    Member Contributions
+                    Group Checkout
                   </h4>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-sm">
-                      <span>Total Amount:</span>
-                      <span className="font-medium">₹{finalTotal.toFixed(2)}</span>
+                      <span>Product Total:</span>
+                      <span className="font-medium">₹{orderTotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span>Split Among {room.memberCount} Members:</span>
-                      <span className="font-medium">₹{(finalTotal / room.memberCount).toFixed(2)} each</span>
+                    <div className="flex justify-between items-center text-sm text-green-600">
+                      <span>Group Discount:</span>
+                      <span className="font-medium">-₹{(orderTotal * 0.15).toFixed(2)}</span>
                     </div>
-                    <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
-                      <p className="text-blue-800">
-                        <strong>How it works:</strong> Each member will be notified to contribute their share 
-                        ({selectedPayment === "wallet" ? "via VyronaWallet" : "via UPI"}). 
-                        The order will be processed once all contributions are received.
-                      </p>
+                    <div className="flex justify-between items-center font-medium">
+                      <span>Required Amount:</span>
+                      <span>₹{(orderTotal * 0.85).toFixed(2)}</span>
                     </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Collected:</span>
+                        <span className="text-green-600 font-medium">₹{(orderTotal * 0.85 * 0.73).toFixed(2)}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{ width: '73%' }}></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>73% funded</span>
+                        <span>₹{(orderTotal * 0.85 * 0.27).toFixed(2)} remaining</span>
+                      </div>
+                    </div>
+
+                    {/* Member Contributions */}
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Member Contributions:</p>
+                      <div className="text-xs space-y-1">
+                        <div className="flex justify-between">
+                          <span>You (35%)</span>
+                          <span className="text-green-600">₹{(orderTotal * 0.85 * 0.35).toFixed(2)} ✓</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Alice (25%)</span>
+                          <span className="text-green-600">₹{(orderTotal * 0.85 * 0.25).toFixed(2)} ✓</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Bob (20%)</span>
+                          <span className="text-orange-600">₹{(orderTotal * 0.85 * 0.20).toFixed(2)} pending</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Carol (20%)</span>
+                          <span className="text-gray-500">₹{(orderTotal * 0.85 * 0.20).toFixed(2)} not set</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* VyronaWallet Balance */}
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium">VyronaWallet</span>
+                      </div>
+                      <span className="text-lg font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</span>
+                    </div>
+
+                    {/* Add Contribution Button */}
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setShowContributionModal(true)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Your Contribution
+                    </Button>
                   </div>
                 </div>
               )}
@@ -833,6 +890,84 @@ export default function PlaceOrder() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Contribution Modal */}
+      <Dialog open={showContributionModal} onOpenChange={setShowContributionModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Your Contribution</DialogTitle>
+            <DialogDescription>
+              Contribute any amount to the group order through VyronaWallet
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="contribution">Contribution Amount (₹)</Label>
+              <Input
+                id="contribution"
+                type="number"
+                placeholder="Enter amount"
+                value={contributionAmount}
+                onChange={(e) => setContributionAmount(e.target.value)}
+                min="1"
+                step="0.01"
+              />
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
+              <div className="flex items-center gap-2">
+                <Wallet className="h-4 w-4 text-blue-600" />
+                <span className="text-sm">Current Balance:</span>
+              </div>
+              <span className="font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</span>
+            </div>
+
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setShowContributionModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="flex-1"
+                onClick={async () => {
+                  if (contributionAmount && parseFloat(contributionAmount) > 0) {
+                    try {
+                      await apiRequest("POST", "/api/wallet/contribute", {
+                        roomId: roomId,
+                        amount: parseFloat(contributionAmount),
+                        userId: 1
+                      });
+                      
+                      toast({
+                        title: "Contribution Added",
+                        description: `₹${contributionAmount} has been contributed to the group order.`,
+                      });
+                      
+                      setContributionAmount('');
+                      setShowContributionModal(false);
+                      
+                      // Refresh wallet balance
+                      queryClient.invalidateQueries({ queryKey: ["/api/wallet/1"] });
+                    } catch (error: any) {
+                      toast({
+                        title: "Contribution Failed",
+                        description: error.message || "Failed to add contribution. Please try again.",
+                        variant: "destructive",
+                      });
+                    }
+                  }
+                }}
+                disabled={!contributionAmount || parseFloat(contributionAmount) <= 0}
+              >
+                Add Contribution
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

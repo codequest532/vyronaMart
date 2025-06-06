@@ -790,6 +790,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/wallet/contribute", async (req, res) => {
+    try {
+      const { roomId, amount, userId } = req.body;
+      
+      if (!roomId || !amount || !userId) {
+        return res.status(400).json({ message: "Room ID, amount, and user ID are required" });
+      }
+
+      if (amount <= 0) {
+        return res.status(400).json({ message: "Contribution amount must be positive" });
+      }
+
+      // Get user's wallet
+      const wallet = await storage.getOrCreateVyronaWallet(userId);
+      
+      if (wallet.balance < amount) {
+        return res.status(400).json({ message: "Insufficient wallet balance" });
+      }
+
+      // Update wallet balance
+      const newBalance = wallet.balance - amount;
+      await storage.updateWalletBalance(userId, newBalance);
+
+      // Create transaction record
+      const transactionData = {
+        userId: userId,
+        type: "group_contribution",
+        amount: amount,
+        description: `Group contribution for room ${roomId}`,
+        metadata: { roomId: roomId }
+      };
+      
+      const transaction = await storage.createWalletTransaction(transactionData);
+
+      res.json({
+        success: true,
+        transaction,
+        newBalance,
+        message: `Successfully contributed ₹${amount} to group order`
+      });
+    } catch (error) {
+      console.error("Wallet contribution error:", error);
+      res.status(500).json({ message: "Failed to process contribution" });
+    }
+  });
+
   app.post("/api/wallet/:userId/transactions", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
