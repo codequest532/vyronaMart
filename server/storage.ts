@@ -2267,6 +2267,81 @@ export class DatabaseStorage implements IStorage {
     return requests;
   }
 
+  // Seller Order Management Implementation
+  async getSellerOrders(): Promise<any[]> {
+    try {
+      const orders = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.status, 'paid'))
+        .orderBy(desc(orders.createdAt));
+
+      return orders.map(order => ({
+        ...order,
+        deliveryAddress: order.metadata?.deliveryAddress || null,
+        customerName: order.metadata?.customerName || 'N/A',
+        customerPhone: order.metadata?.customerPhone || 'N/A',
+        products: order.metadata?.products || []
+      }));
+    } catch (error) {
+      console.error("Error in getSellerOrders:", error);
+      return [];
+    }
+  }
+
+  async getOrderDetails(orderId: number): Promise<any> {
+    try {
+      const [order] = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.id, orderId));
+
+      if (!order) return null;
+
+      return {
+        ...order,
+        deliveryAddress: order.metadata?.deliveryAddress || null,
+        customerName: order.metadata?.customerName || 'N/A',
+        customerPhone: order.metadata?.customerPhone || 'N/A',
+        products: order.metadata?.products || [],
+        trackingNumber: order.metadata?.trackingNumber || null
+      };
+    } catch (error) {
+      console.error("Error in getOrderDetails:", error);
+      return null;
+    }
+  }
+
+  async updateOrderStatus(orderId: number, status: string, trackingNumber?: string): Promise<any> {
+    try {
+      const [order] = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.id, orderId));
+
+      if (!order) throw new Error('Order not found');
+
+      const updatedMetadata = {
+        ...order.metadata,
+        trackingNumber: trackingNumber || order.metadata?.trackingNumber
+      };
+
+      const [updatedOrder] = await db
+        .update(orders)
+        .set({
+          status: status,
+          metadata: updatedMetadata
+        })
+        .where(eq(orders.id, orderId))
+        .returning();
+
+      return updatedOrder;
+    } catch (error) {
+      console.error("Error in updateOrderStatus:", error);
+      throw error;
+    }
+  }
+
   // VyronaWallet - Wallet Management Implementation
   async getOrCreateVyronaWallet(userId: number): Promise<any> {
     try {

@@ -947,11 +947,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      // Create order record
+      // Get customer information for seller fulfillment
+      const customer = await storage.getUser(userId);
+      
+      // Create order record with complete customer and product details for seller
       const order = await storage.createOrder({
         userId: userId,
         totalAmount: isGroupPayment ? contributionPerMember : totalAmount,
-        status: isGroupPayment ? "pending_contributions" : "completed",
+        status: isGroupPayment ? "pending_contributions" : "paid",
         module: "vyronasocial",
         metadata: {
           roomId,
@@ -962,7 +965,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           memberCount,
           totalOrderAmount: totalAmount,
           deliveryAddresses,
-          useSingleDelivery
+          useSingleDelivery,
+          // Customer details for seller fulfillment
+          customerName: customer?.username || 'Customer',
+          customerEmail: customer?.email || 'N/A',
+          customerPhone: customer?.mobile || 'N/A',
+          // Product details for dispatch
+          products: items.map(item => ({
+            productId: item.productId,
+            productName: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            totalPrice: item.price * item.quantity
+          })),
+          // Order fulfillment status
+          fulfillmentStatus: 'processing',
+          orderDate: new Date().toISOString()
         }
       });
 
@@ -1250,6 +1268,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing book purchase:", error);
       res.status(500).json({ message: "Failed to process book purchase" });
+    }
+  });
+
+  // Seller Order Management System
+  app.get("/api/seller/orders", async (req, res) => {
+    try {
+      // Get all orders for sellers to manage
+      const orders = await storage.getSellerOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching seller orders:", error);
+      res.status(500).json({ message: "Failed to fetch seller orders" });
+    }
+  });
+
+  app.get("/api/seller/orders/:orderId", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const orderDetails = await storage.getOrderDetails(orderId);
+      
+      if (!orderDetails) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      res.json(orderDetails);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      res.status(500).json({ message: "Failed to fetch order details" });
+    }
+  });
+
+  app.patch("/api/seller/orders/:orderId/status", async (req, res) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      const { status, trackingNumber } = req.body;
+      
+      const updatedOrder = await storage.updateOrderStatus(orderId, status, trackingNumber);
+      res.json(updatedOrder);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
     }
   });
 
