@@ -139,7 +139,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[95vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
@@ -147,10 +147,9 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-1">
-            {/* Left Panel: Product Info */}
-            <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
+          {/* Left Panel: Product Info */}
+          <div className="space-y-4 overflow-y-auto">
             <div className="bg-muted/50 rounded-lg p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -220,7 +219,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
           </div>
 
           {/* Right Panel: Room Selection */}
-          <div className="space-y-4">
+          <div className="space-y-4 overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Choose Shopping Room</h3>
               <Button
@@ -263,65 +262,62 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
               </div>
             )}
 
-            <div className="border rounded-lg">
-              <ScrollArea className="h-[300px] p-3">
-                <div className="space-y-3">
-                  {loadingRooms ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Loading rooms...
-                    </div>
-                  ) : rooms.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>No shopping rooms available</p>
-                      <p className="text-sm">Create a new room to start shopping together!</p>
-                    </div>
-                  ) : (
-                    rooms.map((room: any) => (
-                      <div
-                        key={room.id}
-                        className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                          selectedRoom?.id === room.id
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                        onClick={() => setSelectedRoom(room)}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium">{room.name}</h4>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+            <div className="border rounded-lg max-h-[400px] overflow-y-auto">
+              <div className="p-3 space-y-3">
+                {loadingRooms ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Loading rooms...
+                  </div>
+                ) : rooms.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No shopping rooms available</p>
+                    <p className="text-sm">Create a new room to start shopping together!</p>
+                  </div>
+                ) : (
+                  rooms.map((room: any) => (
+                    <div
+                      key={room.id}
+                      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                        selectedRoom?.id === room.id
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => setSelectedRoom(room)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-medium">{room.name}</h4>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {room.memberCount} members
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <ShoppingCart className="h-3 w-3" />
+                              ${((room.totalCart || 0) / 100).toFixed(2)}
+                            </span>
+                            {room.currentGame && (
                               <span className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                {room.memberCount} members
+                                <Clock className="h-3 w-3" />
+                                {room.currentGame}
                               </span>
-                              <span className="flex items-center gap-1">
-                                <ShoppingCart className="h-3 w-3" />
-                                ${((room.totalCart || 0) / 100).toFixed(2)}
-                              </span>
-                              {room.currentGame && (
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {room.currentGame}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={room.isActive ? "default" : "secondary"}>
-                              {room.isActive ? "Active" : "Inactive"}
-                            </Badge>
+                            )}
                           </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={room.isActive ? "default" : "secondary"}>
+                            {room.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
                       </div>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
-          </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
