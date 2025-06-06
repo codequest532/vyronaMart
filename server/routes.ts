@@ -483,8 +483,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("=== SHOPPING ROOMS ENDPOINT HIT (FIRST ONE) ===");
       
+      // Get current user ID from session
+      const session = (req as any).session;
+      const userId = session?.user?.id || 4;
+      
+      console.log("Shopping rooms endpoint - Session:", session);
+      console.log("Shopping rooms endpoint - User ID:", userId);
+      
       // Use the VyronaSocial shopping groups data
-      const rooms = await storage.getShoppingGroups(0);
+      const rooms = await storage.getShoppingGroups(userId);
       console.log("Shopping rooms from storage:", rooms);
       
       // Transform to match expected format for checkout
