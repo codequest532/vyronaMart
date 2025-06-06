@@ -611,24 +611,53 @@ export default function VyronaSocial() {
                     <Button 
                       size="sm" 
                       className="w-full h-6 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white border-0"
-                      onClick={(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
-                        addGroupBuyItem({
-                          productId: product.id,
-                          name: product.name,
-                          price: Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)),
-                          discountedPrice: Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)),
-                          imageUrl: product.imageUrl || "/api/placeholder/150/120",
-                          category: product.category || "group-buy",
-                          minQuantity: product.groupBuyMinQuantity || 4,
-                          quantity: 1,
-                          isGroupBuy: true,
-                          groupBuyDiscount: product.groupBuyDiscount || 10
-                        });
-                        toast({
-                          title: "Added to Group Cart",
-                          description: `${product.name} added for group purchase`,
-                        });
+                        
+                        if (!selectedRoomId) {
+                          toast({
+                            title: "No Room Selected",
+                            description: "Please select or enter a room first",
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+
+                        try {
+                          const response = await fetch(`/api/cart/${selectedRoomId}/add`, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                              productId: product.id,
+                              quantity: 1,
+                              addedAt: new Date().toISOString()
+                            })
+                          });
+
+                          if (response.ok) {
+                            toast({
+                              title: "Added to Group Cart",
+                              description: `${product.name} added for group purchase`,
+                            });
+                            // Refresh the shared cart
+                            queryClient.invalidateQueries({ queryKey: [`/api/cart/${selectedRoomId}`] });
+                          } else {
+                            const error = await response.json();
+                            toast({
+                              title: "Failed to Add Item",
+                              description: error.message || "Could not add item to group cart",
+                              variant: "destructive"
+                            });
+                          }
+                        } catch (error) {
+                          toast({
+                            title: "Error",
+                            description: "Failed to add item to group cart",
+                            variant: "destructive"
+                          });
+                        }
                       }}
                     >
                       <ShoppingBag className="w-3 h-3 mr-1" />
