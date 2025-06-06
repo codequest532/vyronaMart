@@ -949,7 +949,8 @@ export default function VyronaSocial() {
               <div className="space-y-6">
                 {/* Cart Items Display */}
                 <div className="space-y-4">
-                  {(sharedCart as any[])?.length === 0 ? (
+                  {console.log("SharedCart data:", sharedCart, "Length:", (sharedCart as any[])?.length)}
+                  {!sharedCart || (sharedCart as any[])?.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
                       <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
