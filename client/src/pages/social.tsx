@@ -278,17 +278,19 @@ export default function VyronaSocial() {
     }
   });
 
-  // Ensure we have an array for cart data with proper null safety
-  const sharedCart = Array.isArray(rawCartData) ? rawCartData : [];
+  // Define cart item type and ensure we have properly typed array
+  interface CartItem {
+    id: number;
+    productId: number;
+    quantity: number;
+    userId: number;
+    name: string;
+    price: number;
+    imageUrl?: string | null;
+    description?: string;
+  }
   
-  // Debug cart processing
-  console.log('CART DATA PROCESSING:', {
-    rawCartData,
-    sharedCart,
-    sharedCartLength: sharedCart?.length || 0,
-    selectedRoomId,
-    cartLoading
-  });
+  const sharedCart: CartItem[] = Array.isArray(rawCartData) ? rawCartData : [];
 
 
 
