@@ -945,20 +945,36 @@ export default function VyronaSocial() {
                         </Badge>
                       </div>
 
-                      <Button 
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-xs py-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toast({
-                            title: "Added to Group Cart",
-                            description: `${product.name} added to group cart`,
-                          });
-                        }}
-                      >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Add to Group
-                      </Button>
+                      {(roomData?.memberCount || 0) >= 2 ? (
+                        <Button 
+                          size="sm"
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-xs py-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast({
+                              title: "Added to Group Cart",
+                              description: `${product.name} added to group cart`,
+                            });
+                          }}
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add to Group
+                        </Button>
+                      ) : (
+                        <div className="space-y-1">
+                          <Button 
+                            size="sm"
+                            disabled
+                            className="w-full bg-gray-300 text-gray-500 cursor-not-allowed text-xs py-2"
+                          >
+                            <Users className="w-3 h-3 mr-1" />
+                            Need 2+ Members
+                          </Button>
+                          <p className="text-xs text-orange-600 text-center">
+                            Room needs {2 - (roomData?.memberCount || 0)} more member{2 - (roomData?.memberCount || 0) === 1 ? '' : 's'}
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -1437,17 +1453,33 @@ export default function VyronaSocial() {
                           </div>
                           
                           {/* Checkout Button */}
-                          <Button
-                            size="sm"
-                            className="w-full h-7 text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setLocation(`/place-order/${room.id}`);
-                            }}
-                          >
-                            <Wallet className="w-3 h-3 mr-1" />
-                            Checkout with VyronaWallet
-                          </Button>
+                          {(room.memberCount || 0) >= 2 ? (
+                            <Button
+                              size="sm"
+                              className="w-full h-7 text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLocation(`/place-order/${room.id}`);
+                              }}
+                            >
+                              <Wallet className="w-3 h-3 mr-1" />
+                              Checkout with VyronaWallet
+                            </Button>
+                          ) : (
+                            <div className="space-y-1">
+                              <Button
+                                size="sm"
+                                disabled
+                                className="w-full h-7 text-xs bg-gray-300 text-gray-500 cursor-not-allowed"
+                              >
+                                <Users className="w-3 h-3 mr-1" />
+                                Need 2+ Members
+                              </Button>
+                              <p className="text-xs text-orange-600 text-center">
+                                Invite {2 - (room.memberCount || 0)} more member{2 - (room.memberCount || 0) === 1 ? '' : 's'} to enable checkout
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

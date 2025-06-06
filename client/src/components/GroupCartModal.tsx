@@ -259,14 +259,29 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                     </Badge>
                   </div>
                 </div>
-                <Button 
-                  onClick={handleAddToRoom} 
-                  className="w-full"
-                  disabled={addToRoomMutation.isPending}
-                >
-                  <Wallet className="h-4 w-4 mr-2" />
-                  {addToRoomMutation.isPending ? "Adding..." : "Add to Room & Checkout with VyronaWallet"}
-                </Button>
+                {(selectedRoom?.memberCount || 0) >= 2 ? (
+                  <Button 
+                    onClick={handleAddToRoom} 
+                    className="w-full"
+                    disabled={addToRoomMutation.isPending}
+                  >
+                    <Wallet className="h-4 w-4 mr-2" />
+                    {addToRoomMutation.isPending ? "Adding..." : "Add to Room & Checkout with VyronaWallet"}
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <Button 
+                      disabled
+                      className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Need 2+ Members for Cost Sharing
+                    </Button>
+                    <p className="text-sm text-orange-600 text-center">
+                      This room needs {2 - (selectedRoom?.memberCount || 0)} more member{2 - (selectedRoom?.memberCount || 0) === 1 ? '' : 's'} to enable VyronaWallet checkout and cost sharing
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
