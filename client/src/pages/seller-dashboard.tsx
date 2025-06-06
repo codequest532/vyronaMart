@@ -45,7 +45,10 @@ export default function SellerDashboard() {
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['/api/seller/orders'],
-    queryFn: () => apiRequest('GET', '/api/seller/orders')
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/seller/orders');
+      return response.json();
+    }
   });
 
   const updateStatusMutation = useMutation({
