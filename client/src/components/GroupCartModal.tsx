@@ -154,17 +154,18 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
-        <DialogHeader>
+      <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
             Add to Group Cart - {product.name}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-          {/* Left Panel - Group Cart Selection */}
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4 pb-6">
+            {/* Left Panel - Group Cart Selection */}
+            <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Available Group Carts</h3>
               <Button
@@ -425,7 +426,8 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
