@@ -72,11 +72,15 @@ import { useLocation } from "wouter";
 
 // Cart Display Component
 const CartDisplay = ({ cartData, selectedRoomId, refetchCart, setLocation }: any) => {
+  console.log('=== CARTDISPLAY COMPONENT ===');
   console.log('CartDisplay - cartData:', cartData);
   console.log('CartDisplay - typeof cartData:', typeof cartData);
   console.log('CartDisplay - Array.isArray(cartData):', Array.isArray(cartData));
+  console.log('CartDisplay - selectedRoomId:', selectedRoomId);
+  console.log('============================');
   
-  const cartItems = Array.isArray(cartData) ? cartData : [];
+  // Force cartData to be an array if it's not already
+  const cartItems = Array.isArray(cartData) ? cartData : (cartData ? [cartData] : []);
   
   if (cartItems.length === 0) {
     return (
@@ -1049,12 +1053,19 @@ export default function VyronaSocial() {
               <div className="space-y-6">
                 {/* Cart Items Display */}
                 <div className="space-y-4">
-                  <CartDisplay 
-                    cartData={sharedCart} 
-                    selectedRoomId={selectedRoomId} 
-                    refetchCart={refetchCart}
-                    setLocation={setLocation}
-                  />
+                  {selectedRoomId ? (
+                    <CartDisplay 
+                      cartData={sharedCart} 
+                      selectedRoomId={selectedRoomId} 
+                      refetchCart={refetchCart}
+                      setLocation={setLocation}
+                    />
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                      <p>Join a room to view the group cart</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
