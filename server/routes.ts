@@ -1022,6 +1022,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add item to shopping room cart
+  app.post("/api/shopping-rooms/:roomId/add-cart-item", async (req, res) => {
+    try {
+      const roomId = parseInt(req.params.roomId);
+      const { productId, quantity } = req.body;
+      const userId = req.session?.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const cartItemData = {
+        userId: userId,
+        productId: productId,
+        quantity: quantity || 1,
+        roomId: roomId
+      };
+
+      const cartItem = await storage.addCartItem(cartItemData);
+      res.json(cartItem);
+    } catch (error) {
+      console.error("Error adding item to shopping room cart:", error);
+      res.status(500).json({ message: "Failed to add item to cart" });
+    }
+  });
+
   // Add item to cart (for GroupCartModal)
   app.post("/api/cart-items", async (req, res) => {
     try {
