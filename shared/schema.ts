@@ -102,30 +102,7 @@ export const groupCartContributions = pgTable("group_cart_contributions", {
   joinedAt: timestamp("joined_at").defaultNow(),
 });
 
-// VyronaWallet Integration
-export const vyronaWallets = pgTable("vyrona_wallets", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().unique(),
-  balance: integer("balance").notNull().default(0), // in cents
-  lockedBalance: integer("locked_balance").notNull().default(0), // for pending group orders
-  totalEarned: integer("total_earned").notNull().default(0),
-  totalSpent: integer("total_spent").notNull().default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const walletTransactions = pgTable("wallet_transactions", {
-  id: serial("id").primaryKey(),
-  walletId: integer("wallet_id").notNull(),
-  type: text("type").notNull(), // 'credit', 'debit', 'lock', 'unlock', 'refund'
-  amount: integer("amount").notNull(), // in cents
-  balanceAfter: integer("balance_after").notNull(),
-  description: text("description").notNull(),
-  referenceType: text("reference_type"), // 'group_order', 'refund', 'cashback', 'topup'
-  referenceId: integer("reference_id"), // order_id, refund_id, etc.
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+// VyronaWallet Integration removed duplicate - using the one defined later in the file
 
 // Group Orders and Checkout
 export const groupOrders = pgTable("group_orders", {
@@ -240,6 +217,28 @@ export const notifications = pgTable("notifications", {
   message: text("message").notNull(),
   metadata: jsonb("metadata"), // groupId, productId, etc.
   isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// VyronaWallet Tables
+export const vyronaWallets = pgTable("vyrona_wallets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  balance: decimal("balance", { precision: 10, scale: 2 }).notNull().default("0.00"),
+  currency: text("currency").notNull().default("INR"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  type: text("type").notNull(), // 'credit', 'debit', 'payment', 'refund'
+  description: text("description"),
+  status: text("status").notNull().default("completed"), // 'pending', 'completed', 'failed'
+  metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
