@@ -141,8 +141,7 @@ export default function VyronaSocial() {
 
   // Fetch shared cart for selected room
   const { data: sharedCart, isLoading: cartLoading } = useQuery({
-    queryKey: ["/api/cart", selectedRoomId],
-    queryFn: () => selectedRoomId ? fetch(`/api/cart/${selectedRoomId}`).then(res => res.json()) : [],
+    queryKey: [`/api/cart/${selectedRoomId}`],
     enabled: !!selectedRoomId && currentView === "room",
   });
 
@@ -1680,7 +1679,7 @@ export default function VyronaSocial() {
         product={selectedProductForGroupCart}
         onSuccess={() => {
           // Invalidate cart cache to refresh shared cart display
-          queryClient.invalidateQueries({ queryKey: ["/api/cart", selectedRoomId] });
+          queryClient.invalidateQueries({ queryKey: [`/api/cart/${selectedRoomId}`] });
           queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
           setGroupCartModalOpen(false);
           setSelectedProductForGroupCart(null);
