@@ -731,58 +731,59 @@ export default function VyronaSocial() {
                 <p className="text-sm text-gray-500 mt-2">Check back later for exclusive deals</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {(groupBuyProducts as any[])?.map((product: any) => (
                   <Card 
                     key={product.id} 
-                    className="group cursor-pointer hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/20 overflow-hidden"
+                    className="group cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-purple-50/30 dark:from-gray-800 dark:to-purple-900/20 overflow-hidden"
                     onClick={() => setSelectedProduct(product)}
                   >
                     <div className="relative">
                       <img 
-                        src={product.imageUrl || "/api/placeholder/300/200"} 
+                        src={product.imageUrl || "/api/placeholder/200/150"} 
                         alt={product.name}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-32 object-cover"
                       />
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold">
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xs">
                           {product.groupBuyDiscount || 10}% OFF
                         </Badge>
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
                     
-                    <CardContent className="p-4">
-                      <h4 className="font-bold text-lg mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                    <CardContent className="p-3">
+                      <h4 className="font-semibold text-sm mb-1 line-clamp-2 group-hover:text-purple-600 transition-colors">
                         {product.name}
                       </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-1">
                         {product.description}
                       </p>
                       
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      <div className="flex items-center gap-1 mb-2">
+                        <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                           ₹{Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)).toLocaleString()}
                         </span>
-                        <span className="text-sm text-gray-500 line-through">
+                        <span className="text-xs text-gray-500 line-through">
                           ₹{(product.price / 100).toLocaleString()}
                         </span>
                       </div>
                       
-                      <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1">
-                          <Users className="w-4 h-4 text-blue-600" />
+                          <Users className="w-3 h-3 text-blue-600" />
                           <span className="text-xs text-blue-600 font-medium">
-                            Min {product.groupBuyMinQuantity || 4} orders
+                            Min {product.groupBuyMinQuantity || 4}
                           </span>
                         </div>
-                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-                          Group Deal
+                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 px-1 py-0">
+                          Deal
                         </Badge>
                       </div>
 
                       <Button 
-                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                        size="sm"
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 text-xs py-2"
                         onClick={(e) => {
                           e.stopPropagation();
                           toast({
@@ -791,7 +792,7 @@ export default function VyronaSocial() {
                           });
                         }}
                       >
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="w-3 h-3 mr-1" />
                         Add to Group
                       </Button>
                     </CardContent>
