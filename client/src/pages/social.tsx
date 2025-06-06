@@ -928,17 +928,27 @@ export default function VyronaSocial() {
                         </div>
                         
                         <Button 
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium"
+                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
                           size="lg"
+                          disabled={(roomMembers as any[])?.length < 2 || (sharedCart as any[])?.length === 0}
                         >
                           <ShoppingCart className="w-5 h-5 mr-2" />
                           Place Group Order
                         </Button>
                         
-                        <p className="text-xs text-center text-gray-500 mt-2">
-                          Proceed to delivery details and payment
-                        </p>
+                        {(roomMembers as any[])?.length < 2 || (sharedCart as any[])?.length === 0 ? (
+                          <p className="text-xs text-center text-orange-600 mt-2">
+                            {(roomMembers as any[])?.length < 2 ? 
+                              `Need ${2 - ((roomMembers as any[])?.length || 0)} more member${2 - ((roomMembers as any[])?.length || 0) === 1 ? '' : 's'} to enable group ordering` :
+                              'Add items to cart to enable ordering'
+                            }
+                          </p>
+                        ) : (
+                          <p className="text-xs text-center text-gray-500 mt-2">
+                            Proceed to delivery details and payment
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
