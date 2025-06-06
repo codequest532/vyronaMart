@@ -821,7 +821,7 @@ export default function VyronaSocial() {
                   </Badge>
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                     <Users className="w-3 h-3 mr-1" />
-                    {(roomMembers as any[])?.length || 1} members
+                    {roomData?.memberCount || 1} members
                   </Badge>
                   <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                     {roomData?.category || "General"}
@@ -940,16 +940,16 @@ export default function VyronaSocial() {
                           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => setLocation(`/place-order/${selectedRoomId}`)}
                           size="lg"
-                          disabled={(roomMembers as any[])?.length < 2 || (sharedCart as any[])?.length === 0}
+                          disabled={(roomData?.memberCount || 0) < 2 || (sharedCart as any[])?.length === 0}
                         >
                           <ShoppingCart className="w-5 h-5 mr-2" />
                           Place Group Order
                         </Button>
                         
-                        {(roomMembers as any[])?.length < 2 || (sharedCart as any[])?.length === 0 ? (
+                        {(roomData?.memberCount || 0) < 2 || (sharedCart as any[])?.length === 0 ? (
                           <p className="text-xs text-center text-orange-600 mt-2">
-                            {(roomMembers as any[])?.length < 2 ? 
-                              `Need ${2 - ((roomMembers as any[])?.length || 0)} more member${2 - ((roomMembers as any[])?.length || 0) === 1 ? '' : 's'} to enable group ordering` :
+                            {(roomData?.memberCount || 0) < 2 ? 
+                              `Need ${2 - (roomData?.memberCount || 0)} more member${2 - (roomData?.memberCount || 0) === 1 ? '' : 's'} to enable group ordering` :
                               'Add items to cart to enable ordering'
                             }
                           </p>
