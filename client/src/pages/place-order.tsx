@@ -127,7 +127,7 @@ export default function PlaceOrder() {
     for (let i = 0; i < memberCount; i++) {
       initialAddresses.push({
         id: `member-${i + 1}`,
-        memberName: i === 0 ? 'You' : `Member ${i + 1}`,
+        memberName: i === 0 ? 'Primary Member (Required)' : `Member ${i + 1} (Optional)`,
         fullName: '',
         phone: '',
         addressLine1: '',
@@ -168,7 +168,19 @@ export default function PlaceOrder() {
 
   // Calculate total
   const orderTotal = cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = deliveryMode.useSingleAddress ? 50 : deliveryMode.addresses.length * 50;
+  
+  // Calculate delivery fee based on filled addresses
+  let deliveryFee = 0;
+  if (deliveryMode.useSingleAddress) {
+    deliveryFee = 50; // Single delivery fee
+  } else {
+    // Count addresses with at least basic info filled
+    const filledAddresses = deliveryMode.addresses.filter(addr => 
+      addr.fullName && addr.phone && addr.addressLine1 && addr.city && addr.state && addr.pincode
+    );
+    deliveryFee = Math.max(1, filledAddresses.length) * 50; // At least 1 (primary) address fee
+  }
+  
   const finalTotal = orderTotal + deliveryFee;
 
   // Process order mutation
@@ -258,9 +270,9 @@ export default function PlaceOrder() {
       const firstAddress = deliveryMode.addresses[0];
       return firstAddress && requiredFields.every(field => firstAddress[field as keyof DeliveryAddress]);
     }
-    return deliveryMode.addresses.every(addr =>
-      requiredFields.every(field => addr[field as keyof DeliveryAddress])
-    );
+    // For multiple addresses, only the primary address is mandatory
+    const primaryAddress = deliveryMode.addresses.find(addr => addr.isDefault);
+    return primaryAddress && requiredFields.every(field => primaryAddress[field as keyof DeliveryAddress]);
   };
 
   const canProceedToPayment = () => {
@@ -464,18 +476,23 @@ export default function PlaceOrder() {
               ) : (
                 // Multiple addresses - one per member
                 deliveryMode.addresses.map((address, index) => (
-                <div key={address.id} className="border rounded-lg p-4 space-y-4">
+                <div key={address.id} className={`border rounded-lg p-4 space-y-4 ${
+                  address.isDefault ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                }`}>
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       {address.memberName}
-                      {address.isDefault && <Badge variant="outline">Primary</Badge>}
+                      {address.isDefault && <Badge variant="default">Required</Badge>}
+                      {!address.isDefault && <Badge variant="outline">Optional</Badge>}
                     </h4>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor={`fullName-${address.id}`}>Full Name *</Label>
+                      <Label htmlFor={`fullName-${address.id}`}>
+                        Full Name {address.isDefault ? '*' : ''}
+                      </Label>
                       <Input
                         id={`fullName-${address.id}`}
                         placeholder="Enter full name"
@@ -484,7 +501,9 @@ export default function PlaceOrder() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`phone-${address.id}`}>Phone Number *</Label>
+                      <Label htmlFor={`phone-${address.id}`}>
+                        Phone Number {address.isDefault ? '*' : ''}
+                      </Label>
                       <Input
                         id={`phone-${address.id}`}
                         placeholder="Enter phone number"
@@ -495,7 +514,9 @@ export default function PlaceOrder() {
                   </div>
                   
                   <div>
-                    <Label htmlFor={`addressLine1-${address.id}`}>Address Line 1 *</Label>
+                    <Label htmlFor={`addressLine1-${address.id}`}>
+                      Address Line 1 {address.isDefault ? '*' : ''}
+                    </Label>
                     <Input
                       id={`addressLine1-${address.id}`}
                       placeholder="House no, Building name, Street"
@@ -516,7 +537,9 @@ export default function PlaceOrder() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor={`city-${address.id}`}>City *</Label>
+                      <Label htmlFor={`city-${address.id}`}>
+                        City {address.isDefault ? '*' : ''}
+                      </Label>
                       <Input
                         id={`city-${address.id}`}
                         placeholder="Enter city"
@@ -525,7 +548,9 @@ export default function PlaceOrder() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`state-${address.id}`}>State *</Label>
+                      <Label htmlFor={`state-${address.id}`}>
+                        State {address.isDefault ? '*' : ''}
+                      </Label>
                       <Input
                         id={`state-${address.id}`}
                         placeholder="Enter state"
@@ -534,7 +559,9 @@ export default function PlaceOrder() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor={`pincode-${address.id}`}>Pincode *</Label>
+                      <Label htmlFor={`pincode-${address.id}`}>
+                        Pincode {address.isDefault ? '*' : ''}
+                      </Label>
                       <Input
                         id={`pincode-${address.id}`}
                         placeholder="Enter pincode"
