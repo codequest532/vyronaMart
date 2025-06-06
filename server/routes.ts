@@ -1234,8 +1234,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log("=== SHOPPING ROOMS ENDPOINT HIT ===");
     
     try {
+      // Get current user ID from session (fallback to user 4 for demo)
+      const session = (req as any).session;
+      const userId = session?.user?.id || 4;
+      
+      console.log("Shopping rooms endpoint - Session:", session);
+      console.log("Shopping rooms endpoint - User ID:", userId);
+      
       // Use the existing VyronaSocial storage method that we know works
-      const rooms = await storage.getShoppingGroups(0);
+      const rooms = await storage.getShoppingGroups(userId);
       console.log("Shopping rooms from storage:", rooms);
       
       // Transform to match expected format
