@@ -224,10 +224,14 @@ export default function VyronaSocial() {
     onSuccess: () => {
       toast({
         title: "Shopping Room Created",
-        description: "Your room is ready for shopping together!"
+        description: selectedUsers.length > 0 
+          ? `Room created and ${selectedUsers.length} users invited!`
+          : "Your room is ready for shopping together!"
       });
       setShowCreateRoom(false);
       createRoomForm.reset();
+      setSelectedUsers([]);
+      setUserSearchQuery("");
       queryClient.invalidateQueries({ queryKey: ["/api/vyronasocial/rooms"] });
     },
     onError: (error: Error) => {
