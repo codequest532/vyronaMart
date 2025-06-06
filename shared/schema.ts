@@ -72,6 +72,87 @@ export const cartItems = pgTable("cart_items", {
   productId: integer("product_id").notNull(),
   quantity: integer("quantity").notNull().default(1),
   roomId: integer("room_id"), // null for individual cart, set for room cart
+  addedAt: timestamp("added_at").defaultNow(),
+});
+
+// Group Cart Management
+export const groupCarts = pgTable("group_carts", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  productId: integer("product_id").notNull(),
+  totalQuantity: integer("total_quantity").notNull().default(0),
+  minThreshold: integer("min_threshold").notNull().default(4),
+  maxCapacity: integer("max_capacity").default(50),
+  targetPrice: integer("target_price"), // target group price in cents
+  currentPrice: integer("current_price"), // current calculated price in cents
+  isActive: boolean("is_active").default(true),
+  createdBy: integer("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  expiresAt: timestamp("expires_at"), // cart expiry for urgency
+});
+
+export const groupCartContributions = pgTable("group_cart_contributions", {
+  id: serial("id").primaryKey(),
+  groupCartId: integer("group_cart_id").notNull(),
+  userId: integer("user_id").notNull(),
+  quantity: integer("quantity").notNull().default(1),
+  contributionAmount: integer("contribution_amount").notNull(), // in cents
+  deliveryAddress: jsonb("delivery_address"), // user's delivery address
+  notes: text("notes"),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+// VyronaWallet Integration
+export const vyronaWallets = pgTable("vyrona_wallets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  balance: integer("balance").notNull().default(0), // in cents
+  lockedBalance: integer("locked_balance").notNull().default(0), // for pending group orders
+  totalEarned: integer("total_earned").notNull().default(0),
+  totalSpent: integer("total_spent").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const walletTransactions = pgTable("wallet_transactions", {
+  id: serial("id").primaryKey(),
+  walletId: integer("wallet_id").notNull(),
+  type: text("type").notNull(), // 'credit', 'debit', 'lock', 'unlock', 'refund'
+  amount: integer("amount").notNull(), // in cents
+  balanceAfter: integer("balance_after").notNull(),
+  description: text("description").notNull(),
+  referenceType: text("reference_type"), // 'group_order', 'refund', 'cashback', 'topup'
+  referenceId: integer("reference_id"), // order_id, refund_id, etc.
+  metadata: jsonb("metadata"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Group Orders and Checkout
+export const groupOrders = pgTable("group_orders", {
+  id: serial("id").primaryKey(),
+  groupCartId: integer("group_cart_id").notNull(),
+  orderNumber: text("order_number").notNull().unique(),
+  totalAmount: integer("total_amount").notNull(), // in cents
+  totalParticipants: integer("total_participants").notNull(),
+  status: text("status").notNull().default("pending"), // 'pending', 'processing', 'shipped', 'delivered', 'cancelled'
+  paymentStatus: text("payment_status").notNull().default("pending"), // 'pending', 'completed', 'failed', 'refunded'
+  createdBy: integer("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  processedAt: timestamp("processed_at"),
+  estimatedDelivery: timestamp("estimated_delivery"),
+});
+
+export const groupOrderContributions = pgTable("group_order_contributions", {
+  id: serial("id").primaryKey(),
+  groupOrderId: integer("group_order_id").notNull(),
+  userId: integer("user_id").notNull(),
+  contributionAmount: integer("contribution_amount").notNull(),
+  deliveryAddress: jsonb("delivery_address").notNull(),
+  paymentStatus: text("payment_status").notNull().default("pending"),
+  trackingNumber: text("tracking_number"),
+  deliveryStatus: text("delivery_status").default("pending"), // 'pending', 'shipped', 'delivered'
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const orders = pgTable("orders", {
@@ -312,45 +393,7 @@ export const vyronaSocialWallet = pgTable("vyrona_social_wallet", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const groupOrders = pgTable("group_orders", {
-  id: serial("id").primaryKey(),
-  roomId: integer("room_id").notNull().references(() => shoppingRooms.id),
-  productId: integer("product_id").notNull().references(() => products.id),
-  totalAmount: integer("total_amount").notNull(), // in cents
-  requiredAmount: integer("required_amount").notNull(), // in cents
-  contributedAmount: integer("contributed_amount").notNull().default(0), // in cents
-  quantity: integer("quantity").notNull().default(1),
-  status: varchar("status", { length: 50 }).default("collecting").notNull(), // 'collecting', 'ready', 'ordered', 'shipped', 'delivered', 'cancelled'
-  orderedBy: integer("ordered_by").references(() => users.id),
-  shippingAddresses: jsonb("shipping_addresses"), // Array of delivery addresses for different contributors
-  orderNotes: text("order_notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  orderedAt: timestamp("ordered_at"),
-});
 
-export const groupOrderContributions = pgTable("group_order_contributions", {
-  id: serial("id").primaryKey(),
-  groupOrderId: integer("group_order_id").notNull().references(() => groupOrders.id),
-  userId: integer("user_id").notNull().references(() => users.id),
-  contributionAmount: integer("contribution_amount").notNull(), // in cents
-  deliveryAddress: jsonb("delivery_address"),
-  sharePercentage: decimal("share_percentage", { precision: 5, scale: 2 }), // e.g., 25.50 for 25.5%
-  status: varchar("status", { length: 50 }).default("pending").notNull(), // 'pending', 'paid', 'refunded'
-  paidAt: timestamp("paid_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const walletTransactions = pgTable("wallet_transactions", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  amount: integer("amount").notNull(), // in cents, positive for credit, negative for debit
-  type: varchar("type", { length: 50 }).notNull(), // 'contribution', 'refund', 'topup', 'withdraw'
-  referenceId: integer("reference_id"), // group_order_id or other reference
-  referenceType: varchar("reference_type", { length: 50 }), // 'group_order', 'refund', etc.
-  description: text("description"),
-  balanceAfter: integer("balance_after").notNull(), // wallet balance after this transaction
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
 
 // Book Rentals with 15-day billing cycle
 export const bookRentals = pgTable("book_rentals", {
@@ -493,6 +536,41 @@ export const insertShoppingRoomSchema = createInsertSchema(shoppingRooms).omit({
 
 export const insertCartItemSchema = createInsertSchema(cartItems).omit({
   id: true,
+  addedAt: true,
+});
+
+// Group Cart Insert Schemas
+export const insertGroupCartSchema = createInsertSchema(groupCarts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGroupCartContributionSchema = createInsertSchema(groupCartContributions).omit({
+  id: true,
+  joinedAt: true,
+});
+
+// VyronaWallet Insert Schemas
+export const insertVyronaWalletSchema = createInsertSchema(vyronaWallets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Group Order Insert Schemas
+export const insertGroupOrderSchema = createInsertSchema(groupOrders).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGroupOrderContributionSchema = createInsertSchema(groupOrderContributions).omit({
+  id: true,
+  createdAt: true,
 });
 
 export const insertOrderSchema = createInsertSchema(orders).omit({
@@ -666,6 +744,24 @@ export type ShoppingRoom = typeof shoppingRooms.$inferSelect;
 export type InsertShoppingRoom = z.infer<typeof insertShoppingRoomSchema>;
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+
+// Group Cart Types
+export type GroupCart = typeof groupCarts.$inferSelect;
+export type InsertGroupCart = z.infer<typeof insertGroupCartSchema>;
+export type GroupCartContribution = typeof groupCartContributions.$inferSelect;
+export type InsertGroupCartContribution = z.infer<typeof insertGroupCartContributionSchema>;
+
+// VyronaWallet Types
+export type VyronaWallet = typeof vyronaWallets.$inferSelect;
+export type InsertVyronaWallet = z.infer<typeof insertVyronaWalletSchema>;
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
+
+// Group Order Types
+export type GroupOrder = typeof groupOrders.$inferSelect;
+export type InsertGroupOrder = z.infer<typeof insertGroupOrderSchema>;
+export type GroupOrderContribution = typeof groupOrderContributions.$inferSelect;
+export type InsertGroupOrderContribution = z.infer<typeof insertGroupOrderContributionSchema>;
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
 export type Achievement = typeof achievements.$inferSelect;
