@@ -117,10 +117,16 @@ export default function PlaceOrder() {
     }
   });
 
-  // Initialize address system with fallback
+  // Initialize address system based on actual room member count
   useEffect(() => {
-    // Initialize with default if room data is not available yet
-    const memberCount = room?.memberCount ? parseInt(room.memberCount.toString()) : 2;
+    if (!room?.memberCount) return; // Wait for room data to load
+    
+    console.log('Room data:', room);
+    console.log('Room memberCount:', room.memberCount, typeof room.memberCount);
+    
+    const memberCount = parseInt(room.memberCount.toString());
+    console.log('Parsed memberCount:', memberCount);
+    
     const initialAddresses: DeliveryAddress[] = [];
     
     // Create address entries based on member count
