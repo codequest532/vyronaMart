@@ -9,9 +9,9 @@ import {
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
-  insertGroupOrderSchema, insertGroupOrderContributionSchema,
-  shoppingGroups, groupMembers
+  insertGroupOrderSchema, insertGroupOrderContributionSchema
 } from "@shared/schema";
+import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail } from "./email";
 import { eq, desc, sql } from "drizzle-orm";
@@ -973,6 +973,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Shopping rooms for checkout selection (maps to VyronaSocial rooms)
   app.get("/api/shopping-rooms", async (req, res) => {
     try {
+      console.log("Fetching shopping rooms...");
       const rooms = await db
         .select({
           id: shoppingGroups.id,
@@ -991,6 +992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .groupBy(shoppingGroups.id)
         .orderBy(desc(shoppingGroups.createdAt));
 
+      console.log("Found rooms:", rooms);
       res.json(rooms);
     } catch (error) {
       console.error("Error fetching shopping rooms:", error);
