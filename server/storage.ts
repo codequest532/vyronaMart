@@ -714,8 +714,37 @@ export class DatabaseStorage implements IStorage {
 
   // Shared Cart - Room-specific operations
   async getSharedCartItems(roomId: number): Promise<CartItem[]> {
-    return await db.select().from(cartItems)
-      .where(eq(cartItems.roomId, roomId));
+    const items = await db.select({
+      id: cartItems.id,
+      userId: cartItems.userId,
+      productId: cartItems.productId,
+      quantity: cartItems.quantity,
+      roomId: cartItems.roomId,
+      addedAt: cartItems.addedAt,
+      productName: products.name,
+      productPrice: products.price,
+      productImageUrl: products.imageUrl,
+      productDescription: products.description
+    })
+    .from(cartItems)
+    .leftJoin(products, eq(cartItems.productId, products.id))
+    .where(eq(cartItems.roomId, roomId));
+
+    return items.map(item => ({
+      id: item.id,
+      userId: item.userId,
+      productId: item.productId,
+      quantity: item.quantity,
+      roomId: item.roomId,
+      addedAt: item.addedAt,
+      product: {
+        id: item.productId,
+        name: item.productName || 'Unknown Product',
+        price: item.productPrice || 0,
+        imageUrl: item.productImageUrl || null,
+        description: item.productDescription || null
+      }
+    }));
   }
 
   async addSharedCartItem(item: InsertCartItem): Promise<CartItem> {
