@@ -360,7 +360,112 @@ export default function VyronaSocial() {
 
   // Room Dashboard Component
   const RoomDashboard = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Featured Group Buy Products */}
+      <Card className="border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow-xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                  Featured Group Buy Products
+                </CardTitle>
+                <p className="text-gray-600 dark:text-gray-400 mt-1">
+                  Discover amazing products with exclusive group discounts
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {productsLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-40 bg-gradient-to-r from-gray-200 to-gray-300 rounded-xl"></div>
+                </div>
+              ))}
+            </div>
+          ) : (groupBuyProducts as any[])?.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="p-6 bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/20 dark:to-red-900/20 rounded-2xl w-fit mx-auto mb-4">
+                <Package className="w-16 h-16 text-orange-600 dark:text-orange-400" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">No Products Available</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Check back later for exclusive group buy deals
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {(groupBuyProducts as any[])?.slice(0, 10).map((product: any) => (
+                <Card 
+                  key={product.id} 
+                  className="group cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border-0 bg-gradient-to-br from-white to-orange-50/30 dark:from-gray-800 dark:to-orange-900/20 overflow-hidden"
+                  onClick={() => setSelectedProduct(product)}
+                >
+                  <div className="relative">
+                    <img 
+                      src={product.imageUrl || "/api/placeholder/150/120"} 
+                      alt={product.name}
+                      className="w-full h-24 object-cover"
+                    />
+                    <div className="absolute top-1 left-1">
+                      <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-xs">
+                        {product.groupBuyDiscount || 10}% OFF
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <CardContent className="p-2">
+                    <h4 className="font-semibold text-xs mb-1 line-clamp-2 group-hover:text-orange-600 transition-colors">
+                      {product.name}
+                    </h4>
+                    
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-sm font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
+                        ₹{Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)).toLocaleString()}
+                      </span>
+                      <span className="text-xs text-gray-500 line-through">
+                        ₹{(product.price / 100).toLocaleString()}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3 text-blue-600" />
+                        <span className="text-xs text-blue-600 font-medium">
+                          {product.groupBuyMinQuantity || 4}+
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 px-1 py-0">
+                        Deal
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+          
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Join a shopping room to start group buying and unlock these discounts
+            </p>
+            <Button 
+              onClick={() => setShowCreateRoom(true)} 
+              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Shopping Room
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="active">
