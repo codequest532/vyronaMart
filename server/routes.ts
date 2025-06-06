@@ -125,11 +125,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // In a real app, you'd create a session/JWT here
+      // Store user information in session
+      (req as any).session.user = {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role
+      };
+      
       res.json({ user: { ...user, password: undefined } });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      (req as any).session.destroy((err: any) => {
+        if (err) {
+          return res.status(500).json({ message: "Logout failed" });
+        }
+        res.json({ message: "Logged out successfully" });
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ message: "Logout failed" });
     }
   });
 
@@ -256,10 +278,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Current user endpoint for authentication
   app.get("/api/current-user", async (req, res) => {
     try {
-      // For now, return null since we don't have session management
-      // In a real app, you'd check the session/JWT here
-      res.json(null);
+      const sessionUser = (req as any).session?.user;
+      
+      if (!sessionUser) {
+        return res.json(null);
+      }
+      
+      // Get full user data from storage
+      const user = await storage.getUser(sessionUser.id);
+      
+      if (!user) {
+        return res.json(null);
+      }
+      
+      res.json({ ...user, password: undefined });
     } catch (error) {
+      console.error("Current user error:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
