@@ -968,8 +968,7 @@ export class DatabaseStorage implements IStorage {
         totalQuantity: 0,
         currentPrice: groupCartData.targetPrice || 0,
         isActive: true,
-        createdAt: new Date(),
-        expiresAt: new Date(Date.now() + (groupCartData.expiresIn || 7) * 24 * 60 * 60 * 1000) // Default 7 days
+        createdAt: new Date()
       })
       .returning();
     return groupCart;

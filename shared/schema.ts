@@ -624,8 +624,6 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
-
-
 // VyronaInstaShop Insert Schemas
 export const insertInstagramStoreSchema = createInsertSchema(instagramStores).omit({
   id: true,
