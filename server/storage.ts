@@ -3,6 +3,7 @@ import {
   shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
   instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
   groupBuyProducts, groupBuyCampaigns, groupBuyParticipants, groupCarts, groupCartContributions,
+  vyronaWallets, walletTransactions,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
@@ -28,6 +29,7 @@ import {
   rentalBillingHistory,
   bookReturnRequests,
 } from "@shared/schema";
+// Wallet tables will be handled through the existing wallet implementation
 
 export interface IStorage {
   // Users
