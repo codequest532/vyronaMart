@@ -836,13 +836,15 @@ export class DatabaseStorage implements IStorage {
           maxMembers: shoppingGroups.maxMembers,
           roomCode: shoppingGroups.roomCode,
           createdAt: shoppingGroups.createdAt,
-          totalCart: shoppingGroups.totalCart,
-          memberCount: sql<number>`COALESCE(COUNT(${groupMembers.id}), 0)`.as('memberCount')
+          memberCount: sql<number>`COALESCE(COUNT(DISTINCT ${groupMembers.id}), 0)`.as('memberCount'),
+          totalCart: sql<number>`COALESCE(SUM(${cartItems.quantity} * ${products.price}), 0)`.as('totalCart')
         })
         .from(shoppingGroups)
         .leftJoin(groupMembers, eq(shoppingGroups.id, groupMembers.groupId))
+        .leftJoin(cartItems, eq(shoppingGroups.id, cartItems.roomId))
+        .leftJoin(products, eq(cartItems.productId, products.id))
         .where(eq(shoppingGroups.isActive, true))
-        .groupBy(shoppingGroups.id, shoppingGroups.totalCart)
+        .groupBy(shoppingGroups.id)
         .orderBy(desc(shoppingGroups.createdAt));
 
       return groups.map(group => ({
