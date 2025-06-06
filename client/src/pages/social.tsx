@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -124,7 +124,7 @@ export default function VyronaSocial() {
   });
 
   // Filter and sort products
-  const filteredAndSortedProducts = React.useMemo(() => {
+  const filteredAndSortedProducts = useMemo(() => {
     if (!groupBuyProducts) return [];
     
     let filtered = [...(groupBuyProducts as any[])];
@@ -814,7 +814,7 @@ export default function VyronaSocial() {
       queryKey: ["/api/vyronasocial/rooms"]
     });
 
-    const roomData = allRooms?.find((room: any) => room.id === selectedRoomId);
+    const roomData = Array.isArray(allRooms) ? allRooms.find((room: any) => room.id === selectedRoomId) : null;
 
     const { data: roomMessages } = useQuery({
       queryKey: ["/api/social/groups", selectedRoomId, "messages"],
