@@ -857,265 +857,31 @@ export default function VyronaSocial() {
           </div>
         </div>
 
-        {/* Room Interface - Group Cart */}
-        <div className="flex justify-center">
-          {/* Group Cart with Checkout */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                Group Cart
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Cart Items */}
-                <div className="lg:col-span-2">
-                  <ScrollArea className="h-96">
-                    <div className="space-y-4">
-                      {(sharedCart as any[])?.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>No items in group cart yet.</p>
-                          <p className="text-sm">Add products to start shopping together!</p>
-                        </div>
-                      ) : (
-                        (sharedCart as any[])?.map((item: any) => (
-                          <div key={item.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <img 
-                              src={item.imageUrl || "/api/placeholder/60/60"} 
-                              alt={item.name}
-                              className="w-12 h-12 object-cover rounded"
-                            />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-sm">{item.name}</h4>
-                              <p className="text-xs text-gray-500">Added by {item.addedBy}</p>
-                              <p className="text-sm font-semibold">₹{item.price}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">Qty: {item.quantity}</span>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
+        {/* Chat Sidebar - Compact design */}
+        <div className="fixed bottom-0 right-4 bg-white dark:bg-gray-900 shadow-2xl rounded-t-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out z-50" 
+             style={{ 
+               width: '280px',
+               height: isChatMinimized ? '48px' : '400px'
+             }}>
+          <div className="flex flex-col h-full">
+            {/* Chat Header */}
+            <div className="p-3 border-b flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-t-2xl">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
+                  <MessageCircle className="w-4 h-4 text-white" />
                 </div>
-
-                {/* Group Checkout with Contribution Tracking */}
-                <div className="space-y-4">
-                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-3">Group Checkout</h4>
-                    
-                    {/* Order Summary */}
-                    <div className="space-y-2 text-sm mb-4">
-                      <div className="flex justify-between">
-                        <span>Product Total:</span>
-                        <span>₹240.00</span>
-                      </div>
-                      <div className="flex justify-between text-green-600">
-                        <span>Group Discount:</span>
-                        <span>-₹36.00</span>
-                      </div>
-                      <Separator className="my-2" />
-                      <div className="flex justify-between font-semibold">
-                        <span>Required Amount:</span>
-                        <span>₹204.00</span>
-                      </div>
-                    </div>
-
-                    {/* Contribution Progress */}
-                    <div className="space-y-3 mb-4">
-                      <div className="flex justify-between text-sm">
-                        <span>Collected:</span>
-                        <span className="font-semibold text-green-600">₹150.00</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-600 h-2 rounded-full" style={{ width: '73%' }}></div>
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>73% funded</span>
-                        <span>₹54.00 remaining</span>
-                      </div>
-                    </div>
-
-                    {/* Member Contributions */}
-                    <div className="space-y-2 mb-4">
-                      <h5 className="font-medium text-sm">Member Contributions:</h5>
-                      <div className="space-y-1 text-xs">
-                        <div className="flex justify-between">
-                          <span>You (35%)</span>
-                          <span className="text-green-600">₹71.40 ✓</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Alice (25%)</span>
-                          <span className="text-green-600">₹51.00 ✓</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Bob (20%)</span>
-                          <span className="text-orange-600">₹40.80 pending</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Carol (20%)</span>
-                          <span className="text-gray-500">₹40.80 not set</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* VyronaWallet Balance */}
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg mb-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Wallet className="w-4 h-4 text-blue-600" />
-                          <span className="text-sm font-medium">VyronaWallet</span>
-                        </div>
-                        <span className="font-semibold text-blue-600">₹125.00</span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="space-y-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button className="w-full" variant="outline">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Your Contribution
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-md">
-                          <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <CreditCard className="w-5 h-5" />
-                              Add Contribution
-                            </DialogTitle>
-                          </DialogHeader>
-                          
-                          <div className="space-y-4">
-                            {/* Contribution Amount */}
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium">Contribution Amount</label>
-                              <div className="relative">
-                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
-                                <Input 
-                                  placeholder="0.00" 
-                                  className="pl-8"
-                                  type="number"
-                                />
-                              </div>
-                              <p className="text-xs text-gray-500">
-                                Suggested: ₹51.00 (25% share)
-                              </p>
-                            </div>
-
-                            {/* VyronaWallet Balance */}
-                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                              <div className="flex items-center justify-between text-sm">
-                                <div className="flex items-center gap-2">
-                                  <Wallet className="w-4 h-4 text-blue-600" />
-                                  <span>Available Balance</span>
-                                </div>
-                                <span className="font-semibold text-blue-600">₹125.00</span>
-                              </div>
-                            </div>
-
-                            {/* Delivery Address */}
-                            <div className="space-y-3">
-                              <label className="text-sm font-medium flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Delivery Address
-                              </label>
-                              
-                              <div className="space-y-2">
-                                <Input placeholder="Full Name" />
-                                <Textarea 
-                                  placeholder="Street Address, Apartment/Suite" 
-                                  rows={2}
-                                />
-                                <div className="grid grid-cols-2 gap-2">
-                                  <Input placeholder="City" />
-                                  <Input placeholder="Postal Code" />
-                                </div>
-                                <Input placeholder="State/Province" />
-                              </div>
-                              
-                              <div className="flex items-center gap-2">
-                                <input type="checkbox" id="same-address" className="rounded" />
-                                <label htmlFor="same-address" className="text-xs text-gray-600">
-                                  Use my default address
-                                </label>
-                              </div>
-                            </div>
-
-                            {/* Payment Method */}
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium">Payment Method</label>
-                              <Select>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select payment method" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="wallet">VyronaWallet</SelectItem>
-                                  <SelectItem value="upi">UPI</SelectItem>
-                                  <SelectItem value="card">Credit/Debit Card</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="space-y-2 pt-2">
-                              <Button className="w-full">
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Confirm Contribution
-                              </Button>
-                              
-                              <p className="text-xs text-center text-gray-500">
-                                Funds will be held securely until order is placed
-                              </p>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      
-                      <Button className="w-full" disabled>
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Place Group Order
-                      </Button>
-                      
-                      <p className="text-xs text-gray-500 text-center">
-                        Order can be placed when 100% funded
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <h3 className="font-semibold text-sm">Group Chat</h3>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Chat Sidebar - Compact design */}
-          <div className="fixed bottom-0 right-4 bg-white dark:bg-gray-900 shadow-2xl rounded-t-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out z-50" 
-               style={{ 
-                 width: '280px',
-                 height: isChatMinimized ? '48px' : '400px'
-               }}>
-            <div className="flex flex-col h-full">
-              {/* Chat Header */}
-              <div className="p-3 border-b flex items-center justify-between bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-t-2xl">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg">
-                    <MessageCircle className="w-4 h-4 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-sm">Group Chat</h3>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsChatMinimized(!isChatMinimized)}
-                  title={isChatMinimized ? "Expand Chat" : "Minimize Chat"}
-                  className="h-8 w-8 p-0"
-                >
-                  {isChatMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsChatMinimized(!isChatMinimized)}
+                title={isChatMinimized ? "Expand Chat" : "Minimize Chat"}
+                className="h-8 w-8 p-0"
+              >
+                {isChatMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </Button>
+            </div>
 
               {/* Chat Content - Only visible when not minimized */}
               {!isChatMinimized && (
@@ -1210,9 +976,12 @@ export default function VyronaSocial() {
             />
           )}
         </div>
-      </div>
-    );
-  };
+      );
+    };
+
+    if (selectedRoomId) {
+      return renderRoomInterface();
+    }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/20">
