@@ -4,6 +4,7 @@ import Header from "@/components/layout/header";
 import TabNavigation from "@/components/layout/tab-navigation";
 import CartButton from "@/components/shopping/cart-button";
 import NotificationToast from "@/components/ui/notification-toast";
+import { GroupCartModal } from "@/components/GroupCartModal";
 import { useUserData } from "@/hooks/use-user-data";
 import { useToastNotifications } from "@/hooks/use-toast-notifications";
 import { useQuery } from "@tanstack/react-query";
@@ -69,6 +70,8 @@ export default function Home() {
   const [readingProgress, setReadingProgress] = useState(68);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
+  const [groupCartModalOpen, setGroupCartModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
 
   // Sample book content

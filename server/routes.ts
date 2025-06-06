@@ -6,7 +6,9 @@ import { setupVyronaSocialAPI } from "./vyronasocial-api";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
-  insertGroupMessageSchema, insertProductShareSchema
+  insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
+  insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
+  insertGroupOrderSchema, insertGroupOrderContributionSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { sendOTPEmail } from "./email";
@@ -660,6 +662,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(shares);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Group Cart Workflow API Routes
+  app.post("/api/group-carts", async (req, res) => {
+    try {
+      const groupCartData = insertGroupCartSchema.parse(req.body);
+      const groupCart = await storage.createGroupCart(groupCartData);
+      res.json(groupCart);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create group cart" });
+    }
+  });
+
+  app.get("/api/group-carts/product/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const groupCarts = await storage.getActiveGroupCartsByProduct(productId);
+      res.json(groupCarts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch group carts" });
+    }
+  });
+
+  app.post("/api/group-carts/:id/join", async (req, res) => {
+    try {
+      const groupCartId = parseInt(req.params.id);
+      const contributionData = insertGroupCartContributionSchema.parse({ 
+        ...req.body, 
+        groupCartId 
+      });
+      const contribution = await storage.joinGroupCart(contributionData);
+      res.json(contribution);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to join group cart" });
+    }
+  });
+
+  app.get("/api/group-carts/:id/contributions", async (req, res) => {
+    try {
+      const groupCartId = parseInt(req.params.id);
+      const contributions = await storage.getGroupCartContributions(groupCartId);
+      res.json(contributions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch contributions" });
+    }
+  });
+
+  app.post("/api/group-carts/:id/checkout", async (req, res) => {
+    try {
+      const groupCartId = parseInt(req.params.id);
+      const orderData = insertGroupOrderSchema.parse({ 
+        ...req.body, 
+        groupCartId 
+      });
+      const groupOrder = await storage.createGroupOrder(orderData);
+      res.json(groupOrder);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create group order" });
+    }
+  });
+
+  // VyronaWallet API Routes
+  app.get("/api/wallet/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const wallet = await storage.getOrCreateVyronaWallet(userId);
+      res.json(wallet);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch wallet" });
+    }
+  });
+
+  app.post("/api/wallet/:userId/transactions", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const transactionData = insertWalletTransactionSchema.parse(req.body);
+      const transaction = await storage.createWalletTransaction(userId, transactionData);
+      res.json(transaction);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create transaction" });
+    }
+  });
+
+  app.get("/api/wallet/:userId/transactions", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const transactions = await storage.getWalletTransactions(userId);
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch transactions" });
     }
   });
 
