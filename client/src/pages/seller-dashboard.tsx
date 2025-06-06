@@ -128,7 +128,7 @@ export default function SellerDashboard() {
       specifications: "",
       tags: "",
       enableGroupBuy: false,
-      groupBuyMinQuantity: 5,
+      groupBuyMinQuantity: 2,
       groupBuyDiscount: 10,
       isActive: true,
     },
@@ -2865,7 +2865,7 @@ export default function SellerDashboard() {
                               <FormControl>
                                 <Input 
                                   type="number" 
-                                  placeholder="5" 
+                                  placeholder="2" 
                                   {...field}
                                   onChange={(e) => field.onChange(Number(e.target.value))}
                                   className="border-purple-300 focus:border-purple-500"
