@@ -178,6 +178,14 @@ export default function VyronaSocial() {
     staleTime: 0, // Always fetch fresh data
     refetchOnMount: true,
     refetchOnWindowFocus: true,
+    gcTime: 0, // Don't cache the data
+    select: (data) => {
+      console.log("Query select - raw data:", data);
+      // Ensure data is always an array
+      if (Array.isArray(data)) return data;
+      if (data && typeof data === 'object' && Array.isArray((data as any).data)) return (data as any).data;
+      return [];
+    }
   });
 
 
@@ -957,13 +965,13 @@ export default function VyronaSocial() {
                     console.log("CART DEBUG:", {
                       sharedCart,
                       isArray: Array.isArray(sharedCart),
-                      length: sharedCart?.length,
+                      length: Array.isArray(sharedCart) ? sharedCart.length : 'not array',
                       selectedRoomId,
                       cartLoading
                     });
                     return null;
                   })()}
-                  {!Array.isArray(sharedCart) || sharedCart.length === 0 ? (
+                  {!sharedCart || !Array.isArray(sharedCart) || sharedCart.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                       <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
                       <h3 className="text-lg font-medium text-gray-700 mb-2">Group Cart is Empty</h3>
