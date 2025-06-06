@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -55,6 +56,7 @@ interface DeliveryAddress {
 interface DeliveryMode {
   type: 'single' | 'multiple';
   addresses: DeliveryAddress[];
+  useSingleAddress: boolean;
 }
 
 export default function PlaceOrder() {
@@ -67,7 +69,8 @@ export default function PlaceOrder() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [deliveryMode, setDeliveryMode] = useState<DeliveryMode>({
     type: 'single',
-    addresses: []
+    addresses: [],
+    useSingleAddress: false
   });
   const [currentStep, setCurrentStep] = useState<'address' | 'payment' | 'review'>('address');
 
@@ -138,13 +141,34 @@ export default function PlaceOrder() {
     
     setDeliveryMode({
       type: memberCount === 1 ? 'single' : 'multiple',
-      addresses: initialAddresses
+      addresses: initialAddresses,
+      useSingleAddress: memberCount === 1
     });
   }, [room?.memberCount, roomId]); // Add roomId as dependency to ensure initialization
 
+  // Helper functions
+  const updateAddress = (addressId: string, field: keyof DeliveryAddress, value: string) => {
+    setDeliveryMode(prev => ({
+      ...prev,
+      addresses: prev.addresses.map(addr => 
+        addr.id === addressId 
+          ? { ...addr, [field]: value }
+          : addr
+      )
+    }));
+  };
+
+  const toggleSingleDelivery = (checked: boolean) => {
+    setDeliveryMode(prev => ({
+      ...prev,
+      useSingleAddress: checked,
+      type: checked ? 'single' : 'multiple'
+    }));
+  };
+
   // Calculate total
   const orderTotal = cartItems.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = deliveryMode.type === 'single' ? 50 : deliveryMode.addresses.length * 50;
+  const deliveryFee = deliveryMode.useSingleAddress ? 50 : deliveryMode.addresses.length * 50;
   const finalTotal = orderTotal + deliveryFee;
 
   // Process order mutation
@@ -225,18 +249,15 @@ export default function PlaceOrder() {
     }
   };
 
-  // Address management functions
-  const updateAddress = (addressId: string, field: keyof DeliveryAddress, value: string) => {
-    setDeliveryMode(prev => ({
-      ...prev,
-      addresses: prev.addresses.map(addr =>
-        addr.id === addressId ? { ...addr, [field]: value } : addr
-      )
-    }));
-  };
+  // Address management functions (removed duplicate)
 
   const validateAddresses = () => {
     const requiredFields = ['fullName', 'phone', 'addressLine1', 'city', 'state', 'pincode'];
+    if (deliveryMode.useSingleAddress) {
+      // Only validate the first address if single delivery is selected
+      const firstAddress = deliveryMode.addresses[0];
+      return firstAddress && requiredFields.every(field => firstAddress[field as keyof DeliveryAddress]);
+    }
     return deliveryMode.addresses.every(addr =>
       requiredFields.every(field => addr[field as keyof DeliveryAddress])
     );
