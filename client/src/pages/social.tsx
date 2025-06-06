@@ -146,7 +146,7 @@ export default function VyronaSocial() {
 
   // Fetch shared cart for selected room
   const { data: sharedCart, isLoading: cartLoading } = useQuery({
-    queryKey: [`/api/rooms/${selectedRoomId}/cart`],
+    queryKey: [`/api/shopping-rooms/${selectedRoomId}/cart`],
     enabled: !!selectedRoomId && currentView === "room",
   });
 
@@ -624,7 +624,7 @@ export default function VyronaSocial() {
                         }
 
                         try {
-                          const response = await fetch(`/api/rooms/${selectedRoomId}/cart/add`, {
+                          const response = await fetch(`/api/shopping-rooms/${selectedRoomId}/add-cart-item`, {
                             method: "POST",
                             headers: {
                               "Content-Type": "application/json",
@@ -642,7 +642,7 @@ export default function VyronaSocial() {
                               description: `${product.name} added for group purchase`,
                             });
                             // Refresh the shared cart
-                            queryClient.invalidateQueries({ queryKey: [`/api/rooms/${selectedRoomId}/cart`] });
+                            queryClient.invalidateQueries({ queryKey: [`/api/shopping-rooms/${selectedRoomId}/cart`] });
                           } else {
                             const error = await response.json();
                             toast({
