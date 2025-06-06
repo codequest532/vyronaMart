@@ -364,7 +364,106 @@ export default function PlaceOrder() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {deliveryMode.addresses.map((address, index) => (
+              {/* Single Delivery Option */}
+              <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg border">
+                <Checkbox
+                  id="single-delivery"
+                  checked={deliveryMode.useSingleAddress}
+                  onCheckedChange={toggleSingleDelivery}
+                />
+                <Label htmlFor="single-delivery" className="text-sm font-medium">
+                  Use single delivery address for all members
+                </Label>
+              </div>
+              
+              {/* Show addresses based on delivery mode */}
+              {deliveryMode.useSingleAddress ? (
+                // Single address form
+                deliveryMode.addresses.slice(0, 1).map((address, index) => (
+                  <div key={address.id} className="border rounded-lg p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Delivery Address for All Members
+                        <Badge variant="outline">Shared</Badge>
+                      </h4>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`fullName-${address.id}`}>Full Name *</Label>
+                        <Input
+                          id={`fullName-${address.id}`}
+                          placeholder="Enter full name"
+                          value={address.fullName}
+                          onChange={(e) => updateAddress(address.id, 'fullName', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`phone-${address.id}`}>Phone Number *</Label>
+                        <Input
+                          id={`phone-${address.id}`}
+                          placeholder="Enter phone number"
+                          value={address.phone}
+                          onChange={(e) => updateAddress(address.id, 'phone', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor={`addressLine1-${address.id}`}>Address Line 1 *</Label>
+                      <Input
+                        id={`addressLine1-${address.id}`}
+                        placeholder="House no, Building name, Street"
+                        value={address.addressLine1}
+                        onChange={(e) => updateAddress(address.id, 'addressLine1', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor={`addressLine2-${address.id}`}>Address Line 2</Label>
+                      <Input
+                        id={`addressLine2-${address.id}`}
+                        placeholder="Area, Locality"
+                        value={address.addressLine2 || ''}
+                        onChange={(e) => updateAddress(address.id, 'addressLine2', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor={`city-${address.id}`}>City *</Label>
+                        <Input
+                          id={`city-${address.id}`}
+                          placeholder="Enter city"
+                          value={address.city}
+                          onChange={(e) => updateAddress(address.id, 'city', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`state-${address.id}`}>State *</Label>
+                        <Input
+                          id={`state-${address.id}`}
+                          placeholder="Enter state"
+                          value={address.state}
+                          onChange={(e) => updateAddress(address.id, 'state', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`pincode-${address.id}`}>Pincode *</Label>
+                        <Input
+                          id={`pincode-${address.id}`}
+                          placeholder="Enter pincode"
+                          value={address.pincode}
+                          onChange={(e) => updateAddress(address.id, 'pincode', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                // Multiple addresses - one per member
+                deliveryMode.addresses.map((address, index) => (
                 <div key={address.id} className="border rounded-lg p-4 space-y-4">
                   <div className="flex items-center justify-between">
                     <h4 className="font-medium flex items-center gap-2">
@@ -445,7 +544,8 @@ export default function PlaceOrder() {
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
               
               <div className="flex justify-end">
                 <Button 
