@@ -347,66 +347,40 @@ export default function VyronaSocial() {
 
   // Hero Section Component
   const HeroSection = () => (
-    <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white p-10 rounded-3xl mb-8 shadow-2xl">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
-      </div>
-      
+    <div className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white p-6 rounded-2xl mb-6 shadow-lg">
       <div className="relative z-10">
-        <div className="flex items-center justify-center mb-6">
-          <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl">
-            <Users className="w-12 h-12 text-white" />
+        <div className="flex items-center justify-center mb-3">
+          <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
+            <Users className="w-6 h-6 text-white" />
           </div>
         </div>
         
-        <h1 className="text-5xl font-bold text-center mb-4 tracking-tight">
+        <h1 className="text-2xl font-bold text-center mb-2 tracking-tight">
           VyronaSocial
         </h1>
-        <p className="text-xl text-center mb-2 opacity-95 font-medium">
+        <p className="text-sm text-center mb-4 opacity-90">
           Shop Together. Save Together.
         </p>
-        <p className="text-center mb-8 opacity-80 text-lg">
-          Create rooms, invite friends, and unlock amazing group discounts
-        </p>
         
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
+        <div className="flex justify-center gap-3">
           <Button 
             onClick={() => setShowCreateRoom(true)}
-            size="lg"
-            className="bg-white text-purple-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            size="sm"
+            className="bg-white text-purple-600 hover:bg-gray-100 font-medium px-4 py-2 rounded-lg"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="w-4 h-4 mr-1" />
             Create Room
           </Button>
           
           <Button 
             onClick={() => setShowJoinRoom(true)}
-            size="lg"
+            size="sm"
             variant="outline"
-            className="border-2 border-white text-white hover:bg-white hover:text-purple-600 font-semibold px-8 py-3 rounded-xl backdrop-blur-sm bg-white/10 hover:shadow-xl transition-all duration-200"
+            className="border border-white text-white hover:bg-white hover:text-purple-600 font-medium px-4 py-2 rounded-lg backdrop-blur-sm bg-white/10"
           >
-            <UserPlus className="w-5 h-5 mr-2" />
+            <UserPlus className="w-4 h-4 mr-1" />
             Join Room
           </Button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-          <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/15 transition-all duration-300">
-            <Globe className="w-10 h-10 mx-auto mb-4 text-white" />
-            <h3 className="font-semibold mb-2 text-lg">Global Shopping</h3>
-            <p className="text-sm opacity-80">Discover products from sellers worldwide</p>
-          </div>
-          <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/15 transition-all duration-300">
-            <Vote className="w-10 h-10 mx-auto mb-4 text-white" />
-            <h3 className="font-semibold mb-2 text-lg">Group Decisions</h3>
-            <p className="text-sm opacity-80">Vote on products with your friends</p>
-          </div>
-          <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl hover:bg-white/15 transition-all duration-300">
-            <TrendingUp className="w-10 h-10 mx-auto mb-4 text-white" />
-            <h3 className="font-semibold mb-2 text-lg">Better Savings</h3>
-            <p className="text-sm opacity-80">Unlock exclusive group discounts</p>
-          </div>
         </div>
       </div>
     </div>
