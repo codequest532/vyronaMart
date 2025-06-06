@@ -52,7 +52,8 @@ import {
   X,
   MoreVertical,
   Share,
-  Trash2
+  Trash2,
+  ShoppingBag
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -88,7 +89,7 @@ type MessageForm = z.infer<typeof messageSchema>;
 export default function VyronaSocial() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { items: groupBuyItems } = useGroupBuyCartStore();
+  const { items: groupBuyItems, addItem: addGroupBuyItem } = useGroupBuyCartStore();
   const [location, setLocation] = useLocation();
   
   const [currentView, setCurrentView] = useState<"dashboard" | "room">("dashboard");
@@ -434,7 +435,7 @@ export default function VyronaSocial() {
                       </span>
                     </div>
                     
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-1">
                         <Users className="w-3 h-3 text-blue-600" />
                         <span className="text-xs text-blue-600 font-medium">
@@ -445,6 +446,33 @@ export default function VyronaSocial() {
                         Deal
                       </Badge>
                     </div>
+                    
+                    <Button 
+                      size="sm" 
+                      className="w-full h-6 text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white border-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addGroupBuyItem({
+                          productId: product.id,
+                          name: product.name,
+                          price: Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)),
+                          discountedPrice: Math.round((product.price / 100) * (1 - (product.groupBuyDiscount || 10) / 100)),
+                          imageUrl: product.imageUrl || "/api/placeholder/150/120",
+                          category: product.category || "group-buy",
+                          minQuantity: product.groupBuyMinQuantity || 4,
+                          quantity: 1,
+                          isGroupBuy: true,
+                          groupBuyDiscount: product.groupBuyDiscount || 10
+                        });
+                        toast({
+                          title: "Added to Group Cart",
+                          description: `${product.name} added for group purchase`,
+                        });
+                      }}
+                    >
+                      <ShoppingBag className="w-3 h-3 mr-1" />
+                      Add to Group
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
