@@ -333,7 +333,7 @@ export function setupVyronaSocialAPI(app: express.Application) {
     
     try {
       const roomId = parseInt(req.params.id);
-      const userId = 1; // From session when auth is implemented
+      const userId = (req as any).session?.user?.id || 1; // Get from session
       
       // Check if user is in the room
       const memberResult = await pool.query(`
