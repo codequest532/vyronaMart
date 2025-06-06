@@ -70,8 +70,10 @@ export interface IStorage {
   getCartItems(userId: number, roomId?: number): Promise<CartItem[]>;
   addCartItem(item: InsertCartItem): Promise<CartItem>;
   removeCartItem(id: number): Promise<boolean>;
+  updateCartItemQuantity(cartItemId: number, quantity: number): Promise<CartItem>;
   
-  // Shared Cart - Room-specific cart operations
+  // Room-specific cart operations
+  getRoomCartItems(roomId: number): Promise<CartItem[]>;
   getSharedCartItems(roomId: number): Promise<CartItem[]>;
   addSharedCartItem(item: InsertCartItem): Promise<CartItem>;
   removeSharedCartItem(roomId: number, itemId: number): Promise<boolean>;
@@ -2516,6 +2518,172 @@ export class DatabaseStorage implements IStorage {
       console.error("Error in getWalletTransactions:", error);
       throw error;
     }
+  }
+
+  // Room-specific cart implementations
+  async getRoomCartItems(roomId: number): Promise<CartItem[]> {
+    try {
+      const items = await db
+        .select({
+          id: cartItems.id,
+          productId: cartItems.productId,
+          quantity: cartItems.quantity,
+          userId: cartItems.userId,
+          roomId: cartItems.roomId,
+          addedAt: cartItems.addedAt,
+          name: products.name,
+          price: products.price,
+          imageUrl: products.imageUrl,
+          description: products.description
+        })
+        .from(cartItems)
+        .innerJoin(products, eq(cartItems.productId, products.id))
+        .where(eq(cartItems.roomId, roomId));
+
+      return items.map(item => ({
+        ...item,
+        addedAt: item.addedAt || new Date()
+      }));
+    } catch (error) {
+      console.error("Error fetching room cart items:", error);
+      return [];
+    }
+  }
+
+  async updateCartItemQuantity(cartItemId: number, quantity: number): Promise<CartItem> {
+    try {
+      const [updatedItem] = await db
+        .update(cartItems)
+        .set({ quantity })
+        .where(eq(cartItems.id, cartItemId))
+        .returning();
+
+      const product = await this.getProduct(updatedItem.productId);
+      
+      return {
+        ...updatedItem,
+        name: product?.name || '',
+        price: product?.price || 0,
+        imageUrl: product?.imageUrl || null,
+        description: product?.description || null,
+        addedAt: updatedItem.addedAt || new Date()
+      };
+    } catch (error) {
+      console.error("Error updating cart item quantity:", error);
+      throw error;
+    }
+  }
+
+  // Implement missing interface methods with stub implementations
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
+  async updateUserPassword(email: string, newPassword: string): Promise<void> {
+    await db.update(users).set({ password: newPassword }).where(eq(users.email, email));
+  }
+
+  async createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification> {
+    const [verification] = await db.insert(otpVerifications).values(otp).returning();
+    return verification;
+  }
+
+  async getOtpVerification(identifier: string, otp: string, type: string): Promise<OtpVerification | undefined> {
+    const [verification] = await db
+      .select()
+      .from(otpVerifications)
+      .where(
+        and(
+          eq(otpVerifications.identifier, identifier),
+          eq(otpVerifications.otp, otp),
+          eq(otpVerifications.type, type)
+        )
+      );
+    return verification;
+  }
+
+  async markOtpAsVerified(id: number): Promise<void> {
+    await db.update(otpVerifications).set({ isVerified: true }).where(eq(otpVerifications.id, id));
+  }
+
+  async connectInstagramStore(store: InsertInstagramStore): Promise<InstagramStore> {
+    const [newStore] = await db.insert(instagramStores).values(store).returning();
+    return newStore;
+  }
+
+  async getUserInstagramStores(userId: number): Promise<InstagramStore[]> {
+    return await db.select().from(instagramStores).where(eq(instagramStores.userId, userId));
+  }
+
+  async getInstagramStore(id: number): Promise<InstagramStore | undefined> {
+    const [store] = await db.select().from(instagramStores).where(eq(instagramStores.id, id));
+    return store;
+  }
+
+  async updateInstagramStoreTokens(id: number, accessToken: string, refreshToken: string, expiresAt: Date): Promise<void> {
+    await db
+      .update(instagramStores)
+      .set({ accessToken, refreshToken, tokenExpiresAt: expiresAt })
+      .where(eq(instagramStores.id, id));
+  }
+
+  async disconnectInstagramStore(id: number): Promise<boolean> {
+    const result = await db.delete(instagramStores).where(eq(instagramStores.id, id));
+    return result.rowCount > 0;
+  }
+
+  async syncInstagramProducts(storeId: number, products: InsertInstagramProduct[]): Promise<InstagramProduct[]> {
+    const insertedProducts = await db.insert(instagramProducts).values(products).returning();
+    return insertedProducts;
+  }
+
+  async getInstagramProducts(storeId: number): Promise<InstagramProduct[]> {
+    return await db.select().from(instagramProducts).where(eq(instagramProducts.storeId, storeId));
+  }
+
+  async updateInstagramProduct(id: number, updates: Partial<InsertInstagramProduct>): Promise<InstagramProduct | undefined> {
+    const [updatedProduct] = await db
+      .update(instagramProducts)
+      .set(updates)
+      .where(eq(instagramProducts.id, id))
+      .returning();
+    return updatedProduct;
+  }
+
+  async createInstagramOrder(order: InsertInstagramOrder): Promise<InstagramOrder> {
+    const [newOrder] = await db.insert(instagramOrders).values(order).returning();
+    return newOrder;
+  }
+
+  async getInstagramOrders(storeId: number): Promise<InstagramOrder[]> {
+    return await db.select().from(instagramOrders).where(eq(instagramOrders.storeId, storeId));
+  }
+
+  async updateInstagramOrderStatus(id: number, status: string): Promise<InstagramOrder | undefined> {
+    const [updatedOrder] = await db
+      .update(instagramOrders)
+      .set({ status })
+      .where(eq(instagramOrders.id, id))
+      .returning();
+    return updatedOrder;
+  }
+
+  async recordInstagramAnalytics(analytics: InsertInstagramAnalytics): Promise<InstagramAnalytics> {
+    const [newAnalytics] = await db.insert(instagramAnalytics).values(analytics).returning();
+    return newAnalytics;
+  }
+
+  async getInstagramAnalytics(storeId: number, startDate: Date, endDate: Date): Promise<InstagramAnalytics[]> {
+    return await db
+      .select()
+      .from(instagramAnalytics)
+      .where(
+        and(
+          eq(instagramAnalytics.storeId, storeId),
+          sql`${instagramAnalytics.createdAt} >= ${startDate}`,
+          sql`${instagramAnalytics.createdAt} <= ${endDate}`
+        )
+      );
   }
 }
 

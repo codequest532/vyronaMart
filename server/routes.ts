@@ -1060,29 +1060,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add item to cart (for GroupCartModal)
-  app.post("/api/cart-items", async (req, res) => {
+  // Room Cart API Endpoints
+  app.post("/api/room-cart/add", async (req, res) => {
     try {
       const { roomId, productId, quantity } = req.body;
-      const userId = 1; // Default user ID for now
+      const userId = req.session?.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       
       const cartItemData = {
         userId: userId,
         productId: productId,
         quantity: quantity || 1,
-        roomId: roomId
+        roomId: roomId,
+        addedAt: new Date()
       };
       
       const cartItem = await storage.addCartItem(cartItemData);
-      
-      // Add cache invalidation headers to force frontend refresh
-      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.set('Pragma', 'no-cache');
-      res.set('Expires', '0');
       res.json(cartItem);
     } catch (error) {
-      console.error("Error adding item to cart:", error);
+      console.error("Error adding item to room cart:", error);
       res.status(500).json({ message: "Failed to add item to cart" });
+    }
+  });
+
+  app.get("/api/room-cart/:roomId", async (req, res) => {
+    try {
+      const roomId = parseInt(req.params.roomId);
+      const cartItems = await storage.getRoomCartItems(roomId);
+      res.json(cartItems);
+    } catch (error) {
+      console.error("Error fetching room cart:", error);
+      res.status(500).json({ message: "Failed to fetch cart items" });
+    }
+  });
+
+  app.post("/api/room-cart/update", async (req, res) => {
+    try {
+      const { cartItemId, quantity } = req.body;
+      const userId = req.session?.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const updatedItem = await storage.updateCartItemQuantity(cartItemId, quantity);
+      res.json(updatedItem);
+    } catch (error) {
+      console.error("Error updating cart quantity:", error);
+      res.status(500).json({ message: "Failed to update quantity" });
+    }
+  });
+
+  app.post("/api/room-cart/remove", async (req, res) => {
+    try {
+      const { cartItemId } = req.body;
+      const userId = req.session?.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      await storage.removeCartItem(cartItemId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing cart item:", error);
+      res.status(500).json({ message: "Failed to remove item" });
     }
   });
 
