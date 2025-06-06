@@ -2806,12 +2806,12 @@ export default function SellerDashboard() {
                     )}
                   />
 
-                  {/* Group Purchase Configuration */}
-                  <div className="border rounded-lg p-4 space-y-4 bg-blue-50">
+                  {/* Platform Selection */}
+                  <div className="border rounded-lg p-4 space-y-4 bg-gradient-to-r from-blue-50 to-purple-50">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium text-blue-900">Group Purchase Options</h4>
-                        <p className="text-sm text-blue-700">Enable group buying to list product in VyronaSocial collaborative shopping rooms</p>
+                        <h4 className="font-medium text-gray-900">Platform Selection</h4>
+                        <p className="text-sm text-gray-600">Choose which platform will sell this product</p>
                       </div>
                       <FormField
                         control={productForm.control}
@@ -2819,17 +2819,33 @@ export default function SellerDashboard() {
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  type="checkbox"
-                                  id="enableGroupBuy"
-                                  checked={field.value}
-                                  onChange={field.onChange}
-                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                />
-                                <Label htmlFor="enableGroupBuy" className="text-sm font-medium">
-                                  Enable Group Purchase
-                                </Label>
+                              <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="radio"
+                                    id="vyronaHub"
+                                    name="platform"
+                                    checked={!field.value}
+                                    onChange={() => field.onChange(false)}
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <Label htmlFor="vyronaHub" className="text-sm font-medium text-blue-700">
+                                    VyronaHub
+                                  </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="radio"
+                                    id="vyronaSocial"
+                                    name="platform"
+                                    checked={field.value}
+                                    onChange={() => field.onChange(true)}
+                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500"
+                                  />
+                                  <Label htmlFor="vyronaSocial" className="text-sm font-medium text-purple-700">
+                                    VyronaSocial
+                                  </Label>
+                                </div>
                               </div>
                             </FormControl>
                             <FormMessage />
@@ -2839,19 +2855,20 @@ export default function SellerDashboard() {
                     </div>
 
                     {productForm.watch("enableGroupBuy") && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-3 bg-purple-100 rounded-lg">
                         <FormField
                           control={productForm.control}
                           name="groupBuyMinQuantity"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Minimum Group Quantity</FormLabel>
+                              <FormLabel className="text-purple-800">Minimum Group Quantity</FormLabel>
                               <FormControl>
                                 <Input 
                                   type="number" 
                                   placeholder="5" 
                                   {...field}
                                   onChange={(e) => field.onChange(Number(e.target.value))}
+                                  className="border-purple-300 focus:border-purple-500"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -2864,13 +2881,14 @@ export default function SellerDashboard() {
                           name="groupBuyDiscount"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Group Discount (%)</FormLabel>
+                              <FormLabel className="text-purple-800">Group Discount (%)</FormLabel>
                               <FormControl>
                                 <Input 
                                   type="number" 
                                   placeholder="10" 
                                   {...field}
                                   onChange={(e) => field.onChange(Number(e.target.value))}
+                                  className="border-purple-300 focus:border-purple-500"
                                 />
                               </FormControl>
                               <FormMessage />
@@ -2880,12 +2898,25 @@ export default function SellerDashboard() {
                       </div>
                     )}
 
-                    <div className="text-xs text-blue-600 bg-blue-100 p-2 rounded">
-                      <strong>Product Visibility:</strong>
+                    <div className="text-xs rounded p-3" style={{
+                      backgroundColor: productForm.watch("enableGroupBuy") ? "#f3e8ff" : "#dbeafe",
+                      color: productForm.watch("enableGroupBuy") ? "#7c3aed" : "#2563eb"
+                    }}>
+                      <strong>Selected Platform:</strong>
                       <br />
-                      • <strong>Group Purchase Disabled:</strong> Product appears only in VyronaHub (individual shopping)
-                      <br />
-                      • <strong>Group Purchase Enabled:</strong> Product appears in both VyronaHub and VyronaSocial (collaborative shopping rooms)
+                      {productForm.watch("enableGroupBuy") ? (
+                        <>
+                          • <strong>VyronaSocial:</strong> Product available for collaborative group shopping rooms
+                          <br />
+                          • Requires minimum quantity and group discount settings
+                        </>
+                      ) : (
+                        <>
+                          • <strong>VyronaHub:</strong> Product available for individual customer purchases
+                          <br />
+                          • Standard individual shopping experience
+                        </>
+                      )}
                     </div>
                   </div>
                 </TabsContent>
