@@ -2204,7 +2204,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get shared cart for room - accessible by all room members
-  app.get("/api/cart/:roomId", async (req, res) => {
+  app.get("/api/rooms/:roomId/cart", async (req, res) => {
     try {
       const { roomId } = req.params;
       const userId = req.session?.user?.id;
@@ -2242,7 +2242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add item to shared cart - only room members can add
-  app.post("/api/cart/:roomId/add", async (req, res) => {
+  app.post("/api/rooms/:roomId/cart/add", async (req, res) => {
     try {
       const { roomId } = req.params;
       const userId = req.session?.user?.id || 1;
@@ -2272,7 +2272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Remove item from shared cart
-  app.delete("/api/cart/:roomId/items/:itemId", async (req, res) => {
+  app.delete("/api/rooms/:roomId/cart/items/:itemId", async (req, res) => {
     try {
       const { itemId } = req.params;
       const success = await storage.removeCartItem(Number(itemId));
