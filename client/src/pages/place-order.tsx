@@ -901,14 +901,14 @@ export default function PlaceOrder() {
 
       {/* Contribution Modal */}
       <Dialog open={showContributionModal} onOpenChange={setShowContributionModal}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Add Your Contribution</DialogTitle>
             <DialogDescription>
-              Contribute any amount to the group order through VyronaWallet
+              Contribute any amount to the group order
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="contribution">Contribution Amount (₹)</Label>
               <Input
@@ -919,18 +919,70 @@ export default function PlaceOrder() {
                 onChange={(e) => setContributionAmount(e.target.value)}
                 min="1"
                 step="0.01"
+                className="text-lg h-12"
               />
             </div>
-            
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded">
-              <div className="flex items-center gap-2">
-                <Wallet className="h-4 w-4 text-blue-600" />
-                <span className="text-sm">Current Balance:</span>
+
+            {/* Payment Method Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Payment Method</Label>
+              <div className="grid grid-cols-1 gap-3">
+                {/* VyronaWallet Option */}
+                <div 
+                  className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    selectedPayment === "wallet" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setSelectedPayment("wallet")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Wallet className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="font-medium">VyronaWallet</p>
+                      <p className="text-sm text-green-600">✓ Group compatible</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</p>
+                    <p className="text-xs text-gray-500">Current Balance</p>
+                  </div>
+                </div>
+
+                {/* UPI Option */}
+                <div 
+                  className={`flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    selectedPayment === "upi" ? "border-purple-500 bg-purple-50" : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setSelectedPayment("upi")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <p className="font-medium">UPI Payment</p>
+                      <p className="text-sm text-green-600">✓ Group compatible</p>
+                    </div>
+                  </div>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                    Instant
+                  </Badge>
+                </div>
+
+                {/* Card Option (Disabled for Group) */}
+                <div className="flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg opacity-50 cursor-not-allowed">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium text-gray-500">Credit/Debit Card</p>
+                      <p className="text-sm text-red-500">✗ Not available for group contributions</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-gray-500 border-gray-300">
+                    Disabled
+                  </Badge>
+                </div>
               </div>
-              <span className="font-bold text-blue-600">₹{walletData?.balance?.toFixed(2) || "0.00"}</span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button 
                 variant="outline" 
                 className="flex-1"
@@ -946,12 +998,13 @@ export default function PlaceOrder() {
                       await apiRequest("POST", "/api/wallet/contribute", {
                         roomId: roomId,
                         amount: parseFloat(contributionAmount),
-                        userId: 1
+                        userId: 1,
+                        paymentMethod: selectedPayment
                       });
                       
                       toast({
                         title: "Contribution Added",
-                        description: `₹${contributionAmount} has been contributed to the group order.`,
+                        description: `₹${contributionAmount} has been contributed via ${selectedPayment === 'wallet' ? 'VyronaWallet' : 'UPI'}.`,
                       });
                       
                       setContributionAmount('');
@@ -968,7 +1021,7 @@ export default function PlaceOrder() {
                     }
                   }
                 }}
-                disabled={!contributionAmount || parseFloat(contributionAmount) <= 0}
+                disabled={!contributionAmount || parseFloat(contributionAmount) <= 0 || selectedPayment === "card"}
               >
                 Add Contribution
               </Button>
