@@ -781,6 +781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const wallet = await storage.getOrCreateVyronaWallet(userId);
       res.json(wallet);
     } catch (error) {
+      console.error("Wallet fetch error:", error);
       res.status(500).json({ message: "Failed to fetch wallet" });
     }
   });
@@ -788,11 +789,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/wallet/:userId/transactions", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const transactionData = insertWalletTransactionSchema.parse(req.body);
-      const transaction = await storage.createWalletTransaction(userId, transactionData);
+      const transactionData = {
+        ...req.body,
+        userId: userId
+      };
+      console.log("Creating wallet transaction:", transactionData);
+      const transaction = await storage.createWalletTransaction(transactionData);
       res.json(transaction);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create transaction" });
+      console.error("Transaction creation error:", error);
+      res.status(500).json({ message: "Failed to create transaction", error: error.message });
     }
   });
 
@@ -803,6 +809,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(transactions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Shopping Room Cart Items endpoint
+  app.get("/api/shopping-rooms/:roomId/cart", async (req, res) => {
+    try {
+      const roomId = parseInt(req.params.roomId);
+      const cartItems = await storage.getShoppingRoomCartItems(roomId);
+      res.json(cartItems);
+    } catch (error) {
+      console.error("Cart items fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch cart items" });
+    }
+  });
+
+  // VyronaWallet Checkout API
+  app.post("/api/wallet/checkout", async (req, res) => {
+    try {
+      const { userId, roomId, items, totalAmount, paymentMethod } = req.body;
+      
+      // Get user's wallet
+      const wallet = await storage.getOrCreateVyronaWallet(userId);
+      
+      // Check if wallet has sufficient balance
+      if (wallet.balance < totalAmount) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Insufficient VyronaWallet balance",
+          balance: wallet.balance,
+          required: totalAmount
+        });
+      }
+
+      // Create transaction record
+      const transaction = await storage.createWalletTransaction({
+        userId: userId,
+        amount: -totalAmount, // Negative for debit
+        type: "payment",
+        description: `Group purchase from room ${roomId}`,
+        metadata: {
+          roomId,
+          items,
+          paymentMethod
+        }
+      });
+
+      // Create order record
+      const order = await storage.createOrder({
+        userId: userId,
+        totalAmount: totalAmount,
+        status: "completed",
+        module: "vyronasocial",
+        metadata: {
+          roomId,
+          items,
+          transactionId: transaction.id,
+          paymentMethod: "vyronawallet"
+        }
+      });
+
+      res.json({
+        success: true,
+        message: "Payment successful",
+        orderId: order.id,
+        transactionId: transaction.id,
+        remainingBalance: wallet.balance - totalAmount
+      });
+    } catch (error) {
+      console.error("Checkout error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Payment processing failed",
+        error: error.message 
+      });
     }
   });
 

@@ -1416,23 +1416,38 @@ export default function VyronaSocial() {
                           </Button>
                         </div>
                         
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-1.5">
-                            <div className="flex items-center gap-0.5">
-                              <Users className="w-3 h-3 text-blue-600" />
-                              <span className="text-blue-600 font-medium">{room.memberCount || 0}</span>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-0.5">
+                                <Users className="w-3 h-3 text-blue-600" />
+                                <span className="text-blue-600 font-medium">{room.memberCount || 0}</span>
+                              </div>
+                              <div className="flex items-center gap-0.5">
+                                <ShoppingCart className="w-3 h-3 text-green-600" />
+                                <span className="text-green-600 font-medium">₹{(room.totalCart || 0).toLocaleString()}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-0.5">
-                              <ShoppingCart className="w-3 h-3 text-green-600" />
-                              <span className="text-green-600 font-medium">₹{(room.totalCart || 0).toLocaleString()}</span>
-                            </div>
+                            <Badge 
+                              variant={room.isActive ? "default" : "secondary"} 
+                              className={`text-xs px-1.5 py-0 ${room.isActive ? 'bg-green-100 text-green-700 border-green-200' : ''}`}
+                            >
+                              {room.isActive ? 'Active' : 'Inactive'}
+                            </Badge>
                           </div>
-                          <Badge 
-                            variant={room.isActive ? "default" : "secondary"} 
-                            className={`text-xs px-1.5 py-0 ${room.isActive ? 'bg-green-100 text-green-700 border-green-200' : ''}`}
+                          
+                          {/* Checkout Button */}
+                          <Button
+                            size="sm"
+                            className="w-full h-7 text-xs bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLocation(`/place-order/${room.id}`);
+                            }}
                           >
-                            {room.isActive ? 'Active' : 'Inactive'}
-                          </Badge>
+                            <Wallet className="w-3 h-3 mr-1" />
+                            Checkout with VyronaWallet
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
