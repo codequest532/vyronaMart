@@ -1501,7 +1501,7 @@ export default function Home() {
                         <Coins className="text-amber-600 h-5 w-5" />
                         <span className="font-medium">VyronaCoins</span>
                       </div>
-                      <span className="font-bold text-amber-600">{user.vyronaCoins.toLocaleString()}</span>
+                      <span className="font-bold text-amber-600">{(user.vyronaCoins || 0).toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                       <div className="flex items-center space-x-3">
