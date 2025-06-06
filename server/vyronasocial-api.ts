@@ -30,11 +30,11 @@ export function setupVyronaSocialAPI(app: express.Application) {
       
       const dbRoom = result.rows[0];
       
-      // Add creator as member
+      // Add creator as admin
       await pool.query(`
         INSERT INTO group_members (group_id, user_id, role, joined_at)
         VALUES ($1, $2, $3, NOW())
-      `, [dbRoom.id, 1, 'creator']);
+      `, [dbRoom.id, 1, 'admin']);
       
       let memberCount = 1; // Start with creator
       
@@ -230,15 +230,6 @@ export function setupVyronaSocialAPI(app: express.Application) {
         return res.status(400).json({ error: "You are not a member of this room" });
       }
       
-      // Check if user is the creator
-      const roomResult = await pool.query(`
-        SELECT creator_id FROM shopping_groups WHERE id = $1
-      `, [roomId]);
-      
-      if (roomResult.rows[0]?.creator_id === userId) {
-        return res.status(400).json({ error: "Room admin cannot exit. Please delete the room instead." });
-      }
-      
       // Remove user from room
       await pool.query(`
         DELETE FROM group_members WHERE group_id = $1 AND user_id = $2
@@ -248,6 +239,178 @@ export function setupVyronaSocialAPI(app: express.Application) {
     } catch (error) {
       console.error("Exit room error:", error);
       res.status(500).json({ error: "Failed to exit room" });
+    } finally {
+      await pool.end();
+    }
+  });
+
+  // Add Member to Room (Admin Only)
+  app.post("/api/vyronasocial/rooms/:id/members", async (req, res) => {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    try {
+      const roomId = parseInt(req.params.id);
+      const { userIdentifier } = req.body; // username or email
+      const adminUserId = 1; // From session when auth is implemented
+      
+      // Check if requesting user is an admin
+      const adminCheck = await pool.query(`
+        SELECT role FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, adminUserId]);
+      
+      if (adminCheck.rows.length === 0 || adminCheck.rows[0].role !== 'admin') {
+        return res.status(403).json({ error: "Only admins can add members" });
+      }
+      
+      // Find user by username or email
+      const userResult = await pool.query(`
+        SELECT id FROM users WHERE username = $1 OR email = $1 LIMIT 1
+      `, [userIdentifier]);
+      
+      if (userResult.rows.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const userId = userResult.rows[0].id;
+      
+      // Check if user is already a member
+      const existingMember = await pool.query(`
+        SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, userId]);
+      
+      if (existingMember.rows.length > 0) {
+        return res.status(400).json({ error: "User is already a member" });
+      }
+      
+      // Add user as member
+      await pool.query(`
+        INSERT INTO group_members (group_id, user_id, role, joined_at)
+        VALUES ($1, $2, $3, NOW())
+      `, [roomId, userId, 'member']);
+      
+      res.json({ message: "Member added successfully" });
+    } catch (error) {
+      console.error("Add member error:", error);
+      res.status(500).json({ error: "Failed to add member" });
+    } finally {
+      await pool.end();
+    }
+  });
+
+  // Remove Member from Room (Admin Only)
+  app.delete("/api/vyronasocial/rooms/:id/members/:userId", async (req, res) => {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    try {
+      const roomId = parseInt(req.params.id);
+      const targetUserId = parseInt(req.params.userId);
+      const adminUserId = 1; // From session when auth is implemented
+      
+      // Check if requesting user is an admin
+      const adminCheck = await pool.query(`
+        SELECT role FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, adminUserId]);
+      
+      if (adminCheck.rows.length === 0 || adminCheck.rows[0].role !== 'admin') {
+        return res.status(403).json({ error: "Only admins can remove members" });
+      }
+      
+      // Check if target user is a member
+      const memberCheck = await pool.query(`
+        SELECT role FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, targetUserId]);
+      
+      if (memberCheck.rows.length === 0) {
+        return res.status(404).json({ error: "User is not a member of this room" });
+      }
+      
+      // Remove member
+      await pool.query(`
+        DELETE FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, targetUserId]);
+      
+      res.json({ message: "Member removed successfully" });
+    } catch (error) {
+      console.error("Remove member error:", error);
+      res.status(500).json({ error: "Failed to remove member" });
+    } finally {
+      await pool.end();
+    }
+  });
+
+  // Promote Member to Admin (Admin Only)
+  app.post("/api/vyronasocial/rooms/:id/members/:userId/promote", async (req, res) => {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    try {
+      const roomId = parseInt(req.params.id);
+      const targetUserId = parseInt(req.params.userId);
+      const adminUserId = 1; // From session when auth is implemented
+      
+      // Check if requesting user is an admin
+      const adminCheck = await pool.query(`
+        SELECT role FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, adminUserId]);
+      
+      if (adminCheck.rows.length === 0 || adminCheck.rows[0].role !== 'admin') {
+        return res.status(403).json({ error: "Only admins can promote members" });
+      }
+      
+      // Check if target user is a member
+      const memberCheck = await pool.query(`
+        SELECT role FROM group_members WHERE group_id = $1 AND user_id = $2
+      `, [roomId, targetUserId]);
+      
+      if (memberCheck.rows.length === 0) {
+        return res.status(404).json({ error: "User is not a member of this room" });
+      }
+      
+      if (memberCheck.rows[0].role === 'admin') {
+        return res.status(400).json({ error: "User is already an admin" });
+      }
+      
+      // Promote to admin
+      await pool.query(`
+        UPDATE group_members SET role = 'admin' WHERE group_id = $1 AND user_id = $2
+      `, [roomId, targetUserId]);
+      
+      res.json({ message: "Member promoted to admin successfully" });
+    } catch (error) {
+      console.error("Promote member error:", error);
+      res.status(500).json({ error: "Failed to promote member" });
+    } finally {
+      await pool.end();
+    }
+  });
+
+  // Get Room Members
+  app.get("/api/vyronasocial/rooms/:id/members", async (req, res) => {
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    
+    try {
+      const roomId = parseInt(req.params.id);
+      
+      // Get all members with user info
+      const result = await pool.query(`
+        SELECT gm.*, u.username, u.email, u.id as user_id
+        FROM group_members gm
+        JOIN users u ON gm.user_id = u.id
+        WHERE gm.group_id = $1
+        ORDER BY gm.role DESC, gm.joined_at ASC
+      `, [roomId]);
+      
+      const members = result.rows.map(row => ({
+        id: row.user_id,
+        username: row.username,
+        email: row.email,
+        role: row.role,
+        joinedAt: row.joined_at
+      }));
+      
+      res.json(members);
+    } catch (error) {
+      console.error("Get members error:", error);
+      res.status(500).json({ error: "Failed to get members" });
     } finally {
       await pool.end();
     }

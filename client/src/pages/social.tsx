@@ -72,9 +72,6 @@ import { useLocation } from "wouter";
 // Form schemas
 const createRoomSchema = z.object({
   name: z.string().min(1, "Room name is required"),
-  category: z.string().min(1, "Category is required"),
-  privacy: z.enum(["public", "private"]),
-  scheduledTime: z.string().optional(),
   description: z.string().optional(),
   addMembers: z.array(z.string()).optional()
 });
@@ -186,7 +183,8 @@ export default function VyronaSocial() {
   const createRoomForm = useForm<CreateRoomForm>({
     resolver: zodResolver(createRoomSchema),
     defaultValues: {
-      privacy: "public"
+      name: "",
+      description: ""
     }
   });
 
@@ -754,63 +752,7 @@ export default function VyronaSocial() {
               )}
             />
 
-            <FormField
-              control={createRoomForm.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Shopping Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="fashion">Fashion</SelectItem>
-                      <SelectItem value="electronics">Electronics</SelectItem>
-                      <SelectItem value="books">Books</SelectItem>
-                      <SelectItem value="home">Home & Garden</SelectItem>
-                      <SelectItem value="sports">Sports</SelectItem>
-                      <SelectItem value="beauty">Beauty</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <FormField
-              control={createRoomForm.control}
-              name="privacy"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Privacy Setting</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="public">
-                        <div className="flex items-center gap-2">
-                          <Globe className="w-4 h-4" />
-                          Public - Anyone can join
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="private">
-                        <div className="flex items-center gap-2">
-                          <Lock className="w-4 h-4" />
-                          Private - Invite only
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={createRoomForm.control}
