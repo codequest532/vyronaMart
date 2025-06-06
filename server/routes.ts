@@ -2207,13 +2207,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/cart/:roomId", async (req, res) => {
     try {
       const { roomId } = req.params;
-      const userId = req.session?.user?.id || 1;
+      const userId = req.session?.user?.id;
       
       console.log("=== SHARED CART ENDPOINT ===");
-      console.log("Fetching shared cart for room:", roomId, "by user:", userId);
-      console.log("Session:", req.session);
+      console.log("Room ID:", roomId);
+      console.log("Session exists:", !!req.session);
+      console.log("Session user:", req.session?.user);
+      console.log("User ID:", userId);
+      
+      if (!userId) {
+        console.log("No user ID found in session - returning empty cart");
+        return res.status(401).json({ message: "Authentication required" });
+      }
       
       // Verify user is member of the room
+      console.log("Checking membership for user", userId, "in room", roomId);
       const isMember = await storage.isUserRoomMember(userId, Number(roomId));
       console.log("User membership check result:", isMember);
       
@@ -2223,6 +2231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get all cart items for the room (shared cart)
+      console.log("Fetching shared cart items for room:", roomId);
       const cartItems = await storage.getSharedCartItems(Number(roomId));
       console.log("=== SHARED CART ITEMS RETURNED ===", cartItems);
       res.json(cartItems);
