@@ -9,6 +9,7 @@ import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
 import PlaceOrder from "@/pages/place-order-new";
+import ModernCheckout from "@/pages/checkout-modern";
 
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";

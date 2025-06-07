@@ -24,7 +24,15 @@ import {
   Plus,
   Clock,
   Target,
-  User
+  User,
+  Heart,
+  Zap,
+  TrendingUp,
+  Award,
+  Star,
+  Gift,
+  ArrowRight,
+  Crown
 } from "lucide-react";
 
 // Interfaces
@@ -587,39 +595,60 @@ export default function PlaceOrderNew() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* Modern Header with Gradient */}
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border-b border-blue-100 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => setLocation("/social")}
-                className="gap-2"
+                className="gap-2 hover:bg-blue-50 dark:hover:bg-gray-700 transition-all duration-200"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Social
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold">Contribution-Based Checkout</h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {room.name} • {room.memberCount} members • Contribute to place order
-                </p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Collaborative Checkout
+                  </h1>
+                  <div className="flex items-center gap-1">
+                    <Crown className="h-6 w-6 text-yellow-500 animate-pulse" />
+                    <Star className="h-5 w-5 text-yellow-400" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    <span className="font-medium">{room.name}</span>
+                  </div>
+                  <span>•</span>
+                  <span>{room.memberCount} members</span>
+                  <span>•</span>
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-blue-500" />
+                    <span className="text-blue-600 dark:text-blue-400 font-medium">Live Sync Active</span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                Room: {room.roomCode}
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1.5">
+                <Gift className="h-4 w-4 mr-1" />
+                {room.roomCode}
               </Badge>
               {checkoutState.allItemsFunded ? (
-                <Badge variant="default" className="bg-green-600 text-white">
+                <Badge variant="default" className="bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg px-3 py-1.5 animate-pulse">
+                  <CheckCircle className="h-4 w-4 mr-1" />
                   Ready to Order
                 </Badge>
               ) : (
-                <Badge variant="outline" className="text-orange-600 border-orange-600">
-                  Funding Required
+                <Badge variant="outline" className="text-orange-600 border-orange-400 dark:text-orange-400 dark:border-orange-500 px-3 py-1.5">
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  Funding in Progress
                 </Badge>
               )}
             </div>
@@ -632,38 +661,77 @@ export default function PlaceOrderNew() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Items & Contributions */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Overall Progress */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Contribution Progress
+            {/* Modern Progress Card */}
+            <Card className="bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 border-blue-200 dark:border-blue-800 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <span className="text-xl font-bold">Contribution Progress</span>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 font-normal">
+                      Track group funding in real-time
+                    </div>
+                  </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between text-sm">
-                    <span>Total Contributed</span>
-                    <span className="font-medium">₹{checkoutState.totalContributed.toFixed(2)} / ₹{checkoutState.totalCartValue.toFixed(2)}</span>
+              <CardContent className="space-y-6">
+                {/* Main Progress Display */}
+                <div className="text-center space-y-3">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    ₹{checkoutState.totalContributed.toFixed(2)}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    of ₹{checkoutState.totalCartValue.toFixed(2)} contributed
                   </div>
                   <Progress 
                     value={(checkoutState.totalContributed / checkoutState.totalCartValue) * 100} 
-                    className="h-3"
+                    className="h-4 bg-gray-200 dark:bg-gray-700"
                   />
-                  <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                    <div>
-                      <div className="font-medium text-blue-600">Items</div>
-                      <div>{checkoutState.items.length}</div>
-                    </div>
-                    <div>
-                      <div className="font-medium text-green-600">Funded</div>
-                      <div>{checkoutState.items.filter(item => item.isFullyFunded).length}</div>
-                    </div>
-                    <div>
-                      <div className="font-medium text-orange-600">Remaining</div>
-                      <div>₹{(checkoutState.totalCartValue - checkoutState.totalContributed).toFixed(2)}</div>
-                    </div>
+                  <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                    {((checkoutState.totalContributed / checkoutState.totalCartValue) * 100).toFixed(1)}% Complete
                   </div>
+                </div>
+
+                <Separator />
+
+                {/* Statistics Grid */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                    <div className="flex items-center justify-center mb-2">
+                      <Package className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{checkoutState.items.length}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Total Items</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                    <div className="flex items-center justify-center mb-2">
+                      <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {checkoutState.items.filter(item => item.isFullyFunded).length}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Fully Funded</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-100 dark:border-orange-800">
+                    <div className="flex items-center justify-center mb-2">
+                      <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                      ₹{(checkoutState.totalCartValue - checkoutState.totalContributed).toFixed(0)}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Remaining</div>
+                  </div>
+                </div>
+
+                {/* Live Activity Indicator */}
+                <div className="flex items-center justify-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-green-700 dark:text-green-400">
+                    Live updates every 2 seconds
+                  </span>
+                  <Zap className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
               </CardContent>
             </Card>
