@@ -1632,26 +1632,6 @@ export default function VyronaSocial() {
                       <div className="flex-1 min-h-0">
                         <ScrollArea className="h-full p-4">
                           <div className="space-y-4">
-                            {/* Test content to make scroller visible */}
-                            {Array.from({length: 10}).map((_, i) => (
-                              <div key={`test-${i}`} className="flex justify-start">
-                                <div className="flex gap-2 max-w-[70%]">
-                                  <Avatar className="w-8 h-8 flex-shrink-0">
-                                    <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                                      T
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <div className="inline-block p-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border">
-                                      Test message {i + 1} to demonstrate scrolling functionality
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
                             {messages.map((message) => (
                               <div
                                 key={message.id}
