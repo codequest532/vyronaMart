@@ -1998,8 +1998,8 @@ export default function VyronaSocial() {
                       
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl font-bold text-indigo-600">₹{product.price}</span>
-                          <span className="text-sm text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
+                          <span className="text-xl font-bold text-indigo-600">₹{Number(product.price).toFixed(2)}</span>
+                          <span className="text-sm text-gray-500 line-through">₹{(product.price * 1.2).toFixed(2)}</span>
                         </div>
                         <Badge variant="outline" className="text-xs">
                           20% OFF
