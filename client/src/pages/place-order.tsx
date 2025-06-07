@@ -103,12 +103,13 @@ export default function PlaceOrder() {
 
   const cartItems = Array.isArray(cartItemsResponse) ? cartItemsResponse : [];
 
-  // Fetch room details
-  const { data: room, isLoading: roomLoading } = useQuery({
-    queryKey: ["/api/social/groups", roomId],
-    queryFn: () => fetch(`/api/social/groups/${roomId}`).then(res => res.json()),
-    enabled: !!roomId
+  // Fetch room details from shopping-rooms endpoint
+  const { data: roomsResponse, isLoading: roomLoading } = useQuery({
+    queryKey: ["/api/shopping-rooms"],
+    queryFn: () => fetch("/api/shopping-rooms").then(res => res.json()),
   });
+
+  const room = Array.isArray(roomsResponse) ? roomsResponse.find(r => r.id === roomId) : null;
 
   // Fetch wallet balance
   const { data: walletData } = useQuery({
