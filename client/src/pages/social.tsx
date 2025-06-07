@@ -39,6 +39,7 @@ import {
   Paperclip,
   Copy,
   MoreVertical,
+  MessageCircle,
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
