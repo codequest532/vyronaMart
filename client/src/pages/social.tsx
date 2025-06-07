@@ -115,6 +115,7 @@ export default function VyronaSocial() {
   const [videoCallInvite, setVideoCallInvite] = useState<any>(null);
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [callParticipants, setCallParticipants] = useState<any[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -334,6 +335,12 @@ export default function VyronaSocial() {
     onSuccess: (data) => {
       setCurrentCallId(data.callId);
       setIsVideoCallActive(true);
+      // Add current user as first participant
+      setCallParticipants([{
+        userId: (authUser as any)?.id || 1,
+        username: (authUser as any)?.username || 'You',
+        joinedAt: new Date()
+      }]);
       toast({ title: "Video call started", description: "Invitations sent to online members" });
     },
     onError: (error: Error) => {
@@ -354,6 +361,19 @@ export default function VyronaSocial() {
     onSuccess: () => {
       setIsVideoCallActive(true);
       setVideoCallInvite(null);
+      // Add current user to participants if not already there
+      setCallParticipants(prev => {
+        const currentUserId = (authUser as any)?.id || 1;
+        const userExists = prev.some(p => p.userId === currentUserId);
+        if (!userExists) {
+          return [...prev, {
+            userId: currentUserId,
+            username: (authUser as any)?.username || 'You',
+            joinedAt: new Date()
+          }];
+        }
+        return prev;
+      });
       toast({ title: "Joined video call successfully!" });
     },
     onError: (error: Error) => {
@@ -430,6 +450,11 @@ export default function VyronaSocial() {
         }
         
         if (data.type === 'user-joined-call') {
+          setCallParticipants(prev => [...prev, { 
+            userId: data.userId, 
+            username: data.username,
+            joinedAt: new Date()
+          }]);
           toast({
             title: "User joined call",
             description: `${data.username} joined the video call`,
@@ -440,6 +465,7 @@ export default function VyronaSocial() {
           setIsVideoCallActive(false);
           setCurrentCallId(null);
           setVideoCallInvite(null);
+          setCallParticipants([]);
           toast({
             title: "Video call ended",
             description: "The video call has been ended",
@@ -1728,6 +1754,132 @@ export default function VyronaSocial() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Video Call Overlay */}
+      {isVideoCallActive && (
+        <div className="fixed inset-0 bg-gray-900 z-40 flex flex-col">
+          {/* Header Bar */}
+          <div className="flex items-center justify-between p-4 bg-gray-800 text-white">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-semibold">Group Video Call - {selectedGroup?.name}</h3>
+              <div className="flex items-center gap-2 text-sm bg-green-600 px-2 py-1 rounded">
+                <Users className="w-4 h-4" />
+                <span>{callParticipants.length} participant{callParticipants.length !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+            
+            {/* Control Bar */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsMicOn(!isMicOn)}
+                className={`${isMicOn ? "bg-gray-700 text-white" : "bg-red-600 text-white"} border-gray-600`}
+              >
+                {isMicOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsCameraOn(!isCameraOn)}
+                className={`${isCameraOn ? "bg-gray-700 text-white" : "bg-red-600 text-white"} border-gray-600`}
+              >
+                {isCameraOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleEndVideoCall}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                <Phone className="h-4 w-4 mr-2" />
+                End Call
+              </Button>
+            </div>
+          </div>
+
+          {/* Participants Grid */}
+          <div className="flex-1 p-4 overflow-hidden">
+            <div className={`grid gap-4 h-full ${
+              callParticipants.length === 1 ? 'grid-cols-1' :
+              callParticipants.length === 2 ? 'grid-cols-2' :
+              callParticipants.length <= 4 ? 'grid-cols-2 grid-rows-2' :
+              callParticipants.length <= 6 ? 'grid-cols-3 grid-rows-2' :
+              'grid-cols-3 grid-rows-3'
+            }`}>
+              {callParticipants.map((participant, index) => {
+                const isCurrentUser = participant.userId === ((authUser as any)?.id || 1);
+                return (
+                  <div
+                    key={participant.userId}
+                    className="bg-gray-800 rounded-lg relative overflow-hidden aspect-video flex items-center justify-center"
+                  >
+                    {isCurrentUser && isCameraOn ? (
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        muted
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-gray-400 p-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-semibold mb-3">
+                          {participant.username.charAt(0).toUpperCase()}
+                        </div>
+                        {!isCurrentUser || !isCameraOn ? (
+                          <>
+                            <VideoOff className="w-6 h-6 mb-2" />
+                            <p className="text-sm text-center">Camera off</p>
+                          </>
+                        ) : null}
+                      </div>
+                    )}
+                    
+                    {/* Participant Info */}
+                    <div className="absolute bottom-2 left-2 bg-black/70 rounded px-2 py-1 text-white text-sm flex items-center gap-2">
+                      <span>{isCurrentUser ? 'You' : participant.username}</span>
+                      {!isMicOn && isCurrentUser && <MicOff className="w-3 h-3" />}
+                    </div>
+
+                    {/* Speaking Indicator */}
+                    {isCurrentUser && isMicOn && (
+                      <div className="absolute top-2 right-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* Empty slots for potential participants */}
+              {callParticipants.length < 4 && Array.from({ length: Math.min(4 - callParticipants.length, 2) }).map((_, index) => (
+                <div
+                  key={`empty-${index}`}
+                  className="bg-gray-800 rounded-lg aspect-video flex items-center justify-center border-2 border-dashed border-gray-600"
+                >
+                  <div className="flex flex-col items-center justify-center text-gray-500">
+                    <Users className="w-8 h-8 mb-2" />
+                    <p className="text-sm">Waiting for others to join</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Call Status */}
+          <div className="p-3 bg-gray-800 text-center">
+            <div className="flex items-center justify-center gap-2 text-green-400">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">Call Active</span>
+              <span className="text-sm text-gray-400">
+                • {isCameraOn && isMicOn ? "Video & Audio" : 
+                   !isCameraOn && !isMicOn ? "Audio Only" :
+                   !isCameraOn ? "Audio Only" : "Video & Audio"}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Video Call Invitation Dialog */}
       {videoCallInvite && (
