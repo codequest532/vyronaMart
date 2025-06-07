@@ -705,16 +705,16 @@ export default function MyVyrona() {
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-lg">{purchase.productName}</h3>
+                              <h3 className="font-semibold text-lg">{purchase.productName || 'Unknown Product'}</h3>
                               <p className="text-sm text-gray-600">Order #{purchase.id}</p>
                               <Badge className="mt-2 bg-green-100 text-green-800">
                                 Owned
                               </Badge>
                             </div>
                             <div className="text-right">
-                              <p className="font-semibold">{formatPrice(purchase.totalAmount)}</p>
+                              <p className="font-semibold">{formatPrice(purchase.totalAmount || 0)}</p>
                               <p className="text-sm text-gray-600">
-                                Purchased: {new Date(purchase.createdAt).toLocaleDateString()}
+                                Purchased: {purchase.createdAt ? new Date(purchase.createdAt).toLocaleDateString() : 'N/A'}
                               </p>
                             </div>
                           </div>
