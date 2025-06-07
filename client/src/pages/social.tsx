@@ -1372,40 +1372,29 @@ export default function VyronaSocial() {
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           <Button
                             size="sm"
                             onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
                             disabled={!isVideoCallActive && onlineMembers.length <= 1}
-                            className={`gap-2 ${isVideoCallActive 
+                            className={`gap-1 text-xs px-2 ${isVideoCallActive 
                               ? 'bg-red-500 hover:bg-red-600' 
                               : onlineMembers.length <= 1 
                                 ? 'bg-gray-400 cursor-not-allowed' 
                                 : 'bg-green-500 hover:bg-green-600'}`}
                           >
-                            {isVideoCallActive ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
-                            {isVideoCallActive ? 'End Call' : 
-                             onlineMembers.length <= 1 ? `${onlineMembers.length} online` : 'Start Call'}
-                          </Button>
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="gap-2 border-green-300"
-                            onClick={() => setActiveTab("products")}
-                          >
-                            <Package className="w-4 h-4" />
-                            Browse Products
+                            {isVideoCallActive ? <VideoOff className="h-3 w-3" /> : <Video className="h-3 w-3" />}
+                            {isVideoCallActive ? 'End' : onlineMembers.length <= 1 ? `${onlineMembers.length}` : 'Call'}
                           </Button>
                           
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => setIsGroupCartOpen(true)}
-                            className="gap-2 border-green-300"
+                            className="gap-1 text-xs px-2 border-green-300"
                           >
-                            <ShoppingCart className="h-4 w-4" />
-                            Cart ({cartItems.length})
+                            <ShoppingCart className="h-3 w-3" />
+                            ({cartItems.length})
                           </Button>
                           
                           <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
@@ -1413,10 +1402,10 @@ export default function VyronaSocial() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                className="gap-2 border-green-300"
+                                className="gap-1 text-xs px-2 border-green-300"
                               >
-                                <Users className="w-4 h-4" />
-                                Invite Members
+                                <UserPlus className="w-3 h-3" />
+                                Invite
                               </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-md">
