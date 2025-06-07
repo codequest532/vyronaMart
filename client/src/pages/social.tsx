@@ -1618,7 +1618,7 @@ export default function VyronaSocial() {
 
                     {/* Chat Messages Area */}
                     <div className="flex-1 min-h-0">
-                      <ScrollArea className="h-64 p-4">
+                      <ScrollArea className="h-32 p-4">
                         <div className="space-y-4">
                           {messages.map((message) => (
                             <div
