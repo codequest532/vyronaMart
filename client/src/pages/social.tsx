@@ -1243,6 +1243,16 @@ export default function VyronaSocial() {
                              onlineMembers.length <= 1 ? `${onlineMembers.length} online` : 'Start Call'}
                           </Button>
                           
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-2 border-green-300"
+                            onClick={() => setActiveTab("products")}
+                          >
+                            <Package className="w-4 h-4" />
+                            Browse Products
+                          </Button>
+                          
                           <Button
                             size="sm"
                             variant="outline"
@@ -1252,6 +1262,52 @@ export default function VyronaSocial() {
                             <ShoppingCart className="h-4 w-4" />
                             Cart ({cartItems.length})
                           </Button>
+                          
+                          <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="gap-2 border-green-300"
+                              >
+                                <Users className="w-4 h-4" />
+                                Invite Members
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                  <Users className="h-5 w-5 text-green-600" />
+                                  Invite Members to {selectedGroup?.name}
+                                </DialogTitle>
+                                <DialogDescription>
+                                  Share the group code to invite friends to join your shopping group
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="text-sm text-gray-600">
+                                  Share this group code with your friends to invite them:
+                                </div>
+                                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                  <code className="flex-1 text-lg font-mono font-bold text-green-600">
+                                    {selectedGroup?.roomCode}
+                                  </code>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => {
+                                      const inviteCode = selectedGroup?.roomCode;
+                                      if (inviteCode) {
+                                        navigator.clipboard.writeText(inviteCode);
+                                        toast({ title: "Code copied!", description: "Share this code with friends to invite them" });
+                                      }
+                                    }}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
 
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
