@@ -1137,7 +1137,7 @@ export default function VyronaSocial() {
 
           {/* Groups Content - WhatsApp Style */}
           <div className="space-y-0">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-0 h-[calc(100vh-200px)]">
               
               {/* Groups List - WhatsApp Style Sidebar */}
               <div className="lg:col-span-1 border-r bg-white dark:bg-gray-900 flex flex-col">
@@ -1340,7 +1340,7 @@ export default function VyronaSocial() {
                 </ScrollArea>
               </div>
 
-              {/* Chat/Group Details Area */}
+              {/* Main Content Area */}
               <div className="lg:col-span-2 flex flex-col bg-gray-50 dark:bg-gray-900 relative">
                 {selectedGroup ? (
                   <>
@@ -1484,21 +1484,16 @@ export default function VyronaSocial() {
                       </div>
                     </div>
 
-                    {/* Products and Chat Tabs */}
-                    <Tabs defaultValue="products" className="flex-1 flex flex-col">
-                      <TabsList className="mx-4 mt-2 grid w-full grid-cols-2">
-                        <TabsTrigger value="products" className="gap-2">
-                          <Package className="h-4 w-4" />
-                          Browse Products
-                        </TabsTrigger>
-                        <TabsTrigger value="chat" className="gap-2">
-                          <MessageCircle className="h-4 w-4" />
-                          Group Chat
-                        </TabsTrigger>
-                      </TabsList>
-
-                      {/* Products Tab */}
-                      <TabsContent value="products" className="flex-1 p-4 space-y-4">
+                    {/* Products Section */}
+                    <div className="flex-1 flex flex-col">
+                      <div className="p-4 border-b bg-white dark:bg-gray-800">
+                        <div className="flex items-center gap-2">
+                          <Package className="h-5 w-5 text-indigo-600" />
+                          <h3 className="font-semibold">Browse Products</h3>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-1 p-4 space-y-4">
                         <div className="flex items-center justify-between">
                           <div>
                             <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -1591,12 +1586,45 @@ export default function VyronaSocial() {
                             )}
                           </div>
                         </ScrollArea>
-                      </TabsContent>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-10 h-10 text-green-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">Select a Group</h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Choose a shopping group to start collaborating
+                      </p>
+                      <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2 bg-green-500 hover:bg-green-600">
+                        <Plus className="w-4 h-4" />
+                        Create New Group
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                      {/* Chat Tab */}
-                      <TabsContent value="chat" className="flex-1 flex flex-col">
-                        {/* Chat Messages Area */}
-                        <ScrollArea className="flex-1 p-4">
+              {/* Fixed Chat Panel - Right Side */}
+              <div className="lg:col-span-1 border-l bg-white dark:bg-gray-900 flex flex-col">
+                {selectedGroup ? (
+                  <>
+                    {/* Chat Header */}
+                    <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5 text-green-600" />
+                        <h3 className="font-semibold text-green-800 dark:text-green-200">Group Chat</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {selectedGroup.name}
+                      </p>
+                    </div>
+
+                    {/* Chat Messages Area */}
+                    <ScrollArea className="flex-1 p-4">
                       <div className="space-y-4">
                         {/* Display chat messages */}
                         {messages.map((message) => (
@@ -1793,8 +1821,6 @@ export default function VyronaSocial() {
                         </Button>
                       </div>
                     </div>
-                      </TabsContent>
-                    </Tabs>
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center">
