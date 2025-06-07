@@ -3131,8 +3131,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   
-  // Setup WebSocket server
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  // Setup WebSocket server using the existing HTTP server
+  const wss = new WebSocketServer({ 
+    server: httpServer, 
+    path: '/ws',
+    port: undefined // Don't bind to a specific port, use the existing server
+  });
   
   wss.on('connection', (ws, req) => {
     console.log('WebSocket connection established');
