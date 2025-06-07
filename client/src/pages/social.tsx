@@ -1093,7 +1093,11 @@ export default function VyronaSocial() {
                           <span className="font-bold text-lg">₹{cartTotal}</span>
                         </div>
                         {(selectedGroup?.memberCount || 0) >= 2 ? (
-                          <Button className="w-full" size="sm">
+                          <Button 
+                            className="w-full" 
+                            size="sm"
+                            onClick={() => setLocation(`/place-order/${selectedGroupId}`)}
+                          >
                             Proceed to Group Checkout
                           </Button>
                         ) : (
