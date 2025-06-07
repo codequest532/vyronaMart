@@ -92,6 +92,7 @@ export default function PlaceOrder() {
   const [contributionAmount, setContributionAmount] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'wallet' | 'upi' | 'gpay-groups'>('wallet');
   const [showGooglePayGroupsModal, setShowGooglePayGroupsModal] = useState(false);
+  const [customSplitAmounts, setCustomSplitAmounts] = useState<{ [key: number]: string }>({});
 
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
@@ -573,7 +574,7 @@ export default function PlaceOrder() {
                                 </div>
                                 <div className="flex-1">
                                   <h4 className="font-medium">Google Pay Groups</h4>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">Split payment with members</p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">Custom split payment with members</p>
                                 </div>
                                 <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
                                   NEW
@@ -583,10 +584,10 @@ export default function PlaceOrder() {
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-2 text-xs text-gray-500">
                                     <Users className="h-3 w-3" />
-                                    <span>Auto-split between {room.memberCount} members</span>
+                                    <span>Custom split between {room.memberCount} members</span>
                                   </div>
                                   <div className="text-xs font-medium text-green-600">
-                                    ₹{(finalTotal / room.memberCount).toFixed(2)} each
+                                    Set custom amounts
                                   </div>
                                 </div>
                               </div>
@@ -975,8 +976,8 @@ export default function PlaceOrder() {
                   <Users className="h-4 w-4 text-green-600" />
                 </div>
                 <div>
-                  <h4 className="font-medium text-green-900 dark:text-green-100">Auto-Split Payment</h4>
-                  <p className="text-sm text-green-700 dark:text-green-300">Equal split between all members</p>
+                  <h4 className="font-medium text-green-900 dark:text-green-100">Custom Split Payment</h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">Set individual amounts for each member</p>
                 </div>
               </div>
               
@@ -986,19 +987,37 @@ export default function PlaceOrder() {
                   <p className="font-bold text-lg">₹{finalTotal.toFixed(2)}</p>
                 </div>
                 <div>
-                  <span className="text-green-600 dark:text-green-400">Per Member:</span>
-                  <p className="font-bold text-lg">₹{(finalTotal / room.memberCount).toFixed(2)}</p>
+                  <span className="text-green-600 dark:text-green-400">Split Total:</span>
+                  <p className="font-bold text-lg">₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0).toFixed(2)}</p>
                 </div>
               </div>
             </div>
 
-            {/* Member Split Details */}
+            {/* Custom Split Input */}
             <div>
-              <h4 className="font-medium mb-3">Payment Split Details</h4>
-              <div className="space-y-2">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium">Custom Payment Split</h4>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    const equalAmount = (finalTotal / room.memberCount).toFixed(2);
+                    const newSplits: { [key: number]: string } = {};
+                    for (let i = 0; i < room.memberCount; i++) {
+                      newSplits[i] = equalAmount;
+                    }
+                    setCustomSplitAmounts(newSplits);
+                  }}
+                  className="text-xs"
+                >
+                  Equal Split
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
                 {Array.from({ length: room.memberCount }, (_, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center gap-2">
+                  <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-2 flex-1">
                       <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
                         <span className="text-xs font-bold text-primary">
                           {i === 0 ? 'Y' : `M${i + 1}`}
@@ -1008,9 +1027,43 @@ export default function PlaceOrder() {
                         {i === 0 ? 'You' : `Member ${i + 1}`}
                       </span>
                     </div>
-                    <span className="font-medium">₹{(finalTotal / room.memberCount).toFixed(2)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-500">₹</span>
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        value={customSplitAmounts[i] || ''}
+                        onChange={(e) => {
+                          setCustomSplitAmounts(prev => ({
+                            ...prev,
+                            [i]: e.target.value
+                          }));
+                        }}
+                        className="w-20 text-right text-sm"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
                   </div>
                 ))}
+              </div>
+              
+              {/* Split Validation */}
+              <div className="mt-3 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                <div className="flex justify-between">
+                  <span>Total Split:</span>
+                  <span>₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Required:</span>
+                  <span>₹{finalTotal.toFixed(2)}</span>
+                </div>
+                {Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0) !== finalTotal && (
+                  <div className="flex justify-between text-red-600">
+                    <span>Difference:</span>
+                    <span>₹{(finalTotal - Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0)).toFixed(2)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1051,26 +1104,43 @@ export default function PlaceOrder() {
               </Button>
               <Button
                 onClick={() => {
-                  // Handle Google Pay Groups integration
-                  const googlePayGroupsUrl = `googlepay://pay?action=split&amount=${finalTotal}&members=${room.memberCount}&currency=INR&note=VyronaSocial Group Order - ${room.name}`;
+                  const totalSplit = Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
                   
-                  // In a real implementation, this would open Google Pay app
-                  // For now, we'll simulate the split and mark all contributions as paid
-                  const splitAmount = finalTotal / room.memberCount;
-                  groupCheckout.contributions.forEach((_, index) => {
-                    updateContribution(index + 1, splitAmount, 'upi');
+                  if (Math.abs(totalSplit - finalTotal) > 0.01) {
+                    toast({
+                      title: "Invalid Split",
+                      description: "Split amounts must equal the total order amount.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  
+                  // Generate Google Pay Groups URL with custom amounts
+                  const splitData = Object.entries(customSplitAmounts)
+                    .filter(([_, amount]) => parseFloat(amount) > 0)
+                    .map(([index, amount]) => `member${parseInt(index) + 1}:${amount}`)
+                    .join(',');
+                  
+                  const googlePayGroupsUrl = `googlepay://pay?action=customsplit&total=${finalTotal}&splits=${splitData}&currency=INR&note=VyronaSocial Group Order - ${room.name}`;
+                  
+                  // Apply custom split to contributions
+                  Object.entries(customSplitAmounts).forEach(([index, amount]) => {
+                    if (parseFloat(amount) > 0) {
+                      updateContribution(parseInt(index) + 1, parseFloat(amount), 'upi');
+                    }
                   });
                   
                   setShowGooglePayGroupsModal(false);
                   toast({
                     title: "Google Pay Groups Initiated",
-                    description: `Payment requests sent to all ${room.memberCount} members via Google Pay.`,
+                    description: `Custom split payment requests sent to all members.`,
                   });
                 }}
+                disabled={Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0) === 0}
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 <Smartphone className="h-4 w-4 mr-2" />
-                Start Google Pay Split
+                Start Custom Split
               </Button>
             </div>
 
