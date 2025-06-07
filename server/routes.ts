@@ -683,6 +683,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/shopping-rooms/join", async (req, res) => {
+    try {
+      const { code } = req.body;
+      
+      if (!code || !code.trim()) {
+        return res.status(400).json({ message: "Room code is required" });
+      }
+
+      // Get current user ID from session
+      const session = (req as any).session;
+      const userId = session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Find group by room code - get all groups and filter
+      const allGroups = await storage.getShoppingGroups(0); // Get all groups regardless of user
+      const targetGroup = allGroups.find((g: any) => g.roomCode === code.trim());
+      
+      if (!targetGroup) {
+        return res.status(404).json({ message: "Invalid room code" });
+      }
+
+      // Check if user is already a member
+      const existingMembership = await storage.getGroupMembers(targetGroup.id);
+      const isAlreadyMember = existingMembership.some((member: any) => member.userId === userId);
+      
+      if (isAlreadyMember) {
+        return res.status(400).json({ message: "You are already a member of this group" });
+      }
+
+      // Add user as member
+      await storage.addGroupMember({
+        groupId: targetGroup.id,
+        userId: userId,
+        role: "member"
+      });
+      
+      res.json({ message: "Joined group successfully", group: targetGroup });
+    } catch (error) {
+      console.error("Error joining group:", error);
+      res.status(500).json({ message: "Failed to join group" });
+    }
+  });
+
   // Cart routes
   app.get("/api/cart/:userId", async (req, res) => {
     try {
