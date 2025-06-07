@@ -1195,6 +1195,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const cartItem = await storage.addCartItem(cartItemData);
+      
+      // Broadcast cart update to all group members via WebSocket
+      const cartUpdateMessage = {
+        type: 'cart-update',
+        roomId: roomId,
+        action: 'add',
+        cartItem: cartItem,
+        userId: userId
+      };
+      
+      // Send to all connected users in this group
+      for (const [userId, userData] of onlineUsers) {
+        if (userData.groupId === roomId && userData.ws.readyState === 1) {
+          userData.ws.send(JSON.stringify(cartUpdateMessage));
+        }
+      }
+      
       res.json(cartItem);
     } catch (error) {
       console.error("Error adding item to room cart:", error);

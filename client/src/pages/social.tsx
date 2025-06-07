@@ -531,6 +531,17 @@ export default function VyronaSocial() {
               }, 100);
             }
             
+            if (data.type === 'cart-update') {
+              // Refresh cart when other group members add/remove items
+              if (data.roomId === selectedGroupId) {
+                refetchCart();
+                toast({
+                  title: "Cart updated",
+                  description: "A group member added an item to the cart",
+                });
+              }
+            }
+            
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
           }
