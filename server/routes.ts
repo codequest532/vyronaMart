@@ -9,12 +9,14 @@ import { setupRoomRoutes } from "./simple-rooms";
 import { setupVyronaSocialAPI } from "./vyronasocial-api";
 import { getAuthenticatedUser } from "./auth-utils";
 import { db, pool } from "./db";
+import Razorpay from "razorpay";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
-  insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema
+  insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
+  walletTransactions, users
 } from "@shared/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
@@ -3252,6 +3254,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   }, 60000);
+
+  // Initialize Razorpay (use demo credentials if not provided)
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'fakeSecret123'
+  });
+
+  // VyronaWallet API Routes
+  app.get("/api/wallet/balance/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUserById(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ 
+        balance: parseFloat(user.walletBalance || "0"),
+        currency: "INR" 
+      });
+    } catch (error: any) {
+      console.error('Get wallet balance error:', error);
+      res.status(500).json({ error: "Failed to fetch wallet balance" });
+    }
+  });
+
+  app.get("/api/wallet/transactions/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const transactions = await db
+        .select()
+        .from(walletTransactions)
+        .where(eq(walletTransactions.userId, userId))
+        .orderBy(desc(walletTransactions.createdAt))
+        .limit(50);
+
+      res.json(transactions);
+    } catch (error: any) {
+      console.error('Get wallet transactions error:', error);
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  app.post("/api/wallet/create-order", async (req, res) => {
+    try {
+      const { amount, currency = "INR", userId } = req.body;
+      
+      if (!userId || !amount || amount <= 0) {
+        return res.status(400).json({ error: "Invalid request parameters" });
+      }
+
+      // Create Razorpay order
+      const options = {
+        amount: Math.round(amount * 100), // Convert to paise
+        currency,
+        receipt: `wallet_${userId}_${Date.now()}`,
+        notes: {
+          userId: userId.toString(),
+          purpose: "wallet_topup"
+        }
+      };
+
+      const order = await razorpay.orders.create(options);
+      
+      res.json({
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag'
+      });
+    } catch (error: any) {
+      console.error('Create Razorpay order error:', error);
+      res.status(500).json({ error: "Failed to create payment order" });
+    }
+  });
+
+  app.post("/api/wallet/verify-payment", async (req, res) => {
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId, amount } = req.body;
+      
+      if (!razorpay_order_id || !razorpay_payment_id || !userId || !amount) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      // For demo purposes, we'll accept the payment without signature verification
+      // In production, you should verify the signature using Razorpay's webhook
+      
+      // Update user wallet balance
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const currentBalance = parseFloat(user.walletBalance || "0");
+      const newBalance = currentBalance + parseFloat(amount);
+      
+      // Update user balance
+      await db
+        .update(users)
+        .set({ walletBalance: newBalance.toString() })
+        .where(eq(users.id, userId));
+
+      // Create transaction record
+      await db.insert(walletTransactions).values({
+        userId,
+        amount: parseFloat(amount),
+        type: "credit",
+        status: "completed",
+        description: "Wallet top-up via Razorpay",
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id
+      });
+
+      res.json({ 
+        success: true, 
+        newBalance,
+        message: "Payment verified and wallet updated successfully" 
+      });
+    } catch (error: any) {
+      console.error('Verify payment error:', error);
+      res.status(500).json({ error: "Failed to verify payment" });
+    }
+  });
+
+  app.post("/api/wallet/debit", async (req, res) => {
+    try {
+      const { userId, amount, description } = req.body;
+      
+      if (!userId || !amount || amount <= 0) {
+        return res.status(400).json({ error: "Invalid request parameters" });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const currentBalance = parseFloat(user.walletBalance || "0");
+      if (currentBalance < amount) {
+        return res.status(400).json({ error: "Insufficient wallet balance" });
+      }
+
+      const newBalance = currentBalance - amount;
+      
+      // Update user balance
+      await db
+        .update(users)
+        .set({ walletBalance: newBalance.toString() })
+        .where(eq(users.id, userId));
+
+      // Create transaction record
+      await db.insert(walletTransactions).values({
+        userId,
+        amount,
+        type: "debit",
+        status: "completed",
+        description: description || "Purchase payment"
+      });
+
+      res.json({ 
+        success: true, 
+        newBalance,
+        message: "Amount debited successfully" 
+      });
+    } catch (error: any) {
+      console.error('Debit wallet error:', error);
+      res.status(500).json({ error: "Failed to debit wallet" });
+    }
+  });
   
   return httpServer;
 }

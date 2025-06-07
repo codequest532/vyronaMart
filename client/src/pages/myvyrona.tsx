@@ -42,6 +42,111 @@ export default function MyVyrona() {
     enabled: !!currentUser.id
   });
 
+  // Fetch wallet balance
+  const { data: walletData, isLoading: walletLoading } = useQuery({
+    queryKey: [`/api/wallet/balance/${currentUser.id}`],
+    enabled: !!currentUser.id
+  });
+
+  // Fetch wallet transactions
+  const { data: transactions = [], isLoading: transactionsLoading } = useQuery({
+    queryKey: [`/api/wallet/transactions/${currentUser.id}`],
+    enabled: !!currentUser.id
+  });
+
+  // Add money to wallet mutation
+  const addMoneyMutation = useMutation({
+    mutationFn: async (amount: number) => {
+      // Create Razorpay order
+      const orderResponse = await fetch("/api/wallet/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount, userId: currentUser.id })
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error("Failed to create payment order");
+      }
+
+      const orderData = await orderResponse.json();
+
+      // Create Razorpay payment
+      return new Promise((resolve, reject) => {
+        const options = {
+          key: orderData.keyId,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: "VyronaMart",
+          description: "Wallet Top-up",
+          order_id: orderData.orderId,
+          handler: async (response: any) => {
+            try {
+              // Verify payment
+              const verifyResponse = await fetch("/api/wallet/verify-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  userId: currentUser.id,
+                  amount
+                })
+              });
+
+              if (!verifyResponse.ok) {
+                throw new Error("Payment verification failed");
+              }
+
+              const result = await verifyResponse.json();
+              resolve(result);
+            } catch (error) {
+              reject(error);
+            }
+          },
+          prefill: {
+            name: currentUser.username || "User",
+            email: currentUser.email || "user@example.com"
+          },
+          theme: {
+            color: "#3B82F6"
+          }
+        };
+
+        // Load Razorpay script if not already loaded
+        if (typeof (window as any).Razorpay === 'undefined') {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = () => {
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+          };
+          script.onerror = () => reject(new Error("Failed to load Razorpay"));
+          document.body.appendChild(script);
+        } else {
+          const rzp = new (window as any).Razorpay(options);
+          rzp.open();
+        }
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Payment Successful",
+        description: "Money added to wallet successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/wallet/balance/${currentUser.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/wallet/transactions/${currentUser.id}`] });
+      setAddMoneyAmount("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to add money to wallet",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Create return request mutation
   const createReturnRequest = useMutation({
     mutationFn: async (requestData: any) => {
@@ -225,7 +330,11 @@ export default function MyVyrona() {
                 <CardContent>
                   <div className="text-center py-6">
                     <div className="text-4xl font-bold text-green-600 mb-2">
-                      ₹{currentUser?.walletBalance || "0.00"}
+                      {walletLoading ? (
+                        <div className="animate-pulse bg-gray-200 h-12 w-32 mx-auto rounded"></div>
+                      ) : (
+                        `₹${walletData?.balance?.toFixed(2) || "0.00"}`
+                      )}
                     </div>
                     <p className="text-gray-600 mb-6">Available Balance</p>
                     
