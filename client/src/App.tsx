@@ -8,7 +8,7 @@ import Landing from "@/pages/landing";
 import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
-import PlaceOrder from "@/pages/place-order";
+import PlaceOrder from "@/pages/place-order-new";
 
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";

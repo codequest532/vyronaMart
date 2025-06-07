@@ -3542,6 +3542,222 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to debit wallet" });
     }
   });
+
+  // Contribution-based payment endpoints
+  app.post("/api/wallet/pay", async (req, res) => {
+    try {
+      const { amount, itemId, roomId } = req.body;
+      const userId = 1; // Default user for demo
+      
+      if (!amount || amount <= 0 || !itemId || !roomId) {
+        return res.status(400).json({ error: "Invalid payment parameters" });
+      }
+
+      // Check wallet balance
+      const walletData = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!walletData.length) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const currentBalance = parseFloat(walletData[0].walletBalance || "0");
+      if (currentBalance < amount) {
+        return res.status(400).json({ error: "Insufficient wallet balance" });
+      }
+
+      // Process wallet payment
+      const newBalance = currentBalance - amount;
+      const transactionId = `wallet_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      await db
+        .update(users)
+        .set({ walletBalance: newBalance.toString() })
+        .where(eq(users.id, userId));
+
+      await db.insert(walletTransactions).values({
+        userId,
+        amount: amount.toString(),
+        type: "debit",
+        status: "completed",
+        description: `Item contribution - Room ${roomId}, Item ${itemId}`,
+        transactionId
+      });
+
+      res.json({ 
+        success: true,
+        transactionId,
+        newBalance,
+        message: "Wallet payment successful"
+      });
+    } catch (error: any) {
+      console.error('Wallet payment error:', error);
+      res.status(500).json({ error: "Wallet payment failed" });
+    }
+  });
+
+  app.post("/api/payments/googlepay-groups", async (req, res) => {
+    try {
+      const { amount, itemId, roomId, memberCount } = req.body;
+      
+      if (!amount || amount <= 0 || !itemId || !roomId) {
+        return res.status(400).json({ error: "Invalid payment parameters" });
+      }
+
+      // Generate Google Pay Groups payment request
+      const transactionId = `gpay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const paymentUrl = `googlepay://pay?action=customsplit&total=${amount}&itemId=${itemId}&roomId=${roomId}&currency=INR&note=VyronaSocial Item Contribution&transactionId=${transactionId}`;
+
+      // In production, integrate with actual Google Pay Groups API
+      // For now, simulate the payment initiation
+      setTimeout(async () => {
+        try {
+          // Simulate successful payment after 2 seconds
+          await db.insert(walletTransactions).values({
+            userId: 1,
+            amount: amount.toString(),
+            type: "credit",
+            status: "completed",
+            description: `Google Pay Groups contribution - Room ${roomId}, Item ${itemId}`,
+            transactionId
+          });
+        } catch (error) {
+          console.error('Google Pay Groups callback error:', error);
+        }
+      }, 2000);
+
+      res.json({
+        success: true,
+        transactionId,
+        paymentUrl,
+        status: "initiated",
+        message: "Google Pay Groups payment initiated"
+      });
+    } catch (error: any) {
+      console.error('Google Pay Groups error:', error);
+      res.status(500).json({ error: "Google Pay Groups payment failed" });
+    }
+  });
+
+  app.post("/api/payments/phonepe-split", async (req, res) => {
+    try {
+      const { amount, itemId, roomId, memberCount } = req.body;
+      
+      if (!amount || amount <= 0 || !itemId || !roomId) {
+        return res.status(400).json({ error: "Invalid payment parameters" });
+      }
+
+      // Generate PhonePe Split payment request
+      const transactionId = `phonepe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const merchantId = "VYRONAMART";
+      const splitRequest = {
+        merchantId,
+        merchantTransactionId: transactionId,
+        amount: amount * 100, // PhonePe expects amount in paise
+        callbackUrl: `${process.env.REPLIT_URL}/api/payments/phonepe-callback`,
+        merchantUserId: "user_1",
+        splitInfo: {
+          type: "CUSTOM",
+          members: Array.from({ length: memberCount }, (_, i) => ({
+            userId: `user_${i + 1}`,
+            amount: Math.round((amount / memberCount) * 100)
+          }))
+        }
+      };
+
+      // In production, integrate with actual PhonePe Split API
+      // For now, simulate the payment initiation
+      setTimeout(async () => {
+        try {
+          // Simulate successful payment after 3 seconds
+          await db.insert(walletTransactions).values({
+            userId: 1,
+            amount: amount.toString(),
+            type: "credit",
+            status: "completed",
+            description: `PhonePe Split contribution - Room ${roomId}, Item ${itemId}`,
+            transactionId
+          });
+        } catch (error) {
+          console.error('PhonePe Split callback error:', error);
+        }
+      }, 3000);
+
+      res.json({
+        success: true,
+        transactionId,
+        splitRequest,
+        status: "initiated",
+        message: "PhonePe Split payment initiated"
+      });
+    } catch (error: any) {
+      console.error('PhonePe Split error:', error);
+      res.status(500).json({ error: "PhonePe Split payment failed" });
+    }
+  });
+
+  app.post("/api/payments/phonepe-callback", async (req, res) => {
+    try {
+      // Handle PhonePe payment callback
+      const { transactionId, status } = req.body;
+      
+      if (status === "SUCCESS") {
+        // Update transaction status
+        await db
+          .update(walletTransactions)
+          .set({ status: "completed" })
+          .where(eq(walletTransactions.transactionId, transactionId));
+      }
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('PhonePe callback error:', error);
+      res.status(500).json({ error: "Callback processing failed" });
+    }
+  });
+
+  app.post("/api/group-orders/place", async (req, res) => {
+    try {
+      const { roomId, items, totalAmount } = req.body;
+      const userId = 1; // Default user for demo
+      
+      if (!roomId || !items || !totalAmount) {
+        return res.status(400).json({ error: "Invalid order parameters" });
+      }
+
+      // Verify all items are fully funded
+      const allItemsFunded = items.every((item: any) => item.isFullyFunded);
+      if (!allItemsFunded) {
+        return res.status(400).json({ error: "All items must be fully funded before placing order" });
+      }
+
+      // Create order record
+      const orderId = `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      await db.insert(orders).values({
+        userId,
+        totalAmount: totalAmount.toString(),
+        status: "placed",
+        metadata: JSON.stringify({
+          roomId,
+          items,
+          orderType: "group_contribution",
+          placedAt: new Date()
+        })
+      });
+
+      // Clear room cart after successful order
+      await db.delete(cartItems).where(eq(cartItems.roomId, roomId));
+
+      res.json({
+        success: true,
+        orderId,
+        message: "Group order placed successfully",
+        estimatedDelivery: "3-5 business days"
+      });
+    } catch (error: any) {
+      console.error('Place order error:', error);
+      res.status(500).json({ error: "Failed to place group order" });
+    }
+  });
   
   return httpServer;
 }
