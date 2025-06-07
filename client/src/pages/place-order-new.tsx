@@ -88,6 +88,7 @@ interface CheckoutState {
   canProceedToOrder: boolean;
   codEligible: boolean;
   deliveryAddress: DeliveryAddress | null;
+  savedAddresses: DeliveryAddress[];
 }
 
 export default function PlaceOrderNew() {
@@ -141,7 +142,8 @@ export default function PlaceOrderNew() {
     allItemsFunded: false,
     canProceedToOrder: false,
     codEligible: false,
-    deliveryAddress: null
+    deliveryAddress: null,
+    savedAddresses: []
   });
 
   const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
@@ -222,7 +224,8 @@ export default function PlaceOrderNew() {
       allItemsFunded: false,
       canProceedToOrder: false,
       codEligible,
-      deliveryAddress: null
+      deliveryAddress: null,
+      savedAddresses: []
     });
   }, [cartItems, room?.memberCount]);
 
@@ -381,21 +384,47 @@ export default function PlaceOrderNew() {
         city: addressForm.city,
         state: addressForm.state,
         pincode: addressForm.pincode,
-        isDefault: addressForm.isDefault || true
+        isDefault: addressForm.isDefault || false
       };
 
-      setCheckoutState(prev => ({
-        ...prev,
-        deliveryAddress: newAddress,
-        canProceedToOrder: prev.allItemsFunded && true
-      }));
+      setCheckoutState(prev => {
+        const updatedAddresses = [...prev.savedAddresses, newAddress];
+        // If this is the first address or marked as default, set it as delivery address
+        const shouldSetAsDelivery = prev.savedAddresses.length === 0 || newAddress.isDefault;
+        
+        return {
+          ...prev,
+          savedAddresses: updatedAddresses,
+          deliveryAddress: shouldSetAsDelivery ? newAddress : prev.deliveryAddress,
+          canProceedToOrder: prev.allItemsFunded && (shouldSetAsDelivery ? true : prev.deliveryAddress !== null)
+        };
+      });
 
       setShowAddressModal(false);
+      setAddressForm({
+        fullName: '',
+        phone: '',
+        addressLine1: '',
+        addressLine2: '',
+        city: '',
+        state: '',
+        pincode: '',
+        isDefault: false
+      });
+      
       toast({
         title: "Address Added",
         description: "Delivery address has been saved successfully.",
       });
     }
+  };
+
+  const selectAddress = (address: DeliveryAddress) => {
+    setCheckoutState(prev => ({
+      ...prev,
+      deliveryAddress: address,
+      canProceedToOrder: prev.allItemsFunded && true
+    }));
   };
 
   // Place order mutation
@@ -690,36 +719,86 @@ export default function PlaceOrderNew() {
               </CardHeader>
               <CardContent>
                 {checkoutState.deliveryAddress ? (
-                  <div className="space-y-2">
-                    <div className="font-medium">{checkoutState.deliveryAddress.fullName}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {checkoutState.deliveryAddress.addressLine1}<br />
-                      {checkoutState.deliveryAddress.addressLine2 && (
-                        <>{checkoutState.deliveryAddress.addressLine2}<br /></>
-                      )}
-                      {checkoutState.deliveryAddress.city}, {checkoutState.deliveryAddress.state} {checkoutState.deliveryAddress.pincode}<br />
-                      Phone: {checkoutState.deliveryAddress.phone}
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-lg bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                      <div className="font-medium">{checkoutState.deliveryAddress.fullName}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {checkoutState.deliveryAddress.addressLine1}<br />
+                        {checkoutState.deliveryAddress.addressLine2 && (
+                          <>{checkoutState.deliveryAddress.addressLine2}<br /></>
+                        )}
+                        {checkoutState.deliveryAddress.city}, {checkoutState.deliveryAddress.state} {checkoutState.deliveryAddress.pincode}<br />
+                        Phone: {checkoutState.deliveryAddress.phone}
+                      </div>
                     </div>
+
+                    {/* Show other saved addresses */}
+                    {checkoutState.savedAddresses.filter(addr => addr.id !== checkoutState.deliveryAddress?.id).length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Other Saved Addresses:</p>
+                        {checkoutState.savedAddresses
+                          .filter(addr => addr.id !== checkoutState.deliveryAddress?.id)
+                          .map((address) => (
+                            <div 
+                              key={address.id}
+                              className="p-2 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                              onClick={() => selectAddress(address)}
+                            >
+                              <div className="text-sm font-medium">{address.fullName}</div>
+                              <div className="text-xs text-gray-600 dark:text-gray-400">
+                                {address.addressLine1}, {address.city}, {address.state}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setShowAddressModal(true)}
-                      className="mt-2"
+                      className="w-full"
                     >
-                      Change Address
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Address
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center">
-                    <p className="text-gray-600 dark:text-gray-400 mb-3">
-                      Add a delivery address to proceed
-                    </p>
+                  <div className="space-y-3">
+                    {/* Show saved addresses if any */}
+                    {checkoutState.savedAddresses.length > 0 ? (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Select Delivery Address:</p>
+                        {checkoutState.savedAddresses.map((address) => (
+                          <div 
+                            key={address.id}
+                            className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-blue-300"
+                            onClick={() => selectAddress(address)}
+                          >
+                            <div className="font-medium">{address.fullName}</div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              {address.addressLine1}<br />
+                              {address.addressLine2 && <>{address.addressLine2}<br /></>}
+                              {address.city}, {address.state} {address.pincode}<br />
+                              Phone: {address.phone}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-gray-600 dark:text-gray-400 mb-3">
+                          Add a delivery address to proceed
+                        </p>
+                      </div>
+                    )}
+                    
                     <Button
                       onClick={() => setShowAddressModal(true)}
                       className="w-full"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Address
+                      Add New Address
                     </Button>
                   </div>
                 )}
@@ -893,6 +972,19 @@ export default function PlaceOrderNew() {
                 onChange={(e) => setAddressForm(prev => ({ ...prev, pincode: e.target.value }))}
                 placeholder="Enter PIN code"
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                id="isDefault"
+                type="checkbox"
+                checked={addressForm.isDefault}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, isDefault: e.target.checked }))}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <Label htmlFor="isDefault" className="text-sm">
+                Set as default address
+              </Label>
             </div>
 
             <div className="flex gap-2 pt-4">
