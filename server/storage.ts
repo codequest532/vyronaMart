@@ -666,22 +666,49 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(module?: string, category?: string): Promise<Product[]> {
-    let results;
+    // Use raw SQL to properly handle decimal conversion
+    let whereClause = '';
+    const params: any[] = [];
+    
     if (module && category) {
-      results = await db.select().from(products).where(and(eq(products.module, module), eq(products.category, category)));
+      whereClause = 'WHERE module = $1 AND category = $2';
+      params.push(module, category);
     } else if (module) {
-      results = await db.select().from(products).where(eq(products.module, module));
+      whereClause = 'WHERE module = $1';
+      params.push(module);
     } else if (category) {
-      results = await db.select().from(products).where(eq(products.category, category));
-    } else {
-      results = await db.select().from(products);
+      whereClause = 'WHERE category = $1';
+      params.push(category);
     }
     
-    // Ensure prices are properly formatted as decimals
-    return results.map(product => ({
-      ...product,
-      price: Number(parseFloat(product.price.toString()).toFixed(2))
-    }));
+    const query = `
+      SELECT 
+        id, 
+        name, 
+        description, 
+        TO_CHAR(ROUND(price::NUMERIC, 2), 'FM999999999999990.00') as price_string,
+        ROUND(price::NUMERIC, 2) as price,
+        category, 
+        module, 
+        "imageUrl", 
+        "storeId", 
+        metadata, 
+        "enableIndividualBuy", 
+        "enableGroupBuy", 
+        "groupBuyMinQuantity", 
+        "groupBuyDiscount"
+      FROM products 
+      ${whereClause}
+    `;
+    
+    const result = await pool.query(query, params);
+    
+    // Convert price strings to proper decimal numbers
+    return result.rows.map((row: any) => ({
+      ...row,
+      price: parseFloat(row.price_string),
+      price_string: undefined // Remove the helper field
+    })) as Product[];
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
