@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +38,7 @@ import {
   Smile,
   Paperclip,
   Copy,
+  MoreVertical,
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
@@ -620,6 +622,70 @@ export default function VyronaSocial() {
     setMessages([]);
     setNewMessage("");
   }, [selectedGroupId]);
+
+  // Delete group mutation
+  const deleteGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      const response = await apiRequest(`/api/social/groups/${groupId}`, {
+        method: "DELETE",
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Group deleted",
+        description: "The group has been successfully deleted",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+      setSelectedGroupId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete group",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Exit group mutation
+  const exitGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      const response = await apiRequest(`/api/social/groups/${groupId}/exit`, {
+        method: "POST",
+      });
+      return response;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Exited group",
+        description: "You have successfully left the group",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/groups"] });
+      setSelectedGroupId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to exit group",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Handle delete group
+  const handleDeleteGroup = () => {
+    if (selectedGroup && window.confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
+      deleteGroupMutation.mutate(selectedGroup.id);
+    }
+  };
+
+  // Handle exit group
+  const handleExitGroup = () => {
+    if (selectedGroup && window.confirm("Are you sure you want to leave this group?")) {
+      exitGroupMutation.mutate(selectedGroup.id);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900/20">
