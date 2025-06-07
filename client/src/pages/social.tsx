@@ -129,6 +129,13 @@ export default function VyronaSocial() {
     retry: false,
   });
 
+  // Handle redirect to auth if not authenticated
+  React.useEffect(() => {
+    if (!userLoading && !authUser) {
+      setLocation("/login");
+    }
+  }, [userLoading, authUser, setLocation]);
+
   // Fetch groups
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["/api/shopping-rooms"],
@@ -752,7 +759,6 @@ export default function VyronaSocial() {
   }
 
   if (!authUser) {
-    setLocation("/auth");
     return null;
   }
 
