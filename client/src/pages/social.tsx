@@ -1561,7 +1561,7 @@ export default function VyronaSocial() {
                                         <Button 
                                           className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
                                           size="sm"
-                                          disabled={!selectedGroup || addToGroupCartMutation.isPending}
+                                          disabled={addToGroupCartMutation.isPending}
                                           onClick={() => selectedGroup ? handleAddToGroupCart(product.id) : setIsCreateGroupOpen(true)}
                                         >
                                           <ShoppingBag className="w-4 h-4 mr-2" />
