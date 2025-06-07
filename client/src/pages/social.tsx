@@ -1600,11 +1600,11 @@ export default function VyronaSocial() {
 
 
               {/* Fixed Chat Panel - Right Side */}
-              <div className="lg:col-span-1 border-l bg-white dark:bg-gray-900 flex flex-col">
+              <div className="lg:col-span-1 border-l bg-white dark:bg-gray-900 flex flex-col h-screen">
                 {selectedGroup ? (
                   <>
                     {/* Chat Header */}
-                    <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
+                    <div className="p-4 border-b bg-green-50 dark:bg-green-900/20 flex-shrink-0">
                       <div className="flex items-center gap-2">
                         <MessageCircle className="h-5 w-5 text-green-600" />
                         <h3 className="font-semibold text-green-800 dark:text-green-200">Group Chat</h3>
@@ -1614,10 +1614,8 @@ export default function VyronaSocial() {
                       </p>
                     </div>
 
-
-
                     {/* Chat Section - 30% */}
-                    <div className="flex flex-col" style={{ height: '30%' }}>
+                    <div className="flex flex-col border-b" style={{ height: '30%' }}>
                       {/* Chat Messages Area */}
                       <div className="flex-1 min-h-0">
                         <ScrollArea className="h-full p-4">
@@ -1722,7 +1720,7 @@ export default function VyronaSocial() {
                     </div>
 
                     {/* Participants Section - 70% */}
-                    <div className="p-3 border-t bg-gray-50 dark:bg-gray-800 flex flex-col" style={{ height: '70%' }}>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 flex flex-col" style={{ height: '70%' }}>
                       <div className="flex items-center gap-2 mb-3">
                         <Users className="h-4 w-4 text-blue-600" />
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
