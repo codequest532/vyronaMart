@@ -117,6 +117,8 @@ export default function VyronaSocial() {
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [callParticipants, setCallParticipants] = useState<any[]>([]);
+  const [isGroupSelectionOpen, setIsGroupSelectionOpen] = useState(false);
+  const [selectedProductForGroup, setSelectedProductForGroup] = useState<number | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -187,11 +189,18 @@ export default function VyronaSocial() {
       if (!response.ok) throw new Error('Failed to create group');
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast({ title: "Group created successfully!" });
       setIsCreateGroupOpen(false);
       createGroupForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      
+      // If there's a selected product, add it to the newly created group
+      if (selectedProductForGroup && response?.room?.id) {
+        setSelectedGroupId(response.room.id);
+        handleAddToGroupCart(selectedProductForGroup);
+        setSelectedProductForGroup(null);
+      }
     },
     onError: (error: Error) => {
       toast({ title: "Error creating group", description: error.message, variant: "destructive" });
@@ -861,6 +870,29 @@ export default function VyronaSocial() {
   const handleExitGroup = () => {
     if (selectedGroup) {
       exitGroupMutation.mutate(selectedGroup.id);
+    }
+  };
+
+  // Handle add to group button click
+  const handleAddToGroupClick = (productId: number) => {
+    setSelectedProductForGroup(productId);
+    
+    // If there are existing groups, show selection dialog
+    if (userGroups && userGroups.length > 0) {
+      setIsGroupSelectionOpen(true);
+    } else {
+      // No groups exist, open create group modal
+      setIsCreateGroupOpen(true);
+    }
+  };
+
+  // Handle group selection for adding product
+  const handleSelectGroupForProduct = (groupId: number) => {
+    if (selectedProductForGroup) {
+      setSelectedGroupId(groupId);
+      handleAddToGroupCart(selectedProductForGroup);
+      setIsGroupSelectionOpen(false);
+      setSelectedProductForGroup(null);
     }
   };
 
@@ -1562,7 +1594,7 @@ export default function VyronaSocial() {
                                           className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
                                           size="sm"
                                           disabled={addToGroupCartMutation.isPending}
-                                          onClick={() => selectedGroup ? handleAddToGroupCart(product.id) : setIsCreateGroupOpen(true)}
+                                          onClick={() => handleAddToGroupClick(product.id)}
                                         >
                                           <ShoppingBag className="w-4 h-4 mr-2" />
                                           {selectedGroup ? "Add to Group" : "Add to Group"}
@@ -2032,6 +2064,59 @@ export default function VyronaSocial() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Group Selection Dialog */}
+      <Dialog open={isGroupSelectionOpen} onOpenChange={setIsGroupSelectionOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-600" />
+              Select Group
+            </DialogTitle>
+            <DialogDescription>
+              Choose which group to add this product to
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {userGroups?.map((group) => (
+              <div
+                key={group.id}
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                onClick={() => handleSelectGroupForProduct(group.id)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <Users className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">{group.name}</div>
+                    <div className="text-xs text-gray-500">
+                      Room Code: {group.roomCode}
+                    </div>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline">
+                  Select
+                </Button>
+              </div>
+            ))}
+            
+            <div className="pt-2 border-t">
+              <Button
+                onClick={() => {
+                  setIsGroupSelectionOpen(false);
+                  setIsCreateGroupOpen(true);
+                }}
+                variant="outline"
+                className="w-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create New Group
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Online Members Indicator */}
       {selectedGroupId && onlineMembers.length > 0 && (
