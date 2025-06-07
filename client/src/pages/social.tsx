@@ -1144,7 +1144,7 @@ export default function VyronaSocial() {
 
           {/* Groups Content - WhatsApp Style */}
           <div className="space-y-0">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-0 h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 h-[calc(100vh-200px)]">
               
               {/* Groups List - WhatsApp Style Sidebar */}
               <div className="lg:col-span-1 border-r bg-white dark:bg-gray-900 flex flex-col">
@@ -1348,7 +1348,7 @@ export default function VyronaSocial() {
               </div>
 
               {/* Main Content Area */}
-              <div className="lg:col-span-2 flex flex-col bg-gray-50 dark:bg-gray-900 relative">
+              <div className="lg:col-span-3 flex flex-col bg-gray-50 dark:bg-gray-900 relative">
                 {/* Group Header - Only show when group is selected */}
                 {selectedGroup && (
                   <div className="p-4 bg-white dark:bg-gray-800 border-b shadow-sm">
