@@ -1379,7 +1379,7 @@ export default function VyronaSocial() {
                                   <div className="flex items-center gap-1">
                                     <ShoppingCart className="w-3 h-3 text-green-600 dark:text-green-400" />
                                     <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                      ₹{(group.totalCart / 100).toFixed(2)}
+                                      ₹{group.totalCart.toFixed(2)}
                                     </span>
                                   </div>
                                 ) : (
