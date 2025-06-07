@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupRoomRoutes } from "./simple-rooms";
 import { setupVyronaSocialAPI } from "./vyronasocial-api";
@@ -15,6 +16,23 @@ import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail } from "./email";
 import { eq, desc, sql } from "drizzle-orm";
+
+// Online status and WebSocket management
+interface OnlineUser {
+  userId: number;
+  username: string;
+  groupId: number | null;
+  ws: WebSocket;
+  lastSeen: Date;
+}
+
+const onlineUsers = new Map<string, OnlineUser>();
+const groupCallStates = new Map<number, {
+  callId: string;
+  initiator: number;
+  participants: number[];
+  startedAt: Date;
+}>();
 
 // Admin credentials (fixed)
 const ADMIN_CREDENTIALS = {
@@ -2633,6 +2651,295 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup isolated VyronaSocial API
   setupVyronaSocialAPI(app);
 
+  // Video call notification endpoints
+  app.get("/api/groups/:groupId/online-members", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const groupMembers = await storage.getGroupMembers(Number(groupId));
+      
+      // Filter for online members
+      const onlineMembers = groupMembers.filter(member => {
+        const userKey = `${member.userId}-${groupId}`;
+        const onlineUser = onlineUsers.get(userKey);
+        return onlineUser && onlineUser.ws.readyState === WebSocket.OPEN;
+      }).map(member => {
+        const userKey = `${member.userId}-${groupId}`;
+        const onlineUser = onlineUsers.get(userKey);
+        return {
+          userId: member.userId,
+          username: member.username || onlineUser?.username || `User ${member.userId}`,
+          lastSeen: onlineUser?.lastSeen
+        };
+      });
+      
+      res.json(onlineMembers);
+    } catch (error) {
+      console.error("Error fetching online members:", error);
+      res.status(500).json({ message: "Failed to fetch online members" });
+    }
+  });
+
+  app.post("/api/groups/:groupId/start-video-call", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const userId = req.session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const callId = `call-${groupId}-${Date.now()}`;
+      
+      // Store call state
+      groupCallStates.set(Number(groupId), {
+        callId,
+        initiator: userId,
+        participants: [userId],
+        startedAt: new Date()
+      });
+      
+      // Notify all online group members
+      const groupMembers = await storage.getGroupMembers(Number(groupId));
+      
+      groupMembers.forEach(member => {
+        if (member.userId !== userId) {
+          const userKey = `${member.userId}-${groupId}`;
+          const onlineUser = onlineUsers.get(userKey);
+          
+          if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN) {
+            onlineUser.ws.send(JSON.stringify({
+              type: 'video-call-invite',
+              callId,
+              groupId: Number(groupId),
+              initiator: userId,
+              initiatorName: req.session?.user?.username || `User ${userId}`,
+              timestamp: new Date().toISOString()
+            }));
+          }
+        }
+      });
+      
+      res.json({ 
+        success: true, 
+        callId,
+        message: "Video call started, invitations sent to online members" 
+      });
+    } catch (error) {
+      console.error("Error starting video call:", error);
+      res.status(500).json({ message: "Failed to start video call" });
+    }
+  });
+
+  app.post("/api/groups/:groupId/join-video-call", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const { callId } = req.body;
+      const userId = req.session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const callState = groupCallStates.get(Number(groupId));
+      
+      if (!callState || callState.callId !== callId) {
+        return res.status(404).json({ message: "Video call not found or expired" });
+      }
+      
+      // Add user to participants
+      if (!callState.participants.includes(userId)) {
+        callState.participants.push(userId);
+      }
+      
+      // Notify all participants about new joiner
+      const groupMembers = await storage.getGroupMembers(Number(groupId));
+      
+      callState.participants.forEach(participantId => {
+        if (participantId !== userId) {
+          const userKey = `${participantId}-${groupId}`;
+          const onlineUser = onlineUsers.get(userKey);
+          
+          if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN) {
+            onlineUser.ws.send(JSON.stringify({
+              type: 'user-joined-call',
+              callId,
+              groupId: Number(groupId),
+              userId,
+              username: req.session?.user?.username || `User ${userId}`,
+              timestamp: new Date().toISOString()
+            }));
+          }
+        }
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Joined video call successfully",
+        participants: callState.participants 
+      });
+    } catch (error) {
+      console.error("Error joining video call:", error);
+      res.status(500).json({ message: "Failed to join video call" });
+    }
+  });
+
+  app.post("/api/groups/:groupId/end-video-call", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const userId = req.session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const callState = groupCallStates.get(Number(groupId));
+      
+      if (callState) {
+        // Notify all participants that call ended
+        const groupMembers = await storage.getGroupMembers(Number(groupId));
+        
+        callState.participants.forEach(participantId => {
+          const userKey = `${participantId}-${groupId}`;
+          const onlineUser = onlineUsers.get(userKey);
+          
+          if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN) {
+            onlineUser.ws.send(JSON.stringify({
+              type: 'video-call-ended',
+              callId: callState.callId,
+              groupId: Number(groupId),
+              endedBy: userId,
+              timestamp: new Date().toISOString()
+            }));
+          }
+        });
+        
+        // Remove call state
+        groupCallStates.delete(Number(groupId));
+      }
+      
+      res.json({ success: true, message: "Video call ended" });
+    } catch (error) {
+      console.error("Error ending video call:", error);
+      res.status(500).json({ message: "Failed to end video call" });
+    }
+  });
+
   const httpServer = createServer(app);
+  
+  // Setup WebSocket server
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  wss.on('connection', (ws, req) => {
+    console.log('WebSocket connection established');
+    
+    ws.on('message', async (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'user-online') {
+          const { userId, username, groupId } = data;
+          const userKey = `${userId}-${groupId}`;
+          
+          // Store online user
+          onlineUsers.set(userKey, {
+            userId,
+            username,
+            groupId,
+            ws,
+            lastSeen: new Date()
+          });
+          
+          console.log(`User ${username} (${userId}) is now online in group ${groupId}`);
+          
+          // Notify other group members about online status
+          const groupMembers = await storage.getGroupMembers(groupId);
+          
+          groupMembers.forEach(member => {
+            if (member.userId !== userId) {
+              const memberKey = `${member.userId}-${groupId}`;
+              const onlineMember = onlineUsers.get(memberKey);
+              
+              if (onlineMember && onlineMember.ws.readyState === WebSocket.OPEN) {
+                onlineMember.ws.send(JSON.stringify({
+                  type: 'user-status-changed',
+                  userId,
+                  username,
+                  status: 'online',
+                  groupId,
+                  timestamp: new Date().toISOString()
+                }));
+              }
+            }
+          });
+        }
+        
+        if (data.type === 'ping') {
+          // Update last seen time
+          Object.values(onlineUsers).forEach(user => {
+            if (user.ws === ws) {
+              user.lastSeen = new Date();
+            }
+          });
+          
+          ws.send(JSON.stringify({ type: 'pong' }));
+        }
+        
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('WebSocket connection closed');
+      
+      // Remove user from online users and notify group members
+      for (const [userKey, onlineUser] of onlineUsers.entries()) {
+        if (onlineUser.ws === ws) {
+          const { userId, username, groupId } = onlineUser;
+          
+          // Notify other group members about offline status
+          storage.getGroupMembers(groupId).then(groupMembers => {
+            groupMembers.forEach(member => {
+              if (member.userId !== userId) {
+                const memberKey = `${member.userId}-${groupId}`;
+                const onlineMember = onlineUsers.get(memberKey);
+                
+                if (onlineMember && onlineMember.ws.readyState === WebSocket.OPEN) {
+                  onlineMember.ws.send(JSON.stringify({
+                    type: 'user-status-changed',
+                    userId,
+                    username,
+                    status: 'offline',
+                    groupId,
+                    timestamp: new Date().toISOString()
+                  }));
+                }
+              }
+            });
+          });
+          
+          onlineUsers.delete(userKey);
+          break;
+        }
+      }
+    });
+    
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
+  
+  // Cleanup inactive connections every 30 seconds
+  setInterval(() => {
+    const now = new Date();
+    for (const [userKey, onlineUser] of onlineUsers.entries()) {
+      const timeSinceLastSeen = now.getTime() - onlineUser.lastSeen.getTime();
+      
+      if (timeSinceLastSeen > 60000 || onlineUser.ws.readyState !== WebSocket.OPEN) {
+        onlineUsers.delete(userKey);
+      }
+    }
+  }, 30000);
+  
   return httpServer;
 }

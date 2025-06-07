@@ -109,8 +109,12 @@ export default function VyronaSocial() {
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("groups");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [onlineMembers, setOnlineMembers] = useState<any[]>([]);
+  const [videoCallInvite, setVideoCallInvite] = useState<any>(null);
+  const [currentCallId, setCurrentCallId] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   // Authentication check
   const { data: authUser, isLoading: userLoading } = useQuery({
@@ -141,6 +145,14 @@ export default function VyronaSocial() {
     queryKey: ["/api/group-messages", selectedGroupId],
     queryFn: () => fetch(`/api/group-messages/${selectedGroupId}`).then(res => res.json()),
     enabled: !!selectedGroupId,
+  });
+
+  // Fetch online members for selected group
+  const { data: onlineMembersData, refetch: refetchOnlineMembers } = useQuery({
+    queryKey: ["/api/groups", selectedGroupId, "online-members"],
+    queryFn: () => fetch(`/api/groups/${selectedGroupId}/online-members`).then(res => res.json()),
+    enabled: !!selectedGroupId,
+    refetchInterval: 5000, // Refresh every 5 seconds
   });
 
   // Forms
@@ -287,6 +299,146 @@ export default function VyronaSocial() {
       toast({ title: "Failed to send message", description: error.message, variant: "destructive" });
     },
   });
+
+  // Video call mutations
+  const startVideoCallMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      const response = await apiRequest(`/api/groups/${groupId}/start-video-call`, {
+        method: "POST"
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      setCurrentCallId(data.callId);
+      setIsVideoCallActive(true);
+      toast({ title: "Video call started", description: "Invitations sent to online members" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to start video call", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const joinVideoCallMutation = useMutation({
+    mutationFn: async ({ groupId, callId }: { groupId: number; callId: string }) => {
+      const response = await apiRequest(`/api/groups/${groupId}/join-video-call`, {
+        method: "POST",
+        body: JSON.stringify({ callId })
+      });
+      return response;
+    },
+    onSuccess: () => {
+      setIsVideoCallActive(true);
+      setVideoCallInvite(null);
+      toast({ title: "Joined video call successfully!" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to join video call", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const endVideoCallMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      const response = await apiRequest(`/api/groups/${groupId}/end-video-call`, {
+        method: "POST"
+      });
+      return response;
+    },
+    onSuccess: () => {
+      setIsVideoCallActive(false);
+      setCurrentCallId(null);
+      toast({ title: "Video call ended" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to end video call", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // WebSocket connection management
+  useEffect(() => {
+    if (!authUser || !selectedGroupId) return;
+
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      // Register as online user
+      ws.send(JSON.stringify({
+        type: 'user-online',
+        userId: authUser.id,
+        username: authUser.username,
+        groupId: selectedGroupId
+      }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'video-call-invite') {
+          setVideoCallInvite(data);
+          toast({
+            title: "Video call invitation",
+            description: `${data.initiatorName} started a video call`,
+          });
+        }
+        
+        if (data.type === 'user-joined-call') {
+          toast({
+            title: "User joined call",
+            description: `${data.username} joined the video call`,
+          });
+        }
+        
+        if (data.type === 'video-call-ended') {
+          setIsVideoCallActive(false);
+          setCurrentCallId(null);
+          setVideoCallInvite(null);
+          toast({
+            title: "Video call ended",
+            description: "The video call has been ended",
+          });
+        }
+        
+        if (data.type === 'user-status-changed') {
+          refetchOnlineMembers();
+        }
+        
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    // Ping to keep connection alive
+    const pingInterval = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, 30000);
+
+    return () => {
+      clearInterval(pingInterval);
+      ws.close();
+    };
+  }, [authUser, selectedGroupId, refetchOnlineMembers]);
+
+  // Update online members when data changes
+  useEffect(() => {
+    if (onlineMembersData) {
+      setOnlineMembers(onlineMembersData);
+    }
+  }, [onlineMembersData]);
 
   // Video call functions
   const handleJoinVideoCall = async () => {
