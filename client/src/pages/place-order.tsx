@@ -35,6 +35,19 @@ interface OrderItem {
   price: number;
   quantity: number;
   imageUrl?: string;
+  contributedAmount: number;
+  targetAmount: number;
+  isFullyFunded: boolean;
+  contributors: ItemContributor[];
+}
+
+interface ItemContributor {
+  userId: number;
+  username: string;
+  amount: number;
+  paymentMethod: 'wallet' | 'googlepay' | 'phonepe' | 'cod';
+  status: 'pending' | 'contributed' | 'confirmed';
+  transactionId?: string;
 }
 
 interface ShoppingRoom {
@@ -42,6 +55,15 @@ interface ShoppingRoom {
   name: string;
   roomCode: string;
   memberCount: number;
+  members: RoomMember[];
+}
+
+interface RoomMember {
+  id: number;
+  username: string;
+  isCurrentUser: boolean;
+  walletBalance: number;
+  deliveryAddress?: DeliveryAddress;
 }
 
 interface DeliveryAddress {
@@ -54,23 +76,40 @@ interface DeliveryAddress {
   city: string;
   state: string;
   pincode: string;
-  isRequired: boolean;
+  isDefault: boolean;
 }
 
-interface GroupContribution {
-  userId: number;
-  username: string;
-  amount: number;
-  status: 'pending' | 'contributed' | 'confirmed';
-  paymentMethod: 'wallet' | 'upi';
+interface PaymentMethod {
+  id: string;
+  name: string;
+  type: 'wallet' | 'googlepay' | 'phonepe' | 'cod';
+  icon: string;
+  enabled: boolean;
+  requiresFullPayment?: boolean;
+  apiEndpoint?: string;
+}
+
+interface ContributionTarget {
+  itemId: number;
+  targetAmount: number;
+  currentAmount: number;
+  remainingAmount: number;
+  progress: number;
+  isComplete: boolean;
+  canPlaceOrder: boolean;
 }
 
 interface GroupCheckoutState {
-  currentTab: 'address' | 'payment' | 'confirm';
-  addresses: DeliveryAddress[];
-  contributions: GroupContribution[];
+  currentStep: 'items' | 'contributions' | 'delivery' | 'confirm';
+  items: OrderItem[];
+  contributionTargets: ContributionTarget[];
+  totalCartValue: number;
   totalContributed: number;
-  isReadyToConfirm: boolean;
+  allItemsFunded: boolean;
+  canProceedToOrder: boolean;
+  selectedPaymentMethod: PaymentMethod | null;
+  deliveryMethod: 'individual' | 'single';
+  codEligible: boolean;
 }
 
 export default function PlaceOrder() {
@@ -79,20 +118,60 @@ export default function PlaceOrder() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Payment method configurations
+  const paymentMethods: PaymentMethod[] = [
+    {
+      id: 'wallet',
+      name: 'Vyrona Wallet',
+      type: 'wallet',
+      icon: 'Wallet',
+      enabled: true,
+      apiEndpoint: '/api/wallet/pay'
+    },
+    {
+      id: 'googlepay',
+      name: 'Google Pay Groups',
+      type: 'googlepay',
+      icon: 'Smartphone',
+      enabled: true,
+      apiEndpoint: '/api/payments/googlepay-groups'
+    },
+    {
+      id: 'phonepe',
+      name: 'PhonePe Split',
+      type: 'phonepe',
+      icon: 'Smartphone',
+      enabled: true,
+      apiEndpoint: '/api/payments/phonepe-split'
+    },
+    {
+      id: 'cod',
+      name: 'Cash on Delivery',
+      type: 'cod',
+      icon: 'Package',
+      enabled: false, // Will be dynamically enabled based on conditions
+      requiresFullPayment: true
+    }
+  ];
+
   // State management
   const [groupCheckout, setGroupCheckout] = useState<GroupCheckoutState>({
-    currentTab: 'address',
-    addresses: [],
-    contributions: [],
+    currentStep: 'items',
+    items: [],
+    contributionTargets: [],
+    totalCartValue: 0,
     totalContributed: 0,
-    isReadyToConfirm: false
+    allItemsFunded: false,
+    canProceedToOrder: false,
+    selectedPaymentMethod: null,
+    deliveryMethod: 'individual',
+    codEligible: false
   });
 
-  const [showContributionModal, setShowContributionModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
   const [contributionAmount, setContributionAmount] = useState('');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'wallet' | 'upi' | 'gpay-groups'>('wallet');
-  const [showGooglePayGroupsModal, setShowGooglePayGroupsModal] = useState(false);
-  const [customSplitAmounts, setCustomSplitAmounts] = useState<{ [key: number]: string }>({});
+  const [showContributionModal, setShowContributionModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
@@ -103,95 +182,197 @@ export default function PlaceOrder() {
     enabled: !!roomId,
   });
 
-  const cartItems = Array.isArray(cartItemsResponse) ? cartItemsResponse : [];
-
-  // Fetch room details from shopping-rooms endpoint
+  // Fetch room details with member information
   const { data: roomsResponse, isLoading: roomLoading } = useQuery({
     queryKey: ["/api/shopping-rooms"],
     queryFn: () => fetch("/api/shopping-rooms").then(res => res.json()),
   });
 
-  const room = Array.isArray(roomsResponse) ? roomsResponse.find(r => r.id === roomId) : null;
-
-  // Fetch wallet balance
+  // Fetch current user wallet balance
   const { data: walletData } = useQuery({
     queryKey: ["/api/wallet/balance/1"],
     queryFn: () => fetch("/api/wallet/balance/1").then(res => res.json()),
   });
 
-  // Initialize checkout state based on room member count
+  // Process raw cart data into contribution-based items
+  const cartItems = Array.isArray(cartItemsResponse) ? cartItemsResponse : [];
+  const room = Array.isArray(roomsResponse) ? roomsResponse.find(r => r.id === roomId) : null;
+
+  // Initialize contribution-based checkout system
   useEffect(() => {
-    if (!room?.memberCount) return;
+    if (!cartItems.length || !room?.memberCount) return;
     
-    const memberCount = parseInt(room.memberCount.toString());
-    const initialAddresses: DeliveryAddress[] = [];
-    const initialContributions: GroupContribution[] = [];
+    // Convert cart items to contribution-trackable items
+    const contributionItems: OrderItem[] = cartItems.map(item => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity || 1,
+      imageUrl: item.imageUrl,
+      contributedAmount: 0,
+      targetAmount: item.price * (item.quantity || 1),
+      isFullyFunded: false,
+      contributors: []
+    }));
+
+    // Create contribution targets for each item
+    const targets: ContributionTarget[] = contributionItems.map(item => ({
+      itemId: item.id,
+      targetAmount: item.targetAmount,
+      currentAmount: 0,
+      remainingAmount: item.targetAmount,
+      progress: 0,
+      isComplete: false,
+      canPlaceOrder: false
+    }));
+
+    const totalCartValue = contributionItems.reduce((sum, item) => sum + item.targetAmount, 0);
     
-    // Create address entries based on member count
-    for (let i = 0; i < memberCount; i++) {
-      initialAddresses.push({
-        id: `member-${i + 1}`,
-        memberName: i === 0 ? 'Primary Member (Required)' : `Member ${i + 1} (Optional)`,
-        fullName: '',
-        phone: '',
-        addressLine1: '',
-        addressLine2: '',
-        city: '',
-        state: '',
-        pincode: '',
-        isRequired: i === 0
+    // Check COD eligibility (single delivery address and one full payer)
+    const codEligible = room.memberCount === 1 || groupCheckout.deliveryMethod === 'single';
+
+    setGroupCheckout(prev => ({
+      ...prev,
+      items: contributionItems,
+      contributionTargets: targets,
+      totalCartValue,
+      totalContributed: 0,
+      allItemsFunded: false,
+      canProceedToOrder: false,
+      codEligible
+    }));
+  }, [cartItems, room?.memberCount, groupCheckout.deliveryMethod]);
+
+  // Contribution management functions
+  const addContribution = async (itemId: number, amount: number, paymentMethod: PaymentMethod) => {
+    try {
+      const item = groupCheckout.items.find(i => i.id === itemId);
+      if (!item) return;
+
+      const remainingAmount = item.targetAmount - item.contributedAmount;
+      if (amount > remainingAmount) {
+        toast({
+          title: "Invalid Amount",
+          description: `Maximum contribution for this item is ₹${remainingAmount.toFixed(2)}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Process payment based on method
+      let transactionId = '';
+      if (paymentMethod.type === 'wallet') {
+        const walletBalance = walletData?.balance || 0;
+        if (amount > walletBalance) {
+          toast({
+            title: "Insufficient Balance",
+            description: "Please add money to your Vyrona Wallet first.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        const response = await apiRequest('POST', paymentMethod.apiEndpoint!, { 
+          amount, 
+          itemId,
+          roomId 
+        });
+        transactionId = response.transactionId;
+      } else if (paymentMethod.type === 'googlepay') {
+        const response = await apiRequest('POST', paymentMethod.apiEndpoint!, {
+          amount,
+          itemId,
+          roomId,
+          memberCount: room?.memberCount
+        });
+        transactionId = response.transactionId;
+      } else if (paymentMethod.type === 'phonepe') {
+        const response = await apiRequest('POST', paymentMethod.apiEndpoint!, {
+          amount,
+          itemId,
+          roomId,
+          memberCount: room?.memberCount
+        });
+        transactionId = response.transactionId;
+      } else if (paymentMethod.type === 'cod') {
+        if (amount !== groupCheckout.totalCartValue) {
+          toast({
+            title: "COD Requires Full Payment",
+            description: "Cash on Delivery requires one person to pay the entire cart amount.",
+            variant: "destructive",
+          });
+          return;
+        }
+        transactionId = `cod_${Date.now()}`;
+      }
+
+      const newContributor: ItemContributor = {
+        userId: 1,
+        username: 'You',
+        amount,
+        paymentMethod: paymentMethod.type,
+        status: 'contributed',
+        transactionId
+      };
+
+      setGroupCheckout(prev => {
+        const updatedItems = prev.items.map(item => 
+          item.id === itemId 
+            ? {
+                ...item,
+                contributedAmount: item.contributedAmount + amount,
+                contributors: [...item.contributors, newContributor],
+                isFullyFunded: (item.contributedAmount + amount) >= item.targetAmount
+              }
+            : item
+        );
+
+        const updatedTargets = prev.contributionTargets.map(target =>
+          target.itemId === itemId
+            ? {
+                ...target,
+                currentAmount: target.currentAmount + amount,
+                remainingAmount: target.remainingAmount - amount,
+                progress: ((target.currentAmount + amount) / target.targetAmount) * 100,
+                isComplete: (target.currentAmount + amount) >= target.targetAmount,
+                canPlaceOrder: (target.currentAmount + amount) >= target.targetAmount
+              }
+            : target
+        );
+
+        const totalContributed = updatedItems.reduce((sum, item) => sum + item.contributedAmount, 0);
+        const allItemsFunded = updatedItems.every(item => item.isFullyFunded);
+        const canProceedToOrder = allItemsFunded;
+
+        return {
+          ...prev,
+          items: updatedItems,
+          contributionTargets: updatedTargets,
+          totalContributed,
+          allItemsFunded,
+          canProceedToOrder
+        };
       });
-      
-      // Initialize contribution slots for each member
-      initialContributions.push({
-        userId: i + 1, // Mock user IDs for now
-        username: i === 0 ? 'You' : `Member ${i + 1}`,
-        amount: 0,
-        status: 'pending',
-        paymentMethod: 'wallet'
+
+      toast({
+        title: "Contribution Added",
+        description: `₹${amount} contributed via ${paymentMethod.name}`,
+      });
+
+      setShowContributionModal(false);
+      setContributionAmount('');
+
+    } catch (error: any) {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process contribution",
+        variant: "destructive",
       });
     }
-    
-    setGroupCheckout(prev => ({
-      ...prev,
-      addresses: initialAddresses,
-      contributions: initialContributions
-    }));
-  }, [room?.memberCount, roomId]);
-
-  // Helper functions
-  const updateAddress = (addressId: string, field: keyof DeliveryAddress, value: string) => {
-    setGroupCheckout(prev => ({
-      ...prev,
-      addresses: prev.addresses.map(addr => 
-        addr.id === addressId 
-          ? { ...addr, [field]: value }
-          : addr
-      )
-    }));
   };
 
-  const updateContribution = (userId: number, amount: number, paymentMethod: 'wallet' | 'upi') => {
-    setGroupCheckout(prev => {
-      const updatedContributions = prev.contributions.map(contrib => 
-        contrib.userId === userId 
-          ? { ...contrib, amount, paymentMethod, status: amount > 0 ? 'contributed' : 'pending' as const }
-          : contrib
-      );
-      
-      const totalContributed = updatedContributions.reduce((sum, contrib) => sum + contrib.amount, 0);
-      
-      return {
-        ...prev,
-        contributions: updatedContributions,
-        totalContributed,
-        isReadyToConfirm: totalContributed >= orderTotal && prev.addresses[0].fullName !== ''
-      };
-    });
-  };
-
-  const handleTabChange = (tab: 'address' | 'payment' | 'confirm') => {
-    setGroupCheckout(prev => ({ ...prev, currentTab: tab }));
+  const handleStepChange = (step: 'items' | 'contributions' | 'delivery' | 'confirm') => {
+    setGroupCheckout(prev => ({ ...prev, currentStep: step }));
   };
 
   // Calculate totals
