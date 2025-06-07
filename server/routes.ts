@@ -1050,6 +1050,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // VyronaWallet API Routes
+  app.get("/api/wallet/balance/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const userResult = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (userResult.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      const user = userResult[0];
+      res.json({ balance: parseFloat(user.walletBalance || "0") });
+    } catch (error) {
+      console.error("Wallet balance fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch wallet balance" });
+    }
+  });
+
   app.get("/api/wallet/:userId", async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
@@ -3295,6 +3316,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Get wallet transactions error:', error);
       res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  // Razorpay wallet routes
+  app.post("/api/wallet/create-order", async (req, res) => {
+    try {
+      const { amount, userId } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ error: "Invalid amount" });
+      }
+
+      const options = {
+        amount: amount * 100, // Convert to paise
+        currency: "INR",
+        receipt: `wallet_${userId}_${Date.now()}`
+      };
+
+      const order = await razorpay.orders.create(options);
+
+      res.json({
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag'
+      });
+    } catch (error: any) {
+      console.error("Razorpay order creation error:", error);
+      res.status(500).json({ error: "Failed to create payment order" });
+    }
+  });
+
+  app.post("/api/wallet/verify-payment", async (req, res) => {
+    try {
+      const {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        userId,
+        amount
+      } = req.body;
+
+      const crypto = require('crypto');
+      const expectedSignature = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'fakeSecret123')
+        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        .digest('hex');
+
+      if (expectedSignature === razorpay_signature) {
+        // Payment verified, update wallet balance
+        const user = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, userId))
+          .limit(1);
+
+        if (user.length === 0) {
+          return res.status(404).json({ error: "User not found" });
+        }
+
+        const currentBalance = parseFloat(user[0].walletBalance || "0");
+        const newBalance = currentBalance + amount;
+
+        await db
+          .update(users)
+          .set({ walletBalance: newBalance.toString() })
+          .where(eq(users.id, userId));
+
+        // Create transaction record
+        await db.insert(walletTransactions).values({
+          userId,
+          amount: amount.toString(),
+          type: "credit",
+          status: "completed",
+          description: "Wallet top-up via Razorpay",
+          transactionId: razorpay_payment_id
+        });
+
+        res.json({
+          success: true,
+          message: "Payment verified and wallet updated",
+          newBalance
+        });
+      } else {
+        res.status(400).json({ error: "Payment verification failed" });
+      }
+    } catch (error: any) {
+      console.error("Payment verification error:", error);
+      res.status(500).json({ error: "Payment verification failed" });
     }
   });
 

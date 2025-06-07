@@ -389,10 +389,11 @@ export default function MyVyrona() {
                         <DialogFooter>
                           <Button
                             className="w-full"
-                            disabled={!addMoneyAmount || parseFloat(addMoneyAmount) <= 0}
+                            disabled={!addMoneyAmount || parseFloat(addMoneyAmount) <= 0 || addMoneyMutation.isPending}
+                            onClick={() => addMoneyMutation.mutate(parseFloat(addMoneyAmount))}
                           >
                             <CreditCard className="h-4 w-4 mr-2" />
-                            Pay ₹{addMoneyAmount || "0"}
+                            {addMoneyMutation.isPending ? "Processing..." : `Pay ₹${addMoneyAmount || "0"}`}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -445,13 +446,68 @@ export default function MyVyrona() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No transactions yet</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Your wallet transactions will appear here
-                  </p>
-                </div>
+                {transactionsLoading ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                            <div>
+                              <div className="w-24 h-4 bg-gray-200 rounded mb-2"></div>
+                              <div className="w-16 h-3 bg-gray-200 rounded"></div>
+                            </div>
+                          </div>
+                          <div className="w-16 h-4 bg-gray-200 rounded"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : transactions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600">No transactions yet</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Your wallet transactions will appear here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {transactions.map((transaction: any) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            transaction.type === 'credit' 
+                              ? 'bg-green-100 text-green-600' 
+                              : 'bg-red-100 text-red-600'
+                          }`}>
+                            {transaction.type === 'credit' ? (
+                              <ArrowDownLeft className="h-5 w-5" />
+                            ) : (
+                              <ArrowUpRight className="h-5 w-5" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium">{transaction.description}</p>
+                            <p className="text-sm text-gray-500">
+                              {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-semibold ${
+                            transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount).toFixed(2)}
+                          </p>
+                          <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                            {transaction.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
