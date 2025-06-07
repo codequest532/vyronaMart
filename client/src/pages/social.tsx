@@ -461,6 +461,16 @@ export default function VyronaSocial() {
           });
         }
         
+        if (data.type === 'call-participants-updated') {
+          setCallParticipants(data.participants);
+          if (data.newJoiner) {
+            toast({
+              title: "User joined call",
+              description: `${data.newJoiner.username} joined the video call`,
+            });
+          }
+        }
+        
         if (data.type === 'video-call-ended') {
           setIsVideoCallActive(false);
           setCurrentCallId(null);
@@ -1755,24 +1765,27 @@ export default function VyronaSocial() {
         </Tabs>
       </div>
 
-      {/* Video Call Overlay - Google Meet Style */}
+      {/* Video Call Overlay - Integrated with Product Browsing */}
       {isVideoCallActive && (
-        <div className="fixed inset-0 bg-gray-900 z-50">
-          {/* Participants Grid */}
-          <div className="h-full p-6 pb-24">
-            <div className={`grid gap-2 h-full ${
-              callParticipants.length === 1 ? 'grid-cols-1' :
-              callParticipants.length === 2 ? 'grid-cols-2' :
-              callParticipants.length <= 4 ? 'grid-cols-2 grid-rows-2' :
-              callParticipants.length <= 6 ? 'grid-cols-3 grid-rows-2' :
-              'grid-cols-4'
-            }`}>
+        <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex">
+          {/* Left Side - Participants */}
+          <div className="w-1/3 bg-gray-900 p-4 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white text-lg font-semibold">Video Call</h3>
+              <div className="text-green-400 text-sm flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                {callParticipants.length} participant{callParticipants.length !== 1 ? 's' : ''}
+              </div>
+            </div>
+
+            {/* Participants Grid */}
+            <div className="flex-1 space-y-3">
               {callParticipants.map((participant, index) => {
                 const isCurrentUser = participant.userId === ((authUser as any)?.id || 1);
                 return (
                   <div
                     key={participant.userId}
-                    className="bg-gray-800 rounded-xl relative overflow-hidden flex items-center justify-center"
+                    className="bg-gray-800 rounded-lg relative overflow-hidden aspect-video flex items-center justify-center"
                   >
                     {isCurrentUser && isCameraOn ? (
                       <video
@@ -1782,70 +1795,159 @@ export default function VyronaSocial() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="flex flex-col items-center justify-center text-white p-8">
-                        <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center text-2xl font-medium mb-4">
+                      <div className="flex flex-col items-center justify-center text-white p-4">
+                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-lg font-medium mb-2">
                           {participant.username.charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-lg font-medium">{isCurrentUser ? 'You' : participant.username}</span>
+                        <span className="text-sm font-medium">{isCurrentUser ? 'You' : participant.username}</span>
                       </div>
                     )}
                     
-                    {/* Participant Name */}
-                    <div className="absolute bottom-4 left-4 bg-black/60 rounded-lg px-3 py-1 text-white text-sm font-medium">
-                      {isCurrentUser ? 'You' : participant.username}
-                    </div>
-
-                    {/* Microphone Status */}
-                    {!isMicOn && isCurrentUser && (
-                      <div className="absolute bottom-4 right-4 bg-red-600 rounded-full p-2">
-                        <MicOff className="w-4 h-4 text-white" />
+                    {/* Participant Controls */}
+                    <div className="absolute bottom-2 left-2 flex items-center gap-2">
+                      <div className="bg-black/60 rounded px-2 py-1 text-white text-xs">
+                        {isCurrentUser ? 'You' : participant.username}
                       </div>
-                    )}
+                      {!isMicOn && isCurrentUser && (
+                        <div className="bg-red-600 rounded-full p-1">
+                          <MicOff className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
-          </div>
 
-          {/* Bottom Control Bar - Google Meet Style */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gray-800 p-6">
-            <div className="flex items-center justify-center gap-4">
-              {/* Microphone Toggle */}
+            {/* Call Controls */}
+            <div className="mt-4 flex items-center justify-center gap-3">
               <button
                 onClick={() => setIsMicOn(!isMicOn)}
-                className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
                   isMicOn 
                     ? 'bg-gray-600 hover:bg-gray-500 text-white' 
                     : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
               >
-                {isMicOn ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+                {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
               </button>
 
-              {/* Camera Toggle */}
               <button
                 onClick={() => setIsCameraOn(!isCameraOn)}
-                className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
                   isCameraOn 
                     ? 'bg-gray-600 hover:bg-gray-500 text-white' 
                     : 'bg-red-600 hover:bg-red-700 text-white'
                 }`}
               >
-                {isCameraOn ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
+                {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
               </button>
 
-              {/* End Call */}
               <button
                 onClick={handleEndVideoCall}
-                className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-colors"
+                className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-colors"
               >
-                <Phone className="w-6 h-6" />
+                <Phone className="w-5 h-5" />
               </button>
             </div>
+          </div>
 
-            {/* Call Info */}
-            <div className="text-center mt-4 text-gray-300 text-sm">
-              {selectedGroup?.name} • {callParticipants.length} participant{callParticipants.length !== 1 ? 's' : ''}
+          {/* Right Side - Collaborative Product Browsing */}
+          <div className="flex-1 bg-white dark:bg-gray-900 flex flex-col">
+            <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
+                  Shopping Together
+                </h3>
+                <div className="text-sm text-green-600 dark:text-green-400">
+                  Browse exclusive products with your group
+                </div>
+              </div>
+            </div>
+
+            {/* Product Grid - Synchronized */}
+            <div className="flex-1 p-4 overflow-y-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredProducts.slice(0, 6).map((product) => (
+                  <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-green-300">
+                    <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
+                      {product.imageUrl ? (
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <Package className="w-12 h-12 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3">
+                        <Badge className="bg-white/90 text-gray-800 shadow-sm">
+                          {product.category}
+                        </Badge>
+                      </div>
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Exclusive
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-2 line-clamp-1">{product.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{product.description}</p>
+                      
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-indigo-600">₹{product.price}</span>
+                          <span className="text-sm text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
+                        </div>
+                        <Badge variant="outline" className="text-xs">
+                          20% OFF
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
+                          size="sm"
+                          disabled={!selectedGroupId || addToGroupCartMutation.isPending}
+                          onClick={() => handleAddToGroupCart(product.id)}
+                        >
+                          <ShoppingBag className="w-4 h-4 mr-2" />
+                          Add to Group
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="px-3"
+                        >
+                          <Heart className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Call Actions */}
+            <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Shopping with {callParticipants.length} member{callParticipants.length !== 1 ? 's' : ''}
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsGroupCartOpen(true)}
+                  className="gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  View Group Cart
+                </Button>
+              </div>
             </div>
           </div>
         </div>

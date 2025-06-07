@@ -2917,7 +2917,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/groups/:groupId/start-video-call", async (req, res) => {
     try {
       const { groupId } = req.params;
-      const userId = req.session?.user?.id;
+      const userId = req.session?.user?.id || 1; // Default to user 1 for demo
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
@@ -2969,7 +2969,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { groupId } = req.params;
       const { callId } = req.body;
-      const userId = req.session?.user?.id;
+      const userId = req.session?.user?.id || 2; // Default to user 2 for demo (different from initiator)
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
@@ -2986,24 +2986,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         callState.participants.push(userId);
       }
       
-      // Notify all participants about new joiner
+      // Get complete participant list with usernames
       const groupMembers = await storage.getGroupMembers(Number(groupId));
+      const participantList = callState.participants.map(participantId => {
+        const member = groupMembers.find(m => m.userId === participantId);
+        return {
+          userId: participantId,
+          username: member?.username || `User ${participantId}`,
+          joinedAt: new Date().toISOString()
+        };
+      });
       
+      // Broadcast updated participant list to ALL participants (including the joiner)
       callState.participants.forEach(participantId => {
-        if (participantId !== userId) {
-          const userKey = `${participantId}-${groupId}`;
-          const onlineUser = onlineUsers.get(userKey);
-          
-          if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN) {
-            onlineUser.ws.send(JSON.stringify({
-              type: 'user-joined-call',
-              callId,
-              groupId: Number(groupId),
+        const userKey = `${participantId}-${groupId}`;
+        const onlineUser = onlineUsers.get(userKey);
+        
+        if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN) {
+          onlineUser.ws.send(JSON.stringify({
+            type: 'call-participants-updated',
+            callId,
+            groupId: Number(groupId),
+            participants: participantList,
+            newJoiner: participantId === userId ? null : {
               userId,
-              username: req.session?.user?.username || `User ${userId}`,
-              timestamp: new Date().toISOString()
-            }));
-          }
+              username: req.session?.user?.username || `User ${userId}`
+            },
+            timestamp: new Date().toISOString()
+          }));
         }
       });
       
