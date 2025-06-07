@@ -7,8 +7,9 @@ import NotificationToast from "@/components/ui/notification-toast";
 import { GroupCartModal } from "@/components/GroupCartModal";
 import { useUserData } from "@/hooks/use-user-data";
 import { useToastNotifications } from "@/hooks/use-toast-notifications";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +58,7 @@ import {
   TrendingUp
 } from "lucide-react";
 
-type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
+type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile" | "wallet";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
@@ -72,6 +73,10 @@ export default function Home() {
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
   const [groupCartModalOpen, setGroupCartModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  
+  // Wallet-related state
+  const [addMoneyAmount, setAddMoneyAmount] = useState("");
+  const { toast } = useToast();
 
 
   // Sample book content
@@ -176,6 +181,61 @@ export default function Home() {
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Wallet-related queries
+  const { data: walletBalance = { balance: 0 }, isLoading: isLoadingWallet } = useQuery({
+    queryKey: [`/api/wallet/balance/${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  const { data: walletTransactions = [], isLoading: isLoadingTransactions } = useQuery({
+    queryKey: [`/api/wallet/transactions/${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  const { data: purchases = [], isLoading: isLoadingPurchases } = useQuery({
+    queryKey: [`/api/orders/user/${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  const { data: rentals = [], isLoading: isLoadingRentals } = useQuery({
+    queryKey: [`/api/rentals/user/${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  const { data: loans = [], isLoading: isLoadingLoans } = useQuery({
+    queryKey: [`/api/book-loans/user/${user?.id}`],
+    enabled: !!user?.id,
+  });
+
+  // Wallet mutations
+  const addMoneyMutation = useMutation({
+    mutationFn: async ({ amount }: { amount: number }) => {
+      const response = await fetch('/api/wallet/add-money', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount, userId: user?.id }),
+      });
+      if (!response.ok) throw new Error('Failed to add money');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/wallet/balance/${user?.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/wallet/transactions/${user?.id}`] });
+      toast({ title: "Success", description: "Money added to wallet successfully!" });
+      setAddMoneyAmount("");
+    },
+    onError: (error) => {
+      toast({ title: "Error", description: "Failed to add money to wallet", variant: "destructive" });
+    },
+  });
+
+  const handleAddMoney = () => {
+    const amount = parseFloat(addMoneyAmount);
+    if (amount > 0) {
+      addMoneyMutation.mutate({ amount });
+    }
+  };
 
   const handleGameClick = (gameName: string) => {
     const coinReward = Math.floor(Math.random() * 100) + 10;
@@ -1419,6 +1479,13 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="space-x-2">
+                    <Button 
+                      variant="outline" 
+                      className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                      onClick={() => setActiveTab('wallet')}
+                    >
+                      VyronaWallet
+                    </Button>
                     <Button 
                       variant="outline" 
                       className="bg-white/20 text-white border-white/30 hover:bg-white/30"
