@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -303,10 +303,12 @@ export default function VyronaSocial() {
   // Video call mutations
   const startVideoCallMutation = useMutation({
     mutationFn: async (groupId: number) => {
-      const response = await apiRequest(`/api/groups/${groupId}/start-video-call`, {
-        method: "POST"
+      const response = await fetch(`/api/groups/${groupId}/start-video-call`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to start video call');
+      return response.json();
     },
     onSuccess: (data) => {
       setCurrentCallId(data.callId);
@@ -320,11 +322,13 @@ export default function VyronaSocial() {
 
   const joinVideoCallMutation = useMutation({
     mutationFn: async ({ groupId, callId }: { groupId: number; callId: string }) => {
-      const response = await apiRequest(`/api/groups/${groupId}/join-video-call`, {
+      const response = await fetch(`/api/groups/${groupId}/join-video-call`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ callId })
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to join video call');
+      return response.json();
     },
     onSuccess: () => {
       setIsVideoCallActive(true);
@@ -338,10 +342,12 @@ export default function VyronaSocial() {
 
   const endVideoCallMutation = useMutation({
     mutationFn: async (groupId: number) => {
-      const response = await apiRequest(`/api/groups/${groupId}/end-video-call`, {
-        method: "POST"
+      const response = await fetch(`/api/groups/${groupId}/end-video-call`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to end video call');
+      return response.json();
     },
     onSuccess: () => {
       setIsVideoCallActive(false);
@@ -355,7 +361,7 @@ export default function VyronaSocial() {
 
   // WebSocket connection management
   useEffect(() => {
-    if (!authUser || !selectedGroupId) return;
+    if (!authUser?.id || !selectedGroupId) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -441,9 +447,19 @@ export default function VyronaSocial() {
   }, [onlineMembersData]);
 
   // Video call functions
-  const handleJoinVideoCall = async () => {
+  const handleStartVideoCall = async () => {
     if (!selectedGroupId) {
       toast({ title: "Please select a group first", variant: "destructive" });
+      return;
+    }
+
+    // Check online members count
+    if (onlineMembers.length <= 1) {
+      toast({ 
+        title: "Not enough online members", 
+        description: "At least 2 members must be online to start a video call",
+        variant: "destructive" 
+      });
       return;
     }
     
@@ -462,10 +478,12 @@ export default function VyronaSocial() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
-      setIsVideoCallActive(true);
       setIsCameraOn(true);
       setIsMicOn(true);
-      toast({ title: "Joined video call successfully!" });
+      
+      // Start the video call via API
+      startVideoCallMutation.mutate(selectedGroupId);
+      
     } catch (error: any) {
       let errorMessage = "Unable to access camera/microphone";
       let description = "";
@@ -490,11 +508,37 @@ export default function VyronaSocial() {
         variant: "destructive" 
       });
       
-      // Still allow joining the call without media for chat purposes
-      setIsVideoCallActive(true);
+      // Still start the call without media for chat purposes
+      setIsCameraOn(false);
+      setIsMicOn(false);
+      startVideoCallMutation.mutate(selectedGroupId);
+    }
+  };
+
+  const handleJoinVideoCallInvite = async () => {
+    if (!videoCallInvite || !selectedGroupId) return;
+
+    try {
+      // Try to get media access
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setIsCameraOn(true);
+        setIsMicOn(true);
+      }
+    } catch (error) {
+      // Continue without media
       setIsCameraOn(false);
       setIsMicOn(false);
     }
+
+    // Join the call via API
+    joinVideoCallMutation.mutate({
+      groupId: selectedGroupId,
+      callId: videoCallInvite.callId
+    });
   };
 
   const handleEndVideoCall = () => {
@@ -635,14 +679,18 @@ export default function VyronaSocial() {
               {/* Video Call Toggle */}
               {selectedGroupId && (
                 <Button
-                  onClick={() => isVideoCallActive ? handleEndVideoCall() : handleJoinVideoCall()}
+                  onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
+                  disabled={!isVideoCallActive && onlineMembers.length <= 1}
                   className={`gap-2 ${isVideoCallActive 
-                    ? 'bg-green-500 hover:bg-green-600' 
-                    : 'bg-indigo-500 hover:bg-indigo-600'}`}
+                    ? 'bg-red-500 hover:bg-red-600' 
+                    : onlineMembers.length <= 1 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-green-500 hover:bg-green-600'}`}
                   size="sm"
                 >
                   {isVideoCallActive ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
-                  {isVideoCallActive ? 'End Call' : 'Join Call'}
+                  {isVideoCallActive ? 'End Call' : 
+                   onlineMembers.length <= 1 ? 'Not enough members online' : 'Start Call'}
                 </Button>
               )}
 
@@ -1088,13 +1136,17 @@ export default function VyronaSocial() {
                         <div className="flex items-center gap-2">
                           <Button
                             size="sm"
-                            onClick={handleJoinVideoCall}
+                            onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
+                            disabled={!isVideoCallActive && onlineMembers.length <= 1}
                             className={`gap-2 ${isVideoCallActive 
                               ? 'bg-red-500 hover:bg-red-600' 
-                              : 'bg-green-500 hover:bg-green-600'}`}
+                              : onlineMembers.length <= 1 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-green-500 hover:bg-green-600'}`}
                           >
                             {isVideoCallActive ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
-                            {isVideoCallActive ? 'End Call' : 'Video Call'}
+                            {isVideoCallActive ? 'End Call' : 
+                             onlineMembers.length <= 1 ? `${onlineMembers.length} online` : 'Start Call'}
                           </Button>
                           
                           <Button
