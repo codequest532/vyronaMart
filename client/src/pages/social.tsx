@@ -584,7 +584,7 @@ export default function VyronaSocial() {
 
   // Auto-select first group when groups load
   useEffect(() => {
-    if (groups && groups.length > 0 && !selectedGroupId) {
+    if (groups && Array.isArray(groups) && groups.length > 0 && !selectedGroupId) {
       setSelectedGroupId(groups[0].id);
     }
   }, [groups, selectedGroupId]);
@@ -1561,11 +1561,11 @@ export default function VyronaSocial() {
                                         <Button 
                                           className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
                                           size="sm"
-                                          disabled={addToGroupCartMutation.isPending}
-                                          onClick={() => handleAddToGroupCart(product.id)}
+                                          disabled={!selectedGroup || addToGroupCartMutation.isPending}
+                                          onClick={() => selectedGroup ? handleAddToGroupCart(product.id) : setIsCreateGroupOpen(true)}
                                         >
                                           <ShoppingBag className="w-4 h-4 mr-2" />
-                                          Add to Group
+                                          {selectedGroup ? "Add to Group" : "Create Group First"}
                                         </Button>
                                         <Button 
                                           variant="outline" 
@@ -1585,20 +1585,24 @@ export default function VyronaSocial() {
                       </div>
                     </div>
 
-                {/* No Groups Message */}
+                {/* No Groups Message - Show below products when no group selected */}
                 {!selectedGroup && (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users className="w-10 h-10 text-green-600" />
-                      </div>
-                      <h3 className="text-lg font-semibold mb-2">Select a Group</h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Choose a shopping group to start collaborating
-                      </p>
+                  <div className="p-8 text-center bg-green-50 dark:bg-green-900/20 border-t">
+                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Users className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">Create or Join a Group</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Start collaborating by creating a new group or joining an existing one
+                    </p>
+                    <div className="flex gap-2 justify-center">
                       <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2 bg-green-500 hover:bg-green-600">
                         <Plus className="w-4 h-4" />
-                        Create New Group
+                        Create Group
+                      </Button>
+                      <Button onClick={() => setIsJoinGroupOpen(true)} variant="outline" className="gap-2 border-green-300">
+                        <UserPlus className="w-4 h-4" />
+                        Join Group
                       </Button>
                     </div>
                   </div>
