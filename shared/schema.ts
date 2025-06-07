@@ -783,7 +783,13 @@ export type OtpVerification = typeof otpVerifications.$inferSelect;
 export type InsertOtpVerification = z.infer<typeof insertOtpVerificationSchema>;
 
 // VyronaSocial Types
-export type ShoppingGroup = typeof shoppingGroups.$inferSelect;
+export type ShoppingGroup = typeof shoppingGroups.$inferSelect & {
+  memberCount?: number;
+  category?: string;
+  privacy?: string;
+  currentGame?: string | null;
+  scheduledTime?: Date | null;
+};
 export type InsertShoppingGroup = z.infer<typeof insertShoppingGroupSchema>;
 export type GroupMember = typeof groupMembers.$inferSelect;
 export type InsertGroupMember = z.infer<typeof insertGroupMemberSchema>;
