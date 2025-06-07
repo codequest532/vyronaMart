@@ -1375,15 +1375,19 @@ export default function VyronaSocial() {
                               
                               {/* Status and details row */}
                               <div className="flex items-center justify-between mt-2">
-                                <p className="text-xs text-green-600 dark:text-green-400">
-                                  Active shopping session
-                                </p>
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  {group.totalCart > 0 && (
-                                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                                {group.totalCart > 0 ? (
+                                  <div className="flex items-center gap-1">
+                                    <ShoppingCart className="w-3 h-3 text-green-600 dark:text-green-400" />
+                                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
                                       ₹{Math.floor(group.totalCart / 100)}
-                                    </Badge>
-                                  )}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-gray-500">
+                                    No items in cart
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-2 flex-shrink-0">
                                   {group.roomCode && (
                                     <Badge variant="outline" className="text-xs font-mono px-1.5 py-0.5">
                                       {group.roomCode}
