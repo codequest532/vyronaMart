@@ -762,10 +762,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addCartItem(insertItem: InsertCartItem): Promise<CartItem> {
+    console.log("=== ADDING CART ITEM ===");
+    console.log("Insert data:", JSON.stringify(insertItem, null, 2));
+    
     const [item] = await db
       .insert(cartItems)
       .values(insertItem)
       .returning();
+    
+    console.log("Cart item added successfully:", JSON.stringify(item, null, 2));
+    console.log("=== CART ITEM ADDED ===");
     
     return item;
   }
