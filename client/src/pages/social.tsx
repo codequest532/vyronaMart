@@ -361,7 +361,7 @@ export default function VyronaSocial() {
 
   // WebSocket connection management
   useEffect(() => {
-    if (!authUser?.id || !selectedGroupId) return;
+    if (!authUser || !selectedGroupId) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -374,8 +374,8 @@ export default function VyronaSocial() {
       // Register as online user
       ws.send(JSON.stringify({
         type: 'user-online',
-        userId: authUser.id,
-        username: authUser.username,
+        userId: (authUser as any).id || 1,
+        username: (authUser as any).username || 'User',
         groupId: selectedGroupId
       }));
     };
@@ -1491,6 +1491,57 @@ export default function VyronaSocial() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Video Call Invitation Dialog */}
+      {videoCallInvite && (
+        <Dialog open={true} onOpenChange={() => setVideoCallInvite(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-green-600" />
+                Video Call Invitation
+              </DialogTitle>
+              <DialogDescription>
+                {videoCallInvite.initiatorName} has started a video call in this group
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-sm text-gray-600">
+                Would you like to join the video call?
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleJoinVideoCallInvite}
+                  className="flex-1 bg-green-500 hover:bg-green-600"
+                  disabled={joinVideoCallMutation.isPending}
+                >
+                  <Video className="w-4 h-4 mr-2" />
+                  {joinVideoCallMutation.isPending ? "Joining..." : "Join Call"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setVideoCallInvite(null)}
+                  className="flex-1"
+                >
+                  Decline
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Online Members Indicator */}
+      {selectedGroupId && onlineMembers.length > 0 && (
+        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-green-200">
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-gray-600 dark:text-gray-300">
+              {onlineMembers.length} member{onlineMembers.length !== 1 ? 's' : ''} online
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
