@@ -1840,6 +1840,134 @@ export default function VyronaSocial() {
                   </div>
                 )}
               </div>
+
+              {/* Fixed Chat Panel - Right Side */}
+              <div className="lg:col-span-1 border-l bg-white dark:bg-gray-900 flex flex-col">
+                {selectedGroup ? (
+                  <>
+                    {/* Chat Header */}
+                    <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5 text-green-600" />
+                        <h3 className="font-semibold text-green-800 dark:text-green-200">Group Chat</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        {selectedGroup.name}
+                      </p>
+                    </div>
+
+                    {/* Chat Messages Area */}
+                    <ScrollArea className="flex-1 p-4">
+                      <div className="space-y-4">
+                        {messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`flex ${
+                              message.messageType === 'system'
+                                ? 'justify-center'
+                                : message.userId === (authUser as any)?.id
+                                ? 'justify-end'
+                                : 'justify-start'
+                            }`}
+                          >
+                            {message.messageType === 'system' ? (
+                              <div className="inline-block p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-200 text-center">
+                                {message.content}
+                              </div>
+                            ) : (
+                              <div className={`flex gap-2 max-w-[70%] ${
+                                message.userId === (authUser as any)?.id ? 'flex-row-reverse' : 'flex-row'
+                              }`}>
+                                <Avatar className="w-8 h-8 flex-shrink-0">
+                                  <AvatarFallback className={`text-xs ${
+                                    message.userId === (authUser as any)?.id 
+                                      ? 'bg-green-100 text-green-600' 
+                                      : 'bg-blue-100 text-blue-600'
+                                  }`}>
+                                    {message.username.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className={`${
+                                  message.userId === (authUser as any)?.id ? 'text-right' : 'text-left'
+                                }`}>
+                                  <div className={`inline-block p-3 rounded-lg ${
+                                    message.userId === (authUser as any)?.id
+                                      ? 'bg-green-500 text-white rounded-br-sm'
+                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border'
+                                  }`}>
+                                    {message.content}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+
+                    {/* Chat Input */}
+                    <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="px-2"
+                          onClick={() => {
+                            const fileInput = document.createElement('input');
+                            fileInput.type = 'file';
+                            fileInput.accept = 'image/*,video/*,.pdf,.doc,.docx,.txt';
+                            fileInput.onchange = (event) => {
+                              const file = (event.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                setSelectedFile(file);
+                                toast({
+                                  title: "File Selected",
+                                  description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+                                });
+                              }
+                            };
+                            fileInput.click();
+                          }}
+                        >
+                          <Paperclip className="w-4 h-4" />
+                        </Button>
+                        
+                        <div className="flex-1 relative">
+                          <Input
+                            placeholder="Type a message..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className="pr-12 border-green-300 focus:border-green-500"
+                            disabled={sendMessageMutation.isPending}
+                          />
+                        </div>
+                        
+                        <Button 
+                          onClick={handleSendMessage}
+                          disabled={(!newMessage.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
+                          className="rounded-full p-2 bg-green-500 hover:bg-green-600"
+                        >
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">Select a Group</h3>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Choose a group to start chatting
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
