@@ -1493,7 +1493,118 @@ export default function VyronaSocial() {
                       </div>
                     </div>
 
-                    {/* Chat Messages Area */}
+                    {/* Products and Chat Tabs */}
+                    <Tabs defaultValue="products" className="flex-1 flex flex-col">
+                      <TabsList className="mx-4 mt-2 grid w-full grid-cols-2">
+                        <TabsTrigger value="products" className="gap-2">
+                          <Package className="h-4 w-4" />
+                          Browse Products
+                        </TabsTrigger>
+                        <TabsTrigger value="chat" className="gap-2">
+                          <MessageCircle className="h-4 w-4" />
+                          Group Chat
+                        </TabsTrigger>
+                      </TabsList>
+
+                      {/* Products Tab */}
+                      <TabsContent value="products" className="flex-1 p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                              Exclusive Products
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">VyronaSocial exclusive products with group discounts</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                            className="gap-2"
+                          >
+                            {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+                            {viewMode === 'grid' ? 'List' : 'Grid'}
+                          </Button>
+                        </div>
+
+                        {/* Products Grid */}
+                        <ScrollArea className="flex-1">
+                          <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+                            {productsLoading ? (
+                              Array.from({ length: 6 }).map((_, i) => (
+                                <Card key={i} className="overflow-hidden">
+                                  <div className="animate-pulse">
+                                    <div className="aspect-square bg-gray-200"></div>
+                                    <div className="p-4 space-y-2">
+                                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                    </div>
+                                  </div>
+                                </Card>
+                              ))
+                            ) : filteredProducts.length === 0 ? (
+                              <div className="col-span-full text-center py-8">
+                                <Package className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                                <p className="text-gray-500">No products found</p>
+                              </div>
+                            ) : (
+                              filteredProducts.map((product: any) => (
+                                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                                  <CardContent className="p-0">
+                                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center relative">
+                                      <Package className="w-12 h-12 text-gray-400" />
+                                      <Badge className="absolute top-2 right-2 bg-gradient-to-r from-green-500 to-blue-500 text-white">
+                                        VyronaSocial
+                                      </Badge>
+                                    </div>
+                                    
+                                    <div className="p-4 space-y-3">
+                                      <div>
+                                        <h3 className="font-semibold text-sm line-clamp-2">{product.name}</h3>
+                                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                                          {product.description}
+                                        </p>
+                                      </div>
+
+                                      <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-bold text-green-600">₹{product.price}</span>
+                                          <span className="text-xs text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
+                                        </div>
+                                        <Badge variant="outline" className="text-xs">
+                                          20% OFF
+                                        </Badge>
+                                      </div>
+
+                                      <div className="flex items-center gap-2">
+                                        <Button 
+                                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
+                                          size="sm"
+                                          disabled={addToGroupCartMutation.isPending}
+                                          onClick={() => handleAddToGroupCart(product.id)}
+                                        >
+                                          <ShoppingBag className="w-4 h-4 mr-2" />
+                                          Add to Group
+                                        </Button>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm"
+                                          className="px-3"
+                                        >
+                                          <Heart className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              ))
+                            )}
+                          </div>
+                        </ScrollArea>
+                      </TabsContent>
+
+                      {/* Chat Tab */}
+                      <TabsContent value="chat" className="flex-1 flex flex-col">
+                        {/* Chat Messages Area */}
                     <ScrollArea className="flex-1 p-4">
                       <div className="space-y-4">
                         {/* Display chat messages */}
@@ -1691,6 +1802,8 @@ export default function VyronaSocial() {
                         </Button>
                       </div>
                     </div>
+                      </TabsContent>
+                    </Tabs>
                   </>
                 ) : (
                   <div className="flex-1 flex items-center justify-center">
