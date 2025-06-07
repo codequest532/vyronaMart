@@ -64,6 +64,7 @@ export interface IStorage {
 
   // Cart
   getCartItems(userId: number, roomId?: number): Promise<CartItem[]>;
+  getCartItem(id: number): Promise<CartItem | undefined>;
   addCartItem(item: InsertCartItem): Promise<CartItem>;
   removeCartItem(id: number): Promise<boolean>;
   updateCartItemQuantity(cartItemId: number, quantity: number): Promise<CartItem>;
@@ -884,6 +885,11 @@ export class DatabaseStorage implements IStorage {
       'UPDATE shopping_groups SET total_cart = $1 WHERE id = $2',
       [totalCart, roomId]
     );
+  }
+
+  async getCartItem(id: number): Promise<CartItem | undefined> {
+    const [item] = await db.select().from(cartItems).where(eq(cartItems.id, id));
+    return item;
   }
 
   async removeCartItem(id: number): Promise<boolean> {

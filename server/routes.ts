@@ -1256,7 +1256,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
 
+      // Get cart item details before removing to identify the room
+      const cartItem = await storage.getCartItem(cartItemId);
+      
       await storage.removeCartItem(cartItemId);
+      
+      // Broadcast cart removal to all group members via WebSocket
+      if (cartItem && cartItem.roomId) {
+        const cartUpdateMessage = {
+          type: 'cart-update',
+          roomId: cartItem.roomId,
+          action: 'remove',
+          cartItemId: cartItemId,
+          userId: userId
+        };
+        
+        // Send to all connected users in this group
+        for (const [userId, userData] of onlineUsers) {
+          if (userData.groupId === cartItem.roomId && userData.ws.readyState === 1) {
+            userData.ws.send(JSON.stringify(cartUpdateMessage));
+          }
+        }
+      }
+      
       res.json({ success: true });
     } catch (error) {
       console.error("Error removing cart item:", error);
