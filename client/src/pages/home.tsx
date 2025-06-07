@@ -1615,6 +1615,239 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* VyronaWallet Tab */}
+        {activeTab === "wallet" && (
+          <div className="space-y-6">
+            <Card className="vyrona-gradient-wallet text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                      <Wallet className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">VyronaWallet</h2>
+                      <p className="opacity-90">Manage your payments and transactions</p>
+                      <div className="flex items-center space-x-1 mt-2">
+                        <span className="text-3xl font-bold">₹{isLoadingWallet ? "..." : (walletBalance?.balance || 0).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                    onClick={() => setActiveTab('profile')}
+                  >
+                    Back to Profile
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Add Money Section */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Add Money to Wallet</h3>
+                <div className="flex space-x-4">
+                  <div className="flex-1">
+                    <input
+                      type="number"
+                      placeholder="Enter amount"
+                      value={addMoneyAmount}
+                      onChange={(e) => setAddMoneyAmount(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                      step="0.01"
+                    />
+                  </div>
+                  <Button 
+                    onClick={handleAddMoney}
+                    disabled={!addMoneyAmount || parseFloat(addMoneyAmount) <= 0 || addMoneyMutation.isPending}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {addMoneyMutation.isPending ? "Adding..." : "Add Money"}
+                  </Button>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Minimum amount: ₹1.00</p>
+              </CardContent>
+            </Card>
+
+            {/* Transaction History */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Transactions</h3>
+                {isLoadingTransactions ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                        <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                        </div>
+                        <div className="h-4 bg-gray-300 rounded w-16"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : walletTransactions.length > 0 ? (
+                  <div className="space-y-3">
+                    {walletTransactions.map((transaction: any) => (
+                      <div key={transaction.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'
+                        }`}>
+                          <Wallet className={`h-4 w-4 ${
+                            transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                          }`} />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">{transaction.description}</div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(transaction.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className={`text-sm font-bold ${
+                          transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {transaction.type === 'credit' ? '+' : '-'}₹{Math.abs(transaction.amount).toFixed(2)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No transactions yet</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Purchase History */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Purchase History</h3>
+                {isLoadingPurchases ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="animate-pulse flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                        <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                        </div>
+                        <div className="h-4 bg-gray-300 rounded w-16"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : purchases.length > 0 ? (
+                  <div className="space-y-3">
+                    {purchases.map((purchase: any) => (
+                      <div key={purchase.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <ShoppingCart className="text-blue-600 h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">Order #{purchase.id}</div>
+                          <div className="text-xs text-gray-500">
+                            {new Date(purchase.createdAt).toLocaleDateString()} • {purchase.status}
+                          </div>
+                        </div>
+                        <div className="text-sm font-bold text-blue-600">
+                          ₹{(purchase.totalAmount / 100).toFixed(2)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No purchases yet</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Book Rentals */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Book Rentals</h3>
+                {isLoadingRentals ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="animate-pulse flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                        <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                        </div>
+                        <div className="h-4 bg-gray-300 rounded w-16"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : rentals.length > 0 ? (
+                  <div className="space-y-3">
+                    {rentals.map((rental: any) => (
+                      <div key={rental.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                          <Book className="text-purple-600 h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">{rental.bookTitle}</div>
+                          <div className="text-xs text-gray-500">
+                            Due: {new Date(rental.dueDate).toLocaleDateString()} • {rental.status}
+                          </div>
+                        </div>
+                        <div className="text-sm font-bold text-purple-600">
+                          ₹{rental.totalCost}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No active rentals</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Library Loans */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Library Loans</h3>
+                {isLoadingLoans ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="animate-pulse flex items-center space-x-3 p-3 bg-gray-100 rounded-lg">
+                        <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-300 rounded w-1/2"></div>
+                        </div>
+                        <div className="h-4 bg-gray-300 rounded w-16"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : loans.length > 0 ? (
+                  <div className="space-y-3">
+                    {loans.map((loan: any) => (
+                      <div key={loan.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                          <GraduationCap className="text-indigo-600 h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium">{loan.bookTitle}</div>
+                          <div className="text-xs text-gray-500">
+                            Due: {new Date(loan.dueDate).toLocaleDateString()} • {loan.status}
+                          </div>
+                        </div>
+                        <Badge variant={loan.status === 'active' ? 'default' : 'secondary'}>
+                          {loan.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No library loans</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       {activeTab === "read-book" && selectedBook && (

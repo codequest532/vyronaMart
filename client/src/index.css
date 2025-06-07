@@ -115,6 +115,10 @@
   .vyrona-gradient-profile {
     background: linear-gradient(to right, hsl(var(--vyrona-purple)), hsl(var(--vyrona-pink)));
   }
+
+  .vyrona-gradient-wallet {
+    background: linear-gradient(to right, hsl(var(--vyrona-emerald)), hsl(var(--vyrona-primary)));
+  }
 }
 
 @media (max-width: 640px) {
