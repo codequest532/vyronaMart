@@ -582,6 +582,13 @@ export default function VyronaSocial() {
     }
   }, [onlineMembersData]);
 
+  // Auto-select first group when groups load
+  useEffect(() => {
+    if (groups && groups.length > 0 && !selectedGroupId) {
+      setSelectedGroupId(groups[0].id);
+    }
+  }, [groups, selectedGroupId]);
+
   // Reset selectedGroupId when groups list changes or selected group no longer exists
   useEffect(() => {
     if (groups && Array.isArray(groups)) {
