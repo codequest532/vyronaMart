@@ -1349,10 +1349,9 @@ export default function VyronaSocial() {
 
               {/* Main Content Area */}
               <div className="lg:col-span-2 flex flex-col bg-gray-50 dark:bg-gray-900 relative">
-                {selectedGroup ? (
-                  <>
-                    {/* Group Header */}
-                    <div className="p-4 bg-white dark:bg-gray-800 border-b shadow-sm">
+                {/* Group Header - Only show when group is selected */}
+                {selectedGroup && (
+                  <div className="p-4 bg-white dark:bg-gray-800 border-b shadow-sm">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -1479,9 +1478,10 @@ export default function VyronaSocial() {
                         </div>
                       </div>
                     </div>
+                )}
 
-                    {/* Products Section */}
-                    <div className="flex-1 flex flex-col">
+                {/* Products Section - Always visible */}
+                <div className="flex-1 flex flex-col">
                       <div className="p-4 border-b bg-white dark:bg-gray-800">
                         <div className="flex items-center gap-2">
                           <Package className="h-5 w-5 text-indigo-600" />
@@ -1584,8 +1584,9 @@ export default function VyronaSocial() {
                         </ScrollArea>
                       </div>
                     </div>
-                  </>
-                ) : (
+
+                {/* No Groups Message */}
+                {!selectedGroup && (
                   <div className="flex-1 flex items-center justify-center">
                     <div className="text-center">
                       <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
