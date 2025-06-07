@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, BookOpen, Calendar, DollarSign, Package, RefreshCw, Clock, CheckCircle, XCircle, Wallet, Plus, ArrowUpRight, ArrowDownLeft, CreditCard } from "lucide-react";
+import { AlertCircle, BookOpen, Calendar, DollarSign, Package, RefreshCw, Clock, CheckCircle, XCircle, Wallet, Plus, ArrowUpRight, ArrowDownLeft, CreditCard, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistance } from "date-fns";
+import { useLocation } from "wouter";
 
 export default function MyVyrona() {
   const [selectedReturnItem, setSelectedReturnItem] = useState<any>(null);
@@ -20,6 +21,7 @@ export default function MyVyrona() {
   const [addMoneyAmount, setAddMoneyAmount] = useState("");
   const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);
   const { toast } = useToast();
+  const [, navigate] = useLocation();
 
   // Get current user from localStorage or context
   const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{"id": 1}');
@@ -238,13 +240,26 @@ export default function MyVyrona() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-8">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            MyVyrona Dashboard
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Manage your VyronaWallet, track book rentals, library loans, and purchases all in one place.
-          </p>
+        <div className="mb-8">
+          <div className="flex items-center mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/home")}
+              className="mr-4 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+          </div>
+          <div className="text-center">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              MyVyrona Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Manage your VyronaWallet, track book rentals, library loans, and purchases all in one place.
+            </p>
+          </div>
         </div>
 
         {/* Quick Stats */}
