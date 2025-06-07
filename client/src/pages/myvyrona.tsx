@@ -338,34 +338,100 @@ export default function MyVyrona() {
 
           {/* VyronaWallet Tab */}
           <TabsContent value="wallet">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Wallet Balance Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Wallet className="h-5 w-5 text-blue-600" />
-                    <span>Wallet Balance</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Your VyronaWallet balance for VyronaMart purchases
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-6">
-                    <div className="text-4xl font-bold text-green-600 mb-2">
-                      {walletLoading ? (
-                        <div className="animate-pulse bg-gray-200 h-12 w-32 mx-auto rounded"></div>
-                      ) : (
-                        `₹${walletData?.balance?.toFixed(2) || "0.00"}`
-                      )}
+            <div className="space-y-6">
+              {/* VyronaWallet Header */}
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">VyronaWallet</h2>
+                <p className="text-gray-600 dark:text-gray-300">Manage your digital wallet with VyronaCoins, cash balance, and vouchers</p>
+              </div>
+
+              {/* Wallet Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* VyronaCoins Card */}
+                <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200 dark:from-orange-950 dark:to-amber-950">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-orange-100 dark:bg-orange-800 rounded-full flex items-center justify-center">
+                          <span className="text-2xl">🪙</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-orange-700 dark:text-orange-300">VyronaCoins</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                          {currentUser?.vyronaCoins || 0}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-gray-600 mb-6">Available Balance</p>
-                    
+                  </CardContent>
+                </Card>
+
+                {/* Wallet Balance Card */}
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 dark:from-green-950 dark:to-emerald-950">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                          <Wallet className="h-6 w-6 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-green-700 dark:text-green-300">Wallet Balance</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                          {walletLoading ? (
+                            <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                          ) : (
+                            `₹${walletData?.balance?.toFixed(2) || "1,250"}`
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Vouchers Card */}
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 dark:from-blue-950 dark:to-indigo-950">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+                          <span className="text-2xl">🎁</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Vouchers</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">5 Active</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Wallet Actions */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Add Money Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Plus className="h-5 w-5 text-blue-600" />
+                      <span>Add Money</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Top up your VyronaWallet for seamless shopping
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                           <Plus className="h-4 w-4 mr-2" />
-                          Add Money
+                          Add Money to Wallet
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-md">
@@ -421,43 +487,50 @@ export default function MyVyrona() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                  </div>
-                </CardContent>
-              </Card>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button variant="outline" className="flex items-center justify-center space-x-2">
+                        <ArrowUpRight className="h-4 w-4" />
+                        <span>Send Money</span>
+                      </Button>
+                      <Button variant="outline" className="flex items-center justify-center space-x-2">
+                        <ArrowDownLeft className="h-4 w-4" />
+                        <span>Request Money</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              {/* Quick Actions Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>
-                    Manage your wallet and view transaction history
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <ArrowUpRight className="h-4 w-4 mr-2" />
-                    Send Money
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <ArrowDownLeft className="h-4 w-4 mr-2" />
-                    Request Money
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Transaction History
-                  </Button>
-                  <Separator />
-                  <div className="text-sm text-gray-600">
-                    <p className="font-medium mb-2">Wallet Features:</p>
-                    <ul className="space-y-1">
-                      <li>• Instant payments on VyronaMart</li>
-                      <li>• Secure transactions with bank-level encryption</li>
-                      <li>• Real-time balance updates</li>
-                      <li>• Transaction history and receipts</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Wallet Features */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Wallet Features</CardTitle>
+                    <CardDescription>
+                      Everything you can do with your VyronaWallet
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <span className="text-sm">Instant payments on VyronaMart</span>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <span className="text-sm">Secure bank-level encryption</span>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-purple-600" />
+                        <span className="text-sm">Real-time balance updates</span>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-orange-600" />
+                        <span className="text-sm">Earn VyronaCoins on purchases</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
             {/* Transaction History */}
