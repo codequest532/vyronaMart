@@ -677,10 +677,10 @@ export class DatabaseStorage implements IStorage {
       results = await db.select().from(products);
     }
     
-    // Convert price from string/decimal to proper number format
+    // Ensure prices are properly formatted as decimals
     return results.map(product => ({
       ...product,
-      price: parseFloat(product.price.toString())
+      price: Number(parseFloat(product.price.toString()).toFixed(2))
     }));
   }
 
