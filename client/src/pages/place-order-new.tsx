@@ -23,7 +23,8 @@ import {
   Smartphone,
   Plus,
   Clock,
-  Target
+  Target,
+  User
 } from "lucide-react";
 
 // Interfaces
