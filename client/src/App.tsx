@@ -22,13 +22,15 @@ import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
 import EbookReader from "@/pages/ebook-reader";
+import TestSocial from "@/pages/test-social";
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
 function Router() {
   const { user, isLoading } = useUserData();
 
-  if (isLoading) {
+  // Don't block routing while loading for development
+  if (isLoading && window.location.pathname === '/') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
         <div className="text-center">
@@ -66,6 +68,7 @@ function Router() {
         {(params) => <StoreDetails storeId={params.storeId} />}
       </Route>
       <Route path="/social" component={VyronaSocial} />
+      <Route path="/test-social" component={TestSocial} />
       <Route path="/place-order/:roomId" component={PlaceOrder} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
