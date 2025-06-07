@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   role: text("role").notNull().default("customer"), // 'customer', 'seller', 'admin'
   vyronaCoins: integer("vyrona_coins").notNull().default(0),
+  walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).notNull().default("0.00"),
   xp: integer("xp").notNull().default(0),
   level: integer("level").notNull().default(1),
   isActive: boolean("is_active").notNull().default(true),
@@ -238,7 +239,8 @@ export const walletTransactions = pgTable("wallet_transactions", {
   userId: integer("user_id").notNull(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   type: text("type").notNull(), // 'credit', 'debit', 'payment', 'refund'
-  description: text("description"),
+  description: text("description").notNull(),
+  transactionId: text("transaction_id"), // for payment gateway reference
   status: text("status").notNull().default("completed"), // 'pending', 'completed', 'failed'
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -295,6 +297,8 @@ export const instagramOrders = pgTable("instagram_orders", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+
 
 export const instagramAnalytics = pgTable("instagram_analytics", {
   id: serial("id").primaryKey(),

@@ -6,16 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { AlertCircle, BookOpen, Calendar, DollarSign, Package, RefreshCw, Clock, CheckCircle, XCircle } from "lucide-react";
+import { AlertCircle, BookOpen, Calendar, DollarSign, Package, RefreshCw, Clock, CheckCircle, XCircle, Wallet, Plus, ArrowUpRight, ArrowDownLeft, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistance } from "date-fns";
 
 export default function MyVyrona() {
   const [selectedReturnItem, setSelectedReturnItem] = useState<any>(null);
   const [returnReason, setReturnReason] = useState("");
+  const [addMoneyAmount, setAddMoneyAmount] = useState("");
   const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);
   const { toast } = useToast();
 
