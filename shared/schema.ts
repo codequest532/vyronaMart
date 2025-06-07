@@ -769,8 +769,6 @@ export type InsertGroupCartContribution = z.infer<typeof insertGroupCartContribu
 // VyronaWallet Types
 export type VyronaWallet = typeof vyronaWallets.$inferSelect;
 export type InsertVyronaWallet = z.infer<typeof insertVyronaWalletSchema>;
-export type WalletTransaction = typeof walletTransactions.$inferSelect;
-export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
 
 // Group Order Types
 export type GroupOrder = typeof groupOrders.$inferSelect;
@@ -837,6 +835,3 @@ export type GroupBuyOrder = typeof groupBuyOrders.$inferSelect;
 export type GroupBuyCampaignProduct = typeof groupBuyCampaignProducts.$inferSelect;
 export type InsertGroupBuyCampaignProduct = z.infer<typeof insertGroupBuyCampaignProductSchema>;
 export type InsertGroupBuyOrder = z.infer<typeof insertGroupBuyOrderSchema>;
-
-export type WalletTransaction = typeof walletTransactions.$inferSelect;
-export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;
