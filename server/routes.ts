@@ -16,8 +16,9 @@ import {
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
   insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
-  walletTransactions, users
+  walletTransactions, users, orders
 } from "@shared/schema";
+import { cartItems } from "../migrations/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail } from "./email";
@@ -3734,14 +3735,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await db.insert(orders).values({
         userId,
-        totalAmount: totalAmount.toString(),
+        totalAmount: totalAmount,
         status: "placed",
-        metadata: JSON.stringify({
+        module: "social",
+        metadata: {
           roomId,
           items,
           orderType: "group_contribution",
           placedAt: new Date()
-        })
+        }
       });
 
       // Clear room cart after successful order

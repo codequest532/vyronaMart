@@ -67,6 +67,18 @@ interface ContributionTarget {
   isComplete: boolean;
 }
 
+interface DeliveryAddress {
+  id: string;
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}
+
 interface CheckoutState {
   items: OrderItem[];
   contributionTargets: ContributionTarget[];
@@ -75,6 +87,7 @@ interface CheckoutState {
   allItemsFunded: boolean;
   canProceedToOrder: boolean;
   codEligible: boolean;
+  deliveryAddress: DeliveryAddress | null;
 }
 
 export default function PlaceOrderNew() {
@@ -127,13 +140,25 @@ export default function PlaceOrderNew() {
     totalContributed: 0,
     allItemsFunded: false,
     canProceedToOrder: false,
-    codEligible: false
+    codEligible: false,
+    deliveryAddress: null
   });
 
   const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
   const [contributionAmount, setContributionAmount] = useState('');
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [showContributionModal, setShowContributionModal] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addressForm, setAddressForm] = useState<Partial<DeliveryAddress>>({
+    fullName: '',
+    phone: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    pincode: '',
+    isDefault: true
+  });
 
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
@@ -196,7 +221,8 @@ export default function PlaceOrderNew() {
       totalContributed: 0,
       allItemsFunded: false,
       canProceedToOrder: false,
-      codEligible
+      codEligible,
+      deliveryAddress: null
     });
   }, [cartItems, room?.memberCount]);
 
@@ -234,7 +260,8 @@ export default function PlaceOrderNew() {
           itemId,
           roomId 
         });
-        transactionId = response.transactionId;
+        const responseData = await response.json();
+        transactionId = responseData.transactionId;
       } else if (paymentMethod.type === 'googlepay') {
         const response = await apiRequest('POST', paymentMethod.apiEndpoint!, {
           amount,
@@ -242,7 +269,8 @@ export default function PlaceOrderNew() {
           roomId,
           memberCount: room?.memberCount
         });
-        transactionId = response.transactionId;
+        const responseData = await response.json();
+        transactionId = responseData.transactionId;
       } else if (paymentMethod.type === 'phonepe') {
         const response = await apiRequest('POST', paymentMethod.apiEndpoint!, {
           amount,
@@ -250,7 +278,8 @@ export default function PlaceOrderNew() {
           roomId,
           memberCount: room?.memberCount
         });
-        transactionId = response.transactionId;
+        const responseData = await response.json();
+        transactionId = responseData.transactionId;
       } else if (paymentMethod.type === 'cod') {
         if (amount !== checkoutState.totalCartValue) {
           toast({
