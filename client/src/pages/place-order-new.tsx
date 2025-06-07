@@ -198,6 +198,14 @@ export default function PlaceOrderNew() {
     enabled: !!roomId,
   });
 
+  // Fetch group contributions for real-time synchronization
+  const { data: groupContributions, refetch: refetchContributions } = useQuery({
+    queryKey: ["/api/groups", roomId, "contributions"],
+    queryFn: () => fetch(`/api/groups/${roomId}/contributions`).then(res => res.json()),
+    enabled: !!roomId,
+    refetchInterval: 2000, // Poll every 2 seconds for real-time updates
+  });
+
   const cartItems = Array.isArray(cartItemsResponse) ? cartItemsResponse : [];
   const room = Array.isArray(roomsResponse) ? roomsResponse.find(r => r.id === roomId) : null;
 
@@ -205,18 +213,34 @@ export default function PlaceOrderNew() {
   useEffect(() => {
     if (!cartItems.length || !room?.memberCount) return;
     
-    // Convert cart items to contribution-trackable items
-    const contributionItems: OrderItem[] = cartItems.map(item => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity || 1,
-      imageUrl: item.imageUrl,
-      contributedAmount: 0,
-      targetAmount: item.price * (item.quantity || 1),
-      isFullyFunded: false,
-      contributors: []
-    }));
+    // Convert cart items to contribution-trackable items with real-time backend data
+    const contributionItems: OrderItem[] = cartItems.map(item => {
+      // Calculate contributions for this item from backend data
+      const itemContributions = groupContributions?.filter((contrib: any) => contrib.cartItemId === item.id) || [];
+      const totalContributed = itemContributions.reduce((sum: number, contrib: any) => sum + (contrib.amount / 100), 0);
+      
+      // Map backend contributions to frontend format
+      const contributors: ItemContributor[] = itemContributions.map((contrib: any) => ({
+        userId: contrib.userId,
+        username: contrib.username,
+        amount: contrib.amount / 100, // Convert from cents
+        paymentMethod: contrib.paymentMethod as 'wallet' | 'googlepay' | 'phonepe' | 'cod',
+        status: contrib.status === 'completed' ? 'contributed' : 'pending',
+        transactionId: contrib.transactionId
+      }));
+
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity || 1,
+        imageUrl: item.imageUrl,
+        contributedAmount: totalContributed,
+        targetAmount: item.price * (item.quantity || 1),
+        isFullyFunded: totalContributed >= (item.price * (item.quantity || 1)),
+        contributors
+      };
+    });
 
     // Create contribution targets for each item
     const targets: ContributionTarget[] = contributionItems.map(item => ({
@@ -242,7 +266,7 @@ export default function PlaceOrderNew() {
       deliveryAddress: null,
       savedAddresses: []
     });
-  }, [cartItems, room?.memberCount]);
+  }, [cartItems, room?.memberCount, groupContributions]);
 
   // Contribution management
   const addContribution = async (itemId: number, amount: number, paymentMethod: PaymentMethod) => {
@@ -309,6 +333,32 @@ export default function PlaceOrderNew() {
         }
         transactionId = `cod_${Date.now()}`;
       }
+
+      // Save contribution to backend
+      const contributionResponse = await fetch(`/api/groups/${roomId}/contributions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cartItemId: itemId,
+          amount,
+          paymentMethod: paymentMethod.type,
+          transactionId
+        }),
+      });
+
+      if (!contributionResponse.ok) {
+        toast({
+          title: "Error",
+          description: "Failed to save contribution. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Trigger immediate refetch of contributions for real-time sync
+      await refetchContributions();
 
       const newContributor: ItemContributor = {
         userId: 1,
