@@ -37,6 +37,11 @@ interface OrderItem {
   targetAmount: number;
   isFullyFunded: boolean;
   contributors: ItemContributor[];
+  assignedMember?: {
+    userId: number;
+    username: string;
+    deliveryAddress?: DeliveryAddress;
+  };
 }
 
 interface ItemContributor {
@@ -151,6 +156,8 @@ export default function PlaceOrderNew() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
   const [showContributionModal, setShowContributionModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+  const [selectedItemForAssignment, setSelectedItemForAssignment] = useState<OrderItem | null>(null);
   const [addressForm, setAddressForm] = useState<Partial<DeliveryAddress>>({
     fullName: '',
     phone: '',
@@ -427,6 +434,43 @@ export default function PlaceOrderNew() {
     }));
   };
 
+  // Member assignment functions
+  const assignItemToMember = (itemId: number, memberId: number, memberUsername: string, deliveryAddress: DeliveryAddress) => {
+    setCheckoutState(prev => ({
+      ...prev,
+      items: prev.items.map(item => 
+        item.id === itemId 
+          ? {
+              ...item,
+              assignedMember: {
+                userId: memberId,
+                username: memberUsername,
+                deliveryAddress
+              }
+            }
+          : item
+      )
+    }));
+    setShowAssignmentModal(false);
+    setSelectedItemForAssignment(null);
+  };
+
+  const unassignItem = (itemId: number) => {
+    setCheckoutState(prev => ({
+      ...prev,
+      items: prev.items.map(item => 
+        item.id === itemId 
+          ? { ...item, assignedMember: undefined }
+          : item
+      )
+    }));
+  };
+
+  const openAssignmentModal = (item: OrderItem) => {
+    setSelectedItemForAssignment(item);
+    setShowAssignmentModal(true);
+  };
+
   // Place order mutation
   const placeOrderMutation = useMutation({
     mutationFn: async () => {
@@ -614,6 +658,56 @@ export default function PlaceOrderNew() {
                               value={target?.progress || 0} 
                               className="h-2"
                             />
+                          </div>
+
+                          {/* Member Assignment */}
+                          <div className="mt-4 space-y-2">
+                            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Item Assignment:</h4>
+                            {item.assignedMember ? (
+                              <div className="flex items-center justify-between bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4 text-blue-600" />
+                                  <div>
+                                    <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                      Assigned to: {item.assignedMember.username}
+                                    </div>
+                                    {item.assignedMember.deliveryAddress && (
+                                      <div className="text-xs text-blue-600 dark:text-blue-400">
+                                        {item.assignedMember.deliveryAddress.addressLine1}, {item.assignedMember.deliveryAddress.city}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openAssignmentModal(item)}
+                                    className="text-xs"
+                                  >
+                                    Change
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => unassignItem(item.id)}
+                                    className="text-xs text-red-600 hover:text-red-700"
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                onClick={() => openAssignmentModal(item)}
+                                className="w-full text-sm"
+                                disabled={!item.isFullyFunded}
+                              >
+                                <Target className="h-4 w-4 mr-2" />
+                                {item.isFullyFunded ? 'Assign to Member' : 'Fund Item First'}
+                              </Button>
+                            )}
                           </div>
 
                           {/* Contributors List */}
@@ -1003,6 +1097,124 @@ export default function PlaceOrderNew() {
               >
                 Save Address
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Member Assignment Modal */}
+      <Dialog open={showAssignmentModal} onOpenChange={setShowAssignmentModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Assign Item to Member</DialogTitle>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {selectedItemForAssignment && `Assigning: ${selectedItemForAssignment.name}`}
+            </p>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Room Members */}
+            <div className="space-y-4">
+              <h3 className="font-medium">Select Member and Delivery Address:</h3>
+              <div className="space-y-2">
+                {room?.members?.map((member) => (
+                  <Card key={member.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                            <User className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{member.username}</div>
+                            <div className="text-xs text-gray-500">Group Member</div>
+                          </div>
+                        </div>
+                        <div className="flex-1 max-w-sm">
+                          <Label className="text-sm">Choose Address:</Label>
+                          <div className="mt-2 space-y-2">
+                            {checkoutState.savedAddresses.map((address) => (
+                              <Button
+                                key={address.id}
+                                variant="outline"
+                                size="sm"
+                                className="w-full text-left justify-start text-xs p-2 h-auto"
+                                onClick={() => {
+                                  if (selectedItemForAssignment) {
+                                    assignItemToMember(
+                                      selectedItemForAssignment.id,
+                                      member.id,
+                                      member.username,
+                                      address
+                                    );
+                                  }
+                                }}
+                              >
+                                <div className="text-left">
+                                  <div className="font-medium">{address.fullName}</div>
+                                  <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                    {address.addressLine1}
+                                    {address.addressLine2 && `, ${address.addressLine2}`}
+                                  </div>
+                                  <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                    {address.city}, {address.state} {address.pincode}
+                                  </div>
+                                  <div className="text-gray-600 dark:text-gray-400 text-xs">
+                                    Ph: {address.phone}
+                                  </div>
+                                </div>
+                              </Button>
+                            ))}
+                            {checkoutState.savedAddresses.length === 0 && (
+                              <p className="text-xs text-gray-500 py-2">No addresses available</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )) || (
+                  <div className="text-center text-gray-500 py-4">
+                    No members found in this room
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Current Assignment (if any) */}
+            {selectedItemForAssignment?.assignedMember && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">Current Assignment:</h4>
+                <div className="text-sm">
+                  <div>Member: {selectedItemForAssignment.assignedMember.username}</div>
+                  {selectedItemForAssignment.assignedMember.deliveryAddress && (
+                    <div className="text-blue-600 dark:text-blue-400">
+                      Address: {selectedItemForAssignment.assignedMember.deliveryAddress.addressLine1}, {selectedItemForAssignment.assignedMember.deliveryAddress.city}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowAssignmentModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              {checkoutState.savedAddresses.length === 0 && (
+                <Button
+                  onClick={() => {
+                    setShowAssignmentModal(false);
+                    setShowAddressModal(true);
+                  }}
+                  className="flex-1"
+                >
+                  Add Address First
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>
