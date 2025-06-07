@@ -626,10 +626,15 @@ export default function VyronaSocial() {
   // Delete group mutation
   const deleteGroupMutation = useMutation({
     mutationFn: async (groupId: number) => {
-      const response = await apiRequest(`/api/social/groups/${groupId}`, {
+      const response = await fetch(`/api/social/groups/${groupId}`, {
         method: "DELETE",
+        credentials: "include",
       });
-      return response;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete group");
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -651,10 +656,15 @@ export default function VyronaSocial() {
   // Exit group mutation
   const exitGroupMutation = useMutation({
     mutationFn: async (groupId: number) => {
-      const response = await apiRequest(`/api/social/groups/${groupId}/exit`, {
+      const response = await fetch(`/api/social/groups/${groupId}/exit`, {
         method: "POST",
+        credentials: "include",
       });
-      return response;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to exit group");
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -675,14 +685,14 @@ export default function VyronaSocial() {
 
   // Handle delete group
   const handleDeleteGroup = () => {
-    if (selectedGroup && window.confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
+    if (selectedGroup) {
       deleteGroupMutation.mutate(selectedGroup.id);
     }
   };
 
   // Handle exit group
   const handleExitGroup = () => {
-    if (selectedGroup && window.confirm("Are you sure you want to leave this group?")) {
+    if (selectedGroup) {
       exitGroupMutation.mutate(selectedGroup.id);
     }
   };
