@@ -368,6 +368,36 @@ export default function PlaceOrderNew() {
     }
   };
 
+  // Address management
+  const handleAddressSubmit = () => {
+    if (addressForm.fullName && addressForm.phone && addressForm.addressLine1 && 
+        addressForm.city && addressForm.state && addressForm.pincode) {
+      const newAddress: DeliveryAddress = {
+        id: `addr_${Date.now()}`,
+        fullName: addressForm.fullName,
+        phone: addressForm.phone,
+        addressLine1: addressForm.addressLine1,
+        addressLine2: addressForm.addressLine2 || '',
+        city: addressForm.city,
+        state: addressForm.state,
+        pincode: addressForm.pincode,
+        isDefault: addressForm.isDefault || true
+      };
+
+      setCheckoutState(prev => ({
+        ...prev,
+        deliveryAddress: newAddress,
+        canProceedToOrder: prev.allItemsFunded && true
+      }));
+
+      setShowAddressModal(false);
+      toast({
+        title: "Address Added",
+        description: "Delivery address has been saved successfully.",
+      });
+    }
+  };
+
   // Place order mutation
   const placeOrderMutation = useMutation({
     mutationFn: async () => {
@@ -650,6 +680,52 @@ export default function PlaceOrderNew() {
               </CardContent>
             </Card>
 
+            {/* Delivery Address */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Delivery Address
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {checkoutState.deliveryAddress ? (
+                  <div className="space-y-2">
+                    <div className="font-medium">{checkoutState.deliveryAddress.fullName}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      {checkoutState.deliveryAddress.addressLine1}<br />
+                      {checkoutState.deliveryAddress.addressLine2 && (
+                        <>{checkoutState.deliveryAddress.addressLine2}<br /></>
+                      )}
+                      {checkoutState.deliveryAddress.city}, {checkoutState.deliveryAddress.state} {checkoutState.deliveryAddress.pincode}<br />
+                      Phone: {checkoutState.deliveryAddress.phone}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAddressModal(true)}
+                      className="mt-2"
+                    >
+                      Change Address
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-gray-600 dark:text-gray-400 mb-3">
+                      Add a delivery address to proceed
+                    </p>
+                    <Button
+                      onClick={() => setShowAddressModal(true)}
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Address
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Wallet Balance */}
             <Card>
               <CardHeader>
@@ -730,6 +806,110 @@ export default function PlaceOrderNew() {
                 className="flex-1"
               >
                 Contribute
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Address Modal */}
+      <Dialog open={showAddressModal} onOpenChange={setShowAddressModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Delivery Address</DialogTitle>
+            <DialogDescription>
+              Enter your delivery address details
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  value={addressForm.fullName}
+                  onChange={(e) => setAddressForm(prev => ({ ...prev, fullName: e.target.value }))}
+                  placeholder="Enter full name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={addressForm.phone}
+                  onChange={(e) => setAddressForm(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="addressLine1">Address Line 1</Label>
+              <Input
+                id="addressLine1"
+                value={addressForm.addressLine1}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, addressLine1: e.target.value }))}
+                placeholder="House/Flat No., Street Name"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="addressLine2">Address Line 2 (Optional)</Label>
+              <Input
+                id="addressLine2"
+                value={addressForm.addressLine2}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, addressLine2: e.target.value }))}
+                placeholder="Area, Landmark"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={addressForm.city}
+                  onChange={(e) => setAddressForm(prev => ({ ...prev, city: e.target.value }))}
+                  placeholder="Enter city"
+                />
+              </div>
+              <div>
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={addressForm.state}
+                  onChange={(e) => setAddressForm(prev => ({ ...prev, state: e.target.value }))}
+                  placeholder="Enter state"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="pincode">PIN Code</Label>
+              <Input
+                id="pincode"
+                value={addressForm.pincode}
+                onChange={(e) => setAddressForm(prev => ({ ...prev, pincode: e.target.value }))}
+                placeholder="Enter PIN code"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowAddressModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddressSubmit}
+                className="flex-1"
+                disabled={!addressForm.fullName || !addressForm.phone || !addressForm.addressLine1 || 
+                         !addressForm.city || !addressForm.state || !addressForm.pincode}
+              >
+                Save Address
               </Button>
             </div>
           </div>
