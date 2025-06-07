@@ -1362,21 +1362,18 @@ export default function VyronaSocial() {
                           </div>
                           <div>
                             <h3 className="font-semibold">{selectedGroup.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                              <div className="flex items-center gap-1">
-                                <Users className="w-3 h-3" />
-                                <span className="font-medium text-green-600">{selectedGroup.memberCount}</span>
-                                <span>members</span>
-                                {onlineMembers.length > 0 && (
-                                  <span className="text-xs text-green-500">
-                                    ({onlineMembers.length} online)
-                                  </span>
-                                )}
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {selectedGroup.description || "Group Shopping"}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <div className="flex items-center gap-1 text-sm">
+                                <Users className="w-4 h-4 text-blue-500" />
+                                <span className="font-semibold text-blue-600">{selectedGroup.memberCount || 0}</span>
+                                <span className="text-gray-600">members</span>
                               </div>
-                              <span>•</span>
-                              <div className="flex items-center gap-1">
-                                <span>Code:</span>
-                                <Badge variant="outline" className="text-xs font-mono">
+                              <div className="flex items-center gap-1 text-sm">
+                                <span className="text-gray-500">Code:</span>
+                                <Badge variant="outline" className="font-mono text-xs">
                                   {selectedGroup.roomCode}
                                 </Badge>
                               </div>
