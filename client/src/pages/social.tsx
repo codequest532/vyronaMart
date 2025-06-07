@@ -287,14 +287,9 @@ export default function VyronaSocial() {
       if (!response.ok) throw new Error('Failed to send message');
       return response.json();
     },
-    onSuccess: (newMessage) => {
-      // Add message to local state immediately for instant feedback
-      setMessages(prev => [...prev, newMessage]);
+    onSuccess: () => {
+      // Clear the input field - message will be added via WebSocket broadcast
       setNewMessage("");
-      // Scroll to bottom
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
       toast({ title: "Message sent!" });
     },
     onError: (error: Error) => {
@@ -413,6 +408,15 @@ export default function VyronaSocial() {
         
         if (data.type === 'user-status-changed') {
           refetchOnlineMembers();
+        }
+        
+        if (data.type === 'new-message') {
+          // Add new message to the messages list in real-time
+          setMessages(prev => [...prev, data.message]);
+          // Scroll to bottom to show new message
+          setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+          }, 100);
         }
         
       } catch (error) {

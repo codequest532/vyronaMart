@@ -1548,20 +1548,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Content and groupId are required" });
       }
 
-      // Create message object
-      const messageData = {
-        id: Date.now(), // Simple ID for demo
-        content,
+      // Save message to database
+      const savedMessage = await storage.addGroupMessage({
         userId,
-        username,
         groupId: parseInt(groupId),
-        messageType,
-        sentAt: new Date().toISOString()
+        content,
+        messageType
+      });
+
+      // Create response message with username
+      const messageData = {
+        id: savedMessage.id,
+        content: savedMessage.content,
+        userId: savedMessage.userId,
+        username,
+        groupId: savedMessage.groupId,
+        messageType: savedMessage.messageType,
+        sentAt: savedMessage.sentAt
       };
 
       console.log("Creating message:", messageData);
 
-      // For now, just return the message data (in a real app, you'd save to database)
+      // Broadcast message to all group members via WebSocket
+      const groupMembers = await storage.getGroupMembers(parseInt(groupId));
+      
+      groupMembers.forEach(member => {
+        const userKey = `${member.userId}-${groupId}`;
+        const onlineUser = onlineUsers.get(userKey);
+        
+        if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN) {
+          onlineUser.ws.send(JSON.stringify({
+            type: 'new-message',
+            message: messageData,
+            timestamp: new Date().toISOString()
+          }));
+        }
+      });
+
       res.json(messageData);
     } catch (error) {
       console.error("Error creating message:", error);
