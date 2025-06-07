@@ -286,6 +286,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
         storeId: null,
+        enableIndividualBuy: true,
+        enableGroupBuy: true,
+        groupBuyMinQuantity: 5,
+        groupBuyDiscount: 20,
         metadata: {
           author: "Robert Martin",
           type: "physical",
@@ -304,6 +308,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400",
         storeId: null,
+        enableIndividualBuy: true,
+        enableGroupBuy: true,
+        groupBuyMinQuantity: 3,
+        groupBuyDiscount: 15,
         metadata: {
           author: "Sarah Johnson",
           type: "physical",
@@ -323,6 +331,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
         storeId: null,
+        enableIndividualBuy: false,
+        enableGroupBuy: true,
+        groupBuyMinQuantity: 10,
+        groupBuyDiscount: 30,
         metadata: {
           author: "Alex Thompson",
           type: "digital",
@@ -341,6 +353,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400",
         storeId: null,
+        enableIndividualBuy: true,
+        enableGroupBuy: true,
+        groupBuyMinQuantity: 7,
+        groupBuyDiscount: 25,
         metadata: {
           author: "Dr. Emily Chen",
           type: "digital",
