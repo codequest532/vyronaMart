@@ -399,11 +399,11 @@ export default function VyronaSocial() {
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
-                onClick={() => setLocation("/dashboard")}
+                onClick={() => setLocation("/")}
                 className="flex items-center gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Dashboard
+                Back to Home
               </Button>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
