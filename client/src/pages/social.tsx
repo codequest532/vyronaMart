@@ -1616,8 +1616,8 @@ export default function VyronaSocial() {
 
 
 
-                    {/* Chat Section - Upper Half */}
-                    <div className="flex-1 flex flex-col">
+                    {/* Chat Section - 30% */}
+                    <div className="flex flex-col" style={{ height: '30%' }}>
                       {/* Chat Messages Area */}
                       <div className="flex-1 min-h-0">
                         <ScrollArea className="h-full p-4">
@@ -1721,8 +1721,8 @@ export default function VyronaSocial() {
                       </div>
                     </div>
 
-                    {/* Participants Section - Lower Half */}
-                    <div className="flex-1 p-3 border-t bg-gray-50 dark:bg-gray-800 flex flex-col">
+                    {/* Participants Section - 70% */}
+                    <div className="p-3 border-t bg-gray-50 dark:bg-gray-800 flex flex-col" style={{ height: '70%' }}>
                       <div className="flex items-center gap-2 mb-3">
                         <Users className="h-4 w-4 text-blue-600" />
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
