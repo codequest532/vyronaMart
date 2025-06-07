@@ -1597,48 +1597,7 @@ export default function VyronaSocial() {
                 )}
               </div>
 
-              {/* Fixed Chat Panel - Right Side */}
-              <div className="lg:col-span-1 border-l bg-white dark:bg-gray-900 flex flex-col">
-                {selectedGroup ? (
-                  <>
-                    {/* Chat Header */}
-                    <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-5 w-5 text-green-600" />
-                        <h3 className="font-semibold text-green-800 dark:text-green-200">Group Chat</h3>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {selectedGroup.name}
-                      </p>
-                    </div>
 
-                    {/* Group Activity Area */}
-                    <div className="flex-1 p-4">
-                      <div className="text-center text-gray-500">
-                        <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm mb-2">Group chat is in the right panel</p>
-                        <p className="text-xs opacity-75">Start chatting with your group members!</p>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Users className="w-10 h-10 text-green-600" />
-                      </div>
-                      <h3 className="text-lg font-semibold mb-2">Select a Group</h3>
-                      <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        Choose a shopping group to start collaborating
-                      </p>
-                      <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2 bg-green-500 hover:bg-green-600">
-                        <Plus className="w-4 h-4" />
-                        Create New Group
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
 
               {/* Fixed Chat Panel - Right Side */}
               <div className="lg:col-span-1 border-l bg-white dark:bg-gray-900 flex flex-col">
