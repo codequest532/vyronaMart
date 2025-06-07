@@ -1617,56 +1617,58 @@ export default function VyronaSocial() {
 
 
                     {/* Chat Messages Area */}
-                    <ScrollArea className="flex-1 p-4">
-                      <div className="space-y-4">
-                        {messages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`flex ${
-                              message.messageType === 'system'
-                                ? 'justify-center'
-                                : message.userId === (authUser as any)?.id
-                                ? 'justify-end'
-                                : 'justify-start'
-                            }`}
-                          >
-                            {message.messageType === 'system' ? (
-                              <div className="inline-block p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-200 text-center">
-                                {message.content}
-                              </div>
-                            ) : (
-                              <div className={`flex gap-2 max-w-[70%] ${
-                                message.userId === (authUser as any)?.id ? 'flex-row-reverse' : 'flex-row'
-                              }`}>
-                                <Avatar className="w-8 h-8 flex-shrink-0">
-                                  <AvatarFallback className={`text-xs ${
-                                    message.userId === (authUser as any)?.id 
-                                      ? 'bg-green-100 text-green-600' 
-                                      : 'bg-blue-100 text-blue-600'
-                                  }`}>
-                                    {message.username.charAt(0).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className={`${
-                                  message.userId === (authUser as any)?.id ? 'text-right' : 'text-left'
+                    <div className="flex-1 min-h-0">
+                      <ScrollArea className="h-64 p-4">
+                        <div className="space-y-4">
+                          {messages.map((message) => (
+                            <div
+                              key={message.id}
+                              className={`flex ${
+                                message.messageType === 'system'
+                                  ? 'justify-center'
+                                  : message.userId === (authUser as any)?.id
+                                  ? 'justify-end'
+                                  : 'justify-start'
+                              }`}
+                            >
+                              {message.messageType === 'system' ? (
+                                <div className="inline-block p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-200 text-center">
+                                  {message.content}
+                                </div>
+                              ) : (
+                                <div className={`flex gap-2 max-w-[70%] ${
+                                  message.userId === (authUser as any)?.id ? 'flex-row-reverse' : 'flex-row'
                                 }`}>
-                                  <div className={`inline-block p-3 rounded-lg ${
-                                    message.userId === (authUser as any)?.id
-                                      ? 'bg-green-500 text-white rounded-br-sm'
-                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border'
+                                  <Avatar className="w-8 h-8 flex-shrink-0">
+                                    <AvatarFallback className={`text-xs ${
+                                      message.userId === (authUser as any)?.id 
+                                        ? 'bg-green-100 text-green-600' 
+                                        : 'bg-blue-100 text-blue-600'
+                                    }`}>
+                                      {message.username.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className={`${
+                                    message.userId === (authUser as any)?.id ? 'text-right' : 'text-left'
                                   }`}>
-                                    {message.content}
-                                  </div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    <div className={`inline-block p-3 rounded-lg ${
+                                      message.userId === (authUser as any)?.id
+                                        ? 'bg-green-500 text-white rounded-br-sm'
+                                        : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border'
+                                    }`}>
+                                      {message.content}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
 
                     {/* Chat Input */}
                     <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
@@ -1717,32 +1719,39 @@ export default function VyronaSocial() {
                     </div>
 
                     {/* Participants Section */}
-                    <div className="p-3 border-t bg-gray-50 dark:bg-gray-800">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="p-3 border-t bg-gray-50 dark:bg-gray-800 h-48">
+                      <div className="flex items-center gap-2 mb-3">
                         <Users className="h-4 w-4 text-blue-600" />
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
                         <span className="text-xs text-gray-500">({onlineMembers.length} online)</span>
                       </div>
-                      <div className="space-y-1 max-h-24 overflow-y-auto">
-                        {onlineMembers.length > 0 ? (
-                          onlineMembers.map((member) => (
-                            <div key={member.userId} className="flex items-center gap-2 py-1">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <Avatar className="w-6 h-6">
-                                <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                                  {member.username.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                                {member.username}
-                              </span>
-                              <span className="text-xs text-green-600 ml-auto">online</span>
+                      <ScrollArea className="h-36">
+                        <div className="space-y-2">
+                          {onlineMembers.length > 0 ? (
+                            onlineMembers.map((member) => (
+                              <div key={member.userId} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <Avatar className="w-8 h-8">
+                                  <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
+                                    {member.username.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate block">
+                                    {member.username}
+                                  </span>
+                                  <span className="text-xs text-green-600">online</span>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8">
+                              <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                              <div className="text-xs text-gray-500 italic">No members online</div>
                             </div>
-                          ))
-                        ) : (
-                          <div className="text-xs text-gray-500 italic">No members online</div>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      </ScrollArea>
                     </div>
                   </>
                 ) : (
