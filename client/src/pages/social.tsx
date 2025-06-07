@@ -1427,6 +1427,23 @@ export default function VyronaSocial() {
                           variant="outline" 
                           size="sm" 
                           className="rounded-full p-2"
+                          onClick={() => {
+                            const fileInput = document.createElement('input');
+                            fileInput.type = 'file';
+                            fileInput.accept = 'image/*,video/*,.pdf,.doc,.docx,.txt';
+                            fileInput.onchange = (event) => {
+                              const file = (event.target as HTMLInputElement).files?.[0];
+                              if (file) {
+                                const fileName = file.name;
+                                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                                toast({
+                                  title: "File Selected",
+                                  description: `${fileName} (${fileSize}MB) - Feature coming soon!`,
+                                });
+                              }
+                            };
+                            fileInput.click();
+                          }}
                         >
                           <Paperclip className="w-4 h-4" />
                         </Button>
