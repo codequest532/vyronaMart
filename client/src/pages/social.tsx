@@ -106,6 +106,8 @@ export default function VyronaSocial() {
   const [isGroupCartOpen, setIsGroupCartOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [activeTab, setActiveTab] = useState("groups");
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -628,7 +630,7 @@ export default function VyronaSocial() {
 
       {/* Main Content with Modern Layout */}
       <div className="container mx-auto px-6 py-8">
-        <Tabs defaultValue="groups" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
             <TabsTrigger value="groups" className="gap-2">
               <Users className="h-4 w-4" />
@@ -1008,7 +1010,7 @@ export default function VyronaSocial() {
                           variant="outline" 
                           size="sm" 
                           className="gap-2 border-green-300 hover:bg-green-50 text-xs"
-                          onClick={() => setLocation('/social?tab=products')}
+                          onClick={() => setActiveTab("products")}
                         >
                           <Package className="w-3 h-3" />
                           Browse Products
@@ -1022,14 +1024,52 @@ export default function VyronaSocial() {
                           <ShoppingCart className="w-3 h-3" />
                           View Cart ({cartItems.length})
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="gap-2 border-green-300 hover:bg-green-50 text-xs"
-                        >
-                          <Users className="w-3 h-3" />
-                          Invite Members
-                        </Button>
+                        <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="gap-2 border-green-300 hover:bg-green-50 text-xs"
+                            >
+                              <Users className="w-3 h-3" />
+                              Invite Members
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <Users className="h-5 w-5 text-green-600" />
+                                Invite Members to {selectedGroup?.name}
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="text-sm text-gray-600">
+                                Share this group code with your friends to invite them:
+                              </div>
+                              <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                <code className="flex-1 text-lg font-mono font-bold text-green-600">
+                                  {selectedGroup?.roomCode}
+                                </code>
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    const inviteCode = selectedGroup?.roomCode;
+                                    if (inviteCode) {
+                                      navigator.clipboard.writeText(inviteCode);
+                                      toast({ title: "Code copied!", description: "Share this code with friends to invite them" });
+                                    }
+                                  }}
+                                  className="bg-green-500 hover:bg-green-600"
+                                >
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Friends can join by entering this code in the "Join Group" dialog.
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   </>
