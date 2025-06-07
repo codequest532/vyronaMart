@@ -562,11 +562,6 @@ export const insertVyronaWalletSchema = createInsertSchema(vyronaWallets).omit({
   updatedAt: true,
 });
 
-export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({
-  id: true,
-  createdAt: true,
-});
-
 // Group Order Insert Schemas
 export const insertGroupOrderSchema = createInsertSchema(groupOrders).omit({
   id: true,
@@ -748,6 +743,11 @@ export const insertGroupBuyOrderSchema = createInsertSchema(groupBuyOrders).omit
   createdAt: true,
 });
 
+export const insertWalletTransactionSchema = createInsertSchema(walletTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -837,3 +837,6 @@ export type GroupBuyOrder = typeof groupBuyOrders.$inferSelect;
 export type GroupBuyCampaignProduct = typeof groupBuyCampaignProducts.$inferSelect;
 export type InsertGroupBuyCampaignProduct = z.infer<typeof insertGroupBuyCampaignProductSchema>;
 export type InsertGroupBuyOrder = z.infer<typeof insertGroupBuyOrderSchema>;
+
+export type WalletTransaction = typeof walletTransactions.$inferSelect;
+export type InsertWalletTransaction = z.infer<typeof insertWalletTransactionSchema>;

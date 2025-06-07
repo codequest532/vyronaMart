@@ -188,8 +188,12 @@ export default function MyVyrona() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="rentals" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue="wallet" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="wallet" className="flex items-center space-x-2">
+              <Wallet className="h-4 w-4" />
+              <span>VyronaWallet</span>
+            </TabsTrigger>
             <TabsTrigger value="rentals" className="flex items-center space-x-2">
               <Clock className="h-4 w-4" />
               <span>Active Rentals</span>
@@ -203,6 +207,145 @@ export default function MyVyrona() {
               <span>Purchased Books</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* VyronaWallet Tab */}
+          <TabsContent value="wallet">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Wallet Balance Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Wallet className="h-5 w-5 text-blue-600" />
+                    <span>Wallet Balance</span>
+                  </CardTitle>
+                  <CardDescription>
+                    Your VyronaWallet balance for VyronaMart purchases
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-6">
+                    <div className="text-4xl font-bold text-green-600 mb-2">
+                      ₹{currentUser?.walletBalance || "0.00"}
+                    </div>
+                    <p className="text-gray-600 mb-6">Available Balance</p>
+                    
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Money
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Add Money to VyronaWallet</DialogTitle>
+                          <DialogDescription>
+                            Enter the amount you want to add to your wallet
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="amount">Amount (₹)</Label>
+                            <Input
+                              id="amount"
+                              type="number"
+                              placeholder="Enter amount"
+                              value={addMoneyAmount}
+                              onChange={(e) => setAddMoneyAmount(e.target.value)}
+                              min="1"
+                              max="10000"
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setAddMoneyAmount("100")}
+                            >
+                              ₹100
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setAddMoneyAmount("500")}
+                            >
+                              ₹500
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setAddMoneyAmount("1000")}
+                            >
+                              ₹1000
+                            </Button>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            className="w-full"
+                            disabled={!addMoneyAmount || parseFloat(addMoneyAmount) <= 0}
+                          >
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            Pay ₹{addMoneyAmount || "0"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                  <CardDescription>
+                    Manage your wallet and view transaction history
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button variant="outline" className="w-full justify-start">
+                    <ArrowUpRight className="h-4 w-4 mr-2" />
+                    Send Money
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <ArrowDownLeft className="h-4 w-4 mr-2" />
+                    Request Money
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Transaction History
+                  </Button>
+                  <Separator />
+                  <div className="text-sm text-gray-600">
+                    <p className="font-medium mb-2">Wallet Features:</p>
+                    <ul className="space-y-1">
+                      <li>• Instant payments on VyronaMart</li>
+                      <li>• Secure transactions with bank-level encryption</li>
+                      <li>• Real-time balance updates</li>
+                      <li>• Transaction history and receipts</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Transaction History */}
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Recent Transactions</CardTitle>
+                <CardDescription>
+                  Your wallet transaction history
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-600">No transactions yet</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Your wallet transactions will appear here
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Active Rentals Tab */}
           <TabsContent value="rentals">
