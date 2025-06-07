@@ -132,9 +132,9 @@ export default function VyronaSocial() {
     enabled: !!authUser,
   });
 
-  // Fetch products
+  // Fetch products for VyronaSocial (group buy products only)
   const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/social/products"],
     enabled: !!authUser,
   });
 
@@ -1634,8 +1634,7 @@ export default function VyronaSocial() {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {(products || [])
-                        .filter((product: any) => product.enableGroupBuy)
+                      {(products as any[] || [])
                         .map((product: any) => (
                         <div key={product.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
                           <div className="aspect-square bg-gray-100 dark:bg-gray-700 relative">
@@ -1718,7 +1717,7 @@ export default function VyronaSocial() {
                       ))}
                     </div>
                     
-                    {(!products || (products as any[]).filter((p: any) => p.enableGroupBuy).length === 0) && (
+                    {(!products || (products as any[]).length === 0) && (
                       <div className="text-center py-12">
                         <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-600 mb-2">No Exclusive Products Available</h3>
