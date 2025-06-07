@@ -666,49 +666,55 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(module?: string, category?: string): Promise<Product[]> {
-    // Use raw SQL to properly handle decimal conversion
-    let whereClause = '';
-    const params: any[] = [];
-    
-    if (module && category) {
-      whereClause = 'WHERE module = $1 AND category = $2';
-      params.push(module, category);
-    } else if (module) {
-      whereClause = 'WHERE module = $1';
-      params.push(module);
-    } else if (category) {
-      whereClause = 'WHERE category = $1';
-      params.push(category);
+    try {
+      // Use raw SQL to properly handle decimal conversion
+      let whereClause = '';
+      const params: any[] = [];
+      
+      if (module && category) {
+        whereClause = 'WHERE module = $1 AND category = $2';
+        params.push(module, category);
+      } else if (module) {
+        whereClause = 'WHERE module = $1';
+        params.push(module);
+      } else if (category) {
+        whereClause = 'WHERE category = $1';
+        params.push(category);
+      }
+      
+      const query = `
+        SELECT 
+          id, 
+          name, 
+          description, 
+          TO_CHAR(ROUND(price::NUMERIC, 2), 'FM999999999999990.00') as price_string,
+          category, 
+          module, 
+          image_url as "imageUrl", 
+          store_id as "storeId", 
+          metadata, 
+          enable_individual_buy as "enableIndividualBuy", 
+          enable_group_buy as "enableGroupBuy", 
+          group_buy_min_quantity as "groupBuyMinQuantity", 
+          group_buy_discount as "groupBuyDiscount"
+        FROM products 
+        ${whereClause}
+      `;
+      
+      const result = await pool.query(query, params);
+      
+      // Convert price strings to proper decimal numbers
+      return result.rows.map((row: any) => {
+        const { price_string, ...productData } = row;
+        return {
+          ...productData,
+          price: parseFloat(price_string)
+        };
+      }) as Product[];
+    } catch (error) {
+      console.error('Error in getProducts:', error);
+      throw error;
     }
-    
-    const query = `
-      SELECT 
-        id, 
-        name, 
-        description, 
-        TO_CHAR(ROUND(price::NUMERIC, 2), 'FM999999999999990.00') as price_string,
-        ROUND(price::NUMERIC, 2) as price,
-        category, 
-        module, 
-        "imageUrl", 
-        "storeId", 
-        metadata, 
-        "enableIndividualBuy", 
-        "enableGroupBuy", 
-        "groupBuyMinQuantity", 
-        "groupBuyDiscount"
-      FROM products 
-      ${whereClause}
-    `;
-    
-    const result = await pool.query(query, params);
-    
-    // Convert price strings to proper decimal numbers
-    return result.rows.map((row: any) => ({
-      ...row,
-      price: parseFloat(row.price_string),
-      price_string: undefined // Remove the helper field
-    })) as Product[];
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
