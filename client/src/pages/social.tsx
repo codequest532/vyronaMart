@@ -1420,7 +1420,7 @@ export default function VyronaSocial() {
                           onClick={() => setIsGroupCartOpen(true)}
                         >
                           <ShoppingCart className="w-3 h-3" />
-                          View Cart ({cartItems.length})
+                          Cart ({cartItems.length})
                         </Button>
                         <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
                           <DialogTrigger asChild>
