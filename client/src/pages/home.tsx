@@ -10,11 +10,14 @@ import { useToastNotifications } from "@/hooks/use-toast-notifications";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { 
   Gamepad2, 
   Zap, 
@@ -55,7 +58,13 @@ import {
   BookOpen,
   Share2,
   Eye,
-  TrendingUp
+  TrendingUp,
+  Plus,
+  CreditCard,
+  ArrowUpRight,
+  ArrowDownLeft,
+  CheckCircle,
+  DollarSign
 } from "lucide-react";
 
 type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
@@ -73,6 +82,7 @@ export default function Home() {
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
   const [groupCartModalOpen, setGroupCartModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [addMoneyAmount, setAddMoneyAmount] = useState("");
   
   const { toast } = useToast();
 
@@ -208,32 +218,32 @@ export default function Home() {
 
   // Wallet mutations
   const addMoneyMutation = useMutation({
-    mutationFn: async ({ amount }: { amount: number }) => {
-      const response = await fetch('/api/wallet/add-money', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount, userId: user?.id }),
+    mutationFn: async (amount: number) => {
+      const response = await fetch("/api/wallet/add-money", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.id, amount }),
       });
-      if (!response.ok) throw new Error('Failed to add money');
+      if (!response.ok) throw new Error("Failed to add money");
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/wallet/balance/${user?.id}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/wallet/transactions/${user?.id}`] });
-      toast({ title: "Success", description: "Money added to wallet successfully!" });
+      toast({
+        title: "Money Added Successfully",
+        description: `₹${addMoneyAmount} has been added to your wallet`,
+      });
       setAddMoneyAmount("");
     },
-    onError: (error) => {
-      toast({ title: "Error", description: "Failed to add money to wallet", variant: "destructive" });
+    onError: (error: any) => {
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to add money to wallet",
+        variant: "destructive",
+      });
     },
   });
-
-  const handleAddMoney = () => {
-    const amount = parseFloat(addMoneyAmount);
-    if (amount > 0) {
-      addMoneyMutation.mutate({ amount });
-    }
-  };
 
   const handleGameClick = (gameName: string) => {
     const coinReward = Math.floor(Math.random() * 100) + 10;
