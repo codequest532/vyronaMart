@@ -8,7 +8,7 @@ import { storage } from "./storage";
 import { setupRoomRoutes } from "./simple-rooms";
 import { setupVyronaSocialAPI } from "./vyronasocial-api";
 import { getAuthenticatedUser } from "./auth-utils";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
@@ -731,18 +731,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`=== JOIN ROOM REQUEST ===`);
       console.log(`User ID: ${userId}, Room Code: ${code.trim()}`);
 
-      // Find group by room code - get all groups and filter
-      const allGroups = await storage.getShoppingGroups(0); // Get all groups regardless of user
-      console.log(`Available groups: ${allGroups.length}`);
-      console.log(`Room codes in system:`, allGroups.map((g: any) => g.roomCode));
+      // Find group by room code - query database directly for all groups
+      const result = await pool.query(`
+        SELECT id, name, description, creator_id, is_active, max_members, room_code, created_at
+        FROM shopping_groups 
+        WHERE is_active = true AND room_code = $1
+      `, [code.trim()]);
       
-      const targetGroup = allGroups.find((g: any) => g.roomCode === code.trim());
+      console.log(`Searching for room code: ${code.trim()}`);
+      console.log(`Query result:`, result.rows);
       
-      if (!targetGroup) {
+      if (result.rows.length === 0) {
         console.log(`Room code '${code.trim()}' not found`);
         return res.status(404).json({ message: "Invalid room code" });
       }
 
+      const targetGroup = result.rows[0];
       console.log(`Found target group:`, targetGroup);
 
       // Check if user is already a member
