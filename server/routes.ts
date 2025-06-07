@@ -649,7 +649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: room.description || '',
         creatorId: room.creatorId,
         isActive: room.isActive,
-        memberCount: room.memberCount || 1,
+        maxMembers: room.maxMembers || 10,
         totalCart: room.totalCart || 0,
         roomCode: room.roomCode,
         createdAt: room.createdAt
@@ -1542,7 +1542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: room.description || '',
         creatorId: room.creatorId,
         isActive: room.isActive,
-        memberCount: room.memberCount || 1,
+        maxMembers: room.maxMembers || 10,
         totalCart: room.totalCart || 0,
         roomCode: room.roomCode,
         createdAt: room.createdAt
