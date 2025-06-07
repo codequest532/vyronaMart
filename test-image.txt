@@ -1,0 +1,2 @@
+This is a test file for testing the attachment system.
+It should be uploadable and downloadable through the chat interface.

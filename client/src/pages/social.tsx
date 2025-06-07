@@ -1426,13 +1426,31 @@ export default function VyronaSocial() {
                                         <div className="text-xs opacity-75">
                                           {(message.metadata.fileSize / 1024 / 1024).toFixed(2)}MB
                                         </div>
-                                        {message.metadata.mimeType?.startsWith('image/') && (
+                                        {message.metadata.mimeType?.startsWith('image/') ? (
                                           <div className="mt-2">
                                             <img 
-                                              src={`/uploads/${message.metadata.fileName}`}
+                                              src={`/uploads/${message.metadata.storedFileName || message.metadata.fileName}`}
                                               alt={message.metadata.fileName}
-                                              className="max-w-[200px] max-h-[200px] rounded object-cover"
+                                              className="max-w-[200px] max-h-[200px] rounded object-cover cursor-pointer"
+                                              onClick={() => window.open(`/uploads/${message.metadata.storedFileName || message.metadata.fileName}`, '_blank')}
                                             />
+                                          </div>
+                                        ) : (
+                                          <div className="mt-2">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="gap-2"
+                                              onClick={() => {
+                                                const link = document.createElement('a');
+                                                link.href = `/uploads/${message.metadata.storedFileName || message.metadata.fileName}`;
+                                                link.download = message.metadata.fileName;
+                                                link.click();
+                                              }}
+                                            >
+                                              <Copy className="w-3 h-3" />
+                                              Download
+                                            </Button>
                                           </div>
                                         )}
                                       </div>

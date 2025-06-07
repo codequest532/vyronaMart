@@ -1640,6 +1640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fileName: req.file.originalname,
         fileSize: req.file.size,
         filePath: req.file.path,
+        storedFileName: req.file.filename, // Add the actual stored filename
         mimeType: req.file.mimetype
       };
 
