@@ -56,7 +56,7 @@ function Router() {
       
       {/* Customer Interface (Default) */}
       {user ? (
-        <Route path="/" component={VyronaSocial} />
+        <Route path="/" component={Home} />
       ) : (
         <Route path="/" component={Landing} />
       )}
