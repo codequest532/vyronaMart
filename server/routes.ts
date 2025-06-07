@@ -633,9 +633,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("=== SHOPPING ROOMS ENDPOINT HIT (FIRST ONE) ===");
       
-      // Get current user ID from session
+      // Get current user ID from session (fallback to user 1 for demo)
       const session = (req as any).session;
-      const userId = session?.user?.id || 4;
+      const userId = session?.user?.id || 1;
       
       console.log("Shopping rooms endpoint - Session:", session);
       console.log("Shopping rooms endpoint - User ID:", userId);
