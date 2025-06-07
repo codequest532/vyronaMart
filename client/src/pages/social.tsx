@@ -132,9 +132,9 @@ export default function VyronaSocial() {
     enabled: !!authUser,
   });
 
-  // Fetch products for VyronaSocial (group buy products only)
+  // Fetch products
   const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["/api/social/products"],
+    queryKey: ["/api/products"],
     enabled: !!authUser,
   });
 
@@ -1627,121 +1627,19 @@ export default function VyronaSocial() {
                     </div>
                   </>
                 ) : (
-                  <div className="flex-1 p-6">
-                    <div className="mb-6">
-                      <h2 className="text-2xl font-bold mb-2">Exclusive Group Products</h2>
-                      <p className="text-gray-600 dark:text-gray-400">Discover premium products available only for group purchasing</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {(products as any[] || [])
-                        .map((product: any) => (
-                        <div key={product.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
-                          <div className="aspect-square bg-gray-100 dark:bg-gray-700 relative">
-                            {product.imageUrl ? (
-                              <img 
-                                src={product.imageUrl} 
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Package className="w-12 h-12 text-gray-400" />
-                              </div>
-                            )}
-                            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
-                              Group Only
-                            </div>
-                          </div>
-                          
-                          <div className="p-4">
-                            <h3 className="font-semibold text-lg mb-1 line-clamp-1">{product.name}</h3>
-                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                              {product.description}
-                            </p>
-                            
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="text-lg font-bold text-green-600">
-                                ₹{product.price}
-                              </div>
-                              {product.groupBuyDiscount && (
-                                <div className="text-sm text-green-600 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded">
-                                  {product.groupBuyDiscount}% off
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                              <span>Min. {product.groupBuyMinQuantity || 1} people</span>
-                              <span className="flex items-center gap-1">
-                                <Users className="w-4 h-4" />
-                                Group Buy
-                              </span>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                className="flex-1"
-                                onClick={() => {
-                                  // Set this product as selected and open group creation
-                                  setIsCreateGroupOpen(true);
-                                }}
-                              >
-                                Start Group
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                className="bg-green-500 hover:bg-green-600 text-white"
-                                onClick={() => {
-                                  if (selectedGroup) {
-                                    addToGroupCartMutation.mutate({
-                                      productId: product.id,
-                                      groupId: selectedGroup.id
-                                    });
-                                  } else {
-                                    toast({
-                                      title: "Join a group first",
-                                      description: "Create or join a group to add products to cart",
-                                      variant: "destructive"
-                                    });
-                                  }
-                                }}
-                              >
-                                <ShoppingCart className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {(!products || (products as any[]).length === 0) && (
-                      <div className="text-center py-12">
-                        <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-600 mb-2">No Exclusive Products Available</h3>
-                        <p className="text-gray-500">Check back later for new group buying opportunities</p>
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-10 h-10 text-green-600" />
                       </div>
-                    )}
-                    
-                    <div className="mt-8 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                          <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-green-800 dark:text-green-200">Ready to start shopping together?</h4>
-                          <p className="text-sm text-green-600 dark:text-green-300">Create a group to unlock exclusive products and group discounts</p>
-                        </div>
-                        <Button 
-                          onClick={() => setIsCreateGroupOpen(true)} 
-                          className="bg-green-500 hover:bg-green-600 ml-auto"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Group
-                        </Button>
-                      </div>
+                      <h3 className="text-lg font-semibold mb-2">Select a Group</h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Choose a shopping group to start collaborating
+                      </p>
+                      <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2 bg-green-500 hover:bg-green-600">
+                        <Plus className="w-4 h-4" />
+                        Create New Group
+                      </Button>
                     </div>
                   </div>
                 )}
