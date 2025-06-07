@@ -144,6 +144,7 @@ export default function VyronaSocial() {
   // Group cart data
   const { data: groupCart, refetch: refetchCart } = useQuery({
     queryKey: ["/api/room-cart", selectedGroupId],
+    queryFn: () => fetch(`/api/room-cart/${selectedGroupId}`).then(res => res.json()),
     enabled: !!selectedGroupId,
   });
 
@@ -198,8 +199,11 @@ export default function VyronaSocial() {
       // If there's a selected product, add it to the newly created group
       if (selectedProductForGroup && response?.room?.id) {
         setSelectedGroupId(response.room.id);
-        handleAddToGroupCart(selectedProductForGroup);
-        setSelectedProductForGroup(null);
+        // Small delay to ensure group selection is set
+        setTimeout(() => {
+          handleAddToGroupCart(selectedProductForGroup);
+          setSelectedProductForGroup(null);
+        }, 100);
       }
     },
     onError: (error: Error) => {
