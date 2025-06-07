@@ -1011,8 +1011,14 @@ export class DatabaseStorage implements IStorage {
       // Delete group messages
       await db.delete(groupMessages).where(eq(groupMessages.groupId, id));
       
-      // Delete group wishlists
-      await db.delete(groupWishlists).where(eq(groupWishlists.groupId, id));
+      // Delete group wishlists (skip if table doesn't exist)
+      try {
+        await db.delete(groupWishlists).where(eq(groupWishlists.groupId, id));
+      } catch (wishlistError: any) {
+        if (wishlistError.code !== '42P01') { // If not "table doesn't exist" error
+          throw wishlistError;
+        }
+      }
       
       // Delete cart items for this group
       await db.delete(cartItems).where(eq(cartItems.roomId, id));
