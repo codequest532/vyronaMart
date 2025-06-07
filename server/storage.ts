@@ -876,48 +876,49 @@ export class DatabaseStorage implements IStorage {
       // Generate room code
       const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       
-      // Use direct SQL query to avoid Drizzle schema issues
-      const groupResult = await pool.query(`
-        INSERT INTO shopping_groups (name, description, creator_id, is_active, max_members, room_code, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6, NOW())
-        RETURNING *
-      `, [
-        insertGroup.name,
-        insertGroup.description,
-        insertGroup.creatorId,
-        true,
-        insertGroup.maxMembers || 10,
-        roomCode
-      ]);
+      // Use Drizzle ORM for better type safety
+      const [group] = await db
+        .insert(shoppingGroups)
+        .values({
+          name: insertGroup.name,
+          description: insertGroup.description,
+          creatorId: insertGroup.creatorId,
+          isActive: true,
+          maxMembers: insertGroup.maxMembers || 10,
+          roomCode: roomCode,
+        })
+        .returning();
       
-      const group = groupResult.rows[0];
       console.log("Group created successfully:", JSON.stringify(group, null, 2));
       
       // Add creator as group member
-      const memberResult = await pool.query(`
-        INSERT INTO group_members (group_id, user_id, role, joined_at)
-        VALUES ($1, $2, $3, NOW())
-        RETURNING *
-      `, [group.id, insertGroup.creatorId, 'creator']);
+      const [member] = await db
+        .insert(groupMembers)
+        .values({
+          groupId: group.id,
+          userId: insertGroup.creatorId,
+          role: 'creator',
+        })
+        .returning();
       
-      console.log("Group member added successfully:", memberResult.rows[0]);
+      console.log("Group member added successfully:", member);
       
       // Return group with all required ShoppingGroup fields
       const result = {
         id: group.id,
         name: group.name,
-        description: group.description,
+        description: group.description || '',
         category: "general",
         privacy: "public",
-        creatorId: group.creator_id,
-        isActive: group.is_active,
+        creatorId: group.creatorId,
+        isActive: group.isActive || true,
         memberCount: 1,
         totalCart: 0,
         currentGame: null,
-        roomCode: group.room_code,
+        roomCode: group.roomCode || roomCode,
         scheduledTime: null,
-        maxMembers: group.max_members,
-        createdAt: group.created_at
+        maxMembers: group.maxMembers || 10,
+        createdAt: group.createdAt || new Date()
       };
       
       console.log("Returning result:", JSON.stringify(result, null, 2));
