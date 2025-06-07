@@ -1,6 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
+import multer from "multer";
+import path from "path";
 import { storage } from "./storage";
 import { setupRoomRoutes } from "./simple-rooms";
 import { setupVyronaSocialAPI } from "./vyronasocial-api";
@@ -33,6 +35,27 @@ const groupCallStates = new Map<number, {
   participants: number[];
   startedAt: Date;
 }>();
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  }),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/', 'video/', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/'];
+    const isAllowed = allowedTypes.some(type => file.mimetype.startsWith(type));
+    cb(null, isAllowed);
+  }
+});
 
 // Admin credentials (fixed)
 const ADMIN_CREDENTIALS = {
@@ -1589,6 +1612,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating message:", error);
       res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  // File upload endpoint for group messages
+  app.post("/api/group-messages/upload", upload.single('file'), async (req, res) => {
+    try {
+      const { groupId, messageType = 'file' } = req.body;
+      const session = (req as any).session;
+      const userId = session?.user?.id;
+      const username = session?.user?.username || 'User';
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      if (!req.file || !groupId) {
+        return res.status(400).json({ message: "File and groupId are required" });
+      }
+
+      // Create file message content with metadata
+      const fileData = {
+        fileName: req.file.originalname,
+        fileSize: req.file.size,
+        filePath: req.file.path,
+        mimeType: req.file.mimetype
+      };
+
+      // Save file message to database
+      const savedMessage = await storage.addGroupMessage({
+        userId,
+        groupId: parseInt(groupId),
+        content: `📎 ${req.file.originalname}`, // Display name for file
+        messageType,
+        metadata: fileData
+      });
+
+      // Create response message with username
+      const messageData = {
+        id: savedMessage.id,
+        content: savedMessage.content,
+        userId: savedMessage.userId,
+        username,
+        groupId: savedMessage.groupId,
+        messageType: savedMessage.messageType,
+        metadata: fileData,
+        sentAt: savedMessage.sentAt
+      };
+
+      console.log("Creating file message:", messageData);
+
+      // Broadcast message to all group members via WebSocket
+      const groupMembers = await storage.getGroupMembers(parseInt(groupId));
+      
+      groupMembers.forEach(member => {
+        const userKey = `${member.userId}-${groupId}`;
+        const onlineUser = onlineUsers.get(userKey);
+        
+        if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN) {
+          onlineUser.ws.send(JSON.stringify({
+            type: 'new-message',
+            message: messageData,
+            timestamp: new Date().toISOString()
+          }));
+        }
+      });
+
+      res.json(messageData);
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({ message: "Failed to upload file" });
     }
   });
 
