@@ -32,6 +32,10 @@ import {
   List,
   Bell,
   Sparkles,
+  Send,
+  Smile,
+  Paperclip,
+  MoreVertical,
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
@@ -52,8 +56,25 @@ const joinGroupSchema = z.object({
   code: z.string().min(6, "Group code must be at least 6 characters"),
 });
 
+const messageSchema = z.object({
+  content: z.string().min(1, "Message cannot be empty"),
+});
+
 type CreateGroupForm = z.infer<typeof createGroupSchema>;
 type JoinGroupForm = z.infer<typeof joinGroupSchema>;
+type MessageForm = z.infer<typeof messageSchema>;
+
+// Chat message interface
+interface ChatMessage {
+  id: number;
+  content: string;
+  userId: number;
+  username: string;
+  groupId: number;
+  messageType: 'text' | 'system' | 'product_share' | 'cart_update';
+  metadata?: any;
+  sentAt: string;
+}
 
 interface CartItem {
   id: number;
@@ -83,7 +104,10 @@ export default function VyronaSocial() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isGroupCartOpen, setIsGroupCartOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Authentication check
   const { data: authUser, isLoading: userLoading } = useQuery({
@@ -118,6 +142,11 @@ export default function VyronaSocial() {
   const joinGroupForm = useForm<JoinGroupForm>({
     resolver: zodResolver(joinGroupSchema),
     defaultValues: { code: "" },
+  });
+
+  const messageForm = useForm<MessageForm>({
+    resolver: zodResolver(messageSchema),
+    defaultValues: { content: "" },
   });
 
   // Mutations
@@ -219,6 +248,44 @@ export default function VyronaSocial() {
     },
   });
 
+  // Send message mutation
+  const sendMessageMutation = useMutation({
+    mutationFn: async (data: { content: string; groupId: number }) => {
+      const response = await fetch("/api/group-messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: data.content,
+          groupId: data.groupId,
+          messageType: 'text'
+        }),
+      });
+      if (!response.ok) throw new Error('Failed to send message');
+      return response.json();
+    },
+    onSuccess: (newMessage) => {
+      // Add message to local state immediately for instant feedback
+      setMessages(prev => [...prev, {
+        id: newMessage.id || Date.now(),
+        content: newMessage.content,
+        userId: (authUser as any)?.id,
+        username: (authUser as any)?.username,
+        groupId: selectedGroupId!,
+        messageType: 'text',
+        sentAt: new Date().toISOString()
+      }]);
+      messageForm.reset();
+      setNewMessage("");
+      // Scroll to bottom
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to send message", description: error.message, variant: "destructive" });
+    },
+  });
+
   // Video call functions
   const handleJoinVideoCall = async () => {
     if (!selectedGroupId) {
@@ -284,6 +351,51 @@ export default function VyronaSocial() {
   const selectedGroup = selectedGroupId ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
   const cartItems = (groupCart as CartItem[]) || [];
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Send message function
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !selectedGroupId) return;
+    
+    sendMessageMutation.mutate({
+      content: newMessage.trim(),
+      groupId: selectedGroupId
+    });
+  };
+
+  // Handle enter key in message input
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  // Initialize sample messages when group is selected
+  React.useEffect(() => {
+    if (selectedGroupId && messages.length === 0) {
+      const sampleMessages: ChatMessage[] = [
+        {
+          id: 1,
+          content: `Welcome to ${selectedGroup?.name || 'the group'}! Start chatting and shopping together.`,
+          userId: 0,
+          username: 'System',
+          groupId: selectedGroupId,
+          messageType: 'system',
+          sentAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          content: 'Hey everyone! Ready to find some great deals together?',
+          userId: (authUser as any)?.id || 1,
+          username: (authUser as any)?.username || 'You',
+          groupId: selectedGroupId,
+          messageType: 'text',
+          sentAt: new Date(Date.now() - 300000).toISOString()
+        }
+      ];
+      setMessages(sampleMessages);
+    }
+  }, [selectedGroupId, selectedGroup?.name, authUser]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900/20">
