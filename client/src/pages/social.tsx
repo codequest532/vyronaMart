@@ -1747,25 +1747,8 @@ export default function VyronaSocial() {
                         <span className="text-xs text-gray-500">({onlineMembers.length} online)</span>
                       </div>
                       <div className="flex-1 min-h-0 overflow-hidden">
-                        <ScrollArea className="h-full">
+                        <div className="h-full overflow-y-auto">
                           <div className="space-y-2 pr-2">
-                            {/* Test participants to make scroller visible */}
-                            {Array.from({length: 15}).map((_, i) => (
-                              <div key={`test-participant-${i}`} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <Avatar className="w-8 h-8">
-                                  <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                                    U{i + 1}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                  <span className="text-sm text-gray-700 dark:text-gray-300 truncate block">
-                                    User {i + 1}
-                                  </span>
-                                  <span className="text-xs text-green-600">online</span>
-                                </div>
-                              </div>
-                            ))}
                             {onlineMembers.length > 0 ? (
                               onlineMembers.map((member) => (
                                 <div key={member.userId} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -1790,7 +1773,7 @@ export default function VyronaSocial() {
                               </div>
                             )}
                           </div>
-                        </ScrollArea>
+                        </div>
                       </div>
                     </div>
                   </>
