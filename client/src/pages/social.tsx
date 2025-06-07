@@ -1245,7 +1245,7 @@ export default function VyronaSocial() {
               </div>
 
               {/* Chat/Group Details Area */}
-              <div className="lg:col-span-2 flex flex-col bg-gray-50 dark:bg-gray-900">
+              <div className="lg:col-span-2 flex flex-col bg-gray-50 dark:bg-gray-900 relative">
                 {selectedGroup ? (
                   <>
                     {/* Group Header */}
@@ -1498,7 +1498,7 @@ export default function VyronaSocial() {
                     </ScrollArea>
 
                     {/* Message Input Area */}
-                    <div className="p-4 bg-white dark:bg-gray-800 border-t">
+                    <div className="p-4 bg-white dark:bg-gray-800 border-t mr-4">
                       {/* File Preview Area */}
                       {selectedFile && (
                         <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border">
