@@ -58,11 +58,13 @@ export const stores = pgTable("stores", {
 export const shoppingRooms = pgTable("shopping_rooms", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  description: text("description"),
   creatorId: integer("creator_id").notNull(),
   isActive: boolean("is_active").default(true),
   currentGame: text("current_game"),
   totalCart: integer("total_cart").default(0),
-  memberCount: integer("member_count").default(1),
+  maxMembers: integer("max_members").default(10),
+  roomCode: text("room_code"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

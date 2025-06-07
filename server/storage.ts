@@ -524,8 +524,12 @@ export class MemStorage implements IStorage {
 
   async addCartItem(insertItem: InsertCartItem): Promise<CartItem> {
     const item: CartItem = {
-      ...insertItem,
       id: this.currentCartId++,
+      userId: insertItem.userId,
+      productId: insertItem.productId,
+      quantity: insertItem.quantity || 1,
+      roomId: insertItem.roomId || null,
+      addedAt: new Date(),
     };
     this.cartItems.set(item.id, item);
     return item;
@@ -542,8 +546,12 @@ export class MemStorage implements IStorage {
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const order: Order = {
-      ...insertOrder,
       id: this.currentOrderId++,
+      userId: insertOrder.userId,
+      totalAmount: insertOrder.totalAmount,
+      status: insertOrder.status || "pending",
+      module: insertOrder.module,
+      metadata: insertOrder.metadata || null,
       createdAt: new Date(),
     };
     this.orders.set(order.id, order);
