@@ -202,6 +202,18 @@ export const groupMessages = pgTable("group_messages", {
   sentAt: timestamp("sent_at").defaultNow(),
 });
 
+export const groupContributions = pgTable("group_contributions", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  cartItemId: integer("cart_item_id").notNull(),
+  userId: integer("user_id").notNull(),
+  amount: integer("amount").notNull(), // in cents
+  paymentMethod: text("payment_method").notNull(), // 'wallet', 'googlepay', 'phonepe', 'cod'
+  transactionId: text("transaction_id"),
+  status: text("status").notNull().default("pending"), // 'pending', 'completed', 'failed'
+  contributedAt: timestamp("contributed_at").defaultNow(),
+});
+
 export const productShares = pgTable("product_shares", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").notNull(),

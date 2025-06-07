@@ -16,7 +16,7 @@ import {
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
   insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
-  walletTransactions, users, orders
+  walletTransactions, users, orders, groupContributions
 } from "@shared/schema";
 import { cartItems } from "../migrations/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
@@ -2650,6 +2650,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting group:", error);
       res.status(500).json({ message: "Failed to delete group" });
+    }
+  });
+
+  // Add contribution to cart item
+  app.post("/api/groups/:groupId/contributions", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const { cartItemId, amount, paymentMethod, transactionId } = req.body;
+      const userId = req.session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const contribution = await db.insert(groupContributions).values({
+        groupId: Number(groupId),
+        cartItemId,
+        userId,
+        amount: Math.round(amount * 100), // Convert to cents
+        paymentMethod,
+        transactionId,
+        status: 'completed'
+      }).returning();
+
+      res.json(contribution[0]);
+    } catch (error) {
+      console.error("Error adding contribution:", error);
+      res.status(500).json({ message: "Failed to add contribution" });
+    }
+  });
+
+  // Get contributions for a group's cart items
+  app.get("/api/groups/:groupId/contributions", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      
+      const contributions = await db.select({
+        id: groupContributions.id,
+        cartItemId: groupContributions.cartItemId,
+        userId: groupContributions.userId,
+        amount: groupContributions.amount,
+        paymentMethod: groupContributions.paymentMethod,
+        transactionId: groupContributions.transactionId,
+        status: groupContributions.status,
+        contributedAt: groupContributions.contributedAt,
+        username: users.username
+      })
+      .from(groupContributions)
+      .innerJoin(users, eq(groupContributions.userId, users.id))
+      .where(eq(groupContributions.groupId, Number(groupId)));
+
+      res.json(contributions);
+    } catch (error) {
+      console.error("Error fetching contributions:", error);
+      res.status(500).json({ message: "Failed to fetch contributions" });
     }
   });
 
