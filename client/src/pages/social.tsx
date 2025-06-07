@@ -642,9 +642,7 @@ export default function VyronaSocial() {
         description: "The group has been successfully deleted",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
-      setSelectedGroup(null);
       setSelectedGroupId(null);
-      setView("main");
     },
     onError: (error: any) => {
       toast({
@@ -674,9 +672,7 @@ export default function VyronaSocial() {
         description: "You have successfully left the group",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
-      setSelectedGroup(null);
       setSelectedGroupId(null);
-      setView("main");
     },
     onError: (error: any) => {
       toast({
