@@ -132,13 +132,11 @@ export default function VyronaSocial() {
   // Fetch groups
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["/api/shopping-rooms"],
-    enabled: !!authUser,
   });
 
   // Fetch products
   const { data: products, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/products"],
-    enabled: !!authUser,
   });
 
   // Group cart data
