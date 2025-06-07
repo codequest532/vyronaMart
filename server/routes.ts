@@ -7,6 +7,7 @@ import path from "path";
 import { storage } from "./storage";
 import { setupRoomRoutes } from "./simple-rooms";
 import { setupVyronaSocialAPI } from "./vyronasocial-api";
+import { getAuthenticatedUser } from "./auth-utils";
 import { db } from "./db";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
@@ -719,21 +720,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Room code is required" });
       }
 
-      // Get current user ID from session
-      const session = (req as any).session;
-      const userId = session?.user?.id;
+      // Get current user ID from session using auth-utils
+      const authenticatedUser = getAuthenticatedUser(req);
       
-      if (!userId) {
+      if (!authenticatedUser) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
+      const userId = authenticatedUser.id;
+      console.log(`=== JOIN ROOM REQUEST ===`);
+      console.log(`User ID: ${userId}, Room Code: ${code.trim()}`);
+
       // Find group by room code - get all groups and filter
       const allGroups = await storage.getShoppingGroups(0); // Get all groups regardless of user
+      console.log(`Available groups: ${allGroups.length}`);
+      console.log(`Room codes in system:`, allGroups.map((g: any) => g.roomCode));
+      
       const targetGroup = allGroups.find((g: any) => g.roomCode === code.trim());
       
       if (!targetGroup) {
+        console.log(`Room code '${code.trim()}' not found`);
         return res.status(404).json({ message: "Invalid room code" });
       }
+
+      console.log(`Found target group:`, targetGroup);
 
       // Check if user is already a member
       const existingMembership = await storage.getGroupMembers(targetGroup.id);
@@ -750,6 +760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: "member"
       });
       
+      console.log(`User ${userId} successfully joined group ${targetGroup.id}`);
       res.json({ message: "Joined group successfully", group: targetGroup });
     } catch (error) {
       console.error("Error joining group:", error);
