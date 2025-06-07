@@ -3416,6 +3416,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Invalid request parameters" });
       }
 
+      // Check if Razorpay is configured
+      if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        return res.status(503).json({ 
+          error: "Payment gateway not configured. Please contact administrator.",
+          code: "PAYMENT_GATEWAY_NOT_CONFIGURED"
+        });
+      }
+
       // Create Razorpay order
       const options = {
         amount: Math.round(amount * 100), // Convert to paise
@@ -3433,7 +3441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         orderId: order.id,
         amount: order.amount,
         currency: order.currency,
-        keyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_1DP5mmOlF5G5ag'
+        keyId: process.env.RAZORPAY_KEY_ID
       });
     } catch (error: any) {
       console.error('Create Razorpay order error:', error);

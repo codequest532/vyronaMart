@@ -139,9 +139,17 @@ export default function MyVyrona() {
       setAddMoneyAmount("");
     },
     onError: (error: any) => {
+      const errorMessage = error.message || "Failed to add money to wallet";
+      let description = errorMessage;
+      
+      // Check for payment gateway configuration error
+      if (error.code === "PAYMENT_GATEWAY_NOT_CONFIGURED" || errorMessage.includes("Payment gateway not configured")) {
+        description = "Payment service is currently unavailable. Please try again later or contact support.";
+      }
+      
       toast({
         title: "Payment Failed",
-        description: error.message || "Failed to add money to wallet",
+        description,
         variant: "destructive",
       });
     }
