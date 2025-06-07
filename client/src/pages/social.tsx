@@ -573,7 +573,7 @@ export default function VyronaSocial() {
         wsRef.current = null;
       }
     };
-  }, [authUser, selectedGroupId, refetchOnlineMembers]);
+  }, [authUser, selectedGroupId]);
 
   // Update online members when data changes
   useEffect(() => {
