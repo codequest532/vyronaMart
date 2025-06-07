@@ -1347,43 +1347,49 @@ export default function VyronaSocial() {
                             </div>
                             
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
-                                <h3 className="font-medium truncate">{group.name}</h3>
-                                <div className="flex items-center gap-1">
+                              <div className="flex items-start justify-between mb-1">
+                                <h3 className="font-medium text-sm leading-tight">{group.name}</h3>
+                                <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                                   {group.creatorId === (authUser as any)?.id && (
                                     <Crown className="w-3 h-3 text-yellow-500" />
                                   )}
-                                  <span className="text-xs text-gray-500">
-                                    {new Date(group.createdAt).toLocaleDateString()}
+                                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                                    {new Date(group.createdAt).toLocaleDateString('en-GB', { 
+                                      day: '2-digit', 
+                                      month: '2-digit',
+                                      year: '2-digit'
+                                    })}
                                   </span>
                                 </div>
                               </div>
                               
-                              <div className="flex items-center justify-between">
-                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                              <div className="flex items-center justify-between mb-1">
+                                <p className="text-sm text-gray-600 dark:text-gray-400 flex-1 mr-2 leading-tight">
                                   {group.description || "Shopping together"}
                                 </p>
-                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
                                   <Users className="w-3 h-3" />
                                   <span>{group.memberCount}</span>
-                                  {group.totalCart > 0 && (
-                                    <Badge variant="secondary" className="text-xs ml-1">
-                                      ₹{group.totalCart}
-                                    </Badge>
-                                  )}
                                 </div>
                               </div>
                               
-                              {/* Status indicator */}
+                              {/* Status and details row */}
                               <div className="flex items-center justify-between mt-2">
                                 <p className="text-xs text-green-600 dark:text-green-400">
                                   Active shopping session
                                 </p>
-                                {group.roomCode && (
-                                  <Badge variant="outline" className="text-xs font-mono">
-                                    {group.roomCode}
-                                  </Badge>
-                                )}
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  {group.totalCart > 0 && (
+                                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                                      ₹{Math.floor(group.totalCart / 100)}
+                                    </Badge>
+                                  )}
+                                  {group.roomCode && (
+                                    <Badge variant="outline" className="text-xs font-mono px-1.5 py-0.5">
+                                      {group.roomCode}
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
