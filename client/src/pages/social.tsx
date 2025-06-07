@@ -894,114 +894,151 @@ export default function VyronaSocial() {
                       </div>
                     </div>
 
-                    {/* Messages/Activity Area */}
-                    <div className="flex-1 p-4 overflow-y-auto">
+                    {/* Chat Messages Area */}
+                    <ScrollArea className="flex-1 p-4">
                       <div className="space-y-4">
-                        {/* Welcome Message */}
-                        <div className="text-center">
-                          <div className="inline-block p-3 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-200">
-                            🛍️ Welcome to {selectedGroup.name}! Start shopping together.
-                          </div>
-                        </div>
-
-                        {/* Group Info Message */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                              <Users className="w-4 h-4 text-blue-600" />
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="font-medium text-blue-600">Group Info</span>
-                                <span className="text-xs text-gray-500">System</span>
+                        {/* Display chat messages */}
+                        {messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`flex ${
+                              message.messageType === 'system'
+                                ? 'justify-center'
+                                : message.userId === (authUser as any)?.id
+                                ? 'justify-end'
+                                : 'justify-start'
+                            }`}
+                          >
+                            {message.messageType === 'system' ? (
+                              <div className="inline-block p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-200 text-center">
+                                {message.content}
                               </div>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <Users className="w-4 h-4 text-gray-500" />
-                                  <span>{selectedGroup.memberCount} members</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <ShoppingCart className="w-4 h-4 text-gray-500" />
-                                  <span>Group Cart: ₹{selectedGroup.totalCart}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Crown className="w-4 h-4 text-yellow-500" />
-                                  <span>
-                                    Created by {selectedGroup.creatorId === (authUser as any)?.id ? 'You' : 'Admin'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Activity Messages */}
-                        {cartItems.length > 0 && (
-                          <div className="space-y-3">
-                            {cartItems.map((item) => (
-                              <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                                <div className="flex items-start gap-3">
-                                  <Avatar className="w-8 h-8">
-                                    <AvatarFallback className="bg-green-100 text-green-600 text-xs">
-                                      {(authUser as any)?.username?.[0]?.toUpperCase() || 'U'}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="font-medium">You</span>
-                                      <span className="text-xs text-gray-500">
-                                        {new Date(item.addedAt || Date.now()).toLocaleTimeString()}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                      <ShoppingBag className="w-4 h-4 text-green-600" />
-                                      <span>Added <strong>{item.name}</strong> to cart</span>
-                                    </div>
-                                    <div className="mt-2 text-xs text-gray-500">
-                                      Quantity: {item.quantity} • Price: ₹{item.price}
-                                    </div>
+                            ) : (
+                              <div className={`flex gap-2 max-w-[70%] ${
+                                message.userId === (authUser as any)?.id ? 'flex-row-reverse' : 'flex-row'
+                              }`}>
+                                <Avatar className="w-8 h-8 flex-shrink-0">
+                                  <AvatarFallback className={`text-xs ${
+                                    message.userId === (authUser as any)?.id 
+                                      ? 'bg-green-100 text-green-600' 
+                                      : 'bg-blue-100 text-blue-600'
+                                  }`}>
+                                    {message.username.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className={`${
+                                  message.userId === (authUser as any)?.id ? 'text-right' : 'text-left'
+                                }`}>
+                                  <div className={`inline-block p-3 rounded-lg ${
+                                    message.userId === (authUser as any)?.id
+                                      ? 'bg-green-500 text-white rounded-br-sm'
+                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border'
+                                  }`}>
+                                    <p className="text-sm">{message.content}</p>
+                                  </div>
+                                  <div className={`flex items-center gap-1 mt-1 text-xs text-gray-500 ${
+                                    message.userId === (authUser as any)?.id ? 'justify-end' : 'justify-start'
+                                  }`}>
+                                    <span>{message.username}</span>
+                                    <span>•</span>
+                                    <span>
+                                      {new Date(message.sentAt).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
-                            ))}
+                            )}
                           </div>
-                        )}
+                        ))}
 
-                        {/* Placeholder for more activity */}
-                        <div className="text-center">
-                          <div className="inline-block p-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs text-gray-500">
-                            Start shopping to see group activity here
+                        {/* Cart activity messages */}
+                        {cartItems.map((item) => (
+                          <div key={`cart-${item.id}`} className="flex justify-center">
+                            <div className="inline-block p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm max-w-md">
+                              <div className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
+                                <ShoppingBag className="w-4 h-4" />
+                                <span>
+                                  <strong>You</strong> added <strong>{item.name}</strong> to group cart
+                                </span>
+                              </div>
+                              <div className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                                Quantity: {item.quantity} • ₹{item.price}
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        ))}
+
+                        <div ref={messagesEndRef} />
                       </div>
-                    </div>
+                    </ScrollArea>
 
-                    {/* Quick Actions Bar */}
+                    {/* Message Input Area */}
                     <div className="p-4 bg-white dark:bg-gray-800 border-t">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-end gap-3">
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="gap-2 border-green-300 hover:bg-green-50"
+                          className="rounded-full p-2"
                         >
-                          <Package className="w-4 h-4" />
+                          <Paperclip className="w-4 h-4" />
+                        </Button>
+                        
+                        <div className="flex-1 relative">
+                          <Input
+                            placeholder="Type a message..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className="pr-12 border-green-300 focus:border-green-500"
+                            disabled={sendMessageMutation.isPending}
+                          />
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="absolute right-1 top-1 rounded-full p-1.5"
+                          >
+                            <Smile className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        
+                        <Button 
+                          onClick={handleSendMessage}
+                          disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                          className="rounded-full p-2 bg-green-500 hover:bg-green-600"
+                        >
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      
+                      {/* Quick Actions */}
+                      <div className="flex items-center gap-2 mt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="gap-2 border-green-300 hover:bg-green-50 text-xs"
+                          onClick={() => setLocation('/social?tab=products')}
+                        >
+                          <Package className="w-3 h-3" />
                           Browse Products
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="gap-2 border-green-300 hover:bg-green-50"
+                          className="gap-2 border-green-300 hover:bg-green-50 text-xs"
                           onClick={() => setIsGroupCartOpen(true)}
                         >
-                          <ShoppingCart className="w-4 h-4" />
+                          <ShoppingCart className="w-3 h-3" />
                           View Cart ({cartItems.length})
                         </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="gap-2 border-green-300 hover:bg-green-50"
+                          className="gap-2 border-green-300 hover:bg-green-50 text-xs"
                         >
-                          <Users className="w-4 h-4" />
+                          <Users className="w-3 h-3" />
                           Invite Members
                         </Button>
                       </div>
