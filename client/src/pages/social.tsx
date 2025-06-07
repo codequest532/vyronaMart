@@ -1614,8 +1614,8 @@ export default function VyronaSocial() {
                       </p>
                     </div>
 
-                    {/* Chat Section - 30% */}
-                    <div className="flex flex-col border-b" style={{ height: '30%' }}>
+                    {/* Chat Section - 45% */}
+                    <div className="flex flex-col border-b" style={{ height: '45%' }}>
                       {/* Chat Messages Area */}
                       <div className="flex-1 min-h-0">
                         <ScrollArea className="h-full p-4">
@@ -1719,16 +1719,16 @@ export default function VyronaSocial() {
                       </div>
                     </div>
 
-                    {/* Participants Section - 70% */}
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 flex flex-col" style={{ height: '70%' }}>
-                      <div className="flex items-center gap-2 mb-3">
+                    {/* Participants Section - 55% */}
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 flex flex-col overflow-hidden" style={{ height: '55%' }}>
+                      <div className="flex items-center gap-2 mb-3 flex-shrink-0">
                         <Users className="h-4 w-4 text-blue-600" />
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
                         <span className="text-xs text-gray-500">({onlineMembers.length} online)</span>
                       </div>
-                      <div className="flex-1 min-h-0">
+                      <div className="flex-1 min-h-0 overflow-hidden">
                         <ScrollArea className="h-full">
-                          <div className="space-y-2">
+                          <div className="space-y-2 pr-2">
                             {onlineMembers.length > 0 ? (
                               onlineMembers.map((member) => (
                                 <div key={member.userId} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
