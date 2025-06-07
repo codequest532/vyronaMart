@@ -1565,7 +1565,7 @@ export default function VyronaSocial() {
                                           onClick={() => selectedGroup ? handleAddToGroupCart(product.id) : setIsCreateGroupOpen(true)}
                                         >
                                           <ShoppingBag className="w-4 h-4 mr-2" />
-                                          {selectedGroup ? "Add to Group" : "Create Group First"}
+                                          {selectedGroup ? "Add to Group" : "Add to Group"}
                                         </Button>
                                         <Button 
                                           variant="outline" 
