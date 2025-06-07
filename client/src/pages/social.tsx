@@ -1614,34 +1614,7 @@ export default function VyronaSocial() {
                       </p>
                     </div>
 
-                    {/* Participants Section */}
-                    <div className="p-3 border-b bg-gray-50 dark:bg-gray-800">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-blue-600" />
-                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
-                        <span className="text-xs text-gray-500">({onlineMembers.length} online)</span>
-                      </div>
-                      <div className="space-y-1 max-h-24 overflow-y-auto">
-                        {onlineMembers.length > 0 ? (
-                          onlineMembers.map((member) => (
-                            <div key={member.userId} className="flex items-center gap-2 py-1">
-                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                              <Avatar className="w-6 h-6">
-                                <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                                  {member.username.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
-                                {member.username}
-                              </span>
-                              <span className="text-xs text-green-600 ml-auto">online</span>
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-xs text-gray-500 italic">No members online</div>
-                        )}
-                      </div>
-                    </div>
+
 
                     {/* Chat Messages Area */}
                     <ScrollArea className="flex-1 p-4">
@@ -1740,6 +1713,35 @@ export default function VyronaSocial() {
                         >
                           <Send className="w-4 h-4" />
                         </Button>
+                      </div>
+                    </div>
+
+                    {/* Participants Section */}
+                    <div className="p-3 border-t bg-gray-50 dark:bg-gray-800">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="h-4 w-4 text-blue-600" />
+                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
+                        <span className="text-xs text-gray-500">({onlineMembers.length} online)</span>
+                      </div>
+                      <div className="space-y-1 max-h-24 overflow-y-auto">
+                        {onlineMembers.length > 0 ? (
+                          onlineMembers.map((member) => (
+                            <div key={member.userId} className="flex items-center gap-2 py-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <Avatar className="w-6 h-6">
+                                <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
+                                  {member.username.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                {member.username}
+                              </span>
+                              <span className="text-xs text-green-600 ml-auto">online</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-xs text-gray-500 italic">No members online</div>
+                        )}
                       </div>
                     </div>
                   </>
