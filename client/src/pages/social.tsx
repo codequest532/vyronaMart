@@ -1754,7 +1754,7 @@ export default function VyronaSocial() {
 
       {/* Online Members Indicator */}
       {selectedGroupId && onlineMembers.length > 0 && (
-        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-green-200">
+        <div className="fixed bottom-20 right-4 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-green-200">
           <div className="flex items-center gap-2 text-sm">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-gray-600 dark:text-gray-300">
