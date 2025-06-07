@@ -114,6 +114,7 @@ export default function VyronaSocial() {
   const [onlineMembers, setOnlineMembers] = useState<any[]>([]);
   const [videoCallInvite, setVideoCallInvite] = useState<any>(null);
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -294,6 +295,29 @@ export default function VyronaSocial() {
     },
     onError: (error: Error) => {
       toast({ title: "Failed to send message", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const uploadFileMutation = useMutation({
+    mutationFn: async ({ file, groupId }: { file: File; groupId: number }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('groupId', groupId.toString());
+      formData.append('messageType', 'file');
+      
+      const response = await fetch("/api/group-messages/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Failed to upload file');
+      return response.json();
+    },
+    onSuccess: () => {
+      setSelectedFile(null);
+      toast({ title: "File sent successfully!" });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Failed to send file", description: error.message, variant: "destructive" });
     },
   });
 
@@ -608,12 +632,24 @@ export default function VyronaSocial() {
 
   // Send message function
   const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedGroupId) return;
+    if (!selectedGroupId) return;
     
-    sendMessageMutation.mutate({
-      content: newMessage.trim(),
-      groupId: selectedGroupId
-    });
+    // If there's a selected file, upload it
+    if (selectedFile) {
+      uploadFileMutation.mutate({
+        file: selectedFile,
+        groupId: selectedGroupId
+      });
+      return;
+    }
+    
+    // If there's a text message, send it
+    if (newMessage.trim()) {
+      sendMessageMutation.mutate({
+        content: newMessage.trim(),
+        groupId: selectedGroupId
+      });
+    }
   };
 
   // Handle enter key in message input
@@ -1422,6 +1458,28 @@ export default function VyronaSocial() {
 
                     {/* Message Input Area */}
                     <div className="p-4 bg-white dark:bg-gray-800 border-t">
+                      {/* File Preview Area */}
+                      {selectedFile && (
+                        <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Paperclip className="w-4 h-4 text-gray-500" />
+                              <span className="text-sm font-medium">{selectedFile.name}</span>
+                              <span className="text-xs text-gray-500">
+                                ({(selectedFile.size / 1024 / 1024).toFixed(2)}MB)
+                              </span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setSelectedFile(null)}
+                              className="h-6 w-6 p-0"
+                            >
+                              ×
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                       <div className="flex items-end gap-3">
                         <Button 
                           variant="outline" 
@@ -1434,11 +1492,10 @@ export default function VyronaSocial() {
                             fileInput.onchange = (event) => {
                               const file = (event.target as HTMLInputElement).files?.[0];
                               if (file) {
-                                const fileName = file.name;
-                                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                                setSelectedFile(file);
                                 toast({
                                   title: "File Selected",
-                                  description: `${fileName} (${fileSize}MB) - Feature coming soon!`,
+                                  description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
                                 });
                               }
                             };
@@ -1468,7 +1525,7 @@ export default function VyronaSocial() {
                         
                         <Button 
                           onClick={handleSendMessage}
-                          disabled={!newMessage.trim() || sendMessageMutation.isPending}
+                          disabled={(!newMessage.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
                           className="rounded-full p-2 bg-green-500 hover:bg-green-600"
                         >
                           <Send className="w-4 h-4" />
