@@ -997,8 +997,20 @@ export class DatabaseStorage implements IStorage {
     return member;
   }
 
-  async getGroupMembers(groupId: number): Promise<GroupMember[]> {
-    return await db.select().from(groupMembers).where(eq(groupMembers.groupId, groupId));
+  async getGroupMembers(groupId: number): Promise<any[]> {
+    return await db
+      .select({
+        id: groupMembers.id,
+        userId: groupMembers.userId,
+        groupId: groupMembers.groupId,
+        role: groupMembers.role,
+        joinedAt: groupMembers.joinedAt,
+        username: users.username,
+        email: users.email
+      })
+      .from(groupMembers)
+      .leftJoin(users, eq(groupMembers.userId, users.id))
+      .where(eq(groupMembers.groupId, groupId));
   }
 
   async removeGroupMember(groupId: number, userId: number): Promise<boolean> {

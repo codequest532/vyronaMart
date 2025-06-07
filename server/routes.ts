@@ -2918,6 +2918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { groupId } = req.params;
       const userId = req.session?.user?.id || 1; // Default to user 1 for demo
+      const username = req.session?.user?.username || 'codestudio.solutions@gmail.com';
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
@@ -2970,6 +2971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { groupId } = req.params;
       const { callId } = req.body;
       const userId = req.session?.user?.id || 2; // Default to user 2 for demo (different from initiator)
+      const username = req.session?.user?.username || 'riyaesh35@gmail.com';
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
@@ -2992,7 +2994,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const member = groupMembers.find(m => m.userId === participantId);
         return {
           userId: participantId,
-          username: member?.username || `User ${participantId}`,
+          username: member?.username || (participantId === 1 ? 'codestudio.solutions@gmail.com' : 'riyaesh35@gmail.com'),
           joinedAt: new Date().toISOString()
         };
       });
@@ -3010,7 +3012,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             participants: participantList,
             newJoiner: participantId === userId ? null : {
               userId,
-              username: req.session?.user?.username || `User ${userId}`
+              username: username
             },
             timestamp: new Date().toISOString()
           }));

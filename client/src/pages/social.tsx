@@ -1050,7 +1050,7 @@ export default function VyronaSocial() {
                   </div>
                 )}
                 <div className="absolute bottom-2 left-2 bg-black/50 rounded px-2 py-1 text-white text-xs">
-                  You
+                  {(authUser as any)?.username || 'codestudio.solutions@gmail.com'}
                 </div>
               </div>
               <div className="bg-gray-100 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
@@ -1799,7 +1799,7 @@ export default function VyronaSocial() {
                         <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-lg font-medium mb-2">
                           {participant.username.charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-sm font-medium">{isCurrentUser ? 'You' : participant.username}</span>
+                        <span className="text-sm font-medium">{participant.username}</span>
                       </div>
                     )}
                     
