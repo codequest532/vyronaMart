@@ -477,6 +477,9 @@ export default function VyronaSocial() {
                       <ShoppingCart className="h-5 w-5" />
                       Group Cart {selectedGroup && `- ${selectedGroup.name}`}
                     </DialogTitle>
+                    <DialogDescription>
+                      View and manage items in your group shopping cart
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <ScrollArea className="h-64">
@@ -666,6 +669,9 @@ export default function VyronaSocial() {
                               <Users className="h-5 w-5 text-green-600" />
                               Create New Group
                             </DialogTitle>
+                            <DialogDescription>
+                              Create a new shopping group to collaborate with friends
+                            </DialogDescription>
                           </DialogHeader>
                           <Form {...createGroupForm}>
                             <form onSubmit={createGroupForm.handleSubmit((data) => createGroupMutation.mutate(data))} className="space-y-4">
@@ -715,6 +721,9 @@ export default function VyronaSocial() {
                               <UserPlus className="h-5 w-5 text-blue-600" />
                               Join Group
                             </DialogTitle>
+                            <DialogDescription>
+                              Enter a group code to join an existing shopping group
+                            </DialogDescription>
                           </DialogHeader>
                           <Form {...joinGroupForm}>
                             <form onSubmit={joinGroupForm.handleSubmit((data) => joinGroupMutation.mutate(data))} className="space-y-4">
@@ -1042,6 +1051,9 @@ export default function VyronaSocial() {
                                 <Users className="h-5 w-5 text-green-600" />
                                 Invite Members to {selectedGroup?.name}
                               </DialogTitle>
+                              <DialogDescription>
+                                Share the group code to invite friends to join your shopping group
+                              </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div className="text-sm text-gray-600">
