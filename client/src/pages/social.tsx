@@ -1277,7 +1277,7 @@ export default function VyronaSocial() {
                           className={`p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
                             selectedGroupId === group.id ? 'bg-green-50 dark:bg-green-900/20 border-r-4 border-green-500' : ''
                           }`}
-                          onClick={() => setSelectedGroupId(selectedGroupId === group.id ? null : group.id)}
+                          onClick={() => setSelectedGroupId(group.id)}
                         >
                           <div className="flex items-center gap-3">
                             {/* Group Avatar */}
