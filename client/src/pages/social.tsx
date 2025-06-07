@@ -1362,9 +1362,25 @@ export default function VyronaSocial() {
                           </div>
                           <div>
                             <h3 className="font-semibold">{selectedGroup.name}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {selectedGroup.memberCount} members • Code: {selectedGroup.roomCode}
-                            </p>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                <span className="font-medium text-green-600">{selectedGroup.memberCount}</span>
+                                <span>members</span>
+                                {onlineMembers.length > 0 && (
+                                  <span className="text-xs text-green-500">
+                                    ({onlineMembers.length} online)
+                                  </span>
+                                )}
+                              </div>
+                              <span>•</span>
+                              <div className="flex items-center gap-1">
+                                <span>Code:</span>
+                                <Badge variant="outline" className="text-xs font-mono">
+                                  {selectedGroup.roomCode}
+                                </Badge>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         
