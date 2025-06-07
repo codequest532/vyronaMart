@@ -3164,17 +3164,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
   
-  // Cleanup inactive connections every 30 seconds
+  // Cleanup inactive connections every 60 seconds
   setInterval(() => {
     const now = new Date();
     for (const [userKey, onlineUser] of onlineUsers.entries()) {
       const timeSinceLastSeen = now.getTime() - onlineUser.lastSeen.getTime();
       
-      if (timeSinceLastSeen > 60000 || onlineUser.ws.readyState !== WebSocket.OPEN) {
+      // Only remove if user hasn't been seen for 5 minutes AND connection is closed
+      if (timeSinceLastSeen > 300000 && onlineUser.ws.readyState !== WebSocket.OPEN) {
+        console.log(`Removing inactive user: ${userKey}`);
         onlineUsers.delete(userKey);
       }
     }
-  }, 30000);
+  }, 60000);
   
   return httpServer;
 }

@@ -399,6 +399,22 @@ export default function VyronaSocial() {
         username: (authUser as any).username || 'User',
         groupId: selectedGroupId
       }));
+      
+      // Start heartbeat to keep connection alive
+      const heartbeatInterval = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'ping',
+            userId: (authUser as any).id || 1,
+            groupId: selectedGroupId
+          }));
+        } else {
+          clearInterval(heartbeatInterval);
+        }
+      }, 30000); // Send ping every 30 seconds
+      
+      // Store interval reference for cleanup
+      (ws as any).heartbeatInterval = heartbeatInterval;
     };
 
     ws.onmessage = (event) => {
@@ -450,21 +466,21 @@ export default function VyronaSocial() {
 
     ws.onclose = () => {
       console.log('WebSocket disconnected');
+      // Clear heartbeat interval when connection closes
+      if ((ws as any).heartbeatInterval) {
+        clearInterval((ws as any).heartbeatInterval);
+      }
     };
 
     ws.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
 
-    // Ping to keep connection alive
-    const pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'ping' }));
-      }
-    }, 30000);
-
     return () => {
-      clearInterval(pingInterval);
+      // Clear heartbeat interval on cleanup
+      if ((ws as any).heartbeatInterval) {
+        clearInterval((ws as any).heartbeatInterval);
+      }
       ws.close();
     };
   }, [authUser, selectedGroupId, refetchOnlineMembers]);
