@@ -1786,70 +1786,126 @@ export default function VyronaSocial() {
         </div>
       </div>
 
-      {/* Video Call Overlay - Integrated with Product Browsing */}
+      {/* Video Call Overlay */}
       {isVideoCallActive && (
-        <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex">
-          {/* Left Side - Participants */}
-          <div className="w-1/3 bg-gray-900 p-4 flex flex-col">
+        <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-4xl w-full mx-4 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-lg font-semibold">Video Call</h3>
-              <div className="text-green-400 text-sm flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                {callParticipants.length} participant{callParticipants.length !== 1 ? 's' : ''}
+              <h3 className="text-lg font-semibold">Group Video Call - {selectedGroup?.name}</h3>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsMicOn(!isMicOn)}
+                  className={isMicOn ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}
+                >
+                  {isMicOn ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsCameraOn(!isCameraOn)}
+                  className={isCameraOn ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}
+                >
+                  {isCameraOn ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => endVideoCallMutation.mutate(selectedGroupId!)}
+                  disabled={endVideoCallMutation.isPending}
+                >
+                  <Phone className="w-4 h-4" />
+                </Button>
               </div>
             </div>
-
-            {/* Participants Grid */}
-            <div className="flex-1 space-y-3">
-              {callParticipants.map((participant, index) => {
-                const isCurrentUser = participant.userId === ((authUser as any)?.id || 1);
-                return (
-                  <div
-                    key={participant.userId}
-                    className="bg-gray-800 rounded-lg relative overflow-hidden aspect-video flex items-center justify-center"
-                  >
-                    {isCurrentUser && isCameraOn ? (
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        muted
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-white p-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-lg font-medium mb-2">
-                          {participant.username.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="text-sm font-medium">{participant.username}</span>
-                      </div>
-                    )}
-                    
-                    {/* Participant Controls */}
-                    <div className="absolute bottom-2 left-2 flex items-center gap-2">
-                      <div className="bg-black/60 rounded px-2 py-1 text-white text-xs">
-                        {isCurrentUser ? 'You' : participant.username}
-                      </div>
-                      {!isMicOn && isCurrentUser && (
-                        <div className="bg-red-600 rounded-full p-1">
-                          <MicOff className="w-3 h-3 text-white" />
-                        </div>
-                      )}
+            
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="bg-gray-900 rounded-lg relative overflow-hidden aspect-video flex items-center justify-center">
+                {isCameraOn ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-white">
+                    <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-xl font-medium mb-2">
+                      {((authUser as any)?.username || 'You').charAt(0).toUpperCase()}
                     </div>
+                    <span className="text-sm">You</span>
                   </div>
-                );
-              })}
+                )}
+              </div>
+              
+              {callParticipants.filter(p => p.userId !== ((authUser as any)?.id || 1)).slice(0, 3).map((participant) => (
+                <div
+                  key={participant.userId}
+                  className="bg-gray-900 rounded-lg relative overflow-hidden aspect-video flex items-center justify-center"
+                >
+                  <div className="flex flex-col items-center justify-center text-white">
+                    <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-xl font-medium mb-2">
+                      {participant.username.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-sm">{participant.username}</span>
+                  </div>
+                </div>
+              ))}
             </div>
+            
+            <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+              {callParticipants.length} participant{callParticipants.length !== 1 ? 's' : ''} in call
+            </div>
+          </div>
+        </div>
+      )}
 
-            {/* Call Controls */}
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <button
-                onClick={() => setIsMicOn(!isMicOn)}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                  isMicOn 
-                    ? 'bg-gray-600 hover:bg-gray-500 text-white' 
-                    : 'bg-red-600 hover:bg-red-700 text-white'
-                }`}
+      {/* Video Call Invitation Dialog */}
+      {videoCallInvite && (
+        <Dialog open={!!videoCallInvite} onOpenChange={() => setVideoCallInvite(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Video Call Invitation</DialogTitle>
+              <DialogDescription>
+                {videoCallInvite.initiatorName} started a video call in {videoCallInvite.groupName}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-2 mt-4">
+              <Button
+                onClick={handleJoinVideoCallInvite}
+                disabled={joinVideoCallMutation.isPending}
+                className="flex-1 bg-green-600 hover:bg-green-700"
               >
+                <Video className="w-4 h-4 mr-2" />
+                {joinVideoCallMutation.isPending ? "Joining..." : "Join Call"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setVideoCallInvite(null)}
+                className="flex-1"
+              >
+                Decline
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Online Members Indicator */}
+      {selectedGroupId && onlineMembers.length > 0 && (
+        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-green-200">
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-gray-600 dark:text-gray-300">
+              {onlineMembers.length} member{onlineMembers.length !== 1 ? 's' : ''} online
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
                 {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
               </button>
 
