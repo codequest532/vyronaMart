@@ -1697,9 +1697,9 @@ export default function VyronaSocial() {
                                 className="bg-green-500 hover:bg-green-600 text-white"
                                 onClick={() => {
                                   if (selectedGroup) {
-                                    addToCartMutation.mutate({
+                                    addToGroupCartMutation.mutate({
                                       productId: product.id,
-                                      quantity: 1,
+                                      groupId: selectedGroup.id
                                     });
                                   } else {
                                     toast({
@@ -1718,7 +1718,7 @@ export default function VyronaSocial() {
                       ))}
                     </div>
                     
-                    {(!products || products.filter(p => p.enableGroupBuy).length === 0) && (
+                    {(!products || (products as any[]).filter((p: any) => p.enableGroupBuy).length === 0) && (
                       <div className="text-center py-12">
                         <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-600 mb-2">No Exclusive Products Available</h3>
