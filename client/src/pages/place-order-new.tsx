@@ -191,6 +191,13 @@ export default function PlaceOrderNew() {
     queryFn: () => fetch("/api/wallet/balance/1").then(res => res.json()),
   });
 
+  // Fetch group members
+  const { data: groupMembers } = useQuery({
+    queryKey: ["/api/social/groups", roomId, "members"],
+    queryFn: () => fetch(`/api/social/groups/${roomId}/members`).then(res => res.json()),
+    enabled: !!roomId,
+  });
+
   const cartItems = Array.isArray(cartItemsResponse) ? cartItemsResponse : [];
   const room = Array.isArray(roomsResponse) ? roomsResponse.find(r => r.id === roomId) : null;
 
@@ -1118,7 +1125,7 @@ export default function PlaceOrderNew() {
             <div className="space-y-4">
               <h3 className="font-medium">Select Member and Delivery Address:</h3>
               <div className="space-y-2">
-                {room?.members?.map((member) => (
+                {groupMembers?.map((member: any) => (
                   <Card key={member.id} className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between gap-4">
@@ -1128,7 +1135,9 @@ export default function PlaceOrderNew() {
                           </div>
                           <div>
                             <div className="font-medium">{member.username}</div>
-                            <div className="text-xs text-gray-500">Group Member</div>
+                            <div className="text-xs text-gray-500">
+                              {member.role === 'creator' ? 'Group Creator' : 'Group Member'}
+                            </div>
                           </div>
                         </div>
                         <div className="flex-1 max-w-sm">
@@ -1144,7 +1153,7 @@ export default function PlaceOrderNew() {
                                   if (selectedItemForAssignment) {
                                     assignItemToMember(
                                       selectedItemForAssignment.id,
-                                      member.id,
+                                      member.userId,
                                       member.username,
                                       address
                                     );
