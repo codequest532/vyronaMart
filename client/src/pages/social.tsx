@@ -448,6 +448,20 @@ export default function VyronaSocial() {
     }
   }, [onlineMembersData]);
 
+  // Reset selectedGroupId when groups list changes or selected group no longer exists
+  useEffect(() => {
+    if (groups && Array.isArray(groups)) {
+      // If no groups exist, reset selectedGroupId
+      if (groups.length === 0) {
+        setSelectedGroupId(null);
+      }
+      // If selectedGroupId is set but the group doesn't exist in the list, reset it
+      else if (selectedGroupId && !groups.find(g => g.id === selectedGroupId)) {
+        setSelectedGroupId(null);
+      }
+    }
+  }, [groups, selectedGroupId]);
+
   // Video call functions
   const handleStartVideoCall = async () => {
     if (!selectedGroupId) {
