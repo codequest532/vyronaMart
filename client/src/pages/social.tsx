@@ -1134,12 +1134,6 @@ export default function VyronaSocial() {
       {/* Main Content with Modern Layout */}
       <div className="container mx-auto px-6 py-8">
         <div className="space-y-6">
-          <div className="flex items-center justify-center">
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 rounded-full border shadow-sm">
-              <Users className="h-4 w-4 text-blue-600" />
-              <span className="font-medium">Shopping Groups</span>
-            </div>
-          </div>
 
           {/* Groups Content - WhatsApp Style */}
           <div className="space-y-0">
