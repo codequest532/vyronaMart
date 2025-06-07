@@ -1498,7 +1498,7 @@ export default function VyronaSocial() {
                     </ScrollArea>
 
                     {/* Message Input Area */}
-                    <div className="p-4 bg-white dark:bg-gray-800 border-t mr-4">
+                    <div className="p-4 pb-2 bg-white dark:bg-gray-800 border-t mr-4">
                       {/* File Preview Area */}
                       {selectedFile && (
                         <div className="mb-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border">
