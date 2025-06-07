@@ -631,7 +631,7 @@ export default function MyVyrona() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {orders.length === 0 ? (
+                {purchases.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No purchases yet</p>
@@ -639,7 +639,7 @@ export default function MyVyrona() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order: any) => (
+                    {purchases.map((order: any) => (
                       <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex items-center space-x-3">
                           <div className="w-12 h-12 bg-green-100 rounded flex items-center justify-center">
