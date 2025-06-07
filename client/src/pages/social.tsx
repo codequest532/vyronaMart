@@ -74,7 +74,7 @@ interface ChatMessage {
   userId: number;
   username: string;
   groupId: number;
-  messageType: 'text' | 'system' | 'product_share' | 'cart_update';
+  messageType: 'text' | 'system' | 'product_share' | 'cart_update' | 'file';
   metadata?: any;
   sentAt: string;
 }
@@ -1415,7 +1415,30 @@ export default function VyronaSocial() {
                                       ? 'bg-green-500 text-white rounded-br-sm'
                                       : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border'
                                   }`}>
-                                    <p className="text-sm">{message.content}</p>
+                                    {message.messageType === 'file' && message.metadata ? (
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                          <Paperclip className="w-4 h-4" />
+                                          <span className="text-sm font-medium">
+                                            {message.metadata.fileName}
+                                          </span>
+                                        </div>
+                                        <div className="text-xs opacity-75">
+                                          {(message.metadata.fileSize / 1024 / 1024).toFixed(2)}MB
+                                        </div>
+                                        {message.metadata.mimeType?.startsWith('image/') && (
+                                          <div className="mt-2">
+                                            <img 
+                                              src={`/uploads/${message.metadata.fileName}`}
+                                              alt={message.metadata.fileName}
+                                              className="max-w-[200px] max-h-[200px] rounded object-cover"
+                                            />
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <p className="text-sm">{message.content}</p>
+                                    )}
                                   </div>
                                   <div className={`flex items-center gap-1 mt-1 text-xs text-gray-500 ${
                                     message.userId === (authUser as any)?.id ? 'justify-end' : 'justify-start'
