@@ -28,6 +28,7 @@ import {
   Phone,
   Heart,
   Filter,
+  LogOut,
   Grid3X3,
   List,
   Bell,
@@ -35,7 +36,6 @@ import {
   Send,
   Smile,
   Paperclip,
-  MoreVertical,
   Copy,
 } from "lucide-react";
 
@@ -1158,6 +1158,33 @@ export default function VyronaSocial() {
                             <ShoppingCart className="h-4 w-4" />
                             Cart ({cartItems.length})
                           </Button>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="sm" variant="outline" className="gap-2">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {selectedGroup?.creatorId === (authUser as any)?.id ? (
+                                <DropdownMenuItem 
+                                  onClick={handleDeleteGroup}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Group
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem 
+                                  onClick={handleExitGroup}
+                                  className="text-orange-600 focus:text-orange-600"
+                                >
+                                  <LogOut className="h-4 w-4 mr-2" />
+                                  Exit Group
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     </div>

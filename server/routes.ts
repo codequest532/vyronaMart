@@ -2367,6 +2367,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete group (only for group creator)
+  app.delete("/api/social/groups/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Get group details to check if user is creator
+      const group = await storage.getShoppingGroup(Number(id));
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+      
+      if (group.creatorId !== userId) {
+        return res.status(403).json({ message: "Only group creator can delete the group" });
+      }
+      
+      // Delete the group
+      await storage.deleteShoppingGroup(Number(id));
+      
+      res.json({ message: "Group deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      res.status(500).json({ message: "Failed to delete group" });
+    }
+  });
+
+  // Exit group (leave group)
+  app.post("/api/social/groups/:id/exit", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Check if user is a member of the group
+      const isMember = await storage.isUserRoomMember(userId, Number(id));
+      if (!isMember) {
+        return res.status(404).json({ message: "You are not a member of this group" });
+      }
+      
+      // Get group details to check if user is creator
+      const group = await storage.getShoppingGroup(Number(id));
+      if (group && group.creatorId === userId) {
+        return res.status(400).json({ message: "Group creator cannot exit. Please delete the group or transfer ownership." });
+      }
+      
+      // Remove user from group
+      await storage.removeUserFromGroup(userId, Number(id));
+      
+      res.json({ message: "Successfully exited the group" });
+    } catch (error) {
+      console.error("Error exiting group:", error);
+      res.status(500).json({ message: "Failed to exit group" });
+    }
+  });
+
   // Get room messages
   app.get("/api/social/groups/:id/messages", async (req, res) => {
     try {

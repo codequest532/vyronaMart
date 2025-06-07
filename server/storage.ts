@@ -95,9 +95,11 @@ export interface IStorage {
   createShoppingGroup(group: InsertShoppingGroup): Promise<ShoppingGroup>;
   getShoppingGroups(userId: number): Promise<ShoppingGroup[]>;
   getShoppingGroup(id: number): Promise<ShoppingGroup | undefined>;
+  deleteShoppingGroup(id: number): Promise<boolean>;
   addGroupMember(member: InsertGroupMember): Promise<GroupMember>;
   getGroupMembers(groupId: number): Promise<GroupMember[]>;
   removeGroupMember(groupId: number, userId: number): Promise<boolean>;
+  removeUserFromGroup(userId: number, groupId: number): Promise<boolean>;
 
   // VyronaSocial - Group Wishlists
   addToGroupWishlist(wishlist: InsertGroupWishlist): Promise<GroupWishlist>;
@@ -998,6 +1000,36 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(groupMembers)
       .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async deleteShoppingGroup(id: number): Promise<boolean> {
+    try {
+      // Delete group members first (foreign key constraint)
+      await db.delete(groupMembers).where(eq(groupMembers.groupId, id));
+      
+      // Delete group messages
+      await db.delete(groupMessages).where(eq(groupMessages.groupId, id));
+      
+      // Delete group wishlists
+      await db.delete(groupWishlists).where(eq(groupWishlists.groupId, id));
+      
+      // Delete cart items for this group
+      await db.delete(cartItems).where(eq(cartItems.roomId, id));
+      
+      // Finally delete the group
+      const result = await db.delete(shoppingGroups).where(eq(shoppingGroups.id, id));
+      return (result.rowCount ?? 0) > 0;
+    } catch (error) {
+      console.error("Error deleting shopping group:", error);
+      return false;
+    }
+  }
+
+  async removeUserFromGroup(userId: number, groupId: number): Promise<boolean> {
+    const result = await db
+      .delete(groupMembers)
+      .where(and(eq(groupMembers.userId, userId), eq(groupMembers.groupId, groupId)));
     return (result.rowCount ?? 0) > 0;
   }
 
