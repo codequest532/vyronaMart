@@ -873,29 +873,34 @@ export class DatabaseStorage implements IStorage {
       console.log("=== STORAGE: Creating shopping group ===");
       console.log("Input data:", JSON.stringify(insertGroup, null, 2));
       
+      // Generate room code
+      const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
       // Use direct SQL query to avoid Drizzle schema issues
       const groupResult = await pool.query(`
-        INSERT INTO shopping_groups (name, description, creator_id, is_active, max_members, created_at)
-        VALUES ($1, $2, $3, $4, $5, NOW())
+        INSERT INTO shopping_groups (name, description, creator_id, is_active, max_members, room_code, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, NOW())
         RETURNING *
       `, [
         insertGroup.name,
         insertGroup.description,
         insertGroup.creatorId,
         true,
-        insertGroup.maxMembers || 10
+        insertGroup.maxMembers || 10,
+        roomCode
       ]);
       
       const group = groupResult.rows[0];
       console.log("Group created successfully:", JSON.stringify(group, null, 2));
       
       // Add creator as group member
-      await pool.query(`
+      const memberResult = await pool.query(`
         INSERT INTO group_members (group_id, user_id, role, joined_at)
         VALUES ($1, $2, $3, NOW())
+        RETURNING *
       `, [group.id, insertGroup.creatorId, 'creator']);
       
-      console.log("Group member added successfully");
+      console.log("Group member added successfully:", memberResult.rows[0]);
       
       // Return group with all required ShoppingGroup fields
       const result = {
@@ -909,7 +914,7 @@ export class DatabaseStorage implements IStorage {
         memberCount: 1,
         totalCart: 0,
         currentGame: null,
-        roomCode: Math.random().toString(36).substring(2, 8).toUpperCase(),
+        roomCode: group.room_code,
         scheduledTime: null,
         maxMembers: group.max_members,
         createdAt: group.created_at
