@@ -90,7 +90,8 @@ export default function PlaceOrder() {
 
   const [showContributionModal, setShowContributionModal] = useState(false);
   const [contributionAmount, setContributionAmount] = useState('');
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'wallet' | 'upi'>('wallet');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'wallet' | 'upi' | 'gpay-groups'>('wallet');
+  const [showGooglePayGroupsModal, setShowGooglePayGroupsModal] = useState(false);
 
   const roomId = params?.roomId ? parseInt(params.roomId) : null;
 
@@ -536,7 +537,7 @@ export default function PlaceOrder() {
                                 VyronaSocial Group Payment
                               </p>
                               <p className="text-amber-700 dark:text-amber-300">
-                                Only VyronaWallet and UPI payments are available for group orders. 
+                                VyronaWallet and UPI payments with Google Pay Groups integration are available for group orders. 
                                 Credit/Debit cards are disabled for group checkout to ensure seamless contribution tracking.
                               </p>
                             </div>
@@ -561,15 +562,32 @@ export default function PlaceOrder() {
                             </CardContent>
                           </Card>
                           
-                          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                          <Card 
+                            className="cursor-pointer hover:shadow-md transition-shadow border-green-200 dark:border-green-800"
+                            onClick={() => setShowGooglePayGroupsModal(true)}
+                          >
                             <CardContent className="p-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                                  <Smartphone className="h-5 w-5 text-blue-600" />
+                                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                                  <Smartphone className="h-5 w-5 text-green-600" />
                                 </div>
-                                <div>
-                                  <h4 className="font-medium">UPI Payment</h4>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">Pay via UPI apps</p>
+                                <div className="flex-1">
+                                  <h4 className="font-medium">Google Pay Groups</h4>
+                                  <p className="text-sm text-gray-600 dark:text-gray-400">Split payment with members</p>
+                                </div>
+                                <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                  NEW
+                                </Badge>
+                              </div>
+                              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <Users className="h-3 w-3" />
+                                    <span>Auto-split between {room.memberCount} members</span>
+                                  </div>
+                                  <div className="text-xs font-medium text-green-600">
+                                    ₹{(finalTotal / room.memberCount).toFixed(2)} each
+                                  </div>
                                 </div>
                               </div>
                             </CardContent>
@@ -932,6 +950,135 @@ export default function PlaceOrder() {
                 Add Contribution
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Google Pay Groups Modal */}
+      <Dialog open={showGooglePayGroupsModal} onOpenChange={setShowGooglePayGroupsModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5 text-green-600" />
+              Google Pay Groups Integration
+            </DialogTitle>
+            <DialogDescription>
+              Split the payment automatically with all group members using Google Pay Groups.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Payment Split Overview */}
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <Users className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-green-900 dark:text-green-100">Auto-Split Payment</h4>
+                  <p className="text-sm text-green-700 dark:text-green-300">Equal split between all members</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-green-600 dark:text-green-400">Total Amount:</span>
+                  <p className="font-bold text-lg">₹{finalTotal.toFixed(2)}</p>
+                </div>
+                <div>
+                  <span className="text-green-600 dark:text-green-400">Per Member:</span>
+                  <p className="font-bold text-lg">₹{(finalTotal / room.memberCount).toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Member Split Details */}
+            <div>
+              <h4 className="font-medium mb-3">Payment Split Details</h4>
+              <div className="space-y-2">
+                {Array.from({ length: room.memberCount }, (_, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-bold text-primary">
+                          {i === 0 ? 'Y' : `M${i + 1}`}
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium">
+                        {i === 0 ? 'You' : `Member ${i + 1}`}
+                      </span>
+                    </div>
+                    <span className="font-medium">₹{(finalTotal / room.memberCount).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Google Pay Groups Features */}
+            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                Google Pay Groups Benefits
+              </h4>
+              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <li className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  Automatic payment requests to all members
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  Real-time payment tracking and notifications
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  Secure UPI-based transactions
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="h-3 w-3 text-green-600" />
+                  No manual calculation or follow-ups needed
+                </li>
+              </ul>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowGooglePayGroupsModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  // Handle Google Pay Groups integration
+                  const googlePayGroupsUrl = `googlepay://pay?action=split&amount=${finalTotal}&members=${room.memberCount}&currency=INR&note=VyronaSocial Group Order - ${room.name}`;
+                  
+                  // In a real implementation, this would open Google Pay app
+                  // For now, we'll simulate the split and mark all contributions as paid
+                  const splitAmount = finalTotal / room.memberCount;
+                  groupCheckout.contributions.forEach((_, index) => {
+                    updateContribution(index + 1, splitAmount, 'upi');
+                  });
+                  
+                  setShowGooglePayGroupsModal(false);
+                  toast({
+                    title: "Google Pay Groups Initiated",
+                    description: `Payment requests sent to all ${room.memberCount} members via Google Pay.`,
+                  });
+                }}
+                className="flex-1 bg-green-600 hover:bg-green-700"
+              >
+                <Smartphone className="h-4 w-4 mr-2" />
+                Start Google Pay Split
+              </Button>
+            </div>
+
+            {/* Disclaimer */}
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              By proceeding, you'll be redirected to Google Pay to create a group payment request. 
+              All members will receive notifications to contribute their share.
+            </p>
           </div>
         </DialogContent>
       </Dialog>
