@@ -319,13 +319,167 @@ export default function MyVyrona() {
           </Card>
         </div>
 
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="wallet" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="wallet" className="flex items-center space-x-2 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-              <Wallet className="h-4 w-4" />
-              <span>VyronaWallet</span>
-            </TabsTrigger>
+        {/* Profile & Wallet Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          {/* Profile Section */}
+          <div className="lg:col-span-1">
+            <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-green-700">
+                  <Wallet className="h-5 w-5" />
+                  <span>VyronaWallet</span>
+                </CardTitle>
+                <CardDescription className="text-green-600">
+                  Manage your wallet and transactions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Balance Display */}
+                  <div className="text-center py-4">
+                    <div className="text-3xl font-bold text-green-600 mb-2">
+                      {walletLoading ? (
+                        <div className="animate-pulse bg-gray-200 h-8 w-24 mx-auto rounded"></div>
+                      ) : (
+                        `₹${walletData?.balance?.toFixed(2) || "0.00"}`
+                      )}
+                    </div>
+                    <p className="text-green-600 text-sm">Available Balance</p>
+                  </div>
+
+                  {/* Add Money Button */}
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Money
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add Money to VyronaWallet</DialogTitle>
+                        <DialogDescription>
+                          Enter the amount you want to add to your wallet
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="amount">Amount (₹)</Label>
+                          <Input
+                            id="amount"
+                            type="number"
+                            placeholder="Enter amount"
+                            value={addMoneyAmount}
+                            onChange={(e) => setAddMoneyAmount(e.target.value)}
+                            min="1"
+                            max="10000"
+                          />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setAddMoneyAmount("100")}
+                          >
+                            ₹100
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setAddMoneyAmount("500")}
+                          >
+                            ₹500
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => setAddMoneyAmount("1000")}
+                          >
+                            ₹1000
+                          </Button>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          className="w-full"
+                          disabled={!addMoneyAmount || parseFloat(addMoneyAmount) <= 0 || addMoneyMutation.isPending}
+                          onClick={() => addMoneyMutation.mutate(parseFloat(addMoneyAmount))}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          {addMoneyMutation.isPending ? "Processing..." : `Pay ₹${addMoneyAmount || "0"}`}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Quick Actions */}
+                  <div className="space-y-2">
+                    <Button variant="outline" size="sm" className="w-full justify-start">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Transaction History
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Transactions Section */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                  <span>Recent Transactions</span>
+                </CardTitle>
+                <CardDescription>
+                  Your latest wallet activity
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {transactionsLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="animate-pulse bg-gray-200 h-16 rounded"></div>
+                    ))}
+                  </div>
+                ) : transactions.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Wallet className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No transactions yet</p>
+                    <p className="text-sm">Add money to start using your wallet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {transactions.slice(0, 5).map((transaction: any) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className={`p-2 rounded-full ${transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'}`}>
+                            {transaction.type === 'credit' ? (
+                              <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                            ) : (
+                              <ArrowUpRight className="h-4 w-4 text-red-600" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium">{transaction.description}</p>
+                            <p className="text-sm text-gray-500">
+                              {formatDistance(new Date(transaction.createdAt), new Date(), { addSuffix: true })}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`font-bold ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
+                          {transaction.type === 'credit' ? '+' : '-'}₹{Math.abs(transaction.amount).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Main Content Tabs - Only Book Management */}
+        <Tabs defaultValue="books" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="books" className="flex items-center space-x-2">
               <BookOpen className="h-4 w-4" />
               <span>Book Management</span>
@@ -336,344 +490,126 @@ export default function MyVyrona() {
             </TabsTrigger>
           </TabsList>
 
-          {/* VyronaWallet Tab */}
-          <TabsContent value="wallet">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Wallet Balance Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Wallet className="h-5 w-5 text-blue-600" />
-                    <span>Wallet Balance</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Your VyronaWallet balance for VyronaMart purchases
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-6">
-                    <div className="text-4xl font-bold text-green-600 mb-2">
-                      {walletLoading ? (
-                        <div className="animate-pulse bg-gray-200 h-12 w-32 mx-auto rounded"></div>
-                      ) : (
-                        `₹${walletData?.balance?.toFixed(2) || "0.00"}`
-                      )}
-                    </div>
-                    <p className="text-gray-600 mb-6">Available Balance</p>
-                    
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Money
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Add Money to VyronaWallet</DialogTitle>
-                          <DialogDescription>
-                            Enter the amount you want to add to your wallet
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="amount">Amount (₹)</Label>
-                            <Input
-                              id="amount"
-                              type="number"
-                              placeholder="Enter amount"
-                              value={addMoneyAmount}
-                              onChange={(e) => setAddMoneyAmount(e.target.value)}
-                              min="1"
-                              max="10000"
-                            />
-                          </div>
-                          <div className="grid grid-cols-3 gap-2">
-                            <Button
-                              variant="outline"
-                              onClick={() => setAddMoneyAmount("100")}
-                            >
-                              ₹100
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => setAddMoneyAmount("500")}
-                            >
-                              ₹500
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => setAddMoneyAmount("1000")}
-                            >
-                              ₹1000
-                            </Button>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button
-                            className="w-full"
-                            disabled={!addMoneyAmount || parseFloat(addMoneyAmount) <= 0 || addMoneyMutation.isPending}
-                            onClick={() => addMoneyMutation.mutate(parseFloat(addMoneyAmount))}
-                          >
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            {addMoneyMutation.isPending ? "Processing..." : `Pay ₹${addMoneyAmount || "0"}`}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                  <CardDescription>
-                    Manage your wallet and view transaction history
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <ArrowUpRight className="h-4 w-4 mr-2" />
-                    Send Money
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <ArrowDownLeft className="h-4 w-4 mr-2" />
-                    Request Money
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Transaction History
-                  </Button>
-                  <Separator />
-                  <div className="text-sm text-gray-600">
-                    <p className="font-medium mb-2">Wallet Features:</p>
-                    <ul className="space-y-1">
-                      <li>• Instant payments on VyronaMart</li>
-                      <li>• Secure transactions with bank-level encryption</li>
-                      <li>• Real-time balance updates</li>
-                      <li>• Transaction history and receipts</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Transaction History */}
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-                <CardDescription>
-                  Your wallet transaction history
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {transactionsLoading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-                            <div>
-                              <div className="w-24 h-4 bg-gray-200 rounded mb-2"></div>
-                              <div className="w-16 h-3 bg-gray-200 rounded"></div>
-                            </div>
-                          </div>
-                          <div className="w-16 h-4 bg-gray-200 rounded"></div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : transactions.length === 0 ? (
-                  <div className="text-center py-8">
-                    <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No transactions yet</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      Your wallet transactions will appear here
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {transactions.map((transaction: any) => (
-                      <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            transaction.type === 'credit' 
-                              ? 'bg-green-100 text-green-600' 
-                              : 'bg-red-100 text-red-600'
-                          }`}>
-                            {transaction.type === 'credit' ? (
-                              <ArrowDownLeft className="h-5 w-5" />
-                            ) : (
-                              <ArrowUpRight className="h-5 w-5" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium">{transaction.description}</p>
-                            <p className="text-sm text-gray-500">
-                              {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className={`font-semibold ${
-                            transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
-                          }`}>
-                            {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount).toFixed(2)}
-                          </p>
-                          <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
-                            {transaction.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* Book Management Tab */}
-          <TabsContent value="books">
-            <div className="space-y-6">
-              {/* Active Rentals Section */}
+          <TabsContent value="books" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Active Rentals */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Clock className="h-5 w-5 text-blue-600" />
-                    <span>Active Book Rentals</span>
+                    <BookOpen className="h-5 w-5 text-blue-600" />
+                    <span>Active Rentals</span>
                   </CardTitle>
                   <CardDescription>
-                    Manage your rented books with 15-day billing cycles
+                    Books you're currently renting
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {rentals.length === 0 ? (
-                    <div className="text-center py-8">
-                      <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">No active rentals found</p>
-                      <p className="text-sm text-gray-500">Start renting books from VyronaRead</p>
+                    <div className="text-center py-8 text-gray-500">
+                      <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No active rentals</p>
+                      <p className="text-sm">Visit VyronaRead to rent books</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {rentals.map((rental: any) => (
-                        <Card key={rental.id} className="border">
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between">
-                              <div className="flex space-x-4">
-                                {rental.productImage && (
-                                  <img
-                                    src={rental.productImage}
-                                    alt={rental.productName}
-                                    className="w-16 h-20 object-cover rounded"
-                                  />
-                                )}
-                                <div className="flex-1">
-                                  <h3 className="font-semibold text-lg">{rental.productName}</h3>
-                                  <p className="text-sm text-gray-600">by {rental.sellerName}</p>
-                                  <div className="flex items-center space-x-4 mt-2">
-                                    <Badge className={getStatusColor(rental.status)}>
-                                      {rental.status}
-                                    </Badge>
-                                    <span className="text-sm text-gray-600">
-                                      Cycle {rental.currentBillingCycle}
-                                    </span>
+                        <div key={rental.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-16 bg-blue-100 rounded flex items-center justify-center">
+                              <BookOpen className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{rental.bookTitle}</h4>
+                              <p className="text-sm text-gray-600">Due: {rental.dueDate}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setSelectedReturnItem(rental)}
+                                >
+                                  Return Book
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Return Book Request</DialogTitle>
+                                  <DialogDescription>
+                                    Request to return "{selectedReturnItem?.bookTitle}"
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor="reason">Reason for return (optional)</Label>
+                                    <Input
+                                      id="reason"
+                                      placeholder="Enter reason"
+                                      value={returnReason}
+                                      onChange={(e) => setReturnReason(e.target.value)}
+                                    />
                                   </div>
                                 </div>
-                              </div>
-                              <div className="text-right space-y-2">
-                                <p className="text-sm text-gray-600">
-                                  Next billing: {formatDistance(new Date(rental.nextBillingDate), new Date(), { addSuffix: true })}
-                                </p>
-                                <p className="font-semibold">
-                                  {formatPrice(rental.rentalPricePerCycle)}/cycle
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  Total paid: {formatPrice(rental.totalAmountPaid)}
-                                </p>
-                                {rental.status === 'active' && !rental.returnRequestId && (
+                                <DialogFooter>
                                   <Button
-                                    size="sm"
-                                    variant="outline"
                                     onClick={() => {
-                                      setSelectedReturnItem({ ...rental, type: 'rental' });
-                                      setIsReturnDialogOpen(true);
+                                      toast({
+                                        title: "Return request submitted",
+                                        description: "Your return request has been sent to the seller",
+                                      });
+                                      setReturnReason("");
+                                      setSelectedReturnItem(null);
                                     }}
                                   >
-                                    Request Return
+                                    Submit Request
                                   </Button>
-                                )}
-                                {rental.returnRequestId && (
-                                  <Badge variant="secondary">Return Requested</Badge>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Library Loans Section */}
+              {/* Library Loans */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <BookOpen className="h-5 w-5 text-purple-600" />
-                    <span>Library Borrowed Books</span>
+                    <Calendar className="h-5 w-5 text-purple-600" />
+                    <span>Library Loans</span>
                   </CardTitle>
                   <CardDescription>
-                    Track your borrowed books from integrated libraries
+                    Books borrowed from libraries
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {loans.length === 0 ? (
-                    <div className="text-center py-8">
-                      <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">No borrowed books found</p>
-                      <p className="text-sm text-gray-500">Borrow books from integrated libraries</p>
+                    <div className="text-center py-8 text-gray-500">
+                      <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No active loans</p>
+                      <p className="text-sm">Visit VyronaRead to borrow from libraries</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {loans.map((loan: any) => (
-                        <Card key={loan.id} className="border">
-                          <CardContent className="p-6">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h3 className="font-semibold text-lg">{loan.bookTitle}</h3>
-                                <p className="text-sm text-gray-600">from {loan.libraryName}</p>
-                                <div className="flex items-center space-x-4 mt-2">
-                                  <Badge className={getStatusColor(loan.status)}>
-                                    {loan.status}
-                                  </Badge>
-                                  <span className="text-sm text-gray-600">
-                                    Due: {new Date(loan.dueDate).toLocaleDateString()}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-gray-600 mb-2">
-                                  Borrowed: {formatDistance(new Date(loan.loanDate), new Date(), { addSuffix: true })}
-                                </p>
-                                {loan.status === 'active' && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      setSelectedReturnItem({ ...loan, type: 'loan' });
-                                      setIsReturnDialogOpen(true);
-                                    }}
-                                  >
-                                    Request Return
-                                  </Button>
-                                )}
-                              </div>
+                        <div key={loan.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-16 bg-purple-100 rounded flex items-center justify-center">
+                              <BookOpen className="h-6 w-6 text-purple-600" />
                             </div>
-                          </CardContent>
-                        </Card>
+                            <div>
+                              <h4 className="font-medium">{loan.bookTitle}</h4>
+                              <p className="text-sm text-gray-600">Library: {loan.libraryName}</p>
+                              <p className="text-sm text-gray-600">Due: {loan.dueDate}</p>
+                            </div>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -682,44 +618,51 @@ export default function MyVyrona() {
             </div>
           </TabsContent>
 
-          {/* Purchased Books Tab */}
-          <TabsContent value="purchases">
+          {/* Purchase History Tab */}
+          <TabsContent value="purchases" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Purchased Books</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <Package className="h-5 w-5 text-green-600" />
+                  <span>Purchase History</span>
+                </CardTitle>
                 <CardDescription>
-                  Your permanent book collection
+                  Your order history from VyronaMart
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {purchases.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">No purchased books found</p>
-                    <p className="text-sm text-gray-500">Buy books to build your permanent collection</p>
+                {orders.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No purchases yet</p>
+                    <p className="text-sm">Start shopping on VyronaMart</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {purchases.map((purchase: any) => (
-                      <Card key={purchase.id} className="border">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-lg">{purchase.productName}</h3>
-                              <p className="text-sm text-gray-600">Order #{purchase.id}</p>
-                              <Badge className="mt-2 bg-green-100 text-green-800">
-                                Owned
-                              </Badge>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold">{formatPrice(purchase.totalAmount)}</p>
-                              <p className="text-sm text-gray-600">
-                                Purchased: {new Date(purchase.createdAt).toLocaleDateString()}
-                              </p>
-                            </div>
+                    {orders.map((order: any) => (
+                      <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-green-100 rounded flex items-center justify-center">
+                            <Package className="h-6 w-6 text-green-600" />
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div>
+                            <h4 className="font-medium">Order #{order.id}</h4>
+                            <p className="text-sm text-gray-600">₹{order.totalAmount}</p>
+                            <p className="text-sm text-gray-600">
+                              {formatDistance(new Date(order.createdAt), new Date(), { addSuffix: true })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            order.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {order.status}
+                          </span>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -727,46 +670,6 @@ export default function MyVyrona() {
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Return Request Dialog */}
-        <Dialog open={isReturnDialogOpen} onOpenChange={setIsReturnDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Request Book Return</DialogTitle>
-              <DialogDescription>
-                Submit a return request for "{selectedReturnItem?.productName || selectedReturnItem?.bookTitle}"
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="return-reason">Reason for Return</Label>
-                <Textarea
-                  id="return-reason"
-                  placeholder="Please provide a reason for returning this book..."
-                  value={returnReason}
-                  onChange={(e) => setReturnReason(e.target.value)}
-                  rows={4}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsReturnDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                onClick={handleReturnRequest}
-                disabled={createReturnRequest.isPending || !returnReason.trim()}
-              >
-                {createReturnRequest.isPending ? "Submitting..." : "Submit Request"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
