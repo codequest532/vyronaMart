@@ -70,8 +70,9 @@ function Router() {
       </Route>
       <Route path="/social" component={VyronaSocial} />
       <Route path="/test-social" component={TestSocial} />
-      <Route path="/place-order/:roomId" component={PlaceOrder} />
+      <Route path="/place-order/:roomId" component={ModernCheckout} />
       <Route path="/place-order-new/:roomId" component={PlaceOrder} />
+      <Route path="/checkout-modern/:id" component={ModernCheckout} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
       <Route path="/vyronaread" component={VyronaRead} />
