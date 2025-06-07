@@ -666,20 +666,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProducts(module?: string, category?: string): Promise<Product[]> {
+    let results;
     if (module && category) {
-      return await db.select().from(products).where(and(eq(products.module, module), eq(products.category, category)));
+      results = await db.select().from(products).where(and(eq(products.module, module), eq(products.category, category)));
     } else if (module) {
-      return await db.select().from(products).where(eq(products.module, module));
+      results = await db.select().from(products).where(eq(products.module, module));
     } else if (category) {
-      return await db.select().from(products).where(eq(products.category, category));
+      results = await db.select().from(products).where(eq(products.category, category));
+    } else {
+      results = await db.select().from(products);
     }
     
-    return await db.select().from(products);
+    // Convert price from string/decimal to proper number format
+    return results.map(product => ({
+      ...product,
+      price: parseFloat(product.price.toString())
+    }));
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
     const [product] = await db.select().from(products).where(eq(products.id, id));
-    return product || undefined;
+    if (!product) return undefined;
+    
+    // Convert price from string/decimal to proper number format
+    return {
+      ...product,
+      price: parseFloat(product.price.toString())
+    };
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
