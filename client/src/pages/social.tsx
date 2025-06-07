@@ -36,6 +36,7 @@ import {
   Smile,
   Paperclip,
   MoreVertical,
+  Copy,
 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
