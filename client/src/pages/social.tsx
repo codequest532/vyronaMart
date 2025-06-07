@@ -402,122 +402,175 @@ export default function VyronaSocial() {
 
   // WebSocket connection management
   useEffect(() => {
-    if (!authUser || !selectedGroupId) return;
+    if (!authUser || !selectedGroupId) {
+      // Clean up existing connection if no user or group
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      return;
+    }
+
+    // Prevent multiple connections
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      return;
+    }
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
+    const reconnectDelay = 1000;
 
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      // Register as online user
-      ws.send(JSON.stringify({
-        type: 'user-online',
-        userId: (authUser as any).id || 1,
-        username: (authUser as any).username || 'User',
-        groupId: selectedGroupId
-      }));
-      
-      // Start heartbeat to keep connection alive
-      const heartbeatInterval = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({
-            type: 'ping',
-            userId: (authUser as any).id || 1,
-            groupId: selectedGroupId
-          }));
-        } else {
-          clearInterval(heartbeatInterval);
-        }
-      }, 30000); // Send ping every 30 seconds
-      
-      // Store interval reference for cleanup
-      (ws as any).heartbeatInterval = heartbeatInterval;
-    };
-
-    ws.onmessage = (event) => {
+    const createConnection = () => {
       try {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'video-call-invite') {
-          setVideoCallInvite(data);
-          toast({
-            title: "Video call invitation",
-            description: `${data.initiatorName} started a video call`,
-          });
-        }
-        
-        if (data.type === 'user-joined-call') {
-          setCallParticipants(prev => [...prev, { 
-            userId: data.userId, 
-            username: data.username,
-            joinedAt: new Date()
-          }]);
-          toast({
-            title: "User joined call",
-            description: `${data.username} joined the video call`,
-          });
-        }
-        
-        if (data.type === 'call-participants-updated') {
-          setCallParticipants(data.participants);
-          if (data.newJoiner) {
-            toast({
-              title: "User joined call",
-              description: `${data.newJoiner.username} joined the video call`,
-            });
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
+
+        ws.onopen = () => {
+          console.log('WebSocket connected');
+          reconnectAttempts = 0; // Reset on successful connection
+          
+          // Register as online user
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+              type: 'user-online',
+              userId: (authUser as any).id || 1,
+              username: (authUser as any).username || 'User',
+              groupId: selectedGroupId
+            }));
           }
-        }
-        
-        if (data.type === 'video-call-ended') {
-          setIsVideoCallActive(false);
-          setCurrentCallId(null);
-          setVideoCallInvite(null);
-          setCallParticipants([]);
-          toast({
-            title: "Video call ended",
-            description: "The video call has been ended",
-          });
-        }
-        
-        if (data.type === 'user-status-changed') {
-          refetchOnlineMembers();
-        }
-        
-        if (data.type === 'new-message') {
-          // Add new message to the messages list in real-time
-          setMessages(prev => [...prev, data.message]);
-          // Scroll to bottom to show new message
-          setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-          }, 100);
-        }
-        
+          
+          // Start heartbeat to keep connection alive
+          const heartbeatInterval = setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({
+                type: 'ping',
+                userId: (authUser as any).id || 1,
+                groupId: selectedGroupId
+              }));
+            } else {
+              clearInterval(heartbeatInterval);
+            }
+          }, 30000); // Send ping every 30 seconds
+          
+          // Store interval reference for cleanup
+          (ws as any).heartbeatInterval = heartbeatInterval;
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'video-call-invite') {
+              setVideoCallInvite(data);
+              toast({
+                title: "Video call invitation",
+                description: `${data.initiatorName} started a video call`,
+              });
+            }
+            
+            if (data.type === 'user-joined-call') {
+              setCallParticipants(prev => [...prev, { 
+                userId: data.userId, 
+                username: data.username,
+                joinedAt: new Date()
+              }]);
+              toast({
+                title: "User joined call",
+                description: `${data.username} joined the video call`,
+              });
+            }
+            
+            if (data.type === 'call-participants-updated') {
+              setCallParticipants(data.participants);
+              if (data.newJoiner) {
+                toast({
+                  title: "User joined call",
+                  description: `${data.newJoiner.username} joined the video call`,
+                });
+              }
+            }
+            
+            if (data.type === 'video-call-ended') {
+              setIsVideoCallActive(false);
+              setCurrentCallId(null);
+              setVideoCallInvite(null);
+              setCallParticipants([]);
+              toast({
+                title: "Video call ended",
+                description: "The video call has been ended",
+              });
+            }
+            
+            if (data.type === 'user-status-changed') {
+              refetchOnlineMembers().catch(err => console.error('Failed to refetch online members:', err));
+            }
+            
+            if (data.type === 'new-message') {
+              // Add new message to the messages list in real-time
+              setMessages(prev => [...prev, data.message]);
+              // Scroll to bottom to show new message
+              setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+              }, 100);
+            }
+            
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
+        };
+
+        ws.onclose = (event) => {
+          console.log('WebSocket disconnected');
+          // Clear heartbeat interval when connection closes
+          if ((ws as any).heartbeatInterval) {
+            clearInterval((ws as any).heartbeatInterval);
+          }
+          
+          // Attempt to reconnect if it wasn't a manual close
+          if (!event.wasClean && reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
+            setTimeout(() => {
+              if (authUser && selectedGroupId) {
+                createConnection();
+              }
+            }, reconnectDelay * reconnectAttempts);
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          // Don't attempt reconnection on error, let onclose handle it
+        };
+
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        console.error('Failed to create WebSocket connection:', error);
+        if (reconnectAttempts < maxReconnectAttempts) {
+          reconnectAttempts++;
+          setTimeout(() => {
+            if (authUser && selectedGroupId) {
+              createConnection();
+            }
+          }, reconnectDelay * reconnectAttempts);
+        }
       }
     };
 
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      // Clear heartbeat interval when connection closes
-      if ((ws as any).heartbeatInterval) {
-        clearInterval((ws as any).heartbeatInterval);
-      }
-    };
-
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+    // Create initial connection
+    createConnection();
 
     return () => {
-      // Clear heartbeat interval on cleanup
-      if ((ws as any).heartbeatInterval) {
-        clearInterval((ws as any).heartbeatInterval);
+      // Clean up connection and intervals
+      if (wsRef.current) {
+        if ((wsRef.current as any).heartbeatInterval) {
+          clearInterval((wsRef.current as any).heartbeatInterval);
+        }
+        wsRef.current.close();
+        wsRef.current = null;
       }
-      ws.close();
     };
   }, [authUser, selectedGroupId, refetchOnlineMembers]);
 

@@ -1332,10 +1332,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getEBooks(sellerId?: number): Promise<any[]> {
-    if (sellerId) {
-      return await db.select().from(eBooks).where(eq(eBooks.sellerId, sellerId));
+    try {
+      if (sellerId) {
+        return await db.select().from(eBooks).where(eq(eBooks.sellerId, sellerId));
+      }
+      return await db.select().from(eBooks);
+    } catch (error) {
+      console.error("Error fetching e-books:", error);
+      return [];
     }
-    return await db.select().from(eBooks);
   }
 
   async updateEBook(id: number, updates: any): Promise<any | null> {
