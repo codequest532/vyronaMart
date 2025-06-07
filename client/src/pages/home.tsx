@@ -1510,29 +1510,275 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Level Progress */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-bold text-gray-900">Level Progress</h3>
-                  <span className="text-sm text-gray-500">1,660 XP to Level {user.level + 1}</span>
-                </div>
-                <Progress value={75} className="mb-4" />
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { label: "Games Played", value: "47" },
-                    { label: "Orders Placed", value: "23" },
-                    { label: "Friends Invited", value: "8" },
-                    { label: "Achievements", value: achievements.length.toString() },
-                  ].map((stat) => (
-                    <div key={stat.label} className="text-center">
-                      <div className="text-lg font-bold text-gray-900">{stat.value}</div>
-                      <div className="text-xs text-gray-500">{stat.label}</div>
+            {/* VyronaWallet Management */}
+            <div className="space-y-6">
+              {/* VyronaWallet Header */}
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">VyronaWallet</h2>
+                <p className="text-gray-600 dark:text-gray-300">Manage your digital wallet with VyronaCoins, cash balance, and vouchers</p>
+              </div>
+
+              {/* Wallet Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* VyronaCoins Card */}
+                <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200 dark:from-orange-950 dark:to-amber-950">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-orange-100 dark:bg-orange-800 rounded-full flex items-center justify-center">
+                          <span className="text-2xl">🪙</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-orange-700 dark:text-orange-300">VyronaCoins</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                          {user?.vyronaCoins || 0}
+                        </p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Wallet Balance Card */}
+                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 dark:from-green-950 dark:to-emerald-950">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                          <Wallet className="h-6 w-6 text-green-600 dark:text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-green-700 dark:text-green-300">Wallet Balance</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-700 dark:text-green-300">
+                          {isLoadingWallet ? (
+                            <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                          ) : (
+                            `₹${walletBalance?.balance?.toFixed(2) || "1,250"}`
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Vouchers Card */}
+                <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 dark:from-blue-950 dark:to-indigo-950">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center">
+                          <span className="text-2xl">🎁</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Vouchers</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">5 Active</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Wallet Actions */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Add Money Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Plus className="h-5 w-5 text-blue-600" />
+                      <span>Add Money</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Top up your VyronaWallet for seamless shopping
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Money to Wallet
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Add Money to VyronaWallet</DialogTitle>
+                          <DialogDescription>
+                            Enter the amount you want to add to your wallet
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="amount">Amount (₹)</Label>
+                            <Input
+                              id="amount"
+                              type="number"
+                              placeholder="Enter amount"
+                              value={addMoneyAmount}
+                              onChange={(e) => setAddMoneyAmount(e.target.value)}
+                              min="1"
+                              max="10000"
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setAddMoneyAmount("100")}
+                            >
+                              ₹100
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setAddMoneyAmount("500")}
+                            >
+                              ₹500
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setAddMoneyAmount("1000")}
+                            >
+                              ₹1000
+                            </Button>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            className="w-full"
+                            disabled={!addMoneyAmount || parseFloat(addMoneyAmount) <= 0 || addMoneyMutation.isPending}
+                            onClick={() => addMoneyMutation.mutate(parseFloat(addMoneyAmount))}
+                          >
+                            <CreditCard className="h-4 w-4 mr-2" />
+                            {addMoneyMutation.isPending ? "Processing..." : `Pay ₹${addMoneyAmount || "0"}`}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button variant="outline" className="flex items-center justify-center space-x-2">
+                        <ArrowUpRight className="h-4 w-4" />
+                        <span>Send Money</span>
+                      </Button>
+                      <Button variant="outline" className="flex items-center justify-center space-x-2">
+                        <ArrowDownLeft className="h-4 w-4" />
+                        <span>Request Money</span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Wallet Features */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Wallet Features</CardTitle>
+                    <CardDescription>
+                      Everything you can do with your VyronaWallet
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <span className="text-sm">Instant payments on VyronaMart</span>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <span className="text-sm">Secure bank-level encryption</span>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-purple-600" />
+                        <span className="text-sm">Real-time balance updates</span>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 bg-orange-50 dark:bg-orange-950 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-orange-600" />
+                        <span className="text-sm">Earn VyronaCoins on purchases</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Transaction History */}
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Recent Transactions</CardTitle>
+                  <CardDescription>
+                    Your wallet transaction history
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingTransactions ? (
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                              <div>
+                                <div className="w-24 h-4 bg-gray-200 rounded mb-2"></div>
+                                <div className="w-16 h-3 bg-gray-200 rounded"></div>
+                              </div>
+                            </div>
+                            <div className="w-16 h-4 bg-gray-200 rounded"></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : walletTransactions.length === 0 ? (
+                    <div className="text-center py-8">
+                      <DollarSign className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No transactions yet</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Your wallet transactions will appear here
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {walletTransactions.map((transaction: any) => (
+                        <div key={transaction.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              transaction.type === 'credit' 
+                                ? 'bg-green-100 text-green-600' 
+                                : 'bg-red-100 text-red-600'
+                            }`}>
+                              {transaction.type === 'credit' ? (
+                                <ArrowDownLeft className="h-5 w-5" />
+                              ) : (
+                                <ArrowUpRight className="h-5 w-5" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{transaction.description}</p>
+                              <p className="text-sm text-gray-500">
+                                {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : 'N/A'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`font-semibold ${
+                              transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount).toFixed(2)}
+                            </p>
+                            <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
+                              {transaction.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Achievements */}
             <Card>
@@ -1558,62 +1804,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Wallet */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">VyronaWallet</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Coins className="text-amber-600 h-5 w-5" />
-                        <span className="font-medium">VyronaCoins</span>
-                      </div>
-                      <span className="font-bold text-amber-600">{(user.vyronaCoins || 0).toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Wallet className="text-green-600 h-5 w-5" />
-                        <span className="font-medium">Wallet Balance</span>
-                      </div>
-                      <span className="font-bold text-green-600">₹1,250</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Gift className="text-blue-600 h-5 w-5" />
-                        <span className="font-medium">Vouchers</span>
-                      </div>
-                      <span className="font-bold text-blue-600">5 Active</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Recent Activity */}
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Recent Activity</h3>
-                  <div className="space-y-3">
-                    {[
-                      { type: "Ludo Win Bonus", time: "2 hours ago", amount: "+150", color: "green" },
-                      { type: "Book Purchase", time: "1 day ago", amount: "+50", color: "blue" },
-                      { type: "Friend Referral", time: "3 days ago", amount: "+200", color: "purple" },
-                    ].map((activity, index) => (
-                      <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div className={`w-8 h-8 bg-${activity.color}-100 rounded-full flex items-center justify-center`}>
-                          <Coins className={`text-${activity.color}-600 h-4 w-4`} />
-                        </div>
-                        <div className="flex-1">
-                          <div className="text-sm font-medium">{activity.type}</div>
-                          <div className="text-xs text-gray-500">{activity.time}</div>
-                        </div>
-                        <div className={`text-sm font-bold text-${activity.color}-600`}>{activity.amount}</div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         )}
 
