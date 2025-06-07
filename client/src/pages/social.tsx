@@ -1133,20 +1133,16 @@ export default function VyronaSocial() {
 
       {/* Main Content with Modern Layout */}
       <div className="container mx-auto px-6 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-            <TabsTrigger value="groups" className="gap-2">
-              <Users className="h-4 w-4" />
-              Shopping Groups
-            </TabsTrigger>
-            <TabsTrigger value="products" className="gap-2">
-              <Package className="h-4 w-4" />
-              Exclusive Products
-            </TabsTrigger>
-          </TabsList>
+        <div className="space-y-6">
+          <div className="flex items-center justify-center">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-800 rounded-full border shadow-sm">
+              <Users className="h-4 w-4 text-blue-600" />
+              <span className="font-medium">Shopping Groups</span>
+            </div>
+          </div>
 
-          {/* Groups Tab - WhatsApp Style */}
-          <TabsContent value="groups" className="space-y-0">
+          {/* Groups Content - WhatsApp Style */}
+          <div className="space-y-0">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 h-[calc(100vh-200px)]">
               
               {/* Groups List - WhatsApp Style Sidebar */}
@@ -1825,124 +1821,8 @@ export default function VyronaSocial() {
                 )}
               </div>
             </div>
-          </TabsContent>
-
-          {/* Products Tab */}
-          <TabsContent value="products" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Exclusive Products
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400">VyronaSocial exclusive products with group discounts</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                  className="gap-2"
-                >
-                  {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
-                  {viewMode === 'grid' ? 'List' : 'Grid'}
-                </Button>
-                {selectedGroup && (
-                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                    Adding to: {selectedGroup.name}
-                  </Badge>
-                )}
-              </div>
-            </div>
-
-            {/* Products Grid */}
-            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-              {productsLoading ? (
-                Array.from({ length: 8 }).map((_, i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <div className="animate-pulse">
-                      <div className="aspect-square bg-gray-200"></div>
-                      <div className="p-4 space-y-2">
-                        <div className="h-4 bg-gray-200 rounded"></div>
-                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-6 bg-gray-200 rounded w-1/2"></div>
-                      </div>
-                    </div>
-                  </Card>
-                ))
-              ) : filteredProducts.length === 0 ? (
-                <div className="col-span-full text-center py-12">
-                  <div className="p-4 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl inline-block mb-4">
-                    <Package className="w-12 h-12 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">No products found</h3>
-                  <p className="text-gray-600 dark:text-gray-400">Try adjusting your search or filters</p>
-                </div>
-              ) : (
-                filteredProducts.map((product: any) => (
-                  <Card key={product.id} className="overflow-hidden group hover:shadow-lg transition-all duration-200">
-                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Package className="w-12 h-12 text-gray-400" />
-                        </div>
-                      )}
-                      <div className="absolute top-3 right-3">
-                        <Badge className="bg-white/90 text-gray-800 shadow-sm">
-                          {product.category}
-                        </Badge>
-                      </div>
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          Exclusive
-                        </Badge>
-                      </div>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2 line-clamp-1">{product.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{product.description}</p>
-                      
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl font-bold text-indigo-600">₹{product.price}</span>
-                          <span className="text-sm text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          20% OFF
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
-                          size="sm"
-                          disabled={!selectedGroupId || addToGroupCartMutation.isPending}
-                          onClick={() => handleAddToGroupCart(product.id)}
-                        >
-                          <ShoppingBag className="w-4 h-4 mr-2" />
-                          Add to Group
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="px-3"
-                        >
-                          <Heart className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </div>
 
       {/* Video Call Overlay - Integrated with Product Browsing */}
