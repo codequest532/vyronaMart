@@ -304,6 +304,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1553484771-371a605b060b?w=400",
         storeId: null,
+        enableIndividualBuy: true,
+        enableGroupBuy: false,
+        groupBuyMinQuantity: null,
+        groupBuyDiscount: null,
         metadata: {
           author: "Sarah Johnson",
           type: "physical",
@@ -323,6 +327,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400",
         storeId: null,
+        enableIndividualBuy: true,
+        enableGroupBuy: false,
+        groupBuyMinQuantity: null,
+        groupBuyDiscount: null,
         metadata: {
           author: "Alex Thompson",
           type: "digital",
@@ -341,6 +349,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400",
         storeId: null,
+        enableIndividualBuy: true,
+        enableGroupBuy: false,
+        groupBuyMinQuantity: null,
+        groupBuyDiscount: null,
         metadata: {
           author: "Dr. Emily Chen",
           type: "digital",
@@ -370,8 +382,17 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
-      ...insertUser,
       id: this.currentUserId++,
+      username: insertUser.username,
+      email: insertUser.email,
+      mobile: insertUser.mobile || null,
+      password: insertUser.password,
+      role: insertUser.role || "user",
+      vyronaCoins: insertUser.vyronaCoins || 100,
+      xp: insertUser.xp || 0,
+      level: insertUser.level || 1,
+      isActive: insertUser.isActive || true,
+      isVerified: insertUser.isVerified || false,
       createdAt: new Date(),
     };
     this.users.set(user.id, user);
@@ -421,8 +442,19 @@ export class MemStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const product: Product = {
-      ...insertProduct,
       id: this.currentProductId++,
+      name: insertProduct.name,
+      description: insertProduct.description || null,
+      price: insertProduct.price,
+      category: insertProduct.category,
+      module: insertProduct.module,
+      imageUrl: insertProduct.imageUrl || null,
+      storeId: insertProduct.storeId || null,
+      metadata: insertProduct.metadata || null,
+      enableIndividualBuy: insertProduct.enableIndividualBuy || true,
+      enableGroupBuy: insertProduct.enableGroupBuy || false,
+      groupBuyMinQuantity: insertProduct.groupBuyMinQuantity || null,
+      groupBuyDiscount: insertProduct.groupBuyDiscount || null,
     };
     this.products.set(product.id, product);
     return product;
@@ -443,8 +475,15 @@ export class MemStorage implements IStorage {
 
   async createStore(insertStore: InsertStore): Promise<Store> {
     const store: Store = {
-      ...insertStore,
       id: this.currentStoreId++,
+      name: insertStore.name,
+      type: insertStore.type,
+      address: insertStore.address || null,
+      latitude: insertStore.latitude || null,
+      longitude: insertStore.longitude || null,
+      isOpen: insertStore.isOpen || true,
+      rating: insertStore.rating || null,
+      reviewCount: insertStore.reviewCount || null,
     };
     this.stores.set(store.id, store);
     return store;
@@ -461,9 +500,16 @@ export class MemStorage implements IStorage {
 
   async createShoppingRoom(insertRoom: InsertShoppingRoom): Promise<ShoppingRoom> {
     const room: ShoppingRoom = {
-      ...insertRoom,
       id: this.currentRoomId++,
+      name: insertRoom.name,
+      isActive: insertRoom.isActive || true,
       createdAt: new Date(),
+      description: insertRoom.description || null,
+      creatorId: insertRoom.creatorId,
+      currentGame: insertRoom.currentGame || null,
+      totalCart: insertRoom.totalCart || null,
+      maxMembers: insertRoom.maxMembers || null,
+      roomCode: insertRoom.roomCode || null,
     };
     this.shoppingRooms.set(room.id, room);
     return room;
