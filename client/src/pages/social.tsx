@@ -296,6 +296,16 @@ export default function VyronaSocial() {
     }
     
     try {
+      // Check if browser supports media devices
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast({ 
+          title: "Camera/Microphone not supported", 
+          description: "Your browser doesn't support video calls. Try using Chrome, Firefox, or Safari.",
+          variant: "destructive" 
+        });
+        return;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -304,8 +314,34 @@ export default function VyronaSocial() {
       setIsCameraOn(true);
       setIsMicOn(true);
       toast({ title: "Joined video call successfully!" });
-    } catch (error) {
-      toast({ title: "Unable to access camera/microphone", variant: "destructive" });
+    } catch (error: any) {
+      let errorMessage = "Unable to access camera/microphone";
+      let description = "";
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Camera/Microphone access denied";
+        description = "Please allow camera and microphone access in your browser settings and try again.";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No camera/microphone found";
+        description = "Make sure your camera and microphone are connected and try again.";
+      } else if (error.name === 'NotSupportedError') {
+        errorMessage = "Video calls not supported";
+        description = "Your browser or device doesn't support video calls. Try using HTTPS or a different browser.";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Camera/Microphone in use";
+        description = "Your camera or microphone is being used by another application.";
+      }
+      
+      toast({ 
+        title: errorMessage, 
+        description: description,
+        variant: "destructive" 
+      });
+      
+      // Still allow joining the call without media for chat purposes
+      setIsVideoCallActive(true);
+      setIsCameraOn(false);
+      setIsMicOn(false);
     }
   };
 
@@ -616,17 +652,44 @@ export default function VyronaSocial() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  className="w-full h-full object-cover rounded-lg"
-                />
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center relative">
+                {isCameraOn ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-gray-500 p-4">
+                    <VideoOff className="w-8 h-8 mb-2" />
+                    <p className="text-sm text-center">Camera not available</p>
+                    <p className="text-xs text-center opacity-75">You can still participate in the call</p>
+                  </div>
+                )}
+                <div className="absolute bottom-2 left-2 bg-black/50 rounded px-2 py-1 text-white text-xs">
+                  You
+                </div>
               </div>
               <div className="bg-gray-100 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
-                <p className="text-gray-500">Other participants</p>
+                <div className="flex flex-col items-center justify-center text-gray-500">
+                  <Users className="w-8 h-8 mb-2" />
+                  <p className="text-sm">Waiting for others to join</p>
+                </div>
               </div>
+            </div>
+            
+            {/* Call Info */}
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                <Video className="w-4 h-4" />
+                <span className="text-sm font-medium">Group Video Call Active</span>
+              </div>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                {isCameraOn && isMicOn ? "Camera and microphone are on" : 
+                 !isCameraOn && !isMicOn ? "Audio-only mode - camera and microphone are off" :
+                 !isCameraOn ? "Audio-only mode - camera is off" : "Microphone is off"}
+              </p>
             </div>
           </div>
         </div>
