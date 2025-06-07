@@ -282,11 +282,11 @@ export default function VyronaHub() {
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500">Group:</span>
-                        <span className="text-sm font-bold text-purple-600">₹{groupProduct.groupBuyPrice}</span>
+                        <span className="text-sm font-bold text-purple-600">₹{groupProduct.groupBuyPrice?.toFixed(2) || groupProduct.price?.toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500">Regular:</span>
-                        <span className="text-xs text-gray-500 line-through">₹{groupProduct.originalPrice}</span>
+                        <span className="text-xs text-gray-500 line-through">₹{groupProduct.originalPrice?.toFixed(2) || (groupProduct.price * 1.2)?.toFixed(2)}</span>
                       </div>
                       <div className="text-center">
                         <Badge variant="secondary" className="text-xs">
@@ -388,9 +388,9 @@ export default function VyronaHub() {
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-lg font-bold text-blue-600">₹{(product.price / 100).toLocaleString()}</span>
+                        <span className="text-lg font-bold text-blue-600">₹{product.price.toFixed(2)}</span>
                         {product.originalPrice && product.originalPrice > product.price && (
-                          <span className="text-sm text-gray-500 line-through">₹{(product.originalPrice / 100).toLocaleString()}</span>
+                          <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toFixed(2)}</span>
                         )}
                       </div>
                       <Button 

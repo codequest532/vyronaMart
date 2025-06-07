@@ -498,8 +498,8 @@ export default function Landing() {
                       </div>
                       <span className="text-xs text-gray-500 ml-1">(4.5)</span>
                     </div>
-                    <p className="text-red-600 font-bold text-sm">₹{product.price}</p>
-                    <p className="text-xs text-gray-500 line-through">₹{Math.floor(product.price * 1.3)}</p>
+                    <p className="text-red-600 font-bold text-sm">₹{product.price.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500 line-through">₹{(product.price * 1.3).toFixed(2)}</p>
                   </CardContent>
                 </Card>
               ))}
