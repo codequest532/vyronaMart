@@ -133,6 +133,13 @@ export default function VyronaSocial() {
     enabled: !!selectedGroupId,
   });
 
+  // Fetch messages for selected group
+  const { data: fetchedMessages, refetch: refetchMessages } = useQuery({
+    queryKey: ["/api/group-messages", selectedGroupId],
+    queryFn: () => fetch(`/api/group-messages/${selectedGroupId}`).then(res => res.json()),
+    enabled: !!selectedGroupId,
+  });
+
   // Forms
   const createGroupForm = useForm<CreateGroupForm>({
     resolver: zodResolver(createGroupSchema),
@@ -265,21 +272,13 @@ export default function VyronaSocial() {
     },
     onSuccess: (newMessage) => {
       // Add message to local state immediately for instant feedback
-      setMessages(prev => [...prev, {
-        id: newMessage.id || Date.now(),
-        content: newMessage.content,
-        userId: (authUser as any)?.id,
-        username: (authUser as any)?.username,
-        groupId: selectedGroupId!,
-        messageType: 'text',
-        sentAt: new Date().toISOString()
-      }]);
-      messageForm.reset();
+      setMessages(prev => [...prev, newMessage]);
       setNewMessage("");
       // Scroll to bottom
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
+      toast({ title: "Message sent!" });
     },
     onError: (error: Error) => {
       toast({ title: "Failed to send message", description: error.message, variant: "destructive" });
@@ -370,32 +369,23 @@ export default function VyronaSocial() {
     }
   };
 
-  // Initialize sample messages when group is selected
+  // Initialize messages from API when group is selected
   React.useEffect(() => {
-    if (selectedGroupId && messages.length === 0) {
-      const sampleMessages: ChatMessage[] = [
-        {
-          id: 1,
-          content: `Welcome to ${selectedGroup?.name || 'the group'}! Start chatting and shopping together.`,
-          userId: 0,
-          username: 'System',
-          groupId: selectedGroupId,
-          messageType: 'system',
-          sentAt: new Date().toISOString()
-        },
-        {
-          id: 2,
-          content: 'Hey everyone! Ready to find some great deals together?',
-          userId: (authUser as any)?.id || 1,
-          username: (authUser as any)?.username || 'You',
-          groupId: selectedGroupId,
-          messageType: 'text',
-          sentAt: new Date(Date.now() - 300000).toISOString()
-        }
-      ];
-      setMessages(sampleMessages);
+    if (selectedGroupId && fetchedMessages) {
+      setMessages(fetchedMessages);
+      // Scroll to bottom when messages load
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
     }
-  }, [selectedGroupId, selectedGroup?.name, authUser]);
+  }, [selectedGroupId, fetchedMessages]);
+
+  // Clear messages when switching groups
+  React.useEffect(() => {
+    if (selectedGroupId) {
+      setMessages([]);
+    }
+  }, [selectedGroupId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900/20">

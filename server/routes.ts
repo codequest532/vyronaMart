@@ -1446,6 +1446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         creatorId: room.creatorId,
         isActive: room.isActive,
         memberCount: room.memberCount || 1,
+        totalCart: room.totalCart || 0,
         roomCode: room.roomCode,
         createdAt: room.createdAt
       }));
@@ -1458,6 +1459,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error stack:", error.stack);
       console.error("=== SHOPPING ROOMS ERROR END ===");
       res.status(500).json({ message: "Failed to fetch shopping rooms" });
+    }
+  });
+
+  // Group messaging endpoints
+  app.post("/api/group-messages", async (req, res) => {
+    try {
+      const { content, groupId, messageType = 'text' } = req.body;
+      const session = (req as any).session;
+      const userId = session?.user?.id;
+      const username = session?.user?.username || 'User';
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      if (!content || !groupId) {
+        return res.status(400).json({ message: "Content and groupId are required" });
+      }
+
+      // Create message object
+      const messageData = {
+        id: Date.now(), // Simple ID for demo
+        content,
+        userId,
+        username,
+        groupId: parseInt(groupId),
+        messageType,
+        sentAt: new Date().toISOString()
+      };
+
+      console.log("Creating message:", messageData);
+
+      // For now, just return the message data (in a real app, you'd save to database)
+      res.json(messageData);
+    } catch (error) {
+      console.error("Error creating message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.get("/api/group-messages/:groupId", async (req, res) => {
+    try {
+      const { groupId } = req.params;
+      const session = (req as any).session;
+      const userId = session?.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // For demo purposes, return sample messages
+      const sampleMessages = [
+        {
+          id: 1,
+          content: `Welcome to the group! Start chatting and shopping together.`,
+          userId: 0,
+          username: 'System',
+          groupId: parseInt(groupId),
+          messageType: 'system',
+          sentAt: new Date(Date.now() - 600000).toISOString()
+        },
+        {
+          id: 2,
+          content: 'Hey everyone! Ready to find some great deals together?',
+          userId: userId,
+          username: session?.user?.username || 'You',
+          groupId: parseInt(groupId),
+          messageType: 'text',
+          sentAt: new Date(Date.now() - 300000).toISOString()
+        }
+      ];
+
+      res.json(sampleMessages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
 
