@@ -647,20 +647,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Room name is required" });
       }
 
-      const roomData = {
+      // Get current user ID from session
+      const session = (req as any).session;
+      const userId = session?.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const groupData = {
         name: name.trim(),
-        creatorId: 1, // Default user ID for now
-        isActive: true,
-        currentGame: null,
-        totalCart: 0,
-        memberCount: 1
+        description: description || '',
+        creatorId: userId,
+        maxMembers: 10
       };
 
-      const newRoom = await storage.createShoppingRoom(roomData);
-      res.json(newRoom);
+      const newGroup = await storage.createShoppingGroup(groupData);
+      res.json(newGroup);
     } catch (error) {
-      console.error("Create shopping room error:", error);
-      res.status(500).json({ message: "Failed to create shopping room", error: error.message });
+      console.error("Create shopping group error:", error);
+      res.status(500).json({ message: "Failed to create shopping group", error: error.message });
     }
   });
 
