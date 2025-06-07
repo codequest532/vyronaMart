@@ -511,7 +511,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const individualBuyProducts = products.filter(product => 
         product.enableIndividualBuy !== false
       );
-      res.json(individualBuyProducts);
+      
+      // Ensure prices are properly converted to numbers with decimal precision
+      const formattedProducts = individualBuyProducts.map(product => ({
+        ...product,
+        price: parseFloat(product.price.toString())
+      }));
+      
+      res.json(formattedProducts);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
     }
