@@ -1618,8 +1618,8 @@ export default function VyronaSocial() {
 
                     {/* Chat Messages Area */}
                     <div className="flex-1 min-h-0">
-                      <ScrollArea className="h-40 p-3">
-                        <div className="space-y-3">
+                      <ScrollArea className="h-64 p-4">
+                        <div className="space-y-4">
                           {messages.map((message) => (
                             <div
                               key={message.id}
@@ -1639,7 +1639,7 @@ export default function VyronaSocial() {
                                 <div className={`flex gap-2 max-w-[70%] ${
                                   message.userId === (authUser as any)?.id ? 'flex-row-reverse' : 'flex-row'
                                 }`}>
-                                  <Avatar className="w-6 h-6 flex-shrink-0">
+                                  <Avatar className="w-8 h-8 flex-shrink-0">
                                     <AvatarFallback className={`text-xs ${
                                       message.userId === (authUser as any)?.id 
                                         ? 'bg-green-100 text-green-600' 
@@ -1651,12 +1651,12 @@ export default function VyronaSocial() {
                                   <div className={`${
                                     message.userId === (authUser as any)?.id ? 'text-right' : 'text-left'
                                   }`}>
-                                    <div className={`inline-block p-2 rounded-lg ${
+                                    <div className={`inline-block p-3 rounded-lg ${
                                       message.userId === (authUser as any)?.id
                                         ? 'bg-green-500 text-white rounded-br-sm'
                                         : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border'
                                     }`}>
-                                      <p className="text-sm">{message.content}</p>
+                                      {message.content}
                                     </div>
                                     <div className="text-xs text-gray-500 mt-1">
                                       {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -1671,12 +1671,12 @@ export default function VyronaSocial() {
                     </div>
 
                     {/* Chat Input */}
-                    <div className="p-2 border-t bg-gray-50 dark:bg-gray-800">
+                    <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
                       <div className="flex items-center gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="px-2 h-8"
+                          className="px-2"
                           onClick={() => {
                             const fileInput = document.createElement('input');
                             fileInput.type = 'file';
@@ -1694,7 +1694,7 @@ export default function VyronaSocial() {
                             fileInput.click();
                           }}
                         >
-                          <Paperclip className="w-3 h-3" />
+                          <Paperclip className="w-4 h-4" />
                         </Button>
                         
                         <div className="flex-1 relative">
@@ -1703,7 +1703,7 @@ export default function VyronaSocial() {
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            className="h-8 text-sm border-green-300 focus:border-green-500"
+                            className="pr-12 border-green-300 focus:border-green-500"
                             disabled={sendMessageMutation.isPending}
                           />
                         </div>
@@ -1711,9 +1711,9 @@ export default function VyronaSocial() {
                         <Button 
                           onClick={handleSendMessage}
                           disabled={(!newMessage.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                          className="h-8 w-8 p-0 bg-green-500 hover:bg-green-600"
+                          className="rounded-full p-2 bg-green-500 hover:bg-green-600"
                         >
-                          <Send className="w-3 h-3" />
+                          <Send className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
