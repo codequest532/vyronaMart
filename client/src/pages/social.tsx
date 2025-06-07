@@ -1191,7 +1191,7 @@ export default function VyronaSocial() {
 
           {/* Groups Content - WhatsApp Style */}
           <div className="space-y-0">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-0 h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 h-[calc(100vh-200px)]">
               
               {/* Groups List - WhatsApp Style Sidebar */}
               <div className="lg:col-span-1 border-r bg-white dark:bg-gray-900 flex flex-col">
