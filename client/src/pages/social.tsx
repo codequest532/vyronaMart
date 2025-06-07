@@ -1606,7 +1606,7 @@ export default function VyronaSocial() {
                       {/* Chat Tab */}
                       <TabsContent value="chat" className="flex-1 flex flex-col">
                         {/* Chat Messages Area */}
-                    <ScrollArea className="flex-1 p-4">
+                        <ScrollArea className="flex-1 p-4">
                       <div className="space-y-4">
                         {/* Display chat messages */}
                         {messages.map((message) => (
