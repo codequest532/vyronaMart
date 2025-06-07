@@ -1085,8 +1085,7 @@ export class DatabaseStorage implements IStorage {
         userId: insertMessage.userId,
         groupId: insertMessage.groupId,
         content: insertMessage.content,
-        messageType: insertMessage.messageType || 'text',
-        metadata: insertMessage.metadata || null
+        messageType: insertMessage.messageType || 'text'
       })
       .returning();
     
