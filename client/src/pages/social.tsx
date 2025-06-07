@@ -1092,9 +1092,25 @@ export default function VyronaSocial() {
                           <span className="font-semibold">Total:</span>
                           <span className="font-bold text-lg">₹{cartTotal}</span>
                         </div>
-                        <Button className="w-full" size="sm">
-                          Proceed to Group Checkout
-                        </Button>
+                        {(selectedGroup?.memberCount || 0) >= 2 ? (
+                          <Button className="w-full" size="sm">
+                            Proceed to Group Checkout
+                          </Button>
+                        ) : (
+                          <div className="space-y-2">
+                            <Button 
+                              disabled
+                              className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
+                              size="sm"
+                            >
+                              <Users className="h-4 w-4 mr-2" />
+                              Need 2+ Members for Group Checkout
+                            </Button>
+                            <p className="text-sm text-orange-600 text-center">
+                              This group needs {2 - (selectedGroup?.memberCount || 0)} more member{2 - (selectedGroup?.memberCount || 0) === 1 ? '' : 's'} to enable group checkout
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
