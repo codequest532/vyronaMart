@@ -3,6 +3,7 @@ import {
   shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
   instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
   groupBuyProducts, groupBuyCampaigns, groupBuyParticipants, groupCarts, groupCartContributions,
+  libraryIntegrationRequests, physicalBooks, eBooks, bookLoans,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
@@ -15,19 +16,14 @@ import {
   type InstagramStore, type InsertInstagramStore, type InstagramProduct, type InsertInstagramProduct,
   type InstagramOrder, type InsertInstagramOrder, type InstagramAnalytics, type InsertInstagramAnalytics,
   type GroupBuyProduct, type InsertGroupBuyProduct, type GroupBuyCampaign, type InsertGroupBuyCampaign,
-  type GroupBuyParticipant, type InsertGroupBuyParticipant
+  type GroupBuyParticipant, type InsertGroupBuyParticipant,
+  type LibraryIntegrationRequest, type InsertLibraryIntegrationRequest,
+  type PhysicalBook, type InsertPhysicalBook, type EBook, type InsertEBook,
+  type BookLoan, type InsertBookLoan
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, isNull, sql, desc } from "drizzle-orm";
-import {
-  libraryIntegrationRequests,
-  physicalBooks,
-  eBooks,
-  bookLoans,
-  bookRentals,
-  rentalBillingHistory,
-  bookReturnRequests,
-} from "@shared/schema";
+
 // Wallet tables will be handled through the existing wallet implementation
 
 export interface IStorage {
@@ -286,6 +282,10 @@ export class MemStorage implements IStorage {
         module: "read",
         imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400",
         storeId: null,
+        enableIndividualBuy: true,
+        enableGroupBuy: false,
+        groupBuyMinQuantity: null,
+        groupBuyDiscount: null,
         metadata: {
           author: "Robert Martin",
           type: "physical",

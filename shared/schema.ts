@@ -671,14 +671,26 @@ export const insertPhysicalBookSchema = createInsertSchema(physicalBooks, {
   updatedAt: true,
 });
 
-export const insertBookLoanSchema = createInsertSchema(bookLoans, {
-  bookId: z.number(),
-  borrowerId: z.number(),
-  libraryId: z.number(),
-  dueDate: z.date(),
+export const insertEBookSchema = createInsertSchema(eBooks, {
+  sellerId: z.number(),
+  title: z.string().min(1),
+  author: z.string().min(1),
+  format: z.string().min(1),
+  fileUrl: z.string().url(),
 }).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
+  isActive: true,
+  downloads: true,
+});
+
+export const insertBookLoanSchema = createInsertSchema(bookLoans, {
+  bookId: z.number(),
+  userId: z.number(),
+  dueDate: z.date(),
+}).omit({
+  id: true,
   loanDate: true,
 });
 
