@@ -13,7 +13,7 @@ import {
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
-  insertGroupOrderSchema, insertGroupOrderContributionSchema
+  insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema
 } from "@shared/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
@@ -1016,11 +1016,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/group-carts/:id/checkout", async (req, res) => {
     try {
       const groupCartId = parseInt(req.params.id);
-      const orderData = insertGroupOrderSchema.parse({ 
-        ...req.body, 
-        groupCartId 
-      });
-      const groupOrder = await storage.createGroupOrder(orderData);
+      const orderData = { 
+        userId: (req as any).user?.id || 1,
+        totalAmount: req.body.totalAmount || 0,
+        module: 'social',
+        status: 'pending',
+        metadata: { groupCartId, ...req.body }
+      };
+      const groupOrder = await storage.createOrder(orderData);
       res.json(groupOrder);
     } catch (error) {
       res.status(500).json({ message: "Failed to create group order" });
