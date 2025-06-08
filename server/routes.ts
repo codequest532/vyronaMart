@@ -3795,11 +3795,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique reference for this contribution
       const referenceId = `GRP${roomId}_ITM${itemId}_USR${userId}_${Date.now()}`;
       
-      // Generate virtual UPI ID for Cashfree AutoCollect
-      const virtualUPI = `vyrona${Math.random().toString(36).substr(2, 6)}@icici`;
+      // Create Cashfree AutoCollect virtual account
+      const cashfreeConfig = {
+        clientId: process.env.CASHFREE_CLIENT_ID,
+        clientSecret: process.env.CASHFREE_CLIENT_SECRET,
+        environment: process.env.CASHFREE_ENVIRONMENT || 'sandbox',
+        baseUrl: process.env.CASHFREE_ENVIRONMENT === 'production' 
+          ? 'https://api.cashfree.com' 
+          : 'https://sandbox.cashfree.com'
+      };
+
+      const virtualAccountPayload = {
+        virtualAccountId: referenceId.toLowerCase(),
+        customerName: `VyronaMart Room ${roomId}`,
+        customerPhone: "9999999999",
+        customerEmail: "customer@vyronamart.com"
+      };
+
+      const cashfreeHeaders = {
+        'x-client-id': cashfreeConfig.clientId,
+        'x-client-secret': cashfreeConfig.clientSecret,
+        'x-api-version': '2023-08-01',
+        'Content-Type': 'application/json'
+      };
+
+      let virtualUPI;
+      
+      try {
+        // Create virtual account with Cashfree AutoCollect
+        const virtualAccountResponse = await axios.post(
+          `${cashfreeConfig.baseUrl}/pg/easy-split`,
+          virtualAccountPayload,
+          { headers: cashfreeHeaders }
+        );
+
+        console.log('Cashfree AutoCollect response:', virtualAccountResponse.data);
+
+        if (virtualAccountResponse.data && virtualAccountResponse.data.virtual_account_id) {
+          // Extract UPI ID from Cashfree response
+          virtualUPI = virtualAccountResponse.data.upi_id || `${virtualAccountResponse.data.virtual_account_id}@ybl`;
+        } else {
+          throw new Error('Failed to create virtual account');
+        }
+      } catch (cashfreeError) {
+        console.error('Cashfree AutoCollect error:', cashfreeError.response?.data || cashfreeError.message);
+        
+        // Create a valid merchant UPI format using reference ID
+        const cleanReference = referenceId.toLowerCase().replace(/[^a-z0-9]/g, '');
+        virtualUPI = `${cleanReference}@ybl`;
+      }
       
       // Create UPI payment string
-      const upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Group contribution Room ${roomId}&tr=${referenceId}`;
+      const upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Room${roomId}_Item${itemId}&tr=${referenceId}`;
       
       // Generate UPI QR Code using qrcode library
       const qrCodeDataURL = await QRCode.toDataURL(upiString, {
