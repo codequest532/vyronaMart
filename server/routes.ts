@@ -1607,7 +1607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const params: any[] = [];
 
       if (status) {
-        whereClause += ` AND o.order_status = $${params.length + 1}`;
+        whereClause += ` AND o.status = $${params.length + 1}`;
         params.push(status);
       }
 
@@ -1626,7 +1626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           o.id as order_id,
           o.user_id,
           o.total_amount,
-          o.order_status,
+          o.status as order_status,
           o.module,
           o.metadata,
           o.created_at,
