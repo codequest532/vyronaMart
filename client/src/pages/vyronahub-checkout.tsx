@@ -96,12 +96,34 @@ export default function VyronaHubCheckout() {
     },
     onSuccess: (data) => {
       clearCart(); // Clear client-side cart
-      toast({
-        title: "Order Placed Successfully!",
-        description: `Your order #${data.id} has been confirmed.`,
-      });
+      
+      // Prepare order success data
+      const orderSuccessData = {
+        orderId: data.id,
+        items: typedCartItems.map((item: CheckoutCartItem) => ({
+          productId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        shippingAddress: {
+          fullName: addressData?.fullName || '',
+          phoneNumber: addressData?.phoneNumber || '',
+          address: addressData?.address || '',
+          city: addressData?.city || '',
+          state: addressData?.state || '',
+          pincode: addressData?.pincode || '',
+        },
+        paymentMethod: addressData?.paymentMethod || '',
+        totalAmount: total,
+        orderDate: new Date().toISOString(),
+      };
+      
+      // Store order data in sessionStorage for the success page
+      sessionStorage.setItem('orderSuccessData', JSON.stringify(orderSuccessData));
+      
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      setLocation("/myvyrona");
+      setLocation("/order-success");
     },
     onError: (error: any) => {
       toast({
@@ -131,9 +153,9 @@ export default function VyronaHubCheckout() {
         items: typedCartItems.map((item: CheckoutCartItem) => ({
           productId: item.id,
           quantity: item.quantity,
-          price: item.price,
+          price: Math.round(item.price * 100), // Convert to cents
         })),
-        totalAmount: total,
+        totalAmount: Math.round(total * 100), // Convert to cents
         shippingAddress: {
           fullName: addressData.fullName,
           phoneNumber: addressData.phoneNumber,
@@ -145,8 +167,8 @@ export default function VyronaHubCheckout() {
         paymentMethod: addressData.paymentMethod,
         module: "vyronahub",
         metadata: {
-          deliveryFee,
-          subtotal,
+          deliveryFee: Math.round(deliveryFee * 100), // Convert to cents
+          subtotal: Math.round(subtotal * 100), // Convert to cents
         },
       };
 
@@ -178,7 +200,7 @@ export default function VyronaHubCheckout() {
           <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-4">Add some items to your cart before checkout</p>
-          <Button onClick={() => setLocation("/customer")}>Continue Shopping</Button>
+          <Button onClick={() => setLocation("/vyronahub")}>Continue Shopping</Button>
         </Card>
       </div>
     );
@@ -189,7 +211,7 @@ export default function VyronaHubCheckout() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center mb-6">
-          <Button variant="ghost" onClick={() => setLocation("/customer")}>
+          <Button variant="ghost" onClick={() => setLocation("/vyronahub")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to VyronaHub
           </Button>
