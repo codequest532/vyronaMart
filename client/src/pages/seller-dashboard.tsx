@@ -1269,6 +1269,19 @@ export default function SellerDashboard() {
                   </button>
                   <button
                     onClick={() => {
+                      console.log("Switching to orders");
+                      setBookSection("orders");
+                    }}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "orders"
+                        ? "border-green-500 text-green-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Order Management
+                  </button>
+                  <button
+                    onClick={() => {
                       console.log("Switching to analytics");
                       setBookSection("analytics");
                     }}
@@ -1624,29 +1637,78 @@ export default function SellerDashboard() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Recent Orders</CardTitle>
-                    <CardDescription>Latest VyronaRead transactions</CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Recent Orders</CardTitle>
+                        <CardDescription>Latest VyronaRead transactions</CardDescription>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setBookSection("orders")}
+                        className="text-green-600 hover:text-green-700 border-green-300 hover:border-green-400"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Manage All Orders
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {sellerOrders && sellerOrders.filter((order: any) => order.module === 'vyronaread').length > 0 ? (
-                        sellerOrders.filter((order: any) => order.module === 'vyronaread').slice(0, 3).map((order: any, index: number) => (
-                          <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <div className={`w-2 h-2 rounded-full ${
-                              order.status === 'completed' ? 'bg-green-500' : 
-                              order.status === 'pending' ? 'bg-blue-500' : 'bg-orange-500'
-                            }`}></div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">Order #{order.id} - {order.status}</p>
-                              <p className="text-xs text-gray-500">Amount: ₹{(order.totalAmount / 100).toFixed(2)} - {new Date(order.createdAt).toLocaleDateString()}</p>
+                      {(() => {
+                        const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+                        return vyronareadOrders.length > 0 ? (
+                          vyronareadOrders.slice(0, 3).map((order: any, index: number) => (
+                            <div key={order.order_id || order.id || index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${
+                                  order.order_status === 'completed' || order.status === 'completed' ? 'bg-green-500' : 
+                                  order.order_status === 'processing' || order.status === 'processing' ? 'bg-blue-500' : 
+                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'bg-orange-500' : 'bg-gray-500'
+                                }`}></div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">Order #{order.order_id || order.id}</p>
+                                  <p className="text-xs text-gray-600">{order.customer_name || 'Customer'} • {order.customer_email}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {order.order_status || order.status || 'pending'}
+                                    </Badge>
+                                    {order.metadata && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {typeof order.metadata === 'string' && order.metadata.includes('rental') ? 'Rental' :
+                                         typeof order.metadata === 'string' && order.metadata.includes('loan') ? 'Library Loan' :
+                                         order.metadata?.transaction_type === 'rental' ? 'Rental' :
+                                         order.metadata?.transaction_type === 'loan' ? 'Library Loan' :
+                                         'Purchase'}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(order.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
                             </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8">
+                            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-600 mb-2">No VyronaRead Orders Yet</h3>
+                            <p className="text-gray-500 mb-4">Book rentals, loans, and purchases will appear here</p>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setBookSection("orders")}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              View Order Management
+                            </Button>
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-4">
-                          <p className="text-sm text-gray-500">No recent VyronaRead orders</p>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
                   </CardContent>
                 </Card>
