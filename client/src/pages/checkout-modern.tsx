@@ -145,11 +145,9 @@ export default function ModernCheckout() {
     userId: number;
   } | null>(null);
 
-  // Delivery and member assignment states
+  // Simplified address states
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const [addressType, setAddressType] = useState<'primary' | 'member-specific'>('primary');
-  const [selectedMemberForAddress, setSelectedMemberForAddress] = useState<number | null>(null);
-  const [newAddress, setNewAddress] = useState<Partial<DeliveryAddress>>({
+  const [newAddress, setNewAddress] = useState({
     fullName: "",
     phone: "",
     addressLine1: "",
@@ -157,11 +155,9 @@ export default function ModernCheckout() {
     city: "",
     state: "",
     pincode: "",
-    isDefault: false
+    isPrimary: false
   });
-  const [itemMemberAssignments, setItemMemberAssignments] = useState<Record<number, number>>({});
-  const [memberAddresses, setMemberAddresses] = useState<Record<number, DeliveryAddress>>({});
-  const [showAddressList, setShowAddressList] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress | null>(null);
 
   // Data fetching
   const { data: cartItemsResponse } = useQuery({
@@ -331,73 +327,48 @@ export default function ModernCheckout() {
     setIsContributionModalOpen(true);
   };
 
-  const handleSaveAddress = async () => {
-    try {
-      // Generate unique ID for the address
-      const addressId = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      const newDeliveryAddress: DeliveryAddress = {
-        id: addressId,
-        fullName: newAddress.fullName || "",
-        phone: newAddress.phone || "",
-        addressLine1: newAddress.addressLine1 || "",
-        addressLine2: newAddress.addressLine2,
-        city: newAddress.city || "",
-        state: newAddress.state || "",
-        pincode: newAddress.pincode || "",
-        isDefault: newAddress.isDefault || false
-      };
-
-      // Update checkout state with the new address
-      if (addressType === 'primary') {
-        setCheckoutState(prev => ({
-          ...prev,
-          primaryAddress: newDeliveryAddress,
-          deliveryAddress: newDeliveryAddress,
-          savedAddresses: [...prev.savedAddresses, newDeliveryAddress]
-        }));
-      } else if (selectedMemberForAddress) {
-        setCheckoutState(prev => ({
-          ...prev,
-          memberSpecificAddresses: {
-            ...prev.memberSpecificAddresses,
-            [selectedMemberForAddress]: newDeliveryAddress
-          },
-          savedAddresses: [...prev.savedAddresses, newDeliveryAddress]
-        }));
-        setMemberAddresses(prev => ({
-          ...prev,
-          [selectedMemberForAddress]: newDeliveryAddress
-        }));
-      }
-
-      // Reset form
-      setNewAddress({
-        fullName: "",
-        phone: "",
-        addressLine1: "",
-        addressLine2: "",
-        city: "",
-        state: "",
-        pincode: "",
-        isDefault: false
-      });
-
-      setShowAddressModal(false);
-
+  const handleSaveAddress = () => {
+    if (!newAddress.fullName || !newAddress.phone || !newAddress.addressLine1 || !newAddress.city || !newAddress.state || !newAddress.pincode) {
       toast({
-        title: "Address Saved",
-        description: "Delivery address has been added successfully",
-      });
-    } catch (error) {
-      console.error("Error saving address:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save address. Please try again.",
+        title: "Incomplete Address",
+        description: "Please fill in all required fields",
         variant: "destructive",
       });
+      return;
     }
-  };
+
+    const address: DeliveryAddress = {
+      id: Date.now().toString(),
+      fullName: newAddress.fullName,
+      phone: newAddress.phone,
+      addressLine1: newAddress.addressLine1,
+      addressLine2: newAddress.addressLine2 || '',
+      city: newAddress.city,
+      state: newAddress.state,
+      pincode: newAddress.pincode,
+      isDefault: newAddress.isPrimary
+    };
+
+    setDeliveryAddress(address);
+    
+    // Reset form
+    setNewAddress({
+      fullName: "",
+      phone: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      state: "",
+      pincode: "",
+      isPrimary: false
+    });
+    setShowAddressModal(false);
+
+    toast({
+      title: "Address Saved",
+      description: newAddress.isPrimary ? "Primary delivery address set for all items" : "Delivery address saved successfully",
+    });
+  };;
 
   // Handle UPI payment success
   const handleUPIPaymentSuccess = async (referenceId: string) => {
