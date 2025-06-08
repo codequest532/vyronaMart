@@ -1693,7 +1693,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Error updating order status:", error);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ 
+        message: "Failed to update order status", 
+        error: error.message 
+      });
     }
   });
 
