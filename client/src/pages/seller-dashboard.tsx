@@ -2932,7 +2932,18 @@ export default function SellerDashboard() {
                     {selectedOrder.metadata?.shippingAddress && (
                       <div className="space-y-1">
                         <span className="font-medium">Shipping Address:</span>
-                        <p className="text-sm text-gray-600">{selectedOrder.metadata.shippingAddress}</p>
+                        <div className="text-sm text-gray-600">
+                          {typeof selectedOrder.metadata.shippingAddress === 'object' ? (
+                            <>
+                              <p>{selectedOrder.metadata.shippingAddress.fullName}</p>
+                              <p>{selectedOrder.metadata.shippingAddress.phoneNumber}</p>
+                              <p>{selectedOrder.metadata.shippingAddress.address}</p>
+                              <p>{selectedOrder.metadata.shippingAddress.city}, {selectedOrder.metadata.shippingAddress.state} - {selectedOrder.metadata.shippingAddress.pincode}</p>
+                            </>
+                          ) : (
+                            <p>{selectedOrder.metadata.shippingAddress}</p>
+                          )}
+                        </div>
                       </div>
                     )}
                     {selectedOrder.metadata?.paymentMethod && (
