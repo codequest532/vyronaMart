@@ -25,13 +25,12 @@ import {
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
   insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
-  walletTransactions, users, orders, groupContributions, notifications
+  walletTransactions, users, orders, groupContributions, notifications, products, cartItems
 } from "@shared/schema";
-import { cartItems } from "../migrations/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail, sendOrderConfirmationEmail } from "./email";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 
 // Online status and WebSocket management
 interface OnlineUser {
@@ -4748,6 +4747,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Admin orders fetch error:', error);
       res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Cart API endpoints for VyronaHub checkout flow
+  app.get("/api/cart", async (req: Request, res: Response) => {
+    try {
+      const userId = 1; // Default user for demo
+      
+      // Get user's cart items with product details
+      const userCartItems = await db
+        .select({
+          id: products.id,
+          name: products.name,
+          price: products.price,
+          category: products.category,
+          module: products.module,
+          imageUrl: products.imageUrl,
+          quantity: cartItems.quantity,
+        })
+        .from(cartItems)
+        .leftJoin(products, eq(cartItems.productId, products.id))
+        .where(eq(cartItems.userId, userId));
+
+      res.json(userCartItems);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      res.status(500).json({ error: "Failed to fetch cart" });
+    }
+  });
+
+  app.post("/api/cart/add", async (req: Request, res: Response) => {
+    try {
+      const { productId, quantity = 1 } = req.body;
+      const userId = 1; // Default user for demo
+
+      if (!productId) {
+        return res.status(400).json({ error: "Product ID is required" });
+      }
+
+      // Check if item already exists in cart
+      const existingItem = await db
+        .select()
+        .from(cartItems)
+        .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)))
+        .limit(1);
+
+      if (existingItem.length > 0) {
+        // Update quantity
+        await db
+          .update(cartItems)
+          .set({ quantity: existingItem[0].quantity + quantity })
+          .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+      } else {
+        // Add new item
+        await db.insert(cartItems).values({
+          userId,
+          productId,
+          quantity,
+          addedAt: new Date(),
+          roomId: null
+        });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      res.status(500).json({ error: "Failed to add to cart" });
+    }
+  });
+
+  app.delete("/api/cart/:productId", async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.params;
+      const userId = 1; // Default user for demo
+
+      await db
+        .delete(cartItems)
+        .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, Number(productId))));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      res.status(500).json({ error: "Failed to remove from cart" });
+    }
+  });
+
+  app.put("/api/cart/:productId", async (req: Request, res: Response) => {
+    try {
+      const { productId } = req.params;
+      const { quantity } = req.body;
+      const userId = 1; // Default user for demo
+
+      if (quantity <= 0) {
+        await db
+          .delete(cartItems)
+          .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, Number(productId))));
+      } else {
+        await db
+          .update(cartItems)
+          .set({ quantity })
+          .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, Number(productId))));
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      res.status(500).json({ error: "Failed to update cart" });
+    }
+  });
+
+  app.delete("/api/cart", async (req: Request, res: Response) => {
+    try {
+      const userId = 1; // Default user for demo
+
+      await db.delete(cartItems).where(eq(cartItems.userId, userId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      res.status(500).json({ error: "Failed to clear cart" });
     }
   });
   
