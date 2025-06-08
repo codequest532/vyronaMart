@@ -109,6 +109,8 @@ interface CheckoutState {
   codEligible: boolean;
   deliveryAddress: DeliveryAddress | null;
   savedAddresses: DeliveryAddress[];
+  primaryAddress: DeliveryAddress | null;
+  memberSpecificAddresses: Record<number, DeliveryAddress>;
 }
 
 export default function ModernCheckout() {
@@ -127,7 +129,9 @@ export default function ModernCheckout() {
     canProceedToOrder: false,
     codEligible: false,
     deliveryAddress: null,
-    savedAddresses: []
+    savedAddresses: [],
+    primaryAddress: null,
+    memberSpecificAddresses: {}
   });
 
   const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
@@ -143,6 +147,8 @@ export default function ModernCheckout() {
 
   // Delivery and member assignment states
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addressType, setAddressType] = useState<'primary' | 'member-specific'>('primary');
+  const [selectedMemberForAddress, setSelectedMemberForAddress] = useState<number | null>(null);
   const [newAddress, setNewAddress] = useState<Partial<DeliveryAddress>>({
     fullName: "",
     phone: "",
@@ -155,6 +161,7 @@ export default function ModernCheckout() {
   });
   const [itemMemberAssignments, setItemMemberAssignments] = useState<Record<number, number>>({});
   const [memberAddresses, setMemberAddresses] = useState<Record<number, DeliveryAddress>>({});
+  const [showAddressList, setShowAddressList] = useState(false);
 
   // Data fetching
   const { data: cartItemsResponse } = useQuery({
@@ -255,7 +262,9 @@ export default function ModernCheckout() {
       canProceedToOrder: contributionItems.every(item => item.isFullyFunded),
       codEligible,
       deliveryAddress: null,
-      savedAddresses: []
+      savedAddresses: [],
+      primaryAddress: null,
+      memberSpecificAddresses: {}
     });
   }, [cartItems, room?.memberCount, groupContributions]);
 
@@ -340,11 +349,27 @@ export default function ModernCheckout() {
       };
 
       // Update checkout state with the new address
-      setCheckoutState(prev => ({
-        ...prev,
-        deliveryAddress: newDeliveryAddress,
-        savedAddresses: [...prev.savedAddresses, newDeliveryAddress]
-      }));
+      if (addressType === 'primary') {
+        setCheckoutState(prev => ({
+          ...prev,
+          primaryAddress: newDeliveryAddress,
+          deliveryAddress: newDeliveryAddress,
+          savedAddresses: [...prev.savedAddresses, newDeliveryAddress]
+        }));
+      } else if (selectedMemberForAddress) {
+        setCheckoutState(prev => ({
+          ...prev,
+          memberSpecificAddresses: {
+            ...prev.memberSpecificAddresses,
+            [selectedMemberForAddress]: newDeliveryAddress
+          },
+          savedAddresses: [...prev.savedAddresses, newDeliveryAddress]
+        }));
+        setMemberAddresses(prev => ({
+          ...prev,
+          [selectedMemberForAddress]: newDeliveryAddress
+        }));
+      }
 
       // Reset form
       setNewAddress({
@@ -676,36 +701,53 @@ export default function ModernCheckout() {
             {/* Delivery Address Section */}
             <Card className="bg-gradient-to-br from-white to-green-50 border-2 border-green-200 shadow-xl">
               <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3 text-xl">
-                  <MapPin className="h-6 w-6" />
-                  Delivery Address & Member Assignment
+                <CardTitle className="flex items-center justify-between text-xl">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-6 w-6" />
+                    Multiple Delivery Addresses
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAddressList(!showAddressList)}
+                    className="border-white/20 text-white hover:bg-white/10"
+                  >
+                    {showAddressList ? 'Hide' : 'Show'} All
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Address Selection */}
+                  {/* Primary Address */}
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-green-600" />
+                      <Crown className="h-5 w-5 text-yellow-600" />
                       Primary Delivery Address
                     </h3>
-                    {checkoutState.deliveryAddress ? (
-                      <div className="p-4 bg-white rounded-lg border-2 border-green-200">
+                    {checkoutState.primaryAddress ? (
+                      <div className="p-4 bg-white rounded-lg border-2 border-yellow-200">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-semibold">{checkoutState.deliveryAddress.fullName}</p>
-                            <p className="text-sm text-gray-600">{checkoutState.deliveryAddress.phone}</p>
-                            <p className="text-sm">{checkoutState.deliveryAddress.addressLine1}</p>
-                            {checkoutState.deliveryAddress.addressLine2 && (
-                              <p className="text-sm">{checkoutState.deliveryAddress.addressLine2}</p>
+                            <p className="font-semibold flex items-center gap-2">
+                              {checkoutState.primaryAddress.fullName}
+                              <Badge className="bg-yellow-500 text-white text-xs">PRIMARY</Badge>
+                            </p>
+                            <p className="text-sm text-gray-600">{checkoutState.primaryAddress.phone}</p>
+                            <p className="text-sm">{checkoutState.primaryAddress.addressLine1}</p>
+                            {checkoutState.primaryAddress.addressLine2 && (
+                              <p className="text-sm">{checkoutState.primaryAddress.addressLine2}</p>
                             )}
-                            <p className="text-sm">{checkoutState.deliveryAddress.city}, {checkoutState.deliveryAddress.state} {checkoutState.deliveryAddress.pincode}</p>
+                            <p className="text-sm">{checkoutState.primaryAddress.city}, {checkoutState.primaryAddress.state} {checkoutState.primaryAddress.pincode}</p>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setShowAddressModal(true)}
-                            className="border-green-300 text-green-600 hover:bg-green-50"
+                            onClick={() => {
+                              setAddressType('primary');
+                              setSelectedMemberForAddress(null);
+                              setShowAddressModal(true);
+                            }}
+                            className="border-yellow-300 text-yellow-600 hover:bg-yellow-50"
                           >
                             Change
                           </Button>
@@ -713,17 +755,101 @@ export default function ModernCheckout() {
                       </div>
                     ) : (
                       <Button
-                        onClick={() => setShowAddressModal(true)}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 rounded-xl"
+                        onClick={() => {
+                          setAddressType('primary');
+                          setSelectedMemberForAddress(null);
+                          setShowAddressModal(true);
+                        }}
+                        className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white py-3 rounded-xl"
                       >
-                        <Plus className="h-5 w-5 mr-2" />
-                        Add Delivery Address
+                        <Crown className="h-5 w-5 mr-2" />
+                        Add Primary Address
                       </Button>
                     )}
                   </div>
 
-                  {/* Item Assignment */}
+                  {/* Member-Specific Addresses */}
                   <div className="space-y-4">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      Member-Specific Addresses
+                    </h3>
+                    <div className="space-y-3">
+                      {groupMembers?.map((member: any) => (
+                        <div key={member.userId} className="p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-sm">{member.username}</span>
+                            {checkoutState.memberSpecificAddresses[member.userId] ? (
+                              <Badge variant="outline" className="text-green-600 border-green-300">
+                                Address Set
+                              </Badge>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setAddressType('member-specific');
+                                  setSelectedMemberForAddress(member.userId);
+                                  setShowAddressModal(true);
+                                }}
+                                className="text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                              >
+                                <Plus className="h-3 w-3 mr-1" />
+                                Add Address
+                              </Button>
+                            )}
+                          </div>
+                          {checkoutState.memberSpecificAddresses[member.userId] && (
+                            <div className="text-xs text-gray-600 space-y-1">
+                              <p className="font-medium">{checkoutState.memberSpecificAddresses[member.userId].fullName}</p>
+                              <p>{checkoutState.memberSpecificAddresses[member.userId].addressLine1}</p>
+                              <p>{checkoutState.memberSpecificAddresses[member.userId].city}, {checkoutState.memberSpecificAddresses[member.userId].state}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address Summary */}
+                {showAddressList && (
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-3">Delivery Address Summary</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {checkoutState.primaryAddress && (
+                        <div className="bg-white p-3 rounded border border-blue-200">
+                          <p className="text-xs font-semibold text-yellow-600 mb-1">PRIMARY ADDRESS</p>
+                          <p className="text-sm font-medium">{checkoutState.primaryAddress.fullName}</p>
+                          <p className="text-xs text-gray-600">{checkoutState.primaryAddress.city}, {checkoutState.primaryAddress.state}</p>
+                        </div>
+                      )}
+                      {Object.entries(checkoutState.memberSpecificAddresses).map(([memberId, address]) => {
+                        const member = groupMembers?.find((m: any) => m.userId === parseInt(memberId));
+                        return (
+                          <div key={memberId} className="bg-white p-3 rounded border border-blue-200">
+                            <p className="text-xs font-semibold text-blue-600 mb-1">{member?.username?.toUpperCase()}</p>
+                            <p className="text-sm font-medium">{address.fullName}</p>
+                            <p className="text-xs text-gray-600">{address.city}, {address.state}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Item Assignment & Delivery Coordination */}
+            <Card className="bg-gradient-to-br from-white to-blue-50 border-2 border-blue-200 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <Package className="h-6 w-6" />
+                  Item Assignment & Delivery Coordination
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div className="space-y-4">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
                       <Users className="h-5 w-5 text-blue-600" />
                       Item Assignments
@@ -770,7 +896,41 @@ export default function ModernCheckout() {
                         </p>
                       </div>
                     )}
-                  </div>
+
+                    {/* Delivery Coordination Summary */}
+                    {Object.keys(itemMemberAssignments).length > 0 && (
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                        <h4 className="font-semibold text-blue-800 mb-3">Delivery Coordination Plan</h4>
+                        <div className="space-y-2">
+                          {Object.entries(itemMemberAssignments).map(([itemId, memberId]) => {
+                            const item = checkoutState.items.find(i => i.id === parseInt(itemId));
+                            const member = groupMembers?.find((m: any) => m.userId === memberId);
+                            const memberAddress = checkoutState.memberSpecificAddresses[memberId];
+                            const fallbackAddress = checkoutState.primaryAddress;
+                            
+                            return (
+                              <div key={itemId} className="flex items-center justify-between bg-white p-3 rounded border">
+                                <div className="flex items-center gap-3">
+                                  <Package className="h-4 w-4 text-blue-600" />
+                                  <span className="font-medium text-sm">{item?.name}</span>
+                                  <ArrowRight className="h-3 w-3 text-gray-400" />
+                                  <span className="text-sm text-blue-600">{member?.username}</span>
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  {memberAddress ? (
+                                    <span className="text-green-600 font-medium">Specific Address</span>
+                                  ) : fallbackAddress ? (
+                                    <span className="text-yellow-600 font-medium">Primary Address</span>
+                                  ) : (
+                                    <span className="text-red-600 font-medium">No Address Set</span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                 </div>
               </CardContent>
             </Card>
