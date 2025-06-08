@@ -334,82 +334,355 @@ export default function SellerDashboard() {
                             </div>
                           </div>
                         ))}
-                      </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              {/* Second Orders Section with Email Workflow */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>All Orders</CardTitle>
-                  <CardDescription>Complete order history with 4-stage email automation</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                  <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  {(() => {
-                    if (!sellerOrders || sellerOrders.length === 0) {
-                      return (
-                        <div className="text-center py-8">
-                          <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-500">No orders found</p>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div className="space-y-4">
-                        {sellerOrders.map((order: any) => (
-                          <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Badge variant={
-                                  order.order_status === 'completed' || order.status === 'completed' ? 'default' :
-                                  order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
-                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
-                                }>
-                                  {order.order_status || order.status}
-                                </Badge>
-                                <span className="text-sm font-medium">#{order.order_id || order.id}</span>
-                              </div>
-                              <p className="font-medium">Order #{order.order_id || order.id}</p>
-                              <p className="text-sm text-gray-600">Customer: {order.customer_name || order.customer_email || 'N/A'}</p>
-                              {order.metadata?.product_names && (
-                                <p className="text-sm text-gray-600">Products: {order.metadata.product_names}</p>
-                              )}
-                              <p className="text-sm font-medium text-green-600">
-                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                Ordered: {new Date(order.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <OrderStatusWorkflow order={order} />
-                              
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedOrder(order);
-                                  setShowOrderDetails(true);
-                                }}
-                              >
-                                View Details
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
+                  <div className="text-2xl font-bold">{sellerOrders?.length || 0}</div>
+                  <p className="text-xs text-muted-foreground">All time orders</p>
                 </CardContent>
               </Card>
-            </TabsContent>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {sellerOrders?.filter((order: any) => 
+                      order.status === 'pending' || order.order_status === 'pending' || 
+                      (!order.status && !order.order_status)
+                    ).length || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Awaiting processing</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    ₹{(sellerOrders?.reduce((sum: number, order: any) => 
+                      sum + (order.total_amount || order.totalAmount || 0), 0) / 100)?.toLocaleString() || 0}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Total earnings</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Products</CardTitle>
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{sellerProducts?.length || 0}</div>
+                  <p className="text-xs text-muted-foreground">Active products</p>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Other tabs content would go here... */}
-          </Tabs>
-        </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Orders - Email Workflow</CardTitle>
+                <CardDescription>Quick overview of recent orders with automated email progression</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  if (!sellerOrders || sellerOrders.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No orders yet</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="space-y-4">
+                      {sellerOrders.slice(0, 5).map((order: any) => (
+                        <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm font-medium">#{order.order_id || order.id}</span>
+                              <span className="text-sm text-gray-600">
+                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600">Customer: {order.customer_name || order.customer_email || 'N/A'}</p>
+                          </div>
+                          <OrderStatusWorkflow order={order} />
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="products" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Product Management</h2>
+              <Button onClick={() => setShowProductForm(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Product
+              </Button>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Products</CardTitle>
+                <CardDescription>Manage your product listings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {(() => {
+                  if (!sellerProducts || sellerProducts.length === 0) {
+                    return (
+                      <div className="text-center py-8">
+                        <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">No products yet</p>
+                        <Button onClick={() => setShowProductForm(true)} className="mt-4">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Your First Product
+                        </Button>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {sellerProducts.map((product: any) => (
+                        <div key={product.id} className="border rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-medium">{product.name}</h3>
+                            <Badge variant="outline">{product.category}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">{product.description}</p>
+                          <p className="text-lg font-semibold text-green-600">₹{product.price}</p>
+                          <div className="flex gap-2 mt-3">
+                            <Button variant="outline" size="sm" onClick={() => setEditingProduct(product)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="vyronaread" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">VyronaRead Management</h2>
+              <div className="flex gap-2">
+                <Button onClick={() => setShowBookForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Book
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Book className="h-5 w-5" />
+                    Physical Books
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold mb-2">
+                    {sellerProducts?.filter((product: any) => 
+                      product.category === 'books' && product.metadata?.format === 'physical'
+                    ).length || 0}
+                  </div>
+                  <p className="text-sm text-gray-600">Books available for rent/purchase</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    E-Books
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold mb-2">
+                    {sellerProducts?.filter((product: any) => 
+                      product.category === 'books' && product.metadata?.format === 'digital'
+                    ).length || 0}
+                  </div>
+                  <p className="text-sm text-gray-600">Digital books for download</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Library className="h-5 w-5" />
+                    Library Books
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold mb-2">
+                    {sellerProducts?.filter((product: any) => 
+                      product.category === 'library-books'
+                    ).length || 0}
+                  </div>
+                  <p className="text-sm text-gray-600">Library integration requests</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="library" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Library Management</h2>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Library Integration</CardTitle>
+                <CardDescription>Manage library books and rental system</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Library className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">Library management features coming soon</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">Analytics & Reports</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Email Workflow Performance</CardTitle>
+                  <CardDescription>Track automated email delivery rates</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span>Order Confirmed Emails</span>
+                      <span className="font-medium">
+                        {sellerOrders?.filter((order: any) => 
+                          order.status === 'processing' || order.order_status === 'processing'
+                        ).length || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Shipped Notifications</span>
+                      <span className="font-medium">
+                        {sellerOrders?.filter((order: any) => 
+                          order.status === 'shipped' || order.order_status === 'shipped'
+                        ).length || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Delivery Updates</span>
+                      <span className="font-medium">
+                        {sellerOrders?.filter((order: any) => 
+                          order.status === 'out_for_delivery' || order.order_status === 'out_for_delivery'
+                        ).length || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Completion Confirmations</span>
+                      <span className="font-medium">
+                        {sellerOrders?.filter((order: any) => 
+                          order.status === 'delivered' || order.order_status === 'delivered'
+                        ).length || 0}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Order Status Distribution</CardTitle>
+                  <CardDescription>Current order status breakdown</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <span>Pending</span>
+                      </div>
+                      <span>{sellerOrders?.filter((order: any) => 
+                        order.status === 'pending' || order.order_status === 'pending' ||
+                        (!order.status && !order.order_status)
+                      ).length || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span>Processing</span>
+                      </div>
+                      <span>{sellerOrders?.filter((order: any) => 
+                        order.status === 'processing' || order.order_status === 'processing'
+                      ).length || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span>Shipped</span>
+                      </div>
+                      <span>{sellerOrders?.filter((order: any) => 
+                        order.status === 'shipped' || order.order_status === 'shipped'
+                      ).length || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                        <span>Out for Delivery</span>
+                      </div>
+                      <span>{sellerOrders?.filter((order: any) => 
+                        order.status === 'out_for_delivery' || order.order_status === 'out_for_delivery'
+                      ).length || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                        <span>Delivered</span>
+                      </div>
+                      <span>{sellerOrders?.filter((order: any) => 
+                        order.status === 'delivered' || order.order_status === 'delivered'
+                      ).length || 0}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Order Details Modal */}
         {showOrderDetails && selectedOrder && (
