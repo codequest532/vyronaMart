@@ -8,13 +8,17 @@ import { Separator } from "@/components/ui/separator";
 
 interface OrderSuccessData {
   orderId: number;
-  items: Array<{
+  module: 'vyronahub' | 'vyronasocial' | 'vyronaread';
+  orderType?: string;
+  
+  // VyronaHub data
+  items?: Array<{
     productId: number;
     name: string;
     quantity: number;
     price: number;
   }>;
-  shippingAddress: {
+  shippingAddress?: {
     fullName: string;
     phoneNumber: string;
     address: string;
@@ -22,9 +26,44 @@ interface OrderSuccessData {
     state: string;
     pincode: string;
   };
+  
+  // VyronaSocial data
+  roomDetails?: {
+    id: number;
+    name: string;
+    roomCode?: string;
+    memberCount?: number;
+  };
+  contributions?: Array<{
+    userId: number;
+    username: string;
+    amount: number;
+    paymentMethod: string;
+  }>;
+  
+  // VyronaRead data
+  bookDetails?: {
+    id: number;
+    name: string;
+    author?: string;
+    type: string;
+  };
+  customerInfo?: {
+    fullName: string;
+    email: string;
+    phone: string;
+    address?: string;
+  };
+  rentalDuration?: number;
+  borrowingInfo?: any;
+  userType?: string;
+  
+  // Common fields
   paymentMethod: string;
-  totalAmount: number;
-  orderDate: string;
+  totalAmount?: number;
+  amount?: number;
+  orderDate?: string;
+  timestamp?: string;
 }
 
 export default function OrderSuccess() {
@@ -33,11 +72,11 @@ export default function OrderSuccess() {
 
   useEffect(() => {
     // Get order data from sessionStorage (set by checkout page)
-    const storedOrderData = sessionStorage.getItem('orderSuccessData');
+    const storedOrderData = sessionStorage.getItem('orderData');
     if (storedOrderData) {
       setOrderData(JSON.parse(storedOrderData));
       // Clear the data after using it
-      sessionStorage.removeItem('orderSuccessData');
+      sessionStorage.removeItem('orderData');
     } else {
       // If no order data, redirect to VyronaHub
       setLocation('/vyronahub');

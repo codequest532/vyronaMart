@@ -280,16 +280,38 @@ export default function VyronaReadCheckout() {
       }
 
       const response = await apiRequest("POST", endpoint, payload);
+      const result = await response.json();
+      
+      // Store order data for success page
+      const orderData = {
+        orderId: result.orderId || result.id,
+        module: 'vyronaread',
+        orderType: checkoutType,
+        bookDetails: {
+          id: bookId,
+          name: bookDetails?.name || bookName,
+          author: author,
+          type: checkoutType
+        },
+        customerInfo,
+        amount: calculatePrice(),
+        paymentMethod,
+        timestamp: new Date().toISOString(),
+        ...(checkoutType === 'rent' && { rentalDuration }),
+        ...(checkoutType === 'borrow' && { borrowingInfo, userType })
+      };
+      
+      sessionStorage.setItem('orderData', JSON.stringify(orderData));
       
       toast({
         title: "Success!",
         description: getSuccessMessage(),
       });
 
-      // Redirect to confirmation page or back to VyronaRead
+      // Redirect to order success page
       setTimeout(() => {
-        setLocation('/vyronaread');
-      }, 2000);
+        setLocation('/order-success');
+      }, 1500);
 
     } catch (error) {
       console.error('Checkout error:', error);
