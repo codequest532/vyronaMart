@@ -4348,7 +4348,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('WebSocket connection closed');
       
       // Remove user from online users and notify group members
-      for (const [userKey, onlineUser] of onlineUsers.entries()) {
+      const entries = Array.from(onlineUsers.entries());
+      for (const [userKey, onlineUser] of entries) {
         if (onlineUser.ws === ws) {
           const { userId, username, groupId } = onlineUser;
           

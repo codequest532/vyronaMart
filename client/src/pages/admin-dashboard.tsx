@@ -447,7 +447,7 @@ export default function AdminDashboard() {
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {statCards.map((stat, index) => (
-                  <Card key={index}>
+                  <Card key={`stat-card-${stat.title}-${index}`}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div>

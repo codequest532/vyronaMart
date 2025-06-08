@@ -1332,7 +1332,7 @@ export default function VyronaSocial() {
                   <div className="divide-y">
                     {groupsLoading ? (
                       Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="p-4 animate-pulse">
+                        <div key={`loading-group-${i}`} className="p-4 animate-pulse">
                           <div className="flex items-center gap-3">
                             <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
                             <div className="flex-1">
@@ -1594,7 +1594,7 @@ export default function VyronaSocial() {
                           <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                             {productsLoading ? (
                               Array.from({ length: 6 }).map((_, i) => (
-                                <Card key={i} className="overflow-hidden">
+                                <Card key={`loading-product-${i}`} className="overflow-hidden">
                                   <div className="animate-pulse">
                                     <div className="aspect-square bg-gray-200"></div>
                                     <div className="p-4 space-y-2">
