@@ -1623,15 +1623,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update order status
       await db.execute(sql`
         UPDATE orders 
-        SET status = ${status},
-            last_email_sent = ${status},
-            email_history = COALESCE(email_history, '[]'::jsonb) || ${JSON.stringify([{
-              status,
-              timestamp: new Date().toISOString(),
-              userId: user.id
-            }])}::jsonb
-        WHERE id = ${parseInt(orderId)}
+        SET status = ${status}
+        WHERE id = ${orderId}
       `);
+
+      // Log email notification data
+      const emailLogData = {
+        status,
+        timestamp: new Date().toISOString(),
+        userId: user.id
+      };
 
       // Send automated email based on status
       let emailResult: { success: boolean; messageId?: string; error?: string } = { success: false, messageId: '', error: 'No email template for this status' };
