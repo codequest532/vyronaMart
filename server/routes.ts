@@ -1444,7 +1444,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Send to all connected users in this group
-      for (const [userId, userData] of onlineUsers) {
+      const entries = Array.from(onlineUsers.entries());
+      for (const [userId, userData] of entries) {
         if (userData.groupId === roomId && userData.ws.readyState === 1) {
           userData.ws.send(JSON.stringify(cartUpdateMessage));
         }
@@ -1510,7 +1511,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         // Send to all connected users in this group
-        for (const [userId, userData] of onlineUsers) {
+        const entries = Array.from(onlineUsers.entries());
+        for (const [userId, userData] of entries) {
           if (userData.groupId === cartItem.roomId && userData.ws.readyState === 1) {
             userData.ws.send(JSON.stringify(cartUpdateMessage));
           }
@@ -4330,7 +4332,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (data.type === 'ping') {
           // Update last seen time
-          Object.values(onlineUsers).forEach(user => {
+          const users = Array.from(onlineUsers.values());
+          users.forEach(user => {
             if (user.ws === ws) {
               user.lastSeen = new Date();
             }
@@ -4388,7 +4391,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cleanup inactive connections every 60 seconds
   setInterval(() => {
     const now = new Date();
-    for (const [userKey, onlineUser] of onlineUsers.entries()) {
+    const entries = Array.from(onlineUsers.entries());
+    for (const [userKey, onlineUser] of entries) {
       const timeSinceLastSeen = now.getTime() - onlineUser.lastSeen.getTime();
       
       // Only remove if user hasn't been seen for 5 minutes AND connection is closed
@@ -5022,7 +5026,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
 
           // Broadcast to all online users in the group
-          for (const [socketId, user] of onlineUsers.entries()) {
+          const entries = Array.from(onlineUsers.entries());
+          for (const [socketId, user] of entries) {
             if (user.groupId === roomId && user.ws.readyState === WebSocket.OPEN) {
               user.ws.send(JSON.stringify({
                 type: "contribution_update",
