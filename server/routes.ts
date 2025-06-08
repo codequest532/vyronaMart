@@ -4750,6 +4750,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Order submission endpoint for VyronaHub checkout flow
+  app.post("/api/orders", async (req: Request, res: Response) => {
+    try {
+      const { items, shippingAddress, paymentMethod, total } = req.body;
+      const userId = 1; // Default user for demo
+
+      if (!items || !shippingAddress || !paymentMethod || !total) {
+        return res.status(400).json({ error: "Missing required order information" });
+      }
+
+      // Create order in database
+      const orderResult = await db.insert(orders).values({
+        userId,
+        totalAmount: total,
+        status: "processing",
+        module: "vyronahub",
+        metadata: {
+          shippingAddress,
+          paymentMethod,
+          items
+        }
+      }).returning();
+
+      const orderId = orderResult[0].id;
+
+      // Clear cart after successful order
+      await db.delete(cartItems).where(eq(cartItems.userId, userId));
+
+      // Send order confirmation email
+      try {
+        await sendBrevoEmail({
+          to: "customer@example.com", // Would use actual user email
+          subject: "Order Confirmation - VyronaHub",
+          htmlContent: generateOrderProcessingEmail({
+            customerName: "Customer",
+            orderNumber: orderId.toString(),
+            items: items.map((item: any) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            total,
+            shippingAddress
+          })
+        });
+      } catch (emailError) {
+        console.error("Email sending failed:", emailError);
+      }
+
+      res.json({ 
+        success: true, 
+        orderId,
+        message: "Order placed successfully"
+      });
+
+    } catch (error) {
+      console.error('Order submission error:', error);
+      res.status(500).json({ error: "Failed to place order" });
+    }
+  });
+
   // Cart API endpoints for VyronaHub checkout flow
   app.get("/api/cart", async (req: Request, res: Response) => {
     try {
