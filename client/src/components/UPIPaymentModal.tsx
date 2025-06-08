@@ -24,6 +24,8 @@ interface UPIPaymentData {
   referenceId: string;
   amount: number;
   virtualUPI: string;
+  paymentLink: string;
+  requiresManualVerification: boolean;
   expiryTime: string;
   instructions: string[];
 }
@@ -42,6 +44,9 @@ export function UPIPaymentModal({
   const [checking, setChecking] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'completed' | 'failed'>('pending');
   const [timeLeft, setTimeLeft] = useState<string>('');
+  const [showManualVerification, setShowManualVerification] = useState(false);
+  const [transactionId, setTransactionId] = useState('');
+  const [verifying, setVerifying] = useState(false);
   const { toast } = useToast();
 
   // Generate UPI QR code when modal opens
@@ -139,6 +144,48 @@ export function UPIPaymentModal({
       console.error('Status check failed:', error);
     } finally {
       setChecking(false);
+    }
+  };
+
+  const handleManualVerification = async () => {
+    if (!paymentData || !transactionId.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your transaction ID",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const response = await apiRequest('POST', '/api/payments/verify-manual', {
+        referenceId: paymentData.referenceId,
+        transactionId: transactionId.trim(),
+        amount: paymentData.amount
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setPaymentStatus('completed');
+        toast({
+          title: "Payment Verified!",
+          description: "Your contribution has been confirmed",
+        });
+        onPaymentSuccess?.(paymentData.referenceId);
+        setTimeout(onClose, 2000);
+      } else {
+        throw new Error(data.error || 'Verification failed');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Please check your transaction ID and try again",
+        variant: "destructive"
+      });
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -276,22 +323,102 @@ export function UPIPaymentModal({
                   </ol>
                 </Card>
 
-                {/* Manual Check Button */}
-                <Button 
-                  onClick={checkPaymentStatus}
-                  disabled={checking}
-                  className="w-full"
-                  variant="outline"
-                >
-                  {checking ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Checking Status...
-                    </>
-                  ) : (
-                    'Check Payment Status'
-                  )}
-                </Button>
+                {/* Payment Verification Options */}
+                {paymentData.requiresManualVerification ? (
+                  <>
+                    {/* Manual Verification Section */}
+                    {!showManualVerification ? (
+                      <div className="space-y-3">
+                        <Button 
+                          onClick={checkPaymentStatus}
+                          disabled={checking}
+                          className="w-full"
+                          variant="outline"
+                        >
+                          {checking ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Checking Status...
+                            </>
+                          ) : (
+                            'Check Payment Status'
+                          )}
+                        </Button>
+                        
+                        <div className="text-center">
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Payment not detected automatically?
+                          </p>
+                          <Button 
+                            onClick={() => setShowManualVerification(true)}
+                            variant="ghost"
+                            size="sm"
+                          >
+                            Verify Payment Manually
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Card className="p-4">
+                        <h4 className="font-medium mb-3">Manual Payment Verification</h4>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-sm font-medium">Transaction ID</label>
+                            <input
+                              type="text"
+                              value={transactionId}
+                              onChange={(e) => setTransactionId(e.target.value)}
+                              placeholder="Enter UPI transaction ID"
+                              className="w-full mt-1 p-2 border rounded-md text-sm"
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Found in your UPI app's transaction history
+                            </p>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={handleManualVerification}
+                              disabled={verifying || !transactionId.trim()}
+                              className="flex-1"
+                            >
+                              {verifying ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Verifying...
+                                </>
+                              ) : (
+                                'Verify Payment'
+                              )}
+                            </Button>
+                            <Button
+                              onClick={() => setShowManualVerification(false)}
+                              variant="outline"
+                            >
+                              Back
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
+                  </>
+                ) : (
+                  <Button 
+                    onClick={checkPaymentStatus}
+                    disabled={checking}
+                    className="w-full"
+                    variant="outline"
+                  >
+                    {checking ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Checking Status...
+                      </>
+                    ) : (
+                      'Check Payment Status'
+                    )}
+                  </Button>
+                )}
               </>
             )}
 

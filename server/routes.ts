@@ -3925,6 +3925,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manual payment verification endpoint
+  app.post("/api/payments/verify-manual", async (req, res) => {
+    try {
+      const { referenceId, transactionId, amount, screenshot } = req.body;
+      
+      if (!referenceId || !transactionId) {
+        return res.status(400).json({ error: "Missing payment details" });
+      }
+
+      // Find the payment notification
+      const existingPayment = await db.select()
+        .from(notifications)
+        .where(sql`metadata->>'referenceId' = ${referenceId} AND type = 'payment'`)
+        .limit(1);
+
+      if (!existingPayment.length) {
+        return res.status(404).json({ error: "Payment record not found" });
+      }
+
+      const payment = existingPayment[0];
+      const metadata = payment.metadata as any;
+
+      // Update payment as manually verified
+      await db.update(notifications)
+        .set({ 
+          metadata: {
+            ...metadata,
+            status: "verified_manual",
+            transactionId,
+            verifiedAt: new Date().toISOString(),
+            screenshot: screenshot || null
+          }
+        })
+        .where(eq(notifications.id, payment.id));
+
+      // Create group contribution notification
+      await db.insert(notifications).values({
+        userId: payment.userId,
+        type: "contribution",
+        title: "Payment Verified",
+        message: `Your contribution of ₹${metadata.amount} has been verified`,
+        metadata: {
+          method: "upi_manual",
+          transactionId,
+          referenceId,
+          roomId: metadata.roomId,
+          itemId: metadata.itemId,
+          amount: metadata.amount,
+          verifiedAt: new Date().toISOString(),
+          status: "confirmed"
+        }
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Payment verified and contribution recorded",
+        status: "verified_manual"
+      });
+
+    } catch (error) {
+      console.error('Manual payment verification error:', error);
+      res.status(500).json({ error: "Failed to verify payment manually" });
+    }
+  });
+
   // Cashfree AutoCollect Webhook Handler
   app.post("/api/payments/cashfree-webhook", async (req, res) => {
     try {
