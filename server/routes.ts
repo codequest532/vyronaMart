@@ -1627,13 +1627,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE id = ${orderId}
       `);
 
-      // Log email notification data
-      const emailLogData = {
-        status,
-        timestamp: new Date().toISOString(),
-        userId: user.id
-      };
-
       // Send automated email based on status
       let emailResult: { success: boolean; messageId?: string; error?: string } = { success: false, messageId: '', error: 'No email template for this status' };
       
