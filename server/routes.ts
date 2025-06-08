@@ -18,7 +18,7 @@ import {
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
   insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
-  walletTransactions, users, orders, groupContributions
+  walletTransactions, users, orders, groupContributions, notifications
 } from "@shared/schema";
 import { cartItems } from "../migrations/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
