@@ -186,7 +186,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   };
 
   const ModalContent = () => (
-    <div className="relative max-w-md mx-auto">
+    <div className="relative max-w-lg mx-auto">
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
