@@ -3818,25 +3818,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        qrCode: qrCodeDataURL,
-        upiString,
-        referenceId,
-        amount,
-        virtualUPI,
-        paymentLink,
-        requiresManualVerification: !virtualUPI,
-        expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        instructions: virtualUPI ? [
-          "Scan the QR code with any UPI app",
-          "Verify the amount and merchant details", 
-          "Complete the payment",
-          "Your contribution will be updated automatically"
-        ] : [
-          "Click the payment link to complete your contribution",
-          "Take a screenshot of your successful transaction",
-          "Return here to verify your payment",
-          "Your contribution will be confirmed within minutes"
-        ]
+        qrCode: paymentResponse.qrCode,
+        upiString: paymentResponse.upiString,
+        referenceId: paymentResponse.referenceId,
+        amount: paymentResponse.amount,
+        virtualUPI: paymentResponse.virtualUPI,
+        paymentLink: paymentResponse.paymentLink,
+        requiresManualVerification: paymentResponse.requiresManualVerification,
+        expiryTime: paymentResponse.expiryTime,
+        instructions: paymentResponse.instructions
       });
 
     } catch (error: any) {
