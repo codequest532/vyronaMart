@@ -141,6 +141,21 @@ export default function ModernCheckout() {
     userId: number;
   } | null>(null);
 
+  // Delivery and member assignment states
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [newAddress, setNewAddress] = useState<Partial<DeliveryAddress>>({
+    fullName: "",
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    pincode: "",
+    isDefault: false
+  });
+  const [itemMemberAssignments, setItemMemberAssignments] = useState<Record<number, number>>({});
+  const [memberAddresses, setMemberAddresses] = useState<Record<number, DeliveryAddress>>({});
+
   // Data fetching
   const { data: cartItemsResponse } = useQuery({
     queryKey: ["/api/room-cart", roomId],
@@ -270,7 +285,7 @@ export default function ModernCheckout() {
           cartItemId: itemId,
           amount,
           paymentMethod: paymentMethod.type,
-          transactionId
+          transactionId: `${paymentMethod.type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
         }),
       });
 
@@ -305,6 +320,58 @@ export default function ModernCheckout() {
   const handleContributeClick = (item: OrderItem) => {
     setSelectedItem(item);
     setIsContributionModalOpen(true);
+  };
+
+  const handleSaveAddress = async () => {
+    try {
+      // Generate unique ID for the address
+      const addressId = `addr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const newDeliveryAddress: DeliveryAddress = {
+        id: addressId,
+        fullName: newAddress.fullName || "",
+        phone: newAddress.phone || "",
+        addressLine1: newAddress.addressLine1 || "",
+        addressLine2: newAddress.addressLine2,
+        city: newAddress.city || "",
+        state: newAddress.state || "",
+        pincode: newAddress.pincode || "",
+        isDefault: newAddress.isDefault || false
+      };
+
+      // Update checkout state with the new address
+      setCheckoutState(prev => ({
+        ...prev,
+        deliveryAddress: newDeliveryAddress,
+        savedAddresses: [...prev.savedAddresses, newDeliveryAddress]
+      }));
+
+      // Reset form
+      setNewAddress({
+        fullName: "",
+        phone: "",
+        addressLine1: "",
+        addressLine2: "",
+        city: "",
+        state: "",
+        pincode: "",
+        isDefault: false
+      });
+
+      setShowAddressModal(false);
+
+      toast({
+        title: "Address Saved",
+        description: "Delivery address has been added successfully",
+      });
+    } catch (error) {
+      console.error("Error saving address:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save address. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle UPI payment success
@@ -605,6 +672,108 @@ export default function ModernCheckout() {
                 );
               })}
             </div>
+
+            {/* Delivery Address Section */}
+            <Card className="bg-gradient-to-br from-white to-green-50 border-2 border-green-200 shadow-xl">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <MapPin className="h-6 w-6" />
+                  Delivery Address & Member Assignment
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Address Selection */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-green-600" />
+                      Primary Delivery Address
+                    </h3>
+                    {checkoutState.deliveryAddress ? (
+                      <div className="p-4 bg-white rounded-lg border-2 border-green-200">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold">{checkoutState.deliveryAddress.fullName}</p>
+                            <p className="text-sm text-gray-600">{checkoutState.deliveryAddress.phone}</p>
+                            <p className="text-sm">{checkoutState.deliveryAddress.addressLine1}</p>
+                            {checkoutState.deliveryAddress.addressLine2 && (
+                              <p className="text-sm">{checkoutState.deliveryAddress.addressLine2}</p>
+                            )}
+                            <p className="text-sm">{checkoutState.deliveryAddress.city}, {checkoutState.deliveryAddress.state} {checkoutState.deliveryAddress.pincode}</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowAddressModal(true)}
+                            className="border-green-300 text-green-600 hover:bg-green-50"
+                          >
+                            Change
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => setShowAddressModal(true)}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 rounded-xl"
+                      >
+                        <Plus className="h-5 w-5 mr-2" />
+                        Add Delivery Address
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Item Assignment */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <Users className="h-5 w-5 text-blue-600" />
+                      Item Assignments
+                    </h3>
+                    <div className="space-y-3">
+                      {checkoutState.items.map((item) => (
+                        <div key={item.id} className="p-4 bg-white rounded-lg border border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Package className="h-4 w-4 text-gray-500" />
+                              <span className="font-medium">{item.name}</span>
+                            </div>
+                            <select
+                              value={itemMemberAssignments[item.id] || ""}
+                              onChange={(e) => setItemMemberAssignments(prev => ({
+                                ...prev,
+                                [item.id]: parseInt(e.target.value)
+                              }))}
+                              className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">Assign to member...</option>
+                              {groupMembers?.map((member: any) => (
+                                <option key={member.userId} value={member.userId}>
+                                  {member.username}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          {itemMemberAssignments[item.id] && (
+                            <div className="mt-2 p-2 bg-blue-50 rounded-md">
+                              <p className="text-xs text-blue-700">
+                                Assigned to: {groupMembers?.find((m: any) => m.userId === itemMemberAssignments[item.id])?.username}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {Object.keys(itemMemberAssignments).length > 0 && (
+                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-700 font-medium">
+                          Items will be delivered to individual members at their specified addresses.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
@@ -750,6 +919,134 @@ export default function ModernCheckout() {
           onPaymentSuccess={handleUPIPaymentSuccess}
         />
       )}
+
+      {/* Address Modal */}
+      <Dialog open={showAddressModal} onOpenChange={setShowAddressModal}>
+        <DialogContent className="max-w-2xl bg-gradient-to-br from-white to-green-50">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg text-white">
+                <MapPin className="h-6 w-6" />
+              </div>
+              Add Delivery Address
+            </DialogTitle>
+            <DialogDescription>
+              Enter the delivery address for group purchases
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name *</Label>
+                <Input
+                  id="fullName"
+                  value={newAddress.fullName || ""}
+                  onChange={(e) => setNewAddress(prev => ({ ...prev, fullName: e.target.value }))}
+                  placeholder="Enter full name"
+                  className="border-2 border-green-200 focus:border-green-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  value={newAddress.phone || ""}
+                  onChange={(e) => setNewAddress(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Enter phone number"
+                  className="border-2 border-green-200 focus:border-green-400"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="addressLine1">Address Line 1 *</Label>
+              <Input
+                id="addressLine1"
+                value={newAddress.addressLine1 || ""}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, addressLine1: e.target.value }))}
+                placeholder="House/Flat No., Building, Street"
+                className="border-2 border-green-200 focus:border-green-400"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="addressLine2">Address Line 2 (Optional)</Label>
+              <Input
+                id="addressLine2"
+                value={newAddress.addressLine2 || ""}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, addressLine2: e.target.value }))}
+                placeholder="Area, Landmark"
+                className="border-2 border-green-200 focus:border-green-400"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  value={newAddress.city || ""}
+                  onChange={(e) => setNewAddress(prev => ({ ...prev, city: e.target.value }))}
+                  placeholder="Enter city"
+                  className="border-2 border-green-200 focus:border-green-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State *</Label>
+                <Input
+                  id="state"
+                  value={newAddress.state || ""}
+                  onChange={(e) => setNewAddress(prev => ({ ...prev, state: e.target.value }))}
+                  placeholder="Enter state"
+                  className="border-2 border-green-200 focus:border-green-400"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pincode">Pincode *</Label>
+                <Input
+                  id="pincode"
+                  value={newAddress.pincode || ""}
+                  onChange={(e) => setNewAddress(prev => ({ ...prev, pincode: e.target.value }))}
+                  placeholder="Enter pincode"
+                  className="border-2 border-green-200 focus:border-green-400"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isDefault"
+                checked={newAddress.isDefault || false}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, isDefault: e.target.checked }))}
+                className="rounded border-green-300 focus:ring-green-500"
+              />
+              <Label htmlFor="isDefault" className="text-sm">
+                Set as default address
+              </Label>
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowAddressModal(false)}
+                className="flex-1 border-green-300 text-green-600 hover:bg-green-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSaveAddress}
+                disabled={!newAddress.fullName || !newAddress.phone || !newAddress.addressLine1 || !newAddress.city || !newAddress.state || !newAddress.pincode}
+                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Save Address
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
