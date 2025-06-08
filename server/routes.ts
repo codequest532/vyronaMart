@@ -1513,43 +1513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      // Send automated order confirmation email to customer
-      if (customer.email && order.id) {
-        try {
-          const estimatedDelivery = new Date();
-          estimatedDelivery.setDate(estimatedDelivery.getDate() + 5); // 5 days delivery estimate
-
-          await sendOrderConfirmationEmail(
-            customer.email,
-            customer.username,
-            order.id,
-            {
-              items: items.map(item => ({
-                name: item.name,
-                quantity: item.quantity,
-                price: item.price
-              })),
-              totalAmount: isGroupPayment ? contributionPerMember : totalAmount,
-              estimatedDelivery: estimatedDelivery.toLocaleDateString('en-IN', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              }),
-              orderDate: new Date().toLocaleDateString('en-IN', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })
-            }
-          );
-          console.log(`Order confirmation email sent to ${customer.email} for order #${order.id}`);
-        } catch (emailError) {
-          console.error('Failed to send order confirmation email:', emailError);
-          // Don't fail the order if email fails
-        }
-      }
+      // Email notifications disabled
 
       res.json({
         success: true,
@@ -4595,59 +4559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test email notification endpoint
-  app.post("/api/test-email", async (req, res) => {
-    try {
-      const { customerEmail, customerName, orderId } = req.body;
-      
-      if (!customerEmail) {
-        return res.status(400).json({ message: "Customer email is required" });
-      }
 
-      const estimatedDelivery = new Date();
-      estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
-
-      const emailSuccess = await sendOrderConfirmationEmail(
-        customerEmail,
-        customerName || 'Valued Customer',
-        orderId || 12345,
-        {
-          items: [
-            { name: 'Sample Product', quantity: 1, price: 2999 },
-            { name: 'Another Item', quantity: 2, price: 1499 }
-          ],
-          totalAmount: 5997,
-          estimatedDelivery: estimatedDelivery.toLocaleDateString('en-IN', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }),
-          orderDate: new Date().toLocaleDateString('en-IN', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          })
-        }
-      );
-
-      if (emailSuccess) {
-        res.json({
-          success: true,
-          message: `Test email sent successfully to ${customerEmail}`
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          message: "Failed to send test email"
-        });
-      }
-    } catch (error: any) {
-      console.error('Test email error:', error);
-      res.status(500).json({ message: "Test email failed" });
-    }
-  });
   
   return httpServer;
 }
