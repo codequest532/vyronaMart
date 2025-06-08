@@ -9,7 +9,7 @@ import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
 import PlaceOrder from "@/pages/place-order-new";
-import ModernCheckout from "@/pages/checkout-modern";
+import SimpleCheckout from "@/pages/checkout-simple";
 
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";
@@ -70,9 +70,9 @@ function Router() {
       </Route>
       <Route path="/social" component={VyronaSocial} />
       <Route path="/test-social" component={TestSocial} />
-      <Route path="/place-order/:roomId" component={ModernCheckout} />
+      <Route path="/place-order/:roomId" component={SimpleCheckout} />
       <Route path="/place-order-new/:roomId" component={PlaceOrder} />
-      <Route path="/checkout-modern/:id" component={ModernCheckout} />
+      <Route path="/checkout-modern/:id" component={SimpleCheckout} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
       <Route path="/vyronaread" component={VyronaRead} />

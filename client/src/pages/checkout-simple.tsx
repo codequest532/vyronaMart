@@ -536,6 +536,9 @@ export default function SimpleCheckout() {
           isOpen={showUPIModal}
           onClose={() => setShowUPIModal(false)}
           amount={upiPaymentDetails.amount / 100}
+          roomId={upiPaymentDetails.roomId}
+          itemId={upiPaymentDetails.itemId}
+          userId={upiPaymentDetails.userId}
           onPaymentSuccess={handleUPIPaymentSuccess}
         />
       )}
