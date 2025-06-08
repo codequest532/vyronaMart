@@ -1761,6 +1761,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaRead order status update endpoint (matches seller dashboard calls)
+  app.post("/api/orders/:orderId/update-status", async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { status, trackingNumber } = req.body;
+
+      if (!orderId || !status) {
+        return res.status(400).json({ message: "Order ID and status are required" });
+      }
+
+      // Validate status progression for VyronaRead orders
+      const validStatuses = ['processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      // Get current order details
+      const orderResult = await db.execute(sql`
+        SELECT o.*, u.email as customer_email, u.username as customer_name 
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        WHERE o.id = ${parseInt(orderId)}
+      `);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const order = orderResult.rows[0] as any;
+      
+      // Update order status in database
+      await db.execute(sql`
+        UPDATE orders 
+        SET status = ${status}
+        WHERE id = ${parseInt(orderId)}
+      `);
+
+      // Send automated email based on status for VyronaRead orders
+      let emailResult: { success: boolean; messageId?: string; error?: string } = { success: false };
+      
+      if (['processing', 'shipped', 'out_for_delivery', 'delivered'].includes(status)) {
+        const orderData = {
+          orderId: order.id,
+          customerName: order.customer_name,
+          customerEmail: order.customer_email,
+          orderTotal: order.total_amount,
+          orderItems: order.metadata?.items || order.metadata?.products || [],
+          orderDate: order.created_at,
+          trackingNumber,
+          deliveryAddress: order.metadata?.deliveryAddress || 'As provided during checkout'
+        };
+
+        let emailTemplate;
+        switch (status) {
+          case 'processing':
+            emailTemplate = generateOrderProcessingEmail(orderData);
+            break;
+          case 'shipped':
+            emailTemplate = generateOrderShippedEmail(orderData);
+            break;
+          case 'out_for_delivery':
+            emailTemplate = generateOrderOutForDeliveryEmail(orderData);
+            break;
+          case 'delivered':
+            emailTemplate = generateOrderDeliveredEmail(orderData);
+            break;
+        }
+
+        if (emailTemplate) {
+          // Send email to customer
+          emailResult = await sendBrevoEmail({
+            to: order.customer_email,
+            subject: emailTemplate.subject,
+            htmlContent: emailTemplate.htmlContent
+          });
+
+          // Log email notification in database
+          try {
+            await db.execute(sql`
+              INSERT INTO email_notifications (
+                order_id, user_id, email_type, status, recipient_email, 
+                subject, content, brevo_message_id, sent_at
+              ) VALUES (
+                ${parseInt(orderId)}, ${order.user_id}, ${status}, 
+                ${emailResult.success ? 'sent' : 'failed'}, ${order.customer_email},
+                ${emailTemplate.subject}, ${emailTemplate.htmlContent},
+                ${emailResult.messageId || null}, 
+                ${emailResult.success ? new Date().toISOString() : null}
+              )
+            `);
+          } catch (emailLogError) {
+            console.error("Error logging VyronaRead email notification:", emailLogError);
+          }
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: "VyronaRead order status updated successfully",
+        emailSent: emailResult.success,
+        emailError: emailResult.error || undefined
+      });
+    } catch (error: any) {
+      console.error("Error updating VyronaRead order status:", error);
+      res.status(500).json({ 
+        message: "Failed to update order status", 
+        error: error.message 
+      });
+    }
+  });
+
   app.get("/api/seller/orders/:orderId/details", async (req, res) => {
     try {
       const user = getAuthenticatedUser(req);
