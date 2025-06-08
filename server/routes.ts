@@ -25,7 +25,7 @@ import {
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
   insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
-  walletTransactions, users, orders, groupContributions, notifications, products, cartItems
+  walletTransactions, users, orders, groupContributions, notifications, products, cartItems, stores
 } from "@shared/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
@@ -1545,7 +1545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seller Dashboard - Order Management (simplified authentication for demo)
   app.get("/api/seller/orders", async (req, res) => {
     try {
-      // Simplified access for demo - allow all requests to view seller orders
+      // Enhanced seller orders with customer details for VyronaHub orders
       const sellerOrders = await db.execute(sql`
         SELECT 
           o.id as order_id,
@@ -1556,14 +1556,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
           o.metadata,
           o.created_at,
           u.username as customer_name,
-          u.email as customer_email
+          u.email as customer_email,
+          u.mobile as customer_phone,
+          CASE 
+            WHEN o.module = 'vyronahub' THEN 
+              COALESCE(o.metadata->>'shippingAddress', '{}')::jsonb
+            ELSE NULL
+          END as shipping_address,
+          CASE 
+            WHEN o.module = 'vyronahub' THEN 
+              COALESCE(o.metadata->>'paymentMethod', 'Not specified')
+            ELSE NULL
+          END as payment_method,
+          CASE 
+            WHEN o.module = 'vyronahub' THEN 
+              COALESCE(o.metadata->>'items', '[]')::jsonb
+            ELSE NULL
+          END as order_items
         FROM orders o
         LEFT JOIN users u ON o.user_id = u.id
         ORDER BY o.created_at DESC
         LIMIT 50
       `);
 
-      res.json(sellerOrders.rows);
+      // Process and format the orders for better display
+      const formattedOrders = sellerOrders.rows.map((order: any) => {
+        let shippingDetails = null;
+        let orderItems = [];
+
+        if (order.module === 'vyronahub' && order.shipping_address) {
+          try {
+            shippingDetails = typeof order.shipping_address === 'string' 
+              ? JSON.parse(order.shipping_address) 
+              : order.shipping_address;
+          } catch (e) {
+            shippingDetails = null;
+          }
+        }
+
+        if (order.module === 'vyronahub' && order.order_items) {
+          try {
+            orderItems = typeof order.order_items === 'string' 
+              ? JSON.parse(order.order_items) 
+              : order.order_items;
+          } catch (e) {
+            orderItems = [];
+          }
+        }
+
+        return {
+          ...order,
+          shipping_address: shippingDetails,
+          order_items: orderItems,
+          formatted_total: `₹${(order.total_amount / 100).toFixed(2)}`,
+          formatted_date: new Date(order.created_at).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        };
+      });
+
+      res.json(formattedOrders);
     } catch (error) {
       console.error("Error fetching seller orders:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -4778,23 +4834,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Clear cart after successful order
       await db.delete(cartItems).where(eq(cartItems.userId, userId));
 
-      // Send order confirmation email
+      // Send notifications to sellers and customer
       try {
-        await sendBrevoEmail({
-          to: "customer@example.com", // Would use actual user email
-          subject: "Order Confirmation - VyronaHub",
-          htmlContent: generateOrderProcessingEmail({
-            customerName: "Customer",
-            orderNumber: orderId.toString(),
-            items: items.map((item: any) => ({
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price
-            })),
-            total,
-            shippingAddress
-          })
-        });
+        // Get unique sellers for the ordered items
+        const sellerEmails = new Set<string>();
+        for (const item of items) {
+          // Get seller info for each product
+          const productResult = await db
+            .select({
+              sellerEmail: users.email,
+              sellerName: users.username,
+              storeName: stores.name
+            })
+            .from(products)
+            .leftJoin(stores, eq(products.storeId, stores.id))
+            .leftJoin(users, eq(stores.sellerId, users.id))
+            .where(eq(products.id, item.id))
+            .limit(1);
+
+          if (productResult.length > 0 && productResult[0].sellerEmail) {
+            sellerEmails.add(productResult[0].sellerEmail);
+            
+            // Send seller notification
+            await sendBrevoEmail(
+              productResult[0].sellerEmail,
+              "New Order Received - VyronaHub",
+              `<h2>New Order Notification</h2>
+                <p>Dear ${productResult[0].sellerName},</p>
+                <p>You have received a new order (Order #${orderId}) from VyronaHub.</p>
+                <h3>Order Details:</h3>
+                <ul>
+                  ${items.filter((orderItem: any) => orderItem.id === item.id).map((orderItem: any) => 
+                    `<li>${orderItem.name} - Quantity: ${orderItem.quantity} - Price: ₹${(orderItem.price / 100).toFixed(2)}</li>`
+                  ).join('')}
+                </ul>
+                <p><strong>Total Amount: ₹${(total / 100).toFixed(2)}</strong></p>
+                <h3>Customer Details:</h3>
+                <p>
+                  Name: ${shippingAddress.fullName}<br>
+                  Phone: ${shippingAddress.phone}<br>
+                  Address: ${shippingAddress.addressLine1}, ${shippingAddress.addressLine2 || ''}<br>
+                  ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
+                </p>
+                <p>Please log in to your seller dashboard to process this order.</p>
+                <p>Best regards,<br>VyronaHub Team</p>`
+            );
+          }
+        }
+
+        // Send customer confirmation email
+        const orderEmailData = {
+          orderId: orderId,
+          customerName: shippingAddress.fullName,
+          customerEmail: "customer@example.com",
+          orderTotal: total,
+          orderItems: items.map((item: any) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          orderDate: new Date().toLocaleDateString(),
+          deliveryAddress: `${shippingAddress.addressLine1}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}`
+        };
+
+        const emailTemplate = generateOrderProcessingEmail(orderEmailData);
+        await sendBrevoEmail(
+          "customer@example.com",
+          emailTemplate.subject,
+          emailTemplate.htmlContent
+        );
       } catch (emailError) {
         console.error("Email sending failed:", emailError);
       }
