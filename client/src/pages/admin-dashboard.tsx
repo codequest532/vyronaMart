@@ -1759,7 +1759,7 @@ export default function AdminDashboard() {
                               <div>
                                 <p className="font-medium">Order #{order.id}</p>
                                 <p className="text-sm text-gray-500">
-                                  Customer: {order.customerEmail || 'N/A'} • Amount: ₹{(order.totalAmount / 100).toLocaleString()}
+                                  Customer: {order.customer_email || 'N/A'} • Amount: ₹{(order.total_amount || 0).toLocaleString()}
                                 </p>
                                 <p className="text-xs text-gray-400">
                                   {new Date(order.createdAt).toLocaleDateString()} • Status: {order.status}
@@ -1993,9 +1993,8 @@ export default function AdminDashboard() {
                               </div>
                               <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                 <p className="text-2xl font-bold text-green-600">
-                                  ₹{orders?.filter((order: any) => order.user_id === customer.id)
-                                    .reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0)
-                                    .toLocaleString() || '0'}
+                                  ₹{(orders?.filter((order: any) => order.user_id === customer.id)
+                                    .reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0) || 0).toLocaleString()}
                                 </p>
                                 <p className="text-sm text-gray-600">Total Spent</p>
                               </div>
@@ -2119,7 +2118,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Revenue</p>
-                        <p className="text-2xl font-bold text-green-600">₹{orders?.reduce((sum: number, order: any) => sum + order.totalAmount, 0)?.toLocaleString() || 0}</p>
+                        <p className="text-2xl font-bold text-green-600">₹{(orders?.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0) || 0).toLocaleString()}</p>
                       </div>
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     </div>
@@ -2155,7 +2154,7 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="text-right">
-                              <p className="font-semibold">₹{order.totalAmount.toLocaleString()}</p>
+                              <p className="font-semibold">₹{(order.total_amount || 0).toLocaleString()}</p>
                               <Badge variant={order.status === 'completed' ? 'default' : order.status === 'pending' ? 'secondary' : 'destructive'}>
                                 {order.status}
                               </Badge>
@@ -2420,7 +2419,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Platform Revenue</p>
-                        <p className="text-3xl font-bold text-green-600">₹{orders?.reduce((sum: number, order: any) => sum + (order.totalAmount * 0.15), 0)?.toLocaleString() || '0'}</p>
+                        <p className="text-3xl font-bold text-green-600">₹{(orders?.reduce((sum: number, order: any) => sum + ((order.total_amount || 0) * 0.15), 0) || 0).toLocaleString()}</p>
                         <p className="text-xs text-green-500">+12% from last month</p>
                       </div>
                       <TrendingUp className="h-8 w-8 text-green-600" />
