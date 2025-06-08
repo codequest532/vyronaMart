@@ -3806,16 +3806,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       const virtualAccountPayload = {
-        virtualAccountId: referenceId.toLowerCase(),
-        customerName: `VyronaMart Room ${roomId}`,
-        customerPhone: "9999999999",
-        customerEmail: "customer@vyronamart.com"
+        vAccountId: referenceId.toLowerCase(),
+        name: `VyronaMart Room ${roomId}`,
+        phone: "9999999999",
+        ifsc: "YESB0000001",
+        accountType: "CURRENT"
       };
 
       const cashfreeHeaders = {
-        'x-client-id': cashfreeConfig.clientId,
-        'x-client-secret': cashfreeConfig.clientSecret,
-        'x-api-version': '2023-08-01',
+        'X-Client-Id': cashfreeConfig.clientId,
+        'X-Client-Secret': cashfreeConfig.clientSecret,
         'Content-Type': 'application/json'
       };
 
@@ -3824,16 +3824,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         // Create virtual account with Cashfree AutoCollect
         const virtualAccountResponse = await axios.post(
-          `${cashfreeConfig.baseUrl}/pg/easy-split`,
+          `${cashfreeConfig.baseUrl}/api/v2/easy-split`,
           virtualAccountPayload,
           { headers: cashfreeHeaders }
         );
 
         console.log('Cashfree AutoCollect response:', virtualAccountResponse.data);
 
-        if (virtualAccountResponse.data && virtualAccountResponse.data.virtual_account_id) {
+        if (virtualAccountResponse.data && virtualAccountResponse.data.data) {
           // Extract UPI ID from Cashfree response
-          virtualUPI = virtualAccountResponse.data.upi_id || `${virtualAccountResponse.data.virtual_account_id}@ybl`;
+          virtualUPI = virtualAccountResponse.data.data.upi || `${virtualAccountResponse.data.data.vAccountId}@ybl`;
         } else {
           throw new Error('Failed to create virtual account');
         }
