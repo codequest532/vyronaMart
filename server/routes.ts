@@ -88,6 +88,124 @@ const ADMIN_CREDENTIALS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Order submission endpoint for VyronaHub checkout flow - MUST BE FIRST
+  app.post("/api/orders", async (req: Request, res: Response) => {
+    try {
+      console.log("VyronaHub Order request body:", JSON.stringify(req.body, null, 2));
+      
+      const { items, shippingAddress, paymentMethod, totalAmount, total } = req.body;
+      const userId = 1; // Default user for demo
+      const orderTotal = totalAmount || total;
+
+      console.log("Extracted values:", { 
+        items: !!items, 
+        shippingAddress: !!shippingAddress, 
+        paymentMethod: !!paymentMethod, 
+        orderTotal: !!orderTotal 
+      });
+
+      if (!items || !shippingAddress || !paymentMethod || !orderTotal) {
+        console.log("Missing required fields validation failed");
+        return res.status(400).json({ error: "Missing required order information" });
+      }
+
+      // Create order in database
+      const orderResult = await db.insert(orders).values({
+        userId,
+        totalAmount: orderTotal,
+        status: "processing",
+        module: "vyronahub",
+        metadata: {
+          shippingAddress,
+          paymentMethod,
+          items
+        }
+      }).returning();
+
+      const orderId = orderResult[0].id;
+
+      // Send seller notifications for each item
+      try {
+        const sellerEmails = new Set<string>();
+
+        for (const item of items) {
+          const productResult = await db.execute(sql`
+            SELECT 
+              p.name as productName,
+              'admin@vyrona.com' as sellerEmail,
+              'Vyrona Team' as sellerName
+            FROM products p 
+            WHERE p.id = ${item.productId}
+            LIMIT 1
+          `);
+
+          if (productResult.length > 0 && productResult[0].sellerEmail) {
+            sellerEmails.add(productResult[0].sellerEmail);
+            
+            // Send seller notification
+            await sendBrevoEmail(
+              productResult[0].sellerEmail,
+              "New Order Received - VyronaHub",
+              `<h2>New Order Notification</h2>
+                <p>Dear ${productResult[0].sellerName},</p>
+                <p>You have received a new order (Order #${orderId}) from VyronaHub.</p>
+                <h3>Order Details:</h3>
+                <ul>
+                  ${items.filter((orderItem: any) => orderItem.productId === item.productId).map((orderItem: any) => 
+                    `<li>${orderItem.name || productResult[0].productName} - Quantity: ${orderItem.quantity} - Price: ₹${(orderItem.price / 100).toFixed(2)}</li>`
+                  ).join('')}
+                </ul>
+                <p><strong>Total Amount: ₹${(orderTotal / 100).toFixed(2)}</strong></p>
+                <h3>Customer Details:</h3>
+                <p>
+                  Name: ${shippingAddress.fullName}<br>
+                  Phone: ${shippingAddress.phoneNumber}<br>
+                  Address: ${shippingAddress.address}<br>
+                  ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
+                </p>
+                <p>Please log in to your seller dashboard to process this order.</p>
+                <p>Best regards,<br>VyronaHub Team</p>`
+            );
+          }
+        }
+
+        // Send customer confirmation email
+        const orderEmailData = {
+          orderId: orderId,
+          customerName: shippingAddress.fullName,
+          customerEmail: "customer@example.com",
+          orderTotal: orderTotal,
+          orderItems: items.map((item: any) => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          orderDate: new Date().toLocaleDateString(),
+          deliveryAddress: `${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}`
+        };
+
+        const emailTemplate = generateOrderProcessingEmail(orderEmailData);
+        await sendBrevoEmail(
+          "customer@example.com",
+          emailTemplate.subject,
+          emailTemplate.htmlContent
+        );
+      } catch (emailError) {
+        console.error("Email sending failed:", emailError);
+      }
+
+      res.json({ 
+        success: true, 
+        orderId,
+        message: "Order placed successfully"
+      });
+
+    } catch (error) {
+      console.error('Order submission error:', error);
+      res.status(500).json({ error: "Failed to place order" });
+    }
+  });
   // Serve uploaded files statically
   app.use('/uploads', express.static('uploads'));
 
@@ -4809,17 +4927,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order submission endpoint for VyronaHub checkout flow
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
-      const { items, shippingAddress, paymentMethod, total } = req.body;
+      console.log("Order request body:", JSON.stringify(req.body, null, 2));
+      
+      const { items, shippingAddress, paymentMethod, totalAmount, total } = req.body;
       const userId = 1; // Default user for demo
+      const orderTotal = totalAmount || total;
 
-      if (!items || !shippingAddress || !paymentMethod || !total) {
+      console.log("Extracted values:", { 
+        items: !!items, 
+        shippingAddress: !!shippingAddress, 
+        paymentMethod: !!paymentMethod, 
+        orderTotal: !!orderTotal 
+      });
+
+      if (!items || !shippingAddress || !paymentMethod || !orderTotal) {
+        console.log("Missing required fields validation failed");
         return res.status(400).json({ error: "Missing required order information" });
       }
 
       // Create order in database
       const orderResult = await db.insert(orders).values({
         userId,
-        totalAmount: total,
+        totalAmount: orderTotal,
         status: "processing",
         module: "vyronahub",
         metadata: {
