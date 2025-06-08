@@ -1519,8 +1519,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? "Your contribution has been processed. Waiting for other members to contribute."
           : "Payment successful",
         orderId: order.id,
-        transactionId: transaction.id,
-        remainingBalance: updatedWallet.balance,
+        transactionId: mockTransaction.id,
+        remainingBalance: mockWallet.balance,
         isGroupPayment,
         contributionAmount: requiredAmount
       });
