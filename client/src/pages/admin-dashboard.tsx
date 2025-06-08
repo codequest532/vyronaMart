@@ -762,15 +762,45 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <Badge variant={user.role === 'seller' ? 'default' : 'secondary'}>
+                            <Badge variant="secondary">
                               {user.role}
                             </Badge>
-                            <Badge variant={user.isActive ? 'default' : 'destructive'}>
-                              {user.isActive ? 'Active' : 'Inactive'}
+                            <Badge variant="default">
+                              Active
                             </Badge>
-                            <Button variant="outline" size="sm">
-                              Manage
-                            </Button>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <MessageSquare className="h-3 w-3 mr-1" />
+                                  Message
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Send Message to {user.username}</DialogTitle>
+                                  <DialogDescription>
+                                    Send a direct message to this customer
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <label className="text-sm font-medium">Subject</label>
+                                    <Input placeholder="Message subject" />
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium">Message</label>
+                                    <Textarea 
+                                      placeholder="Type your message here..."
+                                      className="min-h-[100px]"
+                                    />
+                                  </div>
+                                  <Button className="w-full">
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Send Message
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                           </div>
                         </div>
                       ))}
