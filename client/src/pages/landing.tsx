@@ -64,6 +64,40 @@ export default function Landing() {
 
   const { toast } = useToast();
 
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setShowAuthModal(false);
+      setShowLoginModal(false);
+      setShowSignupModal(false);
+      // Store user data in query cache to maintain auth state
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      toast({
+        title: "Success",
+        description: "Logged in successfully!",
+      });
+      setLocation("/");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const signupMutation = useMutation({
     mutationFn: async (data: { 
       email: string; 
@@ -124,35 +158,6 @@ export default function Landing() {
     onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const verifyOtpMutation = useMutation({
-    mutationFn: async (data: { email: string; otp: string }) => {
-      const response = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      setOtpStep("reset");
-      toast({
-        title: "OTP Verified",
-        description: "You can now reset your password.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Invalid OTP",
         description: error.message,
         variant: "destructive",
       });
