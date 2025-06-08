@@ -3750,10 +3750,15 @@ export default function SellerDashboard() {
                         <p className="text-sm">{selectedOrder.metadata.customer_phone}</p>
                       </div>
                     )}
-                    {selectedOrder.metadata?.delivery_address && (
+                    {selectedOrder.metadata?.shippingAddress && (
                       <div className="md:col-span-2">
                         <label className="text-sm font-medium text-gray-600">Delivery Address</label>
-                        <p className="text-sm">{selectedOrder.metadata.delivery_address}</p>
+                        <div className="text-sm">
+                          <p>{selectedOrder.metadata.shippingAddress.fullName}</p>
+                          <p>{selectedOrder.metadata.shippingAddress.phoneNumber}</p>
+                          <p>{selectedOrder.metadata.shippingAddress.address}</p>
+                          <p>{selectedOrder.metadata.shippingAddress.city}, {selectedOrder.metadata.shippingAddress.state} - {selectedOrder.metadata.shippingAddress.pincode}</p>
+                        </div>
                       </div>
                     )}
                   </div>
