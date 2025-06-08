@@ -131,62 +131,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const sellerEmails = new Set<string>();
 
         console.log("Processing items for email notifications:", items.length);
-        for (const item of items) {
-          console.log("Processing item:", item.productId);
-          const productResult = await db.execute(sql`
-            SELECT 
-              p.name as productName,
-              'ganesan.sixphrase@gmail.com' as sellerEmail,
-              'MSR' as sellerName
-            FROM products p 
-            WHERE p.id = ${item.productId}
-            LIMIT 1
-          `);
-
-          console.log("Product query result:", productResult);
-          if (productResult.rows && productResult.rows.length > 0) {
-            const productData = productResult.rows[0];
-            const sellerEmail = 'ganesan.sixphrase@gmail.com';
-            const sellerName = 'MSR';
-            const productName = productData.productname || 'Product';
-            
-            console.log(`Found product: ${productName}, sending email to: ${sellerEmail}`);
-            sellerEmails.add(sellerEmail);
-            
-            // Send seller notification
-            console.log(`Attempting to send email to seller: ${sellerEmail}`);
-            const emailResult = await sendBrevoEmail(
-              sellerEmail,
-              "New Order Received - VyronaHub",
-              `<h2>New Order Notification</h2>
-                <p>Dear ${sellerName},</p>
-                <p>You have received a new order (Order #${orderId}) from VyronaHub.</p>
-                <h3>Order Details:</h3>
-                <ul>
-                  ${items.filter((orderItem: any) => orderItem.productId === item.productId).map((orderItem: any) => 
-                    `<li>${orderItem.name || productName} - Quantity: ${orderItem.quantity} - Price: ₹${orderItem.price.toFixed(2)}</li>`
-                  ).join('')}
-                </ul>
-                <p><strong>Total Amount: ₹${orderTotal.toFixed(2)}</strong></p>
-                <h3>Customer Details:</h3>
-                <p>
-                  Name: ${shippingAddress.fullName}<br>
-                  Phone: ${shippingAddress.phoneNumber}<br>
-                  Address: ${shippingAddress.address}<br>
-                  ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
-                </p>
-                <p>Please log in to your seller dashboard to process this order.</p>
-                <p>Best regards,<br>VyronaHub Team</p>`
-            );
-            
-            if (emailResult.success) {
-              console.log(`Seller notification email sent successfully to ${sellerEmail}`);
-            } else {
-              console.error(`Failed to send seller notification email: ${emailResult.error}`);
-            }
-          } else {
-            console.log("No product found for ID:", item.productId);
-          }
+        
+        // Send seller notification for all items to ganesan.sixphrase@gmail.com
+        const sellerEmail = 'ganesan.sixphrase@gmail.com';
+        const sellerName = 'MSR';
+        
+        console.log(`Sending consolidated order notification to: ${sellerEmail}`);
+        
+        const orderItems = items.map((item: any) => 
+          `<li>${item.name} - Quantity: ${item.quantity} - Price: ₹${item.price.toFixed(2)}</li>`
+        ).join('');
+        
+        const emailResult = await sendBrevoEmail(
+          sellerEmail,
+          "New Order Received - VyronaHub",
+          `<h2>New Order Notification</h2>
+            <p>Dear ${sellerName},</p>
+            <p>You have received a new order (Order #${orderId}) from VyronaHub.</p>
+            <h3>Order Details:</h3>
+            <ul>${orderItems}</ul>
+            <p><strong>Total Amount: ₹${orderTotal.toFixed(2)}</strong></p>
+            <h3>Customer Details:</h3>
+            <p>
+              Name: ${shippingAddress.fullName}<br>
+              Phone: ${shippingAddress.phoneNumber}<br>
+              Address: ${shippingAddress.address}<br>
+              ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
+            </p>
+            <p>Payment Method: ${paymentMethod.toUpperCase()}</p>
+            <p>Please log in to your seller dashboard to process this order.</p>
+            <p>Best regards,<br>VyronaHub Team</p>`
+        );
+        
+        if (emailResult.success) {
+          console.log(`Seller notification email sent successfully to ${sellerEmail}`);
+        } else {
+          console.error(`Failed to send seller notification email:`, emailResult.error);
         }
 
         // Send customer confirmation email
