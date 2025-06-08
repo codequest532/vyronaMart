@@ -1624,7 +1624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update order status
       await db.execute(sql`
         UPDATE orders 
-        SET order_status = ${status}
+        SET status = ${status}
         WHERE id = ${parseInt(orderId)}
       `);
 
