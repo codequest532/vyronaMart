@@ -43,16 +43,13 @@ const groupCallStates = new Map<number, {
   startedAt: Date;
 }>();
 
-// Cashfree Configuration
-const CASHFREE_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://api.cashfree.com' 
-  : 'https://sandbox.cashfree.com';
-
-const cashfreeHeaders = {
-  'Content-Type': 'application/json',
-  'X-Client-Id': process.env.CASHFREE_APP_ID!,
-  'X-Client-Secret': process.env.CASHFREE_SECRET_KEY!,
+// Simple payment configuration
+const PAYMENT_CONFIG = {
+  merchantName: "Vyrona",
+  merchantUPI: "merchant@upi"
 };
+
+// Removed Cashfree headers - using simple UPI payment system
 
 // Configure multer for file uploads
 const upload = multer({
@@ -3783,7 +3780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Cashfree AutoCollect UPI QR Code Payment System
+  // Simple UPI QR Code Payment System  
   app.post("/api/payments/upi-qr/generate", async (req, res) => {
     try {
       const { roomId, itemId, amount, userId } = req.body;
@@ -3792,107 +3789,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing required parameters" });
       }
 
-      // Generate unique reference for this contribution
-      const referenceId = `GRP${roomId}_ITM${itemId}_USR${userId}_${Date.now()}`;
+      // Generate UPI payment using simplified system
+      const { generateUPIQRCode } = await import('./upi-payment');
+      const paymentResponse = await generateUPIQRCode({ roomId, itemId, amount, userId });
       
-      // Create UPI payment using Cashfree Payment Gateway for QR generation
-      const cashfreeConfig = {
-        clientId: process.env.CASHFREE_CLIENT_ID,
-        clientSecret: process.env.CASHFREE_CLIENT_SECRET,
-        environment: process.env.CASHFREE_ENVIRONMENT || 'sandbox',
-        baseUrl: process.env.CASHFREE_ENVIRONMENT === 'production' 
-          ? 'https://api.cashfree.com' 
-          : 'https://sandbox.cashfree.com'
-      };
-
-      // Create payment order with Cashfree
-      const orderPayload = {
-        order_id: referenceId,
-        order_amount: amount,
-        order_currency: "INR",
-        customer_details: {
-          customer_id: `user_${userId}`,
-          customer_name: `Room ${roomId} Member`,
-          customer_email: "customer@vyronamart.com",
-          customer_phone: "9999999999"
-        },
-        order_meta: {
-          return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/payment-success`,
-          notify_url: `${process.env.BASE_URL || 'http://localhost:5000'}/api/payments/webhook`
-        }
-      };
-
-      const cashfreeHeaders = {
-        'x-client-id': cashfreeConfig.clientId,
-        'x-client-secret': cashfreeConfig.clientSecret,
-        'x-api-version': '2023-08-01',
-        'Content-Type': 'application/json'
-      };
-
-      let virtualUPI;
-      let paymentLink;
-      
-      try {
-        // Create payment order with Cashfree
-        const orderResponse = await axios.post(
-          `${cashfreeConfig.baseUrl}/pg/orders`,
-          orderPayload,
-          { headers: cashfreeHeaders }
-        );
-
-        console.log('Cashfree Order response:', orderResponse.data);
-
-        if (orderResponse.data && orderResponse.data.payment_link) {
-          paymentLink = orderResponse.data.payment_link;
-          // Generate a UPI ID based on the order
-          virtualUPI = `vyrona.${referenceId.toLowerCase().slice(-10)}@paytm`;
-        } else {
-          throw new Error('Failed to create payment order');
-        }
-      } catch (cashfreeError) {
-        console.error('Cashfree Payment Gateway error:', cashfreeError.response?.data || cashfreeError.message);
-        
-        // Create manual payment instructions since AutoCollect isn't available
-        // This creates a clear payment flow for users
-        virtualUPI = null; // No valid UPI ID without AutoCollect
-        paymentLink = `${process.env.BASE_URL || 'http://localhost:5000'}/manual-payment/${referenceId}`;
-        
-        console.log('Cashfree AutoCollect not available - using manual payment flow');
+      if (!paymentResponse.success) {
+        return res.status(500).json({ error: paymentResponse.error });
       }
-      
-      // Create UPI payment string only if we have a valid UPI ID
-      let upiString = null;
-      if (virtualUPI) {
-        upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Room${roomId}_Item${itemId}&tr=${referenceId}`;
-      }
-      
-      // Generate QR Code for payment link or manual payment page
-      const qrContent = paymentLink || `${process.env.BASE_URL || 'http://localhost:5000'}/payment/${referenceId}`;
-      const qrCodeDataURL = await QRCode.toDataURL(qrContent, {
-        width: 300,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
 
-      // Store payment intent in notifications table (simulating wallet transactions)
+      // Store payment intent in notifications table
       await db.insert(notifications).values({
         userId,
-        type: "payment",
+        type: "payment", 
         title: "UPI Payment Pending",
         message: `UPI QR contribution - Room ${roomId}, Item ${itemId}`,
         metadata: {
-          referenceId,
+          referenceId: paymentResponse.referenceId,
           roomId,
           itemId,
           amount,
           paymentMethod: "upi_qr",
           status: "pending",
-          qrExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          upiString,
-          virtualUPI
+          qrExpiry: paymentResponse.expiryTime,
+          upiString: paymentResponse.upiString,
+          virtualUPI: paymentResponse.virtualUPI
         }
       });
 

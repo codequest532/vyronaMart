@@ -1,15 +1,10 @@
 import axios from 'axios';
 import QRCode from 'qrcode';
 
-// Cashfree configuration
-const CASHFREE_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://api.cashfree.com' 
-  : 'https://sandbox.cashfree.com';
-
-const cashfreeHeaders = {
-  'x-client-id': process.env.CASHFREE_APP_ID || '',
-  'x-client-secret': process.env.CASHFREE_SECRET_KEY || '',
-  'Content-Type': 'application/json'
+// Simple UPI payment configuration
+const MERCHANT_CONFIG = {
+  name: "VyronaMart",
+  upiId: "merchant@upi"
 };
 
 export interface UPIPaymentRequest {
@@ -25,6 +20,9 @@ export interface UPIPaymentResponse {
   upiString?: string;
   referenceId?: string;
   amount?: number;
+  virtualUPI?: string;
+  paymentLink?: string;
+  requiresManualVerification?: boolean;
   expiryTime?: Date;
   instructions?: string[];
   error?: string;
@@ -37,11 +35,11 @@ export async function generateUPIQRCode(request: UPIPaymentRequest): Promise<UPI
     // Generate unique reference for this contribution
     const referenceId = `GRP${roomId}_ITM${itemId}_USR${userId}_${Date.now()}`;
     
-    // Generate virtual UPI ID for Cashfree AutoCollect
-    const virtualUPI = `vyrona${Math.random().toString(36).substr(2, 6)}@icici`;
+    // Use merchant UPI ID for payment
+    const virtualUPI = MERCHANT_CONFIG.upiId;
     
     // Create UPI payment string
-    const upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Group contribution Room ${roomId}&tr=${referenceId}`;
+    const upiString = `upi://pay?pa=${virtualUPI}&pn=${MERCHANT_CONFIG.name}&am=${amount}&cu=INR&tn=Group contribution Room ${roomId}&tr=${referenceId}`;
     
     // Generate UPI QR Code
     const qrCodeDataURL = await QRCode.toDataURL(upiString, {
@@ -59,12 +57,15 @@ export async function generateUPIQRCode(request: UPIPaymentRequest): Promise<UPI
       upiString,
       referenceId,
       amount,
+      virtualUPI,
+      paymentLink: upiString,
+      requiresManualVerification: true,
       expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       instructions: [
         "Scan the QR code with any UPI app",
-        "Verify the amount and merchant details",
-        "Complete the payment",
-        "Your contribution will be updated automatically"
+        "Complete the payment to the merchant UPI ID",
+        "Note down your transaction ID from the UPI app",
+        "Use manual verification to confirm your payment"
       ]
     };
 
@@ -77,28 +78,26 @@ export async function generateUPIQRCode(request: UPIPaymentRequest): Promise<UPI
   }
 }
 
-export async function createCashfreeVirtualAccount(referenceId: string, amount: number): Promise<any> {
+export async function createSimpleUPIPayment(referenceId: string, amount: number): Promise<any> {
   try {
-    if (!process.env.CASHFREE_APP_ID || !process.env.CASHFREE_SECRET_KEY) {
-      console.warn('Cashfree credentials not configured - using mock response');
-      return { success: false, error: 'Payment gateway not configured' };
-    }
-
-    const response = await axios.post(
-      `${CASHFREE_BASE_URL}/api/v2/easy-split`,
-      {
-        vpa: `vyrona${Math.random().toString(36).substr(2, 6)}@icici`,
-        amount: amount,
-        purpose: `Group contribution`,
-        reference: referenceId,
-        expiry_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-      },
-      { headers: cashfreeHeaders }
-    );
-
-    return response.data;
+    // Generate a simple UPI payment link for manual verification
+    const merchantUPI = MERCHANT_CONFIG.upiId;
+    const merchantName = MERCHANT_CONFIG.name;
+    
+    return {
+      success: true,
+      virtualUPI: merchantUPI,
+      paymentLink: `upi://pay?pa=${merchantUPI}&pn=${merchantName}&am=${amount}&cu=INR&tn=GroupContribution&tr=${referenceId}`,
+      requiresManualVerification: true,
+      instructions: [
+        "Use any UPI app to scan the QR code",
+        "Complete the payment to the merchant UPI ID",
+        "Note down your transaction ID from the UPI app",
+        "Use the manual verification option to confirm payment"
+      ]
+    };
   } catch (error: any) {
-    console.error('Cashfree API error:', error.response?.data || error.message);
-    return { success: false, error: 'Payment gateway error' };
+    console.error('UPI payment creation error:', error);
+    return { success: false, error: 'Failed to create UPI payment' };
   }
 }
