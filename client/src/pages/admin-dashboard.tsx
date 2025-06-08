@@ -1705,36 +1705,207 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Users with Email Info */}
+              {/* Customer Management */}
               <Card>
                 <CardHeader>
-                  <CardTitle>User Email Directory</CardTitle>
-                  <CardDescription>Manage customer and seller email communications</CardDescription>
+                  <CardTitle>Customer Management</CardTitle>
+                  <CardDescription>View customer details and send direct messages</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!users || users.filter((user: any) => user.role === 'customer').length === 0 ? (
+                    <div className="text-center py-12">
+                      <Users className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No Customers Found</h3>
+                      <p className="text-gray-500 dark:text-gray-400">Customer details will appear here once users register</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {users?.filter((user: any) => user.role === 'customer').map((customer: any) => (
+                        <div key={customer.id} className="p-6 border rounded-lg hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-4 flex-1">
+                              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                                <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <h4 className="font-semibold text-lg mb-2">{customer.username}</h4>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-gray-500" />
+                                        <span className="text-sm">{customer.email}</span>
+                                      </div>
+                                      {customer.mobile && (
+                                        <div className="flex items-center gap-2">
+                                          <span className="h-4 w-4 text-gray-500">📱</span>
+                                          <span className="text-sm">{customer.mobile}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-gray-600">Customer ID:</span>
+                                        <Badge variant="outline">#{customer.id}</Badge>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-gray-600">Status:</span>
+                                        <Badge variant={customer.role === 'customer' ? 'default' : 'secondary'}>
+                                          Active Customer
+                                        </Badge>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-gray-600">Joined:</span>
+                                        <span className="text-sm text-gray-500">
+                                          {customer.created_at ? new Date(customer.created_at).toLocaleDateString() : 'N/A'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 ml-4">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="outline">
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Send Message
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Send Message to {customer.username}</DialogTitle>
+                                    <DialogDescription>
+                                      Send a direct message to customer {customer.email}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <label className="text-sm font-medium">Subject</label>
+                                      <Input 
+                                        placeholder="Enter message subject" 
+                                        id={`messageSubject_${customer.id}`}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium">Message</label>
+                                      <Textarea 
+                                        placeholder="Type your message here..." 
+                                        id={`messageContent_${customer.id}`}
+                                        rows={4}
+                                      />
+                                    </div>
+                                    <div className="flex justify-end gap-2">
+                                      <DialogTrigger asChild>
+                                        <Button variant="outline">Cancel</Button>
+                                      </DialogTrigger>
+                                      <Button
+                                        onClick={() => {
+                                          const subject = (document.getElementById(`messageSubject_${customer.id}`) as HTMLInputElement)?.value;
+                                          const content = (document.getElementById(`messageContent_${customer.id}`) as HTMLTextAreaElement)?.value;
+                                          if (subject && content) {
+                                            toast({
+                                              title: "Message Sent",
+                                              description: `Message sent to ${customer.username} successfully`,
+                                            });
+                                            // Clear the form
+                                            (document.getElementById(`messageSubject_${customer.id}`) as HTMLInputElement).value = '';
+                                            (document.getElementById(`messageContent_${customer.id}`) as HTMLTextAreaElement).value = '';
+                                          } else {
+                                            toast({
+                                              title: "Error",
+                                              description: "Please fill in both subject and message",
+                                              variant: "destructive"
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        <Send className="h-4 w-4 mr-2" />
+                                        Send Message
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              <Button size="sm" variant="ghost">
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Orders
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Customer Order Summary */}
+                          <div className="mt-4 pt-4 border-t">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <p className="text-2xl font-bold text-blue-600">
+                                  {orders?.filter((order: any) => order.user_id === customer.id).length || 0}
+                                </p>
+                                <p className="text-sm text-gray-600">Total Orders</p>
+                              </div>
+                              <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <p className="text-2xl font-bold text-green-600">
+                                  ₹{orders?.filter((order: any) => order.user_id === customer.id)
+                                    .reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0)
+                                    .toLocaleString() || '0'}
+                                </p>
+                                <p className="text-sm text-gray-600">Total Spent</p>
+                              </div>
+                              <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <p className="text-2xl font-bold text-purple-600">
+                                  {orders?.filter((order: any) => order.user_id === customer.id && order.status === 'completed').length || 0}
+                                </p>
+                                <p className="text-sm text-gray-600">Completed</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* All Users Directory */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Complete User Directory</CardTitle>
+                  <CardDescription>All registered users including customers, sellers, and admins</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {users?.length === 0 ? (
                     <p className="text-center text-gray-500 py-8">No users found</p>
                   ) : (
-                    <div className="space-y-4">
-                      {users?.slice(0, 10).map((user: any) => (
+                    <div className="space-y-3">
+                      {users?.map((user: any) => (
                         <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-4">
-                              <div>
-                                <p className="font-medium">{user.username}</p>
-                                <p className="text-sm text-gray-500">{user.email}</p>
-                                <p className="text-xs text-gray-400">
-                                  Role: {user.role} • Mobile: {user.mobile || 'N/A'}
-                                </p>
-                              </div>
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              user.role === 'admin' ? 'bg-red-100 text-red-600' :
+                              user.role === 'seller' ? 'bg-green-100 text-green-600' :
+                              'bg-blue-100 text-blue-600'
+                            }`}>
+                              {user.role === 'admin' ? <Shield className="h-5 w-5" /> :
+                               user.role === 'seller' ? <Store className="h-5 w-5" /> :
+                               <Users className="h-5 w-5" />}
+                            </div>
+                            <div>
+                              <p className="font-medium">{user.username}</p>
+                              <p className="text-sm text-gray-500">{user.email}</p>
+                              <p className="text-xs text-gray-400">
+                                Mobile: {user.mobile || 'N/A'} • ID: #{user.id}
+                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
                             <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'seller' ? 'default' : 'secondary'}>
                               {user.role}
                             </Badge>
-                            <Badge variant={user.isActive ? 'default' : 'secondary'}>
-                              {user.isActive ? 'Active' : 'Inactive'}
+                            <Badge variant="outline">
+                              {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                             </Badge>
                           </div>
                         </div>

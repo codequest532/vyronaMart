@@ -4421,9 +4421,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Users API
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
 
+      const usersResult = await db.execute(sql`
+        SELECT id, username, email, mobile, role, created_at
+        FROM users
+        ORDER BY created_at DESC
+      `);
 
+      res.json(usersResult.rows);
+    } catch (error: any) {
+      console.error('Admin users fetch error:', error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
 
+  // Admin Orders API
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const ordersResult = await db.execute(sql`
+        SELECT 
+          o.id, o.user_id, o.total_amount, o.status, o.module, o.metadata, o.created_at,
+          u.username, u.email, u.mobile
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.id
+        ORDER BY o.created_at DESC
+        LIMIT 100
+      `);
+
+      res.json(ordersResult.rows);
+    } catch (error: any) {
+      console.error('Admin orders fetch error:', error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
   
   return httpServer;
 }
