@@ -247,6 +247,31 @@ export default function SellerDashboard() {
     queryKey: ["/api/current-user"],
   });
 
+  // Order status update mutation with automated email workflow
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status, trackingNumber }: { orderId: number; status: string; trackingNumber?: string }) => {
+      return await apiRequest("PATCH", `/api/seller/orders/${orderId}/status`, { status, trackingNumber });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Order Status Updated",
+        description: data.emailSent 
+          ? "Order status updated and customer notification email sent successfully" 
+          : `Order status updated${data.emailError ? ` (email failed: ${data.emailError})` : ''}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/orders"] });
+      setSelectedOrder(null);
+      setShowOrderDetails(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update order status",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSearchLibraries = () => {
     const searchTerm = prompt("Search libraries by name, type, or location:");
     if (searchTerm) {
@@ -329,26 +354,7 @@ export default function SellerDashboard() {
     queryKey: ["/api/seller/analytics"],
   });
 
-  // Order status update mutation
-  const updateOrderStatusMutation = useMutation({
-    mutationFn: async ({ orderId, status, trackingNumber }: { orderId: number; status: string; trackingNumber?: string }) => {
-      return await apiRequest("PATCH", `/api/seller/orders/${orderId}/status`, { status, trackingNumber });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Order Updated",
-        description: "Order status has been updated successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/seller/orders"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to update order status.",
-        variant: "destructive",
-      });
-    },
-  });
+  // This duplicate declaration is removed - using the one above with automated email workflow
 
   // VyronaRead Data Queries - Seller-specific access with proper typing
   const { data: sellerEBooks = [] } = useQuery({

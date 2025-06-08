@@ -8,6 +8,13 @@ import { storage } from "./storage";
 import { setupRoomRoutes } from "./simple-rooms";
 import { setupVyronaSocialAPI } from "./vyronasocial-api";
 import { getAuthenticatedUser } from "./auth-utils";
+import { 
+  sendBrevoEmail, 
+  generateOrderProcessingEmail, 
+  generateOrderShippedEmail, 
+  generateOrderOutForDeliveryEmail, 
+  generateOrderDeliveredEmail 
+} from "./brevo-email";
 import { db, pool } from "./db";
 import Razorpay from "razorpay";
 import axios from "axios";
@@ -1569,7 +1576,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update order status endpoint
+  // Update order status with automated email workflow
   app.patch("/api/seller/orders/:orderId/status", async (req, res) => {
     try {
       const user = getAuthenticatedUser(req);
@@ -1584,18 +1591,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Order ID and status are required" });
       }
 
+      // Validate status progression
+      const validStatuses = ['processing', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      // Get current order details
+      const orderResult = await db.execute(sql`
+        SELECT o.*, u.email as customer_email, u.username as customer_name 
+        FROM orders o
+        JOIN users u ON o.user_id = u.id
+        WHERE o.id = ${parseInt(orderId)}
+      `);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const order = orderResult.rows[0] as any;
+      
+      // Validate status progression (prevent skipping stages)
+      const statusProgression = ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
+      const currentIndex = statusProgression.indexOf(order.status);
+      const newIndex = statusProgression.indexOf(status);
+      
+      if (status !== 'cancelled' && newIndex <= currentIndex) {
+        return res.status(400).json({ message: "Cannot go backwards in order status progression" });
+      }
+
       // Update order status
       await db.execute(sql`
         UPDATE orders 
-        SET status = ${status}
+        SET status = ${status},
+            last_email_sent = ${status},
+            email_history = COALESCE(email_history, '[]'::jsonb) || ${JSON.stringify([{
+              status,
+              timestamp: new Date().toISOString(),
+              userId: user.id
+            }])}::jsonb
         WHERE id = ${parseInt(orderId)}
       `);
 
+      // Send automated email based on status
+      let emailResult = { success: false, messageId: '', error: 'No email template for this status' };
+      
+      if (['processing', 'shipped', 'out_for_delivery', 'delivered'].includes(status)) {
+        const orderData = {
+          orderId: order.id,
+          customerName: order.customer_name,
+          customerEmail: order.customer_email,
+          orderTotal: order.total_amount,
+          orderItems: order.metadata?.items || order.metadata?.products || [],
+          orderDate: order.created_at,
+          trackingNumber,
+          deliveryAddress: order.metadata?.deliveryAddress || 'As provided during checkout'
+        };
+
+        let emailTemplate;
+        switch (status) {
+          case 'processing':
+            emailTemplate = generateOrderProcessingEmail(orderData);
+            break;
+          case 'shipped':
+            emailTemplate = generateOrderShippedEmail(orderData);
+            break;
+          case 'out_for_delivery':
+            emailTemplate = generateOrderOutForDeliveryEmail(orderData);
+            break;
+          case 'delivered':
+            emailTemplate = generateOrderDeliveredEmail(orderData);
+            break;
+        }
+
+        if (emailTemplate) {
+          emailResult = await sendBrevoEmail({
+            to: order.customer_email,
+            subject: emailTemplate.subject,
+            htmlContent: emailTemplate.htmlContent
+          });
+
+          // Log email notification in database
+          try {
+            await db.execute(sql`
+              INSERT INTO email_notifications (
+                order_id, user_id, email_type, status, recipient_email, 
+                subject, content, brevo_message_id, sent_at
+              ) VALUES (
+                ${parseInt(orderId)}, ${order.user_id}, ${status}, 
+                ${emailResult.success ? 'sent' : 'failed'}, ${order.customer_email},
+                ${emailTemplate.subject}, ${emailTemplate.htmlContent},
+                ${emailResult.messageId || null}, 
+                ${emailResult.success ? new Date().toISOString() : null}
+              )
+            `);
+          } catch (emailLogError) {
+            console.error("Error logging email notification:", emailLogError);
+          }
+        }
+      }
+
       res.json({ 
         success: true, 
-        message: "Order status updated successfully" 
+        message: "Order status updated successfully",
+        emailSent: emailResult.success,
+        emailError: emailResult.error
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating order status:", error);
       res.status(500).json({ message: "Internal server error" });
     }
