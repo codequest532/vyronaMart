@@ -2802,15 +2802,37 @@ export default function SellerDashboard() {
                                       </div>
                                     )}
                                     
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 items-center">
                                       <Button size="sm" variant="outline">
                                         View Details
                                       </Button>
-                                      {(order.order_status === 'processing' || order.status === 'processing') && (
-                                        <Button size="sm" variant="default">
-                                          Mark as Shipped
-                                        </Button>
-                                      )}
+                                      
+                                      {/* Status Update Dropdown for VyronaRead Orders */}
+                                      <div className="flex items-center gap-2">
+                                        <Select
+                                          value={order.order_status || order.status || 'pending'}
+                                          onValueChange={(status) => updateOrderStatusMutation.mutate({ 
+                                            orderId: order.order_id || order.id, 
+                                            status 
+                                          })}
+                                          disabled={updateOrderStatusMutation.isPending}
+                                        >
+                                          <SelectTrigger className="w-40">
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="processing">Processing</SelectItem>
+                                            <SelectItem value="shipped">Shipped</SelectItem>
+                                            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                                            <SelectItem value="delivered">Delivered</SelectItem>
+                                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        {updateOrderStatusMutation.isPending && (
+                                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                                        )}
+                                      </div>
+                                      
                                       {activeBookOrderTab === 'rentals' && (
                                         <Button size="sm" variant="secondary">
                                           Extend Rental
