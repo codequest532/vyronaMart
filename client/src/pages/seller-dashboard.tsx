@@ -209,7 +209,8 @@ export default function SellerDashboard() {
         contact: "",
         phone: "",
         email: "",
-        description: ""
+        description: "",
+        booksListCsv: null
       });
     },
     onError: (error) => {
@@ -252,7 +253,7 @@ export default function SellerDashboard() {
     mutationFn: async ({ orderId, status, trackingNumber }: { orderId: number; status: string; trackingNumber?: string }) => {
       return await apiRequest("PATCH", `/api/seller/orders/${orderId}/status`, { status, trackingNumber });
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: "Order Status Updated",
         description: data.emailSent 

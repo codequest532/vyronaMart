@@ -1634,7 +1634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
 
       // Send automated email based on status
-      let emailResult = { success: false, messageId: '', error: 'No email template for this status' };
+      let emailResult: { success: boolean; messageId?: string; error?: string } = { success: false, messageId: '', error: 'No email template for this status' };
       
       if (['processing', 'shipped', 'out_for_delivery', 'delivered'].includes(status)) {
         const orderData = {
@@ -1695,7 +1695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: true, 
         message: "Order status updated successfully",
         emailSent: emailResult.success,
-        emailError: emailResult.error
+        emailError: emailResult.error || undefined
       });
     } catch (error: any) {
       console.error("Error updating order status:", error);
