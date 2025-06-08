@@ -28,7 +28,11 @@ import {
   Edit,
   Trash2,
   Eye,
-  Upload
+  Upload,
+  User,
+  Printer,
+  Download,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -996,7 +1000,7 @@ export default function SellerDashboard() {
                                   setShowOrderDetails(true);
                                 }}
                               >
-                                <Eye className="h-4 w-4" />
+                                View Details
                               </Button>
                             </div>
                           </div>
@@ -1089,7 +1093,7 @@ export default function SellerDashboard() {
                                   setShowOrderDetails(true);
                                 }}
                               >
-                                <Eye className="h-4 w-4" />
+                                View Details
                               </Button>
                             </div>
                           </div>
