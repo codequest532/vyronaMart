@@ -244,7 +244,10 @@ export default function VyronaSocial() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, roomId: groupId, quantity: 1 }),
       });
-      if (!response.ok) throw new Error('Failed to add to cart');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to add to cart');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -263,7 +266,10 @@ export default function VyronaSocial() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cartItemId, quantity }),
       });
-      if (!response.ok) throw new Error('Failed to update quantity');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update quantity');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -281,7 +287,10 @@ export default function VyronaSocial() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cartItemId }),
       });
-      if (!response.ok) throw new Error('Failed to remove from cart');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to remove from cart');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -305,7 +314,10 @@ export default function VyronaSocial() {
           messageType: 'text'
         }),
       });
-      if (!response.ok) throw new Error('Failed to send message');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to send message');
+      }
       return response.json();
     },
     onSuccess: () => {
