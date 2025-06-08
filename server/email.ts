@@ -1,6 +1,9 @@
 import axios from 'axios';
 
 const isEmailEnabled = !!process.env.BREVO_API_KEY;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_SENDER_EMAIL = 'mgmags25@gmail.com';
+const BREVO_SENDER_NAME = 'VyronaMart Admin';
 
 if (!isEmailEnabled) {
   console.warn("BREVO_API_KEY not set - email functionality will be disabled");
@@ -24,8 +27,8 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
   try {
     const emailData = {
       sender: {
-        name: params.senderName || 'VyronaMart Admin',
-        email: params.senderEmail || 'admin@vyrona.com'
+        name: params.senderName || BREVO_SENDER_NAME,
+        email: params.senderEmail || BREVO_SENDER_EMAIL
       },
       to: [{ email: params.to }],
       subject: params.subject,
@@ -166,7 +169,7 @@ export async function sendOrderConfirmationEmail(
     subject: `VyronaMart Order Confirmation - #${orderId}`,
     htmlContent,
     textContent,
-    senderName: 'VyronaMart Admin',
-    senderEmail: 'admin@vyrona.com'
+    senderName: BREVO_SENDER_NAME,
+    senderEmail: BREVO_SENDER_EMAIL
   });
 }
