@@ -23,7 +23,7 @@ import {
 import { cartItems } from "../migrations/schema";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
-import { sendOTPEmail } from "./email";
+import { sendOTPEmail, sendOrderConfirmationEmail } from "./email";
 import { eq, desc, sql } from "drizzle-orm";
 
 // Online status and WebSocket management
@@ -1512,6 +1512,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ].join(' | ')
         }
       });
+
+      // Send automated order confirmation email to customer
+      if (customer.email && order.id) {
+        try {
+          const estimatedDelivery = new Date();
+          estimatedDelivery.setDate(estimatedDelivery.getDate() + 5); // 5 days delivery estimate
+
+          await sendOrderConfirmationEmail(
+            customer.email,
+            customer.username,
+            order.id,
+            {
+              items: items.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price
+              })),
+              totalAmount: isGroupPayment ? contributionPerMember : totalAmount,
+              estimatedDelivery: estimatedDelivery.toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }),
+              orderDate: new Date().toLocaleDateString('en-IN', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })
+            }
+          );
+          console.log(`Order confirmation email sent to ${customer.email} for order #${order.id}`);
+        } catch (emailError) {
+          console.error('Failed to send order confirmation email:', emailError);
+          // Don't fail the order if email fails
+        }
+      }
 
       res.json({
         success: true,
