@@ -385,6 +385,14 @@ export default function AdminDashboard() {
               VyronaHub Access
             </Button>
             <Button
+              variant={activeTab === "seller-dashboard" ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setActiveTab("seller-dashboard")}
+            >
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Seller Dashboard
+            </Button>
+            <Button
               variant={activeTab === "orders" ? "default" : "ghost"}
               className="w-full justify-start"
               onClick={() => setActiveTab("orders")}
@@ -1507,19 +1515,7 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/seller-dashboard')}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">Seller Dashboard</h3>
-                        <p className="text-sm text-gray-500">Seller panel access</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+
 
                 <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/home')}>
                   <CardContent className="p-6">
@@ -2569,6 +2565,237 @@ export default function AdminDashboard() {
                       </div>
                       <h3 className="font-semibold mb-1">Storage</h3>
                       <p className="text-sm text-yellow-600">75% Used</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "seller-dashboard" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Seller Dashboard</h2>
+                <p className="text-gray-600 dark:text-gray-300">Access and monitor seller panel functionality</p>
+              </div>
+
+              {/* Quick Access Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/seller-dashboard')}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">Main Dashboard</h3>
+                        <p className="text-sm text-gray-500">Access seller dashboard</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/seller-dashboard-new')}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <Store className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">Enhanced Dashboard</h3>
+                        <p className="text-sm text-gray-500">Advanced seller features</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/seller-dashboard-4stage')}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <BarChart3 className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-1">Advanced Analytics</h3>
+                        <p className="text-sm text-gray-500">4-stage dashboard view</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Seller Management Tools */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Active Sellers</CardTitle>
+                    <CardDescription>Monitor registered sellers and their status</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {sellers?.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Store className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-600 mb-2">No Sellers Registered</h3>
+                        <p className="text-gray-500">Sellers will appear here once they register</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {sellers?.slice(0, 5).map((seller: any) => (
+                          <div key={seller.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{seller.username}</p>
+                              <p className="text-sm text-gray-500">{seller.email}</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge variant={seller.role === 'seller' ? 'default' : 'secondary'}>
+                                {seller.role}
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setLocation('/seller-dashboard')}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Dashboard Features</CardTitle>
+                    <CardDescription>Available seller dashboard capabilities</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <Package className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="font-medium text-green-800 dark:text-green-200">Product Management</p>
+                          <p className="text-sm text-green-600 dark:text-green-300">Add, edit, and manage products</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <ShoppingCart className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium text-blue-800 dark:text-blue-200">Order Management</p>
+                          <p className="text-sm text-blue-600 dark:text-blue-300">Track and process orders</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                        <TrendingUp className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <p className="font-medium text-purple-800 dark:text-purple-200">Analytics & Insights</p>
+                          <p className="text-sm text-purple-600 dark:text-purple-300">Sales performance metrics</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                        <Users className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <p className="font-medium text-orange-800 dark:text-orange-200">Customer Management</p>
+                          <p className="text-sm text-orange-600 dark:text-orange-300">Customer interaction tools</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                  <CardDescription>Direct access to key seller dashboard functions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/seller-dashboard')}>
+                      <TrendingUp className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Main Dashboard</span>
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/seller-dashboard-new')}>
+                      <Store className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Enhanced View</span>
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/seller-dashboard-4stage')}>
+                      <BarChart3 className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Analytics View</span>
+                    </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("sellers")}>
+                      <Users className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Manage Sellers</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Dashboard Access Instructions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Access Instructions</CardTitle>
+                  <CardDescription>How to use the seller dashboard effectively</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">For Sellers</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Login with seller credentials</p>
+                            <p className="text-xs text-gray-500">Use your registered email and password</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Access dashboard features</p>
+                            <p className="text-xs text-gray-500">Manage products, orders, and analytics</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Monitor performance</p>
+                            <p className="text-xs text-gray-500">Track sales and customer interactions</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">Admin Access</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">View all seller dashboards</p>
+                            <p className="text-xs text-gray-500">Monitor seller activities and performance</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Test dashboard functionality</p>
+                            <p className="text-xs text-gray-500">Ensure all features work properly</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Provide seller support</p>
+                            <p className="text-xs text-gray-500">Help sellers with dashboard issues</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

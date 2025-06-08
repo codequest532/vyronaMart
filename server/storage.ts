@@ -44,6 +44,7 @@ export interface IStorage {
   // Products
   getProducts(module?: string, category?: string): Promise<Product[]>;
   getProduct(id: number): Promise<Product | undefined>;
+  getProductsBySeller(sellerId: number): Promise<Product[]>;
   createProduct(product: InsertProduct): Promise<Product>;
   updateProductListing(id: number, listing: {
     enableIndividualBuy?: boolean;
@@ -625,6 +626,44 @@ export class DatabaseStorage implements IStorage {
       ...product,
       price: parseFloat(product.price.toString())
     };
+  }
+
+  async getProductsBySeller(sellerId: number): Promise<Product[]> {
+    try {
+      const query = `
+        SELECT 
+          id, 
+          name, 
+          description, 
+          TO_CHAR(ROUND(price::NUMERIC, 2), 'FM999999999999990.00') as price_string,
+          category, 
+          module, 
+          image_url as "imageUrl", 
+          store_id as "storeId", 
+          metadata, 
+          enable_individual_buy as "enableIndividualBuy", 
+          enable_group_buy as "enableGroupBuy", 
+          group_buy_min_quantity as "groupBuyMinQuantity", 
+          group_buy_discount as "groupBuyDiscount"
+        FROM products 
+        WHERE metadata->>'sellerId' = $1
+        ORDER BY id DESC
+      `;
+      
+      const result = await pool.query(query, [sellerId.toString()]);
+      
+      // Convert price strings to proper decimal numbers
+      return result.rows.map((row: any) => {
+        const { price_string, ...productData } = row;
+        return {
+          ...productData,
+          price: parseFloat(price_string)
+        };
+      }) as Product[];
+    } catch (error) {
+      console.error('Error in getProductsBySeller:', error);
+      throw error;
+    }
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
