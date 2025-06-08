@@ -19,6 +19,20 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  otp: z.string().min(6, "OTP must be 6 digits"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 const customerRegisterSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   email: z.string().email("Please enter a valid email"),
@@ -55,6 +69,9 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -87,6 +104,23 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       storeDescription: "",
       businessType: "",
       address: "",
+    },
+  });
+
+  const forgotPasswordForm = useForm<z.infer<typeof forgotPasswordSchema>>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      email: "",
+      otp: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -183,6 +217,72 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
 
   const onSellerRegister = (data: z.infer<typeof sellerRegisterSchema>) => {
     sellerRegisterMutation.mutate(data);
+  };
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof forgotPasswordSchema>) => {
+      const response = await apiRequest("POST", "/api/auth/forgot-password", data);
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      setResetEmail(variables.email);
+      setShowForgotPassword(false);
+      setShowResetPassword(true);
+      toast({
+        title: "OTP Sent",
+        description: "Please check your email for the password reset code.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof resetPasswordSchema>) => {
+      // First verify OTP
+      await apiRequest("POST", "/api/auth/verify-otp", {
+        email: data.email,
+        otp: data.otp,
+      });
+      
+      // Then reset password
+      const response = await apiRequest("POST", "/api/auth/reset-password", {
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      setShowResetPassword(false);
+      setShowForgotPassword(false);
+      setResetEmail("");
+      resetPasswordForm.reset();
+      toast({
+        title: "Password Reset Successful",
+        description: "Your password has been reset. Please login with your new password.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Reset Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onForgotPassword = (data: z.infer<typeof forgotPasswordSchema>) => {
+    forgotPasswordMutation.mutate(data);
+  };
+
+  const onResetPassword = (data: z.infer<typeof resetPasswordSchema>) => {
+    resetPasswordMutation.mutate(data);
   };
 
   const ModalContent = () => (

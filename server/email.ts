@@ -19,6 +19,11 @@ export async function sendOTPEmail(email: string, otp: string): Promise<boolean>
   return false;
 }
 
+export async function sendPasswordResetOTP(email: string, otp: string): Promise<boolean> {
+  console.log(`[EMAIL DISABLED] Password Reset OTP - To: ${email}, OTP: ${otp}`);
+  return false;
+}
+
 export async function sendOrderConfirmationEmail(
   customerEmail: string,
   customerName: string,
