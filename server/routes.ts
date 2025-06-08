@@ -1723,10 +1723,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Seller Dashboard - Order Management (simplified authentication for demo)
+  // Seller Dashboard - Order Management with proper seller authentication
   app.get("/api/seller/orders", async (req, res) => {
     try {
-      // Enhanced seller orders with customer details for VyronaHub orders
+      // Get authenticated seller ID from session
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Ensure only sellers can access this endpoint
+      if (authenticatedUser.role !== 'seller' && authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Seller role required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
+      
+      // Enhanced seller orders with customer details - FILTERED BY SELLER ID
       const sellerOrders = await db.execute(sql`
         SELECT 
           o.id as order_id,
@@ -1756,6 +1770,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           END as order_items
         FROM orders o
         LEFT JOIN users u ON o.user_id = u.id
+        WHERE (
+          (o.module = 'vyronahub' AND o.metadata->>'sellerId' = ${sellerId.toString()})
+          OR (o.module = 'vyronasocial' AND o.metadata->>'sellerId' = ${sellerId.toString()})
+          OR (o.module = 'vyronaread' AND o.metadata->>'sellerId' = ${sellerId.toString()})
+          OR (${authenticatedUser.role === 'admin'})
+        )
         ORDER BY o.created_at DESC
         LIMIT 50
       `);
