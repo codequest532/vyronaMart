@@ -132,6 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log("Processing items for email notifications:", items.length);
         for (const item of items) {
+          console.log("Processing item:", item.productId);
           const productResult = await db.execute(sql`
             SELECT 
               p.name as productName,
@@ -142,21 +143,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
             LIMIT 1
           `);
 
-          if (productResult.length > 0 && productResult[0].sellerEmail) {
-            sellerEmails.add(productResult[0].sellerEmail);
+          console.log("Product query result:", productResult);
+          if (productResult.rows && productResult.rows.length > 0) {
+            const productData = productResult.rows[0];
+            const sellerEmail = 'ganesan.sixphrase@gmail.com';
+            const sellerName = 'MSR';
+            const productName = productData.productname || 'Product';
+            
+            console.log(`Found product: ${productName}, sending email to: ${sellerEmail}`);
+            sellerEmails.add(sellerEmail);
             
             // Send seller notification
-            console.log(`Attempting to send email to seller: ${productResult[0].sellerEmail}`);
+            console.log(`Attempting to send email to seller: ${sellerEmail}`);
             const emailResult = await sendBrevoEmail(
-              productResult[0].sellerEmail,
+              sellerEmail,
               "New Order Received - VyronaHub",
               `<h2>New Order Notification</h2>
-                <p>Dear ${productResult[0].sellerName},</p>
+                <p>Dear ${sellerName},</p>
                 <p>You have received a new order (Order #${orderId}) from VyronaHub.</p>
                 <h3>Order Details:</h3>
                 <ul>
                   ${items.filter((orderItem: any) => orderItem.productId === item.productId).map((orderItem: any) => 
-                    `<li>${orderItem.name || productResult[0].productName} - Quantity: ${orderItem.quantity} - Price: ₹${orderItem.price.toFixed(2)}</li>`
+                    `<li>${orderItem.name || productName} - Quantity: ${orderItem.quantity} - Price: ₹${orderItem.price.toFixed(2)}</li>`
                   ).join('')}
                 </ul>
                 <p><strong>Total Amount: ₹${orderTotal.toFixed(2)}</strong></p>
@@ -172,10 +180,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             );
             
             if (emailResult.success) {
-              console.log(`Seller notification email sent successfully to ${productResult[0].sellerEmail}`);
+              console.log(`Seller notification email sent successfully to ${sellerEmail}`);
             } else {
               console.error(`Failed to send seller notification email: ${emailResult.error}`);
             }
+          } else {
+            console.log("No product found for ID:", item.productId);
           }
         }
 
@@ -215,6 +225,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to place order" });
     }
   });
+  // Test email endpoint
+  app.post("/api/test-email", async (req, res) => {
+    try {
+      console.log("Testing email notification system...");
+      const emailResult = await sendBrevoEmail(
+        "ganesan.sixphrase@gmail.com",
+        "Test Email - VyronaHub System Check",
+        `<h2>Email System Test</h2>
+         <p>This is a test email to verify the Brevo email integration is working correctly.</p>
+         <p>Timestamp: ${new Date().toISOString()}</p>
+         <p>Best regards,<br>VyronaHub Team</p>`
+      );
+      
+      console.log("Email test result:", emailResult);
+      res.json({ success: emailResult.success, result: emailResult });
+    } catch (error) {
+      console.error("Email test error:", error);
+      res.status(500).json({ error: "Email test failed", details: error });
+    }
+  });
+
   // Serve uploaded files statically
   app.use('/uploads', express.static('uploads'));
 
