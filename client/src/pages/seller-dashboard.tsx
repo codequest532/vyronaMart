@@ -2803,7 +2803,14 @@ export default function SellerDashboard() {
                                     )}
                                     
                                     <div className="flex gap-2 items-center">
-                                      <Button size="sm" variant="outline">
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => {
+                                          setSelectedOrder(order);
+                                          setShowOrderDetails(true);
+                                        }}
+                                      >
                                         View Details
                                       </Button>
                                       
@@ -2859,6 +2866,209 @@ export default function SellerDashboard() {
           )}
         </main>
       </div>
+
+      {/* Order Details Modal */}
+      <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Order Details #{selectedOrder?.order_id}</DialogTitle>
+            <DialogDescription>
+              Complete order information and management options
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOrder && (
+            <div className="overflow-y-auto flex-1 px-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                {/* Order Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Order Information</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Order ID:</span>
+                      <span>#{selectedOrder.order_id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Status:</span>
+                      <Badge variant={
+                        selectedOrder.order_status === 'delivered' ? 'default' :
+                        selectedOrder.order_status === 'shipped' ? 'secondary' :
+                        selectedOrder.order_status === 'processing' ? 'outline' : 'destructive'
+                      }>
+                        {selectedOrder.order_status || 'pending'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Module:</span>
+                      <span className="capitalize">{selectedOrder.module}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total Amount:</span>
+                      <span className="font-semibold">₹{(selectedOrder.total_amount / 100).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Order Type:</span>
+                      <span className="capitalize">{selectedOrder.metadata?.type || 'Standard'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Created:</span>
+                      <span>{new Date(selectedOrder.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Customer Information</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Name:</span>
+                      <span>{selectedOrder.metadata?.customerName || selectedOrder.customer_name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Email:</span>
+                      <span>{selectedOrder.metadata?.customerEmail || selectedOrder.customer_email}</span>
+                    </div>
+                    {selectedOrder.metadata?.shippingAddress && (
+                      <div className="space-y-1">
+                        <span className="font-medium">Shipping Address:</span>
+                        <p className="text-sm text-gray-600">{selectedOrder.metadata.shippingAddress}</p>
+                      </div>
+                    )}
+                    {selectedOrder.metadata?.paymentMethod && (
+                      <div className="flex justify-between">
+                        <span className="font-medium">Payment Method:</span>
+                        <span className="capitalize">{selectedOrder.metadata.paymentMethod}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Book/Product Details */}
+                <div className="space-y-4 md:col-span-2">
+                  <h3 className="text-lg font-semibold">
+                    {selectedOrder.module === 'vyronaread' ? 'Book Details' : 'Product Details'}
+                  </h3>
+                  
+                  {selectedOrder.metadata?.items && selectedOrder.metadata.items.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedOrder.metadata.items.map((item: any, index: number) => (
+                        <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <span className="font-medium">Name:</span>
+                              <p>{item.name}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">Quantity:</span>
+                              <p>{item.quantity}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium">Price:</span>
+                              <p>₹{item.price}</p>
+                            </div>
+                            {item.type && (
+                              <div>
+                                <span className="font-medium">Type:</span>
+                                <p className="capitalize">{item.type}</p>
+                              </div>
+                            )}
+                            {item.duration && (
+                              <div>
+                                <span className="font-medium">Duration:</span>
+                                <p>{item.duration}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {selectedOrder.metadata?.bookTitle && (
+                          <div>
+                            <span className="font-medium">Book Title:</span>
+                            <p>{selectedOrder.metadata.bookTitle}</p>
+                          </div>
+                        )}
+                        {selectedOrder.metadata?.author && (
+                          <div>
+                            <span className="font-medium">Author:</span>
+                            <p>{selectedOrder.metadata.author}</p>
+                          </div>
+                        )}
+                        {selectedOrder.metadata?.rentalDuration && (
+                          <div>
+                            <span className="font-medium">Rental Duration:</span>
+                            <p>{selectedOrder.metadata.rentalDuration}</p>
+                          </div>
+                        )}
+                        {selectedOrder.metadata?.libraryName && (
+                          <div>
+                            <span className="font-medium">Library:</span>
+                            <p>{selectedOrder.metadata.libraryName}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rental/Loan Specific Details */}
+                {selectedOrder.metadata?.type === 'rental' && (
+                  <div className="space-y-4 md:col-span-2">
+                    <h3 className="text-lg font-semibold">Rental Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {selectedOrder.metadata.rentalStartDate && (
+                        <div>
+                          <span className="font-medium">Start Date:</span>
+                          <p>{new Date(selectedOrder.metadata.rentalStartDate).toLocaleDateString()}</p>
+                        </div>
+                      )}
+                      {selectedOrder.metadata.rentalEndDate && (
+                        <div>
+                          <span className="font-medium">End Date:</span>
+                          <p>{new Date(selectedOrder.metadata.rentalEndDate).toLocaleDateString()}</p>
+                        </div>
+                      )}
+                      <div>
+                        <span className="font-medium">Duration:</span>
+                        <p>{selectedOrder.metadata.rentalDuration}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedOrder.metadata?.type === 'loan' && selectedOrder.metadata?.membershipId && (
+                  <div className="space-y-4 md:col-span-2">
+                    <h3 className="text-lg font-semibold">Library Loan Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span className="font-medium">Membership ID:</span>
+                        <p>{selectedOrder.metadata.membershipId}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Loan Duration:</span>
+                        <p>{selectedOrder.metadata.loanDuration}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowOrderDetails(false)}>
+                  Close
+                </Button>
+                <Button>
+                  Print Details
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Add Library Modal */}
       <Dialog open={showAddLibraryDialog} onOpenChange={setShowAddLibraryDialog}>
