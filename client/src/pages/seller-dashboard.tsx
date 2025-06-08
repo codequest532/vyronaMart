@@ -112,6 +112,8 @@ export default function SellerDashboard() {
     mainImage: null,
     additionalMedia: [],
   });
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   // Form for adding products
   const productForm = useForm<z.infer<typeof productSchema>>({
@@ -990,7 +992,8 @@ export default function SellerDashboard() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => {
-                                  console.log('Viewing VyronaHub order details:', order.order_id || order.id);
+                                  setSelectedOrder(order);
+                                  setShowOrderDetails(true);
                                 }}
                               >
                                 <Eye className="h-4 w-4" />
@@ -1082,7 +1085,8 @@ export default function SellerDashboard() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => {
-                                  console.log('Viewing VyronaSocial order details:', order.order_id || order.id);
+                                  setSelectedOrder(order);
+                                  setShowOrderDetails(true);
                                 }}
                               >
                                 <Eye className="h-4 w-4" />
@@ -3404,6 +3408,235 @@ export default function SellerDashboard() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Details Modal */}
+      <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${
+                selectedOrder?.module === 'vyronahub' ? 'bg-green-100' : 
+                selectedOrder?.module === 'vyronasocial' ? 'bg-purple-100' : 'bg-blue-100'
+              }`}>
+                {selectedOrder?.module === 'vyronahub' ? (
+                  <Store className="h-5 w-5 text-green-600" />
+                ) : selectedOrder?.module === 'vyronasocial' ? (
+                  <Users className="h-5 w-5 text-purple-600" />
+                ) : (
+                  <ShoppingCart className="h-5 w-5 text-blue-600" />
+                )}
+              </div>
+              Order #{selectedOrder?.order_id || selectedOrder?.id} Details
+            </DialogTitle>
+            <DialogDescription>
+              Complete order information and management options
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-6">
+              {/* Order Status and Module */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Badge variant={
+                    selectedOrder.order_status === 'completed' || selectedOrder.status === 'completed' ? 'default' :
+                    selectedOrder.order_status === 'processing' || selectedOrder.status === 'processing' ? 'secondary' :
+                    selectedOrder.order_status === 'shipped' || selectedOrder.status === 'shipped' ? 'outline' : 'destructive'
+                  } className="text-sm">
+                    {selectedOrder.order_status || selectedOrder.status}
+                  </Badge>
+                  <Badge variant="outline" className={
+                    selectedOrder.module === 'vyronahub' ? 'border-green-500 text-green-700 bg-green-50' :
+                    selectedOrder.module === 'vyronasocial' ? 'border-purple-500 text-purple-700 bg-purple-50' :
+                    'border-blue-500 text-blue-700 bg-blue-50'
+                  }>
+                    {selectedOrder.module === 'vyronahub' ? 'VyronaHub' :
+                     selectedOrder.module === 'vyronasocial' ? 'VyronaSocial' :
+                     selectedOrder.module === 'vyronaread' ? 'VyronaRead' : 'Other'}
+                  </Badge>
+                  {selectedOrder.module === 'vyronasocial' && selectedOrder.metadata?.group_size && (
+                    <Badge variant="secondary" className="bg-purple-200 text-purple-800">
+                      {selectedOrder.metadata.group_size} members
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-600">
+                    ₹{((selectedOrder.total_amount || selectedOrder.totalAmount) / 100).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(selectedOrder.created_at).toLocaleDateString('en-IN', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Customer Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Customer Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Customer Name</label>
+                      <p className="text-sm">{selectedOrder.customer_name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <p className="text-sm">{selectedOrder.customer_email || 'N/A'}</p>
+                    </div>
+                    {selectedOrder.metadata?.customer_phone && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Phone</label>
+                        <p className="text-sm">{selectedOrder.metadata.customer_phone}</p>
+                      </div>
+                    )}
+                    {selectedOrder.metadata?.delivery_address && (
+                      <div className="md:col-span-2">
+                        <label className="text-sm font-medium text-gray-600">Delivery Address</label>
+                        <p className="text-sm">{selectedOrder.metadata.delivery_address}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Order Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Order Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {selectedOrder.metadata?.product_names && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Products</label>
+                      <p className="text-sm">{selectedOrder.metadata.product_names}</p>
+                    </div>
+                  )}
+                  
+                  {selectedOrder.module === 'vyronasocial' && (
+                    <div className="space-y-3">
+                      {selectedOrder.metadata?.group_name && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Group Name</label>
+                          <p className="text-sm">{selectedOrder.metadata.group_name}</p>
+                        </div>
+                      )}
+                      {selectedOrder.metadata?.group_description && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Group Description</label>
+                          <p className="text-sm">{selectedOrder.metadata.group_description}</p>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-4">
+                        {selectedOrder.metadata?.group_size && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Group Size</label>
+                            <p className="text-sm">{selectedOrder.metadata.group_size} members</p>
+                          </div>
+                        )}
+                        {selectedOrder.metadata?.discount_applied && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Group Discount</label>
+                            <p className="text-sm text-green-600">{selectedOrder.metadata.discount_applied}% off</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 pt-3 border-t">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Order ID</label>
+                      <p className="text-sm font-mono">{selectedOrder.order_id || selectedOrder.id}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Payment Status</label>
+                      <p className="text-sm">{selectedOrder.payment_status || 'Pending'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Order Management Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Order Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <label className="text-sm font-medium text-gray-600 mb-2 block">Update Status</label>
+                      <select 
+                        value={selectedOrder.order_status || selectedOrder.status}
+                        onChange={(e) => {
+                          updateOrderStatusMutation.mutate({
+                            orderId: selectedOrder.order_id || selectedOrder.id,
+                            status: e.target.value
+                          });
+                        }}
+                        className="w-full text-sm border rounded-lg px-3 py-2"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          // Add functionality for printing order
+                          window.print();
+                        }}
+                      >
+                        <Printer className="h-4 w-4 mr-2" />
+                        Print
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          // Add functionality for downloading receipt
+                          console.log('Download receipt for order:', selectedOrder.order_id || selectedOrder.id);
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Receipt
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowOrderDetails(false)}
+            >
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
