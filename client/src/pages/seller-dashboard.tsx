@@ -2412,6 +2412,243 @@ export default function SellerDashboard() {
                   </div>
                 </div>
               )}
+
+              {/* VyronaRead Order Management Section */}
+              {bookSection === "orders" && (
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="h-5 w-5" />
+                        VyronaRead Order Management
+                      </CardTitle>
+                      <CardDescription>Manage book rentals, library loans, and e-book purchases</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {(() => {
+                        const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+                        const rentalOrders = vyronareadOrders.filter((order: any) => 
+                          order.metadata?.transaction_type === 'rental' || 
+                          (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('rental'))
+                        );
+                        const loanOrders = vyronareadOrders.filter((order: any) => 
+                          order.metadata?.transaction_type === 'loan' ||
+                          (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('loan'))
+                        );
+                        const purchaseOrders = vyronareadOrders.filter((order: any) => 
+                          order.metadata?.transaction_type === 'purchase' ||
+                          (!order.metadata?.transaction_type && !order.metadata?.includes?.('rental') && !order.metadata?.includes?.('loan'))
+                        );
+
+                        return (
+                          <div className="space-y-6">
+                            {/* Order Statistics */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Total Book Orders</p>
+                                      <p className="text-2xl font-bold text-blue-600">{vyronareadOrders.length}</p>
+                                    </div>
+                                    <BookOpen className="h-6 w-6 text-blue-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Book Rentals</p>
+                                      <p className="text-2xl font-bold text-purple-600">{rentalOrders.length}</p>
+                                    </div>
+                                    <Clock className="h-6 w-6 text-purple-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Library Loans</p>
+                                      <p className="text-2xl font-bold text-green-600">{loanOrders.length}</p>
+                                    </div>
+                                    <Users className="h-6 w-6 text-green-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Book Purchases</p>
+                                      <p className="text-2xl font-bold text-orange-600">{purchaseOrders.length}</p>
+                                    </div>
+                                    <ShoppingCart className="h-6 w-6 text-orange-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+
+                            {/* Tabs for Different Order Types */}
+                            <div className="border-b">
+                              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                                <button
+                                  onClick={() => setActiveBookOrderTab('all')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'all'
+                                      ? 'border-blue-500 text-blue-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  All Orders ({vyronareadOrders.length})
+                                </button>
+                                <button
+                                  onClick={() => setActiveBookOrderTab('rentals')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'rentals'
+                                      ? 'border-purple-500 text-purple-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  Rentals ({rentalOrders.length})
+                                </button>
+                                <button
+                                  onClick={() => setActiveBookOrderTab('loans')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'loans'
+                                      ? 'border-green-500 text-green-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  Library Loans ({loanOrders.length})
+                                </button>
+                                <button
+                                  onClick={() => setActiveBookOrderTab('purchases')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'purchases'
+                                      ? 'border-orange-500 text-orange-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  Purchases ({purchaseOrders.length})
+                                </button>
+                              </nav>
+                            </div>
+
+                            {/* Order List */}
+                            <div className="space-y-4">
+                              {(() => {
+                                let ordersToShow = [];
+                                switch (activeBookOrderTab) {
+                                  case 'rentals':
+                                    ordersToShow = rentalOrders;
+                                    break;
+                                  case 'loans':
+                                    ordersToShow = loanOrders;
+                                    break;
+                                  case 'purchases':
+                                    ordersToShow = purchaseOrders;
+                                    break;
+                                  default:
+                                    ordersToShow = vyronareadOrders;
+                                }
+
+                                if (ordersToShow.length === 0) {
+                                  return (
+                                    <div className="text-center py-12">
+                                      <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                                      <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+                                        No {activeBookOrderTab === 'all' ? 'Book Orders' : activeBookOrderTab.charAt(0).toUpperCase() + activeBookOrderTab.slice(1)} Yet
+                                      </h3>
+                                      <p className="text-gray-500 dark:text-gray-400">
+                                        VyronaRead {activeBookOrderTab === 'all' ? 'orders' : activeBookOrderTab} will appear here once customers start using your library
+                                      </p>
+                                    </div>
+                                  );
+                                }
+
+                                return ordersToShow.map((order: any) => (
+                                  <div key={order.order_id || order.id} className="border rounded-lg p-4 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-4">
+                                        <div>
+                                          <p className="font-medium">Order #{order.order_id || order.id}</p>
+                                          <p className="text-sm text-gray-600">
+                                            {order.customer_name || 'Customer'} • {order.customer_email}
+                                          </p>
+                                        </div>
+                                        <Badge variant={
+                                          order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                          order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                          order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
+                                        }>
+                                          {order.order_status || order.status}
+                                        </Badge>
+                                        <Badge variant="outline" className="border-blue-500 text-blue-700">
+                                          VyronaRead
+                                        </Badge>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
+                                        <p className="text-sm text-gray-500">
+                                          {new Date(order.created_at).toLocaleDateString()}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    
+                                    {order.metadata && (
+                                      <div className="bg-gray-50 dark:bg-gray-800 rounded p-3">
+                                        <h4 className="font-medium text-sm mb-2">Order Details</h4>
+                                        <div className="text-sm space-y-1">
+                                          {typeof order.metadata === 'string' ? (
+                                            <p>{order.metadata}</p>
+                                          ) : (
+                                            Object.entries(order.metadata).map(([key, value]) => (
+                                              <div key={key} className="flex justify-between">
+                                                <span className="capitalize">{key.replace('_', ' ')}:</span>
+                                                <span>{String(value)}</span>
+                                              </div>
+                                            ))
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    <div className="flex gap-2">
+                                      <Button size="sm" variant="outline">
+                                        View Details
+                                      </Button>
+                                      {(order.order_status === 'processing' || order.status === 'processing') && (
+                                        <Button size="sm" variant="default">
+                                          Mark as Shipped
+                                        </Button>
+                                      )}
+                                      {activeBookOrderTab === 'rentals' && (
+                                        <Button size="sm" variant="secondary">
+                                          Extend Rental
+                                        </Button>
+                                      )}
+                                      {activeBookOrderTab === 'loans' && (
+                                        <Button size="sm" variant="secondary">
+                                          Mark Returned
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           )}
         </main>
