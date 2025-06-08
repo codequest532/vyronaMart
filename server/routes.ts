@@ -1827,6 +1827,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seller Products endpoint with proper authentication
+  app.get("/api/seller/products", async (req, res) => {
+    try {
+      // Get authenticated seller ID from session
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Ensure only sellers can access this endpoint
+      if (authenticatedUser.role !== 'seller' && authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Seller role required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
+      
+      // Get products filtered by seller ID
+      const sellerProducts = await storage.getProductsBySeller(sellerId);
+      
+      res.json(sellerProducts);
+    } catch (error: any) {
+      console.error("Error fetching seller products:", error);
+      res.status(500).json({ message: "Failed to fetch seller products" });
+    }
+  });
+
+  // Seller Analytics endpoint with proper authentication
+  app.get("/api/seller/analytics", async (req, res) => {
+    try {
+      // Get authenticated seller ID from session
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Ensure only sellers can access this endpoint
+      if (authenticatedUser.role !== 'seller' && authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Seller role required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
+      
+      // Calculate analytics for this specific seller
+      const sellerOrders = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_orders,
+          SUM(CASE WHEN status = 'delivered' THEN total_amount ELSE 0 END) as total_revenue,
+          COUNT(CASE WHEN status = 'pending' OR status = 'processing' THEN 1 END) as active_orders,
+          AVG(total_amount) as average_order_value
+        FROM orders 
+        WHERE (
+          (module = 'vyronahub' AND metadata->>'sellerId' = ${sellerId.toString()})
+          OR (module = 'vyronasocial' AND metadata->>'sellerId' = ${sellerId.toString()})
+          OR (module = 'vyronaread' AND metadata->>'sellerId' = ${sellerId.toString()})
+        )
+      `);
+      
+      const analytics = sellerOrders.rows[0] as any;
+      
+      res.json({
+        totalOrders: parseInt(analytics.total_orders) || 0,
+        totalRevenue: parseFloat(analytics.total_revenue) || 0,
+        activeOrders: parseInt(analytics.active_orders) || 0,
+        averageOrderValue: parseFloat(analytics.average_order_value) || 0
+      });
+    } catch (error: any) {
+      console.error("Error fetching seller analytics:", error);
+      res.status(500).json({ message: "Failed to fetch seller analytics" });
+    }
+  });
+
   // Update order status with automated email workflow
   app.patch("/api/seller/orders/:orderId/status", async (req, res) => {
     try {
