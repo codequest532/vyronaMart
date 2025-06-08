@@ -10,6 +10,8 @@ import { setupVyronaSocialAPI } from "./vyronasocial-api";
 import { getAuthenticatedUser } from "./auth-utils";
 import { db, pool } from "./db";
 import Razorpay from "razorpay";
+import axios from "axios";
+import QRCode from "qrcode";
 import { 
   insertUserSchema, insertProductSchema, insertCartItemSchema, insertGameScoreSchema,
   insertShoppingGroupSchema, insertGroupMemberSchema, insertGroupWishlistSchema,
@@ -40,6 +42,17 @@ const groupCallStates = new Map<number, {
   participants: number[];
   startedAt: Date;
 }>();
+
+// Cashfree Configuration
+const CASHFREE_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://api.cashfree.com' 
+  : 'https://sandbox.cashfree.com';
+
+const cashfreeHeaders = {
+  'Content-Type': 'application/json',
+  'X-Client-Id': process.env.CASHFREE_APP_ID!,
+  'X-Client-Secret': process.env.CASHFREE_SECRET_KEY!,
+};
 
 // Configure multer for file uploads
 const upload = multer({
@@ -3767,6 +3780,208 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('PhonePe callback error:', error);
       res.status(500).json({ error: "Callback processing failed" });
+    }
+  });
+
+  // Cashfree AutoCollect UPI QR Code Payment System
+  app.post("/api/payments/upi-qr/generate", async (req, res) => {
+    try {
+      const { roomId, itemId, amount, userId } = req.body;
+      
+      if (!roomId || !itemId || !amount || !userId) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      // Generate unique reference for this contribution
+      const referenceId = `GRP${roomId}_ITM${itemId}_USR${userId}_${Date.now()}`;
+      
+      // Create Virtual Account (VPA) with Cashfree AutoCollect
+      const vpaPayload = {
+        vAccountId: referenceId,
+        phoneNumber: "9999999999", // This would be the user's actual phone
+        name: `Group Payment ${roomId}`,
+        ifsc: "ICIC0000001",
+        accountType: "current"
+      };
+
+      const cashfreeResponse = await axios.post(
+        `${CASHFREE_BASE_URL}/api/v2/easy-split`,
+        {
+          vpa: `vyrona${Math.random().toString(36).substr(2, 6)}@icici`,
+          amount: amount,
+          purpose: `Group contribution for Room ${roomId} Item ${itemId}`,
+          reference: referenceId,
+          expiry_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+        },
+        { headers: cashfreeHeaders }
+      );
+
+      // Generate UPI QR Code
+      const upiString = `upi://pay?pa=vyrona${Math.random().toString(36).substr(2, 6)}@icici&pn=VyronaMart&am=${amount}&cu=INR&tn=Group contribution Room ${roomId}&tr=${referenceId}`;
+      
+      const qrCodeDataURL = await QRCode.toDataURL(upiString, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+
+      // Store payment intent in database
+      await db.insert(walletTransactions).values({
+        userId,
+        amount: amount.toString(),
+        type: "credit",
+        status: "pending",
+        description: `UPI QR contribution - Room ${roomId}, Item ${itemId}`,
+        transactionId: referenceId,
+        metadata: {
+          roomId,
+          itemId,
+          paymentMethod: "upi_qr",
+          qrExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          upiString
+        }
+      });
+
+      res.json({
+        success: true,
+        qrCode: qrCodeDataURL,
+        upiString,
+        referenceId,
+        amount,
+        expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        instructions: [
+          "Scan the QR code with any UPI app",
+          "Verify the amount and merchant details",
+          "Complete the payment",
+          "Your contribution will be updated automatically"
+        ]
+      });
+
+    } catch (error: any) {
+      console.error('UPI QR generation error:', error);
+      res.status(500).json({ error: "Failed to generate UPI QR code" });
+    }
+  });
+
+  // Cashfree AutoCollect Webhook Handler
+  app.post("/api/payments/cashfree-webhook", async (req, res) => {
+    try {
+      const { eventType, data } = req.body;
+      
+      if (eventType === "VPA_CREDITED") {
+        const { vAccountId, amount, reference, utr } = data;
+        
+        // Find the pending transaction
+        const transactions = await db
+          .select()
+          .from(walletTransactions)
+          .where(eq(walletTransactions.transactionId, reference))
+          .limit(1);
+
+        if (transactions.length === 0) {
+          return res.status(404).json({ error: "Transaction not found" });
+        }
+
+        const transaction = transactions[0];
+        
+        // Update transaction status
+        await db
+          .update(walletTransactions)
+          .set({ 
+            status: "completed",
+            metadata: {
+              ...transaction.metadata,
+              utr,
+              completedAt: new Date(),
+              cashfreeEventType: eventType
+            }
+          })
+          .where(eq(walletTransactions.transactionId, reference));
+
+        // Update user wallet balance
+        const userData = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, transaction.userId))
+          .limit(1);
+
+        if (userData.length > 0) {
+          const currentBalance = parseFloat(userData[0].walletBalance || "0");
+          const newBalance = currentBalance + parseFloat(transaction.amount);
+          
+          await db
+            .update(users)
+            .set({ walletBalance: newBalance.toString() })
+            .where(eq(users.id, transaction.userId));
+        }
+
+        // Notify all group members via WebSocket about the contribution update
+        const roomId = transaction.metadata?.roomId;
+        if (roomId) {
+          const contribution = {
+            userId: transaction.userId,
+            amount: parseFloat(transaction.amount),
+            transactionId: reference,
+            status: "completed",
+            paymentMethod: "upi_qr",
+            timestamp: new Date()
+          };
+
+          // Broadcast to all online users in the group
+          for (const [socketId, user] of onlineUsers.entries()) {
+            if (user.groupId === roomId && user.ws.readyState === WebSocket.OPEN) {
+              user.ws.send(JSON.stringify({
+                type: "contribution_update",
+                data: contribution
+              }));
+            }
+          }
+        }
+
+        console.log(`UPI payment completed: ${reference} - ₹${amount}`);
+      }
+
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error('Cashfree webhook error:', error);
+      res.status(500).json({ error: "Webhook processing failed" });
+    }
+  });
+
+  // Check UPI payment status
+  app.get("/api/payments/upi-qr/status/:referenceId", async (req, res) => {
+    try {
+      const { referenceId } = req.params;
+      
+      const transactions = await db
+        .select()
+        .from(walletTransactions)
+        .where(eq(walletTransactions.transactionId, referenceId))
+        .limit(1);
+
+      if (transactions.length === 0) {
+        return res.status(404).json({ error: "Payment reference not found" });
+      }
+
+      const transaction = transactions[0];
+      
+      res.json({
+        success: true,
+        status: transaction.status,
+        amount: transaction.amount,
+        referenceId,
+        metadata: transaction.metadata,
+        createdAt: transaction.createdAt,
+        isPending: transaction.status === "pending",
+        isCompleted: transaction.status === "completed"
+      });
+
+    } catch (error: any) {
+      console.error('UPI status check error:', error);
+      res.status(500).json({ error: "Failed to check payment status" });
     }
   });
 

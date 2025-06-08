@@ -1,11 +1,13 @@
 import * as SibApiV3Sdk from '@sendinblue/client';
 
 if (!process.env.BREVO_API_KEY) {
-  throw new Error("BREVO_API_KEY environment variable must be set");
+  console.warn("BREVO_API_KEY not set - email functionality will be disabled");
 }
 
 const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+if (process.env.BREVO_API_KEY) {
+  apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+}
 
 interface EmailParams {
   to: string;
