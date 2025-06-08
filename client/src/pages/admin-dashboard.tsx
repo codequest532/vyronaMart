@@ -2581,44 +2581,77 @@ export default function AdminDashboard() {
 
               {/* Quick Access Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/seller-dashboard')}>
+                <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="h-6 w-6 text-green-600" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/seller-dashboard')}>
+                        <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                          <TrendingUp className="h-6 w-6 text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Main Dashboard</h3>
+                          <p className="text-sm text-gray-500">Access seller dashboard</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">Main Dashboard</h3>
-                        <p className="text-sm text-gray-500">Access seller dashboard</p>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        onClick={() => window.open('/seller-dashboard', '_blank')}
+                        title="Open in new tab"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/seller-dashboard-new')}>
+                <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Store className="h-6 w-6 text-blue-600" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/seller-dashboard-new')}>
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Store className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Enhanced Dashboard</h3>
+                          <p className="text-sm text-gray-500">Advanced seller features</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">Enhanced Dashboard</h3>
-                        <p className="text-sm text-gray-500">Advanced seller features</p>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        onClick={() => window.open('/seller-dashboard-new', '_blank')}
+                        title="Open in new tab"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setLocation('/seller-dashboard-4stage')}>
+                <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <BarChart3 className="h-6 w-6 text-purple-600" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/seller-dashboard-4stage')}>
+                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <BarChart3 className="h-6 w-6 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold mb-1">Advanced Analytics</h3>
+                          <p className="text-sm text-gray-500">4-stage dashboard view</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">Advanced Analytics</h3>
-                        <p className="text-sm text-gray-500">4-stage dashboard view</p>
-                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                        onClick={() => window.open('/seller-dashboard-4stage', '_blank')}
+                        title="Open in new tab"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -2715,7 +2748,7 @@ export default function AdminDashboard() {
                   <CardDescription>Direct access to key seller dashboard functions</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/seller-dashboard')}>
                       <TrendingUp className="h-6 w-6 mb-2" />
                       <span className="text-xs">Main Dashboard</span>
@@ -2732,6 +2765,48 @@ export default function AdminDashboard() {
                       <Users className="h-6 w-6 mb-2" />
                       <span className="text-xs">Manage Sellers</span>
                     </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("overview")}>
+                      <Settings className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Back to Admin</span>
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Eye className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <p className="font-medium text-blue-800 dark:text-blue-200">Open in New Tab</p>
+                          <p className="text-sm text-blue-600 dark:text-blue-300">Keep admin panel open while viewing seller dashboards</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open('/seller-dashboard', '_blank')}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          Main
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open('/seller-dashboard-new', '_blank')}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          Enhanced
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open('/seller-dashboard-4stage', '_blank')}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          Analytics
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
