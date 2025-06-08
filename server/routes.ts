@@ -1748,7 +1748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const countResult = await pool.query(`
         SELECT COUNT(DISTINCT o.id) as total
         FROM orders o
-        JOIN users u ON o.customer_id = u.id
+        JOIN users u ON o.user_id = u.id
         ${whereClause}
       `, params);
 

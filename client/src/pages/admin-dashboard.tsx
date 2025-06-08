@@ -193,15 +193,15 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/sellers"],
   });
 
-  const { data: products } = useQuery({
+  const { data: products = [] } = useQuery({
     queryKey: ["/api/products"],
   });
 
-  const { data: orders } = useQuery({
+  const { data: orders = [] } = useQuery({
     queryKey: ["/api/admin/orders"],
   });
 
-  const { data: libraryRequests, refetch: refetchLibraryRequests } = useQuery({
+  const { data: libraryRequests = [], refetch: refetchLibraryRequests } = useQuery({
     queryKey: ["/api/admin/library-requests"],
     refetchOnWindowFocus: true,
     refetchInterval: 5000, // Refresh every 5 seconds
@@ -620,11 +620,120 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {activeTab === "sellers" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Seller Management</h2>
+                <p className="text-gray-600 dark:text-gray-300">Manage seller accounts and business operations</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Registered Sellers</CardTitle>
+                    <CardDescription>All seller accounts on the platform</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {sellers.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Store className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                        <p className="text-gray-500">No sellers registered yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {sellers.map((seller: any) => (
+                          <div key={seller.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                <Store className="h-4 w-4 text-green-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{seller.username}</p>
+                                <p className="text-xs text-gray-500">{seller.email}</p>
+                                {seller.mobile && <p className="text-xs text-gray-400">{seller.mobile}</p>}
+                                <p className="text-xs text-gray-400">
+                                  Joined: {new Date(seller.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="default">Active</Badge>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm">
+                                    <MessageSquare className="h-3 w-3 mr-1" />
+                                    Message
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Send Message to {seller.username}</DialogTitle>
+                                    <DialogDescription>
+                                      Send a direct message to this seller
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <label className="text-sm font-medium">Subject</label>
+                                      <Input placeholder="Message subject" />
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium">Message</label>
+                                      <Textarea 
+                                        placeholder="Type your message here..."
+                                        className="min-h-[100px]"
+                                      />
+                                    </div>
+                                    <Button className="w-full">
+                                      <Send className="h-4 w-4 mr-2" />
+                                      Send Message
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Seller Analytics</CardTitle>
+                    <CardDescription>Business performance metrics</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Total Sellers</span>
+                        <span className="text-lg font-bold">{sellers.length}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Active Sellers</span>
+                        <span className="text-lg font-bold">{sellers.length}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Total Revenue</span>
+                        <span className="text-lg font-bold">₹2,45,000</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Average Rating</span>
+                        <span className="text-lg font-bold">4.7/5</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
           {activeTab === "users" && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">User Management</h2>
-                <p className="text-gray-600 dark:text-gray-300">Manage customers, sellers, and their accounts</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Customer Management</h2>
+                <p className="text-gray-600 dark:text-gray-300">Manage customer accounts and relationships</p>
               </div>
 
               <Card>
@@ -1249,14 +1358,14 @@ export default function AdminDashboard() {
                     <CardDescription>Manage seller registrations and permissions</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {!users || users.filter((user: any) => user.role === 'seller').length === 0 ? (
+                    {sellers.length === 0 ? (
                       <div className="text-center py-8">
                         <Store className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                         <p className="text-gray-500">No sellers registered yet</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {users?.filter((user: any) => user.role === 'seller').map((seller: any) => (
+                        {sellers.map((seller: any) => (
                           <div key={seller.id} className="flex items-center justify-between p-3 border rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
