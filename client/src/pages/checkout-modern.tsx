@@ -1088,10 +1088,10 @@ export default function ModernCheckout() {
               <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg text-white">
                 <MapPin className="h-6 w-6" />
               </div>
-              Add Delivery Address
+              {addressType === 'primary' ? 'Add Primary Address' : `Add Address for ${groupMembers?.find((m: any) => m.userId === selectedMemberForAddress)?.username}`}
             </DialogTitle>
             <DialogDescription>
-              Enter the delivery address for group purchases
+              {addressType === 'primary' ? 'This will be the main delivery address for the group' : 'This address will be used specifically for this member'}
             </DialogDescription>
           </DialogHeader>
           
