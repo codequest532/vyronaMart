@@ -463,7 +463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/signup", async (req, res) => {
     try {
-      const { username, email, mobile, password, role } = req.body;
+      const { username, email, mobile, password, role, storeName, businessType, storeDescription, address } = req.body;
       
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
@@ -492,6 +492,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         level: 1
       });
       
+      // If seller, create a store entry
+      if (userRole === "seller" && storeName) {
+        try {
+          await storage.createStore({
+            name: storeName,
+            type: businessType || "other",
+            address: address || null,
+            isOpen: true
+          });
+        } catch (storeError) {
+          console.error("Failed to create store:", storeError);
+          // Continue with user creation even if store creation fails
+        }
+      }
+      
       // Store user information in session
       (req as any).session.user = {
         id: newUser.id,
@@ -502,6 +517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ user: { ...newUser, password: undefined } });
     } catch (error) {
+      console.error("Signup error:", error);
       res.status(500).json({ message: "Signup failed" });
     }
   });
