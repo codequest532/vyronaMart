@@ -197,9 +197,11 @@ export default function AdminDashboard() {
     queryKey: ["/api/products"],
   });
 
-  const { data: orders = [] } = useQuery({
+  const { data: ordersData } = useQuery({
     queryKey: ["/api/admin/orders"],
   });
+  
+  const orders = ordersData?.orders || [];
 
   const { data: libraryRequests = [], refetch: refetchLibraryRequests } = useQuery({
     queryKey: ["/api/admin/library-requests"],
