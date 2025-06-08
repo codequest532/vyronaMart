@@ -920,77 +920,179 @@ export default function SellerDashboard() {
                 </Card>
               </div>
 
+              {/* VyronaHub Orders Panel */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
-                  <CardDescription>Latest orders from VyronaHub and VyronaSocial customers</CardDescription>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Store className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-green-700">VyronaHub Orders</CardTitle>
+                      <CardDescription>Individual product purchases from your store</CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  {sellerOrders?.filter((order: any) => order.module !== 'vyronaread').length === 0 ? (
-                    <div className="text-center py-12">
-                      <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No Orders Yet</h3>
-                      <p className="text-gray-500 dark:text-gray-400">Orders from VyronaHub and VyronaSocial will appear here once customers start purchasing</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {sellerOrders?.filter((order: any) => order.module !== 'vyronaread').map((order: any) => (
-                        <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-4 mb-2">
-                              <p className="font-medium">Order #{order.order_id || order.id}</p>
-                              <Badge variant={
-                                order.order_status === 'completed' || order.status === 'completed' ? 'default' :
-                                order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
-                                order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
-                              }>
-                                {order.order_status || order.status}
-                              </Badge>
-                              {order.module && (
-                                <Badge variant="outline" className={
-                                  order.module === 'vyronahub' ? 'border-green-500 text-green-700' :
-                                  order.module === 'vyronasocial' ? 'border-purple-500 text-purple-700' :
-                                  'border-blue-500 text-blue-700'
+                  {(() => {
+                    const vyronahubOrders = sellerOrders?.filter((order: any) => order.module === 'vyronahub') || [];
+                    return vyronahubOrders.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Store className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-600 mb-2">No VyronaHub Orders</h3>
+                        <p className="text-gray-500">Individual product orders will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {vyronahubOrders.map((order: any) => (
+                          <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border border-green-200 rounded-lg bg-green-50/50">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-4 mb-2">
+                                <p className="font-medium">Order #{order.order_id || order.id}</p>
+                                <Badge variant={
+                                  order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                  order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
                                 }>
-                                  {order.module === 'vyronahub' ? 'VyronaHub' :
-                                   order.module === 'vyronasocial' ? 'VyronaSocial' :
-                                   order.module === 'vyronaread' ? 'VyronaRead' : 'Other'}
+                                  {order.order_status || order.status}
                                 </Badge>
+                                <Badge variant="outline" className="border-green-500 text-green-700 bg-green-100">
+                                  Individual Purchase
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600">Customer: {order.customer_name || order.customer_email || 'N/A'}</p>
+                              {order.metadata?.product_names && (
+                                <p className="text-sm text-gray-600">Products: {order.metadata.product_names}</p>
                               )}
+                              <p className="text-sm font-medium text-green-600">
+                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Ordered: {new Date(order.created_at).toLocaleDateString()}
+                              </p>
                             </div>
-                            <p className="text-sm text-gray-600">Customer: {order.customer_name || 'N/A'}</p>
-                            {order.product_names && (
-                              <p className="text-sm text-gray-600">Products: {order.product_names}</p>
-                            )}
-                            <p className="text-sm font-medium text-green-600">
-                              ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Ordered: {new Date(order.created_at).toLocaleDateString()}
-                            </p>
+                            <div className="flex items-center gap-3">
+                              <select 
+                                value={order.order_status || order.status}
+                                onChange={(e) => updateOrderStatusMutation.mutate({
+                                  orderId: order.order_id || order.id,
+                                  status: e.target.value
+                                })}
+                                className="text-sm border rounded px-2 py-1"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  console.log('Viewing VyronaHub order details:', order.order_id || order.id);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <select 
-                              value={order.order_status || order.status}
-                              onChange={(e) => updateOrderStatusMutation.mutate({
-                                orderId: order.order_id || order.id,
-                                status: e.target.value
-                              })}
-                              className="text-sm border rounded px-2 py-1"
-                            >
-                              <option value="processing">Processing</option>
-                              <option value="shipped">Shipped</option>
-                              <option value="delivered">Delivered</option>
-                              <option value="cancelled">Cancelled</option>
-                            </select>
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* VyronaSocial Orders Panel */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Users className="h-6 w-6 text-purple-600" />
                     </div>
-                  )}
+                    <div>
+                      <CardTitle className="text-purple-700">VyronaSocial Orders</CardTitle>
+                      <CardDescription>Group purchases and collaborative shopping</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const vyronasocialOrders = sellerOrders?.filter((order: any) => order.module === 'vyronasocial') || [];
+                    return vyronasocialOrders.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-600 mb-2">No VyronaSocial Orders</h3>
+                        <p className="text-gray-500">Group purchase orders will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {vyronasocialOrders.map((order: any) => (
+                          <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border border-purple-200 rounded-lg bg-purple-50/50">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-4 mb-2">
+                                <p className="font-medium">Order #{order.order_id || order.id}</p>
+                                <Badge variant={
+                                  order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                  order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
+                                }>
+                                  {order.order_status || order.status}
+                                </Badge>
+                                <Badge variant="outline" className="border-purple-500 text-purple-700 bg-purple-100">
+                                  Group Purchase
+                                </Badge>
+                                {order.metadata?.group_size && (
+                                  <Badge variant="secondary" className="bg-purple-200 text-purple-800">
+                                    {order.metadata.group_size} members
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600">Customer: {order.customer_name || order.customer_email || 'N/A'}</p>
+                              {order.metadata?.group_name && (
+                                <p className="text-sm text-gray-600">Group: {order.metadata.group_name}</p>
+                              )}
+                              {order.metadata?.product_names && (
+                                <p className="text-sm text-gray-600">Products: {order.metadata.product_names}</p>
+                              )}
+                              <p className="text-sm font-medium text-purple-600">
+                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Ordered: {new Date(order.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <select 
+                                value={order.order_status || order.status}
+                                onChange={(e) => updateOrderStatusMutation.mutate({
+                                  orderId: order.order_id || order.id,
+                                  status: e.target.value
+                                })}
+                                className="text-sm border rounded px-2 py-1"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  console.log('Viewing VyronaSocial order details:', order.order_id || order.id);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </div>
