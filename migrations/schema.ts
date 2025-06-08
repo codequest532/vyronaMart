@@ -34,6 +34,8 @@ export const orders = pgTable("orders", {
         status: text().default('pending').notNull(),
         module: text().notNull(),
         metadata: jsonb(),
+        lastEmailSent: text("last_email_sent"),
+        emailHistory: jsonb("email_history").default([]),
         createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
 });
 
@@ -446,3 +448,17 @@ export const groupBuyParticipants = pgTable("group_buy_participants", {
                         name: "group_buy_participants_user_id_users_id_fk"
                 }),
 ]);
+
+export const emailNotifications = pgTable("email_notifications", {
+        id: serial().primaryKey().notNull(),
+        orderId: integer("order_id").notNull(),
+        userId: integer("user_id").notNull(),
+        emailType: text("email_type").notNull(), // 'processing', 'shipped', 'out_for_delivery', 'delivered'
+        status: text().default('pending').notNull(), // 'pending', 'sent', 'failed'
+        recipientEmail: text("recipient_email").notNull(),
+        subject: text().notNull(),
+        content: text().notNull(),
+        brevoMessageId: text("brevo_message_id"),
+        sentAt: timestamp("sent_at", { mode: 'string' }),
+        createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+});
