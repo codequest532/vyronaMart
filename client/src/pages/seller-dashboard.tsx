@@ -692,14 +692,6 @@ export default function SellerDashboard() {
               Customers
             </Button>
             <Button
-              variant={activeTab === "vyronasocial" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("vyronasocial")}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              VyronaSocial
-            </Button>
-            <Button
               variant={activeTab === "settings" ? "default" : "ghost"}
               className="w-full justify-start"
               onClick={() => setActiveTab("settings")}
@@ -1035,95 +1027,7 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          {activeTab === "vyronasocial" && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaSocial Group Buy</h2>
-                <p className="text-gray-600 dark:text-gray-300">Create group buy products with bulk discounts</p>
-              </div>
 
-              {/* Create Group Buy Product Button */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">Group Buy Products</h3>
-                      <p className="text-sm text-gray-600">Minimum 10 pieces required for single product group buys</p>
-                    </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button className="bg-red-500 hover:bg-red-600">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Group Buy Product
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Create Group Buy Product</DialogTitle>
-                          <DialogDescription>
-                            Set up a product for group buying with minimum quantity and discount pricing
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label>Quick Create Sample Group Buy</Label>
-                            <p className="text-sm text-gray-600 mb-3">Create a sample group buy product to test VyronaSocial functionality</p>
-                            <Button 
-                              onClick={() => {
-                                // Create sample group buy product
-                                const sampleData = {
-                                  productId: 1,
-                                  sellerId: 4,
-                                  minQuantity: 10,
-                                  originalPrice: 2000,
-                                  groupBuyPrice: 1500,
-                                  discountPercentage: 25,
-                                  isApproved: true,
-                                  isActive: true
-                                };
-                                
-                                fetch('/api/group-buy/products', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify(sampleData)
-                                }).then(() => {
-                                  alert('Sample group buy product created! Check VyronaHub to see it.');
-                                });
-                              }}
-                              className="bg-red-500 hover:bg-red-600 w-full"
-                            >
-                              Create Sample Group Buy Product
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-
-                  {/* Group Buy Products List */}
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-500">
-                      Create group buy products to enable bulk purchasing with discounts. 
-                      Products require admin approval before appearing in VyronaHub.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Instructions */}
-              <Card className="border-red-200 bg-red-50">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-red-800 mb-2">Group Buy Requirements</h3>
-                  <ul className="text-sm text-red-700 space-y-1">
-                    <li>• Minimum 10 pieces for single product group buys</li>
-                    <li>• Alternative: 5+ pieces across multiple sellers</li>
-                    <li>• Products require admin approval</li>
-                    <li>• Discounts enable cost sharing for bulk orders</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          )}
 
           {activeTab === "settings" && (
             <div className="space-y-6">
