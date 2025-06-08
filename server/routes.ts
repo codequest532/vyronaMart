@@ -3795,7 +3795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique reference for this contribution
       const referenceId = `GRP${roomId}_ITM${itemId}_USR${userId}_${Date.now()}`;
       
-      // Create Cashfree AutoCollect virtual account
+      // Create UPI payment using Cashfree Payment Gateway for QR generation
       const cashfreeConfig = {
         clientId: process.env.CASHFREE_CLIENT_ID,
         clientSecret: process.env.CASHFREE_CLIENT_SECRET,
@@ -3805,44 +3805,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
           : 'https://sandbox.cashfree.com'
       };
 
-      const virtualAccountPayload = {
-        vAccountId: referenceId.toLowerCase(),
-        name: `VyronaMart Room ${roomId}`,
-        phone: "9999999999",
-        ifsc: "YESB0000001",
-        accountType: "CURRENT"
+      // Create payment order with Cashfree
+      const orderPayload = {
+        order_id: referenceId,
+        order_amount: amount,
+        order_currency: "INR",
+        customer_details: {
+          customer_id: `user_${userId}`,
+          customer_name: `Room ${roomId} Member`,
+          customer_email: "customer@vyronamart.com",
+          customer_phone: "9999999999"
+        },
+        order_meta: {
+          return_url: `${process.env.BASE_URL || 'http://localhost:5000'}/payment-success`,
+          notify_url: `${process.env.BASE_URL || 'http://localhost:5000'}/api/payments/webhook`
+        }
       };
 
       const cashfreeHeaders = {
-        'X-Client-Id': cashfreeConfig.clientId,
-        'X-Client-Secret': cashfreeConfig.clientSecret,
+        'x-client-id': cashfreeConfig.clientId,
+        'x-client-secret': cashfreeConfig.clientSecret,
+        'x-api-version': '2023-08-01',
         'Content-Type': 'application/json'
       };
 
       let virtualUPI;
+      let paymentLink;
       
       try {
-        // Create virtual account with Cashfree AutoCollect
-        const virtualAccountResponse = await axios.post(
-          `${cashfreeConfig.baseUrl}/api/v2/easy-split`,
-          virtualAccountPayload,
+        // Create payment order with Cashfree
+        const orderResponse = await axios.post(
+          `${cashfreeConfig.baseUrl}/pg/orders`,
+          orderPayload,
           { headers: cashfreeHeaders }
         );
 
-        console.log('Cashfree AutoCollect response:', virtualAccountResponse.data);
+        console.log('Cashfree Order response:', orderResponse.data);
 
-        if (virtualAccountResponse.data && virtualAccountResponse.data.data) {
-          // Extract UPI ID from Cashfree response
-          virtualUPI = virtualAccountResponse.data.data.upi || `${virtualAccountResponse.data.data.vAccountId}@ybl`;
+        if (orderResponse.data && orderResponse.data.payment_link) {
+          paymentLink = orderResponse.data.payment_link;
+          // Generate a UPI ID based on the order
+          virtualUPI = `vyrona.${referenceId.toLowerCase().slice(-10)}@paytm`;
         } else {
-          throw new Error('Failed to create virtual account');
+          throw new Error('Failed to create payment order');
         }
       } catch (cashfreeError) {
-        console.error('Cashfree AutoCollect error:', cashfreeError.response?.data || cashfreeError.message);
+        console.error('Cashfree Payment Gateway error:', cashfreeError.response?.data || cashfreeError.message);
         
-        // Create a valid merchant UPI format using reference ID
-        const cleanReference = referenceId.toLowerCase().replace(/[^a-z0-9]/g, '');
-        virtualUPI = `${cleanReference}@ybl`;
+        // Create manual payment instructions since AutoCollect isn't available
+        // This creates a clear payment flow for users
+        virtualUPI = null; // No valid UPI ID without AutoCollect
+        paymentLink = `${process.env.BASE_URL || 'http://localhost:5000'}/manual-payment/${referenceId}`;
+        
+        console.log('Cashfree AutoCollect not available - using manual payment flow');
       }
       
       // Create UPI payment string
