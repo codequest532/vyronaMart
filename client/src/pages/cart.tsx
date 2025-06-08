@@ -78,15 +78,8 @@ export default function Cart() {
       return;
     }
 
-    toast({
-      title: "Order Placed Successfully!",
-      description: `Your order of ${getTotalItems()} items has been placed. Total: ₹${total.toFixed(2)}`,
-    });
-    
-    clearCart();
-    setAppliedPromo(null);
-    setDiscount(0);
-    setLocation("/vyronahub");
+    // Navigate to the complete VyronaHub checkout flow
+    setLocation("/vyronahub-checkout");
   };
 
   if (items.length === 0) {

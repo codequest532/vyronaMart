@@ -3,7 +3,7 @@ import {
   shoppingGroups, groupMembers, groupWishlists, groupMessages, productShares, notifications,
   instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
   groupBuyProducts, groupBuyCampaigns, groupBuyParticipants, groupCarts, groupCartContributions,
-  libraryIntegrationRequests, physicalBooks, eBooks, bookLoans,
+  libraryIntegrationRequests, physicalBooks, eBooks, bookLoans, bookRentals,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,

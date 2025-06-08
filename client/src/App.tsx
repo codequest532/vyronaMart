@@ -13,6 +13,7 @@ import SimpleCheckout from "@/pages/checkout-simple";
 
 import VyronaInstaShop from "@/pages/instashop";
 import VyronaHub from "@/pages/vyronahub";
+import VyronaHubCheckout from "@/pages/vyronahub-checkout";
 import VyronaRead from "@/pages/vyronaread";
 import VyronaReadCheckout from "@/pages/vyronaread-checkout";
 import EBookCheckout from "@/pages/ebook-checkout";
@@ -75,6 +76,7 @@ function Router() {
       <Route path="/checkout-modern/:id" component={SimpleCheckout} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/vyronahub" component={VyronaHub} />
+      <Route path="/vyronahub-checkout" component={VyronaHubCheckout} />
       <Route path="/vyronaread" component={VyronaRead} />
       <Route path="/vyronaread-checkout" component={VyronaReadCheckout} />
       <Route path="/ebook-checkout" component={EBookCheckout} />
