@@ -783,6 +783,7 @@ export default function ModernCheckout() {
                     >
                       <div className={`p-4 rounded-xl bg-gradient-to-br ${method.color} text-white`}>
                         {method.id === 'wallet' && <Wallet className="h-8 w-8" />}
+                        {method.id === 'upi-qr' && <QrCode className="h-8 w-8" />}
                         {method.id === 'googlepay' && <Smartphone className="h-8 w-8" />}
                         {method.id === 'phonepe' && <Zap className="h-8 w-8" />}
                         {method.id === 'cod' && <Gift className="h-8 w-8" />}
@@ -799,6 +800,22 @@ export default function ModernCheckout() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* UPI Payment Modal */}
+      {upiPaymentDetails && (
+        <UPIPaymentModal
+          isOpen={showUPIModal}
+          onClose={() => {
+            setShowUPIModal(false);
+            setUpiPaymentDetails(null);
+          }}
+          roomId={upiPaymentDetails.roomId}
+          itemId={upiPaymentDetails.itemId}
+          amount={upiPaymentDetails.amount}
+          userId={upiPaymentDetails.userId}
+          onPaymentSuccess={handleUPIPaymentSuccess}
+        />
+      )}
     </div>
   );
 }
