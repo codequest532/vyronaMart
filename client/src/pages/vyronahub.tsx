@@ -155,7 +155,7 @@ export default function VyronaHub() {
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              onClick={() => window.history.back()}
+              onClick={() => setLocation("/")}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
