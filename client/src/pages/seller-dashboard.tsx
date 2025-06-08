@@ -3533,33 +3533,138 @@ export default function SellerDashboard() {
                   )}
                   
                   {selectedOrder.module === 'vyronasocial' && (
-                    <div className="space-y-3">
-                      {selectedOrder.metadata?.group_name && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Group Name</label>
-                          <p className="text-sm">{selectedOrder.metadata.group_name}</p>
+                    <div className="space-y-4">
+                      {/* Group Information */}
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-purple-800 mb-3">Group Purchase Details</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {selectedOrder.metadata?.group_name && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Group Name</label>
+                              <p className="text-sm">{selectedOrder.metadata.group_name}</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.group_description && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Group Description</label>
+                              <p className="text-sm">{selectedOrder.metadata.group_description}</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.group_size && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Total Members</label>
+                              <p className="text-sm font-medium">{selectedOrder.metadata.group_size} members</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.sellerNotes && (
+                            <div className="md:col-span-2">
+                              <label className="text-sm font-medium text-gray-600">Seller Notes</label>
+                              <p className="text-sm text-purple-700 bg-purple-100 p-2 rounded">{selectedOrder.metadata.sellerNotes}</p>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {selectedOrder.metadata?.group_description && (
-                        <div>
-                          <label className="text-sm font-medium text-gray-600">Group Description</label>
-                          <p className="text-sm">{selectedOrder.metadata.group_description}</p>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-4">
-                        {selectedOrder.metadata?.group_size && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Group Size</label>
-                            <p className="text-sm">{selectedOrder.metadata.group_size} members</p>
-                          </div>
-                        )}
-                        {selectedOrder.metadata?.discount_applied && (
-                          <div>
-                            <label className="text-sm font-medium text-gray-600">Group Discount</label>
-                            <p className="text-sm text-green-600">{selectedOrder.metadata.discount_applied}% off</p>
-                          </div>
-                        )}
                       </div>
+
+                      {/* Group Members Information */}
+                      {selectedOrder.metadata?.sellerFulfillment?.groupMembers && (
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            Group Members ({selectedOrder.metadata.sellerFulfillment.groupMembers.length})
+                          </h4>
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {selectedOrder.metadata.sellerFulfillment.groupMembers.map((member, index) => (
+                              <div key={member.id || index} className="flex items-center justify-between p-2 bg-white rounded border">
+                                <div>
+                                  <p className="text-sm font-medium">{member.username || member.memberName}</p>
+                                  <p className="text-xs text-gray-500">{member.email}</p>
+                                </div>
+                                <div className="text-right">
+                                  <Badge variant={member.isOrderCreator ? "default" : "secondary"} className="text-xs">
+                                    {member.isOrderCreator ? "Admin" : member.member_role || "Member"}
+                                  </Badge>
+                                  {member.mobile && (
+                                    <p className="text-xs text-gray-500 mt-1">{member.mobile}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Delivery Addresses */}
+                      {selectedOrder.metadata?.sellerFulfillment?.deliveryDetails?.addresses && (
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h4 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            Delivery Addresses ({selectedOrder.metadata.sellerFulfillment.deliveryDetails.addresses.length})
+                          </h4>
+                          {selectedOrder.metadata.sellerFulfillment.deliveryDetails.useSingleDelivery && (
+                            <div className="mb-3 p-2 bg-blue-100 rounded">
+                              <p className="text-sm text-blue-700 font-medium">Single Delivery Address Requested</p>
+                            </div>
+                          )}
+                          <div className="space-y-3 max-h-60 overflow-y-auto">
+                            {selectedOrder.metadata.sellerFulfillment.deliveryDetails.addresses.map((address, index) => (
+                              <div key={index} className="p-3 bg-white rounded border">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <p className="text-sm font-medium">{address.memberName}</p>
+                                    <p className="text-xs text-gray-500">{address.memberEmail}</p>
+                                    {address.memberPhone && (
+                                      <p className="text-xs text-gray-500">{address.memberPhone}</p>
+                                    )}
+                                  </div>
+                                  {address.isPrimary && (
+                                    <Badge variant="outline" className="text-xs border-blue-500 text-blue-700">
+                                      Primary
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-700">
+                                  <p>{address.fullName}</p>
+                                  <p>{address.addressLine1}</p>
+                                  {address.addressLine2 && <p>{address.addressLine2}</p>}
+                                  <p>{address.city}, {address.state} - {address.pincode}</p>
+                                  {address.phone && <p>Phone: {address.phone}</p>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Product Distribution */}
+                      {selectedOrder.metadata?.sellerFulfillment?.productDistribution && (
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <h4 className="font-medium text-green-800 mb-3 flex items-center gap-2">
+                            <ShoppingCart className="h-4 w-4" />
+                            Product Distribution by Member
+                          </h4>
+                          <div className="space-y-3">
+                            {selectedOrder.metadata.sellerFulfillment.productDistribution.map((product, index) => (
+                              <div key={index} className="p-3 bg-white rounded border">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h5 className="font-medium">{product.productName}</h5>
+                                  <p className="text-sm font-medium">Total: {product.totalQuantity} × ₹{product.unitPrice}</p>
+                                </div>
+                                {product.assignedTo && product.assignedTo.length > 0 && (
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-600">Assigned to:</p>
+                                    {product.assignedTo.map((assignment, assignIndex) => (
+                                      <div key={assignIndex} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                                        <span>{assignment.memberName}</span>
+                                        <span className="font-medium">{assignment.quantity} × ₹{product.unitPrice} = ₹{assignment.memberTotal}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 

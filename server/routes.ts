@@ -1364,15 +1364,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date()
       };
 
-      // Mock customer information for development
-      const customer = {
-        id: userId,
-        username: "TestUser",
-        email: "test@example.com",
-        mobile: "+91-9876543210",
-        vyronaCoins: 100,
-        xp: 250,
-        level: 2
+      // Get real customer information from database
+      const customerResult = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      const customer = customerResult[0];
+      if (!customer) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+
+      // Get all group members and their details for seller fulfillment
+      const groupMembersResult = await db.execute(sql`
+        SELECT DISTINCT 
+          u.id, u.username, u.email, u.mobile,
+          gm.role as member_role
+        FROM group_members gm
+        JOIN users u ON gm.user_id = u.id
+        WHERE gm.group_id = ${roomId}
+        AND gm.user_id != ${userId}
+      `);
+
+      const allGroupMembers = [
+        {
+          id: customer.id,
+          username: customer.username,
+          email: customer.email,
+          mobile: customer.mobile,
+          member_role: 'admin',
+          isOrderCreator: true
+        },
+        ...groupMembersResult.rows.map(member => ({
+          ...member,
+          isOrderCreator: false
+        }))
+      ];
+
+      // Enhance delivery addresses with member details
+      const enhancedDeliveryAddresses = deliveryAddresses?.map((address: any) => {
+        const memberInfo = allGroupMembers.find(member => member.id === address.memberId);
+        return {
+          ...address,
+          memberName: memberInfo?.username || 'Unknown',
+          memberEmail: memberInfo?.email || 'N/A',
+          memberPhone: memberInfo?.mobile || 'N/A'
+        };
+      }) || [];
+
+      // Prepare comprehensive seller fulfillment data
+      const sellerFulfillmentData = {
+        // Primary order contact (order creator)
+        primaryContact: {
+          name: customer.username,
+          email: customer.email,
+          phone: customer.mobile || 'N/A',
+          role: 'Group Admin'
+        },
+        // All group members for reference
+        groupMembers: allGroupMembers,
+        // Delivery information
+        deliveryDetails: {
+          useSingleDelivery,
+          totalAddresses: enhancedDeliveryAddresses.length,
+          addresses: enhancedDeliveryAddresses
+        },
+        // Product breakdown by member
+        productDistribution: items.map((item: any) => {
+          const memberAssignments = item.memberAssignments || [];
+          return {
+            productId: item.productId,
+            productName: item.name,
+            totalQuantity: item.quantity,
+            unitPrice: item.price,
+            totalPrice: item.price * item.quantity,
+            assignedTo: memberAssignments.map((assignment: any) => {
+              const memberInfo = allGroupMembers.find(m => m.id === assignment.memberId);
+              return {
+                memberId: assignment.memberId,
+                memberName: memberInfo?.username || 'Unknown',
+                memberEmail: memberInfo?.email || 'N/A',
+                quantity: assignment.quantity,
+                memberTotal: assignment.quantity * item.price
+              };
+            })
+          };
+        }),
+        // Group summary
+        groupSummary: {
+          groupId: roomId,
+          totalMembers: allGroupMembers.length,
+          totalOrderValue: totalAmount,
+          paymentMethod: 'VyronaWallet Group Payment',
+          orderType: isGroupPayment ? 'Group Contribution' : 'Direct Payment'
+        }
       };
       
       // Create order record with complete customer and product details for seller
@@ -1384,17 +1470,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: {
           roomId,
           items,
-          transactionId: transaction.id,
+          transactionId: mockTransaction.id,
           paymentMethod: "vyronawallet",
           isGroupPayment,
           memberCount,
           totalOrderAmount: totalAmount,
-          deliveryAddresses,
+          deliveryAddresses: enhancedDeliveryAddresses,
           useSingleDelivery,
-          // Customer details for seller fulfillment
-          customerName: customer?.username || 'Customer',
-          customerEmail: customer?.email || 'N/A',
-          customerPhone: customer?.mobile || 'N/A',
+          
+          // Enhanced seller fulfillment data
+          sellerFulfillment: sellerFulfillmentData,
+          
+          // Legacy fields for backward compatibility
+          customerName: customer.username,
+          customerEmail: customer.email,
+          customerPhone: customer.mobile || 'N/A',
+          
           // Product details for dispatch
           products: items.map(item => ({
             productId: item.productId,
@@ -1403,9 +1494,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             price: item.price,
             totalPrice: item.price * item.quantity
           })),
+          
+          // Group purchase specific data
+          group_name: `Shopping Group ${roomId}`,
+          group_description: `Collaborative purchase with ${allGroupMembers.length} members`,
+          group_size: allGroupMembers.length,
+          
           // Order fulfillment status
           fulfillmentStatus: 'processing',
-          orderDate: new Date().toISOString()
+          orderDate: new Date().toISOString(),
+          
+          // Seller notes
+          sellerNotes: [
+            `Group order with ${allGroupMembers.length} members`,
+            useSingleDelivery ? 'Single delivery address requested' : `Multiple delivery addresses (${enhancedDeliveryAddresses.length})`,
+            `Primary contact: ${customer.username} (${customer.email})`
+          ].join(' | ')
         }
       });
 
