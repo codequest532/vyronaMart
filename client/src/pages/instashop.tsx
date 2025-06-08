@@ -13,7 +13,10 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { Instagram, ShoppingBag, TrendingUp, Users, Link2, AlertTriangle, CheckCircle, Eye, Heart, MessageCircle, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/mock-data";
+// Production-ready utility function
+const formatCurrency = (cents: number): string => {
+  return `₹${(cents / 100).toLocaleString('en-IN')}`;
+};
 
 const connectInstagramSchema = z.object({
   instagramUsername: z.string().min(1, "Instagram username is required"),
