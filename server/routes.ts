@@ -3860,11 +3860,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Cashfree AutoCollect not available - using manual payment flow');
       }
       
-      // Create UPI payment string
-      const upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Room${roomId}_Item${itemId}&tr=${referenceId}`;
+      // Create UPI payment string only if we have a valid UPI ID
+      let upiString = null;
+      if (virtualUPI) {
+        upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Room${roomId}_Item${itemId}&tr=${referenceId}`;
+      }
       
-      // Generate UPI QR Code using qrcode library
-      const qrCodeDataURL = await QRCode.toDataURL(upiString, {
+      // Generate QR Code for payment link or manual payment page
+      const qrContent = paymentLink || `${process.env.BASE_URL || 'http://localhost:5000'}/payment/${referenceId}`;
+      const qrCodeDataURL = await QRCode.toDataURL(qrContent, {
         width: 300,
         margin: 2,
         color: {
@@ -3899,12 +3903,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         referenceId,
         amount,
         virtualUPI,
+        paymentLink,
+        requiresManualVerification: !virtualUPI,
         expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        instructions: [
+        instructions: virtualUPI ? [
           "Scan the QR code with any UPI app",
           "Verify the amount and merchant details", 
           "Complete the payment",
           "Your contribution will be updated automatically"
+        ] : [
+          "Click the payment link to complete your contribution",
+          "Take a screenshot of your successful transaction",
+          "Return here to verify your payment",
+          "Your contribution will be confirmed within minutes"
         ]
       });
 
