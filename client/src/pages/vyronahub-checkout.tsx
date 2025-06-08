@@ -153,9 +153,9 @@ export default function VyronaHubCheckout() {
         items: typedCartItems.map((item: CheckoutCartItem) => ({
           productId: item.id,
           quantity: item.quantity,
-          price: Math.round(item.price * 100), // Convert to cents
+          price: Math.round(item.price), // Amount in rupees
         })),
-        totalAmount: Math.round(total * 100), // Convert to cents
+        totalAmount: Math.round(total), // Amount in rupees
         shippingAddress: {
           fullName: addressData.fullName,
           phoneNumber: addressData.phoneNumber,
@@ -167,8 +167,8 @@ export default function VyronaHubCheckout() {
         paymentMethod: addressData.paymentMethod,
         module: "vyronahub",
         metadata: {
-          deliveryFee: Math.round(deliveryFee * 100), // Convert to cents
-          subtotal: Math.round(subtotal * 100), // Convert to cents
+          deliveryFee: Math.round(deliveryFee), // Amount in rupees
+          subtotal: Math.round(subtotal), // Amount in rupees
         },
       };
 
