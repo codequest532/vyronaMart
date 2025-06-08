@@ -78,6 +78,7 @@ export default function SellerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddBookDialog, setShowAddBookDialog] = useState(false);
+  const [activeBookOrderTab, setActiveBookOrderTab] = useState("all");
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showAddProductDialog, setShowAddProductDialog] = useState(false);
   const [bookSection, setBookSection] = useState("overview");
@@ -853,7 +854,7 @@ export default function SellerDashboard() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Order Management</h2>
-                <p className="text-gray-600 dark:text-gray-300">Track and manage orders from VyronaHub and VyronaSocial</p>
+                <p className="text-gray-600 dark:text-gray-300">Track and manage orders from VyronaHub and VyronaSocial (excluding book-related orders)</p>
               </div>
 
               {/* Order Statistics */}
@@ -864,7 +865,7 @@ export default function SellerDashboard() {
                       <div>
                         <p className="text-sm font-medium text-gray-600">Total Orders</p>
                         <p className="text-3xl font-bold text-blue-600">
-                          {sellerOrders?.length || 0}
+                          {sellerOrders?.filter((order: any) => order.module !== 'vyronaread').length || 0}
                         </p>
                         <p className="text-xs text-blue-500">All modules</p>
                       </div>
@@ -909,7 +910,7 @@ export default function SellerDashboard() {
                       <div>
                         <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                         <p className="text-3xl font-bold text-orange-600">
-                          ₹{sellerOrders?.reduce((total: number, order: any) => total + (order.total_amount / 100), 0).toLocaleString() || 0}
+                          ₹{sellerOrders?.filter((order: any) => order.module !== 'vyronaread').reduce((total: number, order: any) => total + (order.total_amount / 100), 0).toLocaleString() || 0}
                         </p>
                         <p className="text-xs text-orange-500">All time</p>
                       </div>
@@ -925,7 +926,7 @@ export default function SellerDashboard() {
                   <CardDescription>Latest orders from VyronaHub and VyronaSocial customers</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {sellerOrders?.length === 0 ? (
+                  {sellerOrders?.filter((order: any) => order.module !== 'vyronaread').length === 0 ? (
                     <div className="text-center py-12">
                       <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                       <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No Orders Yet</h3>
@@ -933,7 +934,7 @@ export default function SellerDashboard() {
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {sellerOrders?.map((order: any) => (
+                      {sellerOrders?.filter((order: any) => order.module !== 'vyronaread').map((order: any) => (
                         <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border rounded-lg">
                           <div className="flex-1">
                             <div className="flex items-center gap-4 mb-2">
