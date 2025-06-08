@@ -6,7 +6,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -293,7 +294,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   };
 
   const ModalContent = () => (
-    <div className="relative max-w-lg mx-auto">
+    <div className="relative max-w-md mx-auto">
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
@@ -776,7 +777,11 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-8">
+        <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-8">
+          <VisuallyHidden>
+            <DialogTitle>Authentication</DialogTitle>
+            <DialogDescription>Sign in to your account or create a new one</DialogDescription>
+          </VisuallyHidden>
           <ModalContent />
         </DialogContent>
       </Dialog>
@@ -784,6 +789,10 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       {/* Forgot Password Modal */}
       <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
         <DialogContent className="max-w-md bg-white rounded-2xl border-0 p-6">
+          <VisuallyHidden>
+            <DialogTitle>Forgot Password</DialogTitle>
+            <DialogDescription>Enter your email to receive a password reset code</DialogDescription>
+          </VisuallyHidden>
           <div className="text-center mb-6">
             <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
             <p className="text-sm text-gray-600 mt-1">Enter your email to receive a reset code</p>
