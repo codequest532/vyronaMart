@@ -4581,10 +4581,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
         LIMIT 100
       `);
 
-      res.json(ordersResult.rows);
+      // Add customerEmail field for email management
+      const enhancedOrders = ordersResult.rows.map((order: any) => ({
+        ...order,
+        customerEmail: order.email,
+        emailSent: true // Default assumption for existing orders
+      }));
+
+      res.json(enhancedOrders);
     } catch (error: any) {
       console.error('Admin orders fetch error:', error);
       res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Test email notification endpoint
+  app.post("/api/test-email", async (req, res) => {
+    try {
+      const { customerEmail, customerName, orderId } = req.body;
+      
+      if (!customerEmail) {
+        return res.status(400).json({ message: "Customer email is required" });
+      }
+
+      const estimatedDelivery = new Date();
+      estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
+
+      const emailSuccess = await sendOrderConfirmationEmail(
+        customerEmail,
+        customerName || 'Valued Customer',
+        orderId || 12345,
+        {
+          items: [
+            { name: 'Sample Product', quantity: 1, price: 2999 },
+            { name: 'Another Item', quantity: 2, price: 1499 }
+          ],
+          totalAmount: 5997,
+          estimatedDelivery: estimatedDelivery.toLocaleDateString('en-IN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          orderDate: new Date().toLocaleDateString('en-IN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        }
+      );
+
+      if (emailSuccess) {
+        res.json({
+          success: true,
+          message: `Test email sent successfully to ${customerEmail}`
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to send test email"
+        });
+      }
+    } catch (error: any) {
+      console.error('Test email error:', error);
+      res.status(500).json({ message: "Test email failed" });
     }
   });
   
