@@ -23,7 +23,7 @@ import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
 import EbookReader from "@/pages/ebook-reader";
-import TestSocial from "@/pages/test-social";
+
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
 
@@ -69,7 +69,7 @@ function Router() {
         {(params) => <StoreDetails storeId={params.storeId} />}
       </Route>
       <Route path="/social" component={VyronaSocial} />
-      <Route path="/test-social" component={TestSocial} />
+
       <Route path="/place-order/:roomId" component={SimpleCheckout} />
       <Route path="/place-order-new/:roomId" component={PlaceOrder} />
       <Route path="/checkout-modern/:id" component={SimpleCheckout} />
