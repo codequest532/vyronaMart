@@ -385,11 +385,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         verified: false
       });
 
-      // Send OTP via email using Brevo
+      // Email functionality disabled
       const emailSent = await sendOTPEmail(email, otp);
       
       if (!emailSent) {
-        return res.status(500).json({ message: "Failed to send OTP email" });
+        return res.status(500).json({ message: "Email service not configured" });
       }
 
       res.json({ 
