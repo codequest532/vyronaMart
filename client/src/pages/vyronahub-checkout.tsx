@@ -70,8 +70,11 @@ export default function VyronaHubCheckout() {
     queryKey: ["/api/current-user"],
   });
 
+  // Type-safe cart items
+  const typedCartItems = (cartItems as CartItem[]) || [];
+
   // Calculate totals
-  const subtotal = cartItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
+  const subtotal = typedCartItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
   const deliveryFee = subtotal > 50000 ? 0 : 4000; // Free delivery above ₹500
   const total = subtotal + deliveryFee;
 
@@ -117,7 +120,7 @@ export default function VyronaHubCheckout() {
     setIsSubmitting(true);
     try {
       const orderData = {
-        items: cartItems.map((item: CartItem) => ({
+        items: typedCartItems.map((item: CartItem) => ({
           productId: item.id,
           quantity: item.quantity,
           price: item.price,
@@ -155,7 +158,7 @@ export default function VyronaHubCheckout() {
     );
   }
 
-  if (!cartItems || cartItems.length === 0) {
+  if (!typedCartItems || typedCartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Card className="p-8 text-center">
@@ -369,7 +372,7 @@ export default function VyronaHubCheckout() {
                                     <div>
                                       <div className="font-medium">VyronaWallet</div>
                                       <div className="text-sm text-gray-500">
-                                        Available Balance: {formatCurrency(userData?.walletBalance * 100 || 0)}
+                                        Available Balance: {formatCurrency((userData as any)?.walletBalance * 100 || 0)}
                                       </div>
                                     </div>
                                   </Label>
@@ -446,7 +449,7 @@ export default function VyronaHubCheckout() {
                   <div>
                     <h3 className="font-medium mb-2">Order Items</h3>
                     <div className="space-y-3">
-                      {cartItems.map((item: CartItem) => (
+                      {typedCartItems.map((item: CartItem) => (
                         <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center space-x-3">
                             {item.imageUrl && (
@@ -491,7 +494,7 @@ export default function VyronaHubCheckout() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  {cartItems.map((item: CartItem) => (
+                  {typedCartItems.map((item: CartItem) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span>{item.name} x{item.quantity}</span>
                       <span>{formatCurrency(item.price * item.quantity)}</span>
