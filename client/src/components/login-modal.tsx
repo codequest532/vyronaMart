@@ -846,6 +846,10 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       {/* Reset Password with OTP Modal */}
       <Dialog open={showResetPassword} onOpenChange={setShowResetPassword}>
         <DialogContent className="max-w-md bg-white rounded-2xl border-0 p-6">
+          <VisuallyHidden>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>Enter the verification code and your new password</DialogDescription>
+          </VisuallyHidden>
           <div className="text-center mb-6">
             <h3 className="text-xl font-semibold text-gray-800">Enter Reset Code</h3>
             <p className="text-sm text-gray-600 mt-1">Check your email for the 6-digit code</p>
