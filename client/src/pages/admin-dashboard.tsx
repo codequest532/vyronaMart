@@ -185,29 +185,37 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/stats"],
   });
 
-  const { data: users = [] } = useQuery({
+  const { data: usersData = [] } = useQuery({
     queryKey: ["/api/admin/users"],
   });
+  
+  const users = Array.isArray(usersData) ? usersData : [];
 
-  const { data: sellers = [] } = useQuery({
+  const { data: sellersData = [] } = useQuery({
     queryKey: ["/api/admin/sellers"],
   });
+  
+  const sellers = Array.isArray(sellersData) ? sellersData : [];
 
-  const { data: products = [] } = useQuery({
+  const { data: productsData = [] } = useQuery({
     queryKey: ["/api/products"],
   });
+  
+  const products = Array.isArray(productsData) ? productsData : [];
 
   const { data: ordersData } = useQuery({
     queryKey: ["/api/admin/orders"],
   });
   
-  const orders = ordersData?.orders || [];
+  const orders = Array.isArray(ordersData?.orders) ? ordersData.orders : [];
 
-  const { data: libraryRequests = [], refetch: refetchLibraryRequests } = useQuery({
+  const { data: libraryRequestsData = [], refetch: refetchLibraryRequests } = useQuery({
     queryKey: ["/api/admin/library-requests"],
     refetchOnWindowFocus: true,
     refetchInterval: 5000, // Refresh every 5 seconds
   });
+  
+  const libraryRequests = Array.isArray(libraryRequestsData) ? libraryRequestsData : [];
 
   const updateLibraryRequestMutation = useMutation({
     mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
@@ -1757,7 +1765,7 @@ export default function AdminDashboard() {
                           <div className="flex-1">
                             <div className="flex items-center gap-4">
                               <div>
-                                <p className="font-medium">Order #{order.id}</p>
+                                <p className="font-medium">Order #{order.order_id}</p>
                                 <p className="text-sm text-gray-500">
                                   Customer: {order.customer_email || 'N/A'} • Amount: ₹{(order.total_amount || 0).toLocaleString()}
                                 </p>
