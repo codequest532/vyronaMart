@@ -1434,7 +1434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/seller/orders", async (req, res) => {
     try {
       const user = getAuthenticatedUser(req);
-      if (!user || user.role !== 'seller') {
+      if (!user || (user.role !== 'seller' && user.role !== 'admin')) {
         return res.status(403).json({ message: "Access denied" });
       }
 
@@ -1470,6 +1470,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(sellerOrders.rows);
     } catch (error) {
       console.error("Error fetching seller orders:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Update order status endpoint
+  app.patch("/api/seller/orders/:orderId/status", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || (user.role !== 'seller' && user.role !== 'admin')) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const { orderId } = req.params;
+      const { status, trackingNumber } = req.body;
+
+      if (!orderId || !status) {
+        return res.status(400).json({ message: "Order ID and status are required" });
+      }
+
+      // Update order status
+      await db.execute(sql`
+        UPDATE orders 
+        SET order_status = ${status}, 
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ${parseInt(orderId)}
+      `);
+
+      res.json({ 
+        success: true, 
+        message: "Order status updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating order status:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });

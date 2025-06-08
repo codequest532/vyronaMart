@@ -322,6 +322,27 @@ export default function SellerDashboard() {
     queryKey: ["/api/seller/analytics"],
   });
 
+  // Order status update mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status, trackingNumber }: { orderId: number; status: string; trackingNumber?: string }) => {
+      return await apiRequest("PATCH", `/api/seller/orders/${orderId}/status`, { status, trackingNumber });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Order Updated",
+        description: "Order status has been updated successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/orders"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update order status.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // VyronaRead Data Queries - Seller-specific access with proper typing
   const { data: sellerEBooks = [] } = useQuery({
     queryKey: ["/api/vyronaread/ebooks", (currentUser as any)?.id],
