@@ -174,18 +174,8 @@ export default function ModernCheckout() {
   const cartItems = Array.isArray(cartItemsResponse) ? cartItemsResponse : [];
   const room = Array.isArray(roomsResponse) ? roomsResponse.find(r => r.id === roomId) : null;
 
-  // Enhanced payment methods
+  // UPI QR Code payment method only
   const paymentMethods: PaymentMethod[] = [
-    {
-      id: 'wallet',
-      name: 'VyronaWallet',
-      type: 'wallet',
-      icon: 'wallet',
-      enabled: true,
-      apiEndpoint: '/api/wallet/pay',
-      description: 'Instant & Secure',
-      color: 'from-yellow-400 to-orange-500'
-    },
     {
       id: 'upi-qr',
       name: 'UPI QR Code',
@@ -193,38 +183,8 @@ export default function ModernCheckout() {
       icon: 'qr',
       enabled: true,
       apiEndpoint: '/api/payments/upi-qr/generate',
-      description: 'Scan & Pay',
+      description: 'Scan & Pay with Cashfree',
       color: 'from-indigo-400 to-purple-500'
-    },
-    {
-      id: 'googlepay',
-      name: 'Google Pay',
-      type: 'googlepay',
-      icon: 'google',
-      enabled: true,
-      apiEndpoint: '/api/googlepay/groups',
-      description: 'Group Friendly',
-      color: 'from-blue-400 to-cyan-500'
-    },
-    {
-      id: 'phonepe',
-      name: 'PhonePe Split',
-      type: 'phonepe',
-      icon: 'phonepe',
-      enabled: true,
-      apiEndpoint: '/api/phonepe/split',
-      description: 'Smart Split',
-      color: 'from-purple-400 to-pink-500'
-    },
-    {
-      id: 'cod',
-      name: 'Cash on Delivery',
-      type: 'cod',
-      icon: 'cash',
-      enabled: checkoutState.codEligible,
-      requiresFullPayment: true,
-      description: 'No Prepayment',
-      color: 'from-green-400 to-emerald-500'
     }
   ];
 
@@ -287,19 +247,7 @@ export default function ModernCheckout() {
   // Handle contribution
   const addContribution = async (itemId: number, amount: number, paymentMethod: PaymentMethod) => {
     try {
-      let transactionId = '';
-      
-      if (paymentMethod.type === 'wallet') {
-        if ((walletData?.balance || 0) < amount) {
-          toast({
-            title: "Insufficient Balance",
-            description: "Please add money to your VyronaWallet first.",
-            variant: "destructive",
-          });
-          return;
-        }
-        transactionId = `wallet_${Date.now()}`;
-      } else if (paymentMethod.type === 'upi') {
+      if (paymentMethod.type === 'upi') {
         // Handle UPI QR code payment
         setUpiPaymentDetails({
           roomId: roomId,
@@ -310,20 +258,6 @@ export default function ModernCheckout() {
         setShowUPIModal(true);
         setIsContributionModalOpen(false);
         return;
-      } else if (paymentMethod.type === 'googlepay') {
-        transactionId = `gpay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      } else if (paymentMethod.type === 'phonepe') {
-        transactionId = `phonepe_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      } else if (paymentMethod.type === 'cod') {
-        if (!checkoutState.codEligible) {
-          toast({
-            title: "COD Not Available",
-            description: "Cash on Delivery is only available for single-member orders with same delivery address.",
-            variant: "destructive",
-          });
-          return;
-        }
-        transactionId = `cod_${Date.now()}`;
       }
 
       // Save contribution to backend

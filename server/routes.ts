@@ -3802,7 +3802,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Group contribution Room ${roomId}&tr=${referenceId}`;
       
       // Generate UPI QR Code using qrcode library
-      const QRCode = require('qrcode');
       const qrCodeDataURL = await QRCode.toDataURL(upiString, {
         width: 300,
         margin: 2,
