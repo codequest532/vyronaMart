@@ -965,9 +965,10 @@ export default function SellerDashboard() {
                                 <Badge variant={
                                   order.order_status === 'delivered' || order.status === 'delivered' ? 'default' :
                                   order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                  order.order_status === 'out_for_delivery' || order.status === 'out_for_delivery' ? 'secondary' :
                                   order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
                                 }>
-                                  {order.order_status || order.status}
+                                  {(order.order_status === 'out_for_delivery' || order.status === 'out_for_delivery') ? 'Out for Delivery' : (order.order_status || order.status || 'Processing')}
                                 </Badge>
                                 <Badge variant="outline" className="border-green-500 text-green-700 bg-green-100">
                                   Individual Purchase
@@ -1051,9 +1052,10 @@ export default function SellerDashboard() {
                                 <Badge variant={
                                   order.order_status === 'delivered' || order.status === 'delivered' ? 'default' :
                                   order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                  order.order_status === 'out_for_delivery' || order.status === 'out_for_delivery' ? 'secondary' :
                                   order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
                                 }>
-                                  {order.order_status || order.status}
+                                  {(order.order_status === 'out_for_delivery' || order.status === 'out_for_delivery') ? 'Out for Delivery' : (order.order_status || order.status || 'Processing')}
                                 </Badge>
                                 <Badge variant="outline" className="border-purple-500 text-purple-700 bg-purple-100">
                                   Group Purchase
@@ -2765,9 +2767,10 @@ export default function SellerDashboard() {
                                         <Badge variant={
                                           order.order_status === 'delivered' || order.status === 'delivered' ? 'default' :
                                           order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
-                                          order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
+                                          order.order_status === 'out_for_delivery' || order.status === 'out_for_delivery' ? 'secondary' :
+                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
                                         }>
-                                          {order.order_status || order.status}
+                                          {(order.order_status === 'out_for_delivery' || order.status === 'out_for_delivery') ? 'Out for Delivery' : (order.order_status || order.status || 'Processing')}
                                         </Badge>
                                         <Badge variant="outline" className="border-blue-500 text-blue-700">
                                           VyronaRead
