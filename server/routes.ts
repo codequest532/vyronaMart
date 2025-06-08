@@ -4421,7 +4421,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin Users API
+  // Admin Users API - Only Customers
   app.get("/api/admin/users", async (req, res) => {
     try {
       const user = getAuthenticatedUser(req);
@@ -4432,6 +4432,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usersResult = await db.execute(sql`
         SELECT id, username, email, mobile, role, created_at
         FROM users
+        WHERE role = 'customer'
         ORDER BY created_at DESC
       `);
 
@@ -4439,6 +4440,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Admin users fetch error:', error);
       res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Admin Sellers API
+  app.get("/api/admin/sellers", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const sellersResult = await db.execute(sql`
+        SELECT id, username, email, mobile, role, created_at
+        FROM users
+        WHERE role = 'seller'
+        ORDER BY created_at DESC
+      `);
+
+      res.json(sellersResult.rows);
+    } catch (error: any) {
+      console.error('Admin sellers fetch error:', error);
+      res.status(500).json({ message: "Failed to fetch sellers" });
     }
   });
 

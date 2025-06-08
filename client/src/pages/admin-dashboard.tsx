@@ -185,8 +185,12 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/stats"],
   });
 
-  const { data: users } = useQuery({
+  const { data: users = [] } = useQuery({
     queryKey: ["/api/admin/users"],
+  });
+
+  const { data: sellers = [] } = useQuery({
+    queryKey: ["/api/admin/sellers"],
   });
 
   const { data: products } = useQuery({
@@ -344,7 +348,7 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab("users")}
             >
               <Users className="h-4 w-4 mr-2" />
-              User Management
+              Customer Management
             </Button>
             <Button
               variant={activeTab === "products" ? "default" : "ghost"}
