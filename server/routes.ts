@@ -1660,28 +1660,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         if (emailTemplate) {
-          emailResult = await sendBrevoEmail({
-            to: order.customer_email,
-            subject: emailTemplate.subject,
-            htmlContent: emailTemplate.htmlContent
-          });
-
-          // Log email notification in database
-          try {
-            await db.execute(sql`
-              INSERT INTO email_notifications (
-                order_id, user_id, email_type, status, recipient_email, 
-                subject, content, brevo_message_id, sent_at
-              ) VALUES (
-                ${parseInt(orderId)}, ${order.user_id}, ${status}, 
-                ${emailResult.success ? 'sent' : 'failed'}, ${order.customer_email},
-                ${emailTemplate.subject}, ${emailTemplate.htmlContent},
-                ${emailResult.messageId || null}, 
-                ${emailResult.success ? new Date().toISOString() : null}
-              )
+          // For VyronaSocial orders, send emails to all group members
+          if (order.module === 'vyronasocial' && order.metadata?.groupId) {
+            // Fetch all group member emails
+            const groupMembersResult = await db.execute(sql`
+              SELECT u.email, u.username
+              FROM group_members gm
+              JOIN users u ON gm.user_id = u.id
+              WHERE gm.group_id = ${order.metadata.groupId}
+                AND u.email IS NOT NULL
+                AND u.email != ''
             `);
-          } catch (emailLogError) {
-            console.error("Error logging email notification:", emailLogError);
+
+            const groupMembers = groupMembersResult.rows as any[];
+            let successfulEmails = 0;
+
+            // Send email to each group member
+            for (const member of groupMembers) {
+              try {
+                const memberEmailResult = await sendBrevoEmail({
+                  to: member.email,
+                  subject: `[Group Order] ${emailTemplate.subject}`,
+                  htmlContent: emailTemplate.htmlContent.replace(
+                    order.customer_name || 'Customer',
+                    `${member.username} (Group Member)`
+                  )
+                });
+                
+                if (memberEmailResult.success) {
+                  successfulEmails++;
+                }
+
+                // Log each email notification
+                await db.execute(sql`
+                  INSERT INTO email_notifications (
+                    order_id, user_id, email_type, status, recipient_email, 
+                    subject, content, brevo_message_id, sent_at
+                  ) VALUES (
+                    ${parseInt(orderId)}, ${order.user_id}, ${status}, 
+                    ${memberEmailResult.success ? 'sent' : 'failed'}, ${member.email},
+                    ${`[Group Order] ${emailTemplate.subject}`}, ${emailTemplate.htmlContent},
+                    ${memberEmailResult.messageId || null}, 
+                    ${memberEmailResult.success ? new Date().toISOString() : null}
+                  )
+                `);
+              } catch (emailError) {
+                console.error(`Failed to send email to group member ${member.email}:`, emailError);
+              }
+            }
+
+            emailResult = {
+              success: successfulEmails > 0,
+              messageId: `group-${successfulEmails}/${groupMembers.length}`,
+              error: successfulEmails === 0 ? 'Failed to send to any group members' : undefined
+            };
+          } else {
+            // Regular order - send to individual customer
+            emailResult = await sendBrevoEmail({
+              to: order.customer_email,
+              subject: emailTemplate.subject,
+              htmlContent: emailTemplate.htmlContent
+            });
+          }
+
+          // Log email notification in database for non-VyronaSocial orders
+          // (VyronaSocial orders handle logging within their group member loop)
+          if (order.module !== 'vyronasocial') {
+            try {
+              await db.execute(sql`
+                INSERT INTO email_notifications (
+                  order_id, user_id, email_type, status, recipient_email, 
+                  subject, content, brevo_message_id, sent_at
+                ) VALUES (
+                  ${parseInt(orderId)}, ${order.user_id}, ${status}, 
+                  ${emailResult.success ? 'sent' : 'failed'}, ${order.customer_email},
+                  ${emailTemplate.subject}, ${emailTemplate.htmlContent},
+                  ${emailResult.messageId || null}, 
+                  ${emailResult.success ? new Date().toISOString() : null}
+                )
+              `);
+            } catch (emailLogError) {
+              console.error("Error logging email notification:", emailLogError);
+            }
           }
         }
       }
