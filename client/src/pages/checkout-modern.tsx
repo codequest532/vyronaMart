@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { UPIPaymentModal } from "@/components/UPIPaymentModal";
 import {
   ArrowLeft,
   Users,
@@ -176,6 +177,16 @@ export default function ModernCheckout() {
       apiEndpoint: '/api/wallet/pay',
       description: 'Instant & Secure',
       color: 'from-yellow-400 to-orange-500'
+    },
+    {
+      id: 'upi-qr',
+      name: 'UPI QR Code',
+      type: 'upi',
+      icon: 'qr',
+      enabled: true,
+      apiEndpoint: '/api/payments/upi-qr/generate',
+      description: 'Scan & Pay',
+      color: 'from-indigo-400 to-purple-500'
     },
     {
       id: 'googlepay',

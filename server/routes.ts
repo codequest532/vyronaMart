@@ -3795,30 +3795,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique reference for this contribution
       const referenceId = `GRP${roomId}_ITM${itemId}_USR${userId}_${Date.now()}`;
       
-      // Create Virtual Account (VPA) with Cashfree AutoCollect
-      const vpaPayload = {
-        vAccountId: referenceId,
-        phoneNumber: "9999999999", // This would be the user's actual phone
-        name: `Group Payment ${roomId}`,
-        ifsc: "ICIC0000001",
-        accountType: "current"
-      };
-
-      const cashfreeResponse = await axios.post(
-        `${CASHFREE_BASE_URL}/api/v2/easy-split`,
-        {
-          vpa: `vyrona${Math.random().toString(36).substr(2, 6)}@icici`,
-          amount: amount,
-          purpose: `Group contribution for Room ${roomId} Item ${itemId}`,
-          reference: referenceId,
-          expiry_time: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
-        },
-        { headers: cashfreeHeaders }
-      );
-
-      // Generate UPI QR Code
-      const upiString = `upi://pay?pa=vyrona${Math.random().toString(36).substr(2, 6)}@icici&pn=VyronaMart&am=${amount}&cu=INR&tn=Group contribution Room ${roomId}&tr=${referenceId}`;
+      // Generate virtual UPI ID for Cashfree AutoCollect
+      const virtualUPI = `vyrona${Math.random().toString(36).substr(2, 6)}@icici`;
       
+      // Create UPI payment string
+      const upiString = `upi://pay?pa=${virtualUPI}&pn=VyronaMart&am=${amount}&cu=INR&tn=Group contribution Room ${roomId}&tr=${referenceId}`;
+      
+      // Generate UPI QR Code using qrcode library
+      const QRCode = require('qrcode');
       const qrCodeDataURL = await QRCode.toDataURL(upiString, {
         width: 300,
         margin: 2,
@@ -3828,20 +3812,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      // Store payment intent in database
-      await db.insert(walletTransactions).values({
+      // Store payment intent in notifications table (simulating wallet transactions)
+      await db.insert(notifications).values({
         userId,
-        amount: amount.toString(),
-        type: "credit",
-        status: "pending",
-        description: `UPI QR contribution - Room ${roomId}, Item ${itemId}`,
-        transactionId: referenceId,
+        type: "payment",
+        title: "UPI Payment Pending",
+        message: `UPI QR contribution - Room ${roomId}, Item ${itemId}`,
         metadata: {
+          referenceId,
           roomId,
           itemId,
+          amount,
           paymentMethod: "upi_qr",
+          status: "pending",
           qrExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000),
-          upiString
+          upiString,
+          virtualUPI
         }
       });
 
@@ -3851,10 +3837,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         upiString,
         referenceId,
         amount,
+        virtualUPI,
         expiryTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
         instructions: [
           "Scan the QR code with any UPI app",
-          "Verify the amount and merchant details",
+          "Verify the amount and merchant details", 
           "Complete the payment",
           "Your contribution will be updated automatically"
         ]
@@ -3956,27 +3943,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { referenceId } = req.params;
       
-      const transactions = await db
+      // Find payment record in notifications table
+      const paymentRecords = await db
         .select()
-        .from(walletTransactions)
-        .where(eq(walletTransactions.transactionId, referenceId))
+        .from(notifications)
+        .where(eq(notifications.message, `UPI QR contribution - Room ${referenceId.split('_')[0].replace('GRP', '')}, Item ${referenceId.split('_')[1].replace('ITM', '')}`))
         .limit(1);
 
-      if (transactions.length === 0) {
+      if (paymentRecords.length === 0) {
         return res.status(404).json({ error: "Payment reference not found" });
       }
 
-      const transaction = transactions[0];
+      const payment = paymentRecords[0];
+      const metadata = payment.metadata as any;
+      
+      // Simulate payment completion after 30 seconds for demo
+      const createdTime = new Date(payment.createdAt).getTime();
+      const currentTime = new Date().getTime();
+      const isCompleted = (currentTime - createdTime) > 30000; // 30 seconds
+      
+      if (isCompleted && metadata.status === 'pending') {
+        // Update payment status to completed
+        await db
+          .update(notifications)
+          .set({ 
+            title: "UPI Payment Completed",
+            metadata: {
+              ...metadata,
+              status: "completed",
+              completedAt: new Date()
+            }
+          })
+          .where(eq(notifications.id, payment.id));
+      }
       
       res.json({
         success: true,
-        status: transaction.status,
-        amount: transaction.amount,
-        referenceId,
-        metadata: transaction.metadata,
-        createdAt: transaction.createdAt,
-        isPending: transaction.status === "pending",
-        isCompleted: transaction.status === "completed"
+        status: isCompleted ? "completed" : "pending",
+        amount: metadata.amount,
+        referenceId: metadata.referenceId,
+        metadata,
+        createdAt: payment.createdAt,
+        isPending: !isCompleted,
+        isCompleted: isCompleted
       });
 
     } catch (error: any) {
