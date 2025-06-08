@@ -1624,28 +1624,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allOrders = await pool.query(`
         SELECT 
           o.id as order_id,
-          o.customer_id,
+          o.user_id,
           o.total_amount,
-          o.payment_status,
           o.order_status,
-          o.delivery_address,
+          o.module,
+          o.metadata,
           o.created_at,
           u.username as customer_name,
-          u.email as customer_email,
-          s.name as store_name,
-          s.seller_id,
-          seller.username as seller_name,
-          COUNT(DISTINCT ci.id) as total_items,
-          SUM(p.price * ci.quantity) as calculated_total
+          u.email as customer_email
         FROM orders o
-        JOIN users u ON o.customer_id = u.id
-        LEFT JOIN group_contributions gc ON gc.order_id = o.id
-        LEFT JOIN cart_items ci ON ci.room_id = gc.room_id
-        LEFT JOIN products p ON ci.product_id = p.id
-        LEFT JOIN stores s ON p.store_id = s.id
-        LEFT JOIN users seller ON s.seller_id = seller.id
+        JOIN users u ON o.user_id = u.id
         ${whereClause}
-        GROUP BY o.id, u.id, s.id, seller.id
         ORDER BY o.created_at DESC
         LIMIT $${params.length + 1} OFFSET $${params.length + 2}
       `, [...params, limit, offset]);

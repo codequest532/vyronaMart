@@ -684,14 +684,6 @@ export default function SellerDashboard() {
               Books Management
             </Button>
             <Button
-              variant={activeTab === "orders" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("orders")}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Orders
-            </Button>
-            <Button
               variant={activeTab === "customers" ? "default" : "ghost"}
               className="w-full justify-start"
               onClick={() => setActiveTab("customers")}
