@@ -75,11 +75,11 @@ export default function VyronaHubCheckout() {
 
   // Calculate totals
   const subtotal = typedCartItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = subtotal > 50000 ? 0 : 4000; // Free delivery above ₹500
+  const deliveryFee = subtotal > 500 ? 0 : 40; // Free delivery above ₹500
   const total = subtotal + deliveryFee;
 
-  const formatCurrency = (cents: number): string => {
-    return `₹${(cents / 100).toLocaleString('en-IN')}`;
+  const formatCurrency = (amount: number): string => {
+    return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const createOrderMutation = useMutation({
