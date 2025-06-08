@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistance } from "date-fns";
 import { useLocation } from "wouter";
 
-export default function MyVyrona() {
+export default function MyVyronaMart() {
   const [selectedReturnItem, setSelectedReturnItem] = useState<any>(null);
   const [returnReason, setReturnReason] = useState("");
   const [isReturnDialogOpen, setIsReturnDialogOpen] = useState(false);

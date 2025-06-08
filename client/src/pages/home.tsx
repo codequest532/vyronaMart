@@ -1510,11 +1510,11 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* VyronaWallet Management */}
+            {/* VyronaMart Wallet Management */}
             <div className="space-y-6">
-              {/* VyronaWallet Header */}
+              {/* VyronaMart Wallet Header */}
               <div className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">VyronaWallet</h2>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">VyronaMart Wallet</h2>
                 <p className="text-gray-600 dark:text-gray-300">Manage your digital wallet with VyronaCoins, cash balance, and vouchers</p>
               </div>
 
