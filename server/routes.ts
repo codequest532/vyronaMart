@@ -1430,6 +1430,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seller Dashboard - Order Management
+  app.get("/api/seller/orders", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Get orders for seller's products
+      const sellerOrders = await db.execute(sql`
+        SELECT DISTINCT
+          o.id as order_id,
+          o.customer_id,
+          o.total_amount,
+          o.payment_status,
+          o.order_status,
+          o.delivery_address,
+          o.created_at,
+          u.username as customer_name,
+          u.email as customer_email,
+          gc.id as group_id,
+          gc.room_id,
+          string_agg(p.name, ', ') as product_names,
+          sum(ci.quantity) as total_items
+        FROM orders o
+        JOIN users u ON o.customer_id = u.id
+        JOIN cart_items ci ON ci.room_id = ANY(
+          SELECT room_id FROM group_contributions gc WHERE gc.order_id = o.id
+        )
+        JOIN products p ON ci.product_id = p.id
+        WHERE p.store_id IN (
+          SELECT id FROM stores WHERE seller_id = ${user.id}
+        )
+        GROUP BY o.id, u.id, gc.id
+        ORDER BY o.created_at DESC
+      `);
+
+      res.json(sellerOrders.rows);
+    } catch (error) {
+      console.error("Error fetching seller orders:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.get("/api/seller/orders/:orderId/details", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const orderId = parseInt(req.params.orderId);
+      
+      // Get detailed order information
+      const orderDetails = await db.execute(sql`
+        SELECT 
+          o.*,
+          u.username as customer_name,
+          u.email as customer_email,
+          u.phone as customer_phone,
+          p.name as product_name,
+          p.price as product_price,
+          ci.quantity,
+          (p.price * ci.quantity) as line_total
+        FROM orders o
+        JOIN users u ON o.customer_id = u.id
+        JOIN cart_items ci ON ci.room_id = ANY(
+          SELECT room_id FROM group_contributions gc WHERE gc.order_id = o.id
+        )
+        JOIN products p ON ci.product_id = p.id
+        WHERE o.id = ${orderId}
+          AND p.store_id IN (
+            SELECT id FROM stores WHERE seller_id = ${user.id}
+          )
+      `);
+
+      if (orderDetails.rows.length === 0) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      res.json(orderDetails.rows);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.patch("/api/seller/orders/:orderId/status", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const orderId = parseInt(req.params.orderId);
+      const { status, trackingNumber } = req.body;
+
+      // Validate status
+      const validStatuses = ['processing', 'shipped', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      // Update order status
+      await db.execute(sql`
+        UPDATE orders 
+        SET order_status = ${status},
+            tracking_number = ${trackingNumber || null},
+            updated_at = NOW()
+        WHERE id = ${orderId}
+          AND EXISTS (
+            SELECT 1 FROM cart_items ci
+            JOIN products p ON ci.product_id = p.id
+            JOIN stores s ON p.store_id = s.id
+            WHERE s.seller_id = ${user.id}
+              AND ci.room_id = ANY(
+                SELECT room_id FROM group_contributions gc WHERE gc.order_id = ${orderId}
+              )
+          )
+      `);
+
+      // Create notification for customer
+      await db.execute(sql`
+        INSERT INTO notifications (user_id, title, message, type, created_at)
+        SELECT 
+          o.customer_id,
+          'Order Status Updated',
+          'Your order #' || o.id || ' is now ' || ${status},
+          'order_update',
+          NOW()
+        FROM orders o
+        WHERE o.id = ${orderId}
+      `);
+
+      res.json({ success: true, message: "Order status updated successfully" });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Admin Dashboard - All Orders Management
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const { status, dateFrom, dateTo, limit = 50, offset = 0 } = req.query;
+
+      let whereClause = "WHERE 1=1";
+      const params: any[] = [];
+
+      if (status) {
+        whereClause += ` AND o.order_status = $${params.length + 1}`;
+        params.push(status);
+      }
+
+      if (dateFrom) {
+        whereClause += ` AND o.created_at >= $${params.length + 1}`;
+        params.push(dateFrom);
+      }
+
+      if (dateTo) {
+        whereClause += ` AND o.created_at <= $${params.length + 1}`;
+        params.push(dateTo);
+      }
+
+      const allOrders = await pool.query(`
+        SELECT 
+          o.id as order_id,
+          o.customer_id,
+          o.total_amount,
+          o.payment_status,
+          o.order_status,
+          o.delivery_address,
+          o.created_at,
+          u.username as customer_name,
+          u.email as customer_email,
+          s.name as store_name,
+          s.seller_id,
+          seller.username as seller_name,
+          COUNT(DISTINCT ci.id) as total_items,
+          SUM(p.price * ci.quantity) as calculated_total
+        FROM orders o
+        JOIN users u ON o.customer_id = u.id
+        LEFT JOIN group_contributions gc ON gc.order_id = o.id
+        LEFT JOIN cart_items ci ON ci.room_id = gc.room_id
+        LEFT JOIN products p ON ci.product_id = p.id
+        LEFT JOIN stores s ON p.store_id = s.id
+        LEFT JOIN users seller ON s.seller_id = seller.id
+        ${whereClause}
+        GROUP BY o.id, u.id, s.id, seller.id
+        ORDER BY o.created_at DESC
+        LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+      `, [...params, limit, offset]);
+
+      // Get total count for pagination
+      const countResult = await pool.query(`
+        SELECT COUNT(DISTINCT o.id) as total
+        FROM orders o
+        JOIN users u ON o.customer_id = u.id
+        ${whereClause}
+      `, params);
+
+      res.json({
+        orders: allOrders.rows,
+        total: parseInt(countResult.rows[0].total),
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+    } catch (error) {
+      console.error("Error fetching admin orders:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // VyronaSocial - Notifications routes
   app.get("/api/social/notifications/:userId", async (req, res) => {
     try {

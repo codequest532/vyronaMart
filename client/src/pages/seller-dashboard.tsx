@@ -252,6 +252,8 @@ export default function SellerDashboard() {
     queryKey: ["/api/seller/products"],
   });
 
+
+
   const { data: vyronaReadBooks = [] } = useQuery({
     queryKey: ["/api/vyronaread/books"],
     queryFn: () => apiRequest("GET", "/api/products?module=vyronaread"),
@@ -310,8 +312,10 @@ export default function SellerDashboard() {
     });
   };
 
+  // Seller orders data with auto-refresh for new orders
   const { data: sellerOrders = [] } = useQuery({
     queryKey: ["/api/seller/orders"],
+    refetchInterval: 30000, // Refresh every 30 seconds for new orders
   });
 
   const { data: analytics = [] } = useQuery({
@@ -657,6 +661,14 @@ export default function SellerDashboard() {
             >
               <Library className="h-4 w-4 mr-2" />
               Books Management
+            </Button>
+            <Button
+              variant={activeTab === "orders" ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setActiveTab("orders")}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Orders
             </Button>
             <Button
               variant={activeTab === "customers" ? "default" : "ghost"}
