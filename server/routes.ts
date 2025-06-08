@@ -1198,6 +1198,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: { groupCartId, ...req.body }
       };
       const groupOrder = await storage.createOrder(orderData);
+
+      // Send email notification for VyronaSocial group order
+      try {
+        console.log("Sending VyronaSocial group order notification email...");
+        const sellerEmail = 'ganesan.sixphrase@gmail.com';
+        const sellerName = 'MSR';
+        
+        const emailResult = await sendBrevoEmail(
+          sellerEmail,
+          "New Group Order - VyronaSocial",
+          `<h2>New Group Order Notification</h2>
+            <p>Dear ${sellerName},</p>
+            <p>A group order has been placed through VyronaSocial (Order #${groupOrder.id}).</p>
+            <h3>Order Details:</h3>
+            <ul>
+              <li>Group Cart ID: ${groupCartId}</li>
+              <li>Total Amount: ₹${orderData.totalAmount.toFixed(2)}</li>
+              <li>Module: VyronaSocial</li>
+              <li>Status: ${orderData.status.toUpperCase()}</li>
+            </ul>
+            <h3>Order Information:</h3>
+            <p>
+              User ID: ${orderData.userId}<br>
+              Payment Method: ${req.body.paymentMethod || 'Not specified'}<br>
+              Shipping Address: ${req.body.shippingAddress ? 
+                `${req.body.shippingAddress.address}, ${req.body.shippingAddress.city}` : 
+                'Not provided'
+              }
+            </p>
+            <p>This is a collaborative group purchase from VyronaSocial platform.</p>
+            <p>Please log in to your seller dashboard to process this group order.</p>
+            <p>Best regards,<br>VyronaSocial Team</p>`
+        );
+        
+        if (emailResult.success) {
+          console.log(`VyronaSocial group order notification sent successfully to ${sellerEmail}`);
+        } else {
+          console.error(`Failed to send VyronaSocial group order notification:`, emailResult.error);
+        }
+      } catch (emailError) {
+        console.error("VyronaSocial group order email notification failed:", emailError);
+      }
+
       res.json(groupOrder);
     } catch (error) {
       res.status(500).json({ message: "Failed to create group order" });
@@ -3732,6 +3775,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
+      // Send email notification for VyronaRead purchase
+      try {
+        console.log("Sending VyronaRead purchase notification email...");
+        const sellerEmail = 'ganesan.sixphrase@gmail.com';
+        const sellerName = 'MSR';
+        
+        const emailResult = await sendBrevoEmail(
+          sellerEmail,
+          "New Book Purchase - VyronaRead",
+          `<h2>New Book Purchase Notification</h2>
+            <p>Dear ${sellerName},</p>
+            <p>A customer has purchased a book from VyronaRead (Order #${order.id}).</p>
+            <h3>Purchase Details:</h3>
+            <ul>
+              <li>Book ID: ${bookId}</li>
+              <li>Amount: ₹${amount.toFixed(2)}</li>
+              <li>Payment Method: ${paymentMethod.toUpperCase()}</li>
+              <li>Purchase Type: Lifetime Access</li>
+            </ul>
+            <h3>Customer Details:</h3>
+            <p>
+              Name: ${customerInfo.name}<br>
+              Email: ${customerInfo.email}<br>
+              Phone: ${customerInfo.phone}
+            </p>
+            <p>Please log in to your seller dashboard to process this order.</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (emailResult.success) {
+          console.log(`VyronaRead purchase notification sent successfully to ${sellerEmail}`);
+        } else {
+          console.error(`Failed to send VyronaRead purchase notification:`, emailResult.error);
+        }
+      } catch (emailError) {
+        console.error("VyronaRead purchase email notification failed:", emailError);
+      }
+
       res.json({
         success: true,
         orderId: order.id,
@@ -3771,6 +3852,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
+      // Send email notification for VyronaRead rental
+      try {
+        console.log("Sending VyronaRead rental notification email...");
+        const sellerEmail = 'ganesan.sixphrase@gmail.com';
+        const sellerName = 'MSR';
+        
+        const emailResult = await sendBrevoEmail(
+          sellerEmail,
+          "New Book Rental - VyronaRead",
+          `<h2>New Book Rental Notification</h2>
+            <p>Dear ${sellerName},</p>
+            <p>A customer has rented a book from VyronaRead (Order #${order.id}).</p>
+            <h3>Rental Details:</h3>
+            <ul>
+              <li>Book ID: ${bookId}</li>
+              <li>Rental Amount: ₹${amount.toFixed(2)}</li>
+              <li>Duration: ${duration} days</li>
+              <li>Payment Method: ${paymentMethod.toUpperCase()}</li>
+              <li>Rental Expires: ${expiryDate.toLocaleDateString()}</li>
+            </ul>
+            <h3>Customer Details:</h3>
+            <p>
+              Name: ${customerInfo.name}<br>
+              Email: ${customerInfo.email}<br>
+              Phone: ${customerInfo.phone}
+            </p>
+            <p>Please log in to your seller dashboard to process this rental order.</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (emailResult.success) {
+          console.log(`VyronaRead rental notification sent successfully to ${sellerEmail}`);
+        } else {
+          console.error(`Failed to send VyronaRead rental notification:`, emailResult.error);
+        }
+      } catch (emailError) {
+        console.error("VyronaRead rental email notification failed:", emailError);
+      }
+
       res.json({
         success: true,
         orderId: order.id,
@@ -3804,6 +3924,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           requestDate: new Date().toISOString()
         }
       });
+
+      // Send email notification for VyronaRead borrowing request
+      try {
+        console.log("Sending VyronaRead borrowing request notification email...");
+        const sellerEmail = 'ganesan.sixphrase@gmail.com';
+        const sellerName = 'MSR';
+        
+        const emailResult = await sendBrevoEmail(
+          sellerEmail,
+          "New Book Borrowing Request - VyronaRead",
+          `<h2>New Book Borrowing Request</h2>
+            <p>Dear ${sellerName},</p>
+            <p>A customer has submitted a borrowing request from VyronaRead (Request #${order.id}).</p>
+            <h3>Borrowing Details:</h3>
+            <ul>
+              <li>Book ID: ${bookId}</li>
+              <li>Request Type: Library Borrowing</li>
+              <li>Status: Pending Approval</li>
+              <li>Expected Duration: ${borrowingInfo?.duration || 'Not specified'} days</li>
+            </ul>
+            <h3>Customer Details:</h3>
+            <p>
+              Name: ${customerInfo.name}<br>
+              Email: ${customerInfo.email}<br>
+              Phone: ${customerInfo.phone}<br>
+              Library ID: ${borrowingInfo?.libraryId || 'Not provided'}
+            </p>
+            <p>Please review and approve this borrowing request in your seller dashboard.</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (emailResult.success) {
+          console.log(`VyronaRead borrowing notification sent successfully to ${sellerEmail}`);
+        } else {
+          console.error(`Failed to send VyronaRead borrowing notification:`, emailResult.error);
+        }
+      } catch (emailError) {
+        console.error("VyronaRead borrowing email notification failed:", emailError);
+      }
 
       res.json({
         success: true,
