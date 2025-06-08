@@ -35,7 +35,8 @@ import {
   Shield,
   Sparkles,
   Flame,
-  Gem
+  Gem,
+  QrCode
 } from "lucide-react";
 
 // Interfaces (same as original)
@@ -60,7 +61,7 @@ interface ItemContributor {
   userId: number;
   username: string;
   amount: number;
-  paymentMethod: 'wallet' | 'googlepay' | 'phonepe' | 'cod';
+  paymentMethod: 'wallet' | 'googlepay' | 'phonepe' | 'cod' | 'upi';
   status: 'pending' | 'contributed' | 'confirmed';
   transactionId?: string;
 }
@@ -68,7 +69,7 @@ interface ItemContributor {
 interface PaymentMethod {
   id: string;
   name: string;
-  type: 'wallet' | 'googlepay' | 'phonepe' | 'cod';
+  type: 'wallet' | 'googlepay' | 'phonepe' | 'cod' | 'upi';
   icon: string;
   enabled: boolean;
   requiresFullPayment?: boolean;
@@ -132,6 +133,13 @@ export default function ModernCheckout() {
   const [selectedItem, setSelectedItem] = useState<OrderItem | null>(null);
   const [isContributionModalOpen, setIsContributionModalOpen] = useState(false);
   const [contributionAmount, setContributionAmount] = useState("");
+  const [showUPIModal, setShowUPIModal] = useState(false);
+  const [upiPaymentDetails, setUpiPaymentDetails] = useState<{
+    roomId: number;
+    itemId: number;
+    amount: number;
+    userId: number;
+  } | null>(null);
 
   // Data fetching
   const { data: cartItemsResponse } = useQuery({
@@ -291,6 +299,17 @@ export default function ModernCheckout() {
           return;
         }
         transactionId = `wallet_${Date.now()}`;
+      } else if (paymentMethod.type === 'upi') {
+        // Handle UPI QR code payment
+        setUpiPaymentDetails({
+          roomId: roomId,
+          itemId: itemId,
+          amount: amount,
+          userId: 1 // Current user ID
+        });
+        setShowUPIModal(true);
+        setIsContributionModalOpen(false);
+        return;
       } else if (paymentMethod.type === 'googlepay') {
         transactionId = `gpay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       } else if (paymentMethod.type === 'phonepe') {
@@ -352,6 +371,49 @@ export default function ModernCheckout() {
   const handleContributeClick = (item: OrderItem) => {
     setSelectedItem(item);
     setIsContributionModalOpen(true);
+  };
+
+  // Handle UPI payment success
+  const handleUPIPaymentSuccess = async (referenceId: string) => {
+    if (!upiPaymentDetails) return;
+
+    try {
+      // Save contribution to backend
+      const contributionResponse = await fetch(`/api/groups/${roomId}/contributions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          cartItemId: upiPaymentDetails.itemId,
+          amount: Math.round(upiPaymentDetails.amount * 100), // Convert to cents
+          paymentMethod: 'upi',
+          transactionId: referenceId,
+          userId: upiPaymentDetails.userId
+        }),
+      });
+
+      if (contributionResponse.ok) {
+        toast({
+          title: "Contribution Added!",
+          description: `₹${upiPaymentDetails.amount} contributed successfully via UPI`,
+        });
+        
+        // Refresh contributions data
+        refetchContributions();
+        setContributionAmount("");
+        setUpiPaymentDetails(null);
+      } else {
+        throw new Error('Failed to save contribution');
+      }
+    } catch (error) {
+      console.error('Error saving UPI contribution:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save contribution. Please contact support.",
+        variant: "destructive",
+      });
+    }
   };
 
   // Debug logging
