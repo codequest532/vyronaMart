@@ -1613,18 +1613,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate status progression (prevent skipping stages)
       const statusProgression = ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
-      const currentIndex = statusProgression.indexOf(order.status);
+      const currentIndex = statusProgression.indexOf(order.status || order.order_status || 'pending');
       const newIndex = statusProgression.indexOf(status);
       
-      if (status !== 'cancelled' && newIndex <= currentIndex) {
+      // Allow updating from pending/null to any valid status, or normal progression
+      if (status !== 'cancelled' && currentIndex > 0 && newIndex <= currentIndex) {
         return res.status(400).json({ message: "Cannot go backwards in order status progression" });
       }
 
       // Update order status
       await db.execute(sql`
         UPDATE orders 
-        SET status = ${status}
-        WHERE id = ${orderId}
+        SET order_status = ${status}
+        WHERE id = ${parseInt(orderId)}
       `);
 
       // Send automated email based on status
