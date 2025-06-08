@@ -81,7 +81,7 @@ export default function VyronaHubCheckout() {
   }));
 
   // Calculate totals
-  const subtotal = typedCartItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
+  const subtotal = typedCartItems.reduce((sum: number, item: CheckoutCartItem) => sum + (item.price * item.quantity), 0);
   const deliveryFee = subtotal > 500 ? 0 : 40; // Free delivery above ₹500
   const total = subtotal + deliveryFee;
 
@@ -95,6 +95,7 @@ export default function VyronaHubCheckout() {
       return response.json();
     },
     onSuccess: (data) => {
+      clearCart(); // Clear client-side cart
       toast({
         title: "Order Placed Successfully!",
         description: `Your order #${data.id} has been confirmed.`,
@@ -127,7 +128,7 @@ export default function VyronaHubCheckout() {
     setIsSubmitting(true);
     try {
       const orderData = {
-        items: typedCartItems.map((item: CartItem) => ({
+        items: typedCartItems.map((item: CheckoutCartItem) => ({
           productId: item.id,
           quantity: item.quantity,
           price: item.price,
@@ -461,7 +462,7 @@ export default function VyronaHubCheckout() {
                   <div>
                     <h3 className="font-medium mb-2">Order Items</h3>
                     <div className="space-y-3">
-                      {typedCartItems.map((item: CartItem) => (
+                      {typedCartItems.map((item: CheckoutCartItem) => (
                         <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center space-x-3">
                             {item.imageUrl && (
@@ -506,7 +507,7 @@ export default function VyronaHubCheckout() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  {typedCartItems.map((item: CartItem) => (
+                  {typedCartItems.map((item: CheckoutCartItem) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span>{item.name} x{item.quantity}</span>
                       <span>{formatCurrency(item.price * item.quantity)}</span>
