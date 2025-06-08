@@ -3697,31 +3697,112 @@ export default function SellerDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <label className="text-sm font-medium text-gray-600 mb-2 block">Update Status</label>
-                      <select 
-                        value={selectedOrder.order_status || selectedOrder.status}
-                        onChange={(e) => {
-                          updateOrderStatusMutation.mutate({
-                            orderId: selectedOrder.order_id || selectedOrder.id,
-                            status: e.target.value
-                          });
-                        }}
-                        className="w-full text-sm border rounded-lg px-3 py-2"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Current Status:</span>
+                      <Badge variant={
+                        selectedOrder.status === 'delivered' ? 'default' :
+                        selectedOrder.status === 'out_for_delivery' ? 'secondary' :
+                        selectedOrder.status === 'shipped' ? 'outline' : 
+                        selectedOrder.status === 'processing' ? 'secondary' : 'destructive'
+                      }>
+                        {selectedOrder.status === 'out_for_delivery' ? 'Out for Delivery' : 
+                         selectedOrder.status?.charAt(0).toUpperCase() + selectedOrder.status?.slice(1) || 'Pending'}
+                      </Badge>
                     </div>
-                    <div className="flex gap-2">
+                    
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-gray-700">Progress to Next Stage (Sends Email):</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedOrder.status !== 'processing' && selectedOrder.status !== 'shipped' && selectedOrder.status !== 'out_for_delivery' && selectedOrder.status !== 'delivered' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'processing'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            📧 Start Processing
+                          </Button>
+                        )}
+                        
+                        {selectedOrder.status === 'processing' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-600 border-green-200 hover:bg-green-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'shipped'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            📦 Mark as Shipped
+                          </Button>
+                        )}
+                        
+                        {selectedOrder.status === 'shipped' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'out_for_delivery'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            🚚 Out for Delivery
+                          </Button>
+                        )}
+                        
+                        {selectedOrder.status === 'out_for_delivery' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'delivered'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            ✅ Mark as Delivered
+                          </Button>
+                        )}
+                        
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateOrderStatusMutation.mutate({
+                            orderId: selectedOrder.order_id || selectedOrder.id,
+                            status: 'cancelled'
+                          })}
+                          disabled={updateOrderStatusMutation.isPending}
+                        >
+                          ❌ Cancel Order
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h5 className="text-sm font-medium text-blue-800 mb-2">Email Workflow Stages:</h5>
+                      <div className="text-xs text-blue-700 space-y-1">
+                        <div>1. Processing → "Order Confirmed" email</div>
+                        <div>2. Shipped → "Order Shipped" email</div>
+                        <div>3. Out for Delivery → "Arriving Today" email</div>
+                        <div>4. Delivered → "Order Delivered" email</div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-3 border-t">
                       <Button 
                         variant="outline"
+                        size="sm"
                         onClick={() => {
-                          // Add functionality for printing order
                           window.print();
                         }}
                       >
@@ -3730,8 +3811,8 @@ export default function SellerDashboard() {
                       </Button>
                       <Button 
                         variant="outline"
+                        size="sm"
                         onClick={() => {
-                          // Add functionality for downloading receipt
                           console.log('Download receipt for order:', selectedOrder.order_id || selectedOrder.id);
                         }}
                       >
