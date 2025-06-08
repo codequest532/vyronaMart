@@ -84,7 +84,41 @@ export default function OrderSuccess() {
   }, [setLocation]);
 
   const handleContinueShopping = () => {
-    setLocation('/vyronahub');
+    if (!orderData) {
+      setLocation('/vyronahub');
+      return;
+    }
+    
+    switch (orderData.module) {
+      case 'vyronasocial':
+        setLocation('/social');
+        break;
+      case 'vyronaread':
+        setLocation('/vyronaread');
+        break;
+      case 'vyronahub':
+      default:
+        setLocation('/vyronahub');
+        break;
+    }
+  };
+
+  const getModuleDisplayName = (module: string) => {
+    switch (module) {
+      case 'vyronasocial': return 'VyronaSocial';
+      case 'vyronaread': return 'VyronaRead';
+      case 'vyronahub': return 'VyronaHub';
+      default: return 'Vyrona';
+    }
+  };
+
+  const getModuleIcon = (module: string) => {
+    switch (module) {
+      case 'vyronasocial': return '👥';
+      case 'vyronaread': return '📚';
+      case 'vyronahub': return '🛍️';
+      default: return '🏪';
+    }
   };
 
   if (!orderData) {
@@ -129,81 +163,195 @@ export default function OrderSuccess() {
             <div className="text-center">
               <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-semibold text-green-800 dark:text-green-400 mb-2">
-                Your order has been placed successfully!
+                Your {getModuleDisplayName(orderData.module)} order has been placed successfully!
               </h2>
               <p className="text-green-700 dark:text-green-300">
-                Order #{orderData.orderId} • Placed on {new Date(orderData.orderDate).toLocaleDateString()}
+                Order #{orderData.orderId} • Placed on {new Date(orderData.orderDate || orderData.timestamp || new Date().toISOString()).toLocaleDateString()}
               </p>
+              <div className="flex items-center justify-center mt-3">
+                <span className="text-2xl mr-2">{getModuleIcon(orderData.module)}</span>
+                <Badge className="bg-green-600 text-white">
+                  {getModuleDisplayName(orderData.module)}
+                </Badge>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Order Items */}
+          {/* Main Content */}
           <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Package className="h-5 w-5 mr-2" />
-                  Order Items
-                </CardTitle>
-                <CardDescription>
-                  {orderData.items.length} item{orderData.items.length > 1 ? 's' : ''} in your order
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {orderData.items.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 dark:text-white">{item.name}</h4>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Quantity: {item.quantity}</p>
+            {/* VyronaHub Order Items */}
+            {orderData.module === 'vyronahub' && orderData.items && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Package className="h-5 w-5 mr-2" />
+                    Order Items
+                  </CardTitle>
+                  <CardDescription>
+                    {orderData.items.length} item{orderData.items.length > 1 ? 's' : ''} in your order
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {orderData.items.map((item, index) => (
+                      <div key={index} className="flex justify-between items-center p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 dark:text-white">{item.name}</h4>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Quantity: {item.quantity}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-gray-900 dark:text-white">
+                            ₹{(item.price * item.quantity).toFixed(2)}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            ₹{item.price.toFixed(2)} each
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-gray-900 dark:text-white">
-                          ₹{(item.price * item.quantity).toFixed(2)}
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          ₹{item.price.toFixed(2)} each
-                        </p>
-                      </div>
+                    ))}
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
+                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      ₹{(orderData.totalAmount || 0).toFixed(2)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* VyronaSocial Group Order */}
+            {orderData.module === 'vyronasocial' && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Package className="h-5 w-5 mr-2" />
+                    Group Order Details
+                  </CardTitle>
+                  <CardDescription>
+                    Collaborative shopping order from {orderData.roomDetails?.name}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                      <h4 className="font-medium text-purple-900 dark:text-purple-100">Room Information</h4>
+                      <p className="text-sm text-purple-700 dark:text-purple-300">
+                        Room: {orderData.roomDetails?.name} • Code: {orderData.roomDetails?.roomCode}
+                      </p>
+                      <p className="text-sm text-purple-700 dark:text-purple-300">
+                        Members: {orderData.roomDetails?.memberCount || 1}
+                      </p>
                     </div>
-                  ))}
-                </div>
-                
-                <Separator className="my-4" />
-                
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    ₹{orderData.totalAmount.toFixed(2)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                    
+                    {orderData.items && orderData.items.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Items Ordered</h4>
+                        {orderData.items.map((item: any, index: number) => (
+                          <div key={index} className="flex justify-between items-center p-3 border rounded">
+                            <span>{item.name}</span>
+                            <span>₹{(item.price * (item.quantity || 1)).toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <Separator className="my-4" />
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
+                      <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        ₹{(orderData.totalAmount || orderData.amount || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* VyronaRead Book Order */}
+            {orderData.module === 'vyronaread' && orderData.bookDetails && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Package className="h-5 w-5 mr-2" />
+                    Book Order Details
+                  </CardTitle>
+                  <CardDescription>
+                    {orderData.orderType === 'rent' ? 'Book Rental' : 
+                     orderData.orderType === 'borrow' ? 'Library Borrowing' : 'Book Purchase'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                      <h4 className="font-medium text-blue-900 dark:text-blue-100">{orderData.bookDetails.name}</h4>
+                      {orderData.bookDetails.author && (
+                        <p className="text-sm text-blue-700 dark:text-blue-300">by {orderData.bookDetails.author}</p>
+                      )}
+                      <Badge className="mt-2 bg-blue-600 text-white">
+                        {orderData.bookDetails.type.toUpperCase()}
+                      </Badge>
+                    </div>
+                    
+                    {orderData.orderType === 'rent' && orderData.rentalDuration && (
+                      <div className="p-3 border rounded">
+                        <h5 className="font-medium">Rental Duration</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{orderData.rentalDuration} days</p>
+                      </div>
+                    )}
+                    
+                    {orderData.customerInfo && (
+                      <div className="p-3 border rounded">
+                        <h5 className="font-medium">Customer Information</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{orderData.customerInfo.fullName}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{orderData.customerInfo.email}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{orderData.customerInfo.phone}</p>
+                      </div>
+                    )}
+                    
+                    <Separator className="my-4" />
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
+                      <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                        ₹{(orderData.amount || orderData.totalAmount || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Order Details Sidebar */}
           <div className="space-y-6">
-            {/* Delivery Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Delivery Address
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm">
-                  <p className="font-medium text-gray-900 dark:text-white">{orderData.shippingAddress.fullName}</p>
-                  <p className="text-gray-600 dark:text-gray-300">{orderData.shippingAddress.phoneNumber}</p>
-                  <p className="text-gray-600 dark:text-gray-300">{orderData.shippingAddress.address}</p>
-                  <p className="text-gray-600 dark:text-gray-300">
-                    {orderData.shippingAddress.city}, {orderData.shippingAddress.state} - {orderData.shippingAddress.pincode}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Delivery Information - VyronaHub */}
+            {orderData.module === 'vyronahub' && orderData.shippingAddress && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <MapPin className="h-5 w-5 mr-2" />
+                    Delivery Address
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    <p className="font-medium text-gray-900 dark:text-white">{orderData.shippingAddress.fullName}</p>
+                    <p className="text-gray-600 dark:text-gray-300">{orderData.shippingAddress.phoneNumber}</p>
+                    <p className="text-gray-600 dark:text-gray-300">{orderData.shippingAddress.address}</p>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      {orderData.shippingAddress.city}, {orderData.shippingAddress.state} - {orderData.shippingAddress.pincode}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Payment Information */}
             <Card>
@@ -220,20 +368,29 @@ export default function OrderSuccess() {
               </CardContent>
             </Card>
 
-            {/* Estimated Delivery */}
+            {/* Processing Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Clock className="h-5 w-5 mr-2" />
-                  Estimated Delivery
+                  {orderData.module === 'vyronaread' ? 'Processing Time' : 'Estimated Delivery'}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {orderData.paymentMethod === 'cod' ? '5-7 business days' : '3-5 business days'}
+                  {orderData.module === 'vyronaread' 
+                    ? (orderData.orderType === 'rent' ? '1-2 hours for rental activation' : 
+                       orderData.orderType === 'borrow' ? '24 hours for library processing' : '3-5 business days')
+                    : orderData.module === 'vyronasocial'
+                    ? '2-5 business days for group orders'
+                    : (orderData.paymentMethod === 'cod' ? '5-7 business days' : '3-5 business days')
+                  }
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  You will receive tracking information via email
+                  {orderData.module === 'vyronaread' 
+                    ? 'You will receive access information via email'
+                    : 'You will receive tracking information via email'
+                  }
                 </p>
               </CardContent>
             </Card>
