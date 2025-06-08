@@ -28,6 +28,7 @@ import EbookReader from "@/pages/ebook-reader";
 
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
+import { useEffect } from "react";
 
 function Router() {
   const { user, isLoading } = useUserData();
@@ -94,6 +95,28 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    // Global error handler for unhandled promise rejections
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.warn('Unhandled promise rejection:', event.reason);
+      // Prevent the default behavior (showing in console as error)
+      event.preventDefault();
+    };
+
+    // Global error handler for JavaScript errors
+    const handleError = (event: ErrorEvent) => {
+      console.warn('Global error:', event.error);
+    };
+
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

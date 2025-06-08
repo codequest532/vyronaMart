@@ -341,7 +341,10 @@ export default function VyronaSocial() {
         method: "POST",
         body: formData,
       });
-      if (!response.ok) throw new Error('Failed to upload file');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to upload file');
+      }
       return response.json();
     },
     onSuccess: () => {
