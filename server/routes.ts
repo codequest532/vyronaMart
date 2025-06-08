@@ -126,15 +126,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = orderResult[0].id;
 
       // Send seller notifications for each item
+      console.log("Starting email notification process...");
       try {
         const sellerEmails = new Set<string>();
 
+        console.log("Processing items for email notifications:", items.length);
         for (const item of items) {
           const productResult = await db.execute(sql`
             SELECT 
               p.name as productName,
-              'admin@vyrona.com' as sellerEmail,
-              'Vyrona Team' as sellerName
+              'ganesan.sixphrase@gmail.com' as sellerEmail,
+              'MSR' as sellerName
             FROM products p 
             WHERE p.id = ${item.productId}
             LIMIT 1
@@ -144,7 +146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             sellerEmails.add(productResult[0].sellerEmail);
             
             // Send seller notification
-            await sendBrevoEmail(
+            console.log(`Attempting to send email to seller: ${productResult[0].sellerEmail}`);
+            const emailResult = await sendBrevoEmail(
               productResult[0].sellerEmail,
               "New Order Received - VyronaHub",
               `<h2>New Order Notification</h2>
@@ -153,10 +156,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 <h3>Order Details:</h3>
                 <ul>
                   ${items.filter((orderItem: any) => orderItem.productId === item.productId).map((orderItem: any) => 
-                    `<li>${orderItem.name || productResult[0].productName} - Quantity: ${orderItem.quantity} - Price: ₹${(orderItem.price / 100).toFixed(2)}</li>`
+                    `<li>${orderItem.name || productResult[0].productName} - Quantity: ${orderItem.quantity} - Price: ₹${orderItem.price.toFixed(2)}</li>`
                   ).join('')}
                 </ul>
-                <p><strong>Total Amount: ₹${(orderTotal / 100).toFixed(2)}</strong></p>
+                <p><strong>Total Amount: ₹${orderTotal.toFixed(2)}</strong></p>
                 <h3>Customer Details:</h3>
                 <p>
                   Name: ${shippingAddress.fullName}<br>
@@ -167,6 +170,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 <p>Please log in to your seller dashboard to process this order.</p>
                 <p>Best regards,<br>VyronaHub Team</p>`
             );
+            
+            if (emailResult.success) {
+              console.log(`Seller notification email sent successfully to ${productResult[0].sellerEmail}`);
+            } else {
+              console.error(`Failed to send seller notification email: ${emailResult.error}`);
+            }
           }
         }
 
