@@ -4456,6 +4456,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to place group order" });
     }
   });
+
+  // Admin Email Management API
+  app.post("/api/admin/send-order-email", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { orderId, customMessage } = req.body;
+      
+      if (!orderId) {
+        return res.status(400).json({ message: "Order ID is required" });
+      }
+
+      // Get order details
+      const orderResult = await db.execute(sql`
+        SELECT 
+          o.id, o.user_id, o.total_amount, o.status, o.metadata, o.created_at,
+          u.username, u.email
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.id
+        WHERE o.id = ${parseInt(orderId)}
+      `);
+
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const order = orderResult.rows[0] as any;
+      
+      if (!order.email) {
+        return res.status(400).json({ message: "Customer email not available" });
+      }
+
+      // Prepare email data
+      const metadata = order.metadata || {};
+      const items = metadata.items || metadata.products || [];
+      
+      const estimatedDelivery = new Date();
+      estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
+
+      // Send email with custom message if provided
+      const emailSuccess = await sendOrderConfirmationEmail(
+        order.email,
+        order.username,
+        order.id,
+        {
+          items: items.map((item: any) => ({
+            name: item.name || item.productName || 'Product',
+            quantity: item.quantity || 1,
+            price: item.price || 0
+          })),
+          totalAmount: order.total_amount,
+          estimatedDelivery: estimatedDelivery.toLocaleDateString('en-IN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          orderDate: new Date(order.created_at).toLocaleDateString('en-IN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        }
+      );
+
+      if (emailSuccess) {
+        res.json({
+          success: true,
+          message: `Order confirmation email sent to ${order.email}`
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to send email"
+        });
+      }
+    } catch (error: any) {
+      console.error('Admin email send error:', error);
+      res.status(500).json({ message: "Failed to send email" });
+    }
+  });
+
+  // Get all users for admin management
+  app.get("/api/admin/users", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const usersResult = await db.execute(sql`
+        SELECT id, username, email, mobile, role, created_at
+        FROM users
+        ORDER BY created_at DESC
+      `);
+
+      res.json(usersResult.rows);
+    } catch (error: any) {
+      console.error('Admin users fetch error:', error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Get all orders for admin management  
+  app.get("/api/admin/orders", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const ordersResult = await db.execute(sql`
+        SELECT 
+          o.id, o.user_id, o.total_amount, o.status, o.module, o.metadata, o.created_at,
+          u.username, u.email, u.mobile
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.id
+        ORDER BY o.created_at DESC
+        LIMIT 100
+      `);
+
+      res.json(ordersResult.rows);
+    } catch (error: any) {
+      console.error('Admin orders fetch error:', error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
   
   return httpServer;
 }

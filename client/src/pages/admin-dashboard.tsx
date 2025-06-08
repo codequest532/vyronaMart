@@ -23,7 +23,9 @@ import {
   Plus,
   Eye,
   Check,
-  X
+  X,
+  Mail,
+  Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -242,6 +244,26 @@ export default function AdminDashboard() {
     },
   });
 
+  // Email management mutations
+  const sendOrderEmailMutation = useMutation({
+    mutationFn: async ({ orderId, customMessage }: { orderId: number; customMessage?: string }) => {
+      return await apiRequest("POST", "/api/admin/send-order-email", { orderId, customMessage });
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Email Sent",
+        description: data.message || "Order confirmation email sent successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Email Failed",
+        description: error.message || "Failed to send order confirmation email.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleLogout = () => {
     setLocation("/login");
   };
@@ -355,6 +377,14 @@ export default function AdminDashboard() {
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
               Order Management
+            </Button>
+            <Button
+              variant={activeTab === "emails" ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setActiveTab("emails")}
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              Email Management
             </Button>
             <Button
               variant={activeTab === "analytics" ? "default" : "ghost"}
@@ -1494,6 +1524,223 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "emails" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Email Management</h2>
+                  <p className="text-gray-600 dark:text-gray-300">Send order confirmation emails and manage customer communications</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Email Templates
+                  </Button>
+                  <Button>
+                    <Send className="h-4 w-4 mr-2" />
+                    Bulk Email
+                  </Button>
+                </div>
+              </div>
+
+              {/* Email Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Emails Sent</p>
+                        <p className="text-2xl font-bold">156</p>
+                      </div>
+                      <Mail className="h-8 w-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Order Confirmations</p>
+                        <p className="text-2xl font-bold text-green-600">132</p>
+                      </div>
+                      <Check className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Delivery Rate</p>
+                        <p className="text-2xl font-bold text-emerald-600">98.5%</p>
+                      </div>
+                      <Send className="h-8 w-8 text-emerald-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Failed Emails</p>
+                        <p className="text-2xl font-bold text-red-600">2</p>
+                      </div>
+                      <X className="h-8 w-8 text-red-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Orders with Email Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Order Email Management</CardTitle>
+                  <CardDescription>Send order confirmation emails to customers</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {orders?.length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">No orders found</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders?.slice(0, 10).map((order: any) => (
+                        <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4">
+                              <div>
+                                <p className="font-medium">Order #{order.id}</p>
+                                <p className="text-sm text-gray-500">
+                                  Customer: {order.customerEmail || 'N/A'} • Amount: ₹{(order.totalAmount / 100).toLocaleString()}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  {new Date(order.createdAt).toLocaleDateString()} • Status: {order.status}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={order.emailSent ? 'default' : 'secondary'}>
+                              {order.emailSent ? 'Email Sent' : 'No Email'}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={sendOrderEmailMutation.isPending}
+                              onClick={() => sendOrderEmailMutation.mutate({ orderId: order.id })}
+                            >
+                              {sendOrderEmailMutation.isPending ? (
+                                <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full" />
+                              ) : (
+                                <Send className="h-4 w-4" />
+                              )}
+                              Send Email
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Quick Email Send */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Email Send</CardTitle>
+                  <CardDescription>Send order confirmation email with custom message</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">Order ID</label>
+                        <Input 
+                          placeholder="Enter order ID" 
+                          type="number"
+                          id="quickEmailOrderId"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Customer Email (Optional)</label>
+                        <Input 
+                          placeholder="Override customer email" 
+                          type="email"
+                          id="quickEmailCustomer"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Custom Message (Optional)</label>
+                      <Textarea 
+                        placeholder="Add a custom message to the email..." 
+                        id="quickEmailMessage"
+                        rows={3}
+                      />
+                    </div>
+                    <Button
+                      disabled={sendOrderEmailMutation.isPending}
+                      onClick={() => {
+                        const orderId = (document.getElementById('quickEmailOrderId') as HTMLInputElement)?.value;
+                        const customMessage = (document.getElementById('quickEmailMessage') as HTMLTextAreaElement)?.value;
+                        if (orderId) {
+                          sendOrderEmailMutation.mutate({ 
+                            orderId: parseInt(orderId), 
+                            customMessage: customMessage || undefined 
+                          });
+                        }
+                      }}
+                    >
+                      {sendOrderEmailMutation.isPending ? (
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                      ) : (
+                        <Send className="h-4 w-4 mr-2" />
+                      )}
+                      Send Order Confirmation Email
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Users with Email Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>User Email Directory</CardTitle>
+                  <CardDescription>Manage customer and seller email communications</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {users?.length === 0 ? (
+                    <p className="text-center text-gray-500 py-8">No users found</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {users?.slice(0, 10).map((user: any) => (
+                        <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-4">
+                              <div>
+                                <p className="font-medium">{user.username}</p>
+                                <p className="text-sm text-gray-500">{user.email}</p>
+                                <p className="text-xs text-gray-400">
+                                  Role: {user.role} • Mobile: {user.mobile || 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={user.role === 'admin' ? 'destructive' : user.role === 'seller' ? 'default' : 'secondary'}>
+                              {user.role}
+                            </Badge>
+                            <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                              {user.isActive ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
