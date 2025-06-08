@@ -110,8 +110,8 @@ interface CheckoutState {
 }
 
 export default function ModernCheckout() {
-  const { id } = useParams();
-  const roomId = id ? Number(id) : null;
+  const { roomId: roomIdParam } = useParams();
+  const roomId = roomIdParam ? Number(roomIdParam) : null;
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -343,12 +343,32 @@ export default function ModernCheckout() {
     setIsContributionModalOpen(true);
   };
 
-  if (!room) {
+  // Debug logging
+  console.log("Room ID:", roomId);
+  console.log("Rooms Response:", roomsResponse);
+  console.log("Room found:", room);
+  console.log("Cart Items:", cartItems);
+
+  if (!roomId || !roomsResponse) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto"></div>
           <p className="text-gray-600">Loading your group checkout...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!room) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-red-600 text-xl font-semibold">Group Not Found</div>
+          <p className="text-gray-600">The group with ID {roomId} could not be found.</p>
+          <Button onClick={() => setLocation("/social")} className="mt-4">
+            Back to Groups
+          </Button>
         </div>
       </div>
     );
