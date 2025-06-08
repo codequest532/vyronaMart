@@ -25,18 +25,12 @@ export default function Landing() {
     queryKey: ["/api/stores"],
   });
 
-  // Get products by module
-  const vyronaMartProducts = products?.filter(p => p.module !== "vyronaread" && p.module !== "vyronahub" && p.module !== "vyronasocial") || [];
-  const vyronaReadProducts = products?.filter(p => p.module === "vyronaread" || p.category === "books" || p.category === "library-books") || [];
-  const vyronaHubProducts = products?.filter(p => p.module === "vyronahub") || [];
-  const vyronaSocialProducts = products?.filter(p => p.module === "vyronasocial") || [];
-  const localStores = stores?.filter(s => s.type === "kirana") || [];
-
-  // Get products by category for filtering
+  // Get products by category
   const electronicsProducts = products?.filter(p => p.category === "electronics") || [];
   const fashionProducts = products?.filter(p => p.category === "fashion") || [];
   const homeProducts = products?.filter(p => p.category === "home") || [];
-  const booksProducts = vyronaReadProducts;
+  const booksProducts = products?.filter(p => p.module === "vyronaread") || [];
+  const localStores = stores?.filter(s => s.type === "kirana") || [];
 
   // Filter products based on search and category
   const getFilteredProducts = () => {
@@ -226,193 +220,57 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* VyronaMart Modules Section */}
+        {/* Featured Categories Section */}
         <div className="mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Explore VyronaMart Universe</h2>
           
-          {/* VyronaMart Products */}
-          {vyronaMartProducts.length > 0 && (
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className="bg-blue-500 rounded-lg p-3 mr-4">
-                    <ShoppingBag className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-800">VyronaMart</h3>
-                    <p className="text-gray-600">Everything you need in one place</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  {vyronaMartProducts.length} Products
-                </Badge>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {vyronaMartProducts.slice(0, 4).map((product) => (
-                  <Card key={product.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
-                    <CardContent className="p-0">
-                      <div className="aspect-square bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                        {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="text-center">
-                            <ShoppingBag className="h-12 w-12 text-blue-400 mx-auto mb-2" />
-                            <span className="text-2xl">
-                              {product.category === "electronics" ? "📱" : product.category === "fashion" ? "👕" : "🏠"}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-sm mb-1 line-clamp-2">{product.name}</h4>
-                        <p className="text-xs text-gray-600 mb-2 line-clamp-1">{product.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-blue-600">{formatPrice(product.price)}</span>
-                          <Badge variant="outline" className="text-xs capitalize">{product.category}</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* VyronaRead Products */}
-          {vyronaReadProducts.length > 0 && (
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className="bg-green-500 rounded-lg p-3 mr-4">
-                    <BookOpen className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-800">VyronaRead</h3>
-                    <p className="text-gray-600">Digital library & educational content</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  {vyronaReadProducts.length} Books
-                </Badge>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {vyronaReadProducts.slice(0, 4).map((product) => (
-                  <Card key={product.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
-                    <CardContent className="p-0">
-                      <div className="aspect-square bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
-                        {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="text-center">
-                            <BookOpen className="h-12 w-12 text-green-400 mx-auto mb-2" />
-                            <span className="text-2xl">📚</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-sm mb-1 line-clamp-2">{product.name}</h4>
-                        <p className="text-xs text-gray-600 mb-2 line-clamp-1">{product.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-green-600">{formatPrice(product.price)}</span>
-                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700">Book</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* VyronaHub Products */}
-          {vyronaHubProducts.length > 0 && (
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className="bg-orange-500 rounded-lg p-3 mr-4">
-                    <Gamepad2 className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-800">VyronaHub</h3>
-                    <p className="text-gray-600">Gaming & entertainment hub</p>
-                  </div>
-                </div>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  {vyronaHubProducts.length} Games
-                </Badge>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {vyronaHubProducts.slice(0, 4).map((product) => (
-                  <Card key={product.id} className="group cursor-pointer hover:shadow-lg transition-all duration-300">
-                    <CardContent className="p-0">
-                      <div className="aspect-square bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center">
-                        {product.imageUrl ? (
-                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="text-center">
-                            <Gamepad2 className="h-12 w-12 text-orange-400 mx-auto mb-2" />
-                            <span className="text-2xl">🎮</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-semibold text-sm mb-1 line-clamp-2">{product.name}</h4>
-                        <p className="text-xs text-gray-600 mb-2 line-clamp-1">{product.description}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-orange-600">{formatPrice(product.price)}</span>
-                          <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700">Game</Badge>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Coming Soon Modules */}
+          {/* Module Showcase */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-gradient-to-br from-blue-50 to-blue-100">
               <CardContent className="p-6 text-center">
-                <div className="bg-purple-500 rounded-full p-4 w-16 h-16 mx-auto mb-4">
-                  <Users className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-purple-900">VyronaSocial</h3>
-                <p className="text-purple-700 text-sm mb-3">Social shopping & groups</p>
-                <Badge className="bg-purple-200 text-purple-800 text-xs">Coming Soon</Badge>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200">
-              <CardContent className="p-6 text-center">
-                <div className="bg-indigo-500 rounded-full p-4 w-16 h-16 mx-auto mb-4">
-                  <MapPin className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-indigo-900">VyronaSpace</h3>
-                <p className="text-indigo-700 text-sm mb-3">Virtual shopping spaces</p>
-                <Badge className="bg-indigo-200 text-indigo-800 text-xs">Coming Soon</Badge>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
-              <CardContent className="p-6 text-center">
-                <div className="bg-pink-500 rounded-full p-4 w-16 h-16 mx-auto mb-4">
-                  <Building2 className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="font-bold text-lg mb-2 text-pink-900">VyronaMallConnect</h3>
-                <p className="text-pink-700 text-sm mb-3">Mall integration platform</p>
-                <Badge className="bg-pink-200 text-pink-800 text-xs">Coming Soon</Badge>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200">
-              <CardContent className="p-6 text-center">
-                <div className="bg-cyan-500 rounded-full p-4 w-16 h-16 mx-auto mb-4">
+                <div className="bg-blue-500 rounded-full p-4 w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform">
                   <ShoppingBag className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="font-bold text-lg mb-2 text-cyan-900">VyronaInstaStore</h3>
-                <p className="text-cyan-700 text-sm mb-3">Instant store creation</p>
-                <Badge className="bg-cyan-200 text-cyan-800 text-xs">Coming Soon</Badge>
+                <h3 className="font-bold text-lg mb-2">VyronaMart</h3>
+                <p className="text-sm text-gray-600 mb-3">Everything you need in one place</p>
+                <Badge variant="secondary" className="text-xs">
+                  {electronicsProducts.length + fashionProducts.length + homeProducts.length} Products
+                </Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-gradient-to-br from-green-50 to-green-100">
+              <CardContent className="p-6 text-center">
+                <div className="bg-green-500 rounded-full p-4 w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <BookOpen className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">VyronaRead</h3>
+                <p className="text-sm text-gray-600 mb-3">Digital library & bookstore</p>
+                <Badge variant="secondary" className="text-xs">
+                  {booksProducts.length} Books
+                </Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-gradient-to-br from-purple-50 to-purple-100">
+              <CardContent className="p-6 text-center">
+                <div className="bg-purple-500 rounded-full p-4 w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Users className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">VyronaSocial</h3>
+                <p className="text-sm text-gray-600 mb-3">Social shopping & groups</p>
+                <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="group cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 bg-gradient-to-br from-orange-50 to-orange-100">
+              <CardContent className="p-6 text-center">
+                <div className="bg-orange-500 rounded-full p-4 w-16 h-16 mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <Gamepad2 className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="font-bold text-lg mb-2">VyronaHub</h3>
+                <p className="text-sm text-gray-600 mb-3">Gaming & entertainment</p>
+                <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
               </CardContent>
             </Card>
           </div>
