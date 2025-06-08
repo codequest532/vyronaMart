@@ -16,6 +16,7 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, CreditCard, Wallet, Truck, DollarSign, ShoppingCart, Package, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCartStore } from "@/lib/cart-store";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -29,7 +30,7 @@ const checkoutSchema = z.object({
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
-interface CartItem {
+interface CheckoutCartItem {
   id: number;
   name: string;
   price: number;
@@ -60,18 +61,24 @@ export default function VyronaHubCheckout() {
     },
   });
 
-  // Get cart data
-  const { data: cartItems = [], isLoading: isLoadingCart } = useQuery({
-    queryKey: ["/api/cart"],
-  });
+  // Get cart data from client store
+  const { items: cartItems, clearCart } = useCartStore();
 
   // Get user wallet balance
   const { data: userData } = useQuery({
     queryKey: ["/api/current-user"],
   });
 
-  // Type-safe cart items
-  const typedCartItems = (cartItems as CartItem[]) || [];
+  // Type-safe cart items - map to expected structure
+  const typedCartItems = cartItems.map(item => ({
+    id: item.productId,
+    name: item.name,
+    price: item.discountedPrice || item.price,
+    quantity: item.quantity,
+    category: item.category,
+    module: "vyronahub",
+    imageUrl: item.imageUrl
+  }));
 
   // Calculate totals
   const subtotal = typedCartItems.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
@@ -150,10 +157,15 @@ export default function VyronaHubCheckout() {
     }
   };
 
-  if (isLoadingCart) {
+  if (cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        <div className="text-center">
+          <p className="text-lg text-gray-600">Your cart is empty</p>
+          <Button onClick={() => setLocation("/vyronahub")} className="mt-4">
+            Continue Shopping
+          </Button>
+        </div>
       </div>
     );
   }
