@@ -22,7 +22,12 @@ const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 const ADMIN_EMAIL = 'mgmags25@gmail.com';
 const ADMIN_NAME = 'Vyrona Platform';
 
-export async function sendBrevoEmail(params: BrevoEmailParams): Promise<{ success: boolean; messageId?: string; error?: string }> {
+export async function sendBrevoEmail(
+  to: string, 
+  subject: string, 
+  htmlContent: string, 
+  textContent?: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
   if (!process.env.BREVO_API_KEY) {
     console.error('BREVO_API_KEY is not configured');
     return { success: false, error: 'Email service not configured' };
@@ -35,12 +40,12 @@ export async function sendBrevoEmail(params: BrevoEmailParams): Promise<{ succes
         email: ADMIN_EMAIL
       },
       to: [{
-        email: params.to,
-        name: params.to.split('@')[0]
+        email: to,
+        name: to.split('@')[0]
       }],
-      subject: params.subject,
-      htmlContent: params.htmlContent,
-      textContent: params.textContent || params.htmlContent.replace(/<[^>]*>/g, '')
+      subject: subject,
+      htmlContent: htmlContent,
+      textContent: textContent || htmlContent.replace(/<[^>]*>/g, '')
     }, {
       headers: {
         'Accept': 'application/json',
