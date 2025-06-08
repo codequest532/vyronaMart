@@ -963,7 +963,7 @@ export default function SellerDashboard() {
                               <div className="flex items-center gap-4 mb-2">
                                 <p className="font-medium">Order #{order.order_id || order.id}</p>
                                 <Badge variant={
-                                  order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                  order.order_status === 'delivered' || order.status === 'delivered' ? 'default' :
                                   order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
                                   order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
                                 }>
@@ -986,16 +986,17 @@ export default function SellerDashboard() {
                             </div>
                             <div className="flex items-center gap-3">
                               <select 
-                                value={order.order_status || order.status}
+                                value={order.order_status || order.status || "processing"}
                                 onChange={(e) => updateOrderStatusMutation.mutate({
                                   orderId: order.order_id || order.id,
                                   status: e.target.value
                                 })}
                                 className="text-sm border rounded px-2 py-1"
                               >
-                                <option value="pending">Pending</option>
+                                
                                 <option value="processing">Processing</option>
                                 <option value="shipped">Shipped</option>
+                                <option value="out_for_delivery">Out for Delivery</option>
                                 <option value="delivered">Delivered</option>
                                 <option value="cancelled">Cancelled</option>
                               </select>
@@ -1048,7 +1049,7 @@ export default function SellerDashboard() {
                               <div className="flex items-center gap-4 mb-2">
                                 <p className="font-medium">Order #{order.order_id || order.id}</p>
                                 <Badge variant={
-                                  order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                  order.order_status === 'delivered' || order.status === 'delivered' ? 'default' :
                                   order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
                                   order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
                                 }>
@@ -1079,16 +1080,17 @@ export default function SellerDashboard() {
                             </div>
                             <div className="flex items-center gap-3">
                               <select 
-                                value={order.order_status || order.status}
+                                value={order.order_status || order.status || "processing"}
                                 onChange={(e) => updateOrderStatusMutation.mutate({
                                   orderId: order.order_id || order.id,
                                   status: e.target.value
                                 })}
                                 className="text-sm border rounded px-2 py-1"
                               >
-                                <option value="pending">Pending</option>
+                                
                                 <option value="processing">Processing</option>
                                 <option value="shipped">Shipped</option>
+                                <option value="out_for_delivery">Out for Delivery</option>
                                 <option value="delivered">Delivered</option>
                                 <option value="cancelled">Cancelled</option>
                               </select>
@@ -1779,7 +1781,7 @@ export default function SellerDashboard() {
                             <div key={order.order_id || order.id || index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                               <div className="flex items-center gap-3">
                                 <div className={`w-3 h-3 rounded-full ${
-                                  order.order_status === 'completed' || order.status === 'completed' ? 'bg-green-500' : 
+                                  order.order_status === 'delivered' || order.status === 'delivered' ? 'bg-green-500' : 
                                   order.order_status === 'processing' || order.status === 'processing' ? 'bg-blue-500' : 
                                   order.order_status === 'shipped' || order.status === 'shipped' ? 'bg-orange-500' : 'bg-gray-500'
                                 }`}></div>
@@ -2761,7 +2763,7 @@ export default function SellerDashboard() {
                                           </p>
                                         </div>
                                         <Badge variant={
-                                          order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                          order.order_status === 'delivered' || order.status === 'delivered' ? 'default' :
                                           order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
                                           order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
                                         }>

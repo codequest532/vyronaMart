@@ -28,7 +28,11 @@ import {
   Edit,
   Trash2,
   Eye,
-  Upload
+  Upload,
+  User,
+  Printer,
+  Download,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +72,9 @@ const productSchema = z.object({
   dimensions: z.string().optional(),
   specifications: z.string().optional(),
   tags: z.string().optional(),
+  enableGroupBuy: z.boolean().default(false),
+  groupBuyMinQuantity: z.number().min(1).optional(),
+  groupBuyDiscount: z.number().min(0).max(100).optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -75,6 +82,7 @@ export default function SellerDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddBookDialog, setShowAddBookDialog] = useState(false);
+  const [activeBookOrderTab, setActiveBookOrderTab] = useState("all");
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showAddProductDialog, setShowAddProductDialog] = useState(false);
   const [bookSection, setBookSection] = useState("overview");
@@ -108,6 +116,8 @@ export default function SellerDashboard() {
     mainImage: null,
     additionalMedia: [],
   });
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   // Form for adding products
   const productForm = useForm<z.infer<typeof productSchema>>({
@@ -124,6 +134,9 @@ export default function SellerDashboard() {
       dimensions: "",
       specifications: "",
       tags: "",
+      enableGroupBuy: false,
+      groupBuyMinQuantity: 2,
+      groupBuyDiscount: 10,
       isActive: true,
     },
   });
@@ -196,7 +209,8 @@ export default function SellerDashboard() {
         contact: "",
         phone: "",
         email: "",
-        description: ""
+        description: "",
+        booksListCsv: null
       });
     },
     onError: (error) => {
@@ -234,6 +248,31 @@ export default function SellerDashboard() {
     queryKey: ["/api/current-user"],
   });
 
+  // Order status update mutation with automated email workflow
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status, trackingNumber }: { orderId: number; status: string; trackingNumber?: string }) => {
+      return await apiRequest("PATCH", `/api/seller/orders/${orderId}/status`, { status, trackingNumber });
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Order Status Updated",
+        description: data.emailSent 
+          ? "Order status updated and customer notification email sent successfully" 
+          : `Order status updated${data.emailError ? ` (email failed: ${data.emailError})` : ''}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/orders"] });
+      setSelectedOrder(null);
+      setShowOrderDetails(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update order status",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSearchLibraries = () => {
     const searchTerm = prompt("Search libraries by name, type, or location:");
     if (searchTerm) {
@@ -245,6 +284,8 @@ export default function SellerDashboard() {
   const { data: sellerProducts = [] } = useQuery({
     queryKey: ["/api/seller/products"],
   });
+
+
 
   const { data: vyronaReadBooks = [] } = useQuery({
     queryKey: ["/api/vyronaread/books"],
@@ -304,13 +345,17 @@ export default function SellerDashboard() {
     });
   };
 
+  // Seller orders data with auto-refresh for new orders
   const { data: sellerOrders = [] } = useQuery({
     queryKey: ["/api/seller/orders"],
+    refetchInterval: 30000, // Refresh every 30 seconds for new orders
   });
 
   const { data: analytics = [] } = useQuery({
     queryKey: ["/api/seller/analytics"],
   });
+
+  // This duplicate declaration is removed - using the one above with automated email workflow
 
   // VyronaRead Data Queries - Seller-specific access with proper typing
   const { data: sellerEBooks = [] } = useQuery({
@@ -661,14 +706,6 @@ export default function SellerDashboard() {
               Customers
             </Button>
             <Button
-              variant={activeTab === "vyronasocial" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("vyronasocial")}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              VyronaSocial
-            </Button>
-            <Button
               variant={activeTab === "settings" ? "default" : "ghost"}
               className="w-full justify-start"
               onClick={() => setActiveTab("settings")}
@@ -830,39 +867,247 @@ export default function SellerDashboard() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Order Management</h2>
-                <p className="text-gray-600 dark:text-gray-300">Track and manage customer orders</p>
+                <p className="text-gray-600 dark:text-gray-300">Track and manage orders from VyronaHub and VyronaSocial (excluding book-related orders)</p>
               </div>
 
+              {/* Order Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                        <p className="text-3xl font-bold text-blue-600">
+                          {sellerOrders?.filter((order: any) => order.module !== 'vyronaread').length || 0}
+                        </p>
+                        <p className="text-xs text-blue-500">All modules</p>
+                      </div>
+                      <ShoppingCart className="h-8 w-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">VyronaHub Orders</p>
+                        <p className="text-3xl font-bold text-green-600">
+                          {sellerOrders?.filter((order: any) => order.module === 'vyronahub').length || 0}
+                        </p>
+                        <p className="text-xs text-green-500">Individual purchases</p>
+                      </div>
+                      <Package className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">VyronaSocial Orders</p>
+                        <p className="text-3xl font-bold text-purple-600">
+                          {sellerOrders?.filter((order: any) => order.module === 'vyronasocial').length || 0}
+                        </p>
+                        <p className="text-xs text-purple-500">Group purchases</p>
+                      </div>
+                      <Users className="h-8 w-8 text-purple-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                        <p className="text-3xl font-bold text-orange-600">
+                          ₹{sellerOrders?.filter((order: any) => order.module !== 'vyronaread').reduce((total: number, order: any) => total + (order.total_amount / 100), 0).toLocaleString() || 0}
+                        </p>
+                        <p className="text-xs text-orange-500">All time</p>
+                      </div>
+                      <TrendingUp className="h-8 w-8 text-orange-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* VyronaHub Orders Panel */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
-                  <CardDescription>Latest orders from your customers</CardDescription>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Store className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-green-700">VyronaHub Orders</CardTitle>
+                      <CardDescription>Individual product purchases from your store</CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  {sellerOrders?.length === 0 ? (
-                    <div className="text-center py-12">
-                      <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">No Orders Yet</h3>
-                      <p className="text-gray-500 dark:text-gray-400">Orders will appear here once customers start purchasing</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {sellerOrders?.map((order: any) => (
-                        <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <p className="font-medium">Order #{order.id}</p>
-                            <p className="text-sm text-gray-500">₹{(order.totalAmount / 100).toLocaleString()}</p>
+                  {(() => {
+                    const vyronahubOrders = sellerOrders?.filter((order: any) => order.module === 'vyronahub') || [];
+                    return vyronahubOrders.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Store className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-600 mb-2">No VyronaHub Orders</h3>
+                        <p className="text-gray-500">Individual product orders will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {vyronahubOrders.map((order: any) => (
+                          <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border border-green-200 rounded-lg bg-green-50/50">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-4 mb-2">
+                                <p className="font-medium">Order #{order.order_id || order.id}</p>
+                                <Badge variant={
+                                  order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                  order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
+                                }>
+                                  {order.order_status || order.status}
+                                </Badge>
+                                <Badge variant="outline" className="border-green-500 text-green-700 bg-green-100">
+                                  Individual Purchase
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600">Customer: {order.customer_name || order.customer_email || 'N/A'}</p>
+                              {order.metadata?.product_names && (
+                                <p className="text-sm text-gray-600">Products: {order.metadata.product_names}</p>
+                              )}
+                              <p className="text-sm font-medium text-green-600">
+                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Ordered: {new Date(order.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <select 
+                                value={order.order_status || order.status}
+                                onChange={(e) => updateOrderStatusMutation.mutate({
+                                  orderId: order.order_id || order.id,
+                                  status: e.target.value
+                                })}
+                                className="text-sm border rounded px-2 py-1"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setShowOrderDetails(true);
+                                }}
+                              >
+                                View Details
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Badge>{order.status}</Badge>
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
+
+              {/* VyronaSocial Orders Panel */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Users className="h-6 w-6 text-purple-600" />
                     </div>
-                  )}
+                    <div>
+                      <CardTitle className="text-purple-700">VyronaSocial Orders</CardTitle>
+                      <CardDescription>Group purchases and collaborative shopping</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const vyronasocialOrders = sellerOrders?.filter((order: any) => order.module === 'vyronasocial') || [];
+                    return vyronasocialOrders.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-600 mb-2">No VyronaSocial Orders</h3>
+                        <p className="text-gray-500">Group purchase orders will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {vyronasocialOrders.map((order: any) => (
+                          <div key={order.order_id || order.id} className="flex items-center justify-between p-4 border border-purple-200 rounded-lg bg-purple-50/50">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-4 mb-2">
+                                <p className="font-medium">Order #{order.order_id || order.id}</p>
+                                <Badge variant={
+                                  order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                  order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
+                                }>
+                                  {order.order_status || order.status}
+                                </Badge>
+                                <Badge variant="outline" className="border-purple-500 text-purple-700 bg-purple-100">
+                                  Group Purchase
+                                </Badge>
+                                {order.metadata?.group_size && (
+                                  <Badge variant="secondary" className="bg-purple-200 text-purple-800">
+                                    {order.metadata.group_size} members
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600">Customer: {order.customer_name || order.customer_email || 'N/A'}</p>
+                              {order.metadata?.group_name && (
+                                <p className="text-sm text-gray-600">Group: {order.metadata.group_name}</p>
+                              )}
+                              {order.metadata?.product_names && (
+                                <p className="text-sm text-gray-600">Products: {order.metadata.product_names}</p>
+                              )}
+                              <p className="text-sm font-medium text-purple-600">
+                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Ordered: {new Date(order.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <select 
+                                value={order.order_status || order.status}
+                                onChange={(e) => updateOrderStatusMutation.mutate({
+                                  orderId: order.order_id || order.id,
+                                  status: e.target.value
+                                })}
+                                className="text-sm border rounded px-2 py-1"
+                              >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedOrder(order);
+                                  setShowOrderDetails(true);
+                                }}
+                              >
+                                View Details
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </div>
@@ -900,95 +1145,7 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          {activeTab === "vyronasocial" && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaSocial Group Buy</h2>
-                <p className="text-gray-600 dark:text-gray-300">Create group buy products with bulk discounts</p>
-              </div>
 
-              {/* Create Group Buy Product Button */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">Group Buy Products</h3>
-                      <p className="text-sm text-gray-600">Minimum 10 pieces required for single product group buys</p>
-                    </div>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button className="bg-red-500 hover:bg-red-600">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Group Buy Product
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Create Group Buy Product</DialogTitle>
-                          <DialogDescription>
-                            Set up a product for group buying with minimum quantity and discount pricing
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label>Quick Create Sample Group Buy</Label>
-                            <p className="text-sm text-gray-600 mb-3">Create a sample group buy product to test VyronaSocial functionality</p>
-                            <Button 
-                              onClick={() => {
-                                // Create sample group buy product
-                                const sampleData = {
-                                  productId: 1,
-                                  sellerId: 4,
-                                  minQuantity: 10,
-                                  originalPrice: 2000,
-                                  groupBuyPrice: 1500,
-                                  discountPercentage: 25,
-                                  isApproved: true,
-                                  isActive: true
-                                };
-                                
-                                fetch('/api/group-buy/products', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify(sampleData)
-                                }).then(() => {
-                                  alert('Sample group buy product created! Check VyronaHub to see it.');
-                                });
-                              }}
-                              className="bg-red-500 hover:bg-red-600 w-full"
-                            >
-                              Create Sample Group Buy Product
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-
-                  {/* Group Buy Products List */}
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-500">
-                      Create group buy products to enable bulk purchasing with discounts. 
-                      Products require admin approval before appearing in VyronaHub.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Instructions */}
-              <Card className="border-red-200 bg-red-50">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold text-red-800 mb-2">Group Buy Requirements</h3>
-                  <ul className="text-sm text-red-700 space-y-1">
-                    <li>• Minimum 10 pieces for single product group buys</li>
-                    <li>• Alternative: 5+ pieces across multiple sellers</li>
-                    <li>• Products require admin approval</li>
-                    <li>• Discounts enable cost sharing for bulk orders</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          )}
 
           {activeTab === "settings" && (
             <div className="space-y-6">
@@ -1226,6 +1383,19 @@ export default function SellerDashboard() {
                     }`}
                   >
                     Digital Reader
+                  </button>
+                  <button
+                    onClick={() => {
+                      console.log("Switching to orders");
+                      setBookSection("orders");
+                    }}
+                    className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      bookSection === "orders"
+                        ? "border-green-500 text-green-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    Order Management
                   </button>
                   <button
                     onClick={() => {
@@ -1584,29 +1754,78 @@ export default function SellerDashboard() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Recent Orders</CardTitle>
-                    <CardDescription>Latest VyronaRead transactions</CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Recent Orders</CardTitle>
+                        <CardDescription>Latest VyronaRead transactions</CardDescription>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setBookSection("orders")}
+                        className="text-green-600 hover:text-green-700 border-green-300 hover:border-green-400"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Manage All Orders
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {sellerOrders && sellerOrders.filter((order: any) => order.module === 'vyronaread').length > 0 ? (
-                        sellerOrders.filter((order: any) => order.module === 'vyronaread').slice(0, 3).map((order: any, index: number) => (
-                          <div key={index} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                            <div className={`w-2 h-2 rounded-full ${
-                              order.status === 'completed' ? 'bg-green-500' : 
-                              order.status === 'pending' ? 'bg-blue-500' : 'bg-orange-500'
-                            }`}></div>
-                            <div className="flex-1">
-                              <p className="text-sm font-medium">Order #{order.id} - {order.status}</p>
-                              <p className="text-xs text-gray-500">Amount: ₹{(order.totalAmount / 100).toFixed(2)} - {new Date(order.createdAt).toLocaleDateString()}</p>
+                      {(() => {
+                        const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+                        return vyronareadOrders.length > 0 ? (
+                          vyronareadOrders.slice(0, 3).map((order: any, index: number) => (
+                            <div key={order.order_id || order.id || index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full ${
+                                  order.order_status === 'completed' || order.status === 'completed' ? 'bg-green-500' : 
+                                  order.order_status === 'processing' || order.status === 'processing' ? 'bg-blue-500' : 
+                                  order.order_status === 'shipped' || order.status === 'shipped' ? 'bg-orange-500' : 'bg-gray-500'
+                                }`}></div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">Order #{order.order_id || order.id}</p>
+                                  <p className="text-xs text-gray-600">{order.customer_name || 'Customer'} • {order.customer_email}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {order.order_status || order.status || 'pending'}
+                                    </Badge>
+                                    {order.metadata && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {typeof order.metadata === 'string' && order.metadata.includes('rental') ? 'Rental' :
+                                         typeof order.metadata === 'string' && order.metadata.includes('loan') ? 'Library Loan' :
+                                         order.metadata?.transaction_type === 'rental' ? 'Rental' :
+                                         order.metadata?.transaction_type === 'loan' ? 'Library Loan' :
+                                         'Purchase'}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(order.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
                             </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8">
+                            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-600 mb-2">No VyronaRead Orders Yet</h3>
+                            <p className="text-gray-500 mb-4">Book rentals, loans, and purchases will appear here</p>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setBookSection("orders")}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              View Order Management
+                            </Button>
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-4">
-                          <p className="text-sm text-gray-500">No recent VyronaRead orders</p>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
                   </CardContent>
                 </Card>
@@ -2372,6 +2591,243 @@ export default function SellerDashboard() {
                   </div>
                 </div>
               )}
+
+              {/* VyronaRead Order Management Section */}
+              {bookSection === "orders" && (
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="h-5 w-5" />
+                        VyronaRead Order Management
+                      </CardTitle>
+                      <CardDescription>Manage book rentals, library loans, and e-book purchases</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {(() => {
+                        const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+                        const rentalOrders = vyronareadOrders.filter((order: any) => 
+                          order.metadata?.transaction_type === 'rental' || 
+                          (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('rental'))
+                        );
+                        const loanOrders = vyronareadOrders.filter((order: any) => 
+                          order.metadata?.transaction_type === 'loan' ||
+                          (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('loan'))
+                        );
+                        const purchaseOrders = vyronareadOrders.filter((order: any) => 
+                          order.metadata?.transaction_type === 'purchase' ||
+                          (!order.metadata?.transaction_type && !order.metadata?.includes?.('rental') && !order.metadata?.includes?.('loan'))
+                        );
+
+                        return (
+                          <div className="space-y-6">
+                            {/* Order Statistics */}
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Total Book Orders</p>
+                                      <p className="text-2xl font-bold text-blue-600">{vyronareadOrders.length}</p>
+                                    </div>
+                                    <BookOpen className="h-6 w-6 text-blue-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Book Rentals</p>
+                                      <p className="text-2xl font-bold text-purple-600">{rentalOrders.length}</p>
+                                    </div>
+                                    <Clock className="h-6 w-6 text-purple-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Library Loans</p>
+                                      <p className="text-2xl font-bold text-green-600">{loanOrders.length}</p>
+                                    </div>
+                                    <Users className="h-6 w-6 text-green-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                              
+                              <Card>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-600">Book Purchases</p>
+                                      <p className="text-2xl font-bold text-orange-600">{purchaseOrders.length}</p>
+                                    </div>
+                                    <ShoppingCart className="h-6 w-6 text-orange-600" />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+
+                            {/* Tabs for Different Order Types */}
+                            <div className="border-b">
+                              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                                <button
+                                  onClick={() => setActiveBookOrderTab('all')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'all'
+                                      ? 'border-blue-500 text-blue-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  All Orders ({vyronareadOrders.length})
+                                </button>
+                                <button
+                                  onClick={() => setActiveBookOrderTab('rentals')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'rentals'
+                                      ? 'border-purple-500 text-purple-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  Rentals ({rentalOrders.length})
+                                </button>
+                                <button
+                                  onClick={() => setActiveBookOrderTab('loans')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'loans'
+                                      ? 'border-green-500 text-green-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  Library Loans ({loanOrders.length})
+                                </button>
+                                <button
+                                  onClick={() => setActiveBookOrderTab('purchases')}
+                                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeBookOrderTab === 'purchases'
+                                      ? 'border-orange-500 text-orange-600'
+                                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                  }`}
+                                >
+                                  Purchases ({purchaseOrders.length})
+                                </button>
+                              </nav>
+                            </div>
+
+                            {/* Order List */}
+                            <div className="space-y-4">
+                              {(() => {
+                                let ordersToShow = [];
+                                switch (activeBookOrderTab) {
+                                  case 'rentals':
+                                    ordersToShow = rentalOrders;
+                                    break;
+                                  case 'loans':
+                                    ordersToShow = loanOrders;
+                                    break;
+                                  case 'purchases':
+                                    ordersToShow = purchaseOrders;
+                                    break;
+                                  default:
+                                    ordersToShow = vyronareadOrders;
+                                }
+
+                                if (ordersToShow.length === 0) {
+                                  return (
+                                    <div className="text-center py-12">
+                                      <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                                      <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">
+                                        No {activeBookOrderTab === 'all' ? 'Book Orders' : activeBookOrderTab.charAt(0).toUpperCase() + activeBookOrderTab.slice(1)} Yet
+                                      </h3>
+                                      <p className="text-gray-500 dark:text-gray-400">
+                                        VyronaRead {activeBookOrderTab === 'all' ? 'orders' : activeBookOrderTab} will appear here once customers start using your library
+                                      </p>
+                                    </div>
+                                  );
+                                }
+
+                                return ordersToShow.map((order: any) => (
+                                  <div key={order.order_id || order.id} className="border rounded-lg p-4 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-4">
+                                        <div>
+                                          <p className="font-medium">Order #{order.order_id || order.id}</p>
+                                          <p className="text-sm text-gray-600">
+                                            {order.customer_name || 'Customer'} • {order.customer_email}
+                                          </p>
+                                        </div>
+                                        <Badge variant={
+                                          order.order_status === 'completed' || order.status === 'completed' ? 'default' :
+                                          order.order_status === 'processing' || order.status === 'processing' ? 'secondary' :
+                                          order.order_status === 'shipped' || order.status === 'shipped' ? 'outline' : 'destructive'
+                                        }>
+                                          {order.order_status || order.status}
+                                        </Badge>
+                                        <Badge variant="outline" className="border-blue-500 text-blue-700">
+                                          VyronaRead
+                                        </Badge>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
+                                        <p className="text-sm text-gray-500">
+                                          {new Date(order.created_at).toLocaleDateString()}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    
+                                    {order.metadata && (
+                                      <div className="bg-gray-50 dark:bg-gray-800 rounded p-3">
+                                        <h4 className="font-medium text-sm mb-2">Order Details</h4>
+                                        <div className="text-sm space-y-1">
+                                          {typeof order.metadata === 'string' ? (
+                                            <p>{order.metadata}</p>
+                                          ) : (
+                                            Object.entries(order.metadata).map(([key, value]) => (
+                                              <div key={key} className="flex justify-between">
+                                                <span className="capitalize">{key.replace('_', ' ')}:</span>
+                                                <span>{String(value)}</span>
+                                              </div>
+                                            ))
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+                                    
+                                    <div className="flex gap-2">
+                                      <Button size="sm" variant="outline">
+                                        View Details
+                                      </Button>
+                                      {(order.order_status === 'processing' || order.status === 'processing') && (
+                                        <Button size="sm" variant="default">
+                                          Mark as Shipped
+                                        </Button>
+                                      )}
+                                      {activeBookOrderTab === 'rentals' && (
+                                        <Button size="sm" variant="secondary">
+                                          Extend Rental
+                                        </Button>
+                                      )}
+                                      {activeBookOrderTab === 'loans' && (
+                                        <Button size="sm" variant="secondary">
+                                          Mark Returned
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ));
+                              })()}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           )}
         </main>
@@ -2799,6 +3255,149 @@ export default function SellerDashboard() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Platform Selection */}
+                  <div className="border rounded-lg p-4 space-y-4 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Platform Selection</h4>
+                        <p className="text-sm text-gray-600">Choose which platform will sell this product</p>
+                      </div>
+                      <FormField
+                        control={productForm.control}
+                        name="enableGroupBuy"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="radio"
+                                    id="vyronaHub"
+                                    name="platform"
+                                    checked={!field.value}
+                                    onChange={() => field.onChange(false)}
+                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <Label htmlFor="vyronaHub" className="text-sm font-medium text-blue-700">
+                                    VyronaHub
+                                  </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <input
+                                    type="radio"
+                                    id="vyronaSocial"
+                                    name="platform"
+                                    checked={field.value}
+                                    onChange={() => field.onChange(true)}
+                                    className="h-4 w-4 text-purple-600 focus:ring-purple-500"
+                                  />
+                                  <Label htmlFor="vyronaSocial" className="text-sm font-medium text-purple-700">
+                                    VyronaSocial
+                                  </Label>
+                                </div>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    {productForm.watch("enableGroupBuy") && (
+                      <div className="mt-4 p-4 bg-purple-100 rounded-lg space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={productForm.control}
+                            name="groupBuyMinQuantity"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-purple-800">Target Group Size (Optional)</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    placeholder="2" 
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    className="border-purple-300 focus:border-purple-500"
+                                  />
+                                </FormControl>
+                                <p className="text-xs text-purple-600">For analytics only - customers can purchase any quantity</p>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={productForm.control}
+                            name="groupBuyDiscount"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel className="text-purple-800">Base Group Discount (%)</FormLabel>
+                                <FormControl>
+                                  <Input 
+                                    type="number" 
+                                    placeholder="10" 
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    className="border-purple-300 focus:border-purple-500"
+                                  />
+                                </FormControl>
+                                <p className="text-xs text-purple-600">Starting discount - increases with quantity purchased</p>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Tiered Discount System */}
+                        <div className="border-t border-purple-200 pt-4">
+                          <h5 className="font-medium text-purple-800 mb-3">Quantity-Based Discount Tiers</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                            <div className="bg-white p-3 rounded border border-purple-200">
+                              <strong className="text-purple-700">Quantity 1-2:</strong>
+                              <br />
+                              <span className="text-gray-600">Base discount ({productForm.watch("groupBuyDiscount") || 10}%)</span>
+                            </div>
+                            <div className="bg-white p-3 rounded border border-purple-200">
+                              <strong className="text-purple-700">Quantity 3-5:</strong>
+                              <br />
+                              <span className="text-gray-600">Base + 5% = {(productForm.watch("groupBuyDiscount") || 10) + 5}%</span>
+                            </div>
+                            <div className="bg-white p-3 rounded border border-purple-200">
+                              <strong className="text-purple-700">Quantity 6+:</strong>
+                              <br />
+                              <span className="text-gray-600">Base + 10% = {(productForm.watch("groupBuyDiscount") || 10) + 10}%</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-purple-600 mt-2">
+                            Higher quantities automatically receive better discounts to encourage bulk purchases
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="text-xs rounded p-3" style={{
+                      backgroundColor: productForm.watch("enableGroupBuy") ? "#f3e8ff" : "#dbeafe",
+                      color: productForm.watch("enableGroupBuy") ? "#7c3aed" : "#2563eb"
+                    }}>
+                      <strong>Selected Platform:</strong>
+                      <br />
+                      {productForm.watch("enableGroupBuy") ? (
+                        <>
+                          • <strong>VyronaSocial:</strong> Product available for collaborative group shopping rooms
+                          <br />
+                          • Customers get progressive discounts: higher quantities = better prices automatically
+                        </>
+                      ) : (
+                        <>
+                          • <strong>VyronaHub:</strong> Product available for individual customer purchases
+                          <br />
+                          • Standard individual shopping experience
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </TabsContent>
               </Tabs>
               
@@ -2820,6 +3419,421 @@ export default function SellerDashboard() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Order Details Modal */}
+      <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${
+                selectedOrder?.module === 'vyronahub' ? 'bg-green-100' : 
+                selectedOrder?.module === 'vyronasocial' ? 'bg-purple-100' : 'bg-blue-100'
+              }`}>
+                {selectedOrder?.module === 'vyronahub' ? (
+                  <Store className="h-5 w-5 text-green-600" />
+                ) : selectedOrder?.module === 'vyronasocial' ? (
+                  <Users className="h-5 w-5 text-purple-600" />
+                ) : (
+                  <ShoppingCart className="h-5 w-5 text-blue-600" />
+                )}
+              </div>
+              Order #{selectedOrder?.order_id || selectedOrder?.id} Details
+            </DialogTitle>
+            <DialogDescription>
+              Complete order information and management options
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-6">
+              {/* Order Status and Module */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-4">
+                  <Badge variant={
+                    selectedOrder.order_status === 'completed' || selectedOrder.status === 'completed' ? 'default' :
+                    selectedOrder.order_status === 'processing' || selectedOrder.status === 'processing' ? 'secondary' :
+                    selectedOrder.order_status === 'shipped' || selectedOrder.status === 'shipped' ? 'outline' : 'destructive'
+                  } className="text-sm">
+                    {selectedOrder.order_status || selectedOrder.status}
+                  </Badge>
+                  <Badge variant="outline" className={
+                    selectedOrder.module === 'vyronahub' ? 'border-green-500 text-green-700 bg-green-50' :
+                    selectedOrder.module === 'vyronasocial' ? 'border-purple-500 text-purple-700 bg-purple-50' :
+                    'border-blue-500 text-blue-700 bg-blue-50'
+                  }>
+                    {selectedOrder.module === 'vyronahub' ? 'VyronaHub' :
+                     selectedOrder.module === 'vyronasocial' ? 'VyronaSocial' :
+                     selectedOrder.module === 'vyronaread' ? 'VyronaRead' : 'Other'}
+                  </Badge>
+                  {selectedOrder.module === 'vyronasocial' && selectedOrder.metadata?.group_size && (
+                    <Badge variant="secondary" className="bg-purple-200 text-purple-800">
+                      {selectedOrder.metadata.group_size} members
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-600">
+                    ₹{((selectedOrder.total_amount || selectedOrder.totalAmount) / 100).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(selectedOrder.created_at).toLocaleDateString('en-IN', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Customer Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Customer Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Customer Name</label>
+                      <p className="text-sm">{selectedOrder.customer_name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <p className="text-sm">{selectedOrder.customer_email || 'N/A'}</p>
+                    </div>
+                    {selectedOrder.metadata?.customer_phone && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600">Phone</label>
+                        <p className="text-sm">{selectedOrder.metadata.customer_phone}</p>
+                      </div>
+                    )}
+                    {selectedOrder.metadata?.delivery_address && (
+                      <div className="md:col-span-2">
+                        <label className="text-sm font-medium text-gray-600">Delivery Address</label>
+                        <p className="text-sm">{selectedOrder.metadata.delivery_address}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Order Details */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Order Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {selectedOrder.metadata?.product_names && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Products</label>
+                      <p className="text-sm">{selectedOrder.metadata.product_names}</p>
+                    </div>
+                  )}
+                  
+                  {selectedOrder.module === 'vyronasocial' && (
+                    <div className="space-y-4">
+                      {/* Group Information */}
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-purple-800 mb-3">Group Purchase Details</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {selectedOrder.metadata?.group_name && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Group Name</label>
+                              <p className="text-sm">{selectedOrder.metadata.group_name}</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.group_description && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Group Description</label>
+                              <p className="text-sm">{selectedOrder.metadata.group_description}</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.group_size && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Total Members</label>
+                              <p className="text-sm font-medium">{selectedOrder.metadata.group_size} members</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.sellerNotes && (
+                            <div className="md:col-span-2">
+                              <label className="text-sm font-medium text-gray-600">Seller Notes</label>
+                              <p className="text-sm text-purple-700 bg-purple-100 p-2 rounded">{selectedOrder.metadata.sellerNotes}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Group Members Information */}
+                      {selectedOrder.metadata?.sellerFulfillment?.groupMembers && (
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <h4 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            Group Members ({selectedOrder.metadata.sellerFulfillment.groupMembers.length})
+                          </h4>
+                          <div className="space-y-2 max-h-40 overflow-y-auto">
+                            {selectedOrder.metadata.sellerFulfillment.groupMembers.map((member, index) => (
+                              <div key={member.id || index} className="flex items-center justify-between p-2 bg-white rounded border">
+                                <div>
+                                  <p className="text-sm font-medium">{member.username || member.memberName}</p>
+                                  <p className="text-xs text-gray-500">{member.email}</p>
+                                </div>
+                                <div className="text-right">
+                                  <Badge variant={member.isOrderCreator ? "default" : "secondary"} className="text-xs">
+                                    {member.isOrderCreator ? "Admin" : member.member_role || "Member"}
+                                  </Badge>
+                                  {member.mobile && (
+                                    <p className="text-xs text-gray-500 mt-1">{member.mobile}</p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Delivery Addresses */}
+                      {selectedOrder.metadata?.sellerFulfillment?.deliveryDetails?.addresses && (
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h4 className="font-medium text-blue-800 mb-3 flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            Delivery Addresses ({selectedOrder.metadata.sellerFulfillment.deliveryDetails.addresses.length})
+                          </h4>
+                          {selectedOrder.metadata.sellerFulfillment.deliveryDetails.useSingleDelivery && (
+                            <div className="mb-3 p-2 bg-blue-100 rounded">
+                              <p className="text-sm text-blue-700 font-medium">Single Delivery Address Requested</p>
+                            </div>
+                          )}
+                          <div className="space-y-3 max-h-60 overflow-y-auto">
+                            {selectedOrder.metadata.sellerFulfillment.deliveryDetails.addresses.map((address, index) => (
+                              <div key={index} className="p-3 bg-white rounded border">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div>
+                                    <p className="text-sm font-medium">{address.memberName}</p>
+                                    <p className="text-xs text-gray-500">{address.memberEmail}</p>
+                                    {address.memberPhone && (
+                                      <p className="text-xs text-gray-500">{address.memberPhone}</p>
+                                    )}
+                                  </div>
+                                  {address.isPrimary && (
+                                    <Badge variant="outline" className="text-xs border-blue-500 text-blue-700">
+                                      Primary
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-700">
+                                  <p>{address.fullName}</p>
+                                  <p>{address.addressLine1}</p>
+                                  {address.addressLine2 && <p>{address.addressLine2}</p>}
+                                  <p>{address.city}, {address.state} - {address.pincode}</p>
+                                  {address.phone && <p>Phone: {address.phone}</p>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Product Distribution */}
+                      {selectedOrder.metadata?.sellerFulfillment?.productDistribution && (
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <h4 className="font-medium text-green-800 mb-3 flex items-center gap-2">
+                            <ShoppingCart className="h-4 w-4" />
+                            Product Distribution by Member
+                          </h4>
+                          <div className="space-y-3">
+                            {selectedOrder.metadata.sellerFulfillment.productDistribution.map((product, index) => (
+                              <div key={index} className="p-3 bg-white rounded border">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h5 className="font-medium">{product.productName}</h5>
+                                  <p className="text-sm font-medium">Total: {product.totalQuantity} × ₹{product.unitPrice}</p>
+                                </div>
+                                {product.assignedTo && product.assignedTo.length > 0 && (
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-medium text-gray-600">Assigned to:</p>
+                                    {product.assignedTo.map((assignment, assignIndex) => (
+                                      <div key={assignIndex} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                                        <span>{assignment.memberName}</span>
+                                        <span className="font-medium">{assignment.quantity} × ₹{product.unitPrice} = ₹{assignment.memberTotal}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-4 pt-3 border-t">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Order ID</label>
+                      <p className="text-sm font-mono">{selectedOrder.order_id || selectedOrder.id}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Payment Status</label>
+                      <p className="text-sm">{selectedOrder.payment_status || 'Pending'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Order Management Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="h-5 w-5" />
+                    Order Management
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Current Status:</span>
+                      <Badge variant={
+                        selectedOrder.status === 'delivered' ? 'default' :
+                        selectedOrder.status === 'out_for_delivery' ? 'secondary' :
+                        selectedOrder.status === 'shipped' ? 'outline' : 
+                        selectedOrder.status === 'processing' ? 'secondary' : 'destructive'
+                      }>
+                        {selectedOrder.status === 'out_for_delivery' ? 'Out for Delivery' : 
+                         selectedOrder.status?.charAt(0).toUpperCase() + selectedOrder.status?.slice(1) || 'Pending'}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium text-gray-700">Progress to Next Stage (Sends Email):</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedOrder.status !== 'processing' && selectedOrder.status !== 'shipped' && selectedOrder.status !== 'out_for_delivery' && selectedOrder.status !== 'delivered' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'processing'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            📧 Start Processing
+                          </Button>
+                        )}
+                        
+                        {selectedOrder.status === 'processing' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-600 border-green-200 hover:bg-green-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'shipped'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            📦 Mark as Shipped
+                          </Button>
+                        )}
+                        
+                        {selectedOrder.status === 'shipped' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'out_for_delivery'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            🚚 Out for Delivery
+                          </Button>
+                        )}
+                        
+                        {selectedOrder.status === 'out_for_delivery' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-purple-600 border-purple-200 hover:bg-purple-50"
+                            onClick={() => updateOrderStatusMutation.mutate({
+                              orderId: selectedOrder.order_id || selectedOrder.id,
+                              status: 'delivered'
+                            })}
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            ✅ Mark as Delivered
+                          </Button>
+                        )}
+                        
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateOrderStatusMutation.mutate({
+                            orderId: selectedOrder.order_id || selectedOrder.id,
+                            status: 'cancelled'
+                          })}
+                          disabled={updateOrderStatusMutation.isPending}
+                        >
+                          ❌ Cancel Order
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h5 className="text-sm font-medium text-blue-800 mb-2">Email Workflow Stages:</h5>
+                      <div className="text-xs text-blue-700 space-y-1">
+                        <div>1. Processing → "Order Confirmed" email</div>
+                        <div>2. Shipped → "Order Shipped" email</div>
+                        <div>3. Out for Delivery → "Arriving Today" email</div>
+                        <div>4. Delivered → "Order Delivered" email</div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-3 border-t">
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          window.print();
+                        }}
+                      >
+                        <Printer className="h-4 w-4 mr-2" />
+                        Print
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          console.log('Download receipt for order:', selectedOrder.order_id || selectedOrder.id);
+                        }}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Receipt
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <div className="flex justify-end pt-4 border-t">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowOrderDetails(false)}
+            >
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
