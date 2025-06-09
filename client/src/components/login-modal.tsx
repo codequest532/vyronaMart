@@ -73,6 +73,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Debug logging
   React.useEffect(() => {
@@ -401,8 +402,12 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
                     className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     onClick={() => {
                       console.log('Forgot password clicked');
+                      setIsTransitioning(true);
                       onOpenChange(false); // Close main modal first
-                      setShowForgotPassword(true);
+                      setTimeout(() => {
+                        setShowForgotPassword(true);
+                        setIsTransitioning(false);
+                      }, 150); // Add delay to ensure main modal closes first
                     }}
                   >
                     Forgot your password?
@@ -798,8 +803,8 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       {/* Forgot Password Modal */}
       <Dialog open={showForgotPassword} onOpenChange={(open) => {
         setShowForgotPassword(open);
-        if (!open) {
-          // Reopen main modal when forgot password modal is closed
+        if (!open && !isTransitioning) {
+          // Reopen main modal when forgot password modal is closed (unless transitioning)
           setTimeout(() => onOpenChange(true), 100);
         }
       }}>
@@ -861,8 +866,8 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       {/* Reset Password with OTP Modal */}
       <Dialog open={showResetPassword} onOpenChange={(open) => {
         setShowResetPassword(open);
-        if (!open) {
-          // Reopen main modal when reset password modal is closed
+        if (!open && !isTransitioning) {
+          // Reopen main modal when reset password modal is closed (unless transitioning)
           setTimeout(() => onOpenChange(true), 100);
         }
       }}>
