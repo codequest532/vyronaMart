@@ -183,7 +183,7 @@ export default function AdminDashboard() {
 
   const removeSellerMutation = useMutation({
     mutationFn: async (sellerId: number) => {
-      await apiRequest(`/api/admin/sellers/${sellerId}`, "DELETE");
+      await apiRequest("DELETE", `/api/admin/sellers/${sellerId}`);
     },
     onSuccess: () => {
       toast({ 
