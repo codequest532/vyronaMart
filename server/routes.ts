@@ -89,6 +89,48 @@ const ADMIN_CREDENTIALS = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Seller registration endpoint
+  app.post("/api/seller-registration", async (req, res) => {
+    try {
+      const formData = req.body;
+      console.log("Seller registration request:", formData);
+      
+      // Basic validation
+      if (!formData.businessName || !formData.ownerName || !formData.email || !formData.phone) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      
+      // Store seller application (for now, just log it)
+      // In production, this would save to a sellers table
+      console.log("New seller application:", {
+        sellerType: formData.sellerType,
+        businessName: formData.businessName,
+        ownerName: formData.ownerName,
+        email: formData.email,
+        phone: formData.phone,
+        category: formData.businessCategory,
+        submittedAt: new Date()
+      });
+      
+      // Send confirmation email (if email service is configured)
+      try {
+        await sendOTPEmail(formData.email, "Thank you for your seller application! We'll review it within 2-3 business days.");
+      } catch (emailError) {
+        console.log("Email sending failed (expected in demo):", emailError);
+      }
+      
+      res.json({ 
+        success: true, 
+        message: "Application submitted successfully",
+        applicationId: `APP${Date.now()}`
+      });
+      
+    } catch (error) {
+      console.error("Seller registration error:", error);
+      res.status(500).json({ error: "Failed to submit application" });
+    }
+  });
+  
   // Order submission endpoint for VyronaHub checkout flow - MUST BE FIRST
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {

@@ -11,6 +11,7 @@ import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import SellerOnboardingModal from "@/components/seller-onboarding-modal";
 import type { Product, Store } from "@shared/schema";
 
 export default function Landing() {
@@ -18,6 +19,7 @@ export default function Landing() {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showSellerOnboarding, setShowSellerOnboarding] = useState(false);
   const [otpStep, setOtpStep] = useState<"email" | "otp" | "reset">("email");
   const [resetEmail, setResetEmail] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -374,6 +376,7 @@ export default function Landing() {
             <div className="flex items-center space-x-4">
               <Button
                 variant="outline"
+                onClick={() => setShowSellerOnboarding(true)}
                 className="bg-white text-blue-900 border-white hover:bg-blue-50 hover:text-blue-800 font-medium"
               >
                 <Building2 className="h-4 w-4 mr-2" />
@@ -1396,6 +1399,12 @@ export default function Landing() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Seller Onboarding Modal */}
+      <SellerOnboardingModal
+        isOpen={showSellerOnboarding}
+        onClose={() => setShowSellerOnboarding(false)}
+      />
     </div>
   );
 }
