@@ -147,7 +147,7 @@ export default function Home() {
   const { user, updateCoins } = useUserData();
   const { notification, showNotification, hideNotification } = useToastNotifications();
 
-  const { data: products = [] } = useQuery({
+  const { data: products = [], isLoading: isLoadingProducts } = useQuery({
     queryKey: ["/api/products"],
   });
 
@@ -340,8 +340,8 @@ export default function Home() {
     );
   }
 
-  // Show production welcome screen when no products exist
-  if (products && products.length === 0 && !isLoadingProducts) {
+  // Show production welcome screen when no products exist and not loading
+  if (!isLoadingProducts && products && Array.isArray(products) && products.length === 0) {
     return <ProductionWelcome />;
   }
 
