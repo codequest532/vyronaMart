@@ -3,26 +3,14 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2, Menu, Users, ShoppingBag } from "lucide-react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
-import LoginModal from "@/components/login-modal";
+import { useQuery } from "@tanstack/react-query";
 import type { Product, Store } from "@shared/schema";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [otpStep, setOtpStep] = useState<"email" | "otp" | "reset">("email");
-  const [resetEmail, setResetEmail] = useState("");
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -365,29 +353,19 @@ export default function Landing() {
             </div>
 
             <div className="flex items-center space-x-4">
-              <LoginModal
-                isOpen={showLoginModal}
-                onOpenChange={setShowLoginModal}
-                trigger={
-                  <Button
-                    variant="ghost"
-                    className="text-white hover:bg-blue-800"
-                  >
-                    Log In
-                  </Button>
-                }
-              />
-              <LoginModal
-                isOpen={showSignupModal}
-                onOpenChange={setShowSignupModal}
-                trigger={
-                  <Button
-                    className="bg-orange-500 hover:bg-orange-600"
-                  >
-                    Sign Up
-                  </Button>
-                }
-              />
+              <Button
+                variant="ghost"
+                className="text-white hover:bg-blue-800"
+                onClick={() => setLocation('/login')}
+              >
+                Log In
+              </Button>
+              <Button
+                className="bg-orange-500 hover:bg-orange-600"
+                onClick={() => setLocation('/login')}
+              >
+                Sign Up
+              </Button>
             </div>
           </div>
         </div>
