@@ -82,7 +82,15 @@ export default function Landing() {
         title: "Success",
         description: "Logged in successfully!",
       });
-      setLocation("/");
+      
+      // Redirect based on user role
+      if (data.user?.role === 'admin') {
+        setLocation("/admin");
+      } else if (data.user?.role === 'seller') {
+        setLocation("/seller");
+      } else {
+        setLocation("/");
+      }
     },
     onError: (error: Error) => {
       toast({
