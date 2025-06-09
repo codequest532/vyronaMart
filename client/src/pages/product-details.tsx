@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Star, Heart, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Star, Heart, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw, Share2, MessageCircle, Users, Zap, Award, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Product } from "@shared/schema";
 
@@ -56,45 +57,88 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
+      {/* Modern Header */}
+      <header className="bg-white/80 backdrop-blur-lg shadow-lg border-b border-purple-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <div className="text-sm text-gray-600">
-              Home &gt; {product.category} &gt; {product.name}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/vyronahub")}
+                className="flex items-center gap-2 hover:bg-purple-100 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to VyronaHub
+              </Button>
+              <div className="text-sm text-gray-600">
+                <span className="text-purple-600 font-medium">VyronaHub</span> › {product.category} › {product.name}
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" className="hover:bg-purple-100">
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Product Images */}
-          <div className="space-y-4">
-            <div className="aspect-square bg-white rounded-lg border overflow-hidden">
-              <img
-                src={mockImages[selectedImageIndex]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+        {/* Trust Indicators */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
+            <Truck className="h-6 w-6 text-green-600 mx-auto mb-2" />
+            <p className="text-sm font-medium text-gray-800">Free Delivery</p>
+          </div>
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
+            <Shield className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+            <p className="text-sm font-medium text-gray-800">Secure Payment</p>
+          </div>
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
+            <RotateCcw className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+            <p className="text-sm font-medium text-gray-800">Easy Returns</p>
+          </div>
+          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
+            <Award className="h-6 w-6 text-orange-600 mx-auto mb-2" />
+            <p className="text-sm font-medium text-gray-800">Quality Assured</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Enhanced Product Images */}
+          <div className="space-y-6">
+            <div className="relative">
+              <div className="aspect-square bg-white rounded-2xl border-2 border-purple-100 overflow-hidden shadow-xl">
+                <img
+                  src={mockImages[selectedImageIndex]}
+                  alt={product.name}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-4 right-4">
+                  <Button variant="secondary" size="icon" className="bg-white/80 backdrop-blur-sm hover:bg-white">
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                </div>
+                {product.enableGroupBuy && (
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                      <Users className="h-3 w-3 mr-1" />
+                      Group Buy Available
+                    </Badge>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-3">
               {mockImages.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`aspect-square bg-white rounded-lg border overflow-hidden ${
-                    selectedImageIndex === index ? "ring-2 ring-blue-500" : ""
+                  className={`aspect-square bg-white rounded-lg border-2 overflow-hidden transition-all ${
+                    selectedImageIndex === index ? "ring-2 ring-purple-500 border-purple-300" : "border-gray-200 hover:border-purple-200"
                   }`}
                 >
                   <img
@@ -107,124 +151,261 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
             </div>
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-6">
-            <div>
-              <Badge variant="secondary" className="mb-2">{product.category}</Badge>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center">
+          {/* Enhanced Product Info */}
+          <div className="space-y-8">
+            {/* Product Header */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge variant="outline" className="border-purple-300 text-purple-700 bg-purple-50">{product.category}</Badge>
+                <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
+                  <Zap className="h-3 w-3 mr-1" />
+                  Best Seller
+                </Badge>
+              </div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
+              
+              {/* Enhanced Rating */}
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <span className="text-sm text-gray-600">(4.5 out of 5)</span>
-                <span className="text-sm text-blue-600">1,234 reviews</span>
+                <span className="text-lg font-semibold text-gray-800">4.8</span>
+                <span className="text-sm text-purple-600 font-medium hover:underline cursor-pointer">2,847 reviews</span>
+                <span className="text-sm text-green-600 font-medium">✓ Verified purchases</span>
               </div>
-              <p className="text-gray-700 leading-relaxed">{product.description}</p>
-            </div>
 
-            <Separator />
-
-            {/* Price */}
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-red-600">₹{product.price}</span>
-                <span className="text-lg text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
-                <Badge variant="destructive">16% off</Badge>
-              </div>
-              <p className="text-sm text-gray-600">Inclusive of all taxes</p>
-            </div>
-
-            <Separator />
-
-            {/* Quantity and Actions */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <label className="font-medium">Quantity:</label>
-                <div className="flex items-center border rounded-lg">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 hover:bg-gray-100"
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-2 border-x">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-3 py-2 hover:bg-gray-100"
-                  >
-                    +
-                  </button>
+              {/* Social Proof */}
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                <div className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  <span>1,247 customers bought this week</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  <span>Limited time offer</span>
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <p className="text-gray-700 leading-relaxed text-lg">{product.description}</p>
+            </div>
+
+            {/* Enhanced Pricing */}
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 border border-purple-200">
+              <div className="space-y-3">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-4xl font-bold text-purple-600">₹{product.price}</span>
+                  <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.3)}</span>
+                  <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm">
+                    {Math.round((1 - product.price / (product.price * 1.3)) * 100)}% OFF
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-600">Inclusive of all taxes • Free delivery on orders above ₹499</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-green-600 font-medium">✓ Best price guaranteed</span>
+                  <span className="text-sm text-blue-600">• EMI starting ₹{Math.floor(product.price / 12)}/month</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Actions */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100 space-y-6">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <label className="font-semibold text-gray-800">Quantity:</label>
+                  <div className="flex items-center border-2 border-purple-200 rounded-xl bg-white">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="px-4 py-2 hover:bg-purple-50 transition-colors"
+                    >
+                      -
+                    </button>
+                    <span className="px-6 py-2 border-x-2 border-purple-100 font-semibold">{quantity}</span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="px-4 py-2 hover:bg-purple-50 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+                {product.enableGroupBuy && (
+                  <div className="text-sm">
+                    <p className="text-green-600 font-medium">🔥 Group Buy: Save extra 15%</p>
+                    <p className="text-gray-600">Min {product.groupBuyMinQuantity} people required</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-4">
                 <Button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
                 >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart
+                  <ShoppingCart className="h-5 w-5 mr-3" />
+                  Add to Cart • ₹{(product.price * quantity).toLocaleString()}
                 </Button>
-                <Button variant="outline" size="icon">
-                  <Heart className="h-4 w-4" />
-                </Button>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <Button variant="outline" size="lg" className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50 py-4 rounded-xl">
+                    Buy Now
+                  </Button>
+                  {product.enableGroupBuy && (
+                    <Button variant="outline" size="lg" className="border-2 border-green-300 text-green-700 hover:bg-green-50 py-4 rounded-xl">
+                      <Users className="h-4 w-4 mr-2" />
+                      Group Buy
+                    </Button>
+                  )}
+                </div>
               </div>
 
-              <Button variant="outline" className="w-full">
-                Buy Now
-              </Button>
-            </div>
-
-            <Separator />
-
-            {/* Delivery Info */}
-            <div className="space-y-3">
-              <h3 className="font-semibold">Delivery Information</h3>
-              <div className="grid gap-3">
-                <div className="flex items-center gap-3">
-                  <Truck className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="font-medium">Free Delivery</p>
-                    <p className="text-sm text-gray-600">Delivered by tomorrow</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <RotateCcw className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium">Easy Returns</p>
-                    <p className="text-sm text-gray-600">7-day return policy</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Shield className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="font-medium">VyronaMart Protected</p>
-                    <p className="text-sm text-gray-600">Secure shopping guarantee</p>
-                  </div>
-                </div>
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <span>💳 Secure checkout with 256-bit encryption</span>
+                <span>🚚 Same-day delivery available</span>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Enhanced Product Details */}
+        <div className="mt-16">
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm rounded-xl p-1 border border-purple-200">
+              <TabsTrigger value="details" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">Product Details</TabsTrigger>
+              <TabsTrigger value="reviews" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">Reviews (2,847)</TabsTrigger>
+              <TabsTrigger value="shipping" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">Shipping & Returns</TabsTrigger>
+              <TabsTrigger value="qa" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">Q&A (156)</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="details" className="mt-6">
+              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Product Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-medium mb-2">Key Features:</h4>
+                      <ul className="space-y-2 text-gray-700">
+                        <li>• Premium quality materials</li>
+                        <li>• Sustainable and eco-friendly</li>
+                        <li>• 2-year warranty included</li>
+                        <li>• Compatible with all devices</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-medium mb-2">Specifications:</h4>
+                      <ul className="space-y-2 text-gray-700">
+                        <li>• Weight: 2.5 kg</li>
+                        <li>• Dimensions: 30 x 20 x 15 cm</li>
+                        <li>• Material: Premium grade</li>
+                        <li>• Color: As shown in images</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="reviews" className="mt-6">
+              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold">Customer Reviews</h3>
+                    <Button variant="outline" className="border-purple-300 text-purple-700">
+                      <MessageCircle className="h-4 w-4 mr-2" />
+                      Write a Review
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((review) => (
+                      <div key={review} className="border-b border-gray-200 pb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                          <span className="font-medium">Verified Buyer</span>
+                          <span className="text-sm text-gray-600">• 2 days ago</span>
+                        </div>
+                        <p className="text-gray-700">"Excellent product quality and fast delivery. Highly recommended!"</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="shipping" className="mt-6">
+              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-semibold mb-4">Shipping & Returns</h3>
+                  <div className="grid gap-6">
+                    <div className="flex items-start gap-4">
+                      <Truck className="h-6 w-6 text-green-600 mt-1" />
+                      <div>
+                        <h4 className="font-medium text-gray-900">Free Delivery</h4>
+                        <p className="text-gray-600">Get free delivery on orders above ₹499. Same-day delivery available in select cities.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <RotateCcw className="h-6 w-6 text-blue-600 mt-1" />
+                      <div>
+                        <h4 className="font-medium text-gray-900">Easy Returns</h4>
+                        <p className="text-gray-600">30-day return policy. Items must be in original condition with tags attached.</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="qa" className="mt-6">
+              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold">Questions & Answers</h3>
+                    <Button variant="outline" className="border-purple-300 text-purple-700">
+                      Ask a Question
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="border-b border-gray-200 pb-4">
+                      <p className="font-medium text-gray-900 mb-2">Q: What is the warranty period?</p>
+                      <p className="text-gray-700">A: This product comes with a 2-year manufacturer warranty covering all defects.</p>
+                    </div>
+                    <div className="border-b border-gray-200 pb-4">
+                      <p className="font-medium text-gray-900 mb-2">Q: Is assembly required?</p>
+                      <p className="text-gray-700">A: No assembly required. The product comes ready to use out of the box.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+
         {/* Related Products */}
         <div className="mt-16">
-          <h2 className="text-2xl font-bold mb-6">Related Products</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <Card key={item} className="cursor-pointer hover:shadow-lg transition-shadow">
+          <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {[1, 2, 3, 4, 5].map((item) => (
+              <Card key={item} className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white/80 backdrop-blur-sm border border-purple-100">
                 <CardContent className="p-4">
-                  <div className="aspect-square bg-gray-200 rounded-lg mb-3 overflow-hidden">
+                  <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl mb-3 overflow-hidden">
                     <img
                       src="/api/placeholder/200/200"
                       alt="Related product"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                     />
                   </div>
-                  <h3 className="font-medium text-sm mb-1 line-clamp-2">Related Product {item}</h3>
-                  <p className="text-orange-600 font-semibold">₹{299 + item * 100}</p>
+                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">Premium Product {item}</h3>
+                  <div className="flex items-center gap-1 mb-2">
+                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs text-gray-600">4.5</span>
+                  </div>
+                  <p className="text-purple-600 font-bold">₹{(299 + item * 100).toLocaleString()}</p>
                 </CardContent>
               </Card>
             ))}
