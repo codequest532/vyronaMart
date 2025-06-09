@@ -57,13 +57,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize database with seed data
-  try {
-    await (storage as any).seedInitialData?.();
-    log("Database initialized with seed data");
-  } catch (error) {
-    log(`Database initialization error: ${error}`);
-  }
+  // Production mode - no seed data initialization
+  log("Production mode - starting with clean database");
 
   const server = await registerRoutes(app);
 

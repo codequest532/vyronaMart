@@ -2719,45 +2719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Shopping rooms for checkout selection (maps to VyronaSocial rooms)
-  app.get("/api/shopping-rooms", async (req, res) => {
-    console.log("=== SHOPPING ROOMS ENDPOINT HIT ===");
-    
-    try {
-      // Get current user ID from session (fallback to user 4 for demo)
-      const session = (req as any).session;
-      const userId = session?.user?.id || 4;
-      
-      console.log("Shopping rooms endpoint - Session:", session);
-      console.log("Shopping rooms endpoint - User ID:", userId);
-      
-      // Use the existing VyronaSocial storage method that we know works
-      const rooms = await storage.getShoppingGroups(userId);
-      console.log("Shopping rooms from storage:", rooms);
-      
-      // Transform to match expected format
-      const transformedRooms = rooms.map(room => ({
-        id: room.id,
-        name: room.name,
-        description: room.description || '',
-        creatorId: room.creatorId,
-        isActive: room.isActive,
-        maxMembers: room.maxMembers || 10,
-        totalCart: room.totalCart || 0,
-        roomCode: room.roomCode,
-        createdAt: room.createdAt
-      }));
-      
-      console.log("Transformed rooms:", transformedRooms);
-      res.json(transformedRooms);
-    } catch (error) {
-      console.error("=== SHOPPING ROOMS ERROR ===");
-      console.error("Error fetching shopping rooms:", error);
-      console.error("Error stack:", error.stack);
-      console.error("=== SHOPPING ROOMS ERROR END ===");
-      res.status(500).json({ message: "Failed to fetch shopping rooms" });
-    }
-  });
+
 
   // Group messaging endpoints
   app.post("/api/group-messages", async (req, res) => {
