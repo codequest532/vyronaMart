@@ -1,545 +1,492 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { apiRequest } from "@/lib/queryClient";
-import { Instagram, ShoppingBag, TrendingUp, Users, Link2, AlertTriangle, CheckCircle, Eye, Heart, MessageCircle, DollarSign } from "lucide-react";
+import { 
+  Instagram, 
+  ShoppingCart, 
+  Heart, 
+  Star, 
+  Filter, 
+  Search, 
+  Package, 
+  Eye, 
+  Shield, 
+  Truck, 
+  CreditCard, 
+  Verified,
+  ArrowLeft,
+  Grid3X3,
+  List,
+  SlidersHorizontal
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-// Production-ready utility function
-const formatCurrency = (cents: number): string => {
-  return `₹${(cents / 100).toLocaleString('en-IN')}`;
-};
-
-const connectInstagramSchema = z.object({
-  instagramUsername: z.string().min(1, "Instagram username is required"),
-  storeName: z.string().min(1, "Store name is required"),
-  storeDescription: z.string().optional(),
-});
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function VyronaInstaShop() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const [selectedStore, setSelectedStore] = useState<number | null>(null);
-  
-  // Mock user ID for demo - in real app this would come from auth
-  const currentUserId = 1;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [priceRange, setPriceRange] = useState("all");
+  const [sortBy, setSortBy] = useState("popular");
+  const [viewMode, setViewMode] = useState("grid");
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  // Fetch user's connected Instagram stores
-  const { data: instagramStores = [], isLoading: storesLoading } = useQuery({
-    queryKey: ["/api/instashop/stores", currentUserId],
+  // Fetch Instagram products for customers
+  const { data: instagramProducts = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["/api/instashop/products"],
   });
 
-  // Fetch products for selected store
-  const { data: storeProducts = [] } = useQuery({
-    queryKey: ["/api/instashop/products", selectedStore],
-    enabled: !!selectedStore,
-  });
-
-  // Fetch orders for selected store
-  const { data: storeOrders = [] } = useQuery({
-    queryKey: ["/api/instashop/orders", selectedStore],
-    enabled: !!selectedStore,
-  });
-
-  // Fetch analytics for selected store
-  const { data: storeAnalytics = [] } = useQuery({
-    queryKey: ["/api/instashop/analytics", selectedStore],
-    enabled: !!selectedStore,
-  });
-
-  // Connect Instagram store mutation
-  const connectStoreMutation = useMutation({
-    mutationFn: async (storeData: z.infer<typeof connectInstagramSchema>) => {
-      return await apiRequest("/api/instashop/connect", "POST", {
-        ...storeData,
-        userId: currentUserId,
-      });
+  // Add to cart mutation
+  const addToCartMutation = useMutation({
+    mutationFn: async (productData) => {
+      return await apiRequest("/api/cart/add", "POST", productData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/instashop/stores"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       toast({
-        title: "Instagram Store Connected",
-        description: "Your Instagram store has been successfully connected to VyronaMart!",
+        title: "Added to Cart",
+        description: "Product added to your cart successfully!",
       });
     },
     onError: () => {
       toast({
-        title: "Connection Failed",
-        description: "Failed to connect Instagram store. Please try again.",
+        title: "Error",
+        description: "Failed to add product to cart. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  // Sync products mutation
-  const syncProductsMutation = useMutation({
-    mutationFn: async (storeId: number) => {
-      return await apiRequest(`/api/instashop/stores/${storeId}/sync`, "POST");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/instashop/products"] });
-      toast({
-        title: "Products Synced",
-        description: "Your Instagram products have been synced successfully!",
-      });
-    },
-  });
-
-  const form = useForm<z.infer<typeof connectInstagramSchema>>({
-    resolver: zodResolver(connectInstagramSchema),
-    defaultValues: {
-      instagramUsername: "",
-      storeName: "",
-      storeDescription: "",
-    },
-  });
-
-  const onSubmit = (values: z.infer<typeof connectInstagramSchema>) => {
-    connectStoreMutation.mutate(values);
-  };
-
-  // Mock data for demonstration
-  const mockStores = [
+  // Mock data for demonstration - in production this would come from API
+  const mockInstagramProducts = [
     {
       id: 1,
-      instagramUsername: "@fashionboutique_delhi",
-      storeName: "Fashion Boutique Delhi",
-      storeDescription: "Trendy fashion for modern women",
-      followersCount: 15420,
-      isActive: true,
-      profilePictureUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=150&h=150&fit=crop&crop=face",
-      connectedAt: new Date().toISOString(),
-    }
-  ];
-
-  const mockProducts = [
-    {
-      id: 1,
-      productName: "Elegant Summer Dress",
-      description: "Perfect for summer occasions",
-      price: 2999,
-      imageUrl: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=300&h=300&fit=crop",
-      likesCount: 234,
-      commentsCount: 45,
-      isAvailable: true,
-      categoryTag: "Dresses",
+      name: "Trendy Oversized Hoodie",
+      seller: "@trendy_fashion_tn",
+      price: 1299,
+      originalPrice: 1899,
+      rating: 4.8,
+      reviews: 156,
+      category: "Fashion",
+      image: "/api/placeholder/300/300",
+      badge: "Trending",
+      verified: true,
+      description: "Premium quality oversized hoodie made from 100% cotton. Perfect for casual wear and street style."
     },
     {
       id: 2,
-      productName: "Designer Handbag",
-      description: "Luxury leather handbag",
-      price: 4599,
-      imageUrl: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=300&fit=crop",
-      likesCount: 156,
-      commentsCount: 23,
-      isAvailable: true,
-      categoryTag: "Accessories",
-    }
-  ];
-
-  const mockOrders = [
+      name: "Wireless Bluetooth Earbuds",
+      seller: "@chennai_electronics",
+      price: 2499,
+      originalPrice: 3999,
+      rating: 4.9,
+      reviews: 89,
+      category: "Electronics",
+      image: "/api/placeholder/300/300",
+      badge: "Best Seller",
+      verified: true,
+      description: "High-quality wireless earbuds with noise cancellation and 24-hour battery life."
+    },
     {
-      id: 1,
-      productId: 1,
-      quantity: 1,
-      totalAmount: 2999,
-      status: "pending",
-      createdAt: new Date().toISOString(),
+      id: 3,
+      name: "Boho Wall Hanging Set",
+      seller: "@homestyle_decor",
+      price: 899,
+      originalPrice: 1299,
+      rating: 4.7,
+      reviews: 234,
+      category: "Home Decor",
+      image: "/api/placeholder/300/300",
+      badge: "New",
+      verified: false,
+      description: "Beautiful handcrafted wall hanging set to enhance your home decor with boho vibes."
+    },
+    {
+      id: 4,
+      name: "Natural Skincare Set",
+      seller: "@beauty_naturals",
+      price: 1599,
+      originalPrice: 2299,
+      rating: 4.6,
+      reviews: 112,
+      category: "Beauty",
+      image: "/api/placeholder/300/300",
+      badge: "Organic",
+      verified: true,
+      description: "Complete natural skincare routine with organic ingredients for healthy glowing skin."
+    },
+    {
+      id: 5,
+      name: "Minimalist Watch",
+      seller: "@time_pieces_chennai",
+      price: 3499,
+      originalPrice: 4999,
+      rating: 4.8,
+      reviews: 67,
+      category: "Accessories",
+      image: "/api/placeholder/300/300",
+      badge: "Limited",
+      verified: true,
+      description: "Elegant minimalist watch with genuine leather strap and precision movement."
+    },
+    {
+      id: 6,
+      name: "Handmade Ceramic Mugs",
+      seller: "@pottery_paradise",
+      price: 799,
+      originalPrice: 1199,
+      rating: 4.5,
+      reviews: 145,
+      category: "Home Decor",
+      image: "/api/placeholder/300/300",
+      badge: "Handmade",
+      verified: false,
+      description: "Set of 2 handcrafted ceramic mugs perfect for your morning coffee or tea."
     }
   ];
 
-  const selectedStoreData = mockStores.find(s => s.id === selectedStore);
+  const categories = [
+    { value: "all", label: "All Categories" },
+    { value: "Fashion", label: "Fashion" },
+    { value: "Electronics", label: "Electronics" },
+    { value: "Beauty", label: "Beauty & Care" },
+    { value: "Home Decor", label: "Home & Decor" },
+    { value: "Accessories", label: "Accessories" }
+  ];
+
+  const priceRanges = [
+    { value: "all", label: "All Prices" },
+    { value: "0-500", label: "Under ₹500" },
+    { value: "500-1000", label: "₹500 - ₹1000" },
+    { value: "1000-2000", label: "₹1000 - ₹2000" },
+    { value: "2000+", label: "Above ₹2000" }
+  ];
+
+  const sortOptions = [
+    { value: "popular", label: "Most Popular" },
+    { value: "rating", label: "Highest Rated" },
+    { value: "price-low", label: "Price: Low to High" },
+    { value: "price-high", label: "Price: High to Low" },
+    { value: "newest", label: "Newest First" }
+  ];
+
+  const filteredProducts = mockInstagramProducts.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         product.seller.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+    const matchesPrice = priceRange === "all" || (
+      priceRange === "0-500" ? product.price <= 500 :
+      priceRange === "500-1000" ? product.price > 500 && product.price <= 1000 :
+      priceRange === "1000-2000" ? product.price > 1000 && product.price <= 2000 :
+      priceRange === "2000+" ? product.price > 2000 : true
+    );
+    
+    return matchesSearch && matchesCategory && matchesPrice;
+  }).sort((a, b) => {
+    switch (sortBy) {
+      case "rating":
+        return b.rating - a.rating;
+      case "price-low":
+        return a.price - b.price;
+      case "price-high":
+        return b.price - a.price;
+      case "newest":
+        return b.id - a.id;
+      default: // popular
+        return b.reviews - a.reviews;
+    }
+  });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <Instagram className="h-10 w-10 text-pink-500" />
-              VyronaInstaShop
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">Connect and manage your Instagram stores seamlessly</p>
-          </div>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-                <Link2 className="h-4 w-4 mr-2" />
-                Connect Instagram Store
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Connect Instagram Store</DialogTitle>
-                <DialogDescription>
-                  Connect your Instagram business account to start selling on VyronaMart.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="instagramUsername"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Instagram Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="@your_store_name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Instagram className="text-white h-6 w-6" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">VyronaInstashop</h1>
+                  <p className="text-gray-600">Shop from verified Instagram sellers</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Badge variant="outline" className="text-purple-600 border-purple-200">
+                {filteredProducts.length} Products
+              </Badge>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search and Filters */}
+        <Card className="mb-8">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search products or sellers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
                   />
-                  <FormField
-                    control={form.control}
-                    name="storeName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Store Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your Store Name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
+                </div>
+              </div>
+
+              {/* Category Filter */}
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full lg:w-48">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Price Filter */}
+              <Select value={priceRange} onValueChange={setPriceRange}>
+                <SelectTrigger className="w-full lg:w-48">
+                  <SelectValue placeholder="Price Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priceRanges.map((range) => (
+                    <SelectItem key={range.value} value={range.value}>
+                      {range.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Sort */}
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full lg:w-48">
+                  <SelectValue placeholder="Sort By" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sortOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Trust Indicators */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+            <CardContent className="p-4 text-center">
+              <Shield className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900">Verified Sellers</h3>
+              <p className="text-sm text-gray-600">All sellers verified by VyronaMart</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+            <CardContent className="p-4 text-center">
+              <Truck className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900">Fast Delivery</h3>
+              <p className="text-sm text-gray-600">Same-day delivery available</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-r from-orange-50 to-red-50 border-orange-200">
+            <CardContent className="p-4 text-center">
+              <CreditCard className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+              <h3 className="font-semibold text-gray-900">Secure Payments</h3>
+              <p className="text-sm text-gray-600">Protected transactions</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Products Grid */}
+        {productsLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Loading products...</p>
+          </div>
+        ) : (
+          <div className={`grid gap-6 ${
+            viewMode === "grid" 
+              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+              : "grid-cols-1"
+          }`}>
+            {filteredProducts.map((product) => (
+              <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-purple-300">
+                <CardContent className="p-0">
+                  {/* Product Image */}
+                  <div className="relative overflow-hidden rounded-t-lg">
+                    <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                      <Package className="h-12 w-12 text-gray-400" />
+                    </div>
+                    {product.badge && (
+                      <Badge className="absolute top-2 left-2 bg-purple-600 text-white">
+                        {product.badge}
+                      </Badge>
                     )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="storeDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Store Description (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Brief description of your store" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="h-5 w-5 text-blue-500 mt-0.5" />
-                      <div className="text-sm text-blue-700 dark:text-blue-300">
-                        <p className="font-medium mb-1">Instagram Business Account Required</p>
-                        <p>Make sure your Instagram account is set up as a business account to enable shopping features and product tagging.</p>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white"
+                    >
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Product Details */}
+                  <div className="p-4">
+                    <div className="mb-2">
+                      <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
+                      <div className="flex items-center space-x-2">
+                        <Instagram className="h-3 w-3 text-purple-600" />
+                        <span className="text-sm text-purple-600">{product.seller}</span>
+                        {product.verified && <Verified className="h-3 w-3 text-blue-500" />}
                       </div>
                     </div>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={connectStoreMutation.isPending}>
-                    {connectStoreMutation.isPending ? "Connecting..." : "Connect Store"}
-                  </Button>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Stores Sidebar */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingBag className="h-5 w-5" />
-                  Connected Stores
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {storesLoading ? (
-                  <div className="space-y-3">
-                    {[...Array(2)].map((_, i) => (
-                      <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
-                    ))}
-                  </div>
-                ) : mockStores.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Instagram className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No stores connected</p>
-                    <p className="text-sm">Connect your first Instagram store!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {mockStores.map((store: any) => (
-                      <div
-                        key={store.id}
-                        className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                          selectedStore === store.id
-                            ? "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-700"
-                            : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                        }`}
-                        onClick={() => setSelectedStore(store.id)}
+                    {/* Price and Rating */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg font-bold text-gray-900">₹{product.price}</span>
+                        <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Star className="text-amber-400 h-4 w-4 fill-current" />
+                        <span className="text-sm font-medium">{product.rating}</span>
+                        <span className="text-xs text-gray-500">({product.reviews})</span>
+                      </div>
+                    </div>
+
+                    {/* Category */}
+                    <div className="mb-3">
+                      <Badge variant="secondary" className="text-xs bg-purple-50 text-purple-700">
+                        {product.category}
+                      </Badge>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-2">
+                      <Button 
+                        size="sm" 
+                        className="flex-1 bg-purple-600 hover:bg-purple-700"
+                        onClick={() => addToCartMutation.mutate({
+                          productId: product.id,
+                          quantity: 1,
+                          price: product.price
+                        })}
+                        disabled={addToCartMutation.isPending}
                       >
-                        <div className="flex items-center gap-3 mb-3">
-                          <img
-                            src={store.profilePictureUrl}
-                            alt={store.storeName}
-                            className="w-12 h-12 rounded-full object-cover"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium truncate">{store.storeName}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">{store.instagramUsername}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Badge variant={store.isActive ? "default" : "secondary"} className="text-xs">
-                            {store.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Users className="h-3 w-3" />
-                            {store.followersCount.toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {selectedStore ? (
-              <Tabs defaultValue="overview" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="products">Products</TabsTrigger>
-                  <TabsTrigger value="orders">Orders</TabsTrigger>
-                  <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                </TabsList>
-
-                {/* Overview Tab */}
-                <TabsContent value="overview">
-                  <div className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
-                          Store Overview
-                          <Button 
-                            onClick={() => selectedStore && syncProductsMutation.mutate(selectedStore)}
-                            disabled={syncProductsMutation.isPending}
-                            size="sm"
-                          >
-                            {syncProductsMutation.isPending ? "Syncing..." : "Sync Products"}
+                        <ShoppingCart className="mr-1 h-3 w-3" />
+                        {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
+                      </Button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="sm" variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
+                            <Eye className="h-3 w-3" />
                           </Button>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {selectedStoreData && (
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
-                              <Users className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                              <p className="text-2xl font-bold text-blue-600">{selectedStoreData.followersCount.toLocaleString()}</p>
-                              <p className="text-sm text-blue-600/80">Followers</p>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>{product.name}</DialogTitle>
+                            <DialogDescription>
+                              Product details from {product.seller}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                              <Package className="h-16 w-16 text-gray-400" />
                             </div>
-                            <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
-                              <ShoppingBag className="h-6 w-6 mx-auto mb-2 text-green-600" />
-                              <p className="text-2xl font-bold text-green-600">{mockProducts.length}</p>
-                              <p className="text-sm text-green-600/80">Products</p>
-                            </div>
-                            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg">
-                              <TrendingUp className="h-6 w-6 mx-auto mb-2 text-purple-600" />
-                              <p className="text-2xl font-bold text-purple-600">{mockOrders.length}</p>
-                              <p className="text-sm text-purple-600/80">Orders</p>
-                            </div>
-                            <div className="text-center p-4 bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-lg">
-                              <DollarSign className="h-6 w-6 mx-auto mb-2 text-pink-600" />
-                              <p className="text-2xl font-bold text-pink-600">₹{mockOrders.reduce((sum, order) => sum + order.totalAmount, 0).toLocaleString()}</p>
-                              <p className="text-sm text-pink-600/80">Revenue</p>
+                            <div className="space-y-4">
+                              <div>
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <span className="text-2xl font-bold">₹{product.price}</span>
+                                  <span className="text-lg text-gray-500 line-through">₹{product.originalPrice}</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <div className="flex items-center">
+                                    <Star className="text-amber-400 h-4 w-4 fill-current" />
+                                    <span className="ml-1 font-medium">{product.rating}</span>
+                                  </div>
+                                  <span className="text-gray-500">({product.reviews} reviews)</span>
+                                </div>
+                              </div>
+                              <p className="text-gray-600">{product.description}</p>
+                              <Button 
+                                className="w-full bg-purple-600 hover:bg-purple-700"
+                                onClick={() => addToCartMutation.mutate({
+                                  productId: product.id,
+                                  quantity: 1,
+                                  price: product.price
+                                })}
+                              >
+                                <ShoppingCart className="mr-2 h-4 w-4" />
+                                Add to Cart - ₹{product.price}
+                              </Button>
                             </div>
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
 
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Connection Status</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                          <CheckCircle className="h-6 w-6 text-green-600" />
-                          <div>
-                            <p className="font-medium text-green-800 dark:text-green-200">Instagram Store Connected</p>
-                            <p className="text-sm text-green-600 dark:text-green-300">
-                              Last synced: {new Date().toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    {/* Seller Info */}
+                    <div className="mt-3 flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Free shipping</span>
+                      <Badge variant="outline" className="border-green-200 text-green-700">
+                        VyronaMart Verified
+                      </Badge>
+                    </div>
                   </div>
-                </TabsContent>
-
-                {/* Products Tab */}
-                <TabsContent value="products">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Instagram Products</CardTitle>
-                      <CardDescription>Products synced from your Instagram account</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {mockProducts.map((product: any) => (
-                          <div key={product.id} className="border rounded-lg p-4 space-y-3">
-                            <img
-                              src={product.imageUrl}
-                              alt={product.productName}
-                              className="w-full h-48 object-cover rounded-lg"
-                            />
-                            <div>
-                              <h3 className="font-medium">{product.productName}</h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                {product.description}
-                              </p>
-                              <div className="flex items-center justify-between mt-3">
-                                <p className="text-lg font-bold text-green-600">
-                                  {formatCurrency(product.price)}
-                                </p>
-                                <Badge variant={product.isAvailable ? "default" : "secondary"}>
-                                  {product.isAvailable ? "Available" : "Out of Stock"}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                                <div className="flex items-center gap-1">
-                                  <Heart className="h-4 w-4" />
-                                  {product.likesCount}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <MessageCircle className="h-4 w-4" />
-                                  {product.commentsCount}
-                                </div>
-                                <Badge variant="outline" className="text-xs">
-                                  {product.categoryTag}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                {/* Orders Tab */}
-                <TabsContent value="orders">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Recent Orders</CardTitle>
-                      <CardDescription>Orders from your Instagram store</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {mockOrders.length === 0 ? (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                          <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                          <p>No orders yet</p>
-                          <p className="text-sm">Orders will appear here when customers make purchases</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {mockOrders.map((order: any) => (
-                            <div key={order.id} className="border rounded-lg p-4">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium">Order #{order.id}</p>
-                                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {new Date(order.createdAt).toLocaleDateString()}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-bold">{formatCurrency(order.totalAmount)}</p>
-                                  <Badge 
-                                    variant={
-                                      order.status === "pending" ? "secondary" :
-                                      order.status === "confirmed" ? "default" :
-                                      order.status === "shipped" ? "default" : "destructive"
-                                    }
-                                  >
-                                    {order.status}
-                                  </Badge>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                {/* Analytics Tab */}
-                <TabsContent value="analytics">
-                  <div className="space-y-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <TrendingUp className="h-5 w-5" />
-                          Performance Analytics
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="text-center p-4 border rounded-lg">
-                            <Eye className="h-6 w-6 mx-auto mb-2 text-blue-600" />
-                            <p className="text-2xl font-bold">12.5K</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Impressions</p>
-                          </div>
-                          <div className="text-center p-4 border rounded-lg">
-                            <Users className="h-6 w-6 mx-auto mb-2 text-green-600" />
-                            <p className="text-2xl font-bold">8.2K</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Reach</p>
-                          </div>
-                          <div className="text-center p-4 border rounded-lg">
-                            <TrendingUp className="h-6 w-6 mx-auto mb-2 text-purple-600" />
-                            <p className="text-2xl font-bold">347</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Profile Views</p>
-                          </div>
-                          <div className="text-center p-4 border rounded-lg">
-                            <Heart className="h-6 w-6 mx-auto mb-2 text-pink-600" />
-                            <p className="text-2xl font-bold">1.2K</p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Likes</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Sales Performance</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                          <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                          <p>Analytics dashboard</p>
-                          <p className="text-sm">Detailed analytics will be available once you have more data</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Instagram className="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
-                  <h3 className="text-lg font-medium mb-2">Select an Instagram Store</h3>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Choose a connected store from the sidebar to view details and manage your Instagram business.
-                  </p>
                 </CardContent>
               </Card>
-            )}
+            ))}
           </div>
-        </div>
+        )}
+
+        {/* Empty State */}
+        {filteredProducts.length === 0 && !productsLoading && (
+          <div className="text-center py-12">
+            <Instagram className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600">Try adjusting your search or filters to find more products.</p>
+          </div>
+        )}
       </div>
     </div>
   );
