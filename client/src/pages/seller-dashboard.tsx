@@ -385,8 +385,15 @@ export default function SellerDashboard() {
     enabled: !!(currentUser as any)?.id,
   });
 
-  const handleLogout = () => {
-    setLocation("/login");
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      queryClient.clear();
+      setLocation('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setLocation('/');
+    }
   };
 
 
