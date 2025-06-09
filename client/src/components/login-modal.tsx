@@ -781,20 +781,22 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-6">
-          <VisuallyHidden>
-            <DialogTitle>Authentication</DialogTitle>
-            <DialogDescription>Sign in to your account or create a new one</DialogDescription>
-          </VisuallyHidden>
-          <ModalContent />
-        </DialogContent>
-      </Dialog>
+      {/* Main Login Dialog */}
+      {!showForgotPassword && !showResetPassword && (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+          <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-6">
+            <VisuallyHidden>
+              <DialogTitle>Authentication</DialogTitle>
+              <DialogDescription>Sign in to your account or create a new one</DialogDescription>
+            </VisuallyHidden>
+            <ModalContent />
+          </DialogContent>
+        </Dialog>
+      )}
 
-      {/* Forgot Password Modal */}
+      {/* Forgot Password Modal - Rendered independently */}
       {showForgotPassword && (
-        console.log('Rendering forgot password modal!'),
-        <div className="fixed inset-0 bg-red-500 flex items-center justify-center" style={{ zIndex: 9999 }}>
+        <div className="fixed inset-0 bg-red-500 flex items-center justify-center" style={{ zIndex: 10000 }}>
           <div className="max-w-md w-full mx-4 bg-white rounded-2xl p-6 shadow-2xl">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
@@ -847,9 +849,9 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
         </div>
       )}
 
-      {/* Reset Password Modal */}
+      {/* Reset Password Modal - Rendered independently */}
       {showResetPassword && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center" style={{ zIndex: 10000 }}>
           <div className="max-w-md w-full mx-4 bg-white rounded-2xl p-6 shadow-2xl">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">Enter Reset Code</h3>
