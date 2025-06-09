@@ -655,7 +655,7 @@ export default function VyronaSocial() {
     }
 
     // Check online members count
-    if (onlineMembers.length <= 1) {
+    if (deduplicatedOnlineMembers.length <= 1) {
       toast({ 
         title: "Not enough online members", 
         description: "At least 2 members must be online to start a video call",
@@ -797,6 +797,20 @@ export default function VyronaSocial() {
   const selectedGroup = selectedGroupId ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
   const cartItems = (groupCart as CartItem[]) || [];
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Deduplicate online members to prevent React key conflicts
+  const deduplicatedOnlineMembers = React.useMemo(() => {
+    if (!onlineMembersData) return [];
+    const seen = new Set();
+    return onlineMembersData.filter((member: any) => {
+      const key = `${member.userId}-${member.username}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }, [onlineMembersData]);
 
   // Send message function
   const handleSendMessage = () => {
@@ -1490,15 +1504,15 @@ export default function VyronaSocial() {
                           <Button
                             size="sm"
                             onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
-                            disabled={!isVideoCallActive && onlineMembers.length <= 1}
+                            disabled={!isVideoCallActive && deduplicatedOnlineMembers.length <= 1}
                             className={`gap-1 text-xs px-2 ${isVideoCallActive 
                               ? 'bg-red-500 hover:bg-red-600' 
-                              : onlineMembers.length <= 1 
+                              : deduplicatedOnlineMembers.length <= 1 
                                 ? 'bg-gray-400 cursor-not-allowed' 
                                 : 'bg-green-500 hover:bg-green-600'}`}
                           >
                             {isVideoCallActive ? <VideoOff className="h-3 w-3" /> : <Video className="h-3 w-3" />}
-                            {isVideoCallActive ? 'End' : onlineMembers.length <= 1 ? `${onlineMembers.length}` : 'Call'}
+                            {isVideoCallActive ? 'End' : deduplicatedOnlineMembers.length <= 1 ? `${deduplicatedOnlineMembers.length}` : 'Call'}
                           </Button>
                           
                           <Button
@@ -1864,13 +1878,13 @@ export default function VyronaSocial() {
                       <div className="flex items-center gap-2 mb-3 flex-shrink-0">
                         <Users className="h-4 w-4 text-blue-600" />
                         <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
-                        <span className="text-xs text-gray-500">({onlineMembers.length} online)</span>
+                        <span className="text-xs text-gray-500">({deduplicatedOnlineMembers.length} online)</span>
                       </div>
                       <div className="flex-1 min-h-0 overflow-hidden">
                         <div className="h-full overflow-y-auto">
                           <div className="space-y-2 pr-2">
-                            {onlineMembers.length > 0 ? (
-                              onlineMembers.map((member, index) => (
+                            {deduplicatedOnlineMembers.length > 0 ? (
+                              deduplicatedOnlineMembers.map((member, index) => (
                                 <div key={`member-${member.userId}-${index}`} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                   <Avatar className="w-8 h-8">
@@ -2299,12 +2313,12 @@ export default function VyronaSocial() {
       </Dialog>
 
       {/* Online Members Indicator */}
-      {selectedGroupId && onlineMembers.length > 0 && (
+      {selectedGroupId && deduplicatedOnlineMembers.length > 0 && (
         <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-green-200">
           <div className="flex items-center gap-2 text-sm">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-gray-600 dark:text-gray-300">
-              {onlineMembers.length} member{onlineMembers.length !== 1 ? 's' : ''} online
+              {deduplicatedOnlineMembers.length} member{deduplicatedOnlineMembers.length !== 1 ? 's' : ''} online
             </span>
           </div>
         </div>
