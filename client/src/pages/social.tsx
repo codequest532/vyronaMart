@@ -1900,6 +1900,110 @@ export default function VyronaSocial() {
             </div>
           </div>
         </div>
+
+        {/* Product Browsing Section */}
+        <div className="container mx-auto px-6 py-8">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Social Shopping Products</h2>
+            <p className="text-gray-600 dark:text-gray-400">Discover exclusive products perfect for group buying</p>
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.slice(0, 12).map((product) => (
+                <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-purple-300" onClick={() => setLocation(`/social/product/${product.id}`)}>
+                  <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900">
+                    {product.imageUrl ? (
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <Package className="w-12 h-12 text-purple-400" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 right-3">
+                      <Badge className="bg-white/90 text-gray-800 shadow-sm">
+                        {product.category}
+                      </Badge>
+                    </div>
+                    {product.enableGroupBuy && (
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                          <Users className="w-3 h-3 mr-1" />
+                          Group Buy
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">{product.name}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{product.description}</p>
+                    
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl font-bold text-purple-600">₹{Number(product.price).toFixed(2)}</span>
+                        {product.enableGroupBuy && (
+                          <span className="text-sm text-gray-500 line-through">₹{(product.price * 1.2).toFixed(2)}</span>
+                        )}
+                      </div>
+                      {product.enableGroupBuy && (
+                        <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                          20% OFF
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (selectedGroupId) {
+                            handleAddToGroupCart(product.id);
+                          } else {
+                            toast({
+                              title: "Select a group first",
+                              description: "Choose a shopping group to add products",
+                              variant: "destructive"
+                            });
+                          }
+                        }}
+                      >
+                        <ShoppingBag className="w-4 h-4 mr-2" />
+                        {product.enableGroupBuy ? 'Group Buy' : 'Add to Cart'}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="px-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Video Call Overlay - Integrated with Product Browsing */}
@@ -2006,7 +2110,7 @@ export default function VyronaSocial() {
             <div className="flex-1 p-4 overflow-y-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredProducts.slice(0, 6).map((product) => (
-                  <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-green-300">
+                  <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-green-300 cursor-pointer" onClick={() => setLocation(`/social/product/${product.id}`)}>
                     <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
                       {product.imageUrl ? (
                         <img 
