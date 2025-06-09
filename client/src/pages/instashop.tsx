@@ -47,13 +47,10 @@ export default function VyronaInstaShop() {
   
   // Chat states
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [selectedSeller, setSelectedSeller] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]);
-  const [chatProducts, setChatProducts] = useState([]);
+  const [selectedSeller, setSelectedSeller] = useState<any>(null);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatProducts, setChatProducts] = useState<any[]>([]);
   const [messageInput, setMessageInput] = useState("");
-  const [chatMessages, setChatMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState("");
-  const [chatProducts, setChatProducts] = useState([]);
 
   // Fetch Instagram products for customers
   const { data: instagramProducts = [], isLoading: productsLoading } = useQuery({
@@ -655,16 +652,16 @@ export default function VyronaInstaShop() {
                     size="sm" 
                     variant="outline" 
                     className="border-purple-200 text-purple-600"
-                    onClick={() => startVideoCall({
+                    onClick={() => startChat({
                       name: selectedProduct.seller,
-                      id: selectedProduct.sellerId || `seller_${selectedProduct.id}`,
+                      id: selectedProduct.seller || `seller_${selectedProduct.id}`,
                       products: [selectedProduct],
-                      avatar: selectedProduct.sellerAvatar,
+                      avatar: selectedProduct.seller,
                       verified: selectedProduct.verified
                     })}
                   >
-                    <Video className="h-4 w-4 mr-2" />
-                    Video Call
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Chat Now
                   </Button>
                 </div>
 
@@ -765,11 +762,11 @@ export default function VyronaInstaShop() {
                       variant="outline" 
                       size="lg"
                       className="border-green-200 text-green-600 hover:bg-green-50"
-                      onClick={() => startVideoCall({
+                      onClick={() => startChat({
                         name: selectedProduct.seller,
-                        id: selectedProduct.sellerId || `seller_${selectedProduct.id}`,
+                        id: selectedProduct.seller || `seller_${selectedProduct.id}`,
                         products: [selectedProduct],
-                        avatar: selectedProduct.sellerAvatar,
+                        avatar: selectedProduct.seller,
                         verified: selectedProduct.verified
                       })}
                     >
@@ -924,6 +921,81 @@ export default function VyronaInstaShop() {
                   </div>
                 </div>
 
+                {/* Products Section */}
+                <div className="p-4 border-b">
+                  <h4 className="font-medium text-gray-900 mb-3">Seller's Products</h4>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {chatProducts.map((product: any) => (
+                      <div key={product.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+                        <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
+                          <Package className="h-4 w-4 text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-gray-900 truncate">{product.name}</p>
+                          <p className="text-xs text-purple-600">₹{product.price}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          className="h-6 px-2 text-xs bg-purple-600 hover:bg-purple-700"
+                          onClick={() => addToCartFromChat(product)}
+                        >
+                          <ShoppingBag className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Chat Messages */}
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    {chatMessages.map((message: any) => (
+                      <div
+                        key={message.id}
+                        className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div
+                          className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                            message.sender === 'customer'
+                              ? 'bg-purple-600 text-white'
+                              : message.sender === 'system'
+                              ? 'bg-green-100 text-green-800 border border-green-200'
+                              : 'bg-gray-100 text-gray-900'
+                          }`}
+                        >
+                          {message.sender === 'seller' && (
+                            <div className="flex items-center space-x-1 mb-1">
+                              <Instagram className="h-3 w-3 text-purple-600" />
+                              <span className="text-xs font-medium text-purple-600">
+                                {selectedSeller.name}
+                              </span>
+                            </div>
+                          )}
+                          <p>{message.message}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Message Input */}
+                  <div className="p-4 border-t">
+                    <div className="flex space-x-2">
+                      <Input
+                        value={messageInput}
+                        onChange={(e) => setMessageInput(e.target.value)}
+                        placeholder="Type a message..."
+                        className="flex-1"
+                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      />
+                      <Button size="sm" onClick={sendMessage} className="bg-purple-600 hover:bg-purple-700">
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
