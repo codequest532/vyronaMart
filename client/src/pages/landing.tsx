@@ -373,7 +373,8 @@ export default function Landing() {
 
             <div className="flex items-center space-x-4">
               <Button
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-0"
+                variant="outline"
+                className="bg-white text-blue-900 border-white hover:bg-blue-50 hover:text-blue-800 font-medium"
               >
                 <Building2 className="h-4 w-4 mr-2" />
                 Become a Seller
