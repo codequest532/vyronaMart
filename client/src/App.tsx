@@ -64,7 +64,7 @@ function Router() {
       {user ? (
         <Route path="/" component={Home} />
       ) : (
-        <Route path="/" component={Landing} />
+        <Route path="/" component={Login} />
       )}
       <Route path="/home" component={Home} />
       <Route path="/product/:productId">

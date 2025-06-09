@@ -266,6 +266,17 @@ export default function Login() {
                       )}
                     />
 
+                    <div className="text-right mb-4">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="text-sm text-purple-600 hover:text-purple-700 p-0 h-auto"
+                        onClick={() => setLocation('/forgot-password')}
+                      >
+                        Forgot Password?
+                      </Button>
+                    </div>
+
                     <Button 
                       type="submit" 
                       className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200" 
