@@ -391,14 +391,19 @@ export default function SellerDashboard() {
     
     setIsLoggingOut(true);
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      queryClient.clear();
-      setLocation('/');
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (response.ok) {
+        queryClient.clear();
+        // Use window.location for immediate redirect
+        window.location.href = '/';
+      } else {
+        throw new Error('Logout failed');
+      }
     } catch (error) {
       console.error('Logout failed:', error);
-      setLocation('/');
-    } finally {
       setIsLoggingOut(false);
+      // Still redirect even if logout fails
+      window.location.href = '/';
     }
   };
 
