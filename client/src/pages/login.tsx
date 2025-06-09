@@ -126,7 +126,7 @@ export default function Login() {
       queryClient.setQueryData(["/api/current-user"], data.user);
       toast({
         title: "Account Created",
-        description: "Welcome to VyronaMart! You've received 500 welcome coins.",
+        description: "Welcome to Vyrona! You've received 500 welcome coins.",
       });
       setLocation("/");
     },
@@ -151,7 +151,7 @@ export default function Login() {
       queryClient.setQueryData(["/api/current-user"], data.user);
       toast({
         title: "Seller Account Created",
-        description: "Welcome to VyronaMart! Your seller account is ready.",
+        description: "Welcome to Vyrona! Your seller account is ready.",
       });
       setLocation("/seller-dashboard");
     },
@@ -186,7 +186,7 @@ export default function Login() {
             </div>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                VyronaMart
+                Vyrona
               </h1>
               <p className="text-gray-600 text-sm">Social Commerce Platform</p>
             </div>
@@ -265,17 +265,6 @@ export default function Login() {
                         </FormItem>
                       )}
                     />
-
-                    <div className="text-right mb-4">
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="text-sm text-purple-600 hover:text-purple-700 p-0 h-auto"
-                        onClick={() => setLocation('/forgot-password')}
-                      >
-                        Forgot Password?
-                      </Button>
-                    </div>
 
                     <Button 
                       type="submit" 

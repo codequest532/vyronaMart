@@ -3,15 +3,23 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2, Menu, Users, ShoppingBag } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 import type { Product, Store } from "@shared/schema";
 
 export default function Landing() {
   const [, setLocation] = useLocation();
-
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [otpStep, setOtpStep] = useState<"email" | "otp" | "reset">("email");
+  const [resetEmail, setResetEmail] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -68,8 +76,6 @@ export default function Landing() {
     },
     onSuccess: (data) => {
       setShowAuthModal(false);
-      setShowLoginModal(false);
-      setShowSignupModal(false);
       // Store user data in query cache to maintain auth state
       queryClient.setQueryData(["/api/current-user"], data.user);
       toast({
@@ -356,14 +362,14 @@ export default function Landing() {
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
+                onClick={() => setLocation("/login")}
                 className="text-white hover:bg-blue-800"
-                onClick={() => setLocation('/login')}
               >
                 Log In
               </Button>
               <Button
+                onClick={() => setLocation("/login")}
                 className="bg-orange-500 hover:bg-orange-600"
-                onClick={() => setLocation('/login')}
               >
                 Sign Up
               </Button>
@@ -971,7 +977,211 @@ export default function Landing() {
         )}
       </main>
 
+      {/* Authentication Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {authMode === "login" ? "Sign In" : "Create Account"}
+            </DialogTitle>
+            <DialogDescription>
+              {authMode === "login" 
+                ? "Sign in to your VyronaMart account to continue shopping."
+                : "Create a new account to start your shopping journey."
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Signing In..." : "Sign In"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="w-full"
+                  onClick={() => setShowForgotPassword(true)}
+                >
+                  Forgot Password?
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div>
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="mobile">Mobile Number</Label>
+                  <Input
+                    id="mobile"
+                    name="mobile"
+                    type="tel"
+                    placeholder="Enter your mobile number"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input
+                    id="signup-password"
+                    name="password"
+                    type="password"
+                    placeholder="Create a password"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <Input
+                    id="confirm-password"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    required
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={signupMutation.isPending}
+                >
+                  {signupMutation.isPending ? "Creating Account..." : "Create Account"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
 
+      {/* Forgot Password Modal */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              {otpStep === "email" && "Enter your email to receive a reset code."}
+              {otpStep === "otp" && "Enter the verification code sent to your email."}
+              {otpStep === "reset" && "Enter your new password."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleForgotPasswordStep} className="space-y-4">
+            {otpStep === "email" && (
+              <div>
+                <Label htmlFor="reset-email">Email</Label>
+                <Input
+                  id="reset-email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+            )}
+            
+            {otpStep === "otp" && (
+              <div>
+                <Label htmlFor="otp">Verification Code</Label>
+                <Input
+                  id="otp"
+                  name="otp"
+                  type="text"
+                  placeholder="Enter 6-digit code"
+                  required
+                />
+              </div>
+            )}
+            
+            {otpStep === "reset" && (
+              <>
+                <div>
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter new password"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                  <Input
+                    id="confirm-new-password"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Confirm new password"
+                    required
+                  />
+                </div>
+              </>
+            )}
+            
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={forgotPasswordMutation.isPending || verifyOtpMutation.isPending || resetPasswordMutation.isPending}
+            >
+              {otpStep === "email" && (forgotPasswordMutation.isPending ? "Sending..." : "Send Code")}
+              {otpStep === "otp" && (verifyOtpMutation.isPending ? "Verifying..." : "Verify Code")}
+              {otpStep === "reset" && (resetPasswordMutation.isPending ? "Resetting..." : "Reset Password")}
+            </Button>
+            
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setShowForgotPassword(false);
+                setOtpStep("email");
+                setResetEmail("");
+              }}
+            >
+              Cancel
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

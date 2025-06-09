@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
-import Landing from "@/pages/landing-fixed";
+import Landing from "@/pages/landing";
 import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
@@ -25,7 +25,6 @@ import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
 import EbookReader from "@/pages/ebook-reader";
-import ForgotPassword from "@/pages/forgot-password";
 
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
@@ -48,9 +47,8 @@ function Router() {
 
   return (
     <Switch>
-      {/* Authentication Routes */}
+      {/* Authentication Route */}
       <Route path="/login" component={Login} />
-      <Route path="/forgot-password" component={ForgotPassword} />
       
       {/* Admin Interface */}
       <Route path="/admin" component={AdminDashboard} />
