@@ -85,6 +85,7 @@ export default function SellerDashboard() {
   const [activeBookOrderTab, setActiveBookOrderTab] = useState("all");
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showAddProductDialog, setShowAddProductDialog] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [bookSection, setBookSection] = useState("overview");
   const [newBook, setNewBook] = useState({
     title: "",
@@ -386,6 +387,9 @@ export default function SellerDashboard() {
   });
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       queryClient.clear();
@@ -393,6 +397,8 @@ export default function SellerDashboard() {
     } catch (error) {
       console.error('Logout failed:', error);
       setLocation('/');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -651,9 +657,9 @@ export default function SellerDashboard() {
                 <Plus className="h-4 w-4 mr-2" />
                 Add Product
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
             </div>
           </div>

@@ -93,6 +93,7 @@ export default function SellerDashboard() {
   const [isAddBookDialogOpen, setIsAddBookDialogOpen] = useState(false);
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   const [isLibraryDialogOpen, setIsLibraryDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -345,6 +346,9 @@ export default function SellerDashboard() {
   ];
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       queryClient.clear();
@@ -352,6 +356,8 @@ export default function SellerDashboard() {
     } catch (error) {
       console.error('Logout failed:', error);
       setLocation('/');
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
