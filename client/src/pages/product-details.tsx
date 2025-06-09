@@ -5,7 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Heart, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw, Share2, MessageCircle, Users, Zap, Award, Clock } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Star, Heart, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw, Share2, MessageCircle, Users, Zap, Award, Clock, Send } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Product } from "@shared/schema";
 
@@ -17,6 +21,13 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
   const [, setLocation] = useLocation();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewerName, setReviewerName] = useState("");
+  const [questionText, setQuestionText] = useState("");
+  const [questionerName, setQuestionerName] = useState("");
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: [`/api/products/${productId}`],
@@ -54,6 +65,37 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
   const handleAddToCart = () => {
     // This would trigger auth modal in real implementation
     alert("Please login to add items to cart");
+  };
+
+  const handleSubmitReview = () => {
+    if (!reviewText.trim() || !reviewerName.trim()) {
+      alert("Please fill in all fields");
+      return;
+    }
+    
+    // In a real app, this would make an API call to submit the review
+    alert(`Review submitted successfully!\nRating: ${reviewRating} stars\nReview: ${reviewText}\nName: ${reviewerName}`);
+    
+    // Reset form and close dialog
+    setReviewText("");
+    setReviewerName("");
+    setReviewRating(5);
+    setReviewDialogOpen(false);
+  };
+
+  const handleSubmitQuestion = () => {
+    if (!questionText.trim() || !questionerName.trim()) {
+      alert("Please fill in all fields");
+      return;
+    }
+    
+    // In a real app, this would make an API call to submit the question
+    alert(`Question submitted successfully!\nQuestion: ${questionText}\nName: ${questionerName}`);
+    
+    // Reset form and close dialog
+    setQuestionText("");
+    setQuestionerName("");
+    setQuestionDialogOpen(false);
   };
 
   return (
@@ -312,10 +354,80 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold">Customer Reviews</h3>
-                    <Button variant="outline" className="border-purple-300 text-purple-700">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Write a Review
-                    </Button>
+                    <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Write a Review
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl font-semibold text-purple-700">Write a Review</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="reviewerName" className="text-sm font-medium">Your Name</Label>
+                            <Input
+                              id="reviewerName"
+                              value={reviewerName}
+                              onChange={(e) => setReviewerName(e.target.value)}
+                              placeholder="Enter your name"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium">Rating</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  onClick={() => setReviewRating(star)}
+                                  className="transition-colors"
+                                >
+                                  <Star
+                                    className={`h-6 w-6 ${
+                                      star <= reviewRating
+                                        ? "fill-yellow-400 text-yellow-400"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                </button>
+                              ))}
+                              <span className="ml-2 text-sm text-gray-600">
+                                {reviewRating} star{reviewRating !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          </div>
+                          <div>
+                            <Label htmlFor="reviewText" className="text-sm font-medium">Your Review</Label>
+                            <Textarea
+                              id="reviewText"
+                              value={reviewText}
+                              onChange={(e) => setReviewText(e.target.value)}
+                              placeholder="Share your experience with this product..."
+                              className="mt-1 min-h-[100px]"
+                            />
+                          </div>
+                          <div className="flex gap-3 pt-4">
+                            <Button
+                              onClick={handleSubmitReview}
+                              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                            >
+                              <Send className="h-4 w-4 mr-2" />
+                              Submit Review
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setReviewDialogOpen(false)}
+                              className="border-gray-300"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <div className="space-y-4">
                     {[1, 2, 3].map((review) => (
@@ -366,9 +478,57 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-xl font-semibold">Questions & Answers</h3>
-                    <Button variant="outline" className="border-purple-300 text-purple-700">
-                      Ask a Question
-                    </Button>
+                    <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Ask a Question
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl font-semibold text-purple-700">Ask a Question</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="questionerName" className="text-sm font-medium">Your Name</Label>
+                            <Input
+                              id="questionerName"
+                              value={questionerName}
+                              onChange={(e) => setQuestionerName(e.target.value)}
+                              placeholder="Enter your name"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="questionText" className="text-sm font-medium">Your Question</Label>
+                            <Textarea
+                              id="questionText"
+                              value={questionText}
+                              onChange={(e) => setQuestionText(e.target.value)}
+                              placeholder="Ask about product features, compatibility, warranty, or anything else..."
+                              className="mt-1 min-h-[100px]"
+                            />
+                          </div>
+                          <div className="flex gap-3 pt-4">
+                            <Button
+                              onClick={handleSubmitQuestion}
+                              className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                            >
+                              <Send className="h-4 w-4 mr-2" />
+                              Submit Question
+                            </Button>
+                            <Button
+                              variant="outline"
+                              onClick={() => setQuestionDialogOpen(false)}
+                              className="border-gray-300"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <div className="space-y-4">
                     <div className="border-b border-gray-200 pb-4">
