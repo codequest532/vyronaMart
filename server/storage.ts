@@ -2239,7 +2239,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async markOtpAsVerified(id: number): Promise<void> {
-    await db.update(otpVerifications).set({ isVerified: true }).where(eq(otpVerifications.id, id));
+    await db.update(otpVerifications).set({ verified: true }).where(eq(otpVerifications.id, id));
   }
 
   async connectInstagramStore(store: InsertInstagramStore): Promise<InstagramStore> {
