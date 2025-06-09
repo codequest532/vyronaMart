@@ -181,6 +181,28 @@ export default function AdminDashboard() {
     addSellerMutation.mutate(data);
   };
 
+  const removeSellerMutation = useMutation({
+    mutationFn: async (sellerId: number) => {
+      await apiRequest(`/api/admin/sellers/${sellerId}`, "DELETE");
+    },
+    onSuccess: () => {
+      toast({ 
+        title: "Success", 
+        description: "Seller and all associated products removed successfully!" 
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/sellers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stores"] });
+    },
+    onError: () => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to remove seller. Please try again." 
+      });
+    },
+  });
+
   const { data: stats } = useQuery({
     queryKey: ["/api/admin/stats"],
   });
@@ -1438,6 +1460,39 @@ export default function AdminDashboard() {
                               <Button variant="outline" size="sm">
                                 <Edit className="h-3 w-3" />
                               </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Remove Seller</DialogTitle>
+                                    <DialogDescription>
+                                      Are you sure you want to remove {seller.username}? This will permanently delete the seller account and all their associated products from the platform.
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="flex justify-end gap-3 mt-6">
+                                    <Button variant="outline" size="sm">
+                                      Cancel
+                                    </Button>
+                                    <Button 
+                                      variant="destructive" 
+                                      size="sm"
+                                      onClick={() => removeSellerMutation.mutate(seller.id)}
+                                      disabled={removeSellerMutation.isPending}
+                                    >
+                                      {removeSellerMutation.isPending ? (
+                                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                                      ) : (
+                                        <Trash2 className="h-3 w-3 mr-2" />
+                                      )}
+                                      Remove Seller
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                             </div>
                           </div>
                         ))}

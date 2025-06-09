@@ -5358,6 +5358,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DELETE seller and all associated products
+  app.delete("/api/admin/sellers/:sellerId", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const sellerId = parseInt(req.params.sellerId);
+      if (!sellerId) {
+        return res.status(400).json({ message: "Invalid seller ID" });
+      }
+
+      // Check if seller exists
+      const sellerCheck = await db.execute(sql`
+        SELECT id, username FROM users WHERE id = ${sellerId} AND role = 'seller'
+      `);
+
+      if (sellerCheck.rows.length === 0) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      // Remove all products associated with this seller
+      await db.execute(sql`
+        DELETE FROM products 
+        WHERE metadata->>'sellerId' = ${sellerId.toString()}
+        OR (metadata IS NOT NULL AND metadata::text LIKE '%"sellerId":${sellerId}%')
+      `);
+
+      // Remove seller's store if exists
+      await db.execute(sql`
+        DELETE FROM stores WHERE id IN (
+          SELECT CAST(metadata->>'storeId' AS INTEGER) 
+          FROM users 
+          WHERE id = ${sellerId} AND metadata->>'storeId' IS NOT NULL
+        )
+      `);
+
+      // Remove any orders from this seller
+      await db.execute(sql`
+        DELETE FROM orders 
+        WHERE metadata->>'sellerId' = ${sellerId.toString()}
+        OR (metadata IS NOT NULL AND metadata::text LIKE '%"sellerId":${sellerId}%')
+      `);
+
+      // Remove cart items for seller's products
+      await db.execute(sql`
+        DELETE FROM cart_items 
+        WHERE product_id IN (
+          SELECT id FROM products 
+          WHERE metadata->>'sellerId' = ${sellerId.toString()}
+        )
+      `);
+
+      // Finally remove the seller user account
+      await db.execute(sql`
+        DELETE FROM users WHERE id = ${sellerId}
+      `);
+
+      console.log(`Admin removed seller ID ${sellerId} and all associated data`);
+      res.json({ 
+        success: true, 
+        message: `Seller ${sellerCheck.rows[0].username} and all associated products removed successfully` 
+      });
+
+    } catch (error: any) {
+      console.error('Admin seller removal error:', error);
+      res.status(500).json({ message: "Failed to remove seller" });
+    }
+  });
+
   // Admin Orders API
   app.get("/api/admin/orders", async (req, res) => {
     try {
