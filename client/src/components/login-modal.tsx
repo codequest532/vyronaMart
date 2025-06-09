@@ -311,7 +311,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
 
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-0 overflow-hidden">
         <Tabs defaultValue="login" className="w-full">
-          <div className="p-6 pb-0">
+          <div className="p-4 pb-0">
             <TabsList className="grid w-full grid-cols-2 bg-gray-100/80 p-1 rounded-xl">
               <TabsTrigger 
                 value="login" 
@@ -330,7 +330,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
             </TabsList>
           </div>
 
-          <TabsContent value="login" className="p-6 space-y-6">
+          <TabsContent value="login" className="p-4 space-y-4">
             <div className="text-center mb-4">
               <h3 className="text-xl font-semibold text-gray-800">Welcome Back</h3>
               <p className="text-sm text-gray-600 mt-1">Sign in to your account</p>
@@ -403,7 +403,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
             </Form>
           </TabsContent>
 
-          <TabsContent value="signup" className="p-6 space-y-6">
+          <TabsContent value="signup" className="p-4 space-y-4">
             <div className="text-center mb-4">
               <h3 className="text-xl font-semibold text-gray-800">Create Account</h3>
               <p className="text-sm text-gray-600 mt-1">Join our social commerce community</p>
@@ -777,7 +777,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-8">
+        <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-6">
           <VisuallyHidden>
             <DialogTitle>Authentication</DialogTitle>
             <DialogDescription>Sign in to your account or create a new one</DialogDescription>
