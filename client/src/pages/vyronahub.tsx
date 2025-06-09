@@ -442,7 +442,7 @@ export default function VyronaHub() {
                         className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs"
                       >
                         <ShoppingCart className="h-3 w-3 mr-1" />
-                        Add
+                        Add to Cart
                       </Button>
                     </div>
                   </CardContent>
