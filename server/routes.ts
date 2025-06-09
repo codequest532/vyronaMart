@@ -5408,14 +5408,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE metadata->>'sellerId' = ${sellerId.toString()}
       `);
 
-      // Remove seller's store if exists
-      await db.execute(sql`
-        DELETE FROM stores WHERE id IN (
-          SELECT CAST(metadata->>'storeId' AS INTEGER) 
-          FROM users 
-          WHERE id = ${sellerId} AND metadata->>'storeId' IS NOT NULL
-        )
-      `);
+      // Remove seller's stores (if any exist for this seller)
+      // Note: Current schema doesn't have direct seller-store relationship
+      // This can be enhanced when store ownership is properly implemented
 
       // Finally remove the seller user account
       await db.execute(sql`
