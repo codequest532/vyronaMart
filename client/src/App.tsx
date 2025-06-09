@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
-import Landing from "@/pages/landing";
+import Landing from "@/pages/landing-clean";
 import ProductDetails from "@/pages/product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
@@ -64,7 +64,7 @@ function Router() {
       {user ? (
         <Route path="/" component={Home} />
       ) : (
-        <Route path="/" component={Login} />
+        <Route path="/" component={Landing} />
       )}
       <Route path="/home" component={Home} />
       <Route path="/product/:productId">
