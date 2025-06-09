@@ -45,15 +45,12 @@ export default function VyronaInstaShop() {
   const [viewMode, setViewMode] = useState("grid");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   
-  // Video call states
-  const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
+  // Chat states
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState(null);
-  const [callStatus, setCallStatus] = useState("idle"); // idle, connecting, connected, ended
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [callMessages, setCallMessages] = useState([]);
+  const [chatMessages, setChatMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
-  const [callProducts, setCallProducts] = useState([]);
+  const [chatProducts, setChatProducts] = useState([]);
 
   // Fetch Instagram products for customers
   const { data: instagramProducts = [], isLoading: productsLoading } = useQuery({
@@ -81,48 +78,42 @@ export default function VyronaInstaShop() {
     },
   });
 
-  // Video call functions
-  const startVideoCall = (seller: any) => {
+  // Chat functions
+  const startChat = (seller: any) => {
     setSelectedSeller(seller);
-    setCallStatus("connecting");
-    setIsVideoCallOpen(true);
-    setCallMessages([]);
-    setCallProducts(seller.products || []);
+    setIsChatOpen(true);
+    setChatMessages([]);
+    setChatProducts(seller.products || []);
     
-    // Simulate connection after 2 seconds
+    // Add initial greeting message
     setTimeout(() => {
-      setCallStatus("connected");
-      setCallMessages([{
+      setChatMessages([{
         id: 1,
         sender: "seller",
-        message: `Hi! I'm ${seller.name}. How can I help you today?`,
+        message: `Hi! I'm ${seller.name} from Instagram. How can I help you with our products today?`,
         timestamp: new Date()
       }]);
-    }, 2000);
+    }, 500);
   };
 
-  const endVideoCall = () => {
-    setCallStatus("ended");
-    setTimeout(() => {
-      setIsVideoCallOpen(false);
-      setSelectedSeller(null);
-      setCallStatus("idle");
-      setCallMessages([]);
-      setCallProducts([]);
-    }, 1000);
+  const endChat = () => {
+    setIsChatOpen(false);
+    setSelectedSeller(null);
+    setChatMessages([]);
+    setChatProducts([]);
   };
 
   const sendMessage = () => {
     if (!messageInput.trim()) return;
     
     const newMessage = {
-      id: callMessages.length + 1,
+      id: chatMessages.length + 1,
       sender: "customer",
       message: messageInput,
       timestamp: new Date()
     };
     
-    setCallMessages([...callMessages, newMessage]);
+    setChatMessages([...chatMessages, newMessage]);
     setMessageInput("");
     
     // Simulate seller response
@@ -135,13 +126,13 @@ export default function VyronaInstaShop() {
       ];
       
       const sellerResponse = {
-        id: callMessages.length + 2,
+        id: chatMessages.length + 2,
         sender: "seller",
         message: responses[Math.floor(Math.random() * responses.length)],
         timestamp: new Date()
       };
       
-      setCallMessages(prev => [...prev, sellerResponse]);
+      setChatMessages(prev => [...prev, sellerResponse]);
     }, 1500);
   };
 
@@ -533,7 +524,7 @@ export default function VyronaInstaShop() {
                         className="border-green-200 text-green-600 hover:bg-green-50"
                         onClick={(e) => {
                           e.stopPropagation();
-                          startVideoCall({
+                          startChat({
                             name: product.seller,
                             id: product.sellerId || `seller_${product.id}`,
                             products: [product],
@@ -542,7 +533,7 @@ export default function VyronaInstaShop() {
                           });
                         }}
                       >
-                        <Video className="h-3 w-3" />
+                        <MessageCircle className="h-3 w-3" />
                       </Button>
                       <Button 
                         size="sm" 
@@ -610,7 +601,7 @@ export default function VyronaInstaShop() {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => startVideoCall({
+                    onClick={() => startChat({
                       name: selectedProduct.seller,
                       id: selectedProduct.sellerId || `seller_${selectedProduct.id}`,
                       products: [selectedProduct],
@@ -618,8 +609,8 @@ export default function VyronaInstaShop() {
                       verified: selectedProduct.verified
                     })}
                   >
-                    <Video className="h-4 w-4 mr-2" />
-                    Call Seller
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Chat with Seller
                   </Button>
                 </div>
               </div>
