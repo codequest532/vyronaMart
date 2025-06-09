@@ -340,9 +340,16 @@ export default function Home() {
     );
   }
 
-  // Show production welcome screen when no products exist and not loading
-  if (!isLoadingProducts && products && Array.isArray(products) && products.length === 0) {
-    return <ProductionWelcome />;
+  // Show loading state while products are being fetched
+  if (isLoadingProducts) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Loading VyronaMart...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
