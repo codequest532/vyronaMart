@@ -802,7 +802,17 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
 
       {/* Forgot Password Modal - Render directly without nesting */}
       {showForgotPassword && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        console.log('Rendering forgot password modal with showForgotPassword:', showForgotPassword),
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center" 
+          style={{ zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForgotPassword(false);
+              setTimeout(() => onOpenChange(true), 100);
+            }
+          }}
+        >
           <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
@@ -860,7 +870,16 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
 
       {/* Reset Password Modal - Also render directly */}
       {showResetPassword && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center" 
+          style={{ zIndex: 9999 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowResetPassword(false);
+              setTimeout(() => onOpenChange(true), 100);
+            }
+          }}
+        >
           <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">Enter Reset Code</h3>
