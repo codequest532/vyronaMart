@@ -25,6 +25,7 @@ import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
 import EbookReader from "@/pages/ebook-reader";
+import ForgotPassword from "@/pages/forgot-password";
 
 import NotFound from "@/pages/not-found";
 import { useUserData } from "./hooks/use-user-data";
@@ -47,8 +48,9 @@ function Router() {
 
   return (
     <Switch>
-      {/* Authentication Route */}
+      {/* Authentication Routes */}
       <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
       
       {/* Admin Interface */}
       <Route path="/admin" component={AdminDashboard} />

@@ -205,71 +205,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger, onForgotPass
     sellerRegisterMutation.mutate(data);
   };
 
-  const forgotPasswordMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof forgotPasswordSchema>) => {
-      const response = await apiRequest("POST", "/api/auth/forgot-password", data);
-      return response.json();
-    },
-    onSuccess: (data, variables) => {
-      setResetEmail(variables.email);
-      setShowForgotPassword(false);
-      setShowResetPassword(true);
-      toast({
-        title: "OTP Sent",
-        description: "Please check your email for the password reset code.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
 
-  const resetPasswordMutation = useMutation({
-    mutationFn: async (data: z.infer<typeof resetPasswordSchema>) => {
-      // First verify OTP
-      await apiRequest("POST", "/api/auth/verify-otp", {
-        email: data.email,
-        otp: data.otp,
-      });
-      
-      // Then reset password
-      const response = await apiRequest("POST", "/api/auth/reset-password", {
-        email: data.email,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-      });
-      return response.json();
-    },
-    onSuccess: () => {
-      setShowResetPassword(false);
-      setShowForgotPassword(false);
-      setResetEmail("");
-      resetPasswordForm.reset();
-      toast({
-        title: "Password Reset Successful",
-        description: "Your password has been reset. Please login with your new password.",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Reset Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleForgotPasswordSubmit = (data: z.infer<typeof forgotPasswordSchema>) => {
-    forgotPasswordMutation.mutate(data);
-  };
-
-  const handleResetPasswordSubmit = (data: z.infer<typeof resetPasswordSchema>) => {
-    resetPasswordMutation.mutate(data);
-  };
 
   const ModalContent = () => (
     <div className="relative max-w-md mx-auto">
