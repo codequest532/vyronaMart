@@ -22,15 +22,10 @@ const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 const ADMIN_EMAIL = 'mgmags25@gmail.com';
 const ADMIN_NAME = 'Vyrona Platform';
 
-export async function sendBrevoEmail(
-  to: string, 
-  subject: string, 
-  htmlContent: string, 
-  textContent?: string
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
+export async function sendBrevoEmail(params: BrevoEmailParams): Promise<boolean> {
   if (!process.env.BREVO_API_KEY) {
     console.error('BREVO_API_KEY is not configured');
-    return { success: false, error: 'Email service not configured' };
+    return false;
   }
 
   try {
@@ -40,12 +35,12 @@ export async function sendBrevoEmail(
         email: ADMIN_EMAIL
       },
       to: [{
-        email: to,
-        name: to.split('@')[0]
+        email: params.to,
+        name: params.to.split('@')[0]
       }],
-      subject: subject,
-      htmlContent: htmlContent,
-      textContent: textContent || htmlContent.replace(/<[^>]*>/g, '')
+      subject: params.subject,
+      htmlContent: params.htmlContent,
+      textContent: params.textContent || params.htmlContent.replace(/<[^>]*>/g, '')
     }, {
       headers: {
         'Accept': 'application/json',
@@ -54,16 +49,11 @@ export async function sendBrevoEmail(
       }
     });
 
-    return {
-      success: true,
-      messageId: response.data.messageId
-    };
+    console.log('Brevo email sent successfully:', response.data.messageId);
+    return true;
   } catch (error: any) {
     console.error('Brevo email error:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.message || error.message
-    };
+    return false;
   }
 }
 
