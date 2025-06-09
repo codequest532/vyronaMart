@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -223,6 +223,9 @@ export function UPIPaymentModal({
             <QrCode className="w-5 h-5" />
             UPI Payment
           </DialogTitle>
+          <DialogDescription>
+            Complete your contribution payment of ₹{amount} using UPI by scanning the QR code or using the virtual UPI ID.
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (

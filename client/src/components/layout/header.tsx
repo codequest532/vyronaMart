@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -141,6 +141,9 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
               <Settings className="h-5 w-5" />
               Account Settings
             </DialogTitle>
+            <DialogDescription>
+              Manage your account preferences, security settings, and notification options.
+            </DialogDescription>
           </DialogHeader>
           
           <Tabs defaultValue="password" className="w-full">
