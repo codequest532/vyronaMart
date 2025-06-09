@@ -112,7 +112,7 @@ export default function VyronaSocial() {
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("groups");
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
-  const [onlineMembers, setOnlineMembers] = useState<any[]>([]);
+
   const [videoCallInvite, setVideoCallInvite] = useState<any>(null);
   const [currentCallId, setCurrentCallId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -619,12 +619,7 @@ export default function VyronaSocial() {
     };
   }, [authUser, selectedGroupId]);
 
-  // Update online members when data changes
-  useEffect(() => {
-    if (onlineMembersData) {
-      setOnlineMembers(onlineMembersData);
-    }
-  }, [onlineMembersData]);
+
 
   // Auto-select first group when groups load
   useEffect(() => {
@@ -1015,17 +1010,17 @@ export default function VyronaSocial() {
               {selectedGroupId && (
                 <Button
                   onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
-                  disabled={!isVideoCallActive && onlineMembers.length <= 1}
+                  disabled={!isVideoCallActive && deduplicatedOnlineMembers.length <= 1}
                   className={`gap-2 ${isVideoCallActive 
                     ? 'bg-red-500 hover:bg-red-600' 
-                    : onlineMembers.length <= 1 
+                    : deduplicatedOnlineMembers.length <= 1 
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-green-500 hover:bg-green-600'}`}
                   size="sm"
                 >
                   {isVideoCallActive ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
                   {isVideoCallActive ? 'End Call' : 
-                   onlineMembers.length <= 1 ? 'Not enough members online' : 'Start Call'}
+                   deduplicatedOnlineMembers.length <= 1 ? 'Not enough members online' : 'Start Call'}
                 </Button>
               )}
 

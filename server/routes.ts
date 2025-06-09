@@ -4263,11 +4263,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { groupId } = req.params;
       const groupMembers = await storage.getGroupMembers(Number(groupId));
       
-      // Filter for online members
+      // Filter for online members and deduplicate by userId
+      const seen = new Set();
       const onlineMembers = groupMembers.filter(member => {
         const userKey = `${member.userId}-${groupId}`;
         const onlineUser = onlineUsers.get(userKey);
-        return onlineUser && onlineUser.ws.readyState === WebSocket.OPEN;
+        
+        // Check if user is online and not already processed
+        if (onlineUser && onlineUser.ws.readyState === WebSocket.OPEN && !seen.has(member.userId)) {
+          seen.add(member.userId);
+          return true;
+        }
+        return false;
       }).map(member => {
         const userKey = `${member.userId}-${groupId}`;
         const onlineUser = onlineUsers.get(userKey);
