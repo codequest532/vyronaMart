@@ -1858,8 +1858,8 @@ export default function VyronaSocial() {
                         <div className="h-full overflow-y-auto">
                           <div className="space-y-2 pr-2">
                             {onlineMembers.length > 0 ? (
-                              onlineMembers.map((member) => (
-                                <div key={member.userId} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                              onlineMembers.map((member, index) => (
+                                <div key={`member-${member.userId}-${index}`} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                   <Avatar className="w-8 h-8">
                                     <AvatarFallback className="text-xs bg-blue-100 text-blue-600">

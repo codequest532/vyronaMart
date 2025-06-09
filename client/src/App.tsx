@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/home";
 import Landing from "@/pages/landing";
 import ProductDetails from "@/pages/product-details";
+import SocialProductDetails from "@/pages/social-product-details";
+import ReadProductDetails from "@/pages/read-product-details";
 import StoreDetails from "@/pages/store-details";
 import VyronaSocial from "@/pages/social";
 import PlaceOrder from "@/pages/place-order-new";
@@ -67,6 +69,12 @@ function Router() {
       <Route path="/home" component={Home} />
       <Route path="/product/:productId">
         {(params) => <ProductDetails productId={params.productId} />}
+      </Route>
+      <Route path="/social/product/:productId">
+        {(params) => <SocialProductDetails productId={params.productId} />}
+      </Route>
+      <Route path="/read/product/:productId">
+        {(params) => <ReadProductDetails productId={params.productId} />}
       </Route>
       <Route path="/store/:storeId">
         {(params) => <StoreDetails storeId={params.storeId} />}
