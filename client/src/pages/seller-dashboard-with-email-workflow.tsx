@@ -410,9 +410,10 @@ export default function SellerDashboard() {
             variant="ghost" 
             className="w-full justify-start gap-3 text-gray-700 dark:text-gray-300"
             onClick={handleLogout}
+            disabled={isLoggingOut}
           >
             <LogOut className="h-5 w-5" />
-            Logout
+            {isLoggingOut ? "Logging out..." : "Logout"}
           </Button>
         </div>
       </div>
