@@ -15,7 +15,13 @@ import {
   Trash2,
   CreditCard,
   Truck,
-  Shield
+  Shield,
+  Tag,
+  Percent,
+  Heart,
+  Star,
+  Users,
+  Gift
 } from "lucide-react";
 import { useCartStore } from "@/lib/cart-store";
 
@@ -84,33 +90,63 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <ShoppingCart className="h-10 w-10 text-blue-500" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-3">
+              <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-3 rounded-xl shadow-lg">
+                <ShoppingCart className="h-8 w-8 text-white" />
+              </div>
               Shopping Cart
             </h1>
             <Button
               variant="outline"
               onClick={() => setLocation("/vyronahub")}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-purple-200 text-purple-700 hover:bg-purple-50"
             >
               <ArrowLeft className="h-4 w-4" />
               Continue Shopping
             </Button>
           </div>
 
-          <Card className="max-w-md mx-auto text-center">
-            <CardContent className="p-8">
-              <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Your cart is empty</h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Start shopping to add items to your cart
+          <Card className="max-w-lg mx-auto text-center bg-white/80 backdrop-blur-sm border border-purple-100 shadow-xl">
+            <CardContent className="p-12">
+              <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-full w-32 h-32 flex items-center justify-center mx-auto mb-6">
+                <ShoppingCart className="h-16 w-16 text-purple-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Your cart is empty</h3>
+              <p className="text-gray-600 mb-8 text-lg">
+                Discover amazing products and start your shopping journey
               </p>
-              <Button onClick={() => setLocation("/vyronahub")} className="w-full">
+              <Button 
+                onClick={() => setLocation("/vyronahub")} 
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-3 text-lg"
+                size="lg"
+              >
+                <Gift className="h-5 w-5 mr-2" />
                 Start Shopping
               </Button>
+              
+              <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-purple-100">
+                <div className="text-center">
+                  <div className="bg-purple-100 rounded-lg p-3 mb-2 mx-auto w-fit">
+                    <Truck className="h-5 w-5 text-purple-600" />
+                  </div>
+                  <p className="text-sm text-gray-600">Free Shipping</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-blue-100 rounded-lg p-3 mb-2 mx-auto w-fit">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <p className="text-sm text-gray-600">Secure Payment</p>
+                </div>
+                <div className="text-center">
+                  <div className="bg-green-100 rounded-lg p-3 mb-2 mx-auto w-fit">
+                    <Users className="h-5 w-5 text-green-600" />
+                  </div>
+                  <p className="text-sm text-gray-600">Group Buying</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -119,18 +155,20 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <ShoppingCart className="h-10 w-10 text-blue-500" />
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-3">
+            <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-3 rounded-xl shadow-lg">
+              <ShoppingCart className="h-8 w-8 text-white" />
+            </div>
             Shopping Cart ({getTotalItems()} items)
           </h1>
           <Button
             variant="outline"
             onClick={() => setLocation("/vyronahub")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-purple-200 text-purple-700 hover:bg-purple-50"
           >
             <ArrowLeft className="h-4 w-4" />
             Continue Shopping
@@ -141,47 +179,76 @@ export default function Cart() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
-              <Card key={item.id}>
+              <Card key={item.id} className="bg-white/80 backdrop-blur-sm border border-purple-100 shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                      <ShoppingCart className="h-8 w-8 text-gray-400" />
+                    <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 to-blue-200/30"></div>
+                      <ShoppingCart className="h-10 w-10 text-purple-600 relative z-10" />
                     </div>
                     
                     <div className="flex-1">
-                      <h3 className="font-semibold text-lg">{item.name}</h3>
-                      <p className="text-gray-600 dark:text-gray-300">{item.category}</p>
-                      {item.isGroupBuy && (
-                        <Badge variant="secondary" className="mt-1">
-                          Group Buy - {item.groupBuyDiscount}% OFF
-                        </Badge>
-                      )}
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xl font-bold text-blue-600">
+                      <div className="flex items-start justify-between mb-2">
+                        <h3 className="font-bold text-xl text-gray-900">{item.name}</h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-400 hover:text-red-500"
+                        >
+                          <Heart className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      <p className="text-gray-600 mb-3 capitalize">{item.category}</p>
+                      
+                      <div className="flex items-center gap-3 mb-3">
+                        {item.isGroupBuy && (
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                            <Users className="h-3 w-3 mr-1" />
+                            Group Buy - {item.groupBuyDiscount}% OFF
+                          </Badge>
+                        )}
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          ))}
+                          <span className="text-sm text-gray-500 ml-1">(4.8)</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                           ₹{(item.discountedPrice || item.price).toFixed(2)}
                         </span>
                         {item.discountedPrice && (
-                          <span className="text-sm text-gray-500 line-through">
+                          <span className="text-lg text-gray-500 line-through">
                             ₹{item.price.toFixed(2)}
                           </span>
+                        )}
+                        {item.discountedPrice && (
+                          <Badge variant="secondary" className="bg-red-100 text-red-700">
+                            {Math.round(((item.price - item.discountedPrice) / item.price) * 100)}% OFF
+                          </Badge>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-end gap-4">
+                      <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1">
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="h-8 w-8 p-0 hover:bg-purple-100"
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
-                        <span className="w-12 text-center font-medium">{item.quantity}</span>
+                        <span className="w-12 text-center font-bold text-lg">{item.quantity}</span>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="h-8 w-8 p-0 hover:bg-purple-100"
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
@@ -189,10 +256,12 @@ export default function Cart() {
                       
                       <Button
                         size="sm"
-                        variant="destructive"
+                        variant="outline"
                         onClick={() => removeItem(item.id)}
+                        className="border-red-200 text-red-600 hover:bg-red-50"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remove
                       </Button>
                     </div>
                   </div>
@@ -204,84 +273,124 @@ export default function Cart() {
           {/* Order Summary */}
           <div className="space-y-6">
             {/* Promo Code */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Promo Code</CardTitle>
+            <Card className="bg-white/80 backdrop-blur-sm border border-purple-100 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-purple-700">
+                  <Tag className="h-5 w-5" />
+                  Promo Code
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {appliedPromo ? (
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
                     <div>
-                      <Badge variant="secondary">{appliedPromo}</Badge>
-                      <p className="text-sm text-green-600 mt-1">{discount}% discount applied</p>
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white mb-2">
+                        <Percent className="h-3 w-3 mr-1" />
+                        {appliedPromo}
+                      </Badge>
+                      <p className="text-sm text-green-700 font-medium">{discount}% discount applied</p>
                     </div>
-                    <Button size="sm" variant="outline" onClick={removePromoCode}>
+                    <Button size="sm" variant="outline" onClick={removePromoCode} className="border-green-300 text-green-700 hover:bg-green-50">
                       Remove
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                    />
-                    <Button onClick={applyPromoCode}>Apply</Button>
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter promo code"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        className="border-purple-200 focus:border-purple-400"
+                      />
+                      <Button onClick={applyPromoCode} className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                        Apply
+                      </Button>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-3">
+                      <p className="text-xs text-purple-600 font-medium mb-1">Available codes:</p>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="outline" className="text-xs border-purple-200 text-purple-600">SAVE10</Badge>
+                        <Badge variant="outline" className="text-xs border-purple-200 text-purple-600">WELCOME20</Badge>
+                        <Badge variant="outline" className="text-xs border-purple-200 text-purple-600">GROUPBUY15</Badge>
+                      </div>
+                    </div>
                   </div>
                 )}
-                <div className="text-xs text-gray-500">
-                  Try: SAVE10, WELCOME20, GROUPBUY15
-                </div>
               </CardContent>
             </Card>
 
             {/* Order Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+            <Card className="bg-white/80 backdrop-blur-sm border border-purple-100 shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-purple-700">
+                  <CreditCard className="h-5 w-5" />
+                  Order Summary
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between">
+                <div className="flex justify-between text-gray-700">
                   <span>Subtotal ({getTotalItems()} items)</span>
-                  <span>₹{subtotal.toFixed(2)}</span>
+                  <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
                 </div>
                 
                 {discount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Discount ({discount}%)</span>
-                    <span>-₹{discountAmount.toFixed(2)}</span>
+                    <span className="flex items-center gap-1">
+                      <Percent className="h-4 w-4" />
+                      Discount ({discount}%)
+                    </span>
+                    <span className="font-semibold">-₹{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
                 
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
+                <div className="flex justify-between text-gray-700">
+                  <span className="flex items-center gap-1">
+                    <Truck className="h-4 w-4" />
+                    Shipping
+                  </span>
+                  <span className="font-semibold">
+                    {shipping === 0 ? (
+                      <Badge className="bg-green-100 text-green-700">FREE</Badge>
+                    ) : (
+                      `₹${shipping}`
+                    )}
+                  </span>
                 </div>
                 
-                <Separator />
+                <Separator className="bg-purple-200" />
                 
-                <div className="flex justify-between text-lg font-bold">
+                <div className="flex justify-between text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   <span>Total</span>
                   <span>₹{total.toFixed(2)}</span>
                 </div>
 
                 <Button 
                   onClick={handleCheckout}
-                  className="w-full bg-blue-500 hover:bg-blue-600"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-3 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
                   size="lg"
                 >
                   <CreditCard className="h-5 w-5 mr-2" />
                   Proceed to Checkout
                 </Button>
 
-                <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Truck className="h-4 w-4" />
-                    Free shipping over ₹500
+                {/* Trust Indicators */}
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="flex items-center gap-2 text-purple-600">
+                      <Truck className="h-4 w-4" />
+                      <span>Free shipping over ₹500</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <Shield className="h-4 w-4" />
+                      <span>Secure checkout</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4" />
-                    Secure checkout
+                  <div className="text-center">
+                    <div className="flex items-center justify-center gap-1 text-xs text-gray-600">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      <span>Trusted by 10,000+ customers</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
