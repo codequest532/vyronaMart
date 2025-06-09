@@ -781,7 +781,19 @@ export default function VyronaSocial() {
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const userGroups = (groups as any[]) || [];
+  // Deduplicate groups by ID to prevent React key conflicts
+  const userGroups = React.useMemo(() => {
+    if (!groups) return [];
+    const seen = new Set();
+    return (groups as any[]).filter((group: any) => {
+      if (seen.has(group.id)) {
+        return false;
+      }
+      seen.add(group.id);
+      return true;
+    });
+  }, [groups]);
+  
   const selectedGroup = selectedGroupId ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
   const cartItems = (groupCart as CartItem[]) || [];
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -1908,7 +1920,7 @@ export default function VyronaSocial() {
             <p className="text-gray-600 dark:text-gray-400">Discover exclusive products perfect for group buying</p>
           </div>
 
-          {isLoading ? (
+          {productsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <Card key={i} className="animate-pulse">
