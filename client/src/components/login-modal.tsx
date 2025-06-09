@@ -65,15 +65,14 @@ interface LoginModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   trigger?: React.ReactNode;
+  onForgotPassword?: () => void;
 }
 
-export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModalProps) {
+export default function LoginModal({ isOpen, onOpenChange, trigger, onForgotPassword }: LoginModalProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showResetPassword, setShowResetPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
+
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -109,29 +108,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
     },
   });
 
-  const forgotPasswordForm = useForm<z.infer<typeof forgotPasswordSchema>>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
 
-  const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
-    resolver: zodResolver(resetPasswordSchema),
-    defaultValues: {
-      email: resetEmail,
-      otp: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-
-  // Update form when resetEmail changes
-  React.useEffect(() => {
-    if (resetEmail) {
-      resetPasswordForm.setValue('email', resetEmail);
-    }
-  }, [resetEmail, resetPasswordForm]);
 
   const loginMutation = useMutation({
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
@@ -286,11 +263,11 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
     },
   });
 
-  const onForgotPassword = (data: z.infer<typeof forgotPasswordSchema>) => {
+  const handleForgotPasswordSubmit = (data: z.infer<typeof forgotPasswordSchema>) => {
     forgotPasswordMutation.mutate(data);
   };
 
-  const onResetPassword = (data: z.infer<typeof resetPasswordSchema>) => {
+  const handleResetPasswordSubmit = (data: z.infer<typeof resetPasswordSchema>) => {
     resetPasswordMutation.mutate(data);
   };
 
@@ -396,9 +373,8 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
                     variant="link"
                     className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     onClick={() => {
-                      console.log('Setting showForgotPassword to true');
-                      setShowForgotPassword(true);
-                      console.log('State should be true now');
+                      onOpenChange(false);
+                      window.location.href = "/forgot-password";
                     }}
                   >
                     Forgot your password?
@@ -780,189 +756,14 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   }
 
   return (
-    <>
-      {/* Main Login Dialog */}
-      {!showForgotPassword && !showResetPassword && (
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-6">
-            <VisuallyHidden>
-              <DialogTitle>Authentication</DialogTitle>
-              <DialogDescription>Sign in to your account or create a new one</DialogDescription>
-            </VisuallyHidden>
-            <ModalContent />
-          </DialogContent>
-        </Dialog>
-      )}
-
-      {/* Forgot Password Modal - Rendered independently */}
-      {showForgotPassword && (
-        <div className="fixed inset-0 bg-red-500 flex items-center justify-center" style={{ zIndex: 10000 }}>
-          <div className="max-w-md w-full mx-4 bg-white rounded-2xl p-6 shadow-2xl">
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
-              <p className="text-sm text-gray-600 mt-1">Enter your email to receive a reset code</p>
-            </div>
-            
-            <Form {...forgotPasswordForm}>
-              <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)} className="space-y-4">
-                <FormField
-                  control={forgotPasswordForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
-                        <Mail className="h-4 w-4" />
-                        Email Address
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter your email" 
-                          className="h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 h-12 border-gray-300 hover:bg-gray-50"
-                    onClick={() => setShowForgotPassword(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    className="flex-1 h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200" 
-                    disabled={forgotPasswordMutation.isPending}
-                  >
-                    {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Code"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
-        </div>
-      )}
-
-      {/* Reset Password Modal - Rendered independently */}
-      {showResetPassword && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center" style={{ zIndex: 10000 }}>
-          <div className="max-w-md w-full mx-4 bg-white rounded-2xl p-6 shadow-2xl">
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-800">Enter Reset Code</h3>
-              <p className="text-sm text-gray-600 mt-1">Check your email for the 6-digit code</p>
-            </div>
-            
-            <Form {...resetPasswordForm}>
-              <form onSubmit={resetPasswordForm.handleSubmit(onResetPassword)} className="space-y-4">
-                <FormField
-                  control={resetPasswordForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input 
-                          type="hidden"
-                          {...field}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={resetPasswordForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium">Verification Code</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter 6-digit code" 
-                          className="h-12 border-gray-200 focus:border-red-500 focus:ring-red-500/20 text-center text-lg tracking-widest" 
-                          maxLength={6}
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={resetPasswordForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
-                        <Lock className="h-4 w-4" />
-                        New Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password"
-                          placeholder="Enter new password" 
-                          className="h-12 border-gray-200 focus:border-red-500 focus:ring-red-500/20" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={resetPasswordForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
-                        <Lock className="h-4 w-4" />
-                        Confirm Password
-                      </FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password"
-                          placeholder="Confirm new password" 
-                          className="h-12 border-gray-200 focus:border-red-500 focus:ring-red-500/20" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 h-12 border-gray-300 hover:bg-gray-50"
-                    onClick={() => {
-                      setShowResetPassword(false);
-                      setShowForgotPassword(true);
-                    }}
-                  >
-                    Back
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    className="flex-1 h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200" 
-                    disabled={resetPasswordMutation.isPending}
-                  >
-                    {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </div>
-        </div>
-      )}
-    </>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md bg-gradient-to-br from-purple-50 via-blue-50 to-orange-50 border-0 p-6">
+        <VisuallyHidden>
+          <DialogTitle>Authentication</DialogTitle>
+          <DialogDescription>Sign in to your account or create a new one</DialogDescription>
+        </VisuallyHidden>
+        <ModalContent />
+      </DialogContent>
+    </Dialog>
   );
 }
