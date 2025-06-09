@@ -291,7 +291,7 @@ export default function VyronaHub() {
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
               {(groupBuyProducts as any[]).map((groupProduct: any) => (
-                <Card key={groupProduct.id} className="relative overflow-hidden border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:shadow-lg transition-shadow">
+                <Card key={groupProduct.id} className="relative overflow-hidden border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/social/product/${groupProduct.id}`)}>
                   <CardContent className="p-3">
                     <div className="absolute top-2 left-2 z-10">
                       <Badge variant="outline" className="text-xs bg-white/80">
@@ -384,7 +384,16 @@ export default function VyronaHub() {
             }>
               {filteredProducts.map((product: any) => (
                 <Card key={product.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:scale-[1.02] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                  <div className="relative overflow-hidden rounded-t-lg" onClick={() => setLocation(`/product/${product.id}`)}>
+                  <div className="relative overflow-hidden rounded-t-lg" onClick={() => {
+                    // Route to appropriate detail page based on product module
+                    if (product.module === 'vyronasocial' || product.enableGroupBuy) {
+                      setLocation(`/social/product/${product.id}`);
+                    } else if (product.module === 'vyronaread' || product.category === 'books' || product.category === 'library-books') {
+                      setLocation(`/read/product/${product.id}`);
+                    } else {
+                      setLocation(`/product/${product.id}`);
+                    }
+                  }}>
                     <div className="h-48 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                       <div className="text-center">
                         <ShoppingBag className="h-12 w-12 text-purple-400 mx-auto mb-1" />
@@ -409,7 +418,16 @@ export default function VyronaHub() {
                     )}
                   </div>
                   <CardContent className="p-3">
-                    <div className="mb-3" onClick={() => setLocation(`/product/${product.id}`)}>
+                    <div className="mb-3" onClick={() => {
+                      // Route to appropriate detail page based on product module
+                      if (product.module === 'vyronasocial' || product.enableGroupBuy) {
+                        setLocation(`/social/product/${product.id}`);
+                      } else if (product.module === 'vyronaread' || product.category === 'books' || product.category === 'library-books') {
+                        setLocation(`/read/product/${product.id}`);
+                      } else {
+                        setLocation(`/product/${product.id}`);
+                      }
+                    }}>
                       <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2 group-hover:text-purple-600 transition-colors">
                         {product.name}
                       </h3>
