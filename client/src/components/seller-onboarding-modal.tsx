@@ -159,11 +159,26 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
       });
       
       if (response.ok) {
+        const result = await response.json();
         onClose();
-        // Show success message or redirect
+        
+        // Route sellers to appropriate dashboards after successful registration:
+        // - VyronaHub & VyronaSocial: Existing seller dashboard for product management
+        // - VyronaInstaStore: Instagram-specific onboarding flow
+        // - VyronaSpace: Physical store setup dashboard
+        // - VyronaMallConnect: Premium brand management interface
+        
+        if (formData.sellerType === "vyronahub") {
+          // Redirect to existing seller dashboard
+          window.location.href = "/seller-dashboard";
+        } else {
+          // Show success message for other seller types pending dashboard development
+          alert("Registration successful! You'll receive an email with next steps.");
+        }
       }
     } catch (error) {
       console.error("Registration failed:", error);
+      alert("Registration failed. Please try again.");
     }
   };
 
@@ -856,12 +871,15 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="seller-onboarding-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShoppingBag className="h-5 w-5" />
             Become a VyronaMart Seller
           </DialogTitle>
+          <div id="seller-onboarding-description" className="sr-only">
+            Complete seller registration form to join VyronaMart marketplace
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
