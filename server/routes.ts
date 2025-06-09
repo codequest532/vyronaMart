@@ -5380,11 +5380,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Seller not found" });
       }
 
-      // First, get product IDs to be removed
-      const productsToDelete = await db.execute(sql`
-        SELECT id FROM products 
-        WHERE metadata->>'sellerId' = ${sellerId.toString()}
+      // Get seller's store IDs first
+      const sellerStores = await db.execute(sql`
+        SELECT id FROM stores WHERE id IN (
+          SELECT DISTINCT store_id FROM products WHERE store_id IS NOT NULL
+        )
       `);
+
+      // First, get product IDs to be removed (products linked to seller's stores or with sellerId in metadata)
+      const productsToDelete = await db.execute(sql`
+        SELECT id, name FROM products 
+        WHERE metadata->>'sellerId' = ${sellerId.toString()}
+           OR store_id IN (
+             SELECT id FROM stores 
+             WHERE id IN (${sellerStores.rows.map(store => store.id).join(',') || 'NULL'})
+           )
+      `);
+
+      console.log(`Found ${productsToDelete.rows.length} products to delete for seller ${sellerId}:`, 
+        productsToDelete.rows.map(p => p.name));
 
       // Remove cart items for seller's products first (before deleting products)
       if (productsToDelete.rows.length > 0) {
@@ -5406,11 +5420,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.execute(sql`
         DELETE FROM products 
         WHERE metadata->>'sellerId' = ${sellerId.toString()}
+           OR store_id IN (
+             SELECT id FROM stores 
+             WHERE id IN (${sellerStores.rows.map(store => store.id).join(',') || 'NULL'})
+           )
       `);
 
-      // Remove seller's stores (if any exist for this seller)
-      // Note: Current schema doesn't have direct seller-store relationship
-      // This can be enhanced when store ownership is properly implemented
+      // Remove seller's stores
+      if (sellerStores.rows.length > 0) {
+        await db.execute(sql`
+          DELETE FROM stores 
+          WHERE id IN (${sellerStores.rows.map(store => store.id).join(',')})
+        `);
+      }
 
       // Finally remove the seller user account
       await db.execute(sql`
