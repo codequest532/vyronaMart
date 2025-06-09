@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Coins, Star, User, Gamepad2, ShoppingBag, Bell, Search, LogOut, Settings, ChevronDown, Lock, Phone, BellRing, Shield, CreditCard, Eye, EyeOff } from "lucide-react";
+import { Coins, Star, User, Gamepad2, ShoppingBag, Bell, Search, LogOut, Settings, ChevronDown, Lock, Phone, BellRing, Shield, CreditCard, Eye, EyeOff, Store } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,16 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
 
           {/* User Actions & Profile */}
           <div className="flex items-center space-x-3">
+            {/* Become a Seller Button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="hidden md:flex bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 hover:from-purple-700 hover:to-blue-700 shadow-md"
+            >
+              <Store className="h-4 w-4 mr-2" />
+              Become a Seller
+            </Button>
+
             {/* Mobile Search */}
             <Button variant="ghost" size="sm" className="md:hidden">
               <Search className="h-4 w-4" />
