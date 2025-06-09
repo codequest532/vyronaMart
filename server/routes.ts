@@ -309,6 +309,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Forgot Password endpoint
+  app.post("/api/auth/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Email is required" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "No account found with this email address" 
+        });
+      }
+
+      // Generate 6-digit OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      // Store OTP in database with 15-minute expiry
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+      await storage.createOtpVerification({
+        identifier: email,
+        otp,
+        type: 'password_reset',
+        expiresAt,
+        verified: false
+      });
+
+      // Send OTP via email
+      const emailSent = await sendOTPEmail(email, otp);
+      
+      if (!emailSent) {
+        return res.status(500).json({ 
+          success: false, 
+          message: "Failed to send verification email" 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Password reset code sent to your email" 
+      });
+
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to process forgot password request" 
+      });
+    }
+  });
+
+  // Verify OTP endpoint
+  app.post("/api/auth/verify-otp", async (req, res) => {
+    try {
+      const { email, otp } = req.body;
+      
+      if (!email || !otp) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Email and OTP are required" 
+        });
+      }
+
+      // Get the latest unused OTP for this email
+      const otpRecord = await storage.getOtpVerification(email, otp, 'password_reset');
+      
+      if (!otpRecord) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Invalid or expired OTP" 
+        });
+      }
+
+      // Check if OTP is expired
+      if (new Date() > otpRecord.expiresAt) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "OTP has expired. Please request a new one." 
+        });
+      }
+
+      // Check if OTP is already used
+      if (otpRecord.isUsed) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "This OTP has already been used" 
+        });
+      }
+
+      // Mark OTP as used
+      await storage.markOtpAsUsed(otpRecord.id);
+
+      res.json({ 
+        success: true, 
+        message: "OTP verified successfully" 
+      });
+
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to verify OTP" 
+      });
+    }
+  });
+
+  // Reset Password endpoint
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { email, password, confirmPassword } = req.body;
+      
+      if (!email || !password || !confirmPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Email, password, and confirm password are required" 
+        });
+      }
+
+      if (password !== confirmPassword) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Passwords do not match" 
+        });
+      }
+
+      if (password.length < 6) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Password must be at least 6 characters long" 
+        });
+      }
+
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+
+      // Update user password
+      await storage.updateUserPassword(user.id, password);
+
+      res.json({ 
+        success: true, 
+        message: "Password reset successfully" 
+      });
+
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to reset password" 
+      });
+    }
+  });
+
   app.get("/api/auth/me", (req, res) => {
     if (req.session?.user) {
       res.json({

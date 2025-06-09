@@ -34,12 +34,12 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   updateUserCoins(id: number, coins: number): Promise<User | undefined>;
   updateUserXP(id: number, xp: number): Promise<User | undefined>;
-  updateUserPassword(email: string, newPassword: string): Promise<void>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
 
   // OTP Verification
   createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification>;
-  getOtpVerification(identifier: string, otp: string, type: string): Promise<OtpVerification | undefined>;
-  markOtpAsVerified(id: number): Promise<void>;
+  getOtpVerification(email: string, otp: string, type: string): Promise<OtpVerification | undefined>;
+  markOtpAsUsed(id: number): Promise<void>;
 
   // Products
   getProducts(module?: string, category?: string): Promise<Product[]>;
@@ -532,10 +532,10 @@ export class DatabaseStorage implements IStorage {
     return user || undefined;
   }
 
-  async updateUserPassword(email: string, newPassword: string): Promise<void> {
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
     await db.update(users)
       .set({ password: newPassword })
-      .where(eq(users.email, email));
+      .where(eq(users.id, userId));
   }
 
   async createOtpVerification(otpData: InsertOtpVerification): Promise<OtpVerification> {
@@ -546,19 +546,20 @@ export class DatabaseStorage implements IStorage {
     return otp;
   }
 
-  async getOtpVerification(identifier: string, otp: string, type: string): Promise<OtpVerification | undefined> {
+  async getOtpVerification(email: string, otp: string, type: string): Promise<OtpVerification | undefined> {
     const [verification] = await db
       .select()
       .from(otpVerifications)
       .where(and(
-        eq(otpVerifications.identifier, identifier),
+        eq(otpVerifications.identifier, email),
         eq(otpVerifications.otp, otp),
-        eq(otpVerifications.type, type)
+        eq(otpVerifications.type, type),
+        eq(otpVerifications.verified, false)
       ));
     return verification;
   }
 
-  async markOtpAsVerified(id: number): Promise<void> {
+  async markOtpAsUsed(id: number): Promise<void> {
     await db
       .update(otpVerifications)
       .set({ verified: true })
