@@ -204,66 +204,66 @@ export default function VyronaHub() {
 
 
 
-        {/* Search and Filter Bar */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4 items-center">
-              <div className="flex-1 flex gap-4">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest First</SelectItem>
-                    <SelectItem value="oldest">Oldest First</SelectItem>
-                    <SelectItem value="price-low">Price: Low to High</SelectItem>
-                    <SelectItem value="price-high">Price: High to Low</SelectItem>
-                    <SelectItem value="name">Name A-Z</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="flex border rounded-md">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                  >
-                    <Grid className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
+        {/* Modern Search and Filter Bar */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 mb-8 shadow-lg border-0">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full sm:w-48 h-12 rounded-xl border-2 border-gray-200 hover:border-purple-300 focus:border-purple-500 bg-gradient-to-r from-white to-gray-50 dark:from-gray-700 dark:to-gray-600">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value} className="rounded-lg">
+                      {category.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400 h-5 w-5" />
+                <Input
+                  placeholder="Search amazing products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-12 rounded-xl border-2 border-gray-200 hover:border-purple-300 focus:border-purple-500 bg-gradient-to-r from-white to-gray-50 dark:from-gray-700 dark:to-gray-600 text-base"
+                />
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex gap-3">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-44 h-12 rounded-xl border-2 border-gray-200 hover:border-purple-300 focus:border-purple-500 bg-gradient-to-r from-white to-gray-50 dark:from-gray-700 dark:to-gray-600">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="newest" className="rounded-lg">Newest First</SelectItem>
+                  <SelectItem value="oldest" className="rounded-lg">Oldest First</SelectItem>
+                  <SelectItem value="price-low" className="rounded-lg">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high" className="rounded-lg">Price: High to Low</SelectItem>
+                  <SelectItem value="name" className="rounded-lg">Name A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                  className={`h-10 w-10 rounded-lg ${viewMode === "grid" ? "bg-purple-500 hover:bg-purple-600 text-white shadow-lg" : "hover:bg-gray-200 dark:hover:bg-gray-600"}`}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                  className={`h-10 w-10 rounded-lg ${viewMode === "list" ? "bg-purple-500 hover:bg-purple-600 text-white shadow-lg" : "hover:bg-gray-200 dark:hover:bg-gray-600"}`}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* VyronaSocial Group Purchase Section */}
         {(groupBuyProducts as any[]).length > 0 && (
