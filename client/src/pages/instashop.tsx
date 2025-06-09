@@ -49,6 +49,9 @@ export default function VyronaInstaShop() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
+  const [chatProducts, setChatProducts] = useState([]);
+  const [messageInput, setMessageInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
   const [chatProducts, setChatProducts] = useState([]);
 
@@ -136,7 +139,7 @@ export default function VyronaInstaShop() {
     }, 1500);
   };
 
-  const addToCartFromCall = async (product: any) => {
+  const addToCartFromChat = async (product: any) => {
     try {
       await addToCartMutation.mutateAsync({
         productId: product.id,
@@ -145,15 +148,15 @@ export default function VyronaInstaShop() {
       });
       
       const orderMessage = {
-        id: callMessages.length + 1,
+        id: chatMessages.length + 1,
         sender: "system",
-        message: `✅ ${product.name} added to cart during call`,
+        message: `✅ ${product.name} added to cart during chat`,
         timestamp: new Date()
       };
       
-      setCallMessages([...callMessages, orderMessage]);
+      setChatMessages([...chatMessages, orderMessage]);
     } catch (error) {
-      console.error('Failed to add to cart from call:', error);
+      console.error('Failed to add to cart from chat:', error);
     }
   };
 
@@ -816,118 +819,81 @@ export default function VyronaInstaShop() {
         </div>
       )}
 
-      {/* Video Call Modal */}
-      {isVideoCallOpen && selectedSeller && (
-        <Dialog open={isVideoCallOpen} onOpenChange={() => endVideoCall()}>
-          <DialogContent className="max-w-6xl h-[80vh] p-0">
+      {/* Chat Modal */}
+      {isChatOpen && selectedSeller && (
+        <Dialog open={isChatOpen} onOpenChange={() => endChat()}>
+          <DialogContent className="max-w-4xl h-[80vh] p-0">
             <DialogHeader className="sr-only">
-              <DialogTitle>Video Call with {selectedSeller.name}</DialogTitle>
+              <DialogTitle>Chat with {selectedSeller.name}</DialogTitle>
               <DialogDescription>
-                Video call interface for communicating with Instagram seller
+                Chat interface for communicating with Instagram seller
               </DialogDescription>
             </DialogHeader>
             <div className="flex h-full">
-              {/* Video Call Area */}
-              <div className="flex-1 bg-gray-900 relative">
-                {/* Call Header */}
-                <div className="absolute top-0 left-0 right-0 z-10 bg-black/50 backdrop-blur-sm p-4">
-                  <div className="flex items-center justify-between text-white">
+              {/* Chat Area */}
+              <div className="flex-1 bg-white relative">
+                {/* Chat Header */}
+                <div className="border-b p-4">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
-                        <Instagram className="h-5 w-5" />
+                        <Instagram className="h-5 w-5 text-white" />
                       </div>
                       <div>
                         <h3 className="font-semibold">{selectedSeller.name}</h3>
                         <div className="flex items-center space-x-2">
-                          <div className={`w-2 h-2 rounded-full ${callStatus === 'connected' ? 'bg-green-400' : callStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-red-400'}`}></div>
-                          <span className="text-sm capitalize">{callStatus === 'connected' ? 'Connected' : callStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}</span>
+                          <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                          <span className="text-sm text-gray-600">Online</span>
                           {selectedSeller.verified && <Verified className="h-4 w-4 text-blue-400" />}
                         </div>
                       </div>
                     </div>
-                    <div className="text-sm">
-                      {callStatus === 'connected' && new Date().toLocaleTimeString()}
+                    <div className="text-sm text-gray-500">
+                      {new Date().toLocaleTimeString()}
                     </div>
                   </div>
                 </div>
 
-                {/* Video Area */}
-                <div className="h-full flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-                  {callStatus === 'connecting' && (
-                    <div className="text-center text-white">
-                      <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-lg">Connecting to {selectedSeller.name}...</p>
-                    </div>
-                  )}
-                  
-                  {callStatus === 'connected' && (
-                    <div className="relative w-full h-full">
-                      {/* Simulated seller video */}
-                      <div className="w-full h-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-                        <div className="text-center text-white">
-                          <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Instagram className="h-16 w-16" />
-                          </div>
-                          <h3 className="text-2xl font-bold">{selectedSeller.name}</h3>
-                          <p className="text-purple-200">Instagram Seller</p>
-                        </div>
-                      </div>
-                      
-                      {/* Customer video (small) */}
-                      <div className="absolute bottom-4 right-4 w-32 h-24 bg-gray-800 rounded-lg border-2 border-white flex items-center justify-center">
-                        <div className="text-white text-xs text-center">
-                          <div className="w-8 h-8 bg-purple-600 rounded-full mx-auto mb-1 flex items-center justify-center">
-                            <span className="text-xs font-bold">You</span>
-                          </div>
-                          <span>Customer</span>
-                        </div>
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{height: 'calc(100% - 140px)'}}>
+                  {chatMessages.map((message) => (
+                    <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                        message.sender === 'user' 
+                          ? 'bg-purple-600 text-white' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        <p className="text-sm">{message.message}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
                       </div>
                     </div>
-                  )}
-
-                  {callStatus === 'ended' && (
-                    <div className="text-center text-white">
-                      <PhoneOff className="w-16 h-16 mx-auto mb-4 text-red-400" />
-                      <p className="text-lg">Call ended</p>
-                    </div>
-                  )}
+                  ))}
                 </div>
 
-                {/* Call Controls */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm">
-                  <div className="flex items-center justify-center space-x-4">
-                    <Button
-                      size="sm"
-                      variant={isAudioEnabled ? "default" : "destructive"}
-                      className="w-12 h-12 rounded-full"
-                      onClick={() => setIsAudioEnabled(!isAudioEnabled)}
+                {/* Message Input */}
+                <div className="border-t p-4">
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      placeholder="Type your message..."
+                      className="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    />
+                    <Button 
+                      onClick={sendMessage}
+                      className="bg-purple-600 hover:bg-purple-700"
                     >
-                      {isAudioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
-                    </Button>
-                    
-                    <Button
-                      size="sm"
-                      variant={isVideoEnabled ? "default" : "destructive"}
-                      className="w-12 h-12 rounded-full"
-                      onClick={() => setIsVideoEnabled(!isVideoEnabled)}
-                    >
-                      {isVideoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
-                    </Button>
-                    
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="w-12 h-12 rounded-full"
-                      onClick={endVideoCall}
-                    >
-                      <PhoneOff className="h-5 w-5" />
+                      <Send className="h-4 w-4" />
                     </Button>
                   </div>
-                </div>
               </div>
 
-              {/* Chat & Products Sidebar */}
-              <div className="w-80 bg-white border-l flex flex-col">
+              {/* Products Sidebar */}
+              <div className="w-80 bg-gray-50 border-l flex flex-col">
                 {/* Sidebar Header */}
                 <div className="p-4 border-b bg-purple-50">
                   <h3 className="font-semibold text-purple-900">Chat & Products</h3>
@@ -937,7 +903,7 @@ export default function VyronaInstaShop() {
                 <div className="p-4 border-b">
                   <h4 className="font-medium text-gray-900 mb-3">Seller's Products</h4>
                   <div className="space-y-2 max-h-32 overflow-y-auto">
-                    {callProducts.map((product: any) => (
+                    {chatProducts.map((product: any) => (
                       <div key={product.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
                         <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
                           <Package className="h-4 w-4 text-gray-400" />
@@ -949,7 +915,7 @@ export default function VyronaInstaShop() {
                         <Button
                           size="sm"
                           className="h-6 px-2 text-xs bg-purple-600 hover:bg-purple-700"
-                          onClick={() => addToCartFromCall(product)}
+                          onClick={() => addToCartFromChat(product)}
                         >
                           <ShoppingBag className="h-3 w-3" />
                         </Button>
@@ -958,57 +924,6 @@ export default function VyronaInstaShop() {
                   </div>
                 </div>
 
-                {/* Chat Messages */}
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                    {callMessages.map((message: any) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-                            message.sender === 'customer'
-                              ? 'bg-purple-600 text-white'
-                              : message.sender === 'system'
-                              ? 'bg-green-100 text-green-800 border border-green-200'
-                              : 'bg-gray-100 text-gray-900'
-                          }`}
-                        >
-                          {message.sender === 'seller' && (
-                            <div className="flex items-center space-x-1 mb-1">
-                              <Instagram className="h-3 w-3 text-purple-600" />
-                              <span className="text-xs font-medium text-purple-600">
-                                {selectedSeller.name}
-                              </span>
-                            </div>
-                          )}
-                          <p>{message.message}</p>
-                          <p className="text-xs opacity-70 mt-1">
-                            {new Date(message.timestamp).toLocaleTimeString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Message Input */}
-                  {callStatus === 'connected' && (
-                    <div className="p-4 border-t">
-                      <div className="flex space-x-2">
-                        <Input
-                          value={messageInput}
-                          onChange={(e) => setMessageInput(e.target.value)}
-                          placeholder="Type a message..."
-                          className="flex-1"
-                          onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                        />
-                        <Button size="sm" onClick={sendMessage} className="bg-purple-600 hover:bg-purple-700">
-                          <Send className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
