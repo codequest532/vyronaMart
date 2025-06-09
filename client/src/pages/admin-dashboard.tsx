@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -713,7 +713,47 @@ export default function AdminDashboard() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="default">Active</Badge>
+                              <Badge variant={seller.is_active ? 'default' : 'secondary'}>
+                                {seller.is_active ? 'Active' : 'Pending'}
+                              </Badge>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Remove Seller</DialogTitle>
+                                    <DialogDescription>
+                                      Are you sure you want to remove {seller.username}? This will permanently delete the seller account and all their associated products from the platform.
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="flex justify-end gap-3 mt-6">
+                                    <DialogClose asChild>
+                                      <Button variant="outline" size="sm">
+                                        Cancel
+                                      </Button>
+                                    </DialogClose>
+                                    <Button 
+                                      variant="destructive" 
+                                      size="sm"
+                                      onClick={() => removeSellerMutation.mutate(seller.id)}
+                                      disabled={removeSellerMutation.isPending}
+                                    >
+                                      {removeSellerMutation.isPending ? (
+                                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                                      ) : (
+                                        <Trash2 className="h-3 w-3 mr-2" />
+                                      )}
+                                      Remove Seller
+                                    </Button>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                               <Dialog>
                                 <DialogTrigger asChild>
                                   <Button variant="outline" size="sm">
