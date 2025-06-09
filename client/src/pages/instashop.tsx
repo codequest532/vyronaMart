@@ -43,7 +43,7 @@ export default function VyronaInstaShop() {
   const [priceRange, setPriceRange] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
   const [viewMode, setViewMode] = useState("grid");
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   
   // Video call states
   const [isVideoCallOpen, setIsVideoCallOpen] = useState(false);
@@ -453,7 +453,11 @@ export default function VyronaInstaShop() {
               : "grid-cols-1"
           }`}>
             {filteredProducts.map((product) => (
-              <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-purple-300">
+              <Card 
+                key={product.id} 
+                className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-gray-200 hover:border-purple-300"
+                onClick={() => setSelectedProduct(product)}
+              >
                 <CardContent className="p-0">
                   {/* Product Image */}
                   <div className="relative overflow-hidden rounded-t-lg">
@@ -510,11 +514,14 @@ export default function VyronaInstaShop() {
                       <Button 
                         size="sm" 
                         className="flex-1 bg-purple-600 hover:bg-purple-700"
-                        onClick={() => addToCartMutation.mutate({
-                          productId: product.id,
-                          quantity: 1,
-                          price: product.price
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCartMutation.mutate({
+                            productId: product.id,
+                            quantity: 1,
+                            price: product.price
+                          });
+                        }}
                         disabled={addToCartMutation.isPending}
                       >
                         <ShoppingCart className="mr-1 h-3 w-3" />
@@ -524,13 +531,16 @@ export default function VyronaInstaShop() {
                         size="sm" 
                         variant="outline" 
                         className="border-green-200 text-green-600 hover:bg-green-50"
-                        onClick={() => startVideoCall({
-                          name: product.seller,
-                          id: product.sellerId || `seller_${product.id}`,
-                          products: [product],
-                          avatar: product.sellerAvatar,
-                          verified: product.verified
-                        })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startVideoCall({
+                            name: product.seller,
+                            id: product.sellerId || `seller_${product.id}`,
+                            products: [product],
+                            avatar: product.sellerAvatar,
+                            verified: product.verified
+                          });
+                        }}
                       >
                         <Video className="h-3 w-3" />
                       </Button>
@@ -538,7 +548,10 @@ export default function VyronaInstaShop() {
                         size="sm" 
                         variant="outline" 
                         className="border-purple-200 text-purple-600 hover:bg-purple-50"
-                        onClick={() => setSelectedProduct(product)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedProduct(product);
+                        }}
                       >
                         <Eye className="h-3 w-3" />
                       </Button>
