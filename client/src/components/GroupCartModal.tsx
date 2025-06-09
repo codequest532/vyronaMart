@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -203,6 +203,9 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
             <ShoppingCart className="h-5 w-5" />
             Add to Shopping Room - {product.name}
           </DialogTitle>
+          <DialogDescription>
+            Select an existing shopping room or create a new one to share this product with friends and split costs using VyronaWallet.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
