@@ -141,39 +141,95 @@ export default function VyronaHub() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-              <ShoppingBag className="h-10 w-10 text-blue-500" />
-              VyronaHub
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-2">Discover amazing products from our sellers</p>
+        {/* Modern Hero Header */}
+        <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-500 rounded-3xl p-10 mb-12 text-white shadow-2xl">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                <ShoppingBag className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold">Welcome to VyronaHub</h1>
+                <p className="text-xl opacity-90 mt-2">Discover millions of products from trusted sellers worldwide</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="secondary"
+                onClick={() => setLocation("/")}
+                className="flex items-center gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Go Back
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setLocation("/cart")}
+                className="flex items-center gap-2 relative bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Cart
+                {cartItemCount > 0 && (
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                    {cartItemCount}
+                  </Badge>
+                )}
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setLocation("/")}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Go Back
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setLocation("/cart")}
-              className="flex items-center gap-2 relative"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              Cart
-              {cartItemCount > 0 && (
-                <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                  {cartItemCount}
-                </Badge>
-              )}
-            </Button>
+          
+          <div className="flex justify-center items-center space-x-8 text-lg">
+            <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
+              <div className="p-2 bg-white/20 rounded-lg mr-3">
+                <ShoppingBag className="h-5 w-5" />
+              </div>
+              <span>Secure Shopping</span>
+            </div>
+            <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
+              <div className="p-2 bg-white/20 rounded-lg mr-3">
+                <Users className="h-5 w-5" />
+              </div>
+              <span>Trusted Community</span>
+            </div>
+            <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
+              <div className="p-2 bg-white/20 rounded-lg mr-3">
+                <ShoppingCart className="h-5 w-5" />
+              </div>
+              <span>Fast Delivery</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Tiles Section */}
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Shop by Category</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+            {categories.slice(1).map((category) => (
+              <Card 
+                key={category.value} 
+                className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 h-32 ${
+                  selectedCategory === category.value 
+                    ? 'border-purple-500 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/50 dark:to-blue-900/50' 
+                    : 'border-gray-200 hover:border-purple-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700'
+                }`}
+                onClick={() => setSelectedCategory(category.value)}
+              >
+                <CardContent className="p-4 h-full flex flex-col items-center justify-center text-center">
+                  <div className={`p-3 rounded-2xl mb-3 ${
+                    selectedCategory === category.value 
+                      ? 'bg-purple-500 text-white' 
+                      : 'bg-gradient-to-br from-purple-500 to-blue-500 text-white'
+                  }`}>
+                    <ShoppingBag className="h-6 w-6" />
+                  </div>
+                  <span className="font-semibold text-sm text-gray-900 dark:text-white leading-tight">
+                    {category.label}
+                  </span>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
 
@@ -352,53 +408,75 @@ export default function VyronaHub() {
             </Card>
           ) : (
             <div className={viewMode === "grid" 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
-              : "space-y-4"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" 
+              : "space-y-6"
             }>
               {filteredProducts.map((product: any) => (
-                <Card key={product.id} className="hover:shadow-lg transition-shadow cursor-pointer group">
-                  <div className="relative overflow-hidden">
-                    <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                      <ShoppingBag className="h-16 w-16 text-gray-400" />
-                    </div>
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="sm" variant="secondary" onClick={() => openProductModal(product)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <Button size="sm" variant="ghost" className="text-gray-400 hover:text-red-500">
-                        <Heart className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="outline">{product.category}</Badge>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs text-gray-600">4.5</span>
+                <Card key={product.id} className="hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:scale-[1.02] bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700 border-0 shadow-lg">
+                  <div className="relative overflow-hidden rounded-t-lg">
+                    <div className="h-64 bg-gradient-to-br from-purple-100 via-blue-100 to-indigo-100 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <div className="text-center">
+                        <ShoppingBag className="h-20 w-20 text-purple-400 mx-auto mb-2" />
+                        <span className="text-sm text-purple-600 font-medium">Product Image</span>
                       </div>
                     </div>
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-purple-500 text-white border-0">NEW</Badge>
+                    </div>
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="flex flex-col gap-2">
+                        <Button size="sm" variant="secondary" onClick={() => openProductModal(product)} className="bg-white/90 hover:bg-white shadow-lg">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="secondary" className="text-gray-400 hover:text-red-500 bg-white/90 hover:bg-white shadow-lg">
+                          <Heart className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {product.enableGroupBuy && (
+                      <div className="absolute bottom-3 left-3">
+                        <Badge variant="secondary" className="bg-green-500 text-white border-0">
+                          <Users className="h-3 w-3 mr-1" />
+                          Group Buy
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-6">
+                    <div className="mb-4">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed">
+                        {product.description}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mb-4">
+                      <Badge variant="outline" className="border-purple-200 text-purple-700">{product.category}</Badge>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <Star className="h-4 w-4 fill-gray-200 text-gray-200" />
+                        <span className="text-sm text-gray-600 ml-1">(4.2)</span>
+                      </div>
+                    </div>
+                    
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-lg font-bold text-blue-600">₹{product.price.toFixed(2)}</span>
+                        <span className="text-2xl font-bold text-purple-600">₹{product.price.toFixed(2)}</span>
                         {product.originalPrice && product.originalPrice > product.price && (
                           <span className="text-sm text-gray-500 line-through">₹{product.originalPrice.toFixed(2)}</span>
                         )}
                       </div>
                       <Button 
-                        size="sm" 
+                        size="lg" 
                         onClick={() => handleAddToCart(product)}
-                        className="bg-blue-500 hover:bg-blue-600"
+                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        <ShoppingCart className="h-4 w-4 mr-1" />
+                        <ShoppingCart className="h-4 w-4 mr-2" />
                         Add to Cart
                       </Button>
                     </div>
