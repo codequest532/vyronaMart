@@ -396,7 +396,9 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
                     variant="link"
                     className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     onClick={() => {
+                      console.log('Setting showForgotPassword to true');
                       setShowForgotPassword(true);
+                      console.log('State should be true now');
                     }}
                   >
                     Forgot your password?
@@ -791,7 +793,8 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
 
       {/* Forgot Password Modal */}
       {showForgotPassword && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
+        console.log('Rendering forgot password modal!'),
+        <div className="fixed inset-0 bg-red-500 flex items-center justify-center" style={{ zIndex: 9999 }}>
           <div className="max-w-md w-full mx-4 bg-white rounded-2xl p-6 shadow-2xl">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
