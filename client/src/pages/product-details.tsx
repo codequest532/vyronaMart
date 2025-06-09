@@ -149,37 +149,37 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Enhanced Product Images */}
-          <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Compact Product Images */}
+          <div className="space-y-4">
             <div className="relative">
-              <div className="aspect-square bg-white rounded-2xl border-2 border-purple-100 overflow-hidden shadow-xl">
+              <div className="aspect-square bg-white rounded-xl border border-purple-100 overflow-hidden shadow-lg max-w-md mx-auto">
                 <img
                   src={mockImages[selectedImageIndex]}
                   alt={product.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover hover:scale-102 transition-transform duration-300"
                 />
-                <div className="absolute top-4 right-4">
-                  <Button variant="secondary" size="icon" className="bg-white/80 backdrop-blur-sm hover:bg-white">
-                    <Heart className="h-4 w-4" />
+                <div className="absolute top-3 right-3">
+                  <Button variant="secondary" size="sm" className="bg-white/90 backdrop-blur-sm hover:bg-white h-8 w-8 p-0">
+                    <Heart className="h-3 w-3" />
                   </Button>
                 </div>
                 {product.enableGroupBuy && (
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                      <Users className="h-3 w-3 mr-1" />
-                      Group Buy Available
+                  <div className="absolute top-3 left-3">
+                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs">
+                      <Users className="h-2 w-2 mr-1" />
+                      Group Buy
                     </Badge>
                   </div>
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
               {mockImages.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`aspect-square bg-white rounded-lg border-2 overflow-hidden transition-all ${
+                  className={`aspect-square bg-white rounded-lg border overflow-hidden transition-all ${
                     selectedImageIndex === index ? "ring-2 ring-purple-500 border-purple-300" : "border-gray-200 hover:border-purple-200"
                   }`}
                 >
