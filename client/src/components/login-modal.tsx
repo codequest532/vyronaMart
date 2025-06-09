@@ -402,13 +402,9 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
                     variant="link"
                     className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     onClick={() => {
-                      console.log('Forgot password clicked');
-                      setIsTransitioning(true);
-                      onOpenChange(false); // Close main modal first
-                      setTimeout(() => {
-                        setShowForgotPassword(true);
-                        setIsTransitioning(false);
-                      }, 150); // Add delay to ensure main modal closes first
+                      console.log('Forgot password clicked - setting state directly');
+                      setShowForgotPassword(true);
+                      console.log('showForgotPassword set to true');
                     }}
                   >
                     Forgot your password?
@@ -804,12 +800,12 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       {/* Forgot Password Modal - Use portal to render at root level */}
       {showForgotPassword && createPortal(
         <div 
-          className="fixed inset-0 bg-black/80 flex items-center justify-center" 
+          className="fixed inset-0 bg-red-500/90 flex items-center justify-center" 
           style={{ zIndex: 10000 }}
           onClick={(e) => {
+            console.log('Portal modal clicked');
             if (e.target === e.currentTarget) {
               setShowForgotPassword(false);
-              setTimeout(() => onOpenChange(true), 100);
             }
           }}
         >
