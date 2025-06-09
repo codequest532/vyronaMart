@@ -74,6 +74,11 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log('showForgotPassword state:', showForgotPassword);
+  }, [showForgotPassword]);
+
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -394,7 +399,10 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
                     type="button"
                     variant="link"
                     className="text-sm text-purple-600 hover:text-purple-700 font-medium"
-                    onClick={() => setShowForgotPassword(true)}
+                    onClick={() => {
+                      console.log('Forgot password clicked');
+                      setShowForgotPassword(true);
+                    }}
                   >
                     Forgot your password?
                   </Button>
