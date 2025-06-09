@@ -64,7 +64,7 @@ export default function Landing() {
   const handleProductClick = (productId: number) => {
     // Navigate to product detail page or handle product selection
     console.log("Product clicked:", productId);
-    // setLocation(`/product/${productId}`);
+    setLocation(`/product/${productId}`);
   };
 
   const loginMutation = useMutation({
