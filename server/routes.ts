@@ -5380,11 +5380,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Seller not found" });
       }
 
+      // First, get product IDs to be removed
+      const productsToDelete = await db.execute(sql`
+        SELECT id FROM products 
+        WHERE metadata->>'sellerId' = ${sellerId.toString()}
+      `);
+
+      // Remove cart items for seller's products first (before deleting products)
+      if (productsToDelete.rows.length > 0) {
+        const productIds = productsToDelete.rows.map(row => row.id);
+        for (const productId of productIds) {
+          await db.execute(sql`
+            DELETE FROM cart_items WHERE product_id = ${productId}
+          `);
+        }
+      }
+
+      // Remove any orders from this seller
+      await db.execute(sql`
+        DELETE FROM orders 
+        WHERE metadata->>'sellerId' = ${sellerId.toString()}
+      `);
+
       // Remove all products associated with this seller
       await db.execute(sql`
         DELETE FROM products 
         WHERE metadata->>'sellerId' = ${sellerId.toString()}
-        OR (metadata IS NOT NULL AND metadata::text LIKE '%"sellerId":${sellerId}%')
       `);
 
       // Remove seller's store if exists
@@ -5393,22 +5414,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           SELECT CAST(metadata->>'storeId' AS INTEGER) 
           FROM users 
           WHERE id = ${sellerId} AND metadata->>'storeId' IS NOT NULL
-        )
-      `);
-
-      // Remove any orders from this seller
-      await db.execute(sql`
-        DELETE FROM orders 
-        WHERE metadata->>'sellerId' = ${sellerId.toString()}
-        OR (metadata IS NOT NULL AND metadata::text LIKE '%"sellerId":${sellerId}%')
-      `);
-
-      // Remove cart items for seller's products
-      await db.execute(sql`
-        DELETE FROM cart_items 
-        WHERE product_id IN (
-          SELECT id FROM products 
-          WHERE metadata->>'sellerId' = ${sellerId.toString()}
         )
       `);
 
