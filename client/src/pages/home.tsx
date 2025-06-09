@@ -5,6 +5,7 @@ import TabNavigation from "@/components/layout/tab-navigation";
 import CartButton from "@/components/shopping/cart-button";
 import NotificationToast from "@/components/ui/notification-toast";
 import { GroupCartModal } from "@/components/GroupCartModal";
+import ProductionWelcome from "@/components/ProductionWelcome";
 import { useUserData } from "@/hooks/use-user-data";
 import { useToastNotifications } from "@/hooks/use-toast-notifications";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -337,6 +338,11 @@ export default function Home() {
         </div>
       </div>
     );
+  }
+
+  // Show production welcome screen when no products exist
+  if (products && products.length === 0 && !isLoadingProducts) {
+    return <ProductionWelcome />;
   }
 
   return (
