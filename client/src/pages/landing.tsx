@@ -61,6 +61,12 @@ export default function Landing() {
 
   const { toast } = useToast();
 
+  const handleProductClick = (productId: number) => {
+    // Navigate to product detail page or handle product selection
+    console.log("Product clicked:", productId);
+    // setLocation(`/product/${productId}`);
+  };
+
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
       const response = await fetch("/api/auth/login", {
@@ -325,9 +331,7 @@ export default function Landing() {
     }
   };
 
-  const handleProductClick = (productId: number) => {
-    setLocation(`/product/${productId}`);
-  };
+
 
   const handleStoreClick = (storeId: number) => {
     setLocation(`/store/${storeId}`);
@@ -486,28 +490,55 @@ export default function Landing() {
           ) : null}
           
           {(searchQuery || selectedCategory !== "all") && (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredProducts.slice(0, 24).map((product) => (
-                <Card key={product.id} className="cursor-pointer hover:shadow-md transition-shadow border-gray-200" onClick={() => handleProductClick(product.id)}>
-                  <CardContent className="p-3">
-                    <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden">
-                      <img
-                        src={product.imageUrl || "/api/placeholder/200/200"}
+                <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1 border-0 shadow-lg" onClick={() => handleProductClick(product.id)}>
+                  <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-48">
+                    {product.imageUrl ? (
+                      <img 
+                        src={product.imageUrl} 
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <ShoppingBag className="h-16 w-16 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 right-3">
+                      <Button size="sm" variant="ghost" className="bg-white/80 backdrop-blur-sm hover:bg-white rounded-full p-2">
+                        <Heart className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <h3 className="font-medium text-xs mb-1 line-clamp-2 leading-tight">{product.name}</h3>
-                    <div className="flex items-center mb-1">
+                    {product.enableGroupBuy && (
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
+                          Group Buy
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold text-base mb-2 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+                      {product.name}
+                    </h4>
+                    <div className="flex items-center mb-3">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                         ))}
                       </div>
-                      <span className="text-xs text-gray-500 ml-1">(4.5)</span>
+                      <span className="text-sm text-gray-500 ml-2">(4.5)</span>
                     </div>
-                    <p className="text-red-600 font-bold text-sm">₹{product.price.toFixed(2)}</p>
-                    <p className="text-xs text-gray-500 line-through">₹{(product.price * 1.3).toFixed(2)}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-blue-600 font-bold text-lg">₹{product.price}</p>
+                        <p className="text-sm text-gray-500 line-through">₹{(product.price * 1.3).toFixed(0)}</p>
+                      </div>
+                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <ShoppingCart className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -518,119 +549,207 @@ export default function Landing() {
         {/* VyronaMart Features Showcase (when no search/filter) */}
         {!searchQuery && selectedCategory === "all" && (
           <>
-            {/* VyronaHub - Comprehensive Categories */}
-            <section className="mb-12">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-4">VyronaHub - Complete Shopping Universe</h2>
-                <p className="text-lg text-gray-600">Your one-stop destination for everything awesome - gadgets to groceries!</p>
+            {/* VyronaHub - Redesigned with Better Appeal */}
+            <section className="mb-16">
+              {/* Hero Header */}
+              <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-500 rounded-3xl p-10 mb-12 text-white">
+                <div className="text-center max-w-4xl mx-auto">
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6">
+                    Welcome to VyronaHub
+                  </h2>
+                  <p className="text-xl md:text-2xl mb-8 opacity-90">
+                    Discover millions of products from trusted sellers worldwide
+                  </p>
+                  <div className="flex justify-center items-center space-x-8 text-lg">
+                    <div className="flex items-center">
+                      <Shield className="h-6 w-6 mr-2" />
+                      <span>Secure Shopping</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Users className="h-6 w-6 mr-2" />
+                      <span>Trusted Community</span>
+                    </div>
+                    <div className="flex items-center">
+                      <ShoppingBag className="h-6 w-6 mr-2" />
+                      <span>Fast Delivery</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-6">
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🔌</div>
-                  <h4 className="font-semibold text-sm mb-2">Electronics</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Smartphones & Accessories</li>
-                    <li>• Laptops & Tablets</li>
-                    <li>• Smart TVs & Monitors</li>
-                    <li>• Wearables & Smart Devices</li>
-                  </ul>
+
+              {/* Category Grid - Larger Tiles */}
+              <div className="mb-12">
+                <h3 className="text-2xl font-bold text-center mb-8">Shop by Category</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("electronics")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📱</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Electronics</h4>
+                    <p className="text-sm text-gray-600 mb-4">Latest gadgets & tech</p>
+                    <div className="text-xs text-blue-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("fashion")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">👗</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Fashion</h4>
+                    <p className="text-sm text-gray-600 mb-4">Trendy clothing & style</p>
+                    <div className="text-xs text-pink-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("home")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🏠</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Home & Living</h4>
+                    <p className="text-sm text-gray-600 mb-4">Furniture & decor</p>
+                    <div className="text-xs text-green-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("kids")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🧸</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Kids & Baby</h4>
+                    <p className="text-sm text-gray-600 mb-4">Toys & essentials</p>
+                    <div className="text-xs text-orange-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("organic")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🥬</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Organic Store</h4>
+                    <p className="text-sm text-gray-600 mb-4">Fresh & healthy</p>
+                    <div className="text-xs text-green-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("groceries")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🛒</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Groceries</h4>
+                    <p className="text-sm text-gray-600 mb-4">Daily essentials</p>
+                    <div className="text-xs text-blue-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("sports")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">💪</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Sports & Fitness</h4>
+                    <p className="text-sm text-gray-600 mb-4">Gear & wellness</p>
+                    <div className="text-xs text-red-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("books")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📚</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Books & Media</h4>
+                    <p className="text-sm text-gray-600 mb-4">Knowledge & entertainment</p>
+                    <div className="text-xs text-purple-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("automotive")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🚗</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Automotive</h4>
+                    <p className="text-sm text-gray-600 mb-4">Car care & accessories</p>
+                    <div className="text-xs text-gray-600 font-medium">Explore →</div>
+                  </div>
+                  
+                  <div 
+                    className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:-translate-y-2 border border-gray-100"
+                    onClick={() => setSelectedCategory("gifts")}
+                  >
+                    <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">🎁</div>
+                    <h4 className="font-bold text-lg mb-3 text-gray-800">Gifts & More</h4>
+                    <p className="text-sm text-gray-600 mb-4">Special occasions</p>
+                    <div className="text-xs text-pink-600 font-medium">Explore →</div>
+                  </div>
                 </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">👗</div>
-                  <h4 className="font-semibold text-sm mb-2">Fashion & Apparels</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Men's, Women's & Kids' Wear</li>
-                    <li>• Footwear & Accessories</li>
-                    <li>• Ethnic & Western Clothing</li>
-                    <li>• Bags, Wallets & Belts</li>
-                  </ul>
+              </div>
+
+              {/* Featured Products Grid - Larger Product Cards */}
+              <div className="mb-12">
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-bold">Featured Products</h3>
+                  <Button variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+                    View All Products
+                  </Button>
                 </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🏠</div>
-                  <h4 className="font-semibold text-sm mb-2">Home & Kitchen</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Kitchen Appliances & Tools</li>
-                    <li>• Storage & Organization</li>
-                    <li>• Furnishings & Decor</li>
-                    <li>• Lighting & Cleaning</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🧸</div>
-                  <h4 className="font-semibold text-sm mb-2">Kids Corner</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Toys, Games & Puzzles</li>
-                    <li>• School Supplies & Stationery</li>
-                    <li>• Baby Care Products</li>
-                    <li>• Learning & Educational Kits</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🥬</div>
-                  <h4 className="font-semibold text-sm mb-2">Organic Store</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Organic Fruits & Vegetables</li>
-                    <li>• Herbal Juices & Superfoods</li>
-                    <li>• Ayurvedic & Natural Products</li>
-                    <li>• Organic Skincare & Wellness</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🛒</div>
-                  <h4 className="font-semibold text-sm mb-2">Groceries</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Daily Essentials (Atta, Rice, Pulses)</li>
-                    <li>• Oils, Spices & Condiments</li>
-                    <li>• Beverages & Snacks</li>
-                    <li>• Dairy, Bakery & Frozen Foods</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🏡</div>
-                  <h4 className="font-semibold text-sm mb-2">Home Automation</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Smart Plugs & Switches</li>
-                    <li>• Voice Assistants (Alexa, Google)</li>
-                    <li>• Smart Lights & Sensors</li>
-                    <li>• Home Security & Surveillance</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🧾</div>
-                  <h4 className="font-semibold text-sm mb-2">Office & Stationery</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Office Chairs & Desks</li>
-                    <li>• Files, Folders & Organizers</li>
-                    <li>• Pens, Notebooks & Writing Tools</li>
-                    <li>• Printers & Computer Accessories</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🧘</div>
-                  <h4 className="font-semibold text-sm mb-2">Health & Wellness</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Fitness Equipment (Yoga Mats)</li>
-                    <li>• Health Monitoring Devices</li>
-                    <li>• Nutrition & Supplements</li>
-                    <li>• Skincare & Personal Hygiene</li>
-                  </ul>
-                </div>
-                <div className="bg-white rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-                  <div className="text-2xl mb-3">🐶</div>
-                  <h4 className="font-semibold text-sm mb-2">Pet Care</h4>
-                  <ul className="text-xs text-gray-600 space-y-1">
-                    <li>• Pet Food & Treats</li>
-                    <li>• Grooming Essentials</li>
-                    <li>• Beds, Toys & Accessories</li>
-                    <li>• Leashes, Collars & Carriers</li>
-                  </ul>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {(products || []).slice(0, 10).map((product) => (
+                    <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1 border-0 shadow-lg">
+                      <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-48">
+                        {product.imageUrl ? (
+                          <img 
+                            src={product.imageUrl} 
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                            <ShoppingBag className="h-16 w-16 text-gray-400" />
+                          </div>
+                        )}
+                        <div className="absolute top-3 right-3">
+                          <Button size="sm" variant="ghost" className="bg-white/80 backdrop-blur-sm hover:bg-white rounded-full p-2">
+                            <Heart className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {product.enableGroupBuy && (
+                          <div className="absolute top-3 left-3">
+                            <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
+                              Group Buy
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold text-base mb-2 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+                          {product.name}
+                        </h4>
+                        <div className="flex items-center mb-3">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500 ml-2">(4.5)</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-blue-600 font-bold text-lg">₹{product.price}</p>
+                            <p className="text-sm text-gray-500 line-through">₹{(product.price * 1.3).toFixed(0)}</p>
+                          </div>
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <ShoppingCart className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
               
-              <div className="text-center mt-8">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
-                  Shop Smart
-                  <ShoppingBag className="ml-2 h-5 w-5" />
+              <div className="text-center">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
+                  Start Shopping Now
+                  <ShoppingBag className="ml-3 h-6 w-6" />
                 </Button>
               </div>
             </section>
