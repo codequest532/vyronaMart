@@ -65,7 +65,11 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   CheckCircle,
-  DollarSign
+  DollarSign,
+  Filter,
+  Package,
+  Shield,
+  Truck
 } from "lucide-react";
 
 type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
@@ -675,7 +679,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Instagram Seller Connect */}
+            {/* VyronaInstashop - Customer Shopping Interface */}
             <Card className="bg-gradient-to-br from-pink-50 to-purple-50 border-pink-200">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-6">
@@ -684,81 +688,183 @@ export default function Home() {
                       <Instagram className="text-white h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900">Instagram Store Connect</h3>
-                      <p className="text-gray-600">Discover and shop from your favorite Instagram sellers</p>
+                      <h3 className="text-xl font-bold text-gray-900">VyronaInstashop</h3>
+                      <p className="text-gray-600">Shop products from Instagram sellers directly on VyronaMart</p>
                     </div>
                   </div>
-                  <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white">
-                    <Instagram className="mr-2 h-4 w-4" />
-                    Connect Store
+                  <Button onClick={() => handleTabChange("instashop")} className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white">
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    Browse All
                   </Button>
                 </div>
 
-                {/* Featured Instagram Sellers */}
+                {/* Category Filters */}
+                <div className="mb-6">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Filter className="h-5 w-5 text-gray-600" />
+                    <span className="font-medium text-gray-700">Shop by Category</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { name: "Fashion", count: 156, color: "pink" },
+                      { name: "Electronics", count: 89, color: "blue" },
+                      { name: "Home Decor", count: 234, color: "purple" },
+                      { name: "Beauty", count: 167, color: "rose" },
+                      { name: "Accessories", count: 98, color: "indigo" }
+                    ].map((category) => (
+                      <Badge 
+                        key={category.name}
+                        variant="outline" 
+                        className={`cursor-pointer hover:bg-${category.color}-50 border-${category.color}-200 text-${category.color}-700 px-3 py-1`}
+                      >
+                        {category.name} ({category.count})
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Featured Instagram Products */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[
-                    { username: "@trendy_fashion_tn", followers: "12.5K", category: "Fashion", verified: true, products: 156, rating: 4.8 },
-                    { username: "@chennai_electronics", followers: "8.3K", category: "Electronics", verified: true, products: 89, rating: 4.9 },
-                    { username: "@homestyle_decor", followers: "15.2K", category: "Home Decor", verified: false, products: 234, rating: 4.7 },
-                  ].map((seller, index) => (
-                    <Card key={index} className="bg-white border border-pink-100 hover:border-pink-300 hover:shadow-lg transition-all duration-300 cursor-pointer">
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                            {seller.username.charAt(1).toUpperCase()}
+                    { 
+                      name: "Trendy Oversized Hoodie", 
+                      seller: "@trendy_fashion_tn", 
+                      price: 1299, 
+                      originalPrice: 1899, 
+                      image: "/api/placeholder/300/300",
+                      rating: 4.8, 
+                      orders: 156,
+                      badge: "Trending"
+                    },
+                    { 
+                      name: "Wireless Bluetooth Earbuds", 
+                      seller: "@chennai_electronics", 
+                      price: 2499, 
+                      originalPrice: 3999, 
+                      image: "/api/placeholder/300/300",
+                      rating: 4.9, 
+                      orders: 89,
+                      badge: "Best Seller"
+                    },
+                    { 
+                      name: "Boho Wall Hanging Set", 
+                      seller: "@homestyle_decor", 
+                      price: 899, 
+                      originalPrice: 1299, 
+                      image: "/api/placeholder/300/300",
+                      rating: 4.7, 
+                      orders: 234,
+                      badge: "New"
+                    }
+                  ].map((product, index) => (
+                    <Card key={index} className="bg-white border border-pink-100 hover:border-pink-300 hover:shadow-lg transition-all duration-300 cursor-pointer group">
+                      <CardContent className="p-0">
+                        {/* Product Image */}
+                        <div className="relative overflow-hidden rounded-t-lg">
+                          <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                            <Package className="h-12 w-12 text-gray-400" />
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-1">
-                              <h4 className="font-semibold text-gray-900">{seller.username}</h4>
-                              {seller.verified && <Verified className="text-blue-500 h-4 w-4" />}
-                            </div>
-                            <p className="text-sm text-gray-500">{seller.followers} followers</p>
-                          </div>
+                          {product.badge && (
+                            <Badge className="absolute top-2 left-2 bg-pink-600 text-white">
+                              {product.badge}
+                            </Badge>
+                          )}
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 hover:bg-white"
+                          >
+                            <Heart className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Category:</span>
-                            <Badge variant="secondary" className="text-pink-600 bg-pink-50">{seller.category}</Badge>
+
+                        {/* Product Details */}
+                        <div className="p-4">
+                          <div className="mb-2">
+                            <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">{product.name}</h4>
+                            <p className="text-sm text-purple-600 flex items-center">
+                              <Instagram className="h-3 w-3 mr-1" />
+                              {product.seller}
+                            </p>
                           </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Products:</span>
-                            <span className="font-semibold">{seller.products}</span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Rating:</span>
+
+                          {/* Price and Rating */}
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-lg font-bold text-gray-900">₹{product.price}</span>
+                              <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                            </div>
                             <div className="flex items-center space-x-1">
                               <Star className="text-amber-400 h-4 w-4 fill-current" />
-                              <span className="font-semibold">{seller.rating}</span>
+                              <span className="text-sm font-medium">{product.rating}</span>
+                              <span className="text-xs text-gray-500">({product.orders})</span>
                             </div>
                           </div>
-                        </div>
-                        <div className="mt-4 flex items-center space-x-2">
-                          <Button size="sm" className="flex-1 bg-pink-600 hover:bg-pink-700">
-                            <Eye className="mr-1 h-3 w-3" />
-                            View Store
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-pink-200 text-pink-600">
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center space-x-2">
+                            <Button size="sm" className="flex-1 bg-pink-600 hover:bg-pink-700">
+                              <ShoppingCart className="mr-1 h-3 w-3" />
+                              Add to Cart
+                            </Button>
+                            <Button size="sm" variant="outline" className="border-pink-200 text-pink-600 hover:bg-pink-50">
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                          </div>
+
+                          {/* Seller Badge */}
+                          <div className="mt-3 flex items-center justify-between">
+                            <Badge variant="secondary" className="text-xs bg-purple-50 text-purple-700">
+                              VyronaMart Verified
+                            </Badge>
+                            <span className="text-xs text-gray-500">Free shipping</span>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
 
-                {/* Instagram Connect Stats */}
-                <div className="mt-6 grid grid-cols-3 gap-4">
+                {/* VyronaInstashop Features & Stats */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-pink-600">500+</div>
-                    <div className="text-sm text-gray-600">Connected Sellers</div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Shield className="text-white h-6 w-6" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Verified Sellers</h4>
+                    <p className="text-sm text-gray-600">All Instagram sellers are verified by VyronaMart</p>
                   </div>
                   <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600">15K+</div>
-                    <div className="text-sm text-gray-600">Products Available</div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Truck className="text-white h-6 w-6" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Fast Delivery</h4>
+                    <p className="text-sm text-gray-600">Same-day delivery in Chennai & suburbs</p>
                   </div>
                   <div className="bg-white/60 backdrop-blur-sm rounded-lg p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">95%</div>
-                    <div className="text-sm text-gray-600">Customer Satisfaction</div>
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CreditCard className="text-white h-6 w-6" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Secure Payments</h4>
+                    <p className="text-sm text-gray-600">Protected by VyronaMart payment security</p>
+                  </div>
+                </div>
+
+                {/* Quick Access Banner */}
+                <div className="mt-6 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg p-6 text-white">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-lg font-bold mb-2">Discover More Instagram Sellers</h4>
+                      <p className="opacity-90 text-sm">Browse 500+ verified Instagram sellers with exclusive VyronaMart pricing</p>
+                    </div>
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => handleTabChange("instashop")}
+                      className="bg-white text-purple-600 hover:bg-gray-100"
+                    >
+                      <Instagram className="mr-2 h-4 w-4" />
+                      Explore All
+                    </Button>
                   </div>
                 </div>
               </CardContent>
