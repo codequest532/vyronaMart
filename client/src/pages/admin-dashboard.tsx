@@ -1454,8 +1454,8 @@ export default function AdminDashboard() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant={seller.isActive ? 'default' : 'secondary'}>
-                                {seller.isActive ? 'Active' : 'Pending'}
+                              <Badge variant={seller.is_active ? 'default' : 'secondary'}>
+                                {seller.is_active ? 'Active' : 'Pending'}
                               </Badge>
                               <Button variant="outline" size="sm">
                                 <Edit className="h-3 w-3" />

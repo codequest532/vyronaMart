@@ -5345,7 +5345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const sellersResult = await db.execute(sql`
-        SELECT id, username, email, mobile, role, created_at
+        SELECT id, username, email, mobile, role, created_at, is_active
         FROM users
         WHERE role = 'seller'
         ORDER BY created_at DESC
