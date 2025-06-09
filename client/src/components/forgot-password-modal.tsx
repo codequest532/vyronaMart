@@ -58,9 +58,10 @@ export default function ForgotPasswordModal({ isOpen, onClose, onSuccess }: Forg
 
   return createPortal(
     <div 
-      className="fixed inset-0 bg-black/80 flex items-center justify-center" 
+      className="fixed inset-0 bg-red-500/90 flex items-center justify-center" 
       style={{ zIndex: 10000 }}
       onClick={(e) => {
+        console.log('ForgotPasswordModal overlay clicked');
         if (e.target === e.currentTarget) {
           onClose();
         }
