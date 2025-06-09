@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2, Menu, Users, ShoppingBag } from "lucide-react";
+import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building2, Menu, Users, ShoppingBag, Shield } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -979,58 +979,80 @@ export default function Landing() {
 
       {/* Authentication Modal */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {authMode === "login" ? "Sign In" : "Create Account"}
+        <DialogContent className="sm:max-w-lg border-0 shadow-2xl bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 backdrop-blur-sm">
+          <DialogHeader className="text-center space-y-4 pb-6">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <ShoppingBag className="w-8 h-8 text-white" />
+            </div>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              {authMode === "login" ? "Welcome Back!" : "Join VyronaMart"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600 text-base">
               {authMode === "login" 
-                ? "Sign in to your VyronaMart account to continue shopping."
-                : "Create a new account to start your shopping journey."
+                ? "Sign in to continue your shopping adventure"
+                : "Create your account and earn 500 welcome coins!"
               }
             </DialogDescription>
           </DialogHeader>
           
           <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-xl h-12">
+              <TabsTrigger 
+                value="login" 
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 font-medium"
+              >
+                Sign In
+              </TabsTrigger>
+              <TabsTrigger 
+                value="signup" 
+                className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 font-medium"
+              >
+                Sign Up
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email</Label>
+            <TabsContent value="login" className="mt-6">
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     placeholder="Enter your email"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-gray-700 font-medium">Password</Label>
                   <Input
                     id="password"
                     name="password"
                     type="password"
                     placeholder="Enter your password"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
                   disabled={loginMutation.isPending}
                 >
-                  {loginMutation.isPending ? "Signing In..." : "Sign In"}
+                  {loginMutation.isPending ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Signing In...</span>
+                    </div>
+                  ) : (
+                    "Sign In to VyronaMart"
+                  )}
                 </Button>
                 <Button
                   type="button"
                   variant="link"
-                  className="w-full"
+                  className="w-full text-blue-600 hover:text-blue-700 font-medium"
                   onClick={() => setShowForgotPassword(true)}
                 >
                   Forgot Password?
@@ -1038,55 +1060,73 @@ export default function Landing() {
               </form>
             </TabsContent>
             
-            <TabsContent value="signup">
+            <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignup} className="space-y-4">
-                <div>
-                  <Label htmlFor="signup-email">Email</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email" className="text-gray-700 font-medium">Email Address</Label>
                   <Input
                     id="signup-email"
                     name="email"
                     type="email"
                     placeholder="Enter your email"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="mobile">Mobile Number</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="mobile" className="text-gray-700 font-medium">Mobile Number</Label>
                   <Input
                     id="mobile"
                     name="mobile"
                     type="tel"
                     placeholder="Enter your mobile number"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="signup-password">Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password" className="text-gray-700 font-medium">Password</Label>
                   <Input
                     id="signup-password"
                     name="password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Create a strong password"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password" className="text-gray-700 font-medium">Confirm Password</Label>
                   <Input
                     id="confirm-password"
                     name="confirmPassword"
                     type="password"
                     placeholder="Confirm your password"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={signupMutation.isPending}
-                >
-                  {signupMutation.isPending ? "Creating Account..." : "Create Account"}
-                </Button>
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+                    disabled={signupMutation.isPending}
+                  >
+                    {signupMutation.isPending ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Creating Account...</span>
+                      </div>
+                    ) : (
+                      "Create Your Account"
+                    )}
+                  </Button>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500">
+                    By creating an account, you agree to our Terms of Service
+                  </p>
+                </div>
               </form>
             </TabsContent>
           </Tabs>
@@ -1095,82 +1135,122 @@ export default function Landing() {
 
       {/* Forgot Password Modal */}
       <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Reset Password</DialogTitle>
-            <DialogDescription>
-              {otpStep === "email" && "Enter your email to receive a reset code."}
-              {otpStep === "otp" && "Enter the verification code sent to your email."}
-              {otpStep === "reset" && "Enter your new password."}
+        <DialogContent className="sm:max-w-lg border-0 shadow-2xl bg-gradient-to-br from-white via-green-50/30 to-blue-50/30 backdrop-blur-sm">
+          <DialogHeader className="text-center space-y-4 pb-6">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              Reset Your Password
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 text-base">
+              {otpStep === "email" && "We'll send a secure verification code to your email"}
+              {otpStep === "otp" && "Enter the 6-digit code sent to your email"}
+              {otpStep === "reset" && "Create a new secure password for your account"}
             </DialogDescription>
           </DialogHeader>
           
-          <form onSubmit={handleForgotPasswordStep} className="space-y-4">
+          <form onSubmit={handleForgotPasswordStep} className="space-y-5">
             {otpStep === "email" && (
-              <div>
-                <Label htmlFor="reset-email">Email</Label>
+              <div className="space-y-2">
+                <Label htmlFor="reset-email" className="text-gray-700 font-medium">Email Address</Label>
                 <Input
                   id="reset-email"
                   name="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Enter your registered email"
+                  className="h-12 bg-white/80 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 rounded-lg transition-all"
                   required
                 />
               </div>
             )}
             
             {otpStep === "otp" && (
-              <div>
-                <Label htmlFor="otp">Verification Code</Label>
+              <div className="space-y-2">
+                <Label htmlFor="otp" className="text-gray-700 font-medium">Verification Code</Label>
                 <Input
                   id="otp"
                   name="otp"
                   type="text"
-                  placeholder="Enter 6-digit code"
+                  placeholder="Enter 6-digit verification code"
+                  className="h-12 bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all text-center tracking-widest"
+                  maxLength={6}
                   required
                 />
+                <p className="text-sm text-gray-500 text-center">
+                  Code expires in 15 minutes
+                </p>
               </div>
             )}
             
             {otpStep === "reset" && (
-              <>
-                <div>
-                  <Label htmlFor="new-password">New Password</Label>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="new-password" className="text-gray-700 font-medium">New Password</Label>
                   <Input
                     id="new-password"
                     name="password"
                     type="password"
-                    placeholder="Enter new password"
+                    placeholder="Create a strong password"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-new-password" className="text-gray-700 font-medium">Confirm New Password</Label>
                   <Input
                     id="confirm-new-password"
                     name="confirmPassword"
                     type="password"
-                    placeholder="Confirm new password"
+                    placeholder="Confirm your new password"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 rounded-lg transition-all"
                     required
                   />
                 </div>
-              </>
+              </div>
             )}
             
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-12 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
               disabled={forgotPasswordMutation.isPending || verifyOtpMutation.isPending || resetPasswordMutation.isPending}
             >
-              {otpStep === "email" && (forgotPasswordMutation.isPending ? "Sending..." : "Send Code")}
-              {otpStep === "otp" && (verifyOtpMutation.isPending ? "Verifying..." : "Verify Code")}
-              {otpStep === "reset" && (resetPasswordMutation.isPending ? "Resetting..." : "Reset Password")}
+              {otpStep === "email" && (
+                forgotPasswordMutation.isPending ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Sending Code...</span>
+                  </div>
+                ) : (
+                  "Send Verification Code"
+                )
+              )}
+              {otpStep === "otp" && (
+                verifyOtpMutation.isPending ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Verifying...</span>
+                  </div>
+                ) : (
+                  "Verify Code"
+                )
+              )}
+              {otpStep === "reset" && (
+                resetPasswordMutation.isPending ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <span>Updating Password...</span>
+                  </div>
+                ) : (
+                  "Update Password"
+                )
+              )}
             </Button>
             
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full h-12 border-gray-200 hover:bg-gray-50 transition-all duration-200"
               onClick={() => {
                 setShowForgotPassword(false);
                 setOtpStep("email");
