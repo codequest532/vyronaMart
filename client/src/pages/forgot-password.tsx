@@ -16,6 +16,11 @@ const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email"),
 });
 
+const verifyOtpSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  otp: z.string().min(6, "OTP must be 6 digits"),
+});
+
 const resetPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   otp: z.string().min(6, "OTP must be 6 digits"),
@@ -29,12 +34,21 @@ const resetPasswordSchema = z.object({
 export default function ForgotPassword() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [step, setStep] = useState<"email" | "reset">("email");
+  const [step, setStep] = useState<"email" | "otp" | "reset">("email");
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
 
   const forgotPasswordForm = useForm({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { email: "" },
+  });
+
+  const verifyOtpForm = useForm({
+    resolver: zodResolver(verifyOtpSchema),
+    defaultValues: { 
+      email: "",
+      otp: ""
+    },
   });
 
   const resetPasswordForm = useForm({
@@ -54,8 +68,8 @@ export default function ForgotPassword() {
     },
     onSuccess: (data, variables) => {
       setEmail(variables.email);
-      resetPasswordForm.setValue('email', variables.email);
-      setStep("reset");
+      verifyOtpForm.setValue('email', variables.email);
+      setStep("otp");
       toast({
         title: "Reset code sent!",
         description: "Check your email for the 6-digit reset code.",
@@ -65,6 +79,30 @@ export default function ForgotPassword() {
       toast({
         title: "Error",
         description: error.message || "Failed to send reset code. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (data: { email: string; otp: string }) => {
+      const response = await apiRequest("POST", "/api/auth/verify-otp", data);
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      setOtp(variables.otp);
+      resetPasswordForm.setValue('email', variables.email);
+      resetPasswordForm.setValue('otp', variables.otp);
+      setStep("reset");
+      toast({
+        title: "OTP verified!",
+        description: "Now enter your new password.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Verification Failed",
+        description: error.message || "Invalid or expired OTP. Please try again.",
         variant: "destructive",
       });
     },
@@ -95,6 +133,10 @@ export default function ForgotPassword() {
     forgotPasswordMutation.mutate(data);
   };
 
+  const onVerifyOtpSubmit = (data: { email: string; otp: string }) => {
+    verifyOtpMutation.mutate(data);
+  };
+
   const onResetPasswordSubmit = (data: { email: string; otp: string; password: string; confirmPassword: string }) => {
     resetPasswordMutation.mutate(data);
   };
@@ -111,12 +153,15 @@ export default function ForgotPassword() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <CardTitle className="text-2xl font-bold">
-            {step === "email" ? "Reset Password" : "Enter Reset Code"}
+            {step === "email" ? "Reset Password" : 
+             step === "otp" ? "Verify Code" : "Set New Password"}
           </CardTitle>
           <CardDescription>
             {step === "email" 
               ? "Enter your email to receive a reset code"
-              : "Check your email for the 6-digit code"
+              : step === "otp" 
+              ? "Check your email for the 6-digit code"
+              : "Enter your new password"
             }
           </CardDescription>
         </CardHeader>
@@ -152,6 +197,59 @@ export default function ForgotPassword() {
                 >
                   {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Code"}
                 </Button>
+              </form>
+            </Form>
+          ) : step === "otp" ? (
+            <Form {...verifyOtpForm}>
+              <form onSubmit={verifyOtpForm.handleSubmit(onVerifyOtpSubmit)} className="space-y-4">
+                <FormField
+                  control={verifyOtpForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input type="hidden" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={verifyOtpForm.control}
+                  name="otp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">Verification Code</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter 6-digit code" 
+                          className="h-12 text-center text-lg tracking-widest" 
+                          maxLength={6}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 h-12"
+                    onClick={() => setStep("email")}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="flex-1 h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700" 
+                    disabled={verifyOtpMutation.isPending}
+                  >
+                    {verifyOtpMutation.isPending ? "Verifying..." : "Verify Code"}
+                  </Button>
+                </div>
               </form>
             </Form>
           ) : (
