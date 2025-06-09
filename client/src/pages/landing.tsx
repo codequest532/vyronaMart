@@ -374,6 +374,13 @@ export default function Landing() {
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
+                className="text-white hover:bg-blue-800 border border-white/20"
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                Become a Seller
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => setShowAuthModal(true)}
                 className="text-white hover:bg-blue-800"
               >
