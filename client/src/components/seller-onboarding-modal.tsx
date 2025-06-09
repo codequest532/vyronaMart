@@ -36,13 +36,48 @@ interface FormData {
   phone: string;
   businessCategory: string;
   businessDescription: string;
+  
+  // VyronaInstaStore fields
   instagramHandle?: string;
+  instagramBusinessLink?: string;
+  autoFetchInstagram?: boolean;
+  productUploadMode?: string;
+  enableGroupBuy?: boolean;
+  storeBio?: string;
+  deliveryMode?: string;
+  codEnabled?: boolean;
+  
+  // VyronaHub & VyronaSocial fields
   websiteUrl?: string;
+  fulfillmentPartner?: string;
+  storePincode?: string;
+  
+  // VyronaSpace fields
   storeAddress?: string;
+  workingHours?: string;
+  deliveryCoverage?: string;
+  whoDelivers?: string;
+  minOrderFreeDelivery?: string;
+  
+  // VyronaMallConnect fields
   mallName?: string;
   brandName?: string;
+  storeLocationInMall?: string;
+  brandWebsite?: string;
+  deliveryPincodeSupport?: string;
+  specialLaunchOffer?: string;
+  
+  // Legal & Payout
   gstNumber?: string;
   panNumber?: string;
+  bankAccountNumber?: string;
+  ifscCode?: string;
+  accountHolderName?: string;
+  
+  // Final consent
+  agreeTerms?: boolean;
+  agreePrivacy?: boolean;
+  
   expectedMonthlyRevenue: string;
   hasExistingOnlinePresence: string;
 }
@@ -96,7 +131,7 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
     hasExistingOnlinePresence: ""
   });
 
-  const totalSteps = 4;
+  const totalSteps = 5;
   const progress = (currentStep / totalSteps) * 100;
 
   const updateFormData = (updates: Partial<FormData>) => {
@@ -281,37 +316,169 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold mb-2">Platform-Specific Details</h3>
-              <p className="text-gray-600">Additional information for your chosen platform</p>
+              <p className="text-gray-600">Complete your {sellerTypes.find(t => t.id === formData.sellerType)?.title} setup</p>
             </div>
 
             {formData.sellerType === "vyronainstastore" && (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="instagramHandle">Instagram Handle *</Label>
-                  <div className="relative">
-                    <Instagram className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="instagramHandle">Instagram Handle *</Label>
+                    <div className="relative">
+                      <Instagram className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="instagramHandle"
+                        value={formData.instagramHandle || ""}
+                        onChange={(e) => updateFormData({ instagramHandle: e.target.value })}
+                        placeholder="@yourusername"
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="instagramBusinessLink">Instagram Business Link</Label>
                     <Input
-                      id="instagramHandle"
-                      value={formData.instagramHandle || ""}
-                      onChange={(e) => updateFormData({ instagramHandle: e.target.value })}
-                      placeholder="@yourusername"
-                      className="pl-10"
+                      id="instagramBusinessLink"
+                      value={formData.instagramBusinessLink || ""}
+                      onChange={(e) => updateFormData({ instagramBusinessLink: e.target.value })}
+                      placeholder="Instagram business profile URL"
                     />
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="productUploadMode">Product Upload Mode</Label>
+                    <Select onValueChange={(value) => updateFormData({ productUploadMode: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select upload mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="instagram-sync">Instagram Sync</SelectItem>
+                        <SelectItem value="manual">Manual Upload</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="deliveryMode">Delivery Mode</Label>
+                    <Select onValueChange={(value) => updateFormData({ deliveryMode: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select delivery mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="self">Self Delivery</SelectItem>
+                        <SelectItem value="vyrona">Vyrona Delivery</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="storeBio">Store Bio</Label>
+                  <Textarea
+                    id="storeBio"
+                    value={formData.storeBio || ""}
+                    onChange={(e) => updateFormData({ storeBio: e.target.value })}
+                    placeholder="Describe your Instagram store"
+                    rows={2}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="enableGroupBuy"
+                    checked={formData.enableGroupBuy || false}
+                    onChange={(e) => updateFormData({ enableGroupBuy: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="enableGroupBuy">Enable Group Buy (VyronaSocial)</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="codEnabled"
+                    checked={formData.codEnabled || false}
+                    onChange={(e) => updateFormData({ codEnabled: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="codEnabled">Enable Cash on Delivery</Label>
                 </div>
               </div>
             )}
 
-            {(formData.sellerType === "vyronahub" || formData.sellerType === "vyronainstastore") && (
+            {formData.sellerType === "vyronahub" && (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="websiteUrl">Website URL (Optional)</Label>
-                  <Input
-                    id="websiteUrl"
-                    value={formData.websiteUrl || ""}
-                    onChange={(e) => updateFormData({ websiteUrl: e.target.value })}
-                    placeholder="https://yourwebsite.com"
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="websiteUrl">Website URL</Label>
+                    <Input
+                      id="websiteUrl"
+                      value={formData.websiteUrl || ""}
+                      onChange={(e) => updateFormData({ websiteUrl: e.target.value })}
+                      placeholder="https://yourwebsite.com"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="storePincode">Store Pincode</Label>
+                    <Input
+                      id="storePincode"
+                      value={formData.storePincode || ""}
+                      onChange={(e) => updateFormData({ storePincode: e.target.value })}
+                      placeholder="Store location pincode"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fulfillmentPartner">Fulfillment Partner</Label>
+                    <Select onValueChange={(value) => updateFormData({ fulfillmentPartner: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select fulfillment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="self">Self Fulfillment</SelectItem>
+                        <SelectItem value="vyrona">Vyrona Logistics</SelectItem>
+                        <SelectItem value="other">Other Partner</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="productUploadMode">Product Upload Mode</Label>
+                    <Select onValueChange={(value) => updateFormData({ productUploadMode: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select upload mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual Upload</SelectItem>
+                        <SelectItem value="csv">CSV Bulk Upload</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="enableGroupBuy"
+                    checked={formData.enableGroupBuy || false}
+                    onChange={(e) => updateFormData({ enableGroupBuy: e.target.checked })}
+                    className="rounded"
                   />
+                  <Label htmlFor="enableGroupBuy">Enable Group Buy Features</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="codEnabled"
+                    checked={formData.codEnabled || false}
+                    onChange={(e) => updateFormData({ codEnabled: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="codEnabled">Enable Cash on Delivery</Label>
                 </div>
               </div>
             )}
@@ -328,45 +495,174 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
                     rows={3}
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="workingHours">Working Hours</Label>
+                    <Input
+                      id="workingHours"
+                      value={formData.workingHours || ""}
+                      onChange={(e) => updateFormData({ workingHours: e.target.value })}
+                      placeholder="e.g., 9 AM - 9 PM"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="minOrderFreeDelivery">Min Order for Free Delivery</Label>
+                    <Input
+                      id="minOrderFreeDelivery"
+                      value={formData.minOrderFreeDelivery || ""}
+                      onChange={(e) => updateFormData({ minOrderFreeDelivery: e.target.value })}
+                      placeholder="₹500"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="deliveryCoverage">Delivery Coverage</Label>
+                    <Select onValueChange={(value) => updateFormData({ deliveryCoverage: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select coverage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="local">Local Only</SelectItem>
+                        <SelectItem value="all-india">All India</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="whoDelivers">Who Delivers?</Label>
+                    <Select onValueChange={(value) => updateFormData({ whoDelivers: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select delivery partner" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="self">Self Delivery</SelectItem>
+                        <SelectItem value="vyrona">Vyrona Logistics</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="codEnabled"
+                    checked={formData.codEnabled || false}
+                    onChange={(e) => updateFormData({ codEnabled: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="codEnabled">Enable Cash on Delivery</Label>
+                </div>
               </div>
             )}
 
             {formData.sellerType === "vyronamallconnect" && (
               <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="mallName">Mall Name *</Label>
+                    <Input
+                      id="mallName"
+                      value={formData.mallName || ""}
+                      onChange={(e) => updateFormData({ mallName: e.target.value })}
+                      placeholder="Enter mall name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="brandName">Brand Name</Label>
+                    <Input
+                      id="brandName"
+                      value={formData.brandName || ""}
+                      onChange={(e) => updateFormData({ brandName: e.target.value })}
+                      placeholder="Enter brand name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="storeLocationInMall">Store Location in Mall</Label>
+                    <Input
+                      id="storeLocationInMall"
+                      value={formData.storeLocationInMall || ""}
+                      onChange={(e) => updateFormData({ storeLocationInMall: e.target.value })}
+                      placeholder="Floor 2, Shop No. 45"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="brandWebsite">Brand Website</Label>
+                    <Input
+                      id="brandWebsite"
+                      value={formData.brandWebsite || ""}
+                      onChange={(e) => updateFormData({ brandWebsite: e.target.value })}
+                      placeholder="https://yourbrand.com"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="fulfillmentPartner">Fulfillment Partner</Label>
+                    <Select onValueChange={(value) => updateFormData({ fulfillmentPartner: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select fulfillment" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="self">Brand Fulfillment</SelectItem>
+                        <SelectItem value="vyrona">Vyrona Logistics</SelectItem>
+                        <SelectItem value="mall">Mall Partner</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="productUploadMode">Product Upload Mode</Label>
+                    <Select onValueChange={(value) => updateFormData({ productUploadMode: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select upload mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">Manual Upload</SelectItem>
+                        <SelectItem value="csv">CSV Bulk Upload</SelectItem>
+                        <SelectItem value="api">API Integration</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="mallName">Mall Name *</Label>
-                  <Input
-                    id="mallName"
-                    value={formData.mallName || ""}
-                    onChange={(e) => updateFormData({ mallName: e.target.value })}
-                    placeholder="Enter mall name"
+                  <Label htmlFor="deliveryPincodeSupport">Delivery Pincode Support</Label>
+                  <Textarea
+                    id="deliveryPincodeSupport"
+                    value={formData.deliveryPincodeSupport || ""}
+                    onChange={(e) => updateFormData({ deliveryPincodeSupport: e.target.value })}
+                    placeholder="Enter supported pincodes separated by commas"
+                    rows={2}
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="brandName">Brand Name</Label>
-                  <Input
-                    id="brandName"
-                    value={formData.brandName || ""}
-                    onChange={(e) => updateFormData({ brandName: e.target.value })}
-                    placeholder="Enter brand name (if applicable)"
+                  <Label htmlFor="specialLaunchOffer">Special Launch Offer (Optional)</Label>
+                  <Textarea
+                    id="specialLaunchOffer"
+                    value={formData.specialLaunchOffer || ""}
+                    onChange={(e) => updateFormData({ specialLaunchOffer: e.target.value })}
+                    placeholder="Describe any special offers for launch"
+                    rows={2}
                   />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="codEnabled"
+                    checked={formData.codEnabled || false}
+                    onChange={(e) => updateFormData({ codEnabled: e.target.checked })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="codEnabled">Enable Cash on Delivery</Label>
                 </div>
               </div>
             )}
-
-            <div className="space-y-2">
-              <Label htmlFor="hasExistingOnlinePresence">Do you have existing online presence?</Label>
-              <Select onValueChange={(value) => updateFormData({ hasExistingOnlinePresence: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select option" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="yes">Yes, I already sell online</SelectItem>
-                  <SelectItem value="no">No, this is my first online venture</SelectItem>
-                  <SelectItem value="planning">I'm planning to start online</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
         );
 
@@ -374,21 +670,11 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold mb-2">Legal & Tax Information</h3>
-              <p className="text-gray-600">Required for compliance and payments</p>
+              <h3 className="text-2xl font-bold mb-2">Legal & Payout Details</h3>
+              <p className="text-gray-600">Required for compliance and payment processing</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="gstNumber">GST Number</Label>
-                <Input
-                  id="gstNumber"
-                  value={formData.gstNumber || ""}
-                  onChange={(e) => updateFormData({ gstNumber: e.target.value })}
-                  placeholder="Enter GST number (if applicable)"
-                />
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="panNumber">PAN Number *</Label>
                 <Input
@@ -398,24 +684,141 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
                   placeholder="Enter PAN number"
                 />
               </div>
-            </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">Review Your Information</h4>
-              <div className="space-y-1 text-sm text-blue-800">
-                <p><strong>Platform:</strong> {sellerTypes.find(t => t.id === formData.sellerType)?.title}</p>
-                <p><strong>Business:</strong> {formData.businessName}</p>
-                <p><strong>Owner:</strong> {formData.ownerName}</p>
-                <p><strong>Email:</strong> {formData.email}</p>
-                <p><strong>Category:</strong> {formData.businessCategory}</p>
+              <div className="space-y-2">
+                <Label htmlFor="gstNumber">GST Number</Label>
+                <Input
+                  id="gstNumber"
+                  value={formData.gstNumber || ""}
+                  onChange={(e) => updateFormData({ gstNumber: e.target.value })}
+                  placeholder="Enter GST number (optional for individuals)"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="bankAccountNumber">Bank Account Number *</Label>
+                <Input
+                  id="bankAccountNumber"
+                  value={formData.bankAccountNumber || ""}
+                  onChange={(e) => updateFormData({ bankAccountNumber: e.target.value })}
+                  placeholder="Enter bank account number"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="ifscCode">IFSC Code *</Label>
+                <Input
+                  id="ifscCode"
+                  value={formData.ifscCode || ""}
+                  onChange={(e) => updateFormData({ ifscCode: e.target.value })}
+                  placeholder="Enter IFSC code"
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="accountHolderName">Account Holder Name *</Label>
+                <Input
+                  id="accountHolderName"
+                  value={formData.accountHolderName || ""}
+                  onChange={(e) => updateFormData({ accountHolderName: e.target.value })}
+                  placeholder="Enter account holder name"
+                />
               </div>
             </div>
 
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                <strong>Next Steps:</strong> After submission, our team will review your application within 2-3 business days. 
-                You'll receive an email with your account setup instructions and onboarding materials.
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-blue-900 mb-2">Document Upload (Optional)</h4>
+              <p className="text-sm text-blue-700 mb-3">
+                Upload documents for faster verification. You can also submit these later.
               </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm text-blue-800">Cancelled Cheque / Passbook</Label>
+                  <Input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    className="text-sm"
+                  />
+                </div>
+                {formData.sellerType === "vyronamallconnect" && (
+                  <div className="space-y-2">
+                    <Label className="text-sm text-blue-800">Brand Authorization Letter</Label>
+                    <Input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.pdf"
+                      className="text-sm"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold mb-2">Review & Submit</h3>
+              <p className="text-gray-600">Please review your information and agree to our terms</p>
+            </div>
+
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-blue-900 mb-3">Application Summary</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+                <div>
+                  <p><strong>Platform:</strong> {sellerTypes.find(t => t.id === formData.sellerType)?.title}</p>
+                  <p><strong>Business:</strong> {formData.businessName}</p>
+                  <p><strong>Owner:</strong> {formData.ownerName}</p>
+                  <p><strong>Email:</strong> {formData.email}</p>
+                  <p><strong>Phone:</strong> {formData.phone}</p>
+                </div>
+                <div>
+                  <p><strong>Category:</strong> {formData.businessCategory}</p>
+                  {formData.instagramHandle && <p><strong>Instagram:</strong> {formData.instagramHandle}</p>}
+                  {formData.mallName && <p><strong>Mall:</strong> {formData.mallName}</p>}
+                  {formData.storeAddress && <p><strong>Store:</strong> {formData.storeAddress?.substring(0, 50)}...</p>}
+                  <p><strong>Revenue:</strong> {formData.expectedMonthlyRevenue}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="agreeTerms"
+                  checked={formData.agreeTerms || false}
+                  onChange={(e) => updateFormData({ agreeTerms: e.target.checked })}
+                  className="mt-1 rounded"
+                />
+                <Label htmlFor="agreeTerms" className="text-sm leading-5">
+                  I agree to the <a href="#" className="text-blue-600 hover:underline">Terms & Conditions</a> of VyronaMart seller program
+                </Label>
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="agreePrivacy"
+                  checked={formData.agreePrivacy || false}
+                  onChange={(e) => updateFormData({ agreePrivacy: e.target.checked })}
+                  className="mt-1 rounded"
+                />
+                <Label htmlFor="agreePrivacy" className="text-sm leading-5">
+                  I agree to the <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a> and consent to data processing
+                </Label>
+              </div>
+            </div>
+
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-green-900 mb-2">What happens next?</h4>
+              <div className="text-sm text-green-700 space-y-1">
+                <p>• Your application will be reviewed within 2-3 business days</p>
+                <p>• You'll receive an email with verification status and next steps</p>
+                <p>• Once approved, you'll get access to your seller dashboard</p>
+                <p>• Our onboarding team will guide you through product listing</p>
+              </div>
             </div>
           </div>
         );
@@ -443,7 +846,9 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
         }
         return true;
       case 4:
-        return formData.panNumber;
+        return formData.panNumber && formData.bankAccountNumber && formData.ifscCode && formData.accountHolderName;
+      case 5:
+        return formData.agreeTerms && formData.agreePrivacy;
       default:
         return false;
     }
@@ -496,7 +901,7 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
                 disabled={!canProceed()}
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
               >
-                Submit Application
+                Register as Vyrona Seller
                 <ArrowRight className="h-4 w-4" />
               </Button>
             )}
