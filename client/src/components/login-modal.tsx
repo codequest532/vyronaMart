@@ -401,6 +401,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
                     className="text-sm text-purple-600 hover:text-purple-700 font-medium"
                     onClick={() => {
                       console.log('Forgot password clicked');
+                      onOpenChange(false); // Close main modal first
                       setShowForgotPassword(true);
                     }}
                   >
@@ -795,7 +796,13 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       </Dialog>
 
       {/* Forgot Password Modal */}
-      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+      <Dialog open={showForgotPassword} onOpenChange={(open) => {
+        setShowForgotPassword(open);
+        if (!open) {
+          // Reopen main modal when forgot password modal is closed
+          setTimeout(() => onOpenChange(true), 100);
+        }
+      }}>
         <DialogContent className="max-w-md bg-white rounded-2xl border-0 p-6">
           <VisuallyHidden>
             <DialogTitle>Forgot Password</DialogTitle>
@@ -852,7 +859,13 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
       </Dialog>
 
       {/* Reset Password with OTP Modal */}
-      <Dialog open={showResetPassword} onOpenChange={setShowResetPassword}>
+      <Dialog open={showResetPassword} onOpenChange={(open) => {
+        setShowResetPassword(open);
+        if (!open) {
+          // Reopen main modal when reset password modal is closed
+          setTimeout(() => onOpenChange(true), 100);
+        }
+      }}>
         <DialogContent className="max-w-md bg-white rounded-2xl border-0 p-6">
           <VisuallyHidden>
             <DialogTitle>Reset Password</DialogTitle>
