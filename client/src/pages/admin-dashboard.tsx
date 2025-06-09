@@ -70,6 +70,7 @@ const sellerSchema = z.object({
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof productSchema>>({
@@ -301,13 +302,21 @@ export default function AdminDashboard() {
   });
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    
+    setIsLoggingOut(true);
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      // Clear cache first for faster perceived logout
       queryClient.clear();
-      setLocation('/');
+      
+      // Call logout endpoint without waiting for response
+      fetch('/api/auth/logout', { method: 'POST' }).catch(console.error);
+      
+      // Immediate redirect for better UX
+      window.location.replace('/');
     } catch (error) {
       console.error('Logout failed:', error);
-      setLocation('/');
+      window.location.replace('/');
     }
   };
 
@@ -360,9 +369,9 @@ export default function AdminDashboard() {
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
               </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
+              <Button variant="outline" size="sm" onClick={handleLogout} disabled={isLoggingOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                {isLoggingOut ? "Logging out..." : "Logout"}
               </Button>
             </div>
           </div>
