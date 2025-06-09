@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -800,12 +801,11 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
         </DialogContent>
       </Dialog>
 
-      {/* Forgot Password Modal - Render directly without nesting */}
-      {showForgotPassword && (
-        console.log('Rendering forgot password modal with showForgotPassword:', showForgotPassword),
+      {/* Forgot Password Modal - Use portal to render at root level */}
+      {showForgotPassword && createPortal(
         <div 
           className="fixed inset-0 bg-black/80 flex items-center justify-center" 
-          style={{ zIndex: 9999 }}
+          style={{ zIndex: 10000 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowForgotPassword(false);
@@ -813,7 +813,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
             }
           }}
         >
-          <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6">
+          <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6 shadow-2xl">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
               <p className="text-sm text-gray-600 mt-1">Enter your email to receive a reset code</p>
@@ -865,14 +865,15 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
               </form>
             </Form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Reset Password Modal - Also render directly */}
-      {showResetPassword && (
+      {/* Reset Password Modal - Use portal to render at root level */}
+      {showResetPassword && createPortal(
         <div 
           className="fixed inset-0 bg-black/80 flex items-center justify-center" 
-          style={{ zIndex: 9999 }}
+          style={{ zIndex: 10000 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowResetPassword(false);
@@ -880,7 +881,7 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
             }
           }}
         >
-          <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6">
+          <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6 shadow-2xl">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-gray-800">Enter Reset Code</h3>
               <p className="text-sm text-gray-600 mt-1">Check your email for the 6-digit code</p>
@@ -989,7 +990,8 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
               </form>
             </Form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
