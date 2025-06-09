@@ -800,188 +800,178 @@ export default function LoginModal({ isOpen, onOpenChange, trigger }: LoginModal
         </DialogContent>
       </Dialog>
 
-      {/* Forgot Password Modal */}
-      <Dialog open={showForgotPassword} onOpenChange={(open) => {
-        setShowForgotPassword(open);
-        if (!open && !isTransitioning) {
-          // Reopen main modal when forgot password modal is closed (unless transitioning)
-          setTimeout(() => onOpenChange(true), 100);
-        }
-      }}>
-        <DialogContent className="max-w-md bg-white rounded-2xl border-0 p-6">
-          <VisuallyHidden>
-            <DialogTitle>Forgot Password</DialogTitle>
-            <DialogDescription>Enter your email to receive a password reset code</DialogDescription>
-          </VisuallyHidden>
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
-            <p className="text-sm text-gray-600 mt-1">Enter your email to receive a reset code</p>
+      {/* Forgot Password Modal - Render directly without nesting */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
+              <p className="text-sm text-gray-600 mt-1">Enter your email to receive a reset code</p>
+            </div>
+            
+            <Form {...forgotPasswordForm}>
+              <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)} className="space-y-4">
+                <FormField
+                  control={forgotPasswordForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email Address
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter your email" 
+                          className="h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 h-12 border-gray-300 hover:bg-gray-50"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setTimeout(() => onOpenChange(true), 100);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="flex-1 h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200" 
+                    disabled={forgotPasswordMutation.isPending}
+                  >
+                    {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Code"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </div>
-          
-          <Form {...forgotPasswordForm}>
-            <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)} className="space-y-4">
-              <FormField
-                control={forgotPasswordForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      Email Address
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter your email" 
-                        className="h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        </div>
+      )}
 
-              <div className="flex gap-3 pt-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => setShowForgotPassword(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                  disabled={forgotPasswordMutation.isPending}
-                >
-                  {forgotPasswordMutation.isPending ? "Sending..." : "Send OTP"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+      {/* Reset Password Modal - Also render directly */}
+      {showResetPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="max-w-md w-full mx-4 bg-white rounded-2xl border-0 p-6">
+            <div className="text-center mb-6">
+              <h3 className="text-xl font-semibold text-gray-800">Enter Reset Code</h3>
+              <p className="text-sm text-gray-600 mt-1">Check your email for the 6-digit code</p>
+            </div>
+            
+            <Form {...resetPasswordForm}>
+              <form onSubmit={resetPasswordForm.handleSubmit(onResetPassword)} className="space-y-4">
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input 
+                          type="hidden"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
-      {/* Reset Password with OTP Modal */}
-      <Dialog open={showResetPassword} onOpenChange={(open) => {
-        setShowResetPassword(open);
-        if (!open && !isTransitioning) {
-          // Reopen main modal when reset password modal is closed (unless transitioning)
-          setTimeout(() => onOpenChange(true), 100);
-        }
-      }}>
-        <DialogContent className="max-w-md bg-white rounded-2xl border-0 p-6">
-          <VisuallyHidden>
-            <DialogTitle>Reset Password</DialogTitle>
-            <DialogDescription>Enter the verification code and your new password</DialogDescription>
-          </VisuallyHidden>
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-gray-800">Enter Reset Code</h3>
-            <p className="text-sm text-gray-600 mt-1">Check your email for the 6-digit code</p>
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="otp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium">Verification Code</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter 6-digit code" 
+                          className="h-12 border-gray-200 focus:border-red-500 focus:ring-red-500/20 text-center text-lg tracking-widest" 
+                          maxLength={6}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
+                        <Lock className="h-4 w-4" />
+                        New Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password"
+                          placeholder="Enter new password" 
+                          className="h-12 border-gray-200 focus:border-red-500 focus:ring-red-500/20" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={resetPasswordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
+                        <Lock className="h-4 w-4" />
+                        Confirm Password
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="password"
+                          placeholder="Confirm new password" 
+                          className="h-12 border-gray-200 focus:border-red-500 focus:ring-red-500/20" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1 h-12 border-gray-300 hover:bg-gray-50"
+                    onClick={() => {
+                      setShowResetPassword(false);
+                      setTimeout(() => onOpenChange(true), 100);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="flex-1 h-12 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200" 
+                    disabled={resetPasswordMutation.isPending}
+                  >
+                    {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </div>
-          
-          <Form {...resetPasswordForm}>
-            <form onSubmit={resetPasswordForm.handleSubmit(onResetPassword)} className="space-y-4">
-              <FormField
-                control={resetPasswordForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input 
-                        type="hidden"
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={resetPasswordForm.control}
-                name="otp"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">Reset Code</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="Enter 6-digit code" 
-                        className="h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 text-center text-lg tracking-widest"
-                        maxLength={6}
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={resetPasswordForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium flex items-center gap-2">
-                      <Lock className="h-4 w-4" />
-                      New Password
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password"
-                        placeholder="Enter new password" 
-                        className="h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={resetPasswordForm.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-700 font-medium">Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password"
-                        placeholder="Confirm new password" 
-                        className="h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex gap-3 pt-2">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => {
-                    setShowResetPassword(false);
-                    setShowForgotPassword(true);
-                  }}
-                >
-                  Back
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
-                  disabled={resetPasswordMutation.isPending}
-                >
-                  {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </>
   );
 }
