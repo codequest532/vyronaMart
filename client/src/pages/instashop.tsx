@@ -534,53 +534,14 @@ export default function VyronaInstaShop() {
                       >
                         <Video className="h-3 w-3" />
                       </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button size="sm" variant="outline" className="border-purple-200 text-purple-600 hover:bg-purple-50">
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>{product.name}</DialogTitle>
-                            <DialogDescription>
-                              Product details from {product.seller}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                              <Package className="h-16 w-16 text-gray-400" />
-                            </div>
-                            <div className="space-y-4">
-                              <div>
-                                <div className="flex items-center space-x-2 mb-2">
-                                  <span className="text-2xl font-bold">₹{product.price}</span>
-                                  <span className="text-lg text-gray-500 line-through">₹{product.originalPrice}</span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <div className="flex items-center">
-                                    <Star className="text-amber-400 h-4 w-4 fill-current" />
-                                    <span className="ml-1 font-medium">{product.rating}</span>
-                                  </div>
-                                  <span className="text-gray-500">({product.reviews} reviews)</span>
-                                </div>
-                              </div>
-                              <p className="text-gray-600">{product.description}</p>
-                              <Button 
-                                className="w-full bg-purple-600 hover:bg-purple-700"
-                                onClick={() => addToCartMutation.mutate({
-                                  productId: product.id,
-                                  quantity: 1,
-                                  price: product.price
-                                })}
-                              >
-                                <ShoppingCart className="mr-2 h-4 w-4" />
-                                Add to Cart - ₹{product.price}
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                        onClick={() => setSelectedProduct(product)}
+                      >
+                        <Eye className="h-3 w-3" />
+                      </Button>
                     </div>
 
                     {/* Seller Info */}
@@ -607,10 +568,260 @@ export default function VyronaInstaShop() {
         )}
       </div>
 
+      {/* Product Details Page */}
+      {selectedProduct && (
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+          {/* Header */}
+          <div className="bg-white border-b sticky top-0 z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedProduct(null)}
+                    className="flex items-center space-x-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>Back to InstShop</span>
+                  </Button>
+                  <div className="text-sm text-gray-500">
+                    <span className="text-purple-600 font-medium">VyronaInstashop</span> › {selectedProduct.category} › {selectedProduct.name}
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm">
+                    <Heart className="h-4 w-4 mr-2" />
+                    Save
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => startVideoCall({
+                      name: selectedProduct.seller,
+                      id: selectedProduct.sellerId || `seller_${selectedProduct.id}`,
+                      products: [selectedProduct],
+                      avatar: selectedProduct.sellerAvatar,
+                      verified: selectedProduct.verified
+                    })}
+                  >
+                    <Video className="h-4 w-4 mr-2" />
+                    Call Seller
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Details Content */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {/* Product Images */}
+              <div className="space-y-4">
+                <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center">
+                  <Package className="h-32 w-32 text-gray-400" />
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                      <Package className="h-8 w-8 text-gray-400" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Product Information */}
+              <div className="space-y-8">
+                {/* Seller Info */}
+                <div className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg">
+                  <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                    <Instagram className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-semibold text-purple-900">{selectedProduct.seller}</h3>
+                      {selectedProduct.verified && <Verified className="h-4 w-4 text-blue-500" />}
+                    </div>
+                    <p className="text-sm text-purple-600">Instagram Seller</p>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="border-purple-200 text-purple-600"
+                    onClick={() => startVideoCall({
+                      name: selectedProduct.seller,
+                      id: selectedProduct.sellerId || `seller_${selectedProduct.id}`,
+                      products: [selectedProduct],
+                      avatar: selectedProduct.sellerAvatar,
+                      verified: selectedProduct.verified
+                    })}
+                  >
+                    <Video className="h-4 w-4 mr-2" />
+                    Video Call
+                  </Button>
+                </div>
+
+                {/* Product Title and Badge */}
+                <div>
+                  <div className="flex items-start justify-between mb-2">
+                    <h1 className="text-3xl font-bold text-gray-900">{selectedProduct.name}</h1>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                      {selectedProduct.badge}
+                    </Badge>
+                  </div>
+                  <Badge variant="outline" className="text-purple-600 border-purple-200">
+                    {selectedProduct.category}
+                  </Badge>
+                </div>
+
+                {/* Price and Rating */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-4xl font-bold text-gray-900">₹{selectedProduct.price}</span>
+                    <span className="text-2xl text-gray-500 line-through">₹{selectedProduct.originalPrice}</span>
+                    <Badge variant="destructive" className="text-sm">
+                      {Math.round(((selectedProduct.originalPrice - selectedProduct.price) / selectedProduct.originalPrice) * 100)}% OFF
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star} 
+                            className={`h-5 w-5 ${star <= selectedProduct.rating ? 'text-amber-400 fill-current' : 'text-gray-300'}`} 
+                          />
+                        ))}
+                      </div>
+                      <span className="text-lg font-medium">{selectedProduct.rating}</span>
+                      <span className="text-gray-500">({selectedProduct.reviews} reviews)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Description</h3>
+                  <p className="text-gray-700 leading-relaxed">{selectedProduct.description}</p>
+                  
+                  {/* Additional Details */}
+                  <div className="mt-6 grid grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Shield className="h-4 w-4 text-green-500" />
+                      <span>Authentic Product</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Truck className="h-4 w-4 text-blue-500" />
+                      <span>Fast Delivery</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <CreditCard className="h-4 w-4 text-purple-500" />
+                      <span>Secure Payment</span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Instagram className="h-4 w-4 text-pink-500" />
+                      <span>Instagram Verified</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="space-y-4">
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-purple-600 hover:bg-purple-700 h-14 text-lg"
+                    onClick={() => {
+                      addToCartMutation.mutate({
+                        productId: selectedProduct.id,
+                        quantity: 1,
+                        price: selectedProduct.price
+                      });
+                      setSelectedProduct(null);
+                    }}
+                    disabled={addToCartMutation.isPending}
+                  >
+                    <ShoppingCart className="mr-3 h-5 w-5" />
+                    {addToCartMutation.isPending ? "Adding to Cart..." : `Add to Cart - ₹${selectedProduct.price}`}
+                  </Button>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                    >
+                      <Heart className="mr-2 h-4 w-4" />
+                      Save for Later
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      className="border-green-200 text-green-600 hover:bg-green-50"
+                      onClick={() => startVideoCall({
+                        name: selectedProduct.seller,
+                        id: selectedProduct.sellerId || `seller_${selectedProduct.id}`,
+                        products: [selectedProduct],
+                        avatar: selectedProduct.sellerAvatar,
+                        verified: selectedProduct.verified
+                      })}
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Ask Seller
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="mt-16 border-t pt-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-8">Customer Reviews</h2>
+              <div className="space-y-6">
+                {[
+                  { name: "Priya K.", rating: 5, comment: "Amazing quality! Exactly as shown in the Instagram post. Fast delivery too.", date: "2 days ago" },
+                  { name: "Rahul M.", rating: 4, comment: "Good product but took a bit longer to deliver. Overall satisfied with the purchase.", date: "1 week ago" },
+                  { name: "Sneha R.", rating: 5, comment: "Loved it! The seller was very responsive and helpful. Will buy again.", date: "2 weeks ago" }
+                ].map((review, index) => (
+                  <div key={index} className="border rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                          <span className="text-purple-600 font-medium">{review.name[0]}</span>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">{review.name}</h4>
+                          <div className="flex items-center space-x-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star 
+                                key={star} 
+                                className={`h-4 w-4 ${star <= review.rating ? 'text-amber-400 fill-current' : 'text-gray-300'}`} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-500">{review.date}</span>
+                    </div>
+                    <p className="text-gray-700">{review.comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Video Call Modal */}
       {isVideoCallOpen && selectedSeller && (
         <Dialog open={isVideoCallOpen} onOpenChange={() => endVideoCall()}>
           <DialogContent className="max-w-6xl h-[80vh] p-0">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Video Call with {selectedSeller.name}</DialogTitle>
+              <DialogDescription>
+                Video call interface for communicating with Instagram seller
+              </DialogDescription>
+            </DialogHeader>
             <div className="flex h-full">
               {/* Video Call Area */}
               <div className="flex-1 bg-gray-900 relative">
