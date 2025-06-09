@@ -202,36 +202,7 @@ export default function VyronaHub() {
           </div>
         </div>
 
-        {/* Category Tiles Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Shop by Category</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-            {categories.slice(1).map((category) => (
-              <Card 
-                key={category.value} 
-                className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 h-32 ${
-                  selectedCategory === category.value 
-                    ? 'border-purple-500 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/50 dark:to-blue-900/50' 
-                    : 'border-gray-200 hover:border-purple-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700'
-                }`}
-                onClick={() => setSelectedCategory(category.value)}
-              >
-                <CardContent className="p-4 h-full flex flex-col items-center justify-center text-center">
-                  <div className={`p-3 rounded-2xl mb-3 ${
-                    selectedCategory === category.value 
-                      ? 'bg-purple-500 text-white' 
-                      : 'bg-gradient-to-br from-purple-500 to-blue-500 text-white'
-                  }`}>
-                    <ShoppingBag className="h-6 w-6" />
-                  </div>
-                  <span className="font-semibold text-sm text-gray-900 dark:text-white leading-tight">
-                    {category.label}
-                  </span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+
 
         {/* Search and Filter Bar */}
         <Card className="mb-6">
