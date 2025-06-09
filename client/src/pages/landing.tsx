@@ -362,13 +362,13 @@ export default function Landing() {
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
-                onClick={() => setLocation("/login")}
+                onClick={() => setShowAuthModal(true)}
                 className="text-white hover:bg-blue-800"
               >
                 Log In
               </Button>
               <Button
-                onClick={() => setLocation("/login")}
+                onClick={() => setShowAuthModal(true)}
                 className="bg-orange-500 hover:bg-orange-600"
               >
                 Sign Up
