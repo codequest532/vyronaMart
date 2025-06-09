@@ -819,16 +819,16 @@ export default function VyronaInstaShop() {
       {/* Chat Modal */}
       {isChatOpen && selectedSeller && (
         <Dialog open={isChatOpen} onOpenChange={() => endChat()}>
-          <DialogContent className="max-w-4xl h-[80vh] p-0">
+          <DialogContent className="max-w-4xl h-[85vh] p-0 flex flex-col">
             <DialogHeader className="sr-only">
               <DialogTitle>Chat with {selectedSeller.name}</DialogTitle>
               <DialogDescription>
                 Chat interface for communicating with Instagram seller
               </DialogDescription>
             </DialogHeader>
-            <div className="flex h-full">
+            <div className="flex flex-1 min-h-0">
               {/* Chat Area */}
-              <div className="flex-1 bg-white relative">
+              <div className="flex-1 bg-white flex flex-col">
                 {/* Chat Header */}
                 <div className="border-b p-4">
                   <div className="flex items-center justify-between">
@@ -922,13 +922,13 @@ export default function VyronaInstaShop() {
                 </div>
 
                 {/* Products Section */}
-                <div className="p-4 border-b">
+                <div className="p-4 border-b flex-shrink-0">
                   <h4 className="font-medium text-gray-900 mb-3">Seller's Products</h4>
-                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                  <div className="space-y-2 max-h-24 overflow-y-auto">
                     {chatProducts.map((product: any) => (
                       <div key={product.id} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
-                        <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                          <Package className="h-4 w-4 text-gray-400" />
+                        <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                          <Package className="h-3 w-3 text-gray-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-gray-900 truncate">{product.name}</p>
@@ -947,7 +947,7 @@ export default function VyronaInstaShop() {
                 </div>
 
                 {/* Chat Messages */}
-                <div className="flex-1 overflow-hidden flex flex-col">
+                <div className="flex-1 flex flex-col min-h-0">
                   <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     {chatMessages.map((message: any) => (
                       <div
@@ -981,7 +981,7 @@ export default function VyronaInstaShop() {
                   </div>
 
                   {/* Message Input */}
-                  <div className="p-4 border-t">
+                  <div className="p-4 border-t flex-shrink-0 bg-white">
                     <div className="flex space-x-2">
                       <Input
                         value={messageInput}
@@ -993,7 +993,6 @@ export default function VyronaInstaShop() {
                       <Button size="sm" onClick={sendMessage} className="bg-purple-600 hover:bg-purple-700">
                         <Send className="h-4 w-4" />
                       </Button>
-                    </div>
                     </div>
                   </div>
                 </div>
