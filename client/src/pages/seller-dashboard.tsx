@@ -115,10 +115,7 @@ export default function SellerDashboard() {
   // Update order status mutation
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      return apiRequest(`/api/orders/${orderId}/status`, {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      });
+      return apiRequest(`/api/orders/${orderId}/status`, "PUT", { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/seller/orders"] });
