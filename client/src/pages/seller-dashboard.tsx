@@ -123,6 +123,34 @@ export default function SellerDashboard() {
   // Product form tab tracking
   const [currentProductTab, setCurrentProductTab] = useState("basic");
   const [completedProductTabs, setCompletedProductTabs] = useState<Set<string>>(new Set());
+  
+  // Tab order for progressive navigation
+  const tabOrder = ["basic", "details", "images", "inventory"];
+  
+  // Get next incomplete tab
+  const getNextIncompleteTab = () => {
+    for (const tab of tabOrder) {
+      if (!completedProductTabs.has(tab)) {
+        return tab;
+      }
+    }
+    return null;
+  };
+  
+  // Navigate to next tab
+  const goToNextTab = () => {
+    const currentIndex = tabOrder.indexOf(currentProductTab);
+    const nextIndex = currentIndex + 1;
+    if (nextIndex < tabOrder.length) {
+      setCurrentProductTab(tabOrder[nextIndex]);
+    }
+  };
+  
+  // Check if current tab is completed
+  const isCurrentTabCompleted = completedProductTabs.has(currentProductTab);
+  
+  // Check if we're on the last tab
+  const isLastTab = currentProductTab === "inventory";
 
   // Form for adding products
   const productForm = useForm<z.infer<typeof productSchema>>({
@@ -213,7 +241,7 @@ export default function SellerDashboard() {
     checkAndMarkTabComplete('details');
     checkAndMarkTabComplete('images');
     checkAndMarkTabComplete('inventory');
-  }, [formValues]);
+  }, [formValues.name, formValues.description, formValues.category, formValues.price, formValues.brand, formValues.weight, formValues.dimensions, formValues.sku, uploadedFiles.mainImage]);
 
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
@@ -3782,7 +3810,7 @@ export default function SellerDashboard() {
                 </TabsContent>
               </Tabs>
               
-              <div className="flex justify-end gap-3 pt-6 border-t">
+              <div className="flex justify-between pt-6 border-t">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -3790,18 +3818,37 @@ export default function SellerDashboard() {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  disabled={!allTabsCompleted || addProductMutation.isPending}
-                  className={`${allTabsCompleted 
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700' 
-                    : 'bg-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {addProductMutation.isPending ? "Adding Product..." : 
-                   !allTabsCompleted ? `Complete All Tabs (${completedProductTabs.size}/4)` : 
-                   "Add Product to Catalog"}
-                </Button>
+                
+                <div className="flex gap-3">
+                  {!isLastTab && (
+                    <Button 
+                      type="button"
+                      onClick={goToNextTab}
+                      disabled={!isCurrentTabCompleted}
+                      className={`${isCurrentTabCompleted 
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      {isCurrentTabCompleted ? "Next Step" : "Complete Current Step"}
+                    </Button>
+                  )}
+                  
+                  {isLastTab && (
+                    <Button 
+                      type="submit" 
+                      disabled={!allTabsCompleted || addProductMutation.isPending}
+                      className={`${allTabsCompleted 
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white' 
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      {addProductMutation.isPending ? "Adding Product..." : 
+                       !allTabsCompleted ? "Complete All Steps" : 
+                       "Add Product to Catalog"}
+                    </Button>
+                  )}
+                </div>
               </div>
             </form>
           </Form>
