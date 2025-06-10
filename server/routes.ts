@@ -27,6 +27,7 @@ import {
   insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
   walletTransactions, users, orders, groupContributions, notifications, products, cartItems, stores
 } from "@shared/schema";
+import { eq, desc, and, sql } from "drizzle-orm";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail, sendOrderConfirmationEmail } from "./email";
@@ -279,24 +280,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check demo seller credentials first
       if (email === "seller@vyronahub.com" && password === "demo123") {
         // Create or get existing seller account
-        const existingSellers = await db.execute(sql`
-          SELECT * FROM users WHERE email = 'seller@vyronahub.com' LIMIT 1
-        `);
+        const existingSellers = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, 'seller@vyronahub.com'))
+          .limit(1);
         
         let sellerId;
-        if (existingSellers.rows.length === 0) {
+        if (existingSellers.length === 0) {
           // Create demo seller account
-          const newSeller = await db.execute(sql`
-            INSERT INTO users (username, email, mobile, role) 
-            VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
-            RETURNING id
-          `);
-          sellerId = newSeller.rows[0].id;
+          const newSeller = await db
+            .insert(users)
+            .values({
+              username: 'VyronaHub Demo Seller',
+              email: 'seller@vyronahub.com',
+              mobile: '+91-9876543210',
+              role: 'seller',
+              password: 'demo123'
+            })
+            .returning({ id: users.id });
+          
+          sellerId = newSeller[0].id;
           
           // Create demo seller data
           await createDemoSellerData(sellerId);
         } else {
-          sellerId = existingSellers.rows[0].id;
+          sellerId = existingSellers[0].id;
         }
         
         req.session.user = {
@@ -5843,8 +5852,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let sellerId;
       if (sellers.rows.length === 0) {
         const newSeller = await db.execute(sql`
-          INSERT INTO users (username, email, mobile, role) 
-          VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
+          INSERT INTO users (username, email, mobile, role, password) 
+          VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller', 'demo123')
           RETURNING id
         `);
         sellerId = newSeller.rows[0].id;
