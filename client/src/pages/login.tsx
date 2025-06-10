@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShoppingBag, User, Store, Shield, Mail, Lock, Phone, Building, MapPin } from "lucide-react";
+import { ShoppingBag, User, Store, Shield, Mail, Lock, Phone, Building, MapPin, BookOpen } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -96,11 +96,16 @@ export default function Login() {
         description: "Welcome back!",
       });
       
-      // Redirect based on role
+      // Redirect based on role and seller type
       if (data.user.role === "admin") {
         setLocation("/admin-dashboard");
       } else if (data.user.role === "seller") {
-        setLocation("/seller-dashboard");
+        // Check if it's a VyronaRead seller based on email
+        if (data.user.email === "seller@vyronaread.com") {
+          setLocation("/vyronaread-seller-dashboard");
+        } else {
+          setLocation("/seller-dashboard");
+        }
       } else {
         setLocation("/");
       }
@@ -287,6 +292,16 @@ export default function Login() {
                       </div>
                       <div className="text-blue-700 space-y-1">
                         <p><strong>Email:</strong> seller@vyronahub.com</p>
+                        <p><strong>Password:</strong> demo123</p>
+                      </div>
+                    </div>
+                    <div className="p-3 bg-white rounded-lg border border-orange-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BookOpen className="h-4 w-4 text-orange-600" />
+                        <span className="font-medium text-orange-900">VyronaRead Book Seller</span>
+                      </div>
+                      <div className="text-orange-700 space-y-1">
+                        <p><strong>Email:</strong> seller@vyronaread.com</p>
                         <p><strong>Password:</strong> demo123</p>
                       </div>
                     </div>

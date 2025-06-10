@@ -323,6 +323,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Seller login successful"
         });
       }
+
+      // Check VyronaRead seller credentials
+      if (email === "seller@vyronaread.com" && password === "demo123") {
+        // Create or get existing VyronaRead seller account
+        const existingReadSellers = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, 'seller@vyronaread.com'))
+          .limit(1);
+        
+        let readSellerId;
+        if (existingReadSellers.length === 0) {
+          // Create demo VyronaRead seller account
+          const newReadSeller = await db
+            .insert(users)
+            .values({
+              username: 'VyronaRead Demo Seller',
+              email: 'seller@vyronaread.com',
+              mobile: '+91-9876543211',
+              role: 'seller',
+              password: 'demo123'
+            })
+            .returning({ id: users.id });
+          
+          readSellerId = newReadSeller[0].id;
+          
+          // Create demo VyronaRead seller data
+          await createDemoReadSellerData(readSellerId);
+        } else {
+          readSellerId = existingReadSellers[0].id;
+        }
+        
+        req.session.user = {
+          id: readSellerId,
+          email: 'seller@vyronaread.com',
+          username: 'VyronaRead Demo Seller',
+          role: 'seller'
+        };
+        
+        return res.json({
+          success: true,
+          user: req.session.user,
+          message: "VyronaRead seller login successful"
+        });
+      }
       
       // Check admin credentials
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
@@ -5831,6 +5876,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+
+  // Helper function to create demo VyronaRead seller data
+  async function createDemoReadSellerData(sellerId: any) {
+    try {
+      // Create demo physical books
+      const demoBooks = [
+        {
+          title: 'The Psychology of Money',
+          author: 'Morgan Housel',
+          isbn: '9780857197689',
+          category: 'Finance',
+          condition: 'excellent',
+          price: 450,
+          rentalPrice: 50,
+          sellerId: sellerId,
+          description: 'Timeless lessons on wealth, greed, and happiness',
+          imageUrl: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?w=400'
+        },
+        {
+          title: 'Atomic Habits',
+          author: 'James Clear',
+          isbn: '9780735211292',
+          category: 'Self-Help',
+          condition: 'good',
+          price: 380,
+          rentalPrice: 45,
+          sellerId: sellerId,
+          description: 'An easy & proven way to build good habits & break bad ones',
+          imageUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400'
+        },
+        {
+          title: 'The Intelligent Investor',
+          author: 'Benjamin Graham',
+          isbn: '9780060555665',
+          category: 'Finance',
+          condition: 'excellent',
+          price: 520,
+          rentalPrice: 60,
+          sellerId: sellerId,
+          description: 'The definitive book on value investing',
+          imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'
+        }
+      ];
+
+      for (const book of demoBooks) {
+        await db.execute(sql`
+          INSERT INTO physical_books (title, author, isbn, category, condition, price, rental_price, seller_id, description, image_url, availability_status)
+          VALUES (${book.title}, ${book.author}, ${book.isbn}, ${book.category}, ${book.condition}, ${book.price}, ${book.rentalPrice}, ${book.sellerId}, ${book.description}, ${book.imageUrl}, 'available')
+          ON CONFLICT (isbn, seller_id) DO NOTHING
+        `);
+      }
+
+      // Create demo e-books
+      const demoEBooks = [
+        {
+          title: 'Digital Marketing Mastery',
+          author: 'Sarah Johnson',
+          isbn: '9781234567890',
+          category: 'Business',
+          price: 299,
+          sellerId: sellerId,
+          description: 'Complete guide to modern digital marketing strategies',
+          fileUrl: '/demo/ebook1.pdf',
+          previewUrl: '/demo/preview1.pdf'
+        },
+        {
+          title: 'Python Programming Fundamentals',
+          author: 'Alex Chen',
+          isbn: '9781234567891',
+          category: 'Technology',
+          price: 399,
+          sellerId: sellerId,
+          description: 'Learn Python programming from basics to advanced',
+          fileUrl: '/demo/ebook2.pdf',
+          previewUrl: '/demo/preview2.pdf'
+        }
+      ];
+
+      for (const ebook of demoEBooks) {
+        await db.execute(sql`
+          INSERT INTO e_books (title, author, isbn, category, price, seller_id, description, file_url, preview_url)
+          VALUES (${ebook.title}, ${ebook.author}, ${ebook.isbn}, ${ebook.category}, ${ebook.price}, ${ebook.sellerId}, ${ebook.description}, ${ebook.fileUrl}, ${ebook.previewUrl})
+          ON CONFLICT (isbn, seller_id) DO NOTHING
+        `);
+      }
+
+      // Create demo rental transactions
+      const demoRentals = [
+        {
+          bookId: 1,
+          userId: 1,
+          rentalDuration: 14,
+          totalAmount: 50,
+          status: 'active',
+          sellerId: sellerId
+        },
+        {
+          bookId: 2,
+          userId: 1,
+          rentalDuration: 7,
+          totalAmount: 45,
+          status: 'returned',
+          sellerId: sellerId
+        }
+      ];
+
+      for (const rental of demoRentals) {
+        await db.execute(sql`
+          INSERT INTO book_loans (physical_book_id, user_id, rental_duration_days, total_amount, status, seller_id, loan_date, due_date)
+          VALUES (${rental.bookId}, ${rental.userId}, ${rental.rentalDuration}, ${rental.totalAmount}, ${rental.status}, ${rental.sellerId}, NOW(), NOW() + INTERVAL '${rental.rentalDuration} days')
+          ON CONFLICT DO NOTHING
+        `);
+      }
+
+    } catch (error) {
+      console.error('Error creating demo VyronaRead seller data:', error);
+    }
+  }
 
   // Helper function to create demo seller data
   async function createDemoSellerData(sellerId: any) {
