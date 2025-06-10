@@ -323,6 +323,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Seller login successful"
         });
       }
+
+      // Check VyronaRead seller credentials
+      if (email === "seller@vyronaread.com" && password === "book123") {
+        // Create or get existing VyronaRead seller account
+        const existingSellers = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, 'seller@vyronaread.com'))
+          .limit(1);
+        
+        let sellerId;
+        if (existingSellers.length === 0) {
+          // Create VyronaRead seller account
+          const newSeller = await db
+            .insert(users)
+            .values({
+              username: 'VyronaRead Library Manager',
+              email: 'seller@vyronaread.com',
+              mobile: '+91-9876543211',
+              role: 'seller',
+              password: 'book123'
+            })
+            .returning({ id: users.id });
+          
+          sellerId = newSeller[0].id;
+          
+          // Create demo library data
+          await createDemoLibraryData(sellerId);
+        } else {
+          sellerId = existingSellers[0].id;
+        }
+        
+        req.session.user = {
+          id: sellerId,
+          email: 'seller@vyronaread.com',
+          username: 'VyronaRead Library Manager',
+          role: 'seller'
+        };
+        
+        return res.json({
+          success: true,
+          user: req.session.user,
+          message: "VyronaRead seller login successful"
+        });
+      }
       
       // Check admin credentials
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
@@ -5831,6 +5876,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+
+  // Helper function to create demo library data for VyronaRead seller
+  async function createDemoLibraryData(sellerId: any) {
+    try {
+      // Create demo physical books
+      const demoBooks = [
+        {
+          title: 'The Psychology of Money',
+          author: 'Morgan Housel',
+          isbn: '978-0857197689',
+          category: 'business',
+          publisher: 'Harriman House',
+          publicationYear: 2020,
+          copies: 5,
+          availableCopies: 4,
+          language: 'English',
+          description: 'Timeless lessons on wealth, greed, and happiness from one of the most important voices in modern finance.',
+          sellerId: sellerId
+        },
+        {
+          title: 'Atomic Habits',
+          author: 'James Clear',
+          isbn: '978-0735211292',
+          category: 'self-help',
+          publisher: 'Avery',
+          publicationYear: 2018,
+          copies: 3,
+          availableCopies: 2,
+          language: 'English',
+          description: 'An easy & proven way to build good habits & break bad ones.',
+          sellerId: sellerId
+        },
+        {
+          title: 'Sapiens',
+          author: 'Yuval Noah Harari',
+          isbn: '978-0062316097',
+          category: 'history',
+          publisher: 'Harper',
+          publicationYear: 2015,
+          copies: 4,
+          availableCopies: 3,
+          language: 'English',
+          description: 'A brief history of humankind.',
+          sellerId: sellerId
+        },
+        {
+          title: 'The Alchemist',
+          author: 'Paulo Coelho',
+          isbn: '978-0062315007',
+          category: 'fiction',
+          publisher: 'HarperOne',
+          publicationYear: 1988,
+          copies: 6,
+          availableCopies: 5,
+          language: 'English',
+          description: 'A magical story about following your dreams.',
+          sellerId: sellerId
+        }
+      ];
+
+      for (const book of demoBooks) {
+        await db.execute(sql`
+          INSERT INTO physical_books (title, author, isbn, category, publisher, publication_year, copies, available_copies, language, description, seller_id)
+          VALUES (${book.title}, ${book.author}, ${book.isbn}, ${book.category}, ${book.publisher}, ${book.publicationYear}, ${book.copies}, ${book.availableCopies}, ${book.language}, ${book.description}, ${book.sellerId})
+          ON CONFLICT (isbn) DO NOTHING
+        `);
+      }
+
+      // Create demo e-books
+      const demoEBooks = [
+        {
+          title: 'Digital Marketing Mastery',
+          author: 'Sarah Johnson',
+          category: 'business',
+          price: 299,
+          description: 'Complete guide to modern digital marketing strategies.',
+          fileUrl: 'https://example.com/digital-marketing.pdf',
+          sellerId: sellerId,
+          downloads: 45
+        },
+        {
+          title: 'JavaScript: The Complete Guide',
+          author: 'Alex Smith',
+          category: 'technology',
+          price: 499,
+          description: 'Comprehensive JavaScript programming tutorial.',
+          fileUrl: 'https://example.com/javascript-guide.pdf',
+          sellerId: sellerId,
+          downloads: 78
+        },
+        {
+          title: 'Mindfulness for Beginners',
+          author: 'Dr. Lisa Chen',
+          category: 'self-help',
+          price: 199,
+          description: 'Introduction to mindfulness and meditation practices.',
+          fileUrl: 'https://example.com/mindfulness.pdf',
+          sellerId: sellerId,
+          downloads: 32
+        }
+      ];
+
+      for (const ebook of demoEBooks) {
+        await db.execute(sql`
+          INSERT INTO e_books (title, author, category, price, description, file_url, seller_id, downloads)
+          VALUES (${ebook.title}, ${ebook.author}, ${ebook.category}, ${ebook.price}, ${ebook.description}, ${ebook.fileUrl}, ${ebook.sellerId}, ${ebook.downloads})
+          ON CONFLICT (title, author) DO NOTHING
+        `);
+      }
+
+      console.log(`Demo library data created for seller ${sellerId}`);
+    } catch (error) {
+      console.error('Error creating demo library data:', error);
+    }
+  }
 
   // Helper function to create demo seller data
   async function createDemoSellerData(sellerId: any) {
