@@ -249,9 +249,30 @@ export default function SellerDashboard() {
 
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
+      // Upload main image if available
+      let imageUrl = null;
+      if (uploadedFiles.mainImage) {
+        const formData = new FormData();
+        formData.append('image', uploadedFiles.mainImage);
+        
+        const uploadResponse = await fetch('/api/upload/product-image', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          imageUrl = uploadResult.imageUrl;
+        }
+      }
+
       // Determine platform based on enableGroupBuy selection
       const module = productData.enableGroupBuy ? "vyronasocial" : "vyronahub";
-      return await apiRequest("POST", "/api/products", { ...productData, module });
+      return await apiRequest("POST", "/api/products", { 
+        ...productData, 
+        module, 
+        imageUrl 
+      });
     },
     onSuccess: () => {
       toast({

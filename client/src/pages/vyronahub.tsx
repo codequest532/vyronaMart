@@ -394,12 +394,20 @@ export default function VyronaHub() {
                       setLocation(`/product/${product.id}`);
                     }
                   }}>
-                    <div className="h-48 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                      <div className="text-center">
-                        <ShoppingBag className="h-12 w-12 text-purple-400 mx-auto mb-1" />
-                        <span className="text-xs text-purple-600 font-medium">Product Image</span>
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="h-48 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                        <div className="text-center">
+                          <ShoppingBag className="h-12 w-12 text-purple-400 mx-auto mb-1" />
+                          <span className="text-xs text-purple-600 font-medium">Product Image</span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div className="absolute top-2 left-2">
                       <Badge className="bg-purple-500 text-white border-0 text-xs">NEW</Badge>
                     </div>

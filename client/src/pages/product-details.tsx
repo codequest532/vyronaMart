@@ -55,12 +55,8 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
     );
   }
 
-  const mockImages = [
-    product.imageUrl || "/api/placeholder/400/400",
-    "/api/placeholder/400/400",
-    "/api/placeholder/400/400",
-    "/api/placeholder/400/400"
-  ];
+  const productImages = product.imageUrl ? [product.imageUrl] : ["/api/placeholder/400/400"];
+  const mockImages = productImages;
 
   const handleAddToCart = () => {
     // This would trigger auth modal in real implementation
