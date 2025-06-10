@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   ShoppingCart, 
   ArrowLeft, 
@@ -23,16 +25,86 @@ import {
   Users,
   Gift
 } from "lucide-react";
-import { useCartStore } from "@/lib/cart-store";
 
 export default function Cart() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { items, updateQuantity, removeItem, clearCart, getTotalItems, getTotalPrice } = useCartStore();
+  const queryClient = useQueryClient();
   
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
+
+  // Fetch cart items from server
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["/api/cart"],
+    retry: false,
+  });
+
+  // Mutations for cart operations
+  const updateQuantityMutation = useMutation({
+    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
+      return apiRequest(`/api/cart/${productId}`, "PUT", { quantity });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Cart Updated",
+        description: "Item quantity has been updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update item quantity.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const removeItemMutation = useMutation({
+    mutationFn: async (productId: number) => {
+      return apiRequest(`/api/cart/${productId}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Item Removed",
+        description: "Item has been removed from your cart.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to remove item from cart.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const clearCartMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("/api/cart", "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Cart Cleared",
+        description: "All items have been removed from your cart.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to clear cart.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Helper functions
+  const getTotalItems = () => items.length;
+  const getTotalPrice = () => items.reduce((total: number, item: any) => total + (item.price * item.quantity), 0);
 
   const promoCodes = {
     "SAVE10": 10,
@@ -238,7 +310,8 @@ export default function Cart() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantityMutation.mutate({ productId: item.id, quantity: Math.max(1, item.quantity - 1) })}
+                          disabled={updateQuantityMutation.isPending || item.quantity <= 1}
                           className="h-8 w-8 p-0 hover:bg-purple-100"
                         >
                           <Minus className="h-4 w-4" />
@@ -247,7 +320,8 @@ export default function Cart() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantityMutation.mutate({ productId: item.id, quantity: item.quantity + 1 })}
+                          disabled={updateQuantityMutation.isPending}
                           className="h-8 w-8 p-0 hover:bg-purple-100"
                         >
                           <Plus className="h-4 w-4" />
@@ -257,11 +331,12 @@ export default function Cart() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItemMutation.mutate(item.id)}
+                        disabled={removeItemMutation.isPending}
                         className="border-red-200 text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
-                        Remove
+                        {removeItemMutation.isPending ? "Removing..." : "Remove"}
                       </Button>
                     </div>
                   </div>
