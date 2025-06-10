@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -19,14 +20,14 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Instagram, Store, Users, Building, ShoppingBag } from "lucide-react";
+import { ArrowLeft, ArrowRight, Instagram, Store, Users, Building, ShoppingBag, BookOpen, Upload, FileText, CreditCard } from "lucide-react";
 
 interface SellerOnboardingModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type SellerType = "vyronainstastore" | "vyronahub" | "vyronaspace" | "vyronamallconnect" | null;
+type SellerType = "vyronainstastore" | "vyronahub" | "vyronaspace" | "vyronamallconnect" | "vyronaread" | null;
 
 interface FormData {
   sellerType: SellerType;
@@ -66,6 +67,21 @@ interface FormData {
   brandWebsite?: string;
   deliveryPincodeSupport?: string;
   specialLaunchOffer?: string;
+  
+  // VyronaRead fields
+  storeLibraryName?: string;
+  businessAddress?: string;
+  listingTypes?: string[];
+  businessType?: string;
+  estimatedBooks?: string;
+  pickupDropService?: string;
+  libraryIntegration?: string;
+  bankName?: string;
+  upiId?: string;
+  addressProof?: File;
+  idProof?: File;
+  businessProof?: File;
+  logoFile?: File;
   
   // Legal & Payout
   gstNumber?: string;
@@ -114,6 +130,14 @@ const sellerTypes = [
     icon: Building,
     color: "bg-gradient-to-br from-orange-500 to-red-600",
     features: ["Premium Branding", "Mall Integration", "Brand Management", "Enterprise Features"]
+  },
+  {
+    id: "vyronaread" as const,
+    title: "VyronaRead",
+    description: "For book sellers, libraries & educational institutions",
+    icon: BookOpen,
+    color: "bg-gradient-to-br from-amber-500 to-yellow-600",
+    features: ["Book Sales", "Rentals", "Library Management", "Digital Books", "Educational Content"]
   }
 ];
 
@@ -128,7 +152,13 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
     businessCategory: "",
     businessDescription: "",
     expectedMonthlyRevenue: "",
-    hasExistingOnlinePresence: ""
+    hasExistingOnlinePresence: "",
+    // VyronaRead specific fields
+    listingTypes: [],
+    businessType: "",
+    estimatedBooks: "",
+    pickupDropService: "",
+    libraryIntegration: ""
   });
 
   const totalSteps = 5;
