@@ -36,6 +36,7 @@ export const products = pgTable("products", {
   category: text("category").notNull(),
   module: text("module").notNull(), // 'social', 'space', 'read', 'mall'
   imageUrl: text("image_url"),
+  imageUrls: text("image_urls").array(), // Array of multiple image URLs
   storeId: integer("store_id"),
   metadata: jsonb("metadata"), // for flexible data like book authors, rental periods, etc.
   enableIndividualBuy: boolean("enable_individual_buy").default(true),

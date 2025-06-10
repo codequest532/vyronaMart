@@ -250,8 +250,11 @@ export default function SellerDashboard() {
 
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
-      // Upload main image only if seller has uploaded one
+      // Upload main image and additional images
       let imageUrl = null;
+      const imageUrls: string[] = [];
+      
+      // Upload main image
       if (uploadedFiles.mainImage) {
         const formData = new FormData();
         formData.append('image', uploadedFiles.mainImage);
@@ -264,11 +267,29 @@ export default function SellerDashboard() {
         if (uploadResponse.ok) {
           const uploadResult = await uploadResponse.json();
           imageUrl = uploadResult.imageUrl;
+          imageUrls.push(uploadResult.imageUrl);
         } else {
-          throw new Error('Failed to upload image');
+          throw new Error('Failed to upload main image');
         }
       }
-      // If no image uploaded, imageUrl remains null
+      
+      // Upload additional images
+      for (const file of uploadedFiles.additionalMedia) {
+        if (file.type.startsWith('image/')) {
+          const formData = new FormData();
+          formData.append('image', file);
+          
+          const uploadResponse = await fetch('/api/upload/product-image', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json();
+            imageUrls.push(uploadResult.imageUrl);
+          }
+        }
+      }
 
       // Determine platform based on enableGroupBuy selection
       const module = productData.enableGroupBuy ? "vyronasocial" : "vyronahub";
@@ -276,7 +297,8 @@ export default function SellerDashboard() {
       const productPayload = {
         ...productData, 
         module, 
-        imageUrl // This will be null if no image was uploaded or the uploaded URL if successful
+        imageUrl, // Primary image for backward compatibility
+        imageUrls // Array of all uploaded images
       };
       
       return await apiRequest("POST", "/api/products", productPayload);
