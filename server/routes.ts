@@ -89,6 +89,9 @@ const ADMIN_CREDENTIALS = {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Serve uploaded files
+  app.use('/uploads', express.static('uploads'));
+  
   // Seller registration endpoint
   app.post("/api/seller-registration", async (req, res) => {
     try {
@@ -3149,6 +3152,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Image upload error:", error);
       res.status(500).json({ error: "Failed to upload image" });
+    }
+  });
+
+  // Product image upload endpoint
+  app.post("/api/upload/product-image", upload.single('image'), async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      // Create image URL from uploaded file
+      const imageUrl = `/uploads/${req.file.filename}`;
+      
+      res.json({ success: true, imageUrl });
+    } catch (error) {
+      console.error("Product image upload error:", error);
+      res.status(500).json({ error: "Failed to upload product image" });
     }
   });
 
