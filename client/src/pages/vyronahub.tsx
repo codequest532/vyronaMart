@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useCartStore, useGroupBuyCartStore } from "@/lib/cart-store";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -47,8 +46,6 @@ export default function VyronaHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
-  const { addItem, getTotalItems } = useCartStore();
-  const groupBuyCart = useGroupBuyCartStore();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -57,10 +54,37 @@ export default function VyronaHub() {
   const [quantity, setQuantity] = useState(1);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   
-  const cartItemCount = getTotalItems();
+  // Cart query for item count
+  const { data: cartItems = [] } = useQuery({
+    queryKey: ["/api/cart"],
+    retry: false,
+  });
+  
+  const cartItemCount = cartItems.length;
 
   const { data: user } = useQuery({
     queryKey: ["/api/current-user"],
+  });
+
+  // Add to cart mutation
+  const addToCartMutation = useMutation({
+    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
+      return apiRequest("POST", "/api/cart/add", { productId, quantity });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      toast({
+        title: "Added to Cart",
+        description: "Item has been added to your cart successfully!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Failed to Add",
+        description: "Could not add item to cart. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const { data: products = [], isLoading } = useQuery({
@@ -76,36 +100,13 @@ export default function VyronaHub() {
   });
 
   const handleAddToCart = (product: any, isGroupBuy = false) => {
-    try {
-      const cartItem = {
-        productId: product.id,
-        name: product.name,
-        price: product.price,
-        discountedPrice: isGroupBuy ? product.price * 0.75 : undefined,
-        quantity: quantity,
-        imageUrl: product.imageUrl || "/api/placeholder/300/200",
-        isGroupBuy,
-        groupBuyDiscount: isGroupBuy ? 25 : undefined,
-        category: product.category
-      };
-
-      addItem(cartItem);
-      
-      toast({
-        title: "Added to Cart",
-        description: `${product.name} has been added to your cart successfully!`,
-      });
-      
-      setQuantity(1);
-      setIsProductModalOpen(false);
-    } catch (error) {
-      console.error("Add to cart error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add product to cart. Please try again.",
-        variant: "destructive",
-      });
-    }
+    addToCartMutation.mutate({
+      productId: product.id,
+      quantity: quantity,
+    });
+    
+    setQuantity(1);
+    setIsProductModalOpen(false);
   };
 
 
