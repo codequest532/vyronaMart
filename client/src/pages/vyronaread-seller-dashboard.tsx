@@ -1937,6 +1937,346 @@ export default function VyronaReadSellerDashboard() {
           </div>
         </div>
       )}
+
+      {/* Add Book Dialog */}
+      {showAddBookDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Add Physical Book</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowAddBookDialog(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              addBookMutation.mutate(newBook);
+            }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="title">Book Title *</Label>
+                  <Input
+                    id="title"
+                    placeholder="Enter book title"
+                    value={newBook.title}
+                    onChange={(e) => setNewBook({...newBook, title: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="author">Author *</Label>
+                  <Input
+                    id="author"
+                    placeholder="Enter author name"
+                    value={newBook.author}
+                    onChange={(e) => setNewBook({...newBook, author: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="isbn">ISBN</Label>
+                  <Input
+                    id="isbn"
+                    placeholder="Enter ISBN"
+                    value={newBook.isbn}
+                    onChange={(e) => setNewBook({...newBook, isbn: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="category">Category *</Label>
+                  <Select 
+                    value={newBook.category}
+                    onValueChange={(value) => setNewBook({...newBook, category: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Fiction">Fiction</SelectItem>
+                      <SelectItem value="Non-Fiction">Non-Fiction</SelectItem>
+                      <SelectItem value="Science">Science</SelectItem>
+                      <SelectItem value="Technology">Technology</SelectItem>
+                      <SelectItem value="Business">Business</SelectItem>
+                      <SelectItem value="Self-Help">Self-Help</SelectItem>
+                      <SelectItem value="Education">Education</SelectItem>
+                      <SelectItem value="Children">Children</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="condition">Book Condition *</Label>
+                  <Select 
+                    value={newBook.condition}
+                    onValueChange={(value) => setNewBook({...newBook, condition: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select condition" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="excellent">Excellent</SelectItem>
+                      <SelectItem value="good">Good</SelectItem>
+                      <SelectItem value="fair">Fair</SelectItem>
+                      <SelectItem value="poor">Poor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="language">Language</Label>
+                  <Input
+                    id="language"
+                    placeholder="Enter language"
+                    value={newBook.language}
+                    onChange={(e) => setNewBook({...newBook, language: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="salePrice">Sale Price (₹)</Label>
+                  <Input
+                    id="salePrice"
+                    type="number"
+                    placeholder="0"
+                    value={newBook.salePrice}
+                    onChange={(e) => setNewBook({...newBook, salePrice: Number(e.target.value)})}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="rentalPrice">Rental Price (₹/15 days)</Label>
+                  <Input
+                    id="rentalPrice"
+                    type="number"
+                    placeholder="0"
+                    value={newBook.rentalPrice}
+                    onChange={(e) => setNewBook({...newBook, rentalPrice: Number(e.target.value)})}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="copies">Available Copies</Label>
+                  <Input
+                    id="copies"
+                    type="number"
+                    placeholder="1"
+                    value={newBook.copies}
+                    onChange={(e) => setNewBook({...newBook, copies: Number(e.target.value)})}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Brief description of the book"
+                  className="resize-none"
+                  value={newBook.description}
+                  onChange={(e) => setNewBook({...newBook, description: e.target.value})}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowAddBookDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={addBookMutation.isPending}
+                >
+                  {addBookMutation.isPending ? "Adding..." : "Add Book"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add E-book Dialog */}
+      {showAddEbookDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Upload E-book</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowAddEbookDialog(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              addEbookMutation.mutate(newEbook);
+            }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ebook-title">E-book Title *</Label>
+                  <Input
+                    id="ebook-title"
+                    placeholder="Enter e-book title"
+                    value={newEbook.title}
+                    onChange={(e) => setNewEbook({...newEbook, title: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="ebook-author">Author *</Label>
+                  <Input
+                    id="ebook-author"
+                    placeholder="Enter author name"
+                    value={newEbook.author}
+                    onChange={(e) => setNewEbook({...newEbook, author: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ebook-isbn">ISBN</Label>
+                  <Input
+                    id="ebook-isbn"
+                    placeholder="Enter ISBN"
+                    value={newEbook.isbn}
+                    onChange={(e) => setNewEbook({...newEbook, isbn: e.target.value})}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="ebook-category">Category *</Label>
+                  <Select 
+                    value={newEbook.category}
+                    onValueChange={(value) => setNewEbook({...newEbook, category: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Fiction">Fiction</SelectItem>
+                      <SelectItem value="Non-Fiction">Non-Fiction</SelectItem>
+                      <SelectItem value="Science">Science</SelectItem>
+                      <SelectItem value="Technology">Technology</SelectItem>
+                      <SelectItem value="Business">Business</SelectItem>
+                      <SelectItem value="Self-Help">Self-Help</SelectItem>
+                      <SelectItem value="Education">Education</SelectItem>
+                      <SelectItem value="Children">Children</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ebook-format">Format *</Label>
+                  <Select 
+                    value={newEbook.format}
+                    onValueChange={(value) => setNewEbook({...newEbook, format: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PDF">PDF</SelectItem>
+                      <SelectItem value="EPUB">EPUB</SelectItem>
+                      <SelectItem value="MOBI">MOBI</SelectItem>
+                      <SelectItem value="TXT">TXT</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="ebook-language">Language</Label>
+                  <Input
+                    id="ebook-language"
+                    placeholder="Enter language"
+                    value={newEbook.language}
+                    onChange={(e) => setNewEbook({...newEbook, language: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ebook-salePrice">Sale Price (₹)</Label>
+                  <Input
+                    id="ebook-salePrice"
+                    type="number"
+                    placeholder="0"
+                    value={newEbook.salePrice}
+                    onChange={(e) => setNewEbook({...newEbook, salePrice: Number(e.target.value)})}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="ebook-rentalPrice">Rental Price (₹/15 days)</Label>
+                  <Input
+                    id="ebook-rentalPrice"
+                    type="number"
+                    placeholder="0"
+                    value={newEbook.rentalPrice}
+                    onChange={(e) => setNewEbook({...newEbook, rentalPrice: Number(e.target.value)})}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="ebook-description">Description</Label>
+                <Textarea
+                  id="ebook-description"
+                  placeholder="Brief description of the e-book"
+                  className="resize-none"
+                  value={newEbook.description}
+                  onChange={(e) => setNewEbook({...newEbook, description: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="file-url">File URL/Path</Label>
+                <Input
+                  id="file-url"
+                  placeholder="Enter file URL or upload path"
+                  value={newEbook.fileUrl}
+                  onChange={(e) => setNewEbook({...newEbook, fileUrl: e.target.value})}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload your e-book file and provide the URL or file path
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowAddEbookDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={addEbookMutation.isPending}
+                >
+                  {addEbookMutation.isPending ? "Uploading..." : "Upload E-book"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
