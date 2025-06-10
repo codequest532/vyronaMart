@@ -1263,15 +1263,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart/:id", async (req, res) => {
+  app.delete("/api/cart/:productId", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const success = await storage.removeCartItem(id);
-      if (!success) {
+      const productId = parseInt(req.params.productId);
+      const userId = 1; // Default user for demo
+      
+      console.log(`DELETE /api/cart/${productId} - Looking for cart item with userId: ${userId}, productId: ${productId}`);
+      
+      // First check if the item exists
+      const existingItems = await db
+        .select()
+        .from(cartItems)
+        .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+      
+      console.log(`Found ${existingItems.length} cart items:`, existingItems);
+      
+      const result = await db
+        .delete(cartItems)
+        .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+      
+      console.log(`Delete result:`, result);
+      
+      if ((result.rowCount || 0) === 0) {
         return res.status(404).json({ message: "Cart item not found" });
       }
       res.json({ success: true });
     } catch (error) {
+      console.error('DELETE cart error:', error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -5785,21 +5803,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart/:productId", async (req: Request, res: Response) => {
-    try {
-      const { productId } = req.params;
-      const userId = 1; // Default user for demo
 
-      await db
-        .delete(cartItems)
-        .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, Number(productId))));
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error removing from cart:', error);
-      res.status(500).json({ error: "Failed to remove from cart" });
-    }
-  });
 
   app.put("/api/cart/:productId", async (req: Request, res: Response) => {
     try {
