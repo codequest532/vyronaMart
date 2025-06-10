@@ -334,23 +334,43 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
                   <h3 className="text-xl font-semibold mb-4">Product Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-medium mb-2">Key Features:</h4>
-                      <ul className="space-y-2 text-gray-700">
-                        <li>• Premium quality materials</li>
-                        <li>• Sustainable and eco-friendly</li>
-                        <li>• 2-year warranty included</li>
-                        <li>• Compatible with all devices</li>
-                      </ul>
+                      <h4 className="font-medium mb-2">Description:</h4>
+                      <div className="text-gray-700">
+                        {product.description || "No description provided by seller."}
+                      </div>
+                      {product.specifications && (
+                        <div className="mt-4">
+                          <h4 className="font-medium mb-2">Additional Details:</h4>
+                          <div className="text-gray-700 whitespace-pre-line">
+                            {product.specifications}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Specifications:</h4>
                       <ul className="space-y-2 text-gray-700">
+                        {product.brand && <li>• Brand: {product.brand}</li>}
                         {product.weight && <li>• Weight: {product.weight}</li>}
                         {product.dimensions && <li>• Dimensions: {product.dimensions}</li>}
-                        {product.brand && <li>• Brand: {product.brand}</li>}
-                        <li>• Material: Premium grade</li>
-                        <li>• Color: As shown in images</li>
+                        {product.sku && <li>• SKU: {product.sku}</li>}
+                        {product.category && <li>• Category: {product.category}</li>}
+                        {(!product.brand && !product.weight && !product.dimensions && !product.sku) && (
+                          <li className="text-gray-500 italic">No specifications provided by seller.</li>
+                        )}
                       </ul>
+                      {product.tags && (
+                        <div className="mt-4">
+                          <h4 className="font-medium mb-2">Tags:</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {product.tags.split(',').map((tag, index) => (
+                              <span key={index} className="bg-purple-100 text-purple-700 px-2 py-1 rounded-md text-sm">
+                                {tag.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>

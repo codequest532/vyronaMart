@@ -43,6 +43,15 @@ export const products = pgTable("products", {
   enableGroupBuy: boolean("enable_group_buy").default(false),
   groupBuyMinQuantity: integer("group_buy_min_quantity").default(4),
   groupBuyDiscount: integer("group_buy_discount").default(0), // percentage discount for group buy
+  // Seller-provided product details
+  sku: text("sku"),
+  originalPrice: integer("original_price"),
+  brand: text("brand"),
+  weight: text("weight"),
+  dimensions: text("dimensions"),
+  specifications: text("specifications"),
+  tags: text("tags"),
+  isActive: boolean("is_active").default(true),
 });
 
 export const stores = pgTable("stores", {
