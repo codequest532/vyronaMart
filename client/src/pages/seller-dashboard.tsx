@@ -119,6 +119,10 @@ export default function SellerDashboard() {
   });
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  
+  // Product form tab tracking
+  const [currentProductTab, setCurrentProductTab] = useState("basic");
+  const [completedProductTabs, setCompletedProductTabs] = useState<Set<string>>(new Set());
 
   // Form for adding products
   const productForm = useForm<z.infer<typeof productSchema>>({
@@ -145,9 +149,66 @@ export default function SellerDashboard() {
   // Mutation for creating library integration requests
   const { toast } = useToast();
 
+  // Tab validation functions
+  const validateBasicInfoTab = () => {
+    const values = productForm.getValues();
+    return !!(values.name && values.description && values.category && values.sku);
+  };
+
+  const validateProductDetailsTab = () => {
+    const values = productForm.getValues();
+    return !!(values.price && values.price > 0);
+  };
+
+  const validateImagesTab = () => {
+    // For now, we'll make images optional but track completion
+    return true; // Images are optional but tab must be visited
+  };
+
+  const validateInventoryTab = () => {
+    const values = productForm.getValues();
+    // Must have visited the tab and made platform selection (enableGroupBuy choice)
+    return values.enableGroupBuy !== undefined;
+  };
+
+  // Function to mark tab as completed when all required fields are filled
+  const checkAndMarkTabComplete = (tabName: string) => {
+    let isValid = false;
+    
+    switch (tabName) {
+      case 'basic':
+        isValid = validateBasicInfoTab();
+        break;
+      case 'details':
+        isValid = validateProductDetailsTab();
+        break;
+      case 'images':
+        isValid = validateImagesTab();
+        break;
+      case 'inventory':
+        isValid = validateInventoryTab();
+        break;
+    }
+
+    if (isValid) {
+      setCompletedProductTabs(prev => new Set([...prev, tabName]));
+    } else {
+      setCompletedProductTabs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(tabName);
+        return newSet;
+      });
+    }
+  };
+
+  // Check if all tabs are completed
+  const allTabsCompleted = completedProductTabs.size === 4;
+
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
-      return await apiRequest("POST", "/api/products", { ...productData, module: "vyronahub" });
+      // Determine platform based on enableGroupBuy selection
+      const module = productData.enableGroupBuy ? "vyronasocial" : "vyronahub";
+      return await apiRequest("POST", "/api/products", { ...productData, module });
     },
     onSuccess: () => {
       toast({
@@ -228,7 +289,32 @@ export default function SellerDashboard() {
   };
 
   const handleAddProduct = (data: z.infer<typeof productSchema>) => {
+    // Check if all tabs are completed before submission
+    if (!allTabsCompleted) {
+      const missingTabs = [];
+      if (!completedProductTabs.has('basic')) missingTabs.push('Basic Info');
+      if (!completedProductTabs.has('details')) missingTabs.push('Product Details');
+      if (!completedProductTabs.has('images')) missingTabs.push('Images & Media');
+      if (!completedProductTabs.has('inventory')) missingTabs.push('Inventory & Specs');
+      
+      toast({
+        title: "Complete All Tabs Required",
+        description: `Please complete the following tabs: ${missingTabs.join(', ')}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     addProductMutation.mutate(data);
+  };
+
+  // Reset form and tabs when dialog closes
+  const resetProductForm = () => {
+    productForm.reset();
+    setCurrentProductTab("basic");
+    setCompletedProductTabs(new Set());
+    setShowAddProductDialog(false);
+    setUploadedFiles({ mainImage: null, additionalMedia: [] });
   };
 
   const handleSubmitLibrary = () => {
@@ -3218,12 +3304,24 @@ export default function SellerDashboard() {
           </DialogHeader>
           <Form {...productForm}>
             <form onSubmit={productForm.handleSubmit(handleAddProduct)} className="space-y-6">
-              <Tabs defaultValue="basic" className="w-full">
+              <Tabs value={currentProductTab} onValueChange={(value) => {
+                // Check and mark current tab as complete before switching
+                checkAndMarkTabComplete(currentProductTab);
+                setCurrentProductTab(value);
+              }} className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                  <TabsTrigger value="details">Product Details</TabsTrigger>
-                  <TabsTrigger value="images">Images & Media</TabsTrigger>
-                  <TabsTrigger value="inventory">Inventory & Specs</TabsTrigger>
+                  <TabsTrigger value="basic" className={completedProductTabs.has('basic') ? 'bg-green-100 text-green-800 border-green-300' : ''}>
+                    Basic Info {completedProductTabs.has('basic') && '✓'}
+                  </TabsTrigger>
+                  <TabsTrigger value="details" className={completedProductTabs.has('details') ? 'bg-green-100 text-green-800 border-green-300' : ''}>
+                    Product Details {completedProductTabs.has('details') && '✓'}
+                  </TabsTrigger>
+                  <TabsTrigger value="images" className={completedProductTabs.has('images') ? 'bg-green-100 text-green-800 border-green-300' : ''}>
+                    Images & Media {completedProductTabs.has('images') && '✓'}
+                  </TabsTrigger>
+                  <TabsTrigger value="inventory" className={completedProductTabs.has('inventory') ? 'bg-green-100 text-green-800 border-green-300' : ''}>
+                    Inventory & Specs {completedProductTabs.has('inventory') && '✓'}
+                  </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="basic" className="space-y-4 mt-6">
