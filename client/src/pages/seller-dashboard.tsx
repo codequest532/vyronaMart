@@ -249,7 +249,7 @@ export default function SellerDashboard() {
 
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
-      // Upload main image if available
+      // Upload main image only if seller has uploaded one
       let imageUrl = null;
       if (uploadedFiles.mainImage) {
         const formData = new FormData();
@@ -265,13 +265,14 @@ export default function SellerDashboard() {
           imageUrl = uploadResult.imageUrl;
         }
       }
+      // If no image uploaded, imageUrl remains null
 
       // Determine platform based on enableGroupBuy selection
       const module = productData.enableGroupBuy ? "vyronasocial" : "vyronahub";
       return await apiRequest("POST", "/api/products", { 
         ...productData, 
         module, 
-        imageUrl 
+        imageUrl // This will be null if no image was uploaded
       });
     },
     onSuccess: () => {
