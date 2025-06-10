@@ -144,6 +144,11 @@ export default function VyronaReadSellerDashboard() {
     enabled: !!user && user.role === "seller"
   });
 
+  const { data: sellerOrders = [], isLoading: sellerOrdersLoading } = useQuery({
+    queryKey: ["/api/seller/orders"],
+    enabled: !!user && user.role === "seller"
+  });
+
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ["/api/seller/analytics"],
     enabled: !!user && user.role === "seller"
