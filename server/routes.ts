@@ -276,7 +276,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // Check admin credentials first
+      // Check demo seller credentials first
+      if (email === "seller@vyronahub.com" && password === "demo123") {
+        // Create or get existing seller account
+        const existingSellers = await db.execute(sql`
+          SELECT * FROM users WHERE email = 'seller@vyronahub.com' LIMIT 1
+        `);
+        
+        let sellerId;
+        if (existingSellers.rows.length === 0) {
+          // Create demo seller account
+          const newSeller = await db.execute(sql`
+            INSERT INTO users (username, email, mobile, role) 
+            VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
+            RETURNING id
+          `);
+          sellerId = newSeller.rows[0].id;
+          
+          // Create demo seller data
+          await createDemoSellerData(sellerId);
+        } else {
+          sellerId = existingSellers.rows[0].id;
+        }
+        
+        req.session.user = {
+          id: sellerId,
+          email: 'seller@vyronahub.com',
+          username: 'VyronaHub Demo Seller',
+          role: 'seller'
+        };
+        
+        return res.json({
+          success: true,
+          user: req.session.user,
+          message: "Seller login successful"
+        });
+      }
+      
+      // Check admin credentials
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
         req.session.user = {
           id: ADMIN_CREDENTIALS.id,
@@ -5731,77 +5768,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Demo seller login endpoint
-  app.post("/api/demo-seller-login", async (req: Request, res: Response) => {
-    try {
-      const { email, password } = req.body;
-      
-      // Demo seller credentials
-      if (email === "seller@vyronahub.com" && password === "demo123") {
-        // Create or get existing seller account
-        const existingSellers = await db.execute(sql`
-          SELECT * FROM users WHERE email = 'seller@vyronahub.com' LIMIT 1
-        `);
-        
-        let sellerId;
-        if (existingSellers.rows.length === 0) {
-          // Create demo seller account
-          const newSeller = await db.execute(sql`
-            INSERT INTO users (username, email, mobile, role) 
-            VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
-            RETURNING id
-          `);
-          sellerId = newSeller.rows[0].id;
-        } else {
-          sellerId = existingSellers.rows[0].id;
-        }
-        
-        // Set session
-        req.session.user = {
-          id: sellerId,
-          email: 'seller@vyronahub.com',
-          username: 'VyronaHub Demo Seller',
-          role: 'seller'
-        };
-        
-        res.json({ 
-          success: true, 
-          user: { 
-            id: sellerId, 
-            email: 'seller@vyronahub.com', 
-            username: 'VyronaHub Demo Seller', 
-            role: 'seller' 
-          }
-        });
-      } else {
-        res.status(401).json({ message: "Invalid credentials" });
-      }
-    } catch (error) {
-      console.error('Demo seller login error:', error);
-      res.status(500).json({ message: "Login failed" });
-    }
-  });
 
-  // Create demo seller products for testing
-  app.post("/api/create-demo-seller-data", async (req: Request, res: Response) => {
-    try {
-      // Get or create demo seller
-      const sellers = await db.execute(sql`
-        SELECT * FROM users WHERE email = 'seller@vyronahub.com' LIMIT 1
-      `);
-      
-      let sellerId;
-      if (sellers.rows.length === 0) {
-        const newSeller = await db.execute(sql`
-          INSERT INTO users (username, email, mobile, role) 
-          VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
-          RETURNING id
-        `);
-        sellerId = newSeller.rows[0].id;
-      } else {
-        sellerId = sellers.rows[0].id;
-      }
 
+  // Helper function to create demo seller data
+  async function createDemoSellerData(sellerId: any) {
+    try {
       // Create demo products
       const demoProducts = [
         {
@@ -5881,6 +5852,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           VALUES (${order.userId}, ${order.totalAmount}, ${order.status}, ${order.module}, ${order.metadata}, NOW())
         `);
       }
+    } catch (error) {
+      console.error('Error creating demo seller data:', error);
+    }
+  }
+
+  // Create demo seller products for testing
+  app.post("/api/create-demo-seller-data", async (req: Request, res: Response) => {
+    try {
+      // Get or create demo seller
+      const sellers = await db.execute(sql`
+        SELECT * FROM users WHERE email = 'seller@vyronahub.com' LIMIT 1
+      `);
+      
+      let sellerId;
+      if (sellers.rows.length === 0) {
+        const newSeller = await db.execute(sql`
+          INSERT INTO users (username, email, mobile, role) 
+          VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
+          RETURNING id
+        `);
+        sellerId = newSeller.rows[0].id;
+      } else {
+        sellerId = sellers.rows[0].id;
+      }
+
+      await createDemoSellerData(sellerId);
 
       res.json({ success: true, message: "Demo seller data created", sellerId });
     } catch (error) {
