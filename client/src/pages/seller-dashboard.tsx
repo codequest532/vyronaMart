@@ -38,6 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -318,11 +319,9 @@ export default function SellerDashboard() {
     },
   });
 
-  // Delete product handler
-  const handleDeleteProduct = (product: any) => {
-    if (window.confirm(`Are you sure you want to delete "${product.name}"? This action cannot be undone.`)) {
-      deleteProductMutation.mutate(product.id);
-    }
+  // Delete product handler - now uses AlertDialog instead of window.confirm
+  const handleDeleteProduct = (productId: number) => {
+    deleteProductMutation.mutate(productId);
   };
 
   const handleFileUpload = (files: FileList | null, type: 'main' | 'additional') => {
@@ -1084,14 +1083,34 @@ export default function SellerDashboard() {
                                 <BarChart3 className="h-4 w-4 mr-1" />
                                 Analytics
                               </Button>
-                              <Button 
-                                variant="destructive" 
-                                size="sm"
-                                onClick={() => handleDeleteProduct(product)}
-                                disabled={deleteProductMutation.isPending}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    disabled={deleteProductMutation.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Product</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete "{product.name}"? This action cannot be undone and will permanently remove the product from your catalog.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteProduct(product.id)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Delete Product
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
                           </CardContent>
                         </Card>
