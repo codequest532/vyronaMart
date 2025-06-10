@@ -81,10 +81,13 @@ export default function SellerDashboard() {
   // Add product mutation
   const addProductMutation = useMutation({
     mutationFn: async (productData: any) => {
-      return apiRequest("/api/products", "POST", {
-        ...productData,
-        price: Math.round(parseFloat(productData.price) * 100),
-        stock_quantity: parseInt(productData.stock_quantity),
+      return apiRequest("/api/products", {
+        method: "POST",
+        body: JSON.stringify({
+          ...productData,
+          price: Math.round(parseFloat(productData.price) * 100),
+          stock_quantity: parseInt(productData.stock_quantity),
+        }),
       });
     },
     onSuccess: () => {
@@ -174,7 +177,7 @@ export default function SellerDashboard() {
         {/* Sidebar */}
         <aside className="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
           <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Seller Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">VyronaHub Seller</h1>
             <p className="text-sm text-gray-600 dark:text-gray-300">Seller Dashboard</p>
           </div>
           
