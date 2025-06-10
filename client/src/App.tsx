@@ -106,8 +106,18 @@ function App() {
   useEffect(() => {
     // Global error handler for unhandled promise rejections
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      // Check if this is a query-related error we can safely ignore
+      const reason = event.reason;
+      if (reason && typeof reason === 'object' && 'message' in reason) {
+        const message = String(reason.message);
+        // Ignore common authentication and API errors that are handled by the app
+        if (message.includes('401') || message.includes('Unauthorized') || 
+            message.includes('Failed to fetch') || message.includes('NetworkError')) {
+          event.preventDefault();
+          return;
+        }
+      }
       console.warn('Unhandled promise rejection:', event.reason);
-      // Prevent the default behavior (showing in console as error)
       event.preventDefault();
     };
 
