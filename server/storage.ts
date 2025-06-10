@@ -676,6 +676,10 @@ export class DatabaseStorage implements IStorage {
     return product;
   }
 
+  async deleteProduct(id: number): Promise<void> {
+    await db.delete(products).where(eq(products.id, id));
+  }
+
   async updateProductListing(id: number, listing: {
     enableIndividualBuy?: boolean;
     enableGroupBuy?: boolean;
