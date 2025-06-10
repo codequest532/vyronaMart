@@ -72,6 +72,8 @@ export default function VyronaReadSellerDashboard() {
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showLibraryIntegrationDialog, setShowLibraryIntegrationDialog] = useState(false);
   const [activeBookOrderTab, setActiveBookOrderTab] = useState('all');
+  const [activeBookSection, setActiveBookSection] = useState("overview");
+  const [activeManagementTab, setActiveManagementTab] = useState("physical");
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -1080,108 +1082,1012 @@ export default function VyronaReadSellerDashboard() {
             </div>
           </TabsContent>
 
-          {/* Books Tab */}
+          {/* Books Tab - Complete Book Management Section */}
           <TabsContent value="books" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Physical Books</h2>
-                <p className="text-gray-600">Manage your book inventory</p>
-              </div>
-              <Button 
-                className="bg-amber-600 hover:bg-amber-700"
-                onClick={() => setShowAddBookDialog(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Book
-              </Button>
+            {/* VyronaRead Navigation Tabs */}
+            <div className="border-b border-gray-200 dark:border-gray-800 mb-6">
+              <div className="text-xs text-gray-500 mb-2">Current section: {activeBookSection}</div>
+              <nav className="flex space-x-8">
+                <button
+                  onClick={() => setActiveBookSection("overview")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeBookSection === "overview"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveBookSection("management")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeBookSection === "management"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Book Management
+                </button>
+                <button
+                  onClick={() => setActiveBookSection("physical")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeBookSection === "physical"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Physical Library
+                </button>
+                <button
+                  onClick={() => setActiveBookSection("ebooks")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeBookSection === "ebooks"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  E-Book Store
+                </button>
+                <button
+                  onClick={() => setActiveBookSection("orders")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeBookSection === "orders"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Order Management
+                </button>
+                <button
+                  onClick={() => setActiveBookSection("analytics")}
+                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeBookSection === "analytics"
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Analytics
+                </button>
+              </nav>
             </div>
 
-            <Card className="bg-white/80 backdrop-blur-sm">
-              <CardHeader>
-                <div className="flex justify-between items-center">
+            {/* Overview Section */}
+            {activeBookSection === "overview" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Physical Books</p>
+                          <p className="text-3xl font-bold text-blue-600">
+                            {sellerBooks?.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length || 0}
+                          </p>
+                          <p className="text-xs text-blue-500">Library inventory</p>
+                        </div>
+                        <Library className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">E-Books Listed</p>
+                          <p className="text-3xl font-bold text-purple-600">
+                            {sellerEBooks?.length || 0}
+                          </p>
+                          <p className="text-xs text-purple-500">Digital catalog</p>
+                        </div>
+                        <BookOpen className="h-8 w-8 text-purple-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Available for Loan</p>
+                          <p className="text-3xl font-bold text-green-600">
+                            {libraryBooks?.filter((book: any) => book.status === 'available').length || 0}
+                          </p>
+                          <p className="text-xs text-green-500">Ready to lend</p>
+                        </div>
+                        <BookOpen className="h-8 w-8 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Active Orders</p>
+                          <p className="text-3xl font-bold text-red-600">
+                            {sellerOrders?.filter((order: any) => order.module === 'vyronaread' && order.status === 'pending').length || 0}
+                          </p>
+                          <p className="text-xs text-red-500">Processing orders</p>
+                        </div>
+                        <ShoppingCart className="h-8 w-8 text-red-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Service Overview */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Physical Library Services</CardTitle>
+                      <CardDescription>Traditional library management</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Books Available</span>
+                          <span className="font-bold text-orange-600">
+                            {sellerBooks?.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Book Orders</span>
+                          <span className="font-bold text-green-600">
+                            {sellerOrders?.filter((order: any) => order.module === 'vyronaread').length || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Active Loans</span>
+                          <span className="font-bold text-blue-600">
+                            {libraryBooks?.filter((book: any) => book.status === 'loaned').length || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Digital Services</CardTitle>
+                      <CardDescription>E-book store and digital reader</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">E-Books Available</span>
+                          <span className="font-bold text-purple-600">
+                            {sellerEBooks?.length || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Digital Sales</span>
+                          <span className="font-bold text-green-600">
+                            {sellerOrders?.filter((order: any) => order.metadata && JSON.stringify(order.metadata).includes('ebook')).length || 0}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Reader Downloads</span>
+                          <span className="font-bold text-blue-600">
+                            {sellerEBooks?.reduce((total: number, book: any) => total + (book.downloads || 0), 0) || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+
+            {/* Book Management Section */}
+            {activeBookSection === "management" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Book Inventory</CardTitle>
-                    <CardDescription>{books.length} books in your collection</CardDescription>
+                    <h3 className="text-2xl font-bold">Book Management</h3>
+                    <p className="text-gray-600">Comprehensive book catalog management</p>
                   </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filter
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setShowAddBookDialog(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Physical Book
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Search className="h-4 w-4 mr-2" />
-                      Search
+                    <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowAddEbookDialog(true)}>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload E-Book
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {books.length === 0 ? (
-                  <div className="text-center py-12">
-                    <BookOpen className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No books yet</h3>
-                    <p className="text-gray-500 mb-4">Start building your collection by adding your first book</p>
-                    <Button className="bg-amber-600 hover:bg-amber-700">
+
+                {/* Management Tabs */}
+                <Tabs value={activeManagementTab} onValueChange={setActiveManagementTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="physical">Physical Books</TabsTrigger>
+                    <TabsTrigger value="ebooks">E-Books</TabsTrigger>
+                    <TabsTrigger value="library">Library Books</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="physical" className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Physical Books Catalog</CardTitle>
+                        <CardDescription>Manage your physical book inventory</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {sellerBooks && sellerBooks.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length > 0 ? (
+                            sellerBooks
+                              .filter((book: any) => book.category === 'books' && book.module === 'vyronaread')
+                              .map((book: any, index: number) => (
+                                <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+                                  <div className="w-12 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded flex items-center justify-center flex-shrink-0">
+                                    <BookOpen className="h-6 w-6 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold">{book.title || book.name}</h4>
+                                    <p className="text-sm text-gray-600">by {book.author || 'Unknown Author'}</p>
+                                    <div className="flex items-center gap-4 mt-2">
+                                      <Badge variant="secondary">{book.category || 'General'}</Badge>
+                                      <span className="text-sm font-medium text-green-600">₹{book.price || 0} Sale</span>
+                                      <span className="text-sm font-medium text-blue-600">₹{book.rentalPrice || 0}/month Rent</span>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-sm text-gray-600">Status: {book.status || 'Available'}</p>
+                                    <p className="text-sm text-gray-600">Stock: {book.stock || book.quantity || 1}</p>
+                                    <div className="flex gap-2 mt-2">
+                                      <Button variant="outline" size="sm">
+                                        <Edit className="h-4 w-4 mr-1" />
+                                        Edit
+                                      </Button>
+                                      <Button variant="outline" size="sm">
+                                        <Eye className="h-4 w-4 mr-1" />
+                                        View
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                          ) : (
+                            <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">No Physical Books</h3>
+                              <p className="text-gray-600 mb-4">
+                                Add your first physical book to start building your catalog
+                              </p>
+                              <Button onClick={() => setShowAddBookDialog(true)}>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add First Book
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="ebooks" className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>E-Book Catalog</CardTitle>
+                        <CardDescription>Your digital book inventory</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {sellerEBooks && sellerEBooks.length > 0 ? (
+                            sellerEBooks.map((ebook: any, index: number) => (
+                              <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+                                <div className="w-12 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center flex-shrink-0">
+                                  <BookOpen className="h-6 w-6 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold">{ebook.title || 'Untitled E-Book'}</h4>
+                                  <p className="text-sm text-gray-600">by {ebook.author || 'Unknown Author'}</p>
+                                  <div className="flex items-center gap-4 mt-2">
+                                    <Badge variant="secondary">{ebook.category || 'General'}</Badge>
+                                    <span className="text-sm font-medium text-green-600">₹{ebook.salePrice || 0} Sale</span>
+                                    {ebook.rentalPrice && (
+                                      <span className="text-sm font-medium text-blue-600">₹{ebook.rentalPrice}/month Rent</span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm text-gray-600">Status: {ebook.status || 'Active'}</p>
+                                  <p className="text-sm text-gray-600">Format: {ebook.format || 'PDF'}</p>
+                                  <div className="flex gap-2 mt-2">
+                                    <Button variant="outline" size="sm">
+                                      <Edit className="h-4 w-4 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button variant="outline" size="sm">
+                                      <Download className="h-4 w-4 mr-1" />
+                                      Download
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">No E-Books Listed</h3>
+                              <p className="text-gray-600 mb-4">
+                                Start building your digital catalog by uploading your first e-book
+                              </p>
+                              <Button onClick={() => setShowAddEbookDialog(true)} className="bg-purple-600 hover:bg-purple-700">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Upload First E-Book
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="library" className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Library Books Collection</CardTitle>
+                        <CardDescription>Books available for library loans</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {libraryBooks && libraryBooks.length > 0 ? (
+                            libraryBooks.map((book: any, index: number) => (
+                              <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+                                <div className="w-12 h-16 bg-gradient-to-br from-green-500 to-blue-500 rounded flex items-center justify-center flex-shrink-0">
+                                  <Library className="h-6 w-6 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold">{book.title}</h4>
+                                  <p className="text-sm text-gray-600">by {book.author}</p>
+                                  <div className="flex items-center gap-4 mt-2">
+                                    <Badge variant="secondary">{book.category}</Badge>
+                                    <Badge variant={book.status === 'available' ? 'default' : 'destructive'}>
+                                      {book.status === 'available' ? 'Available' : 'On Loan'}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm text-gray-600">Copies: {book.copies}</p>
+                                  <p className="text-sm text-gray-600">Available: {book.available}</p>
+                                  <div className="flex gap-2 mt-2">
+                                    <Button variant="outline" size="sm">
+                                      <Edit className="h-4 w-4 mr-1" />
+                                      Edit
+                                    </Button>
+                                    <Button variant="outline" size="sm">
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      View
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                              <Library className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">No Library Books</h3>
+                              <p className="text-gray-600 mb-4">
+                                Add books to your library collection for lending services
+                              </p>
+                              <Button onClick={() => setShowAddLibraryDialog(true)}>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Library Book
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            )}
+
+            {/* Physical Library Section */}
+            {activeBookSection === "physical" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Books</p>
+                          <p className="text-3xl font-bold text-blue-600">
+                            {libraryBooks?.length || 0}
+                          </p>
+                          <p className="text-xs text-blue-500">Physical inventory</p>
+                        </div>
+                        <Library className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Available</p>
+                          <p className="text-3xl font-bold text-green-600">
+                            {libraryBooks?.filter((book: any) => book.status === 'available').length || 0}
+                          </p>
+                          <p className="text-xs text-green-500">Ready to lend</p>
+                        </div>
+                        <CheckCircle className="h-8 w-8 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">On Loan</p>
+                          <p className="text-3xl font-bold text-orange-600">
+                            {libraryBooks?.filter((book: any) => book.status === 'loaned').length || 0}
+                          </p>
+                          <p className="text-xs text-orange-500">Currently borrowed</p>
+                        </div>
+                        <Clock className="h-8 w-8 text-orange-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Copies</p>
+                          <p className="text-3xl font-bold text-purple-600">
+                            {libraryBooks?.reduce((total: number, book: any) => total + (book.copies || 0), 0) || 0}
+                          </p>
+                          <p className="text-xs text-purple-500">All copies</p>
+                        </div>
+                        <Archive className="h-8 w-8 text-purple-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Library Book Collection</CardTitle>
+                    <CardDescription>Comprehensive library management</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {libraryBooks && libraryBooks.length > 0 ? (
+                        libraryBooks.map((book: any, index: number) => (
+                          <div key={index} className="flex items-center gap-4 p-4 border rounded-lg hover:shadow-md transition-shadow">
+                            <div className="w-12 h-16 bg-gradient-to-br from-green-500 to-blue-500 rounded flex items-center justify-center flex-shrink-0">
+                              <Library className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{book.title}</h4>
+                              <p className="text-sm text-gray-600">by {book.author}</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <Badge variant="secondary">{book.category}</Badge>
+                                <Badge variant={book.status === 'available' ? 'default' : 'destructive'}>
+                                  {book.status === 'available' ? 'Available' : 'On Loan'}
+                                </Badge>
+                                <span className="text-sm text-gray-500">ISBN: {book.isbn}</span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium">Copies: {book.copies}</p>
+                              <p className="text-sm text-green-600">Available: {book.available}</p>
+                              <p className="text-sm text-orange-600">On Loan: {(book.copies || 0) - (book.available || 0)}</p>
+                              <div className="flex gap-2 mt-2">
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  Details
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                          <Library className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">No Library Books</h3>
+                          <p className="text-gray-600 mb-4">
+                            Start building your library collection for lending services
+                          </p>
+                          <Button onClick={() => setShowAddLibraryDialog(true)}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Library Book
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* E-Book Store Section */}
+            {activeBookSection === "ebooks" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold">E-Book Store Management</h3>
+                    <p className="text-gray-600">Upload, sell, and rent digital books with VyronaRead</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline">
+                      <Search className="h-4 w-4 mr-2" />
+                      Search E-books
+                    </Button>
+                    <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowAddEbookDialog(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Your First Book
+                      Upload E-book
                     </Button>
                   </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Book</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Category</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Price</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Stock</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                          <th className="text-left py-3 px-4 font-medium text-gray-900">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {books.map((book: any) => (
-                          <tr key={book.id} className="border-b border-gray-100 hover:bg-gray-50">
-                            <td className="py-3 px-4">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                  <BookOpen className="h-5 w-5 text-amber-600" />
-                                </div>
-                                <div>
-                                  <p className="font-medium text-gray-900">{book.title}</p>
-                                  <p className="text-sm text-gray-500">{book.author}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Listed E-books</p>
+                          <p className="text-3xl font-bold text-purple-600">
+                            {sellerEBooks?.length || 0}
+                          </p>
+                          <p className="text-xs text-purple-500">Digital catalog</p>
+                        </div>
+                        <BookOpen className="h-8 w-8 text-purple-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Digital Orders</p>
+                          <p className="text-3xl font-bold text-green-600">
+                            {sellerOrders?.filter((order: any) => order.metadata && JSON.stringify(order.metadata).includes('ebook')).length || 0}
+                          </p>
+                          <p className="text-xs text-green-500">Total sales</p>
+                        </div>
+                        <ShoppingCart className="h-8 w-8 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Downloads</p>
+                          <p className="text-3xl font-bold text-blue-600">
+                            {sellerEBooks?.reduce((total: number, book: any) => total + (book.downloads || 0), 0) || 0}
+                          </p>
+                          <p className="text-xs text-blue-500">Total downloads</p>
+                        </div>
+                        <Download className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Revenue</p>
+                          <p className="text-3xl font-bold text-orange-600">
+                            ₹{sellerOrders?.filter((order: any) => order.metadata && JSON.stringify(order.metadata).includes('ebook'))
+                              .reduce((total: number, order: any) => total + (order.totalAmount / 100), 0).toLocaleString() || 0}
+                          </p>
+                          <p className="text-xs text-orange-500">Digital sales</p>
+                        </div>
+                        <DollarSign className="h-8 w-8 text-orange-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <Card className="lg:col-span-2">
+                    <CardHeader>
+                      <CardTitle>E-Book Catalog</CardTitle>
+                      <CardDescription>Your digital book inventory</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {sellerEBooks && sellerEBooks.length > 0 ? (
+                          sellerEBooks.map((ebook: any, index: number) => (
+                            <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
+                              <div className="w-12 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center flex-shrink-0">
+                                <BookOpen className="h-6 w-6 text-white" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold">{ebook.title || 'Untitled E-Book'}</h4>
+                                <p className="text-sm text-gray-600">by {ebook.author || 'Unknown Author'}</p>
+                                <div className="flex items-center gap-4 mt-2">
+                                  <Badge variant="secondary">{ebook.category || 'General'}</Badge>
+                                  <span className="text-sm font-medium text-green-600">₹{ebook.salePrice || 0} Sale</span>
+                                  {ebook.rentalPrice && (
+                                    <span className="text-sm font-medium text-blue-600">₹{ebook.rentalPrice}/month Rent</span>
+                                  )}
                                 </div>
                               </div>
-                            </td>
-                            <td className="py-3 px-4 text-gray-600">{book.category}</td>
-                            <td className="py-3 px-4 text-gray-900 font-medium">₹{book.price}</td>
-                            <td className="py-3 px-4 text-gray-600">{book.stock}</td>
-                            <td className="py-3 px-4">
-                              <Badge variant={book.status === 'active' ? 'default' : 'secondary'}>
-                                {book.status}
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-4">
-                              <div className="flex space-x-2">
-                                <Button variant="ghost" size="sm">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
+                              <div className="text-right">
+                                <p className="text-sm text-gray-600">Status: {ebook.status || 'Active'}</p>
+                                <p className="text-sm text-gray-600">Format: {ebook.format || 'PDF'}</p>
+                                <Button variant="outline" size="sm" className="mt-2">
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
                                 </Button>
                               </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8">
+                            <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <h3 className="text-lg font-medium text-gray-600 mb-2">No E-Books Listed</h3>
+                            <p className="text-gray-500 mb-4">Start building your digital catalog by uploading your first e-book</p>
+                            <Button onClick={() => setShowAddEbookDialog(true)} className="bg-purple-600 hover:bg-purple-700">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Upload First E-Book
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Quick Actions</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={() => setShowAddEbookDialog(true)}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload New E-Book
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <Search className="h-4 w-4 mr-2" />
+                        Browse Catalog
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        View Analytics
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <Settings className="h-4 w-4 mr-2" />
+                        Store Settings
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+
+            {/* Order Management Section */}
+            {activeBookSection === "orders" && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="h-5 w-5" />
+                      VyronaRead Order Management
+                    </CardTitle>
+                    <CardDescription>Manage book rentals, library loans, and e-book purchases</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {(() => {
+                      const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+                      const rentalOrders = vyronareadOrders.filter((order: any) => 
+                        order.metadata?.transaction_type === 'rental' || 
+                        (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('rental'))
+                      );
+                      const loanOrders = vyronareadOrders.filter((order: any) => 
+                        order.metadata?.transaction_type === 'loan' ||
+                        (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('loan'))
+                      );
+                      const purchaseOrders = vyronareadOrders.filter((order: any) => 
+                        order.metadata?.transaction_type === 'purchase' ||
+                        (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('purchase')) ||
+                        (!order.metadata?.transaction_type && order.metadata && !order.metadata.includes('rental') && !order.metadata.includes('loan'))
+                      );
+
+                      return (
+                        <div className="space-y-6">
+                          <div className="border-b">
+                            <nav className="flex space-x-8">
+                              <button
+                                onClick={() => setActiveBookOrderTab('all')}
+                                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                  activeBookOrderTab === 'all'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                              >
+                                All Orders ({vyronareadOrders.length})
+                              </button>
+                              <button
+                                onClick={() => setActiveBookOrderTab('rentals')}
+                                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                  activeBookOrderTab === 'rentals'
+                                    ? 'border-blue-500 text-blue-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                              >
+                                Rentals ({rentalOrders.length})
+                              </button>
+                              <button
+                                onClick={() => setActiveBookOrderTab('loans')}
+                                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                  activeBookOrderTab === 'loans'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                              >
+                                Library Loans ({loanOrders.length})
+                              </button>
+                              <button
+                                onClick={() => setActiveBookOrderTab('purchases')}
+                                className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                                  activeBookOrderTab === 'purchases'
+                                    ? 'border-orange-500 text-orange-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                              >
+                                Purchases ({purchaseOrders.length})
+                              </button>
+                            </nav>
+                          </div>
+
+                          <div className="space-y-4">
+                            {(() => {
+                              let ordersToShow = vyronareadOrders;
+                              if (activeBookOrderTab === 'rentals') ordersToShow = rentalOrders;
+                              else if (activeBookOrderTab === 'loans') ordersToShow = loanOrders;
+                              else if (activeBookOrderTab === 'purchases') ordersToShow = purchaseOrders;
+
+                              return ordersToShow.length > 0 ? ordersToShow.map((order: any, index: number) => (
+                                <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                  <div className="flex items-center justify-between">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-4">
+                                        <h4 className="font-semibold">Order #{order.order_id || order.id}</h4>
+                                        <Badge variant={order.status === 'delivered' ? 'default' : order.status === 'pending' ? 'secondary' : 'outline'}>
+                                          {order.order_status || order.status || 'pending'}
+                                        </Badge>
+                                        <span className="text-sm text-gray-500">
+                                          {order.created_at ? new Date(order.created_at).toLocaleDateString() : 'Date unavailable'}
+                                        </span>
+                                      </div>
+                                      <p className="text-sm text-gray-600">
+                                        Customer: {order.customer_name || order.metadata?.customerName || 'N/A'}
+                                      </p>
+                                      <p className="text-sm font-medium text-green-600">
+                                        Total: ₹{(order.total_amount / 100).toFixed(2)}
+                                      </p>
+                                      {order.metadata && (
+                                        <div>
+                                          <h4 className="font-medium text-sm mb-2">Order Details</h4>
+                                          <div className="text-sm space-y-1">
+                                            {typeof order.metadata === 'string' ? (
+                                              <p>{order.metadata}</p>
+                                            ) : (
+                                              Object.entries(order.metadata).map(([key, value]) => (
+                                                <div key={key} className="flex justify-between">
+                                                  <span className="capitalize">{key.replace('_', ' ')}:</span>
+                                                  <span>{String(value)}</span>
+                                                </div>
+                                              ))
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    <div className="flex gap-2 items-center">
+                                      <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => {
+                                          console.log('View order details:', order);
+                                        }}
+                                      >
+                                        View Details
+                                      </Button>
+                                      
+                                      {activeBookOrderTab === 'rentals' && (
+                                        <Button size="sm" variant="secondary">
+                                          Extend Rental
+                                        </Button>
+                                      )}
+                                      {activeBookOrderTab === 'loans' && (
+                                        <Button size="sm" variant="secondary">
+                                          Mark Returned
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )) : (
+                                <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Orders Found</h3>
+                                  <p className="text-gray-600">
+                                    {activeBookOrderTab === 'all' ? 'No VyronaRead orders yet' :
+                                     activeBookOrderTab === 'rentals' ? 'No rental orders found' :
+                                     activeBookOrderTab === 'loans' ? 'No library loan orders found' :
+                                     'No purchase orders found'}
+                                  </p>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Analytics Section */}
+            {activeBookSection === "analytics" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold">VyronaRead Analytics</h3>
+                    <p className="text-gray-600">Comprehensive insights across all book services</p>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <div className="flex gap-2">
+                    <Button variant="outline">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Date Range
+                    </Button>
+                    <Button variant="outline">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Export Report
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                          <p className="text-3xl font-bold text-green-600">
+                            ₹{sellerOrders?.filter((order: any) => order.module === 'vyronaread')
+                              .reduce((total: number, order: any) => total + (order.totalAmount / 100), 0).toLocaleString() || 0}
+                          </p>
+                          <p className="text-xs text-green-500">VyronaRead orders</p>
+                        </div>
+                        <TrendingUp className="h-8 w-8 text-green-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Books Available</p>
+                          <p className="text-3xl font-bold text-purple-600">
+                            {(sellerBooks?.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length || 0) + 
+                             (sellerEBooks?.length || 0)}
+                          </p>
+                          <p className="text-xs text-purple-500">Physical + Digital</p>
+                        </div>
+                        <ShoppingCart className="h-8 w-8 text-purple-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">Active Orders</p>
+                          <p className="text-3xl font-bold text-blue-600">
+                            {sellerOrders?.filter((order: any) => order.module === 'vyronaread' && 
+                              (order.status === 'pending' || order.status === 'processing')).length || 0}
+                          </p>
+                          <p className="text-xs text-blue-500">Processing orders</p>
+                        </div>
+                        <Clock className="h-8 w-8 text-blue-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-600">E-Books Listed</p>
+                          <p className="text-3xl font-bold text-orange-600">
+                            {sellerEBooks?.length || 0}
+                          </p>
+                          <p className="text-xs text-orange-500">Digital catalog</p>
+                        </div>
+                        <BookOpen className="h-8 w-8 text-orange-600" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Revenue Trends</CardTitle>
+                    <CardDescription>Monthly revenue breakdown by service type</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-64 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500">Revenue chart visualization would be displayed here</p>
+                        <p className="text-sm text-gray-400">Physical Library • E-book Sales • Rentals • Subscriptions</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Top Physical Books</CardTitle>
+                      <CardDescription>Most ordered physical books</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {sellerBooks && sellerBooks.filter((book: any) => book.category === 'books' && book.module === 'vyronaread').length > 0 ? (
+                          sellerBooks
+                            .filter((book: any) => book.category === 'books' && book.module === 'vyronaread')
+                            .slice(0, 3)
+                            .map((book: any, index: number) => (
+                              <div key={book.id} className="flex items-center justify-between">
+                                <span className="text-sm">{book.title || book.name}</span>
+                                <span className="font-bold text-blue-600">
+                                  {sellerOrders?.filter((order: any) => 
+                                    order.items?.some((item: any) => item.productId === book.id)
+                                  ).length || 0} orders
+                                </span>
+                              </div>
+                            ))
+                        ) : (
+                          <div className="text-center py-4 text-gray-500">
+                            <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">No physical books available</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Top Digital Books</CardTitle>
+                      <CardDescription>Best-selling e-books</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {sellerEBooks && sellerEBooks.length > 0 ? (
+                          sellerEBooks
+                            .slice(0, 3)
+                            .map((ebook: any, index: number) => (
+                              <div key={ebook.id} className="flex items-center justify-between">
+                                <span className="text-sm">{ebook.title || ebook.name}</span>
+                                <span className="font-bold text-purple-600">
+                                  ₹{(ebook.salePrice || 0).toLocaleString()}
+                                </span>
+                              </div>
+                            ))
+                        ) : (
+                          <div className="text-center py-4 text-gray-500">
+                            <BookOpen className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">No e-books available</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* E-Books Tab */}
