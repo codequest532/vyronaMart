@@ -5924,11 +5924,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       for (const book of demoBooks) {
-        await db.execute(sql`
-          INSERT INTO physical_books (title, author, isbn, category, book_condition, price, rental_price, seller_id, description, image_url, availability_status)
-          VALUES (${book.title}, ${book.author}, ${book.isbn}, ${book.category}, ${book.condition}, ${book.price}, ${book.rentalPrice}, ${book.sellerId}, ${book.description}, ${book.imageUrl}, 'available')
-          ON CONFLICT (isbn, seller_id) DO NOTHING
-        `);
+        await db.insert(physicalBooks).values({
+          title: book.title,
+          author: book.author,
+          isbn: book.isbn,
+          category: book.category,
+          condition: book.condition,
+          libraryId: 1, // Default library ID for sellers
+          copies: 1,
+          available: 1,
+          description: book.description
+        }).onConflictDoNothing();
       }
 
       // Create demo e-books
@@ -5958,11 +5964,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ];
 
       for (const ebook of demoEBooks) {
-        await db.execute(sql`
-          INSERT INTO e_books (title, author, isbn, category, price, seller_id, description, file_url, preview_url)
-          VALUES (${ebook.title}, ${ebook.author}, ${ebook.isbn}, ${ebook.category}, ${ebook.price}, ${ebook.sellerId}, ${ebook.description}, ${ebook.fileUrl}, ${ebook.previewUrl})
-          ON CONFLICT (isbn, seller_id) DO NOTHING
-        `);
+        await db.insert(eBooks).values({
+          title: ebook.title,
+          author: ebook.author,
+          isbn: ebook.isbn,
+          category: ebook.category,
+          price: ebook.price,
+          sellerId: ebook.sellerId,
+          description: ebook.description,
+          fileUrl: ebook.fileUrl,
+          previewUrl: ebook.previewUrl
+        }).onConflictDoNothing();
       }
 
       // Create demo rental transactions
