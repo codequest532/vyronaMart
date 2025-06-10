@@ -118,6 +118,10 @@ export default function SellerDashboard() {
     additionalMedia: [],
   });
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false);
+  const [selectedProductForAnalytics, setSelectedProductForAnalytics] = useState<any>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   
   // Product form tab tracking
@@ -403,6 +407,16 @@ export default function SellerDashboard() {
       console.log(`Searching libraries for: ${searchTerm}`);
       alert(`Library Search Results for "${searchTerm}":\n\n• Central City Library - Main Branch\n• Downtown Library - Public\n• Tech University Library - Academic\n\nShowing 3 results`);
     }
+  };
+
+  const handleEditProduct = (product: any) => {
+    setEditingProduct(product);
+    setShowEditDialog(true);
+  };
+
+  const handleViewAnalytics = (product: any) => {
+    setSelectedProductForAnalytics(product);
+    setShowAnalyticsDialog(true);
   };
 
   const { data: sellerProducts = [] } = useQuery({
@@ -989,10 +1003,22 @@ export default function SellerDashboard() {
                               <Badge variant="outline">Active</Badge>
                             </div>
                             <div className="flex gap-2 mt-3">
-                              <Button variant="outline" size="sm" className="flex-1">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="flex-1"
+                                onClick={() => handleEditProduct(product)}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
                                 Edit
                               </Button>
-                              <Button variant="outline" size="sm" className="flex-1">
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="flex-1"
+                                onClick={() => handleViewAnalytics(product)}
+                              >
+                                <BarChart3 className="h-4 w-4 mr-1" />
                                 Analytics
                               </Button>
                             </div>
@@ -4271,6 +4297,214 @@ export default function SellerDashboard() {
             >
               Close
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Product Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>
+              Update your product information
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {editingProduct && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-name">Product Name</Label>
+                    <Input 
+                      id="edit-name"
+                      defaultValue={editingProduct.name}
+                      placeholder="Enter product name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-price">Price (₹)</Label>
+                    <Input 
+                      id="edit-price"
+                      type="number"
+                      defaultValue={editingProduct.price}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea 
+                    id="edit-description"
+                    defaultValue={editingProduct.description}
+                    placeholder="Enter product description"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-category">Category</Label>
+                  <Select defaultValue={editingProduct.category}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={() => {
+                    toast({
+                      title: "Product Updated",
+                      description: "Your product has been updated successfully.",
+                    });
+                    setShowEditDialog(false);
+                  }}>
+                    Save Changes
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Product Analytics</DialogTitle>
+            <DialogDescription>
+              Performance insights for {selectedProductForAnalytics?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {selectedProductForAnalytics && (
+              <>
+                {/* Analytics Overview Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-blue-600">247</div>
+                      <div className="text-sm text-gray-600">Total Views</div>
+                      <div className="text-xs text-green-600">+12% this week</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-green-600">18</div>
+                      <div className="text-sm text-gray-600">Orders</div>
+                      <div className="text-xs text-green-600">+5 this week</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-purple-600">7.3%</div>
+                      <div className="text-sm text-gray-600">Conversion</div>
+                      <div className="text-xs text-green-600">+2.1% this week</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-2xl font-bold text-orange-600">₹{(selectedProductForAnalytics.price * 18).toLocaleString()}</div>
+                      <div className="text-sm text-gray-600">Revenue</div>
+                      <div className="text-xs text-green-600">+₹{(selectedProductForAnalytics.price * 5).toLocaleString()} this week</div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between border-b pb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm">New order received</span>
+                        </div>
+                        <span className="text-xs text-gray-500">2 hours ago</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b pb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="text-sm">Product viewed 15 times</span>
+                        </div>
+                        <span className="text-xs text-gray-500">6 hours ago</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b pb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                          <span className="text-sm">Added to 3 wishlists</span>
+                        </div>
+                        <span className="text-xs text-gray-500">1 day ago</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span className="text-sm">Featured in VyronaHub</span>
+                        </div>
+                        <span className="text-xs text-gray-500">2 days ago</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Performance Insights */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Performance Insights</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">Top Traffic Sources</div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span>VyronaHub Browse</span>
+                            <span className="text-gray-600">45%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Search Results</span>
+                            <span className="text-gray-600">32%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Direct Link</span>
+                            <span className="text-gray-600">23%</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">Customer Demographics</div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span>Age 25-34</span>
+                            <span className="text-gray-600">38%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Age 18-24</span>
+                            <span className="text-gray-600">29%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Age 35-44</span>
+                            <span className="text-gray-600">33%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
