@@ -663,32 +663,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Authentication endpoints
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await storage.getUserByEmail(email);
-      
 
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Store user information in session
-      (req as any).session.user = {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role
-      };
-      
-      res.json({ user: { ...user, password: undefined } });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Login failed" });
-    }
-  });
 
   // Logout endpoint
   app.post("/api/auth/logout", async (req, res) => {
