@@ -291,7 +291,12 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
                 </Button>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" size="lg" className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50 py-4 rounded-xl">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50 py-4 rounded-xl"
+                    onClick={() => setLocation(`/vyronahub-checkout?productId=${productId}&quantity=${quantity}`)}
+                  >
                     Buy Now
                   </Button>
                   {product.enableGroupBuy && (

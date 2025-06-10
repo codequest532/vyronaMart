@@ -61,6 +61,11 @@ export default function VyronaHubCheckout() {
     },
   });
 
+  // Get URL parameters for direct product purchase
+  const urlParams = new URLSearchParams(window.location.search);
+  const directProductId = urlParams.get('productId');
+  const directQuantity = parseInt(urlParams.get('quantity') || '1');
+
   // Get cart data from client store
   const { items: cartItems, clearCart } = useCartStore();
 
@@ -69,16 +74,40 @@ export default function VyronaHubCheckout() {
     queryKey: ["/api/current-user"],
   });
 
-  // Type-safe cart items - map to expected structure
-  const typedCartItems = cartItems.map(item => ({
-    id: item.productId,
-    name: item.name,
-    price: item.discountedPrice || item.price,
-    quantity: item.quantity,
-    category: item.category,
-    module: "vyronahub",
-    imageUrl: item.imageUrl
-  }));
+  // Fetch direct product data if coming from "Buy Now"
+  const { data: directProduct } = useQuery({
+    queryKey: [`/api/products/${directProductId}`],
+    enabled: !!directProductId,
+  });
+
+  // Determine checkout items - either from cart or direct product
+  const getCheckoutItems = (): CheckoutCartItem[] => {
+    if (directProductId && directProduct) {
+      // Direct product purchase
+      return [{
+        id: directProduct.id,
+        name: directProduct.name,
+        price: directProduct.price,
+        quantity: directQuantity,
+        category: directProduct.category,
+        module: "vyronahub",
+        imageUrl: directProduct.imageUrl
+      }];
+    } else {
+      // Cart checkout
+      return cartItems.map(item => ({
+        id: item.productId,
+        name: item.name,
+        price: item.discountedPrice || item.price,
+        quantity: item.quantity,
+        category: item.category,
+        module: "vyronahub",
+        imageUrl: item.imageUrl
+      }));
+    }
+  };
+
+  const typedCartItems = getCheckoutItems();
 
   // Calculate totals
   const subtotal = typedCartItems.reduce((sum: number, item: CheckoutCartItem) => sum + (item.price * item.quantity), 0);
