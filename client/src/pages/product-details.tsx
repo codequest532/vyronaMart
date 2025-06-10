@@ -574,31 +574,7 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
           </Tabs>
         </div>
 
-        {/* Related Products */}
-        <div className="mt-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">You Might Also Like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <Card key={item} className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:scale-105 bg-white/80 backdrop-blur-sm border border-purple-100">
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-100 rounded-xl mb-3 overflow-hidden">
-                    <img
-                      src="/api/placeholder/200/200"
-                      alt="Related product"
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-2 line-clamp-2">Premium Product {item}</h3>
-                  <div className="flex items-center gap-1 mb-2">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs text-gray-600">4.5</span>
-                  </div>
-                  <p className="text-purple-600 font-bold">₹{(299 + item * 100).toLocaleString()}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+
       </div>
     </div>
   );
