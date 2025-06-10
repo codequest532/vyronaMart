@@ -263,17 +263,22 @@ export default function SellerDashboard() {
         if (uploadResponse.ok) {
           const uploadResult = await uploadResponse.json();
           imageUrl = uploadResult.imageUrl;
+        } else {
+          throw new Error('Failed to upload image');
         }
       }
       // If no image uploaded, imageUrl remains null
 
       // Determine platform based on enableGroupBuy selection
       const module = productData.enableGroupBuy ? "vyronasocial" : "vyronahub";
-      return await apiRequest("POST", "/api/products", { 
+      
+      const productPayload = {
         ...productData, 
         module, 
-        imageUrl // This will be null if no image was uploaded
-      });
+        imageUrl // This will be null if no image was uploaded or the uploaded URL if successful
+      };
+      
+      return await apiRequest("POST", "/api/products", productPayload);
     },
     onSuccess: () => {
       toast({
