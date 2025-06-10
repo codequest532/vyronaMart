@@ -26,6 +26,7 @@ import Cart from "@/pages/cart";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
+import DemoSellerLogin from "@/pages/demo-seller-login";
 import EbookReader from "@/pages/ebook-reader";
 
 import NotFound from "@/pages/not-found";

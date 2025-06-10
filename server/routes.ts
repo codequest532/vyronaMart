@@ -5730,6 +5730,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to clear cart" });
     }
   });
+
+  // Demo seller login endpoint
+  app.post("/api/demo-seller-login", async (req: Request, res: Response) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Demo seller credentials
+      if (email === "seller@vyronahub.com" && password === "demo123") {
+        // Create or get existing seller account
+        const existingSellers = await db.execute(sql`
+          SELECT * FROM users WHERE email = 'seller@vyronahub.com' LIMIT 1
+        `);
+        
+        let sellerId;
+        if (existingSellers.rows.length === 0) {
+          // Create demo seller account
+          const newSeller = await db.execute(sql`
+            INSERT INTO users (username, email, mobile, role) 
+            VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
+            RETURNING id
+          `);
+          sellerId = newSeller.rows[0].id;
+        } else {
+          sellerId = existingSellers.rows[0].id;
+        }
+        
+        // Set session
+        req.session.user = {
+          id: sellerId,
+          email: 'seller@vyronahub.com',
+          username: 'VyronaHub Demo Seller',
+          role: 'seller'
+        };
+        
+        res.json({ 
+          success: true, 
+          user: { 
+            id: sellerId, 
+            email: 'seller@vyronahub.com', 
+            username: 'VyronaHub Demo Seller', 
+            role: 'seller' 
+          }
+        });
+      } else {
+        res.status(401).json({ message: "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error('Demo seller login error:', error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Create demo seller products for testing
+  app.post("/api/create-demo-seller-data", async (req: Request, res: Response) => {
+    try {
+      // Get or create demo seller
+      const sellers = await db.execute(sql`
+        SELECT * FROM users WHERE email = 'seller@vyronahub.com' LIMIT 1
+      `);
+      
+      let sellerId;
+      if (sellers.rows.length === 0) {
+        const newSeller = await db.execute(sql`
+          INSERT INTO users (username, email, mobile, role) 
+          VALUES ('VyronaHub Demo Seller', 'seller@vyronahub.com', '+91-9876543210', 'seller')
+          RETURNING id
+        `);
+        sellerId = newSeller.rows[0].id;
+      } else {
+        sellerId = sellers.rows[0].id;
+      }
+
+      // Create demo products
+      const demoProducts = [
+        {
+          name: 'Premium Wireless Headphones',
+          description: 'High-quality wireless headphones with noise cancellation',
+          price: 2999,
+          sellerId: sellerId,
+          category: 'Electronics',
+          imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500'
+        },
+        {
+          name: 'Smart Fitness Watch',
+          description: 'Track your health and fitness with this advanced smartwatch',
+          price: 4999,
+          sellerId: sellerId,
+          category: 'Electronics',
+          imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500'
+        },
+        {
+          name: 'Organic Coffee Beans',
+          description: 'Premium organic coffee beans from sustainable farms',
+          price: 899,
+          sellerId: sellerId,
+          category: 'Food & Beverages',
+          imageUrl: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=500'
+        }
+      ];
+
+      for (const product of demoProducts) {
+        await db.execute(sql`
+          INSERT INTO products (name, description, price, seller_id, category, image_url, stock_quantity, module)
+          VALUES (${product.name}, ${product.description}, ${product.price}, ${product.sellerId}, ${product.category}, ${product.imageUrl}, 50, 'vyronahub')
+          ON CONFLICT (name) DO NOTHING
+        `);
+      }
+
+      // Create demo orders
+      const demoOrders = [
+        {
+          userId: 1,
+          totalAmount: 2999,
+          status: 'delivered',
+          module: 'vyronahub',
+          metadata: JSON.stringify({ 
+            sellerId: sellerId.toString(),
+            shippingAddress: '123 Customer Street, Mumbai 400001',
+            paymentMethod: 'Online'
+          })
+        },
+        {
+          userId: 1,
+          totalAmount: 4999,
+          status: 'processing',
+          module: 'vyronahub',
+          metadata: JSON.stringify({ 
+            sellerId: sellerId.toString(),
+            shippingAddress: '456 Buyer Avenue, Delhi 110001',
+            paymentMethod: 'COD'
+          })
+        },
+        {
+          userId: 1,
+          totalAmount: 899,
+          status: 'pending',
+          module: 'vyronahub',
+          metadata: JSON.stringify({ 
+            sellerId: sellerId.toString(),
+            shippingAddress: '789 Purchase Road, Bangalore 560001',
+            paymentMethod: 'Online'
+          })
+        }
+      ];
+
+      for (const order of demoOrders) {
+        await db.execute(sql`
+          INSERT INTO orders (user_id, total_amount, status, module, metadata, created_at)
+          VALUES (${order.userId}, ${order.totalAmount}, ${order.status}, ${order.module}, ${order.metadata}, NOW())
+        `);
+      }
+
+      res.json({ success: true, message: "Demo seller data created", sellerId });
+    } catch (error) {
+      console.error('Error creating demo data:', error);
+      res.status(500).json({ message: "Failed to create demo data" });
+    }
+  });
   
   return httpServer;
 }
