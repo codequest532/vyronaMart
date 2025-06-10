@@ -25,7 +25,8 @@ import {
   insertGroupMessageSchema, insertProductShareSchema, insertGroupCartSchema,
   insertGroupCartContributionSchema, insertVyronaWalletSchema, insertWalletTransactionSchema,
   insertGroupOrderSchema, insertGroupOrderContributionSchema, insertOrderSchema,
-  walletTransactions, users, orders, groupContributions, notifications, products, cartItems, stores
+  walletTransactions, users, orders, groupContributions, notifications, products, cartItems, stores,
+  physicalBooks, eBooks
 } from "@shared/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
