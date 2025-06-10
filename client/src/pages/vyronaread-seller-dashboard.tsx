@@ -134,10 +134,7 @@ export default function VyronaReadSellerDashboard() {
   // Add book mutation
   const addBookMutation = useMutation({
     mutationFn: async (bookData: any) => {
-      return await apiRequest("/api/vyronaread/books", {
-        method: "POST",
-        body: JSON.stringify(bookData),
-      });
+      return await apiRequest("/api/vyronaread/books", "POST", bookData);
     },
     onSuccess: () => {
       toast({
@@ -170,10 +167,7 @@ export default function VyronaReadSellerDashboard() {
   // Add e-book mutation
   const addEBookMutation = useMutation({
     mutationFn: async (ebookData: any) => {
-      return await apiRequest("/api/vyronaread/ebooks", {
-        method: "POST",
-        body: JSON.stringify(ebookData),
-      });
+      return await apiRequest("/api/vyronaread/ebooks", "POST", ebookData);
     },
     onSuccess: () => {
       toast({
@@ -203,9 +197,7 @@ export default function VyronaReadSellerDashboard() {
   // Delete book mutation
   const deleteBookMutation = useMutation({
     mutationFn: async (bookId: number) => {
-      return await apiRequest(`/api/vyronaread/books/${bookId}`, {
-        method: "DELETE",
-      });
+      return await apiRequest(`/api/vyronaread/books/${bookId}`, "DELETE");
     },
     onSuccess: () => {
       toast({
@@ -274,7 +266,7 @@ export default function VyronaReadSellerDashboard() {
   // Logout function
   const handleLogout = async () => {
     try {
-      await apiRequest("/api/auth/logout", { method: "POST" });
+      await apiRequest("/api/auth/logout", "POST");
       window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
@@ -368,7 +360,7 @@ export default function VyronaReadSellerDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Physical Books</p>
-                      <p className="text-3xl font-bold text-gray-900 dark:text-white">{sellerBooks.length}</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">{(sellerBooks as any[]).length}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">In your library</p>
                     </div>
                     <BookOpen className="h-8 w-8 text-blue-600" />
