@@ -70,6 +70,7 @@ export default function VyronaReadSellerDashboard() {
   const [showAddBookDialog, setShowAddBookDialog] = useState(false);
   const [showAddEbookDialog, setShowAddEbookDialog] = useState(false);
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
+  const [showLibraryIntegrationDialog, setShowLibraryIntegrationDialog] = useState(false);
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -101,6 +102,17 @@ export default function VyronaReadSellerDashboard() {
     phone: "",
     email: "",
     description: ""
+  });
+
+  const [libraryIntegrationForm, setLibraryIntegrationForm] = useState({
+    libraryName: "",
+    contactPerson: "",
+    email: "",
+    phone: "",
+    address: "",
+    libraryType: "",
+    totalBooks: 0,
+    message: "",
   });
 
   // Redirect non-sellers
@@ -234,6 +246,37 @@ export default function VyronaReadSellerDashboard() {
         phone: "",
         email: "",
         description: ""
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to submit library integration request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const submitLibraryIntegrationMutation = useMutation({
+    mutationFn: async (formData: any) => {
+      const response = await apiRequest("POST", "/api/library-integration-requests", formData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Library integration request submitted successfully!",
+      });
+      setShowLibraryIntegrationDialog(false);
+      setLibraryIntegrationForm({
+        libraryName: "",
+        contactPerson: "",
+        email: "",
+        phone: "",
+        address: "",
+        libraryType: "",
+        totalBooks: 0,
+        message: "",
       });
     },
     onError: (error: any) => {
@@ -960,7 +1003,7 @@ export default function VyronaReadSellerDashboard() {
                   <Button 
                     variant="outline" 
                     className="h-20 flex flex-col items-center justify-center"
-                    onClick={() => setShowAddLibraryDialog(true)}
+                    onClick={() => setShowLibraryIntegrationDialog(true)}
                   >
                     <Library className="h-6 w-6 mb-2" />
                     Library Integration
