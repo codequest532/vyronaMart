@@ -55,8 +55,14 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
     );
   }
 
-  const productImages = product.imageUrl ? [product.imageUrl] : ["/api/placeholder/400/400"];
-  const mockImages = productImages;
+  // Use imageUrls array if available, fallback to single imageUrl, then placeholder
+  const productImages = product.imageUrls && product.imageUrls.length > 0 
+    ? product.imageUrls 
+    : product.imageUrl 
+      ? [product.imageUrl] 
+      : ["/api/placeholder/400/400"];
+  
+  const images = productImages;
 
   const handleAddToCart = () => {
     // This would trigger auth modal in real implementation
@@ -151,7 +157,7 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
             <div className="relative">
               <div className="aspect-square bg-white rounded-xl border border-purple-100 overflow-hidden shadow-lg max-w-md mx-auto">
                 <img
-                  src={mockImages[selectedImageIndex]}
+                  src={images[selectedImageIndex]}
                   alt={product.name}
                   className="w-full h-full object-cover hover:scale-102 transition-transform duration-300"
                 />
@@ -171,7 +177,7 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
-              {mockImages.map((image, index) => (
+              {images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
