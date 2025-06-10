@@ -1015,8 +1015,16 @@ export default function SellerDashboard() {
                       {sellerProducts?.map((product: any) => (
                         <Card key={product.id} className="hover:shadow-md transition-shadow">
                           <CardContent className="p-4">
-                            <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 flex items-center justify-center">
-                              <Package className="h-8 w-8 text-gray-400" />
+                            <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+                              {product.imageUrl ? (
+                                <img
+                                  src={product.imageUrl}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <Package className="h-8 w-8 text-gray-400" />
+                              )}
                             </div>
                             <h3 className="font-medium mb-1">{product.name}</h3>
                             <p className="text-sm text-gray-500 mb-2">{product.category}</p>
