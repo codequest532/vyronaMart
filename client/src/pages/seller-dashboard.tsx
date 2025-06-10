@@ -930,6 +930,15 @@ export default function SellerDashboard() {
               <Library className="h-4 w-4 mr-2" />
               Books Management
             </Button>
+            <Link href="/vyronaread-seller-dashboard">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-blue-600 hover:text-blue-700"
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                VyronaRead Dashboard
+              </Button>
+            </Link>
             <Button
               variant={activeTab === "customers" ? "default" : "ghost"}
               className="w-full justify-start"
