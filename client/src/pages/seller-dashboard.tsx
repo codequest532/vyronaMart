@@ -185,12 +185,12 @@ export default function SellerDashboard() {
   // Tab validation functions
   const validateBasicInfoTab = () => {
     const values = productForm.getValues();
-    return !!(values.name && values.description && values.category && values.sku);
+    return !!(values.name && values.description && values.category);
   };
 
   const validateProductDetailsTab = () => {
     const values = productForm.getValues();
-    return !!(values.price && values.price > 0);
+    return !!(values.price && values.price > 0 && values.brand);
   };
 
   const validateImagesTab = () => {
@@ -246,7 +246,7 @@ export default function SellerDashboard() {
     checkAndMarkTabComplete('details');
     checkAndMarkTabComplete('images');
     checkAndMarkTabComplete('inventory');
-  }, [formValues.name, formValues.description, formValues.category, formValues.price, formValues.brand, formValues.weight, formValues.dimensions, formValues.sku, uploadedFiles.mainImage]);
+  }, [formValues.name, formValues.description, formValues.category, formValues.price, formValues.brand, formValues.weight, formValues.dimensions, formValues.enableGroupBuy, uploadedFiles.mainImage]);
 
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
