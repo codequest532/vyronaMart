@@ -922,14 +922,6 @@ export default function SellerDashboard() {
               <TrendingUp className="h-4 w-4 mr-2" />
               Social Analytics
             </Button>
-            <Button
-              variant={activeTab === "books" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("books")}
-            >
-              <Library className="h-4 w-4 mr-2" />
-              Books Management
-            </Button>
             <Link href="/vyronaread-seller-dashboard">
               <Button
                 variant="ghost"
@@ -1456,37 +1448,139 @@ export default function SellerDashboard() {
               </Card>
             </div>
           )}
+        </main>
+      </div>
 
-          {activeTab === "books" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaRead - Complete Book Ecosystem</h2>
-                  <p className="text-gray-600 dark:text-gray-300">Manage physical library, sell e-books, and provide digital reading services</p>
+      {/* Order Details Modal */}
+      <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Order Details #{selectedOrder?.order_id}</DialogTitle>
+            <DialogDescription>
+              Complete order information and management options
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOrder && (
+            <div className="overflow-y-auto flex-1 px-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                {/* Order Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Order Information</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Order ID:</span>
+                      <span>#{selectedOrder.order_id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Status:</span>
+                      <Badge variant={
+                        selectedOrder.order_status === 'delivered' ? 'default' :
+                        selectedOrder.order_status === 'shipped' ? 'secondary' :
+                        selectedOrder.order_status === 'processing' ? 'outline' : 'destructive'
+                      }>
+                        {selectedOrder.order_status || 'pending'}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Module:</span>
+                      <span className="capitalize">{selectedOrder.module}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total Amount:</span>
+                      <span className="font-semibold">₹{(selectedOrder.total_amount / 100).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Order Type:</span>
+                      <span className="capitalize">{selectedOrder.metadata?.type || 'Standard'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Created:</span>
+                      <span>{new Date(selectedOrder.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={handleSearchBooks}>
-                    <Search className="h-4 w-4 mr-2" />
-                    Search Library
-                  </Button>
-                  <Dialog open={showAddBookDialog} onOpenChange={setShowAddBookDialog}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-blue-600 hover:bg-blue-700">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Book
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Add New Book to Library</DialogTitle>
-                        <DialogDescription>
-                          Add a new book to your VyronaRead library inventory
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="title">Book Title *</Label>
+
+                {/* Customer Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Customer Information</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Customer ID:</span>
+                      <span>#{selectedOrder.user_id}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Email:</span>
+                      <span>{selectedOrder.customer_email || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Phone:</span>
+                      <span>{selectedOrder.customer_phone || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Address:</span>
+                      <span className="text-right max-w-48">
+                        {selectedOrder.shipping_address ? (
+                          <div className="text-sm">
+                            <div>{selectedOrder.shipping_address.street}</div>
+                            <div>{selectedOrder.shipping_address.city}, {selectedOrder.shipping_address.state}</div>
+                            <div>{selectedOrder.shipping_address.zipCode}</div>
+                          </div>
+                        ) : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold mb-4">Order Items</h3>
+                <div className="space-y-2">
+                  {selectedOrder.items?.map((item: any) => (
+                    <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded">
+                      <div>
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">Quantity: {item.quantity}</div>
+                      </div>
+                      <div className="font-semibold">₹{((item.price * item.quantity) / 100).toFixed(2)}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Order Status Update */}
+              <div className="mt-6 flex gap-4">
+                <Select
+                  value={selectedOrder.order_status || 'pending'}
+                  onValueChange={(status) => updateOrderStatusMutation.mutate({ 
+                    orderId: selectedOrder.order_id, 
+                    status 
+                  })}
+                  disabled={updateOrderStatusMutation.isPending}
+                >
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="shipped">Shipped</SelectItem>
+                    <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
+                    <SelectItem value="delivered">Delivered</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+                {updateOrderStatusMutation.isPending && (
+                  <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
                           <Input
                             id="title"
                             value={newBook.title}
