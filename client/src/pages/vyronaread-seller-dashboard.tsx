@@ -151,6 +151,17 @@ export default function VyronaReadSellerDashboard() {
     enabled: !!user && user.role === "seller"
   });
 
+  // Additional queries for migrated book management functionality
+  const { data: sellerBooks = [], isLoading: sellerBooksLoading } = useQuery({
+    queryKey: ["/api/vyronaread/seller-books"],
+    enabled: !!user && user.role === "seller"
+  });
+
+  const { data: sellerEBooks = [], isLoading: sellerEBooksLoading } = useQuery({
+    queryKey: ["/api/vyronaread/ebooks"],
+    enabled: !!user && user.role === "seller"
+  });
+
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ["/api/seller/analytics"],
     enabled: !!user && user.role === "seller"
@@ -296,7 +307,7 @@ export default function VyronaReadSellerDashboard() {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || booksLoading || ebooksLoading || libraryLoading || ordersLoading || sellerOrdersLoading || sellerBooksLoading || sellerEBooksLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100">
         <div className="text-center">
