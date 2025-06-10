@@ -968,7 +968,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/products", async (req, res) => {
     try {
-      const product = await storage.createProduct(req.body);
+      // Get authenticated seller ID from session
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Ensure only sellers can create products
+      if (authenticatedUser.role !== 'seller' && authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Seller role required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
+      
+      // Add seller ID to product metadata
+      const productData = {
+        ...req.body,
+        metadata: {
+          ...req.body.metadata,
+          sellerId: sellerId.toString(),
+          sellerName: authenticatedUser.username,
+          sellerEmail: authenticatedUser.email
+        }
+      };
+      
+      const product = await storage.createProduct(productData);
       res.json(product);
     } catch (error) {
       console.error("Error creating product:", error);
