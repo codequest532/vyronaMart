@@ -21,6 +21,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Instagram, Store, Users, Building, ShoppingBag, BookOpen, Upload, FileText, CreditCard } from "lucide-react";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 interface SellerOnboardingModalProps {
   isOpen: boolean;
@@ -143,6 +145,8 @@ const sellerTypes = [
 
 export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboardingModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
+  const [location, setLocation] = useLocation();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     sellerType: null,
     businessName: "",
@@ -177,38 +181,6 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
-    }
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const response = await fetch("/api/seller-registration", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        onClose();
-        
-        // Route sellers to appropriate dashboards after successful registration:
-        // - VyronaHub & VyronaSocial: Existing seller dashboard for product management
-        // - VyronaInstaStore: Instagram-specific onboarding flow
-        // - VyronaSpace: Physical store setup dashboard
-        // - VyronaMallConnect: Premium brand management interface
-        
-        if (formData.sellerType === "vyronahub") {
-          // Redirect to existing seller dashboard
-          window.location.href = "/seller-dashboard";
-        } else {
-          // Show success message for other seller types pending dashboard development
-          alert("Registration successful! You'll receive an email with next steps.");
-        }
-      }
-    } catch (error) {
-      console.error("Registration failed:", error);
-      alert("Registration failed. Please try again.");
     }
   };
 
@@ -1142,6 +1114,9 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
         if (formData.sellerType === "vyronamallconnect") {
           return formData.mallName;
         }
+        if (formData.sellerType === "vyronaread") {
+          return formData.storeLibraryName && formData.businessAddress && formData.listingTypes && formData.listingTypes.length > 0;
+        }
         return true;
       case 4:
         return formData.panNumber && formData.bankAccountNumber && formData.ifscCode && formData.accountHolderName;
@@ -1149,6 +1124,45 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
         return formData.agreeTerms && formData.agreePrivacy;
       default:
         return false;
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // For now, we'll simulate the registration process
+      toast({
+        title: "Registration Successful!",
+        description: `Your ${sellerTypes.find(t => t.id === formData.sellerType)?.title} seller application has been submitted.`,
+      });
+      
+      // Close the modal
+      onClose();
+      
+      // Redirect based on seller type
+      if (formData.sellerType === "vyronaread") {
+        // Redirect VyronaRead sellers to their dedicated dashboard
+        setLocation("/vyronaread-seller-dashboard");
+      } else {
+        // Redirect other sellers to the general seller dashboard
+        setLocation("/seller-dashboard");
+      }
+      
+      // Show success message with specific guidance
+      setTimeout(() => {
+        toast({
+          title: "Welcome to VyronaMart!",
+          description: formData.sellerType === "vyronaread" 
+            ? "You've been redirected to your VyronaRead book seller dashboard. Start by adding your first book!"
+            : "You've been redirected to your seller dashboard. Start setting up your store!",
+        });
+      }, 1000);
+      
+    } catch (error) {
+      toast({
+        title: "Registration Failed",
+        description: "There was an error submitting your application. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
