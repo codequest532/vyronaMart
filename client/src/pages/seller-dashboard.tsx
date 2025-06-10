@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -204,6 +204,17 @@ export default function SellerDashboard() {
   // Check if all tabs are completed
   const allTabsCompleted = completedProductTabs.size === 4;
 
+  // Watch form changes to automatically validate tabs
+  const formValues = productForm.watch();
+  
+  // Real-time validation effect
+  useEffect(() => {
+    checkAndMarkTabComplete('basic');
+    checkAndMarkTabComplete('details');
+    checkAndMarkTabComplete('images');
+    checkAndMarkTabComplete('inventory');
+  }, [formValues]);
+
   const addProductMutation = useMutation({
     mutationFn: async (productData: z.infer<typeof productSchema>) => {
       // Determine platform based on enableGroupBuy selection
@@ -215,9 +226,7 @@ export default function SellerDashboard() {
         title: "Product Added Successfully",
         description: "Your product has been added to the catalog.",
       });
-      setShowAddProductDialog(false);
-      productForm.reset();
-      setUploadedFiles({ mainImage: null, additionalMedia: [] });
+      resetProductForm();
       queryClient.invalidateQueries({ queryKey: ["/api/seller/products"] });
     },
     onError: (error: any) => {
@@ -3294,7 +3303,13 @@ export default function SellerDashboard() {
       </Dialog>
 
       {/* Add Product Modal */}
-      <Dialog open={showAddProductDialog} onOpenChange={setShowAddProductDialog}>
+      <Dialog open={showAddProductDialog} onOpenChange={(open) => {
+        if (!open) {
+          resetProductForm();
+        } else {
+          setShowAddProductDialog(open);
+        }
+      }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Product</DialogTitle>
@@ -3771,16 +3786,21 @@ export default function SellerDashboard() {
                 <Button 
                   type="button" 
                   variant="outline" 
-                  onClick={() => setShowAddProductDialog(false)}
+                  onClick={resetProductForm}
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-                  disabled={addProductMutation.isPending}
+                  disabled={!allTabsCompleted || addProductMutation.isPending}
+                  className={`${allTabsCompleted 
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700' 
+                    : 'bg-gray-400 cursor-not-allowed'
+                  }`}
                 >
-                  {addProductMutation.isPending ? "Adding Product..." : "Add Product to Catalog"}
+                  {addProductMutation.isPending ? "Adding Product..." : 
+                   !allTabsCompleted ? `Complete All Tabs (${completedProductTabs.size}/4)` : 
+                   "Add Product to Catalog"}
                 </Button>
               </div>
             </form>
