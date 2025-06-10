@@ -3497,13 +3497,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get seller's rentals
   app.get("/api/seller/rentals", async (req: Request, res: Response) => {
     try {
-      const sellerId = parseInt(req.query.sellerId as string);
-      if (!sellerId) {
-        return res.status(400).json({ error: "Seller ID is required" });
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ error: "Unauthorized" });
       }
       
       // Get rentals for this seller
-      const rentals = await storage.getSellerRentals(sellerId);
+      const rentals = await storage.getSellerRentals(user.id);
       res.json(rentals);
     } catch (error) {
       console.error("Error fetching seller rentals:", error);
@@ -3514,12 +3514,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get seller's return requests
   app.get("/api/seller/return-requests", async (req: Request, res: Response) => {
     try {
-      const sellerId = parseInt(req.query.sellerId as string);
-      if (!sellerId) {
-        return res.status(400).json({ error: "Seller ID is required" });
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ error: "Unauthorized" });
       }
       
-      const returnRequests = await storage.getSellerReturnRequests(sellerId);
+      const returnRequests = await storage.getSellerReturnRequests(user.id);
       res.json(returnRequests);
     } catch (error) {
       console.error("Error fetching seller return requests:", error);

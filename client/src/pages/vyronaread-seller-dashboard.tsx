@@ -57,7 +57,8 @@ import {
   CreditCard,
   Truck,
   Home,
-  Building2
+  Building2,
+  X
 } from "lucide-react";
 
 export default function VyronaReadSellerDashboard() {
@@ -941,17 +942,28 @@ export default function VyronaReadSellerDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Button className="h-20 flex flex-col items-center justify-center bg-amber-600 hover:bg-amber-700">
+                  <Button 
+                    className="h-20 flex flex-col items-center justify-center bg-amber-600 hover:bg-amber-700"
+                    onClick={() => setShowAddBookDialog(true)}
+                  >
                     <Plus className="h-6 w-6 mb-2" />
                     Add New Book
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center"
+                    onClick={() => setShowAddEbookDialog(true)}
+                  >
                     <Upload className="h-6 w-6 mb-2" />
                     Upload E-Book
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
+                  <Button 
+                    variant="outline" 
+                    className="h-20 flex flex-col items-center justify-center"
+                    onClick={() => setShowAddLibraryDialog(true)}
+                  >
                     <Library className="h-6 w-6 mb-2" />
-                    Library Settings
+                    Library Integration
                   </Button>
                   <Button variant="outline" className="h-20 flex flex-col items-center justify-center">
                     <BarChart3 className="h-6 w-6 mb-2" />
@@ -1026,7 +1038,10 @@ export default function VyronaReadSellerDashboard() {
                 <h2 className="text-2xl font-bold text-gray-900">Physical Books</h2>
                 <p className="text-gray-600">Manage your book inventory</p>
               </div>
-              <Button className="bg-amber-600 hover:bg-amber-700">
+              <Button 
+                className="bg-amber-600 hover:bg-amber-700"
+                onClick={() => setShowAddBookDialog(true)}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Book
               </Button>
