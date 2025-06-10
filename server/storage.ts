@@ -46,6 +46,7 @@ export interface IStorage {
   getProduct(id: number): Promise<Product | undefined>;
   getProductsBySeller(sellerId: number): Promise<Product[]>;
   createProduct(product: InsertProduct): Promise<Product>;
+  deleteProduct(id: number): Promise<void>;
   updateProductListing(id: number, listing: {
     enableIndividualBuy?: boolean;
     enableGroupBuy?: boolean;

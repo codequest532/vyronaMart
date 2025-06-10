@@ -297,6 +297,34 @@ export default function SellerDashboard() {
     },
   });
 
+  // Delete product mutation
+  const deleteProductMutation = useMutation({
+    mutationFn: async (productId: number) => {
+      return await apiRequest("DELETE", `/api/products/${productId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Product Deleted",
+        description: "Product has been successfully removed from your catalog.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/products"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Deleting Product",
+        description: error.message || "Failed to delete product. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete product handler
+  const handleDeleteProduct = (product: any) => {
+    if (window.confirm(`Are you sure you want to delete "${product.name}"? This action cannot be undone.`)) {
+      deleteProductMutation.mutate(product.id);
+    }
+  };
+
   const handleFileUpload = (files: FileList | null, type: 'main' | 'additional') => {
     if (!files) return;
     
@@ -1055,6 +1083,14 @@ export default function SellerDashboard() {
                               >
                                 <BarChart3 className="h-4 w-4 mr-1" />
                                 Analytics
+                              </Button>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => handleDeleteProduct(product)}
+                                disabled={deleteProductMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </CardContent>

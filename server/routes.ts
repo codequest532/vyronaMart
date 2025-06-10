@@ -1004,6 +1004,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete product endpoint - only sellers can delete their own products
+  app.delete("/api/products/:id", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.id);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      // Ensure only sellers can delete products
+      if (authenticatedUser.role !== 'seller' && authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Seller role required." });
+      }
+      
+      // Get the product to verify ownership
+      const product = await storage.getProduct(productId);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      // Check if the seller owns this product (unless admin)
+      if (authenticatedUser.role !== 'admin') {
+        const productSellerId = product.metadata?.sellerId;
+        if (productSellerId !== authenticatedUser.id.toString()) {
+          return res.status(403).json({ message: "Access denied. You can only delete your own products." });
+        }
+      }
+      
+      await storage.deleteProduct(productId);
+      res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
   // VyronaRead - Add book through seller dashboard
   app.post("/api/vyronaread/books", async (req, res) => {
     try {
