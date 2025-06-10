@@ -124,7 +124,10 @@ export default function VyronaHubCheckout() {
       return response.json();
     },
     onSuccess: (data) => {
-      clearCart(); // Clear client-side cart
+      // Only clear cart if this was a cart checkout, not a direct product purchase
+      if (!directProductId) {
+        clearCart();
+      }
       
       // Prepare order success data
       const orderSuccessData = {
