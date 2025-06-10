@@ -71,6 +71,7 @@ export default function VyronaReadSellerDashboard() {
   const [showAddEbookDialog, setShowAddEbookDialog] = useState(false);
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showLibraryIntegrationDialog, setShowLibraryIntegrationDialog] = useState(false);
+  const [activeBookOrderTab, setActiveBookOrderTab] = useState('all');
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -1319,12 +1320,12 @@ export default function VyronaReadSellerDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Rentals Tab */}
+          {/* Rentals Tab - Comprehensive Order Management */}
           <TabsContent value="rentals" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Book Rentals</h2>
-                <p className="text-gray-600">Track rental status and due dates</p>
+                <h2 className="text-2xl font-bold text-gray-900">VyronaRead Order Management</h2>
+                <p className="text-gray-600">Manage book rentals, library loans, and e-book purchases</p>
               </div>
               <Button variant="outline">
                 <Calendar className="h-4 w-4 mr-2" />
@@ -1332,78 +1333,224 @@ export default function VyronaReadSellerDashboard() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Active Rentals</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-blue-600 mb-1">{rentals.length}</div>
-                  <p className="text-sm text-gray-600">Currently rented out</p>
-                </CardContent>
-              </Card>
+            {(() => {
+              const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+              const rentalOrders = vyronareadOrders.filter((order: any) => 
+                order.metadata?.transaction_type === 'rental' || 
+                (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('rental'))
+              );
+              const loanOrders = vyronareadOrders.filter((order: any) => 
+                order.metadata?.transaction_type === 'loan' ||
+                (order.metadata && typeof order.metadata === 'string' && order.metadata.includes('loan'))
+              );
+              const purchaseOrders = vyronareadOrders.filter((order: any) => 
+                order.metadata?.transaction_type === 'purchase' ||
+                (!order.metadata?.transaction_type && !order.metadata?.includes?.('rental') && !order.metadata?.includes?.('loan'))
+              );
 
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Due Today</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-orange-600 mb-1">3</div>
-                  <p className="text-sm text-gray-600">Books due for return</p>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Overdue</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-red-600 mb-1">1</div>
-                  <p className="text-sm text-gray-600">Late returns</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card className="bg-white/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Rental Management</CardTitle>
-                <CardDescription>Track all book rentals and returns</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {rentals.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Clock className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No active rentals</h3>
-                    <p className="text-gray-500">Rental activity will appear here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {rentals.map((rental: any) => (
-                      <div key={rental.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <BookOpen className="h-6 w-6 text-blue-600" />
-                          </div>
+              return (
+                <div className="space-y-6">
+                  {/* Order Statistics */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="font-medium text-gray-900">{rental.bookTitle}</h3>
-                            <p className="text-sm text-gray-500">Rented by {rental.customerName}</p>
-                            <p className="text-xs text-gray-400">Due: {new Date(rental.dueDate).toLocaleDateString()}</p>
+                            <p className="text-sm font-medium text-gray-600">Total Book Orders</p>
+                            <p className="text-2xl font-bold text-blue-600">{vyronareadOrders.length}</p>
                           </div>
+                          <BookOpen className="h-6 w-6 text-blue-600" />
                         </div>
-                        <div className="flex items-center space-x-3">
-                          <Badge variant={rental.status === 'overdue' ? 'destructive' : 'default'}>
-                            {rental.status}
-                          </Badge>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Book Rentals</p>
+                            <p className="text-2xl font-bold text-purple-600">{rentalOrders.length}</p>
+                          </div>
+                          <Clock className="h-6 w-6 text-purple-600" />
                         </div>
-                      </div>
-                    ))}
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Library Loans</p>
+                            <p className="text-2xl font-bold text-green-600">{loanOrders.length}</p>
+                          </div>
+                          <Users className="h-6 w-6 text-green-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium text-gray-600">Book Purchases</p>
+                            <p className="text-2xl font-bold text-orange-600">{purchaseOrders.length}</p>
+                          </div>
+                          <ShoppingCart className="h-6 w-6 text-orange-600" />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+
+                  {/* Tabs for Different Order Types */}
+                  <div className="border-b">
+                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                      <button
+                        onClick={() => setActiveBookOrderTab('all')}
+                        className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                          activeBookOrderTab === 'all'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        All Orders ({vyronareadOrders.length})
+                      </button>
+                      <button
+                        onClick={() => setActiveBookOrderTab('rentals')}
+                        className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                          activeBookOrderTab === 'rentals'
+                            ? 'border-purple-500 text-purple-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Rentals ({rentalOrders.length})
+                      </button>
+                      <button
+                        onClick={() => setActiveBookOrderTab('loans')}
+                        className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                          activeBookOrderTab === 'loans'
+                            ? 'border-green-500 text-green-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Library Loans ({loanOrders.length})
+                      </button>
+                      <button
+                        onClick={() => setActiveBookOrderTab('purchases')}
+                        className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                          activeBookOrderTab === 'purchases'
+                            ? 'border-orange-500 text-orange-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        Purchases ({purchaseOrders.length})
+                      </button>
+                    </nav>
+                  </div>
+
+                  {/* Order List */}
+                  <div className="space-y-4">
+                    {(() => {
+                      let ordersToShow = [];
+                      switch (activeBookOrderTab) {
+                        case 'rentals':
+                          ordersToShow = rentalOrders;
+                          break;
+                        case 'loans':
+                          ordersToShow = loanOrders;
+                          break;
+                        case 'purchases':
+                          ordersToShow = purchaseOrders;
+                          break;
+                        default:
+                          ordersToShow = vyronareadOrders;
+                      }
+
+                      if (ordersToShow.length === 0) {
+                        return (
+                          <Card>
+                            <CardContent className="p-8 text-center">
+                              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+                              <p className="text-gray-500">
+                                {activeBookOrderTab === 'all' && "No book orders yet"}
+                                {activeBookOrderTab === 'rentals' && "No rental orders yet"}
+                                {activeBookOrderTab === 'loans' && "No library loan orders yet"}
+                                {activeBookOrderTab === 'purchases' && "No purchase orders yet"}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        );
+                      }
+
+                      return ordersToShow.map((order: any) => (
+                        <Card key={order.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start space-x-4">
+                                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  {activeBookOrderTab === 'rentals' || order.metadata?.transaction_type === 'rental' ? (
+                                    <Clock className="h-6 w-6 text-purple-600" />
+                                  ) : activeBookOrderTab === 'loans' || order.metadata?.transaction_type === 'loan' ? (
+                                    <Users className="h-6 w-6 text-green-600" />
+                                  ) : (
+                                    <ShoppingCart className="h-6 w-6 text-orange-600" />
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <h3 className="font-semibold text-gray-900">Order #{order.id}</h3>
+                                    <Badge variant={
+                                      order.status === 'delivered' ? 'default' :
+                                      order.status === 'shipped' ? 'secondary' :
+                                      order.status === 'processing' ? 'outline' :
+                                      'destructive'
+                                    }>
+                                      {order.status}
+                                    </Badge>
+                                    {(activeBookOrderTab === 'rentals' || order.metadata?.transaction_type === 'rental') && (
+                                      <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                                        Rental
+                                      </Badge>
+                                    )}
+                                    {(activeBookOrderTab === 'loans' || order.metadata?.transaction_type === 'loan') && (
+                                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                                        Library Loan
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-gray-600 mb-1">
+                                    Customer: {order.customerName || 'N/A'} • {order.customerEmail || 'N/A'}
+                                  </p>
+                                  <p className="text-sm text-gray-500 mb-2">
+                                    {order.items?.length || 0} item(s) • Total: ₹{(order.totalAmount / 100).toFixed(2)}
+                                  </p>
+                                  <p className="text-xs text-gray-400">
+                                    Order Date: {new Date(order.createdAt).toLocaleDateString()} • 
+                                    {order.trackingNumber && ` Tracking: ${order.trackingNumber}`}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-4 w-4 mr-1" />
+                                  View
+                                </Button>
+                                {order.status === 'processing' && (
+                                  <Button variant="outline" size="sm">
+                                    <Package className="h-4 w-4 mr-1" />
+                                    Ship
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              );
+            })()}
           </TabsContent>
 
           {/* Orders Tab */}
