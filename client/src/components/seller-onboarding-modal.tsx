@@ -708,6 +708,259 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
                 </div>
               </div>
             )}
+
+            {formData.sellerType === "vyronaread" && (
+              <div className="space-y-6">
+                <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <BookOpen className="h-5 w-5 text-amber-600" />
+                    <h4 className="font-semibold text-amber-900">VyronaRead Book Seller Registration</h4>
+                  </div>
+                  <p className="text-sm text-amber-700">
+                    Complete registration for books, rentals, and library services
+                  </p>
+                </div>
+
+                {/* Store/Library Information */}
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 border-b pb-2">Store/Library Information</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="storeLibraryName">Store/Library Name *</Label>
+                      <Input
+                        id="storeLibraryName"
+                        value={formData.storeLibraryName || ""}
+                        onChange={(e) => updateFormData({ storeLibraryName: e.target.value })}
+                        placeholder="Enter your store or library name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="businessAddress">Business Address *</Label>
+                      <Input
+                        id="businessAddress"
+                        value={formData.businessAddress || ""}
+                        onChange={(e) => updateFormData({ businessAddress: e.target.value })}
+                        placeholder="Complete business address"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Listing Types */}
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 border-b pb-2">What will you list?</h5>
+                  <div className="grid grid-cols-2 gap-3">
+                    {["New Books", "Used Books", "Book Rentals", "Digital/E-books"].map((type) => (
+                      <div key={type} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={type}
+                          checked={formData.listingTypes?.includes(type) || false}
+                          onCheckedChange={(checked) => {
+                            const current = formData.listingTypes || [];
+                            if (checked) {
+                              updateFormData({ listingTypes: [...current, type] });
+                            } else {
+                              updateFormData({ listingTypes: current.filter(t => t !== type) });
+                            }
+                          }}
+                        />
+                        <Label htmlFor={type} className="text-sm">{type}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Business Type */}
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 border-b pb-2">Business Type</h5>
+                  <Select onValueChange={(value) => updateFormData({ businessType: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your business type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="individual">Individual Seller</SelectItem>
+                      <SelectItem value="bookstore">Book Store</SelectItem>
+                      <SelectItem value="library">Library</SelectItem>
+                      <SelectItem value="educational">Educational Institution</SelectItem>
+                      <SelectItem value="publishing">Publishing House</SelectItem>
+                      <SelectItem value="distributor">Book Distributor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Inventory & Logistics */}
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 border-b pb-2">Inventory & Logistics</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="estimatedBooks">Estimated Number of Books</Label>
+                      <Select onValueChange={(value) => updateFormData({ estimatedBooks: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1-50">1-50 books</SelectItem>
+                          <SelectItem value="51-200">51-200 books</SelectItem>
+                          <SelectItem value="201-500">201-500 books</SelectItem>
+                          <SelectItem value="501-1000">501-1000 books</SelectItem>
+                          <SelectItem value="1000+">1000+ books</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="pickupDropService">Pickup/Drop Service</Label>
+                      <Select onValueChange={(value) => updateFormData({ pickupDropService: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select service type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="self-delivery">Self Delivery</SelectItem>
+                          <SelectItem value="customer-pickup">Customer Pickup</SelectItem>
+                          <SelectItem value="vyrona-logistics">Vyrona Logistics</SelectItem>
+                          <SelectItem value="both">Both Options</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Library Integration */}
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 border-b pb-2">Library Integration (Optional)</h5>
+                  <Select onValueChange={(value) => updateFormData({ libraryIntegration: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Do you want library management integration?" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="yes">Yes, integrate with existing library system</SelectItem>
+                      <SelectItem value="vyrona-system">Use Vyrona's library management system</SelectItem>
+                      <SelectItem value="no">No, just selling books</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Payment Information */}
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 border-b pb-2">Payment Information</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="bankName">Bank Name</Label>
+                      <Input
+                        id="bankName"
+                        value={formData.bankName || ""}
+                        onChange={(e) => updateFormData({ bankName: e.target.value })}
+                        placeholder="Enter your bank name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="upiId">UPI ID (Optional)</Label>
+                      <Input
+                        id="upiId"
+                        value={formData.upiId || ""}
+                        onChange={(e) => updateFormData({ upiId: e.target.value })}
+                        placeholder="your-upi@bank"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Document Upload */}
+                <div className="space-y-4">
+                  <h5 className="font-semibold text-gray-900 border-b pb-2">Document Upload</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4" />
+                        <span>Address Proof *</span>
+                      </Label>
+                      <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={(e) => updateFormData({ addressProof: e.target.files?.[0] })}
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-gray-500">Aadhaar, Passport, Utility Bill</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4" />
+                        <span>ID Proof *</span>
+                      </Label>
+                      <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={(e) => updateFormData({ idProof: e.target.files?.[0] })}
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-gray-500">PAN Card, Aadhaar, Driving License</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4" />
+                        <span>Business Proof</span>
+                      </Label>
+                      <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.pdf"
+                        onChange={(e) => updateFormData({ businessProof: e.target.files?.[0] })}
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-gray-500">GST Certificate, Shop License (if applicable)</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="flex items-center space-x-2">
+                        <Upload className="h-4 w-4" />
+                        <span>Store/Library Logo</span>
+                      </Label>
+                      <Input
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        onChange={(e) => updateFormData({ logoFile: e.target.files?.[0] })}
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-gray-500">Optional: Upload your logo</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Special Features */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h5 className="font-semibold text-blue-900 mb-3">VyronaRead Special Features</h5>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="inventory-management" />
+                      <Label htmlFor="inventory-management" className="text-sm text-blue-800">
+                        Enable advanced inventory management
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="rental-system" />
+                      <Label htmlFor="rental-system" className="text-sm text-blue-800">
+                        Enable book rental system with due date tracking
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="digital-library" />
+                      <Label htmlFor="digital-library" className="text-sm text-blue-800">
+                        Set up digital library for e-books
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="educational-tools" />
+                      <Label htmlFor="educational-tools" className="text-sm text-blue-800">
+                        Access to educational content management tools
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 
