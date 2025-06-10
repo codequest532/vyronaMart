@@ -1268,28 +1268,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const productId = parseInt(req.params.productId);
       const userId = 1; // Default user for demo
       
-      console.log(`DELETE /api/cart/${productId} - Looking for cart item with userId: ${userId}, productId: ${productId}`);
-      
-      // First check if the item exists
-      const existingItems = await db
-        .select()
-        .from(cartItems)
-        .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
-      
-      console.log(`Found ${existingItems.length} cart items:`, existingItems);
-      
       const result = await db
         .delete(cartItems)
         .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
-      
-      console.log(`Delete result:`, result);
       
       if ((result.rowCount || 0) === 0) {
         return res.status(404).json({ message: "Cart item not found" });
       }
       res.json({ success: true });
     } catch (error) {
-      console.error('DELETE cart error:', error);
+      console.error('Error removing cart item:', error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
