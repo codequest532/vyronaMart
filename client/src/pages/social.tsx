@@ -141,9 +141,9 @@ export default function VyronaSocial() {
     queryKey: ["/api/shopping-rooms"],
   });
 
-  // Fetch products
+  // Fetch products (VyronaSocial specific - group buy enabled products only)
   const { data: products, isLoading: productsLoading } = useQuery({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/social/products"],
   });
 
   // Group cart data
