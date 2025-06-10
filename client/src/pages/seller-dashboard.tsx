@@ -649,10 +649,13 @@ export default function SellerDashboard() {
         <div className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Store className="h-8 w-8 text-blue-600" />
+              <div className="flex items-center gap-2">
+                <Users className="h-8 w-8 text-blue-600" />
+                <Store className="h-6 w-6 text-indigo-600" />
+              </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Seller Dashboard</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Manage your VyronaMart store</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">VyronaHub & VyronaSocial Dashboard</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Manage your group-buying & social commerce store</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -698,12 +701,20 @@ export default function SellerDashboard() {
               Orders
             </Button>
             <Button
+              variant={activeTab === "group-buying" ? "default" : "ghost"}
+              className="w-full justify-start"
+              onClick={() => setActiveTab("group-buying")}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Group Buying
+            </Button>
+            <Button
               variant={activeTab === "analytics" ? "default" : "ghost"}
               className="w-full justify-start"
               onClick={() => setActiveTab("analytics")}
             >
               <TrendingUp className="h-4 w-4 mr-2" />
-              Analytics
+              Social Analytics
             </Button>
             <Button
               variant={activeTab === "books" ? "default" : "ghost"}
@@ -1144,6 +1155,162 @@ export default function SellerDashboard() {
                   <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Analytics Coming Soon</h3>
                   <p className="text-gray-500 dark:text-gray-400">Detailed sales analytics will be available once you have sales data</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === "group-buying" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Group Buying & Social Commerce</h2>
+                <p className="text-gray-600 dark:text-gray-300">Manage group purchases and social shopping campaigns for VyronaHub & VyronaSocial</p>
+              </div>
+              
+              {/* Group Buying Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="border-purple-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-purple-600">Active Group Campaigns</p>
+                        <p className="text-3xl font-bold text-purple-700">0</p>
+                        <p className="text-xs text-purple-500">Start your first group buy</p>
+                      </div>
+                      <Users className="h-8 w-8 text-purple-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-blue-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">Group Members</p>
+                        <p className="text-3xl font-bold text-blue-700">0</p>
+                        <p className="text-xs text-blue-500">Total participants</p>
+                      </div>
+                      <User className="h-8 w-8 text-blue-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="border-green-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-green-600">Group Sales</p>
+                        <p className="text-3xl font-bold text-green-700">₹0</p>
+                        <p className="text-xs text-green-500">From group purchases</p>
+                      </div>
+                      <DollarSign className="h-8 w-8 text-green-600" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Group Products Section */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5" />
+                        Group-Enabled Products
+                      </CardTitle>
+                      <CardDescription>
+                        Products available for group buying and social commerce
+                      </CardDescription>
+                    </div>
+                    <Button 
+                      onClick={() => setShowAddProductDialog(true)}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Group Product
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {sellerProducts && sellerProducts.filter((product: any) => product.enable_group_buy).length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {sellerProducts
+                        .filter((product: any) => product.enable_group_buy)
+                        .map((product: any) => (
+                          <Card key={product.id} className="border-purple-100">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                  <Package className="h-6 w-6 text-purple-600" />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="font-medium text-gray-900">{product.name}</h4>
+                                  <p className="text-sm text-gray-500">₹{product.price?.toLocaleString()}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-600">Group Target:</span>
+                                  <span className="font-medium">{product.group_buy_min_quantity || 'Any size'}</span>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-gray-600">Group Discount:</span>
+                                  <span className="font-medium text-green-600">{product.group_buy_discount || 0}%</span>
+                                </div>
+                                <Badge variant="secondary" className="w-full justify-center bg-purple-50 text-purple-700">
+                                  Group Buy Enabled
+                                </Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-gray-600 mb-2">No Group Products Yet</h3>
+                      <p className="text-gray-500 mb-6 max-w-md mx-auto">
+                        Enable group buying on your products to let customers form groups and get bulk discounts
+                      </p>
+                      <Button 
+                        onClick={() => setShowAddProductDialog(true)}
+                        className="bg-purple-600 hover:bg-purple-700"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Group Product
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Social Commerce Tips */}
+              <Card className="bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="text-purple-800">VyronaHub & VyronaSocial Tips</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-purple-700">Group Buying Best Practices:</h4>
+                      <ul className="text-sm text-purple-600 space-y-1">
+                        <li>• Set realistic group size targets (4-10 members)</li>
+                        <li>• Offer attractive group discounts (10-20%)</li>
+                        <li>• Use clear product descriptions</li>
+                        <li>• Respond quickly to group inquiries</li>
+                      </ul>
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-indigo-700">Social Commerce Features:</h4>
+                      <ul className="text-sm text-indigo-600 space-y-1">
+                        <li>• Community-driven purchasing</li>
+                        <li>• Bulk order management</li>
+                        <li>• Social sharing incentives</li>
+                        <li>• Group chat integration</li>
+                      </ul>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
