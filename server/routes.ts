@@ -362,6 +362,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: 'seller'
         };
         
+        // Always ensure demo data exists for VyronaRead seller
+        await createDemoReadSellerData(readSellerId);
+        
         return res.json({
           success: true,
           user: req.session.user,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,6 +66,41 @@ export default function VyronaReadSellerDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
+  const [showAddBookDialog, setShowAddBookDialog] = useState(false);
+  const [showAddEbookDialog, setShowAddEbookDialog] = useState(false);
+  const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
+  const [newBook, setNewBook] = useState({
+    title: "",
+    author: "",
+    isbn: "",
+    category: "",
+    condition: "excellent",
+    price: 0,
+    rentalPrice: 0,
+    description: "",
+    publisher: "",
+    publicationYear: "",
+    language: "English"
+  });
+  const [newEbook, setNewEbook] = useState({
+    title: "",
+    author: "",
+    isbn: "",
+    category: "",
+    price: 0,
+    description: "",
+    fileUrl: "",
+    previewUrl: ""
+  });
+  const [newLibrary, setNewLibrary] = useState({
+    name: "",
+    type: "",
+    address: "",
+    contact: "",
+    phone: "",
+    email: "",
+    description: ""
+  });
 
   // Redirect non-sellers
   useEffect(() => {
@@ -109,6 +145,105 @@ export default function VyronaReadSellerDashboard() {
     enabled: !!user && user.role === "seller"
   });
 
+  // Mutations for book management
+  const addBookMutation = useMutation({
+    mutationFn: async (bookData: any) => {
+      const response = await apiRequest("POST", "/api/vyronaread/books", bookData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Physical book added successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/seller-books"] });
+      setShowAddBookDialog(false);
+      setNewBook({
+        title: "",
+        author: "",
+        isbn: "",
+        category: "",
+        condition: "excellent",
+        price: 0,
+        rentalPrice: 0,
+        description: "",
+        publisher: "",
+        publicationYear: "",
+        language: "English"
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to add book. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addEbookMutation = useMutation({
+    mutationFn: async (ebookData: any) => {
+      const response = await apiRequest("POST", "/api/vyronaread/ebooks", ebookData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "E-book added successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/ebooks"] });
+      setShowAddEbookDialog(false);
+      setNewEbook({
+        title: "",
+        author: "",
+        isbn: "",
+        category: "",
+        price: 0,
+        description: "",
+        fileUrl: "",
+        previewUrl: ""
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to add e-book. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const addLibraryMutation = useMutation({
+    mutationFn: async (libraryData: any) => {
+      const response = await apiRequest("POST", "/api/vyronaread/libraries", libraryData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Library integration request submitted successfully!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/library-books"] });
+      setShowAddLibraryDialog(false);
+      setNewLibrary({
+        name: "",
+        type: "",
+        address: "",
+        contact: "",
+        phone: "",
+        email: "",
+        description: ""
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to submit library request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-100">
@@ -116,6 +251,554 @@ export default function VyronaReadSellerDashboard() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading VyronaRead Dashboard...</p>
         </div>
+
+        {/* Add Book Dialog */}
+        {showAddBookDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Add Physical Book</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowAddBookDialog(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                    Title *
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    value={newBook.title}
+                    onChange={(e) => setNewBook({...newBook, title: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="Enter book title"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
+                    Author *
+                  </label>
+                  <input
+                    id="author"
+                    type="text"
+                    value={newBook.author}
+                    onChange={(e) => setNewBook({...newBook, author: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="Enter author name"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="isbn" className="block text-sm font-medium text-gray-700 mb-1">
+                      ISBN
+                    </label>
+                    <input
+                      id="isbn"
+                      type="text"
+                      value={newBook.isbn}
+                      onChange={(e) => setNewBook({...newBook, isbn: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="ISBN number"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                      Category *
+                    </label>
+                    <select
+                      id="category"
+                      value={newBook.category}
+                      onChange={(e) => setNewBook({...newBook, category: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      required
+                    >
+                      <option value="">Select category</option>
+                      <option value="fiction">Fiction</option>
+                      <option value="non-fiction">Non-Fiction</option>
+                      <option value="textbook">Textbook</option>
+                      <option value="reference">Reference</option>
+                      <option value="children">Children's Books</option>
+                      <option value="academic">Academic</option>
+                      <option value="biography">Biography</option>
+                      <option value="history">History</option>
+                      <option value="science">Science</option>
+                      <option value="technology">Technology</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="condition" className="block text-sm font-medium text-gray-700 mb-1">
+                      Condition *
+                    </label>
+                    <select
+                      id="condition"
+                      value={newBook.condition}
+                      onChange={(e) => setNewBook({...newBook, condition: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      required
+                    >
+                      <option value="excellent">Excellent</option>
+                      <option value="very-good">Very Good</option>
+                      <option value="good">Good</option>
+                      <option value="fair">Fair</option>
+                      <option value="poor">Poor</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
+                      Language
+                    </label>
+                    <select
+                      id="language"
+                      value={newBook.language}
+                      onChange={(e) => setNewBook({...newBook, language: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    >
+                      <option value="English">English</option>
+                      <option value="Hindi">Hindi</option>
+                      <option value="Bengali">Bengali</option>
+                      <option value="Tamil">Tamil</option>
+                      <option value="Telugu">Telugu</option>
+                      <option value="Marathi">Marathi</option>
+                      <option value="Gujarati">Gujarati</option>
+                      <option value="Urdu">Urdu</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                      Selling Price (₹) *
+                    </label>
+                    <input
+                      id="price"
+                      type="number"
+                      value={newBook.price}
+                      onChange={(e) => setNewBook({...newBook, price: parseFloat(e.target.value) || 0})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="0"
+                      min="0"
+                      step="0.01"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="rentalPrice" className="block text-sm font-medium text-gray-700 mb-1">
+                      Rental Price (₹/day)
+                    </label>
+                    <input
+                      id="rentalPrice"
+                      type="number"
+                      value={newBook.rentalPrice}
+                      onChange={(e) => setNewBook({...newBook, rentalPrice: parseFloat(e.target.value) || 0})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="0"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="publisher" className="block text-sm font-medium text-gray-700 mb-1">
+                      Publisher
+                    </label>
+                    <input
+                      id="publisher"
+                      type="text"
+                      value={newBook.publisher}
+                      onChange={(e) => setNewBook({...newBook, publisher: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="Publisher name"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="publicationYear" className="block text-sm font-medium text-gray-700 mb-1">
+                      Publication Year
+                    </label>
+                    <input
+                      id="publicationYear"
+                      type="text"
+                      value={newBook.publicationYear}
+                      onChange={(e) => setNewBook({...newBook, publicationYear: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="2024"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    value={newBook.description}
+                    onChange={(e) => setNewBook({...newBook, description: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    rows={3}
+                    placeholder="Brief description of the book"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button variant="outline" onClick={() => setShowAddBookDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (newBook.title && newBook.author && newBook.category && newBook.price > 0) {
+                        addBookMutation.mutate(newBook);
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Please fill in all required fields",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    disabled={addBookMutation.isPending}
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                  >
+                    {addBookMutation.isPending ? "Adding..." : "Add Book"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add E-book Dialog */}
+        {showAddEbookDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Add E-Book</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowAddEbookDialog(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="ebook-title" className="block text-sm font-medium text-gray-700 mb-1">
+                    Title *
+                  </label>
+                  <input
+                    id="ebook-title"
+                    type="text"
+                    value={newEbook.title}
+                    onChange={(e) => setNewEbook({...newEbook, title: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="Enter e-book title"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="ebook-author" className="block text-sm font-medium text-gray-700 mb-1">
+                    Author *
+                  </label>
+                  <input
+                    id="ebook-author"
+                    type="text"
+                    value={newEbook.author}
+                    onChange={(e) => setNewEbook({...newEbook, author: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="Enter author name"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="ebook-isbn" className="block text-sm font-medium text-gray-700 mb-1">
+                      ISBN
+                    </label>
+                    <input
+                      id="ebook-isbn"
+                      type="text"
+                      value={newEbook.isbn}
+                      onChange={(e) => setNewEbook({...newEbook, isbn: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="ISBN number"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="ebook-category" className="block text-sm font-medium text-gray-700 mb-1">
+                      Category *
+                    </label>
+                    <select
+                      id="ebook-category"
+                      value={newEbook.category}
+                      onChange={(e) => setNewEbook({...newEbook, category: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      required
+                    >
+                      <option value="">Select category</option>
+                      <option value="fiction">Fiction</option>
+                      <option value="non-fiction">Non-Fiction</option>
+                      <option value="textbook">Textbook</option>
+                      <option value="reference">Reference</option>
+                      <option value="children">Children's Books</option>
+                      <option value="academic">Academic</option>
+                      <option value="biography">Biography</option>
+                      <option value="history">History</option>
+                      <option value="science">Science</option>
+                      <option value="technology">Technology</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="ebook-price" className="block text-sm font-medium text-gray-700 mb-1">
+                    Price (₹) *
+                  </label>
+                  <input
+                    id="ebook-price"
+                    type="number"
+                    value={newEbook.price}
+                    onChange={(e) => setNewEbook({...newEbook, price: parseFloat(e.target.value) || 0})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="ebook-description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    id="ebook-description"
+                    value={newEbook.description}
+                    onChange={(e) => setNewEbook({...newEbook, description: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    rows={3}
+                    placeholder="Brief description of the e-book"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="ebook-fileUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                    File URL
+                  </label>
+                  <input
+                    id="ebook-fileUrl"
+                    type="url"
+                    value={newEbook.fileUrl}
+                    onChange={(e) => setNewEbook({...newEbook, fileUrl: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="https://example.com/ebook.pdf"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="ebook-previewUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                    Preview URL
+                  </label>
+                  <input
+                    id="ebook-previewUrl"
+                    type="url"
+                    value={newEbook.previewUrl}
+                    onChange={(e) => setNewEbook({...newEbook, previewUrl: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="https://example.com/preview.pdf"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button variant="outline" onClick={() => setShowAddEbookDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (newEbook.title && newEbook.author && newEbook.category && newEbook.price > 0) {
+                        addEbookMutation.mutate(newEbook);
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Please fill in all required fields",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    disabled={addEbookMutation.isPending}
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                  >
+                    {addEbookMutation.isPending ? "Adding..." : "Add E-book"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Library Dialog */}
+        {showAddLibraryDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Request Library Integration</h3>
+                <Button variant="ghost" size="sm" onClick={() => setShowAddLibraryDialog(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="library-name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Library Name *
+                  </label>
+                  <input
+                    id="library-name"
+                    type="text"
+                    value={newLibrary.name}
+                    onChange={(e) => setNewLibrary({...newLibrary, name: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="Enter library name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="library-type" className="block text-sm font-medium text-gray-700 mb-1">
+                    Library Type *
+                  </label>
+                  <select
+                    id="library-type"
+                    value={newLibrary.type}
+                    onChange={(e) => setNewLibrary({...newLibrary, type: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    required
+                  >
+                    <option value="">Select type</option>
+                    <option value="public">Public Library</option>
+                    <option value="academic">Academic Library</option>
+                    <option value="school">School Library</option>
+                    <option value="special">Special Library</option>
+                    <option value="private">Private Library</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="library-address" className="block text-sm font-medium text-gray-700 mb-1">
+                    Address *
+                  </label>
+                  <textarea
+                    id="library-address"
+                    value={newLibrary.address}
+                    onChange={(e) => setNewLibrary({...newLibrary, address: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    rows={2}
+                    placeholder="Enter complete address"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="library-contact" className="block text-sm font-medium text-gray-700 mb-1">
+                    Contact Person *
+                  </label>
+                  <input
+                    id="library-contact"
+                    type="text"
+                    value={newLibrary.contact}
+                    onChange={(e) => setNewLibrary({...newLibrary, contact: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    placeholder="Contact person name"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="library-phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone
+                    </label>
+                    <input
+                      id="library-phone"
+                      type="tel"
+                      value={newLibrary.phone}
+                      onChange={(e) => setNewLibrary({...newLibrary, phone: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="Phone number"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="library-email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      id="library-email"
+                      type="email"
+                      value={newLibrary.email}
+                      onChange={(e) => setNewLibrary({...newLibrary, email: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      placeholder="Email address"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="library-description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    id="library-description"
+                    value={newLibrary.description}
+                    onChange={(e) => setNewLibrary({...newLibrary, description: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    rows={3}
+                    placeholder="Brief description and integration requirements"
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3 pt-4">
+                  <Button variant="outline" onClick={() => setShowAddLibraryDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (newLibrary.name && newLibrary.type && newLibrary.address && newLibrary.contact) {
+                        addLibraryMutation.mutate(newLibrary);
+                      } else {
+                        toast({
+                          title: "Error",
+                          description: "Please fill in all required fields",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    disabled={addLibraryMutation.isPending}
+                    className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                  >
+                    {addLibraryMutation.isPending ? "Submitting..." : "Submit Request"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
