@@ -1619,6 +1619,172 @@ export default function VyronaReadSellerDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Library Integration Dialog */}
+      {showLibraryIntegrationDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Library Integration Request</h3>
+              <Button variant="ghost" size="sm" onClick={() => setShowLibraryIntegrationDialog(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              Submit a request to integrate with libraries for book lending and distribution
+            </p>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              submitLibraryIntegrationMutation.mutate(libraryIntegrationForm);
+            }} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="libraryName">Library Name *</Label>
+                  <Input
+                    id="libraryName"
+                    placeholder="Enter library name"
+                    value={libraryIntegrationForm.libraryName}
+                    onChange={(e) => setLibraryIntegrationForm({
+                      ...libraryIntegrationForm,
+                      libraryName: e.target.value
+                    })}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="libraryType">Library Type *</Label>
+                  <Select 
+                    value={libraryIntegrationForm.libraryType}
+                    onValueChange={(value) => setLibraryIntegrationForm({
+                      ...libraryIntegrationForm,
+                      libraryType: value
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public Library</SelectItem>
+                      <SelectItem value="academic">Academic Library</SelectItem>
+                      <SelectItem value="corporate">Corporate Library</SelectItem>
+                      <SelectItem value="special">Special Library</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="contactPerson">Contact Person *</Label>
+                  <Input
+                    id="contactPerson"
+                    placeholder="Enter contact person name"
+                    value={libraryIntegrationForm.contactPerson}
+                    onChange={(e) => setLibraryIntegrationForm({
+                      ...libraryIntegrationForm,
+                      contactPerson: e.target.value
+                    })}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="contact@library.com"
+                    value={libraryIntegrationForm.email}
+                    onChange={(e) => setLibraryIntegrationForm({
+                      ...libraryIntegrationForm,
+                      email: e.target.value
+                    })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input
+                    id="phone"
+                    placeholder="+91 9876543210"
+                    value={libraryIntegrationForm.phone}
+                    onChange={(e) => setLibraryIntegrationForm({
+                      ...libraryIntegrationForm,
+                      phone: e.target.value
+                    })}
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="totalBooks">Total Books in Collection</Label>
+                  <Input
+                    id="totalBooks"
+                    type="number"
+                    placeholder="0"
+                    value={libraryIntegrationForm.totalBooks}
+                    onChange={(e) => setLibraryIntegrationForm({
+                      ...libraryIntegrationForm,
+                      totalBooks: Number(e.target.value)
+                    })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="address">Address *</Label>
+                <Textarea
+                  id="address"
+                  placeholder="Complete address with city, state, and pincode"
+                  className="resize-none"
+                  value={libraryIntegrationForm.address}
+                  onChange={(e) => setLibraryIntegrationForm({
+                    ...libraryIntegrationForm,
+                    address: e.target.value
+                  })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="message">Additional Message</Label>
+                <Textarea
+                  id="message"
+                  placeholder="Any additional information or special requirements"
+                  className="resize-none"
+                  value={libraryIntegrationForm.message}
+                  onChange={(e) => setLibraryIntegrationForm({
+                    ...libraryIntegrationForm,
+                    message: e.target.value
+                  })}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowLibraryIntegrationDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={submitLibraryIntegrationMutation.isPending}
+                >
+                  {submitLibraryIntegrationMutation.isPending ? "Submitting..." : "Submit Request"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
