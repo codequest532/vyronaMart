@@ -5979,33 +5979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }).onConflictDoNothing();
       }
 
-      // Create demo rental transactions
-      const demoRentals = [
-        {
-          bookId: 1,
-          userId: 1,
-          rentalDuration: 14,
-          totalAmount: 50,
-          status: 'active',
-          sellerId: sellerId
-        },
-        {
-          bookId: 2,
-          userId: 1,
-          rentalDuration: 7,
-          totalAmount: 45,
-          status: 'returned',
-          sellerId: sellerId
-        }
-      ];
-
-      for (const rental of demoRentals) {
-        await db.execute(sql`
-          INSERT INTO book_loans (physical_book_id, user_id, rental_duration_days, total_amount, status, seller_id, loan_date, due_date)
-          VALUES (${rental.bookId}, ${rental.userId}, ${rental.rentalDuration}, ${rental.totalAmount}, ${rental.status}, ${rental.sellerId}, NOW(), NOW() + INTERVAL '${rental.rentalDuration} days')
-          ON CONFLICT DO NOTHING
-        `);
-      }
+      console.log("VyronaRead demo seller data created successfully");
 
     } catch (error) {
       console.error('Error creating demo VyronaRead seller data:', error);
