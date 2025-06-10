@@ -31,7 +31,6 @@ import { eq, desc, and, sql } from "drizzle-orm";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail, sendOrderConfirmationEmail } from "./email";
-import { eq, desc, sql, and } from "drizzle-orm";
 
 // Online status and WebSocket management
 interface OnlineUser {
@@ -5787,8 +5786,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const product of demoProducts) {
         await db.execute(sql`
-          INSERT INTO products (name, description, price, seller_id, category, image_url, stock_quantity, module)
-          VALUES (${product.name}, ${product.description}, ${product.price}, ${product.sellerId}, ${product.category}, ${product.imageUrl}, 50, 'vyronahub')
+          INSERT INTO products (name, description, price, store_id, category, image_url, module)
+          VALUES (${product.name}, ${product.description}, ${product.price}, ${product.sellerId}, ${product.category}, ${product.imageUrl}, 'vyronahub')
           ON CONFLICT (name) DO NOTHING
         `);
       }
