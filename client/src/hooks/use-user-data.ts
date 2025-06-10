@@ -11,6 +11,7 @@ export function useUserData() {
   const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/current-user"],
     retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const actualUser = user || currentUser;
