@@ -5970,6 +5970,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           author: ebook.author,
           isbn: ebook.isbn,
           category: ebook.category,
+          format: 'PDF',
           price: ebook.price,
           sellerId: ebook.sellerId,
           description: ebook.description,
