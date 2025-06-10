@@ -556,7 +556,7 @@ export default function VyronaRead() {
                         {/* Pricing */}
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="text-lg font-bold text-purple-600">₹{Math.floor((book.price || 299) / 100)}</span>
+                            <span className="text-lg font-bold text-purple-600">₹{Math.floor(book.price || 299)}</span>
                             <span className="text-xs text-gray-500 ml-1">to buy</span>
                           </div>
                           <div className="text-right">
@@ -897,7 +897,7 @@ export default function VyronaRead() {
                           onClick={() => proceedToEBookCheckout(ebook)}
                         >
                           <ShoppingCart className="mr-2 h-4 w-4" />
-                          Buy Now - ₹{Math.floor((ebook.price || 1999) / 100)}
+                          Buy Now - ₹{Math.floor(ebook.price || 1999)}
                         </Button>
                       </div>
 
@@ -1122,7 +1122,7 @@ export default function VyronaRead() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold">₹{Math.floor((selectedEBook.price || 1999) / 100)}</div>
+                    <div className="text-3xl font-bold">₹{Math.floor(selectedEBook.price || 1999)}</div>
                     <div className="text-blue-100 text-sm">One-time purchase</div>
                     <Button 
                       className="mt-3 bg-white text-blue-600 hover:bg-blue-50"
@@ -1268,7 +1268,7 @@ export default function VyronaRead() {
                                   onClick={() => proceedToEBookCheckout()}
                                 >
                                   <ShoppingCart className="mr-2 h-5 w-5" />
-                                  Purchase Full E-Book - ₹{Math.floor((selectedEBook.price || 1999) / 100)}
+                                  Purchase Full E-Book - ₹{Math.floor(selectedEBook.price || 1999)}
                                 </Button>
                               </div>
                             </div>
@@ -1316,7 +1316,7 @@ export default function VyronaRead() {
                     </div>
 
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">₹{Math.floor((selectedEBook.price || 1999) / 100)}</div>
+                      <div className="text-2xl font-bold text-blue-600">₹{Math.floor(selectedEBook.price || 1999)}</div>
                       <div className="text-sm text-gray-500">One-time payment</div>
                       <div className="text-xs text-green-600 mt-1">✓ 30-day money-back guarantee</div>
                     </div>
