@@ -985,7 +985,7 @@ export default function SellerDashboard() {
                             <h3 className="font-medium mb-1">{product.name}</h3>
                             <p className="text-sm text-gray-500 mb-2">{product.category}</p>
                             <div className="flex items-center justify-between">
-                              <span className="font-bold text-blue-600">₹{(product.price / 100).toLocaleString()}</span>
+                              <span className="font-bold text-blue-600">₹{product.price.toLocaleString()}</span>
                               <Badge variant="outline">Active</Badge>
                             </div>
                             <div className="flex gap-2 mt-3">
