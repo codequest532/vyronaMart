@@ -5922,7 +5922,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const book of demoBooks) {
         await db.execute(sql`
-          INSERT INTO physical_books (title, author, isbn, category, condition, price, rental_price, seller_id, description, image_url, availability_status)
+          INSERT INTO physical_books (title, author, isbn, category, book_condition, price, rental_price, seller_id, description, image_url, availability_status)
           VALUES (${book.title}, ${book.author}, ${book.isbn}, ${book.category}, ${book.condition}, ${book.price}, ${book.rentalPrice}, ${book.sellerId}, ${book.description}, ${book.imageUrl}, 'available')
           ON CONFLICT (isbn, seller_id) DO NOTHING
         `);

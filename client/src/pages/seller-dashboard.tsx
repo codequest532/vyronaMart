@@ -87,6 +87,39 @@ export default function SellerDashboard() {
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showAddProductDialog, setShowAddProductDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Get current user for authentication check
+  const { data: currentUser, isLoading: userLoading } = useQuery({
+    queryKey: ["/api/current-user"],
+  });
+
+  // Redirect VyronaRead sellers to their specialized dashboard
+  useEffect(() => {
+    if (!userLoading && currentUser) {
+      if (currentUser.role !== "seller") {
+        setLocation("/login");
+      } else if (currentUser.email === "seller@vyronaread.com") {
+        setLocation("/vyronaread-seller-dashboard");
+      }
+    }
+  }, [currentUser, userLoading, setLocation]);
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (!currentUser || currentUser.role !== "seller") {
+    return null;
+  }
+
+  // Prevent VyronaRead sellers from accessing this dashboard
+  if (currentUser.email === "seller@vyronaread.com") {
+    return null;
+  }
   const [bookSection, setBookSection] = useState("overview");
   const [newBook, setNewBook] = useState({
     title: "",
@@ -447,10 +480,7 @@ export default function SellerDashboard() {
     createLibraryRequestMutation.mutate(newLibrary);
   };
 
-  // Get current user for seller-specific data access
-  const { data: currentUser } = useQuery({
-    queryKey: ["/api/current-user"],
-  });
+
 
   // Order status update mutation with automated email workflow
   const updateOrderStatusMutation = useMutation({
