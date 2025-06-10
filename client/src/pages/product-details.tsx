@@ -10,7 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Star, Heart, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw, Share2, MessageCircle, Users, Zap, Award, Clock, Send } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import type { Product } from "@shared/schema";
 
 interface ProductDetailsProps {
@@ -28,9 +30,46 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
   const [reviewerName, setReviewerName] = useState("");
   const [questionText, setQuestionText] = useState("");
   const [questionerName, setQuestionerName] = useState("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: product, isLoading } = useQuery<Product>({
     queryKey: [`/api/products/${productId}`],
+  });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ["/api/current-user"],
+    retry: false,
+  });
+
+  // Add to cart mutation
+  const addToCartMutation = useMutation({
+    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
+      return await apiRequest("POST", "/api/cart/add", { productId, quantity });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Added to Cart",
+        description: `${product?.name} has been added to your cart.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+    },
+    onError: (error: any) => {
+      if (error.message.includes("401")) {
+        toast({
+          title: "Please Login",
+          description: "You need to login to add items to cart.",
+          variant: "destructive",
+        });
+        setLocation("/login");
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to add item to cart. Please try again.",
+          variant: "destructive",
+        });
+      }
+    },
   });
 
   if (isLoading) {
@@ -65,8 +104,22 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
   const images = productImages;
 
   const handleAddToCart = () => {
-    // This would trigger auth modal in real implementation
-    alert("Please login to add items to cart");
+    if (!currentUser) {
+      toast({
+        title: "Please Login",
+        description: "You need to login to add items to cart.",
+        variant: "destructive",
+      });
+      setLocation("/login");
+      return;
+    }
+
+    if (!product) return;
+
+    addToCartMutation.mutate({
+      productId: product.id,
+      quantity: quantity,
+    });
   };
 
   const handleSubmitReview = () => {
@@ -285,11 +338,21 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
               <div className="grid grid-cols-1 gap-4">
                 <Button
                   onClick={handleAddToCart}
+                  disabled={addToCartMutation.isPending}
                   size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ShoppingCart className="h-5 w-5 mr-3" />
-                  Add to Cart • ₹{(product.price * quantity).toLocaleString()}
+                  {addToCartMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                      Adding to Cart...
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart className="h-5 w-5 mr-3" />
+                      Add to Cart • ₹{(product.price * quantity).toLocaleString()}
+                    </>
+                  )}
                 </Button>
                 
                 <div className="grid grid-cols-2 gap-3">
