@@ -345,8 +345,9 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
                     <div>
                       <h4 className="font-medium mb-2">Specifications:</h4>
                       <ul className="space-y-2 text-gray-700">
-                        <li>• Weight: 2.5 kg</li>
-                        <li>• Dimensions: 30 x 20 x 15 cm</li>
+                        {product.weight && <li>• Weight: {product.weight}</li>}
+                        {product.dimensions && <li>• Dimensions: {product.dimensions}</li>}
+                        {product.brand && <li>• Brand: {product.brand}</li>}
                         <li>• Material: Premium grade</li>
                         <li>• Color: As shown in images</li>
                       </ul>
