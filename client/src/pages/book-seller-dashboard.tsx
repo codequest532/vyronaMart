@@ -127,6 +127,8 @@ export default function BookSellerDashboard() {
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [activeBookOrderTab, setActiveBookOrderTab] = useState('all');
   const [driveLink, setDriveLink] = useState("");
+  const [selectedLibraryId, setSelectedLibraryId] = useState<number | null>(null);
+  const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
   const [newEbook, setNewEbook] = useState({
     title: "",
     author: "",
@@ -149,6 +151,10 @@ export default function BookSellerDashboard() {
 
   const { data: libraryBooks } = useQuery({
     queryKey: ["/api/vyronaread/library-books"],
+  });
+
+  const { data: libraryRequests } = useQuery({
+    queryKey: ["/api/library-integration-requests"],
   });
 
   const { data: sellerOrders } = useQuery({
@@ -259,6 +265,27 @@ export default function BookSellerDashboard() {
     if (searchTerm) {
       console.log(`Searching books for: ${searchTerm}`);
     }
+  };
+
+  const handleLibrarySelect = async (libraryId: number) => {
+    setSelectedLibraryId(libraryId);
+    try {
+      const response = await fetch(`/api/vyronaread/library-books/${libraryId}`);
+      const data = await response.json();
+      setSelectedLibraryBooks(data);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch library books",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleBackToLibraries = () => {
+    setSelectedLibraryId(null);
+    setSelectedLibraryBooks([]);
   };
 
   const handleLogout = async () => {
@@ -778,39 +805,139 @@ export default function BookSellerDashboard() {
                       </Button>
                     </div>
                     
-                    {libraryBooks && libraryBooks.length > 0 ? (
-                      <div className="grid gap-4">
-                        {libraryBooks.map((book: any) => (
-                          <div key={book.id} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-semibold">{book.title}</h4>
-                                <p className="text-sm text-gray-600">by {book.author}</p>
-                                <p className="text-xs text-gray-500">ISBN: {book.isbn} | Category: {book.category}</p>
-                                <p className="text-xs text-green-600">Available: {book.available}/{book.copies} copies</p>
+                    {selectedLibraryId ? (
+                      // Show books for selected library
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 pb-4 border-b">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={handleBackToLibraries}
+                            className="flex items-center gap-2"
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Back to Libraries
+                          </Button>
+                          <h3 className="text-lg font-semibold">
+                            {libraryRequests?.find((lib: any) => lib.id === selectedLibraryId)?.libraryName || 'Library'} Books
+                          </h3>
+                        </div>
+                        
+                        {selectedLibraryBooks && selectedLibraryBooks.length > 0 ? (
+                          <div className="grid gap-4">
+                            {selectedLibraryBooks.map((book: any) => (
+                              <div key={book.id} className="border rounded-lg p-4">
+                                <div className="flex justify-between items-start">
+                                  <div className="flex gap-4">
+                                    {book.imageUrl && (
+                                      <div className="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                                        <img 
+                                          src={book.imageUrl.includes('drive.google.com') 
+                                            ? book.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) 
+                                              ? `https://drive.google.com/thumbnail?id=${book.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1]}&sz=w200`
+                                              : book.imageUrl
+                                            : book.imageUrl
+                                          }
+                                          alt={book.title}
+                                          className="w-full h-full object-cover"
+                                          onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            const fallback = target.parentElement?.querySelector('.book-fallback') as HTMLElement;
+                                            if (fallback) fallback.style.display = 'flex';
+                                          }}
+                                        />
+                                        <div className="book-fallback w-full h-full bg-gray-200 flex items-center justify-center hidden">
+                                          <Book className="h-6 w-6 text-gray-400" />
+                                        </div>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <h4 className="font-semibold">{book.title}</h4>
+                                      <p className="text-sm text-gray-600">by {book.author}</p>
+                                      <p className="text-xs text-gray-500">ISBN: {book.isbn} | Category: {book.category}</p>
+                                      <p className="text-xs text-green-600">Available: {book.available}/{book.copies} copies</p>
+                                      {book.publisher && (
+                                        <p className="text-xs text-gray-500">Publisher: {book.publisher}</p>
+                                      )}
+                                      {book.publicationYear && (
+                                        <p className="text-xs text-gray-500">Year: {book.publicationYear}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button size="sm" variant="outline">
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button size="sm" variant="outline">
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
+                            ))}
                           </div>
-                        ))}
+                        ) : (
+                          <div className="text-center py-8">
+                            <Book className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <p className="text-gray-500">No books found in this library.</p>
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div className="text-center py-8">
-                        <Library className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-600 mb-2">No Library Books Yet</h3>
-                        <p className="text-gray-500 mb-4">Start by adding books to your library or integrating with partner libraries</p>
-                        <Button onClick={handleAddLibrary}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add First Library
-                        </Button>
-                      </div>
+                      // Show library list
+                      libraryRequests && libraryRequests.length > 0 ? (
+                        <div className="grid gap-4">
+                          <h3 className="text-lg font-semibold mb-4">Your Library Partnerships</h3>
+                          {libraryRequests.map((library: any) => (
+                            <div 
+                              key={library.id} 
+                              className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer group"
+                              onClick={() => handleLibrarySelect(library.id)}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="flex gap-4">
+                                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <Library className="h-6 w-6 text-blue-600" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                      {library.libraryName}
+                                    </h4>
+                                    <p className="text-sm text-gray-600">Type: {library.libraryType}</p>
+                                    <p className="text-xs text-gray-500">{library.address}</p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <Badge 
+                                        variant={library.status === 'approved' ? 'default' : 'secondary'}
+                                        className="text-xs"
+                                      >
+                                        {library.status || 'pending'}
+                                      </Badge>
+                                      <span className="text-xs text-gray-500">
+                                        Contact: {library.contactPerson}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-gray-500">View Books</span>
+                                  <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Library className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-600 mb-2">No Library Partnerships Yet</h3>
+                          <p className="text-gray-500 mb-4">Start by adding library partnerships to manage book inventory</p>
+                          <Button onClick={handleAddLibrary}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add First Library
+                          </Button>
+                        </div>
+                      )
                     )}
                   </div>
                 </CardContent>
