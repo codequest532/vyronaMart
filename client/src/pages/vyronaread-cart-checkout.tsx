@@ -258,8 +258,26 @@ export default function VyronaReadCartCheckout() {
                   <div className="text-right">
                     <div className="text-lg font-semibold text-purple-600">
                       ₹{calculateItemPrice(item)}
-                      {item.type === 'rent' && <span className="text-sm">/week</span>}
+                      {item.type === 'rent' && <span className="text-sm"> total</span>}
                     </div>
+                    {item.type === 'rent' && (
+                      <div className="mt-2">
+                        <Label htmlFor={`duration-${item.book.id}`} className="text-xs text-gray-600">
+                          Rental Duration:
+                        </Label>
+                        <select
+                          id={`duration-${item.book.id}`}
+                          value={rentalDurations[`${item.book.id}-${item.type}`] || 1}
+                          onChange={(e) => updateRentalDuration(`${item.book.id}-${item.type}`, parseInt(e.target.value))}
+                          className="mt-1 block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-purple-500"
+                        >
+                          <option value={1}>1 period (15 days)</option>
+                          <option value={2}>2 periods (30 days)</option>
+                          <option value={3}>3 periods (45 days)</option>
+                          <option value={4}>4 periods (60 days)</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
