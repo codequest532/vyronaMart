@@ -41,7 +41,8 @@ import {
   Library,
   Building,
   Edit,
-  X
+  X,
+  Send
 } from "lucide-react";
 
 // Google Drive URL conversion function
@@ -1040,7 +1041,7 @@ export default function VyronaRead() {
                               View All Books
                             </Button>
                           </div>
-                          <LibraryBooksSection libraryId={library.id} libraryName={library.libraryName || library.name} />
+                          <LibraryBooksSection libraryId={library.id} libraryName={library.libraryName || library.name} addToLibraryCart={addToLibraryCart} />
                         </div>
                       </CardContent>
                     </Card>
@@ -1862,6 +1863,98 @@ export default function VyronaRead() {
                     >
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       Proceed to Checkout
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Library Cart Dialog */}
+      <Dialog open={showLibraryCart} onOpenChange={setShowLibraryCart}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Library className="h-5 w-5" />
+              <span>Library Cart ({libraryCart.length} items)</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="max-h-96 overflow-y-auto space-y-3">
+            {libraryCart.length === 0 ? (
+              <div className="text-center py-8">
+                <Library className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">Your library cart is empty</p>
+                <p className="text-gray-400 text-sm">Add library books to borrow multiple books at once!</p>
+              </div>
+            ) : (
+              <>
+                {libraryCart.map((item) => (
+                  <Card key={item.id} className="border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded flex items-center justify-center flex-shrink-0">
+                            <BookOpen className="text-green-600 h-6 w-6" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{item.book.name || item.book.title}</h4>
+                            <p className="text-sm text-gray-600">by {item.book.author || "Unknown Author"}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant="secondary" className="bg-green-100 text-green-700">
+                                Borrow Request
+                              </Badge>
+                              <span className="text-sm font-medium text-green-600">
+                                Free Borrowing
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removeFromLibraryCart(item.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                <div className="border-t pt-4">
+                  <div className="bg-green-50 p-4 rounded-lg mb-4">
+                    <h4 className="font-semibold text-green-800 mb-2">Bulk Borrow Request</h4>
+                    <p className="text-sm text-green-700">
+                      Submit borrow requests for all {libraryCart.length} books to their respective libraries. 
+                      Libraries will review and approve/reject your requests individually.
+                    </p>
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setShowLibraryCart(false)}
+                    >
+                      Continue Browsing
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={clearLibraryCart}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Clear Cart
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      onClick={submitBulkBorrowRequests}
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      Submit All Requests
                     </Button>
                   </div>
                 </div>
