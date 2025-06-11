@@ -34,7 +34,8 @@ import {
   Download,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Tablet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -771,90 +772,113 @@ export default function BookSellerDashboard() {
             </div>
           </div>
 
-          {/* VyronaRead Navigation Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-800 mb-6">
-            <div className="text-xs text-gray-500 mb-2">Current section: {bookSection}</div>
-            <nav className="flex space-x-8">
-              <button
-                onClick={() => {
-                  console.log("Switching to overview");
-                  setBookSection("overview");
-                }}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  bookSection === "overview"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => {
-                  console.log("Switching to physical");
-                  setBookSection("physical");
-                }}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  bookSection === "physical"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Physical Library
-              </button>
-              <button
-                onClick={() => {
-                  console.log("Switching to ebooks");
-                  setBookSection("ebooks");
-                }}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  bookSection === "ebooks"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                E-Book Store
-              </button>
-              <button
-                onClick={() => {
-                  console.log("Switching to reader");
-                  setBookSection("reader");
-                }}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  bookSection === "reader"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Digital Reader
-              </button>
-              <button
-                onClick={() => {
-                  console.log("Switching to orders");
-                  setBookSection("orders");
-                }}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  bookSection === "orders"
-                    ? "border-green-500 text-green-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Order Management
-              </button>
-              <button
-                onClick={() => {
-                  console.log("Switching to analytics");
-                  setBookSection("analytics");
-                }}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  bookSection === "analytics"
-                    ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
-              >
-                Analytics
-              </button>
-            </nav>
-          </div>
+          {/* VyronaRead Navigation Tabs - Vertical Layout */}
+          <div className="flex gap-6 mb-6">
+            {/* Vertical Navigation Sidebar */}
+            <div className="w-64 flex-shrink-0">
+              <div className="text-xs text-gray-500 mb-4">Current section: {bookSection}</div>
+              <nav className="flex flex-col space-y-2">
+                <button
+                  onClick={() => {
+                    console.log("Switching to overview");
+                    setBookSection("overview");
+                  }}
+                  className={`py-3 px-4 rounded-lg font-medium text-sm text-left transition-colors ${
+                    bookSection === "overview"
+                      ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="h-4 w-4" />
+                    Overview
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    console.log("Switching to physical");
+                    setBookSection("physical");
+                  }}
+                  className={`py-3 px-4 rounded-lg font-medium text-sm text-left transition-colors ${
+                    bookSection === "physical"
+                      ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Library className="h-4 w-4" />
+                    Physical Library
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    console.log("Switching to ebooks");
+                    setBookSection("ebooks");
+                  }}
+                  className={`py-3 px-4 rounded-lg font-medium text-sm text-left transition-colors ${
+                    bookSection === "ebooks"
+                      ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <BookOpen className="h-4 w-4" />
+                    E-Book Store
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    console.log("Switching to reader");
+                    setBookSection("reader");
+                  }}
+                  className={`py-3 px-4 rounded-lg font-medium text-sm text-left transition-colors ${
+                    bookSection === "reader"
+                      ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Tablet className="h-4 w-4" />
+                    Digital Reader
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    console.log("Switching to orders");
+                    setBookSection("orders");
+                  }}
+                  className={`py-3 px-4 rounded-lg font-medium text-sm text-left transition-colors ${
+                    bookSection === "orders"
+                      ? "bg-green-100 text-green-700 border-l-4 border-green-500"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <ShoppingCart className="h-4 w-4" />
+                    Order Management
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
+                    console.log("Switching to analytics");
+                    setBookSection("analytics");
+                  }}
+                  className={`py-3 px-4 rounded-lg font-medium text-sm text-left transition-colors ${
+                    bookSection === "analytics"
+                      ? "bg-blue-100 text-blue-700 border-l-4 border-blue-500"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <TrendingUp className="h-4 w-4" />
+                    Analytics
+                  </div>
+                </button>
+              </nav>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 min-w-0">
 
           {/* Overview Section */}
           {bookSection === "overview" && (
@@ -1752,6 +1776,8 @@ export default function BookSellerDashboard() {
           </Dialog>
         </div>
       </div>
+            </div>
+          </div>
     </div>
   );
 }
