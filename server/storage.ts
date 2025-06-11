@@ -1454,14 +1454,14 @@ export class DatabaseStorage implements IStorage {
           author: csvBook["Author"] || csvBook.author || "Unknown Author", 
           isbn: csvBook["ISBN Number"] || csvBook.isbn || "",
           imageUrl: csvBook["Book Image"] || csvBook.bookImage || "", // Map Book Image to imageUrl
-          genre: "General", // Default genre since not in CSV
+          genre: csvBook["Genre"] || csvBook.genre || "General", // Now from CSV
           condition: "New",
           price: 0, // Default price for library books
           availability: "Available",
           libraryId: requestId,
-          publisher: "Unknown Publisher",
+          publisher: csvBook["Publisher"] || csvBook.publisher || "Unknown Publisher", // Now from CSV
           publicationYear: parseInt(csvBook["Year of Publishing"] || csvBook.yearOfPublish) || new Date().getFullYear(),
-          language: "English",
+          language: csvBook["Language"] || csvBook.language || "English", // Now from CSV
           pages: 200, // Default page count
           isAvailable: true
         };
@@ -1859,6 +1859,7 @@ export class DatabaseStorage implements IStorage {
       author: book.author,
       isbn: book.isbn,
       imageUrl: book.image_url,
+      genre: book.genre,
       publisher: book.publisher,
       publicationYear: book.publication_year,
       category: book.category,

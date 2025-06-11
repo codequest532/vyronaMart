@@ -338,9 +338,26 @@ export default function LibraryBrowse() {
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="space-y-2 mb-4">
-                      <Badge variant="outline" className="text-xs">
-                        {book.category || "General"}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="outline" className="text-xs">
+                          {book.genre || book.category || "General"}
+                        </Badge>
+                        {book.language && book.language !== "English" && (
+                          <Badge variant="secondary" className="text-xs">
+                            {book.language}
+                          </Badge>
+                        )}
+                      </div>
+                      {book.publisher && book.publisher !== "Unknown Publisher" && (
+                        <div className="text-xs text-gray-600">
+                          Published by {book.publisher}
+                        </div>
+                      )}
+                      {book.publicationYear && (
+                        <div className="text-xs text-gray-500">
+                          {book.publicationYear}
+                        </div>
+                      )}
                       {book.rating && (
                         <div className="flex items-center gap-1">
                           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />

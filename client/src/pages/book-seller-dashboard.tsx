@@ -1312,7 +1312,7 @@ export default function BookSellerDashboard() {
                           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         />
                         <div className="text-xs text-gray-500 mt-2">
-                          Expected columns: Book Name, Author, ISBN Number, Book Image, Year of Publishing
+                          Expected columns: Book Name, Author, ISBN Number, Year of Publishing, Genre, Publisher, Language, Book Image
                         </div>
                       </div>
                       {csvBooksList.length > 0 && (
