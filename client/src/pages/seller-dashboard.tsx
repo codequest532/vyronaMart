@@ -953,12 +953,12 @@ export default function SellerDashboard() {
               Social Analytics
             </Button>
             <Button
-              variant={activeTab === "books" ? "default" : "ghost"}
+              variant="ghost"
               className="w-full justify-start"
-              onClick={() => setActiveTab("books")}
+              onClick={() => setLocation("/book-management-dashboard")}
             >
               <Library className="h-4 w-4 mr-2" />
-              Books Management
+              Book Management
             </Button>
             <Button
               variant={activeTab === "customers" ? "default" : "ghost"}
@@ -1478,7 +1478,8 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          {activeTab === "books" && (
+          {/* Book management moved to standalone dashboard */}
+          {activeTab === "books-removed" && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
