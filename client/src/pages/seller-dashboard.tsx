@@ -1479,26 +1479,22 @@ export default function SellerDashboard() {
               </Card>
             </div>
           )}
-                  <Button variant="outline" onClick={handleSearchBooks}>
-                    <Search className="h-4 w-4 mr-2" />
-                    Search Library
-                  </Button>
-                  <Dialog open={showAddBookDialog} onOpenChange={setShowAddBookDialog}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-blue-600 hover:bg-blue-700">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Book
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Add New Book to Library</DialogTitle>
-                        <DialogDescription>
-                          Add a new book to your VyronaRead library inventory
-                        </DialogDescription>
-                      </DialogHeader>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+        </main>
+      </div>
+
+      {/* Order Details Modal */}
+      <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Order Details #{selectedOrder?.order_id}</DialogTitle>
+            <DialogDescription>
+              Complete order information and management options
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedOrder && (
+            <div className="overflow-y-auto flex-1 px-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
                         <div className="space-y-2">
                           <Label htmlFor="title">Book Title *</Label>
                           <Input
