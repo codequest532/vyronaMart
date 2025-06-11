@@ -81,10 +81,11 @@ export default function VyronaReadCartCheckout() {
     if (item.type === 'buy') {
       return Math.floor(item.book.price || 299);
     } else {
-      // For rental, calculate based on metadata rental price or fallback, multiplied by duration
+      // For rental, calculate based on book price dynamically, multiplied by duration
       const itemKey = `${item.book.id}-${item.type}`;
       const duration = rentalDurations[itemKey] || 1;
-      const baseRentalPrice = item.book.metadata?.rentalPrice || Math.floor((item.book.price || 299) / 10);
+      const bookPrice = item.book.price || 299;
+      const baseRentalPrice = Math.floor(bookPrice / 10); // 10% of book price per 15-day period
       return baseRentalPrice * duration;
     }
   };
