@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -150,6 +150,44 @@ export default function VyronaRead() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showEReader, setShowEReader] = useState(false);
   const { toast } = useToast();
+
+  // Authentication check
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ["/api/current-user"],
+    retry: false,
+  });
+
+  // Use useEffect for redirect to avoid setState during render
+  useEffect(() => {
+    if (!userLoading && !user) {
+      setLocation("/login");
+    }
+  }, [user, userLoading, setLocation]);
+
+  // Show loading while checking authentication
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading VyronaRead...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while redirecting if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
+
   const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
