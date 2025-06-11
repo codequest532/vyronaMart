@@ -388,7 +388,7 @@ export default function VyronaRead() {
         title: product.name, // Map name to title for consistency
         author: product.metadata?.author || "Unknown Author",
         category: product.metadata?.genre || product.metadata?.category || "General",
-        price: product.price / 100, // Convert from cents to dollars
+        price: product.price, // Price is already in paise format
         rentalPrice: product.metadata?.rentalPrice || 0,
         imageUrl: product.imageUrl,
         isAvailable: true,
