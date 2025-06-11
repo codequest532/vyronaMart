@@ -164,17 +164,18 @@ export default function VyronaReadCheckout() {
     if (checkoutType === 'cart') {
       return cartItems.reduce((total, item) => {
         if (item.type === 'buy') {
-          const price = (item.book.price || 29900) / 100; // Convert from paise to rupees
-          return total + Math.floor(price);
+          const price = item.book.price || 29900; // Price already in paise
+          return total + Math.floor(price / 100);
         } else if (item.type === 'rent') {
-          const bookPrice = (item.book.price || 29900) / 100; // Convert from paise to rupees
+          const bookPrice = item.book.price || 29900; // Price already in paise
           const periods = itemRentalDurations[item.book.id] || 1;
+          const basePrice = Math.floor(bookPrice / 100); // Convert paise to rupees first
           // New pricing: 7 days = 20%, 15 days = 40%, 30 days = 80%
           let rentalPrice;
-          if (periods === 1) rentalPrice = Math.floor(bookPrice * 0.2); // 7 days
-          else if (periods === 2) rentalPrice = Math.floor(bookPrice * 0.4); // 15 days  
-          else if (periods === 3) rentalPrice = Math.floor(bookPrice * 0.6); // 22 days
-          else rentalPrice = Math.floor(bookPrice * 0.8); // 30 days
+          if (periods === 1) rentalPrice = Math.floor(basePrice * 0.2); // 7 days
+          else if (periods === 2) rentalPrice = Math.floor(basePrice * 0.4); // 15 days  
+          else if (periods === 3) rentalPrice = Math.floor(basePrice * 0.6); // 22 days
+          else rentalPrice = Math.floor(basePrice * 0.8); // 30 days
           return total + rentalPrice;
         }
         return total;
@@ -185,15 +186,16 @@ export default function VyronaReadCheckout() {
     
     switch (checkoutType) {
       case 'buy':
-        const buyPrice = (bookDetails.price || bookDetails.buyPrice || 29900) / 100; // Convert from paise to rupees
-        return Math.floor(buyPrice);
+        const buyPrice = (bookDetails.price || bookDetails.buyPrice || 29900); // Price already in paise
+        return Math.floor(buyPrice / 100);
       case 'rent':
         // New pricing structure: 7 days = 20%, 15 days = 40%, 30 days = 80%
-        const bookPrice = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
+        const bookPrice = (bookDetails.price || 29900); // Price already in paise
+        const basePrice = Math.floor(bookPrice / 100); // Convert to rupees
         const days = parseInt(rentalDuration);
-        if (days <= 7) return Math.floor(bookPrice * 0.2);
-        else if (days <= 15) return Math.floor(bookPrice * 0.4);
-        else return Math.floor(bookPrice * 0.8);
+        if (days <= 7) return Math.floor(basePrice * 0.2);
+        else if (days <= 15) return Math.floor(basePrice * 0.4);
+        else return Math.floor(basePrice * 0.8);
       case 'borrow':
         // If user doesn't have membership, charge membership fee
         return hasMembership ? 0 : 2000; // ₹2000 annual membership
@@ -538,12 +540,13 @@ export default function VyronaReadCheckout() {
                             {item.type === 'buy' ? 'Purchase' : 'Rental'}
                           </Badge>
                           <span className="text-sm text-gray-500">
-                            ₹{item.type === 'buy' ? Math.floor(item.book.price || 299) : (() => {
-                              const bookPrice = item.book.price || 299;
+                            ₹{item.type === 'buy' ? Math.floor((item.book.price || 29900) / 100) : (() => {
+                              const bookPrice = item.book.price || 29900;
+                              const basePrice = Math.floor(bookPrice / 100);
                               const days = itemRentalDurations[item.book.id] || 15;
-                              if (days === 7) return Math.floor(bookPrice * 0.2);
-                              else if (days === 15) return Math.floor(bookPrice * 0.4);
-                              else return Math.floor(bookPrice * 0.8);
+                              if (days === 7) return Math.floor(basePrice * 0.2);
+                              else if (days === 15) return Math.floor(basePrice * 0.4);
+                              else return Math.floor(basePrice * 0.8);
                             })()}
                             {item.type === 'rent' && ` for ${itemRentalDurations[item.book.id] || 15} days`}
                           </span>
@@ -573,11 +576,12 @@ export default function VyronaReadCheckout() {
                             </div>
                             <p className="text-sm text-gray-600 mt-1">
                               Total: ₹{(() => {
-                                const bookPrice = item.book.price || 299;
+                                const bookPrice = item.book.price || 29900;
+                                const basePrice = Math.floor(bookPrice / 100);
                                 const days = itemRentalDurations[item.book.id] || 15;
-                                if (days === 7) return Math.floor(bookPrice * 0.2);
-                                else if (days === 15) return Math.floor(bookPrice * 0.4);
-                                else return Math.floor(bookPrice * 0.8);
+                                if (days === 7) return Math.floor(basePrice * 0.2);
+                                else if (days === 15) return Math.floor(basePrice * 0.4);
+                                else return Math.floor(basePrice * 0.8);
                               })()}
                             </p>
                           </div>
@@ -622,24 +626,27 @@ export default function VyronaReadCheckout() {
                       <RadioGroupItem value="7" id="7days" />
                       <Label htmlFor="7days">7 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        const price = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
-                        return Math.floor(price * 0.2);
+                        const price = bookDetails.price || 29900; // Price already in paise
+                        const basePrice = Math.floor(price / 100); // Convert to rupees
+                        return Math.floor(basePrice * 0.2);
                       })()}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="15" id="15days" />
                       <Label htmlFor="15days">15 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        const price = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
-                        return Math.floor(price * 0.4);
+                        const price = bookDetails.price || 29900; // Price already in paise
+                        const basePrice = Math.floor(price / 100); // Convert to rupees
+                        return Math.floor(basePrice * 0.4);
                       })()} (Recommended)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="30" id="30days" />
                       <Label htmlFor="30days">30 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        const price = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
-                        return Math.floor(price * 0.8);
+                        const price = bookDetails.price || 29900; // Price already in paise
+                        const basePrice = Math.floor(price / 100); // Convert to rupees
+                        return Math.floor(basePrice * 0.8);
                       })()}</Label>
                     </div>
                   </RadioGroup>
