@@ -148,17 +148,29 @@ export default function VyronaReadCheckout() {
   };
 
   const calculatePrice = () => {
+    if (checkoutType === 'cart') {
+      return cartItems.reduce((total, item) => {
+        if (item.type === 'buy') {
+          return total + Math.floor(item.book.price || 299);
+        } else if (item.type === 'rent') {
+          const basePrice = Math.floor((item.book.price || 299) * 0.1); // 10% per period
+          const periods = itemRentalDurations[item.book.id] || 1;
+          return total + (basePrice * periods);
+        }
+        return total;
+      }, 0);
+    }
+    
     if (!bookDetails) return 0;
     
     switch (checkoutType) {
       case 'buy':
         return bookDetails.price || bookDetails.buyPrice || 0;
       case 'rent':
-        // Get rental price from metadata (per month) and convert to daily rate
-        const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
-        const dailyRate = monthlyRentPrice / 30; // Convert monthly to daily
-        const totalPrice = dailyRate * parseInt(rentalDuration);
-        return Math.round(totalPrice * 100); // Convert to cents for consistency
+        // Use the new 15-day period pricing: 10% of book price per period
+        const basePrice = Math.floor((bookDetails.price || 299) * 0.1);
+        const periods = Math.ceil(parseInt(rentalDuration) / 15); // Convert days to 15-day periods
+        return basePrice * periods;
       case 'borrow':
         // If user doesn't have membership, charge membership fee
         return hasMembership ? 0 : 2000; // ₹2000 annual membership
@@ -279,6 +291,26 @@ export default function VyronaReadCheckout() {
           };
           break;
           
+        case 'cart':
+          endpoint = '/api/orders';
+          payload = {
+            items: cartItems.map(item => ({
+              productId: item.book.id,
+              name: item.book.title || item.book.name,
+              price: item.type === 'buy' 
+                ? Math.floor(item.book.price || 299)
+                : Math.floor((item.book.price || 299) * 0.1) * (itemRentalDurations[item.book.id] || 1),
+              quantity: 1,
+              type: item.type,
+              rentalDuration: item.type === 'rent' ? (itemRentalDurations[item.book.id] || 1) * 15 : undefined
+            })),
+            shippingAddress: `${customerInfo.address}, ${customerInfo.city} - ${customerInfo.postalCode}`,
+            paymentMethod: paymentMethod,
+            totalAmount: calculatePrice(),
+            total: calculatePrice()
+          };
+          break;
+          
         case 'borrow':
           if (userType === 'new') {
             // New user: process membership payment + borrowing request
@@ -309,7 +341,13 @@ export default function VyronaReadCheckout() {
         orderId: result.orderId || result.id,
         module: 'vyronaread',
         orderType: checkoutType,
-        bookDetails: {
+        bookDetails: checkoutType === 'cart' ? cartItems.map(item => ({
+          id: item.book.id,
+          name: item.book.title || item.book.name,
+          author: item.book.author,
+          type: item.type,
+          rentalDuration: item.type === 'rent' ? (itemRentalDurations[item.book.id] || 1) * 15 : undefined
+        })) : {
           id: bookId,
           name: bookDetails?.name || bookName,
           author: author,
@@ -324,6 +362,11 @@ export default function VyronaReadCheckout() {
       };
       
       sessionStorage.setItem('orderData', JSON.stringify(orderData));
+      
+      // Clear cart after successful checkout
+      if (checkoutType === 'cart') {
+        sessionStorage.removeItem('vyronaread_cart');
+      }
       
       toast({
         title: "Success!",
@@ -368,6 +411,8 @@ export default function VyronaReadCheckout() {
         return "Rent Book";
       case 'borrow':
         return "Borrow from Library";
+      case 'cart':
+        return "Cart Checkout";
       default:
         return "Checkout";
     }
@@ -415,6 +460,7 @@ export default function VyronaReadCheckout() {
             {checkoutType === 'buy' && <ShoppingCart className="h-8 w-8" />}
             {checkoutType === 'rent' && <Clock className="h-8 w-8" />}
             {checkoutType === 'borrow' && <Building2 className="h-8 w-8" />}
+            {checkoutType === 'cart' && <ShoppingCart className="h-8 w-8" />}
             <div>
               <h1 className="text-2xl font-bold">{getCheckoutTitle()}</h1>
               <p className="opacity-90">Complete your book access request</p>
