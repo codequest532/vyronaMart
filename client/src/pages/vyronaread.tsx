@@ -220,7 +220,7 @@ export default function VyronaRead() {
 
     // Store cart data and navigate to checkout
     sessionStorage.setItem('vyronaread_cart', JSON.stringify(cart));
-    setLocation('/vyronaread-checkout?type=cart');
+    setLocation('/vyronaread-cart-checkout');
   };
 
   // Handler functions for buy/rent/borrow operations
