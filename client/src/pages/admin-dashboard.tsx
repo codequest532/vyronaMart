@@ -2720,45 +2720,20 @@ export default function AdminDashboard() {
                 <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/seller-dashboard-new')}>
+                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/book-seller-dashboard')}>
                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Store className="h-6 w-6 text-blue-600" />
+                          <Package className="h-6 w-6 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold mb-1">Enhanced Dashboard</h3>
-                          <p className="text-sm text-gray-500">Advanced seller features</p>
+                          <h3 className="font-semibold mb-1">Book Seller Dashboard</h3>
+                          <p className="text-sm text-gray-500">VyronaRead book management</p>
                         </div>
                       </div>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-8 w-8 p-0"
-                        onClick={() => window.open('/seller-dashboard-new', '_blank')}
-                        title="Open in new tab"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/seller-dashboard-4stage')}>
-                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                          <BarChart3 className="h-6 w-6 text-purple-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold mb-1">Advanced Analytics</h3>
-                          <p className="text-sm text-gray-500">4-stage dashboard view</p>
-                        </div>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 w-8 p-0"
-                        onClick={() => window.open('/seller-dashboard-4stage', '_blank')}
+                        onClick={() => window.open('/book-seller-dashboard', '_blank')}
                         title="Open in new tab"
                       >
                         <Eye className="h-4 w-4" />
@@ -2864,13 +2839,9 @@ export default function AdminDashboard() {
                       <TrendingUp className="h-6 w-6 mb-2" />
                       <span className="text-xs">Main Dashboard</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/seller-dashboard-new')}>
-                      <Store className="h-6 w-6 mb-2" />
-                      <span className="text-xs">Enhanced View</span>
-                    </Button>
-                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/seller-dashboard-4stage')}>
-                      <BarChart3 className="h-6 w-6 mb-2" />
-                      <span className="text-xs">Analytics View</span>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/book-seller-dashboard')}>
+                      <Package className="h-6 w-6 mb-2" />
+                      <span className="text-xs">Book Management</span>
                     </Button>
                     <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("sellers")}>
                       <Users className="h-6 w-6 mb-2" />
@@ -2903,18 +2874,10 @@ export default function AdminDashboard() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => window.open('/seller-dashboard-new', '_blank')}
+                          onClick={() => window.open('/book-seller-dashboard', '_blank')}
                           className="text-blue-600 hover:text-blue-800"
                         >
-                          Enhanced
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => window.open('/seller-dashboard-4stage', '_blank')}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          Analytics
+                          Books
                         </Button>
                       </div>
                     </div>
