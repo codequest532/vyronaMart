@@ -2894,6 +2894,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get Library Integration Requests for seller
+  app.get("/api/library-integration-requests", async (req, res) => {
+    try {
+      const requests = await storage.getLibraryIntegrationRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching library requests:", error);
+      res.status(500).json({ message: "Failed to fetch library requests" });
+    }
+  });
+
+  // Get books for a specific library
+  app.get("/api/vyronaread/library-books/:libraryId", async (req, res) => {
+    try {
+      const libraryId = parseInt(req.params.libraryId);
+      const books = await storage.getPhysicalBooks(libraryId);
+      res.json(books);
+    } catch (error) {
+      console.error("Error fetching library books:", error);
+      res.status(500).json({ message: "Failed to fetch library books" });
+    }
+  });
+
   // Admin - Get Library Integration Requests
   app.get("/api/admin/library-requests", async (req, res) => {
     try {
