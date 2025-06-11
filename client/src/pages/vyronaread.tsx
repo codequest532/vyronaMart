@@ -203,6 +203,27 @@ export default function VyronaRead() {
   const [cart, setCart] = useState<any[]>([]);
   const [showCart, setShowCart] = useState(false);
 
+  // Load cart from session storage on component mount
+  useEffect(() => {
+    try {
+      const savedCart = sessionStorage.getItem('vyronaread_cart');
+      if (savedCart) {
+        setCart(JSON.parse(savedCart));
+      }
+    } catch (error) {
+      console.error('Error loading cart from session storage:', error);
+    }
+  }, []);
+
+  // Save cart to session storage whenever cart changes
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('vyronaread_cart', JSON.stringify(cart));
+    } catch (error) {
+      console.error('Error saving cart to session storage:', error);
+    }
+  }, [cart]);
+
   // Cart handler functions
   const addToCart = (book: any, type: 'buy' | 'rent') => {
     const cartItem = {
@@ -256,8 +277,7 @@ export default function VyronaRead() {
       return;
     }
 
-    // Store cart data and navigate to checkout
-    sessionStorage.setItem('vyronaread_cart', JSON.stringify(cart));
+    // Navigate to checkout (cart is already persisted in session storage)
     setLocation('/vyronaread-cart-checkout');
   };
 
