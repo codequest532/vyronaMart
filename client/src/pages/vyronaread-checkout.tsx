@@ -135,8 +135,11 @@ export default function VyronaReadCheckout() {
       case 'buy':
         return bookDetails.price || bookDetails.buyPrice || 0;
       case 'rent':
-        const baseDailyRate = (bookDetails.rentPrice || bookDetails.price * 0.1) / 100; // 10% of buy price per day
-        return Math.round(baseDailyRate * parseInt(rentalDuration));
+        // Get rental price from metadata (per month) and convert to daily rate
+        const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
+        const dailyRate = monthlyRentPrice / 30; // Convert monthly to daily
+        const totalPrice = dailyRate * parseInt(rentalDuration);
+        return Math.round(totalPrice * 100); // Convert to cents for consistency
       case 'borrow':
         // If user doesn't have membership, charge membership fee
         return hasMembership ? 0 : 2000; // ₹2000 annual membership
@@ -444,15 +447,29 @@ export default function VyronaReadCheckout() {
                 <RadioGroup value={rentalDuration} onValueChange={setRentalDuration}>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="15" id="15days" />
-                    <Label htmlFor="15days">15 days - ₹{Math.floor(calculatePrice() / 100)} (Recommended)</Label>
+                    <Label htmlFor="15days">15 days - ₹{(() => {
+                      if (!bookDetails) return 0;
+                      const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
+                      const dailyRate = monthlyRentPrice / 30;
+                      return Math.round(dailyRate * 15);
+                    })()} (Recommended)</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="30" id="30days" />
-                    <Label htmlFor="30days">30 days - ₹{Math.floor((calculatePrice() * 2) / 100)}</Label>
+                    <Label htmlFor="30days">30 days - ₹{(() => {
+                      if (!bookDetails) return 0;
+                      const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
+                      return Math.round(monthlyRentPrice);
+                    })()}</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="60" id="60days" />
-                    <Label htmlFor="60days">60 days - ₹{Math.floor((calculatePrice() * 4) / 100)}</Label>
+                    <Label htmlFor="60days">60 days - ₹{(() => {
+                      if (!bookDetails) return 0;
+                      const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
+                      const dailyRate = monthlyRentPrice / 30;
+                      return Math.round(dailyRate * 60);
+                    })()}</Label>
                   </div>
                 </RadioGroup>
               </CardContent>
