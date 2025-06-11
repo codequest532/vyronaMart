@@ -1936,41 +1936,41 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllPhysicalBooks(): Promise<any[]> {
-    const books = await db.select({
-      id: physicalBooks.id,
-      libraryId: physicalBooks.libraryId,
-      title: physicalBooks.title,
-      author: physicalBooks.author,
-      isbn: physicalBooks.isbn,
-      imageUrl: physicalBooks.image_url,
-      category: physicalBooks.category,
-      copies: physicalBooks.copies,
-      available: physicalBooks.available,
-      publisher: physicalBooks.publisher,
-      publicationYear: physicalBooks.publicationYear,
-      language: physicalBooks.language,
-      createdAt: physicalBooks.createdAt
-    }).from(physicalBooks);
-    return books;
+    const books = await db.select().from(physicalBooks);
+    return books.map(book => ({
+      id: book.id,
+      libraryId: book.libraryId,
+      title: book.title,
+      author: book.author,
+      isbn: book.isbn,
+      imageUrl: book.imageUrl,
+      category: book.category,
+      copies: book.copies,
+      available: book.available,
+      publisher: book.publisher,
+      publicationYear: book.publicationYear,
+      language: book.language,
+      createdAt: book.createdAt
+    }));
   }
 
   async getPhysicalBooksByLibrary(libraryId: number): Promise<any[]> {
-    const books = await db.select({
-      id: physicalBooks.id,
-      libraryId: physicalBooks.libraryId,
-      title: physicalBooks.title,
-      author: physicalBooks.author,
-      isbn: physicalBooks.isbn,
-      imageUrl: physicalBooks.image_url,
-      category: physicalBooks.category,
-      copies: physicalBooks.copies,
-      available: physicalBooks.available,
-      publisher: physicalBooks.publisher,
-      publicationYear: physicalBooks.publicationYear,
-      language: physicalBooks.language,
-      createdAt: physicalBooks.createdAt
-    }).from(physicalBooks).where(eq(physicalBooks.libraryId, libraryId));
-    return books;
+    const books = await db.select().from(physicalBooks).where(eq(physicalBooks.libraryId, libraryId));
+    return books.map(book => ({
+      id: book.id,
+      libraryId: book.libraryId,
+      title: book.title,
+      author: book.author,
+      isbn: book.isbn,
+      imageUrl: book.imageUrl,
+      category: book.category,
+      copies: book.copies,
+      available: book.available,
+      publisher: book.publisher,
+      publicationYear: book.publicationYear,
+      language: book.language,
+      createdAt: book.createdAt
+    }));
   }
 
   async deletePhysicalBook(bookId: number): Promise<boolean> {
