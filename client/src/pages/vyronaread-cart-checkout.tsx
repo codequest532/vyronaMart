@@ -82,19 +82,17 @@ export default function VyronaReadCartCheckout() {
       const price = item.book.price || 29900; // Price in paise
       return Math.floor(price / 100); // Convert to rupees
     } else {
-      // For rental, calculate based on book price dynamically, with different pricing tiers
+      // For rental, use fixed pricing based on duration
       const itemKey = `${item.book.id}-${item.type}`;
       const periods = rentalDurations[itemKey] || 1;
-      const bookPrice = item.book.price || 29900; // Price in paise
-      const basePrice = Math.floor(bookPrice / 100); // Convert to rupees
       
-      // Pricing: 1 period (15 days) = 40%, 2 periods (30 days) = 60%, 3+ periods = 80%
+      // Fixed pricing: 1 period (7 days) = ₹99, 2 periods (15 days) = ₹199, 3 periods (30 days) = ₹399
       if (periods === 1) {
-        return Math.floor(basePrice * 0.4); // 15 days - 40%
+        return 99; // 7 days
       } else if (periods === 2) {
-        return Math.floor(basePrice * 0.6); // 30 days - 60%
+        return 199; // 15 days
       } else {
-        return Math.floor(basePrice * 0.8); // 45+ days - 80%
+        return 399; // 30 days
       }
     }
   };
@@ -286,13 +284,10 @@ export default function VyronaReadCartCheckout() {
                         </Label>
                         <div className="space-y-2">
                           {[
-                            { periods: 1, days: 15, percentage: 0.4, label: "15 days" },
-                            { periods: 2, days: 30, percentage: 0.6, label: "30 days" },
-                            { periods: 3, days: 45, percentage: 0.8, label: "45 days" }
+                            { periods: 1, days: 7, price: 99, label: "7 days" },
+                            { periods: 2, days: 15, price: 199, label: "15 days" },
+                            { periods: 3, days: 30, price: 399, label: "30 days" }
                           ].map((option) => {
-                            const bookPrice = item.book.price || 29900;
-                            const basePrice = Math.floor(bookPrice / 100);
-                            const price = Math.floor(basePrice * option.percentage);
                             const itemKey = `${item.book.id}-${item.type}`;
                             const isSelected = (rentalDurations[itemKey] || 1) === option.periods;
                             
@@ -320,7 +315,7 @@ export default function VyronaReadCartCheckout() {
                                   </div>
                                   <span className="text-sm font-medium">{option.label}</span>
                                 </div>
-                                <span className="text-sm font-semibold text-purple-600">₹{price}</span>
+                                <span className="text-sm font-semibold text-purple-600">₹{option.price}</span>
                               </div>
                             );
                           })}
