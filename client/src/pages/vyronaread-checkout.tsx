@@ -37,10 +37,12 @@ export default function VyronaReadCheckout() {
   const bookName = urlParams.get('bookName');
   const author = urlParams.get('author');
   const clientSecret = urlParams.get('client_secret');
+  const source = urlParams.get('source'); // 'library-cart' for bulk borrow
   
   // State management
   const [bookDetails, setBookDetails] = useState<any>(null);
   const [cartItems, setCartItems] = useState<any[]>([]);
+  const [libraryCartItems, setLibraryCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
@@ -85,6 +87,19 @@ export default function VyronaReadCheckout() {
     try {
       setLoading(true);
       
+      // Handle library cart checkout - load library cart items from sessionStorage
+      if (checkoutType === 'borrow' && source === 'library-cart') {
+        const libraryCartData = sessionStorage.getItem('vyronaread_library_cart');
+        console.log('Loading library cart for checkout:', libraryCartData);
+        if (libraryCartData) {
+          const items = JSON.parse(libraryCartData);
+          setLibraryCartItems(items);
+          console.log('Loaded library cart items:', items);
+        }
+        setLoading(false);
+        return;
+      }
+      
       // Handle cart checkout - load cart items from sessionStorage
       if (checkoutType === 'cart') {
         const cartData = sessionStorage.getItem('vyronaread_cart');
@@ -103,7 +118,7 @@ export default function VyronaReadCheckout() {
         return;
       }
       
-      // For borrow type, use URL parameters instead of API call
+      // For individual borrow type, use URL parameters instead of API call
       if (checkoutType === 'borrow' && bookName && author) {
         setBookDetails({
           id: bookId,
@@ -111,6 +126,7 @@ export default function VyronaReadCheckout() {
           author: decodeURIComponent(author),
           price: 0 // Borrowing is free (membership fee handled separately)
         });
+        setLoading(false);
         return;
       }
       

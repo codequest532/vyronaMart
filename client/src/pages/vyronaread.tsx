@@ -364,8 +364,13 @@ export default function VyronaRead() {
       return;
     }
 
-    // Navigate to library cart checkout page (library cart is already persisted in session storage)
-    setLocation('/library-cart-checkout');
+    // Navigate to the same checkout page used by individual borrow button
+    // Mark this as a bulk borrow request by adding a special parameter
+    const params = new URLSearchParams({
+      type: 'borrow',
+      source: 'library-cart'
+    });
+    setLocation(`/vyronaread-checkout?${params.toString()}`);
   };
 
   // Handler functions for buy/rent/borrow operations
