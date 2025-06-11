@@ -691,10 +691,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sellerId = req.query.sellerId;
       if (sellerId) {
         const sellerBooks = await storage.getPhysicalBooksBySeller(parseInt(sellerId as string));
-        res.json(sellerBooks);
+        // Filter out library integration books (books with libraryId)
+        const onlySellerBooks = sellerBooks.filter(book => !book.libraryId);
+        res.json(onlySellerBooks);
       } else {
         const physicalBooks = await storage.getAllPhysicalBooks();
-        res.json(physicalBooks);
+        // Only return books added via seller dashboard (no libraryId)
+        const onlySellerBooks = physicalBooks.filter(book => !book.libraryId);
+        res.json(onlySellerBooks);
       }
     } catch (error) {
       console.error("Error fetching seller books:", error);
@@ -704,7 +708,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/vyronaread/library-books", async (req, res) => {
     try {
-      const libraryBooks = await storage.getAllPhysicalBooks();
+      const allBooks = await storage.getAllPhysicalBooks();
+      // Only return library integration books (books with libraryId)
+      const libraryBooks = allBooks.filter(book => book.libraryId);
       res.json(libraryBooks);
     } catch (error) {
       console.error("Error fetching library books:", error);
