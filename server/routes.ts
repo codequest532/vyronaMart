@@ -4087,6 +4087,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const membershipData = req.body;
       
+      // Create order record with automatic activation for payment completion
+      const order = await storage.createOrder({
+        userId: 1, // Default user for now, should be from session
+        totalAmount: (membershipData.fee || 2000) * 100, // Convert to paise
+        status: membershipData.autoActivate ? "completed" : "pending", // Auto-activate if flag is set
+        module: "library_membership",
+        metadata: {
+          fullName: membershipData.fullName,
+          email: membershipData.email,
+          phone: membershipData.phone,
+          address: membershipData.address || "Not provided",
+          membershipType: membershipData.membershipType || "annual",
+          membershipFee: membershipData.fee || 2000,
+          libraryId: membershipData.libraryId || 28,
+          bookId: membershipData.bookId,
+          bookTitle: membershipData.bookTitle || 'Library Access',
+          borrowingInfo: membershipData.borrowingInfo,
+          status: membershipData.autoActivate ? "activated" : "pending",
+          applicationDate: new Date().toISOString(),
+          activatedDate: membershipData.autoActivate ? new Date().toISOString() : null,
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()
+        }
+      });
+      
       // Send library membership confirmation email
       try {
         const { sendLibraryMembershipEmail } = await import('./library-membership-email');

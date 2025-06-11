@@ -358,17 +358,19 @@ export default function VyronaReadCheckout() {
           
         case 'borrow':
           if (userType === 'new') {
-            // New user: process membership payment + borrowing request
-            endpoint = '/api/library/membership';
+            // New user: process automatic membership activation + borrowing request
+            endpoint = '/api/library-membership';
             payload = {
               fullName: customerInfo.name,
               email: customerInfo.email,
               phone: customerInfo.phone,
+              address: customerInfo.address,
               membershipType: "annual",
               fee: 2000,
               bookId: bookId,
               bookTitle: bookDetails?.name || 'Unknown Book',
-              borrowingInfo: borrowingInfo
+              borrowingInfo: borrowingInfo,
+              autoActivate: true // Flag for automatic activation
             };
           } else {
             // Existing member: process borrowing order directly

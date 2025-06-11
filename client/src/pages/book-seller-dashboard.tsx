@@ -2304,49 +2304,82 @@ export default function BookSellerDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="text-sm text-gray-600">
-                          {selectedOrder.module === 'library_membership' ? 
-                            'Progress through the 4-stage library membership workflow. Each status change sends an automated email to the customer.' :
-                            'Update order status to progress through the fulfillment workflow. Automated emails are sent at each stage.'
-                          }
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2">
-                          {['processing', 'shipped', 'out_for_delivery', 'delivered'].map((status) => {
-                            const currentStatus = selectedOrder.order_status || selectedOrder.metadata?.status || 'pending';
-                            const isCurrentStatus = currentStatus === status;
-                            const isPastStatus = ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(currentStatus) > 
-                                                ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(status);
+                        {selectedOrder.module === 'library_membership' ? (
+                          // Library membership: show automatic activation status
+                          <div className="space-y-3">
+                            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span className="font-semibold text-green-800">
+                                  {selectedOrder.order_status === 'completed' || selectedOrder.metadata?.status === 'activated' 
+                                    ? 'Membership Automatically Activated'
+                                    : 'Processing Automatic Activation'}
+                                </span>
+                              </div>
+                              <div className="space-y-2 text-sm text-green-700">
+                                <p>
+                                  {selectedOrder.order_status === 'completed' || selectedOrder.metadata?.status === 'activated' 
+                                    ? 'Customer can now access library services and borrow books. Welcome email sent automatically.'
+                                    : 'Membership will be activated automatically upon payment completion. No manual approval required.'}
+                                </p>
+                                {selectedOrder.metadata?.activatedDate && (
+                                  <div className="flex justify-between border-t border-green-200 pt-2 mt-2">
+                                    <span>Activated:</span>
+                                    <span className="font-medium">{new Date(selectedOrder.metadata.activatedDate).toLocaleDateString()}</span>
+                                  </div>
+                                )}
+                                {selectedOrder.metadata?.expiryDate && (
+                                  <div className="flex justify-between">
+                                    <span>Expires:</span>
+                                    <span className="font-medium">{new Date(selectedOrder.metadata.expiryDate).toLocaleDateString()}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Library memberships are processed automatically. Manual intervention is not required.
+                            </div>
+                          </div>
+                        ) : (
+                          // Regular orders: show manual workflow
+                          <div className="space-y-3">
+                            <div className="text-sm text-gray-600">
+                              Update order status to progress through the fulfillment workflow. Automated emails are sent at each stage.
+                            </div>
                             
-                            const statusLabels: { [key: string]: string } = selectedOrder.module === 'library_membership' ? {
-                              processing: 'Approve Membership',
-                              shipped: 'Activate Membership', 
-                              out_for_delivery: 'Ready for Collection',
-                              delivered: 'Books Collected'
-                            } : {
-                              processing: 'Start Processing',
-                              shipped: 'Mark Shipped',
-                              out_for_delivery: 'Out for Delivery', 
-                              delivered: 'Mark Delivered'
-                            };
+                            <div className="flex flex-wrap gap-2">
+                              {['processing', 'shipped', 'out_for_delivery', 'delivered'].map((status) => {
+                                const currentStatus = selectedOrder.order_status || 'pending';
+                                const isCurrentStatus = currentStatus === status;
+                                const isPastStatus = ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(currentStatus) > 
+                                                    ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(status);
+                                
+                                const statusLabels: { [key: string]: string } = {
+                                  processing: 'Start Processing',
+                                  shipped: 'Mark Shipped',
+                                  out_for_delivery: 'Out for Delivery', 
+                                  delivered: 'Mark Delivered'
+                                };
 
-                            return (
-                              <Button
-                                key={status}
-                                size="sm"
-                                variant={isCurrentStatus ? "default" : isPastStatus ? "secondary" : "outline"}
-                                disabled={isPastStatus || updateOrderStatusMutation.isPending}
-                                onClick={() => updateOrderStatusMutation.mutate({
-                                  orderId: selectedOrder.order_id || selectedOrder.id,
-                                  status: status
-                                })}
-                                className={isCurrentStatus ? "bg-blue-600 text-white" : ""}
-                              >
-                                {isPastStatus ? '✓' : ''} {statusLabels[status]}
-                              </Button>
-                            );
-                          })}
-                        </div>
+                                return (
+                                  <Button
+                                    key={status}
+                                    size="sm"
+                                    variant={isCurrentStatus ? "default" : isPastStatus ? "secondary" : "outline"}
+                                    disabled={isPastStatus || updateOrderStatusMutation.isPending}
+                                    onClick={() => updateOrderStatusMutation.mutate({
+                                      orderId: selectedOrder.order_id || selectedOrder.id,
+                                      status: status
+                                    })}
+                                    className={isCurrentStatus ? "bg-blue-600 text-white" : ""}
+                                  >
+                                    {isPastStatus ? '✓' : ''} {statusLabels[status]}
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
 
                         {updateOrderStatusMutation.isPending && (
                           <div className="flex items-center gap-2 text-sm text-blue-600">
