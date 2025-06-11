@@ -87,24 +87,24 @@ export default function SellerDashboard() {
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showAddProductDialog, setShowAddProductDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { toast } = useToast();
 
   // Get current user for authentication check
   const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ["/api/current-user"],
   });
 
-  // Redirect specialized sellers to their dedicated dashboards
+  // Check authentication and redirect if not authenticated
   useEffect(() => {
-    if (!userLoading && currentUser) {
-      if (currentUser.role !== "seller") {
-        setLocation("/login");
-      } else if (currentUser.email === "seller@vyronaread.com") {
-        setLocation("/vyronaread-seller-dashboard");
-      } else if (currentUser.email === "bookseller@vyronaread.com") {
-        setLocation("/vyronaread-dashboard");
-      }
+    if (!userLoading && (!currentUser || currentUser.role !== 'seller')) {
+      setLocation('/login');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in as a seller to access this dashboard.",
+        variant: "destructive",
+      });
     }
-  }, [currentUser, userLoading, setLocation]);
+  }, [currentUser, userLoading, setLocation, toast]);
 
   if (userLoading) {
     return (
@@ -115,11 +115,6 @@ export default function SellerDashboard() {
   }
 
   if (!currentUser || currentUser.role !== "seller") {
-    return null;
-  }
-
-  // Prevent specialized sellers from accessing this dashboard
-  if (currentUser.email === "seller@vyronaread.com" || currentUser.email === "bookseller@vyronaread.com") {
     return null;
   }
   const [bookSection, setBookSection] = useState("overview");
@@ -214,8 +209,11 @@ export default function SellerDashboard() {
     },
   });
 
-  // Mutation for creating library integration requests
-  const { toast } = useToast();
+  // Get seller-specific products
+  const { data: sellerProducts = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["/api/seller/products"],
+    enabled: !!currentUser && currentUser.role === 'seller',
+  });
 
   // Tab validation functions
   const validateBasicInfoTab = () => {

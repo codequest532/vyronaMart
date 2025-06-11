@@ -1152,9 +1152,8 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
       // Close the modal
       onClose();
       
-      // For VyronaRead sellers, automatically log them in and redirect to book seller dashboard
-      if (formData.sellerType === "vyronaread" && result.credentials) {
-        // Auto-login the VyronaRead seller
+      // Auto-login and redirect sellers based on their type
+      if (result.credentials) {
         const loginResponse = await fetch("/api/auth/login", {
           method: "POST",
           headers: {
@@ -1167,13 +1166,34 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
         });
 
         if (loginResponse.ok) {
-          setLocation("/vyronaread-dashboard");
-          setTimeout(() => {
-            toast({
-              title: "Welcome to VyronaRead!",
-              description: "You've been automatically logged in. Start by adding your first book or setting up library partnerships!",
-            });
-          }, 1000);
+          // Redirect to appropriate dashboard based on seller type
+          if (formData.sellerType === "vyronaread") {
+            setLocation("/vyronaread-dashboard");
+            setTimeout(() => {
+              toast({
+                title: "Welcome to VyronaRead!",
+                description: "You've been automatically logged in. Start by adding your first book or setting up library partnerships!",
+              });
+            }, 1000);
+          } else if (formData.sellerType === "vyronahub" || formData.sellerType === "vyronainstastore") {
+            // General e-commerce sellers go to VyronaHub dashboard
+            setLocation("/vyronahub-dashboard");
+            setTimeout(() => {
+              toast({
+                title: "Welcome to VyronaHub!",
+                description: "You've been automatically logged in. Start by adding your products and setting up your store!",
+              });
+            }, 1000);
+          } else {
+            // Other seller types go to general dashboard
+            setLocation("/seller-dashboard");
+            setTimeout(() => {
+              toast({
+                title: "Welcome to VyronaMart!",
+                description: "You've been redirected to your seller dashboard. Start setting up your store!",
+              });
+            }, 1000);
+          }
         } else {
           setLocation("/login");
           setTimeout(() => {
@@ -1184,12 +1204,11 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
           }, 1000);
         }
       } else {
-        // Redirect other sellers to the general seller dashboard
-        setLocation("/seller-dashboard");
+        setLocation("/login");
         setTimeout(() => {
           toast({
-            title: "Welcome to VyronaMart!",
-            description: "You've been redirected to your seller dashboard. Start setting up your store!",
+            title: "Registration Complete",
+            description: "Please login with your seller credentials to access your dashboard.",
           });
         }, 1000);
       }
