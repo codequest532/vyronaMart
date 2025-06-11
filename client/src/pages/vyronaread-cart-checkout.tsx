@@ -278,11 +278,11 @@ export default function VyronaReadCartCheckout() {
                       {item.type === 'rent' && <span className="text-sm"> total</span>}
                     </div>
                     {item.type === 'rent' && (
-                      <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                        <Label className="text-sm font-medium text-gray-700 mb-3 block">
-                          Select Rental Duration:
+                      <div className="mt-3">
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          Rental Duration:
                         </Label>
-                        <div className="space-y-2">
+                        <div className="flex gap-2">
                           {[
                             { periods: 1, days: 7, price: 99, label: "7 days" },
                             { periods: 2, days: 15, price: 199, label: "15 days" },
@@ -294,7 +294,7 @@ export default function VyronaReadCartCheckout() {
                             return (
                               <div
                                 key={option.periods}
-                                className={`flex items-center justify-between p-2 border rounded cursor-pointer transition-colors ${
+                                className={`flex items-center p-2 border rounded cursor-pointer transition-colors ${
                                   isSelected 
                                     ? 'border-purple-500 bg-purple-50' 
                                     : 'border-gray-200 hover:border-gray-300'
@@ -303,23 +303,25 @@ export default function VyronaReadCartCheckout() {
                               >
                                 <div className="flex items-center">
                                   <div
-                                    className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
+                                    className={`w-3 h-3 rounded-full border-2 mr-2 flex items-center justify-center ${
                                       isSelected 
                                         ? 'border-purple-500 bg-purple-500' 
                                         : 'border-gray-300'
                                     }`}
                                   >
                                     {isSelected && (
-                                      <div className="w-2 h-2 rounded-full bg-white" />
+                                      <div className="w-1 h-1 rounded-full bg-white" />
                                     )}
                                   </div>
-                                  <span className="text-sm font-medium">{option.label}</span>
+                                  <span className="text-xs font-medium">{option.label}</span>
                                 </div>
-                                <span className="text-sm font-semibold text-purple-600">₹{option.price}</span>
                               </div>
                             );
                           })}
                         </div>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Total: ₹{calculateItemPrice(item)}
+                        </p>
                       </div>
                     )}
                   </div>
