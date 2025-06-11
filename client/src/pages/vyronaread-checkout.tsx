@@ -18,6 +18,7 @@ import {
   Clock, 
   ShoppingCart,
   CheckCircle,
+  MapPin,
   Building2,
   User,
   Users,
