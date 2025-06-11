@@ -354,45 +354,18 @@ export default function VyronaRead() {
     });
   };
 
-  const submitBulkBorrowRequests = async () => {
+  const goToLibraryCartCheckout = () => {
     if (libraryCart.length === 0) {
       toast({
         title: "Empty Library Cart",
-        description: "Please add library books to cart before submitting borrow requests.",
+        description: "Please add library books to cart before checkout.",
         variant: "destructive"
       });
       return;
     }
 
-    try {
-      // Submit borrow requests for all items in library cart
-      for (const item of libraryCart) {
-        await apiRequest("POST", "/api/book-loans", {
-          bookId: item.book.id,
-          borrowerName: "VyronaRead User", // This could be made dynamic
-          borrowerEmail: "user@vyronaread.com", // This could be made dynamic
-          borrowerPhone: "1234567890", // This could be made dynamic
-          requestDate: new Date().toISOString(),
-          module: "VyronaRead"
-        });
-      }
-
-      toast({
-        title: "Borrow Requests Submitted",
-        description: `${libraryCart.length} borrow requests have been sent to the libraries for approval.`,
-      });
-
-      // Clear library cart after successful submission
-      clearLibraryCart();
-      setShowLibraryCart(false);
-    } catch (error) {
-      console.error("Error submitting bulk borrow requests:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit borrow requests. Please try again.",
-        variant: "destructive"
-      });
-    }
+    // Navigate to library cart checkout page (library cart is already persisted in session storage)
+    setLocation('/library-cart-checkout');
   };
 
   // Handler functions for buy/rent/borrow operations
@@ -1951,10 +1924,10 @@ export default function VyronaRead() {
                     </Button>
                     <Button 
                       className="flex-1 bg-green-600 hover:bg-green-700"
-                      onClick={submitBulkBorrowRequests}
+                      onClick={goToLibraryCartCheckout}
                     >
-                      <Send className="mr-2 h-4 w-4" />
-                      Submit All Requests
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Proceed to Checkout
                     </Button>
                   </div>
                 </div>

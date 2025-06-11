@@ -22,6 +22,7 @@ import VyronaReadCheckout from "@/pages/vyronaread-checkout";
 import VyronaReadCartCheckout from "@/pages/vyronaread-cart-checkout";
 import EBookCheckout from "@/pages/ebook-checkout";
 import LibraryBrowse from "@/pages/library-browse";
+import LibraryCartCheckout from "@/pages/library-cart-checkout";
 import MyVyrona from "@/pages/myvyrona";
 import Cart from "@/pages/cart";
 import Login from "@/pages/login";
@@ -98,6 +99,7 @@ function Router() {
       <Route path="/vyronaread" component={VyronaRead} />
       <Route path="/vyronaread-checkout" component={VyronaReadCheckout} />
       <Route path="/vyronaread-cart-checkout" component={VyronaReadCartCheckout} />
+      <Route path="/library-cart-checkout" component={LibraryCartCheckout} />
       <Route path="/ebook-checkout" component={EBookCheckout} />
       <Route path="/library-browse" component={LibraryBrowse} />
       <Route path="/myvyrona" component={MyVyrona} />
