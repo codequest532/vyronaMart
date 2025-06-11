@@ -1090,33 +1090,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // VyronaRead - Add book through seller dashboard
-  app.post("/api/vyronaread/books", async (req, res) => {
-    try {
-      const { title, author, isbn, genre, price, category, format, fileUrl } = req.body;
-      
-      const bookProduct = {
-        name: title,
-        description: `${author} - ${genre}`,
-        price: price || Math.floor(Math.random() * 100000) + 29900,
-        category: category || (format === "ebook" ? "ebooks" : "books"),
-        module: "vyronaread",
-        metadata: {
-          author,
-          isbn,
-          genre,
-          format: format || "physical",
-          fileUrl: fileUrl || null
-        }
-      };
-      
-      const product = await storage.createProduct(bookProduct);
-      res.json(product);
-    } catch (error) {
-      console.error("Error adding VyronaRead book:", error);
-      res.status(500).json({ message: "Failed to add book" });
-    }
-  });
+
 
   // Store routes
   app.get("/api/stores", async (req, res) => {
@@ -3166,54 +3140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // VyronaRead Data Organization - Authentic seller-uploaded content
-  
-  // E-books uploaded by sellers for VyronaRead E-Reader section (public access to all approved books)
-  app.get("/api/vyronaread/ebooks", async (req, res) => {
-    try {
-      const ebooks = await storage.getProducts("vyronaread", "ebooks");
-      res.json(ebooks);
-    } catch (error) {
-      console.error("Error fetching e-books:", error);
-      res.status(500).json({ message: "Failed to fetch e-books" });
-    }
-  });
 
-  // Physical/digital books uploaded by sellers for Browse Books section (public access to all approved books)
-  app.get("/api/vyronaread/seller-books", async (req, res) => {
-    try {
-      // Get all books with "books" category for customer browsing
-      const allBooks = await storage.getProducts("vyronaread", "books");
-      res.json(allBooks);
-    } catch (error) {
-      console.error("Error fetching seller books:", error);
-      res.status(500).json({ message: "Failed to fetch seller books" });
-    }
-  });
-
-  // Library books from specific approved library for Library Integration section
-  app.get("/api/vyronaread/library-books/:libraryId", async (req, res) => {
-    try {
-      const libraryId = parseInt(req.params.libraryId);
-      const libraryBooks = await storage.getPhysicalBooks(libraryId);
-      res.json(libraryBooks);
-    } catch (error) {
-      console.error("Error fetching library books:", error);
-      res.status(500).json({ message: "Failed to fetch library books" });
-    }
-  });
-
-  // Get all library books (fallback for general browsing)
-  app.get("/api/vyronaread/library-books", async (req, res) => {
-    try {
-      // Get all physical books from all approved libraries
-      const allPhysicalBooks = await storage.getPhysicalBooks();
-      res.json(allPhysicalBooks);
-    } catch (error) {
-      console.error("Error fetching library books:", error);
-      res.status(500).json({ message: "Failed to fetch library books" });
-    }
-  });
 
   // Get available libraries for "Visit Library" functionality
   app.get("/api/vyronaread/libraries", async (req, res) => {
