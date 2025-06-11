@@ -642,17 +642,18 @@ export class DatabaseStorage implements IStorage {
           module, 
           image_url as "imageUrl", 
           store_id as "storeId", 
+          seller_id as "sellerId",
           metadata, 
           enable_individual_buy as "enableIndividualBuy", 
           enable_group_buy as "enableGroupBuy", 
           group_buy_min_quantity as "groupBuyMinQuantity", 
           group_buy_discount as "groupBuyDiscount"
         FROM products 
-        WHERE metadata->>'sellerId' = $1
+        WHERE seller_id = $1
         ORDER BY id DESC
       `;
       
-      const result = await pool.query(query, [sellerId.toString()]);
+      const result = await pool.query(query, [sellerId]);
       
       // Convert price strings to proper decimal numbers
       return result.rows.map((row: any) => {
