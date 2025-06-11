@@ -2695,20 +2695,20 @@ export default function AdminDashboard() {
                 <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/seller-dashboard')}>
+                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/vyronahub-dashboard')}>
                         <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                           <TrendingUp className="h-6 w-6 text-green-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold mb-1">Main Dashboard</h3>
-                          <p className="text-sm text-gray-500">Access seller dashboard</p>
+                          <h3 className="font-semibold mb-1">VyronaHub Dashboard</h3>
+                          <p className="text-sm text-gray-500">General commerce platform</p>
                         </div>
                       </div>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-8 w-8 p-0"
-                        onClick={() => window.open('/seller-dashboard', '_blank')}
+                        onClick={() => window.open('/vyronahub-dashboard', '_blank')}
                         title="Open in new tab"
                       >
                         <Eye className="h-4 w-4" />
@@ -2835,9 +2835,9 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/seller-dashboard')}>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/vyronahub-dashboard')}>
                       <TrendingUp className="h-6 w-6 mb-2" />
-                      <span className="text-xs">Main Dashboard</span>
+                      <span className="text-xs">VyronaHub</span>
                     </Button>
                     <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/book-seller-dashboard')}>
                       <Package className="h-6 w-6 mb-2" />
@@ -2866,10 +2866,10 @@ export default function AdminDashboard() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => window.open('/seller-dashboard', '_blank')}
+                          onClick={() => window.open('/vyronahub-dashboard', '_blank')}
                           className="text-blue-600 hover:text-blue-800"
                         >
-                          Main
+                          VyronaHub
                         </Button>
                         <Button
                           size="sm"
