@@ -447,7 +447,7 @@ export default function VyronaRead() {
         <Button
           variant="outline"
           className="flex items-center gap-2"
-          onClick={() => setLocation('/home')}
+          onClick={() => setLocation('/')}
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
