@@ -166,9 +166,15 @@ export default function VyronaReadCheckout() {
         if (item.type === 'buy') {
           return total + Math.floor(item.book.price || 299);
         } else if (item.type === 'rent') {
-          const basePrice = Math.floor((item.book.price || 299) * 0.1); // 10% per period
+          const bookPrice = item.book.price || 299;
           const periods = itemRentalDurations[item.book.id] || 1;
-          return total + (basePrice * periods);
+          // New pricing: 7 days = 20%, 15 days = 40%, 30 days = 80%
+          let rentalPrice;
+          if (periods === 1) rentalPrice = Math.floor(bookPrice * 0.2); // 7 days
+          else if (periods === 2) rentalPrice = Math.floor(bookPrice * 0.4); // 15 days  
+          else if (periods === 3) rentalPrice = Math.floor(bookPrice * 0.6); // 22 days
+          else rentalPrice = Math.floor(bookPrice * 0.8); // 30 days
+          return total + rentalPrice;
         }
         return total;
       }, 0);
@@ -180,10 +186,12 @@ export default function VyronaReadCheckout() {
       case 'buy':
         return bookDetails.price || bookDetails.buyPrice || 0;
       case 'rent':
-        // Use the new 15-day period pricing: 10% of book price per period
-        const basePrice = Math.floor((bookDetails.price || 299) * 0.1);
-        const periods = Math.ceil(parseInt(rentalDuration) / 15); // Convert days to 15-day periods
-        return basePrice * periods;
+        // New pricing structure: 7 days = 20%, 15 days = 40%, 30 days = 80%
+        const bookPrice = bookDetails.price || 299;
+        const days = parseInt(rentalDuration);
+        if (days <= 7) return Math.floor(bookPrice * 0.2);
+        else if (days <= 15) return Math.floor(bookPrice * 0.4);
+        else return Math.floor(bookPrice * 0.8);
       case 'borrow':
         // If user doesn't have membership, charge membership fee
         return hasMembership ? 0 : 2000; // ₹2000 annual membership
@@ -528,31 +536,47 @@ export default function VyronaReadCheckout() {
                             {item.type === 'buy' ? 'Purchase' : 'Rental'}
                           </Badge>
                           <span className="text-sm text-gray-500">
-                            ₹{item.type === 'buy' ? Math.floor(item.book.price || 299) : Math.floor((item.book.price || 299) * 0.1)}
-                            {item.type === 'rent' && ' per 15-day period'}
+                            ₹{item.type === 'buy' ? Math.floor(item.book.price || 299) : (() => {
+                              const bookPrice = item.book.price || 299;
+                              const days = itemRentalDurations[item.book.id] || 15;
+                              if (days === 7) return Math.floor(bookPrice * 0.2);
+                              else if (days === 15) return Math.floor(bookPrice * 0.4);
+                              else return Math.floor(bookPrice * 0.8);
+                            })()}
+                            {item.type === 'rent' && ` for ${itemRentalDurations[item.book.id] || 15} days`}
                           </span>
                         </div>
                         {item.type === 'rent' && (
                           <div className="mt-3">
                             <Label className="text-sm font-medium">Rental Duration:</Label>
                             <div className="flex gap-2 mt-2">
-                              {[1, 2, 3, 4].map((periods) => (
+                              {[
+                                { days: 7, label: '7 days' },
+                                { days: 15, label: '15 days' },
+                                { days: 30, label: '30 days' }
+                              ].map((option) => (
                                 <Button
-                                  key={periods}
+                                  key={option.days}
                                   size="sm"
-                                  variant={itemRentalDurations[item.book.id] === periods ? 'default' : 'outline'}
+                                  variant={itemRentalDurations[item.book.id] === option.days ? 'default' : 'outline'}
                                   onClick={() => setItemRentalDurations(prev => ({
                                     ...prev,
-                                    [item.book.id]: periods
+                                    [item.book.id]: option.days
                                   }))}
                                   className="text-xs"
                                 >
-                                  {periods} period{periods > 1 ? 's' : ''} ({periods * 15} days)
+                                  {option.label}
                                 </Button>
                               ))}
                             </div>
                             <p className="text-sm text-gray-600 mt-1">
-                              Total: ₹{Math.floor((item.book.price || 299) * 0.1) * (itemRentalDurations[item.book.id] || 1)}
+                              Total: ₹{(() => {
+                                const bookPrice = item.book.price || 299;
+                                const days = itemRentalDurations[item.book.id] || 15;
+                                if (days === 7) return Math.floor(bookPrice * 0.2);
+                                else if (days === 15) return Math.floor(bookPrice * 0.4);
+                                else return Math.floor(bookPrice * 0.8);
+                              })()}
                             </p>
                           </div>
                         )}
@@ -593,31 +617,24 @@ export default function VyronaReadCheckout() {
                 {checkoutType === 'rent' ? (
                   <RadioGroup value={rentalDuration} onValueChange={setRentalDuration}>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="15" id="15days" />
-                      <Label htmlFor="15days">1 period (15 days) - ₹{(() => {
+                      <RadioGroupItem value="7" id="7days" />
+                      <Label htmlFor="7days">7 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        return Math.floor((bookDetails.price || 299) * 0.1);
+                        return Math.floor((bookDetails.price || 299) * 0.2);
+                      })()}</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="15" id="15days" />
+                      <Label htmlFor="15days">15 days - ₹{(() => {
+                        if (!bookDetails) return 0;
+                        return Math.floor((bookDetails.price || 299) * 0.4);
                       })()} (Recommended)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="30" id="30days" />
-                      <Label htmlFor="30days">2 periods (30 days) - ₹{(() => {
+                      <Label htmlFor="30days">30 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        return Math.floor((bookDetails.price || 299) * 0.1) * 2;
-                      })()}</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="45" id="45days" />
-                      <Label htmlFor="45days">3 periods (45 days) - ₹{(() => {
-                        if (!bookDetails) return 0;
-                        return Math.floor((bookDetails.price || 299) * 0.1) * 3;
-                      })()}</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="60" id="60days" />
-                      <Label htmlFor="60days">4 periods (60 days) - ₹{(() => {
-                        if (!bookDetails) return 0;
-                        return Math.floor((bookDetails.price || 299) * 0.1) * 4;
+                        return Math.floor((bookDetails.price || 299) * 0.8);
                       })()}</Label>
                     </div>
                   </RadioGroup>
