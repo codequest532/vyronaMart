@@ -153,6 +153,30 @@ export default function BookSellerDashboard() {
     queryKey: ["/api/seller/analytics"],
   });
 
+  // Update order status mutation with email workflow
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+      const response = await apiRequest(`/api/seller/orders/${orderId}/status`, "PATCH", {
+        status
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/seller/orders"] });
+      toast({
+        title: "Order Updated",
+        description: `Order status updated successfully. ${data.emailSent ? 'Email sent to customer.' : 'Email notification failed.'}`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update order status",
+        variant: "destructive",
+      });
+    },
+  });
+
   // All useMutation hooks must also be at top level
   const createLibraryRequestMutation = useMutation({
     mutationFn: async (libraryData: any) => {
@@ -1439,41 +1463,131 @@ export default function BookSellerDashboard() {
 
                     return (
                       <div className="space-y-4">
-                        {allOrders.map((order: any) => (
-                          <div key={order.order_id} className="border rounded-lg p-4 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div>
-                                  <p className="font-medium">Order #{order.order_id}</p>
-                                  <p className="text-sm text-gray-600">
-                                    {order.customer_name || 'Customer'} • {order.customer_email}
-                                  </p>
-                                  {order.customer_phone && (
-                                    <p className="text-xs text-gray-500">
-                                      Phone: {order.customer_phone}
+                        {allOrders.map((order: any) => {
+                          const currentStatus = order.order_status || order.status || 'pending';
+                          const isLibraryMembership = order.module === 'library_membership';
+                          
+                          return (
+                            <div key={order.order_id} className="border rounded-lg p-4 space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                  <div>
+                                    <p className="font-medium">Order #{order.order_id}</p>
+                                    <p className="text-sm text-gray-600">
+                                      {order.customer_name || 'Customer'} • {order.customer_email}
                                     </p>
+                                    {order.customer_phone && (
+                                      <p className="text-xs text-gray-500">
+                                        Phone: {order.customer_phone}
+                                      </p>
+                                    )}
+                                  </div>
+                                  <Badge variant="outline" className={
+                                    isLibraryMembership 
+                                      ? "border-green-500 text-green-700" 
+                                      : "border-blue-500 text-blue-700"
+                                  }>
+                                    {isLibraryMembership ? 'Library Membership' : 'VyronaRead'}
+                                  </Badge>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
+                                  <p className="text-sm text-gray-500">
+                                    {new Date(order.created_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* 4-Stage Status Workflow */}
+                              <div className="flex items-center justify-between pt-3 border-t">
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={
+                                    currentStatus === 'delivered' ? 'default' :
+                                    currentStatus === 'out_for_delivery' ? 'secondary' :
+                                    currentStatus === 'shipped' ? 'outline' : 
+                                    currentStatus === 'processing' ? 'secondary' : 'destructive'
+                                  }>
+                                    {currentStatus === 'out_for_delivery' ? 'Ready for Collection' : 
+                                     currentStatus === 'shipped' ? isLibraryMembership ? 'Membership Active' : 'Shipped' :
+                                     currentStatus === 'delivered' ? isLibraryMembership ? 'Books Collected' : 'Delivered' :
+                                     currentStatus?.charAt(0).toUpperCase() + currentStatus?.slice(1) || 'Pending'}
+                                  </Badge>
+                                </div>
+                                
+                                {/* Interactive Status Buttons */}
+                                <div className="flex gap-1">
+                                  {(currentStatus === 'pending' || !currentStatus) && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-xs px-3 py-1 text-blue-600 border-blue-200 hover:bg-blue-50"
+                                      onClick={() => updateOrderStatusMutation.mutate({
+                                        orderId: order.order_id,
+                                        status: 'processing'
+                                      })}
+                                      disabled={updateOrderStatusMutation.isPending}
+                                      title={isLibraryMembership ? "Approve Membership - Sends confirmation email" : "Start Processing - Sends 'Order Confirmed' email"}
+                                    >
+                                      {isLibraryMembership ? '✓ Approve' : '📧 Process'}
+                                    </Button>
+                                  )}
+                                  
+                                  {currentStatus === 'processing' && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-xs px-3 py-1 text-orange-600 border-orange-200 hover:bg-orange-50"
+                                      onClick={() => updateOrderStatusMutation.mutate({
+                                        orderId: order.order_id,
+                                        status: 'shipped'
+                                      })}
+                                      disabled={updateOrderStatusMutation.isPending}
+                                      title={isLibraryMembership ? "Activate Membership - Sends welcome email" : "Mark Shipped - Sends tracking email"}
+                                    >
+                                      {isLibraryMembership ? '🎫 Activate' : '📦 Ship'}
+                                    </Button>
+                                  )}
+                                  
+                                  {currentStatus === 'shipped' && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-xs px-3 py-1 text-purple-600 border-purple-200 hover:bg-purple-50"
+                                      onClick={() => updateOrderStatusMutation.mutate({
+                                        orderId: order.order_id,
+                                        status: 'out_for_delivery'
+                                      })}
+                                      disabled={updateOrderStatusMutation.isPending}
+                                      title={isLibraryMembership ? "Ready for Book Collection" : "Out for Delivery"}
+                                    >
+                                      {isLibraryMembership ? '📚 Ready' : '🚚 Out'}
+                                    </Button>
+                                  )}
+                                  
+                                  {currentStatus === 'out_for_delivery' && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="text-xs px-3 py-1 text-green-600 border-green-200 hover:bg-green-50"
+                                      onClick={() => updateOrderStatusMutation.mutate({
+                                        orderId: order.order_id,
+                                        status: 'delivered'
+                                      })}
+                                      disabled={updateOrderStatusMutation.isPending}
+                                      title={isLibraryMembership ? "Mark Books Collected" : "Mark Delivered"}
+                                    >
+                                      {isLibraryMembership ? '✅ Collected' : '✅ Delivered'}
+                                    </Button>
+                                  )}
+                                  
+                                  {updateOrderStatusMutation.isPending && (
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
                                   )}
                                 </div>
-                                <Badge variant="outline" className={
-                                  order.module === 'library_membership' 
-                                    ? "border-green-500 text-green-700" 
-                                    : "border-blue-500 text-blue-700"
-                                }>
-                                  {order.module === 'library_membership' ? 'Library Membership' : 'VyronaRead'}
-                                </Badge>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
-                                <p className="text-sm text-gray-500">
-                                  {new Date(order.created_at).toLocaleDateString()}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Status: {order.order_status || 'Pending'}
-                                </p>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     );
                   })()}

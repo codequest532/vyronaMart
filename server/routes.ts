@@ -2360,7 +2360,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid status" });
       }
 
-      // Get current order details
+      // Check if this is a library membership order (stored in notifications) or regular order
+      let order: any = null;
+      let isLibraryMembership = false;
+      
+      // First try to find in regular orders table
       const orderResult = await db.execute(sql`
         SELECT o.*, u.email as customer_email, u.username as customer_name 
         FROM orders o
@@ -2368,11 +2372,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE o.id = ${parseInt(orderId)}
       `);
 
-      if (orderResult.rows.length === 0) {
-        return res.status(404).json({ message: "Order not found" });
+      if (orderResult.rows.length > 0) {
+        order = orderResult.rows[0] as any;
+      } else {
+        // Try to find in notifications table (library membership)
+        const notificationResult = await db.execute(sql`
+          SELECT n.*, n.metadata->>'email' as customer_email, n.metadata->>'fullName' as customer_name,
+                 'library_membership' as module, n.metadata->>'status' as status
+          FROM notifications n
+          WHERE n.id = ${parseInt(orderId)} AND n.type = 'library_membership_request'
+        `);
+        
+        if (notificationResult.rows.length > 0) {
+          order = {
+            ...notificationResult.rows[0],
+            total_amount: (notificationResult.rows[0] as any).metadata?.membershipFee * 100 || 200000,
+            order_status: (notificationResult.rows[0] as any).metadata?.status || 'pending'
+          };
+          isLibraryMembership = true;
+        }
       }
 
-      const order = orderResult.rows[0] as any;
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
       
       // Validate status progression (prevent skipping stages)
       const statusProgression = ['pending', 'processing', 'shipped', 'out_for_delivery', 'delivered'];
@@ -2384,12 +2407,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Cannot go backwards in order status progression" });
       }
 
-      // Update order status
-      await db.execute(sql`
-        UPDATE orders 
-        SET status = ${status}
-        WHERE id = ${parseInt(orderId)}
-      `);
+      // Update order status (different table based on order type)
+      if (isLibraryMembership) {
+        // Update notification metadata for library membership
+        const updatedMetadata = {
+          ...order.metadata,
+          status: status
+        };
+        await db.execute(sql`
+          UPDATE notifications 
+          SET metadata = ${JSON.stringify(updatedMetadata)}
+          WHERE id = ${parseInt(orderId)}
+        `);
+      } else {
+        // Update regular orders table
+        await db.execute(sql`
+          UPDATE orders 
+          SET status = ${status}
+          WHERE id = ${parseInt(orderId)}
+        `);
+      }
 
       // Send automated email based on status
       let emailResult: { success: boolean; messageId?: string; error?: string } = { success: false, messageId: '', error: 'No email template for this status' };
@@ -2407,19 +2444,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
 
         let emailTemplate;
-        switch (status) {
-          case 'processing':
-            emailTemplate = generateOrderProcessingEmail(orderData);
-            break;
-          case 'shipped':
-            emailTemplate = generateOrderShippedEmail(orderData);
-            break;
-          case 'out_for_delivery':
-            emailTemplate = generateOrderOutForDeliveryEmail(orderData);
-            break;
-          case 'delivered':
-            emailTemplate = generateOrderDeliveredEmail(orderData);
-            break;
+        
+        if (isLibraryMembership) {
+          // Library membership specific email templates
+          switch (status) {
+            case 'processing':
+              emailTemplate = {
+                subject: `Library Membership Approved - Welcome!`,
+                htmlContent: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; font-size: 28px;">🎉 Membership Approved!</h1>
+                    </div>
+                    <div style="padding: 30px; background: #f9fafb;">
+                      <h2 style="color: #374151;">Dear ${orderData.customerName},</h2>
+                      <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+                        Congratulations! Your library membership application has been approved. 
+                        You can now access our extensive collection of books and resources.
+                      </p>
+                      <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+                        <h3 style="color: #10b981; margin-top: 0;">Membership Details</h3>
+                        <p><strong>Membership Fee:</strong> ₹${(orderData.orderTotal / 100).toFixed(2)}</p>
+                        <p><strong>Status:</strong> Approved</p>
+                        <p><strong>Next Step:</strong> Membership activation in progress</p>
+                      </div>
+                      <p style="color: #6b7280;">We'll notify you once your membership is fully activated.</p>
+                    </div>
+                  </div>
+                `
+              };
+              break;
+            case 'shipped':
+              emailTemplate = {
+                subject: `Library Membership Activated - Start Borrowing Books!`,
+                htmlContent: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; font-size: 28px;">📚 Membership Active!</h1>
+                    </div>
+                    <div style="padding: 30px; background: #f9fafb;">
+                      <h2 style="color: #374151;">Dear ${orderData.customerName},</h2>
+                      <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+                        Great news! Your library membership is now active. You can browse and select books 
+                        from our catalog for borrowing.
+                      </p>
+                      <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3b82f6;">
+                        <h3 style="color: #3b82f6; margin-top: 0;">What's Next?</h3>
+                        <p>• Browse our online catalog</p>
+                        <p>• Select books you want to borrow</p>
+                        <p>• Wait for collection notification</p>
+                      </div>
+                    </div>
+                  </div>
+                `
+              };
+              break;
+            case 'out_for_delivery':
+              emailTemplate = {
+                subject: `Books Ready for Collection - Visit Our Library`,
+                htmlContent: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; font-size: 28px;">📖 Books Ready!</h1>
+                    </div>
+                    <div style="padding: 30px; background: #f9fafb;">
+                      <h2 style="color: #374151;">Dear ${orderData.customerName},</h2>
+                      <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+                        Your selected books are ready for collection! Please visit our library at your convenience 
+                        to pick up your books.
+                      </p>
+                      <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+                        <h3 style="color: #f59e0b; margin-top: 0;">Collection Details</h3>
+                        <p><strong>Status:</strong> Ready for pickup</p>
+                        <p><strong>Note:</strong> Please contact the library for address and timing</p>
+                      </div>
+                      <p style="color: #6b7280;">Please bring your membership confirmation and ID for verification.</p>
+                    </div>
+                  </div>
+                `
+              };
+              break;
+            case 'delivered':
+              emailTemplate = {
+                subject: `Books Collected Successfully - Happy Reading!`,
+                htmlContent: `
+                  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; font-size: 28px;">✅ Books Collected!</h1>
+                    </div>
+                    <div style="padding: 30px; background: #f9fafb;">
+                      <h2 style="color: #374151;">Dear ${orderData.customerName},</h2>
+                      <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+                        Thank you for collecting your books! We hope you enjoy reading them. 
+                        Remember to return them by the due date to avoid any late fees.
+                      </p>
+                      <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+                        <h3 style="color: #10b981; margin-top: 0;">Important Reminders</h3>
+                        <p>• Return books by the due date</p>
+                        <p>• Take care of the books</p>
+                        <p>• Visit us for more book recommendations</p>
+                      </div>
+                      <p style="color: #6b7280;">Happy reading! We look forward to serving you again.</p>
+                    </div>
+                  </div>
+                `
+              };
+              break;
+          }
+        } else {
+          // Regular order email templates
+          switch (status) {
+            case 'processing':
+              emailTemplate = generateOrderProcessingEmail(orderData);
+              break;
+            case 'shipped':
+              emailTemplate = generateOrderShippedEmail(orderData);
+              break;
+            case 'out_for_delivery':
+              emailTemplate = generateOrderOutForDeliveryEmail(orderData);
+              break;
+            case 'delivered':
+              emailTemplate = generateOrderDeliveredEmail(orderData);
+              break;
+          }
         }
 
         if (emailTemplate) {
