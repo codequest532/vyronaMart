@@ -28,7 +28,7 @@ import Cart from "@/pages/cart";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import VyronaHubDashboard from "@/pages/vyronahub-dashboard";
-import BookSellerDashboard from "@/pages/book-seller-dashboard";
+import VyronaReadDashboard from "@/pages/vyronaread-dashboard";
 import EbookReader from "@/pages/ebook-reader";
 
 import NotFound from "@/pages/not-found";
@@ -64,8 +64,9 @@ function Router() {
       <Route path="/seller-dashboard" component={VyronaHubDashboard} />
       <Route path="/vyronahub-dashboard" component={VyronaHubDashboard} />
       
-      {/* Book Seller Interface */}
-      <Route path="/book-seller-dashboard" component={BookSellerDashboard} />
+      {/* VyronaRead Interface */}
+      <Route path="/book-seller-dashboard" component={VyronaReadDashboard} />
+      <Route path="/vyronaread-dashboard" component={VyronaReadDashboard} />
       
 
       

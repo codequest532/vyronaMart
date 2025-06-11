@@ -2720,20 +2720,20 @@ export default function AdminDashboard() {
                 <Card className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/book-seller-dashboard')}>
+                      <div className="flex items-center gap-4 cursor-pointer" onClick={() => setLocation('/vyronaread-dashboard')}>
                         <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                           <Package className="h-6 w-6 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold mb-1">Book Seller Dashboard</h3>
-                          <p className="text-sm text-gray-500">VyronaRead book management</p>
+                          <h3 className="font-semibold mb-1">VyronaRead Dashboard</h3>
+                          <p className="text-sm text-gray-500">Book management platform</p>
                         </div>
                       </div>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-8 w-8 p-0"
-                        onClick={() => window.open('/book-seller-dashboard', '_blank')}
+                        onClick={() => window.open('/vyronaread-dashboard', '_blank')}
                         title="Open in new tab"
                       >
                         <Eye className="h-4 w-4" />
@@ -2839,9 +2839,9 @@ export default function AdminDashboard() {
                       <TrendingUp className="h-6 w-6 mb-2" />
                       <span className="text-xs">VyronaHub</span>
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/book-seller-dashboard')}>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setLocation('/vyronaread-dashboard')}>
                       <Package className="h-6 w-6 mb-2" />
-                      <span className="text-xs">Book Management</span>
+                      <span className="text-xs">VyronaRead</span>
                     </Button>
                     <Button variant="outline" className="h-20 flex-col" onClick={() => setActiveTab("sellers")}>
                       <Users className="h-6 w-6 mb-2" />
@@ -2874,10 +2874,10 @@ export default function AdminDashboard() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => window.open('/book-seller-dashboard', '_blank')}
+                          onClick={() => window.open('/vyronaread-dashboard', '_blank')}
                           className="text-blue-600 hover:text-blue-800"
                         >
-                          Books
+                          VyronaRead
                         </Button>
                       </div>
                     </div>
