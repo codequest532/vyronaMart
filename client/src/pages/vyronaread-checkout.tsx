@@ -422,12 +422,12 @@ export default function VyronaReadCheckout() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-bold text-lg">{bookDetails.title || bookDetails.name}</h3>
-                  <p className="text-gray-600 mb-2">by {bookDetails.author || "Unknown Author"}</p>
-                  {bookDetails.isbn && (
-                    <p className="text-sm text-gray-500">ISBN: {bookDetails.isbn}</p>
+                  <p className="text-gray-600 mb-2">by {bookDetails.metadata?.author || bookDetails.author || "Unknown Author"}</p>
+                  {(bookDetails.metadata?.isbn || bookDetails.isbn) && (
+                    <p className="text-sm text-gray-500">ISBN: {bookDetails.metadata?.isbn || bookDetails.isbn}</p>
                   )}
-                  {bookDetails.category && (
-                    <Badge variant="secondary" className="mt-2">{bookDetails.category}</Badge>
+                  {(bookDetails.metadata?.genre || bookDetails.category) && (
+                    <Badge variant="secondary" className="mt-2">{bookDetails.metadata?.genre || bookDetails.category}</Badge>
                   )}
                 </div>
               </div>
