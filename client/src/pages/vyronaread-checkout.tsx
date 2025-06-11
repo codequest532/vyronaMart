@@ -59,6 +59,17 @@ export default function VyronaReadCheckout() {
     postalCode: ''
   });
 
+  // Shipping address
+  const [shippingAddress, setShippingAddress] = useState({
+    fullName: '',
+    phone: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    pincode: ''
+  });
+
   // Borrowing specific information
   const [borrowingInfo, setBorrowingInfo] = useState({
     libraryCardNumber: '',
@@ -215,6 +226,10 @@ export default function VyronaReadCheckout() {
 
   const handleBorrowingInfoChange = (field: string, value: string) => {
     setBorrowingInfo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleShippingAddressChange = (field: string, value: string) => {
+    setShippingAddress(prev => ({ ...prev, [field]: value }));
   };
 
   const validateForm = () => {
