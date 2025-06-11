@@ -18,9 +18,6 @@ import {
   LogOut,
   DollarSign,
   AlertCircle,
-  Book,
-  BookOpen,
-  Library,
   Calendar,
   UserCheck,
   Clock,
@@ -71,21 +68,7 @@ export default function SellerDashboard() {
     queryFn: () => apiRequest("/api/seller/analytics").then(res => res.json())
   });
 
-  // Fetch VyronaRead data
-  const { data: eBooks = [] } = useQuery({
-    queryKey: ["/api/vyronaread/ebooks"],
-    queryFn: () => apiRequest("/api/vyronaread/ebooks").then(res => res.json())
-  });
 
-  const { data: sellerBooks = [] } = useQuery({
-    queryKey: ["/api/vyronaread/seller-books"],
-    queryFn: () => apiRequest("/api/vyronaread/seller-books").then(res => res.json())
-  });
-
-  const { data: libraryBooks = [] } = useQuery({
-    queryKey: ["/api/vyronaread/library-books"],
-    queryFn: () => apiRequest("/api/vyronaread/library-books").then(res => res.json())
-  });
 
   // Update order status mutation with email workflow
   const updateOrderStatusMutation = useMutation({
@@ -120,8 +103,8 @@ export default function SellerDashboard() {
             <div className="flex items-center gap-3">
               <Store className="h-8 w-8 text-primary" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Seller Dashboard</h1>
-                <p className="text-sm text-gray-500">Manage your products and orders</p>
+                <h1 className="text-xl font-bold text-gray-900">VyronaHub Seller</h1>
+                <p className="text-sm text-gray-500">Manage your store and orders</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -149,11 +132,10 @@ export default function SellerDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
             <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="vyronaread">VyronaRead</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
@@ -365,52 +347,7 @@ export default function SellerDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="vyronaread" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">VyronaRead Management</h2>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Book className="h-5 w-5" />
-                    E-Books
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold mb-2">{eBooks?.length || 0}</div>
-                  <p className="text-sm text-gray-600">Digital books available</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5" />
-                    Your Books
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold mb-2">{sellerBooks?.length || 0}</div>
-                  <p className="text-sm text-gray-600">Books you've listed</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Library className="h-5 w-5" />
-                    Library Books
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold mb-2">{libraryBooks?.length || 0}</div>
-                  <p className="text-sm text-gray-600">Library collection</p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
             <div className="flex justify-between items-center">
