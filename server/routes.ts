@@ -2626,11 +2626,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
           } else {
             // Regular order - send to individual customer
-            emailResult = await sendBrevoEmail({
-              to: order.customer_email,
-              subject: emailTemplate.subject,
-              htmlContent: emailTemplate.htmlContent
-            });
+            emailResult = await sendBrevoEmail(
+              order.customer_email,
+              emailTemplate.subject,
+              emailTemplate.htmlContent
+            );
           }
 
           // Log email notification in database for non-VyronaSocial orders
@@ -5306,6 +5306,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error('Verify payment error:', error);
       res.status(500).json({ error: "Failed to verify payment" });
+    }
+  });
+
+  // Get books requested for borrowing in a library membership order
+  app.get("/api/orders/:orderId/requested-books", async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      
+      // Get order details first
+      const orderResult = await db.execute(sql`
+        SELECT * FROM orders WHERE id = ${orderId}
+      `);
+      
+      if (orderResult.rows.length === 0) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      const order = orderResult.rows[0] as any;
+      
+      // For library membership orders, get the books from cart items
+      if (order.module === 'library_membership') {
+        const cartResult = await db.execute(sql`
+          SELECT 
+            ci.*,
+            lb.title,
+            lb.author,
+            lb.isbn,
+            lb.imageUrl,
+            lb.category,
+            lb.publisher,
+            lb.publicationYear,
+            lb.language
+          FROM cart_items ci
+          JOIN library_books lb ON ci.product_id = lb.id
+          WHERE ci.user_id = ${order.user_id}
+          AND ci.module = 'library_browsing'
+        `);
+        
+        const requestedBooks = cartResult.rows.map((row: any) => ({
+          id: row.id,
+          bookId: row.product_id,
+          title: row.title,
+          author: row.author,
+          isbn: row.isbn,
+          imageUrl: row.imageUrl,
+          category: row.category,
+          publisher: row.publisher,
+          publicationYear: row.publicationYear,
+          language: row.language,
+          quantity: row.quantity,
+          rentalDuration: row.rental_duration,
+          pricePerDay: row.price_per_day
+        }));
+        
+        return res.json({ 
+          success: true, 
+          requestedBooks,
+          totalBooks: requestedBooks.length
+        });
+      }
+      
+      res.json({ 
+        success: true, 
+        requestedBooks: [],
+        totalBooks: 0
+      });
+      
+    } catch (error: any) {
+      console.error("Error fetching requested books:", error);
+      res.status(500).json({ error: "Failed to fetch requested books" });
     }
   });
 

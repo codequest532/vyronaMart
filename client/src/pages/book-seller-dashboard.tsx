@@ -35,7 +35,8 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Tablet
+  Tablet,
+  Building
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -2234,7 +2235,7 @@ export default function BookSellerDashboard() {
                             const isPastStatus = ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(currentStatus) > 
                                                 ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(status);
                             
-                            const statusLabels = selectedOrder.module === 'library_membership' ? {
+                            const statusLabels: { [key: string]: string } = selectedOrder.module === 'library_membership' ? {
                               processing: 'Approve Membership',
                               shipped: 'Activate Membership', 
                               out_for_delivery: 'Ready for Collection',
