@@ -677,7 +677,7 @@ export default function VyronaRead() {
                           </div>
                           <div className="text-right">
                             <div className="text-xs text-gray-500">or rent</div>
-                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) / 500)}/week</div>
+                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) / 10)}/15 days</div>
                           </div>
                         </div>
 
@@ -716,7 +716,7 @@ export default function VyronaRead() {
                               onClick={() => addToCart(book, 'rent')}
                             >
                               <ShoppingCart className="mr-1 h-3 w-3" />
-                              Cart (Rent)
+                              Add (Rent)
                             </Button>
                           </div>
                         </div>
@@ -1634,7 +1634,7 @@ export default function VyronaRead() {
                               </Badge>
                               <span className="text-sm font-medium text-purple-600">
                                 ₹{item.type === 'buy' ? Math.floor(item.book.price || 299) : Math.floor((item.book.price || 299) / 10)}
-                                {item.type === 'rent' && '/week'}
+                                {item.type === 'rent' && '/15 days'}
                               </span>
                             </div>
                           </div>

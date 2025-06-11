@@ -34,6 +34,9 @@ export default function VyronaReadCartCheckout() {
   });
   const [paymentMethod, setPaymentMethod] = useState("");
   const [specialInstructions, setSpecialInstructions] = useState("");
+  
+  // Rental duration state for each rental item
+  const [rentalDurations, setRentalDurations] = useState<{[key: string]: number}>({});
 
   // Load cart data from session storage
   useEffect(() => {
@@ -42,6 +45,16 @@ export default function VyronaReadCartCheckout() {
       if (cartData) {
         const parsedCart = JSON.parse(cartData);
         setCartItems(parsedCart);
+        
+        // Initialize rental durations for rental items
+        const initialDurations: {[key: string]: number} = {};
+        parsedCart.forEach((item: any) => {
+          if (item.type === 'rent') {
+            const itemKey = `${item.book.id}-${item.type}`;
+            initialDurations[itemKey] = 1; // Default to 1 period (15 days)
+          }
+        });
+        setRentalDurations(initialDurations);
       } else {
         toast({
           title: "No Cart Items",
@@ -68,10 +81,20 @@ export default function VyronaReadCartCheckout() {
     if (item.type === 'buy') {
       return Math.floor(item.book.price || 299);
     } else {
-      // For rental, calculate based on metadata rental price or fallback
-      const rentalPrice = item.book.metadata?.rentalPrice || Math.floor((item.book.price || 299) / 10);
-      return rentalPrice;
+      // For rental, calculate based on metadata rental price or fallback, multiplied by duration
+      const itemKey = `${item.book.id}-${item.type}`;
+      const duration = rentalDurations[itemKey] || 1;
+      const baseRentalPrice = item.book.metadata?.rentalPrice || Math.floor((item.book.price || 299) / 10);
+      return baseRentalPrice * duration;
     }
+  };
+
+  // Function to update rental duration
+  const updateRentalDuration = (itemKey: string, duration: number) => {
+    setRentalDurations(prev => ({
+      ...prev,
+      [itemKey]: duration
+    }));
   };
 
   const subtotal = cartItems.reduce((total, item) => total + calculateItemPrice(item), 0);
@@ -226,7 +249,7 @@ export default function VyronaReadCartCheckout() {
                         {item.type === 'rent' && (
                           <Badge variant="outline" className="text-xs">
                             <Clock className="mr-1 h-3 w-3" />
-                            Weekly
+                            15 Days
                           </Badge>
                         )}
                       </div>
