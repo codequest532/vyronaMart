@@ -1,6 +1,6 @@
-Book Name,Author,ISBN Number,Edition,Year of Publishing
-To Kill a Mockingbird,Harper Lee,54422,1st,1960
-1984,George Orwell,54423,1st,1949
+Book Name,Author,ISBN Number,Book Image,Year of Publishing
+To Kill a Mockingbird,Harper Lee,54422,https://drive.google.com/uc?id=1abc123def456ghi789jkl,1960
+1984,George Orwell,54423,https://drive.google.com/uc?id=1xyz789uvw456rst123abc,1949
 Pride and Prejudice,Jane Austen,54424,1st,1813
 The Great Gatsby,F. Scott Fitzgerald,54425,1st,1925
 The Catcher in the Rye,J.D. Salinger,54426,1st,1951

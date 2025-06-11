@@ -1453,6 +1453,7 @@ export class DatabaseStorage implements IStorage {
           title: csvBook["Book Name"] || csvBook.bookName || "Unknown Title",
           author: csvBook["Author"] || csvBook.author || "Unknown Author", 
           isbn: csvBook["ISBN Number"] || csvBook.isbn || "",
+          imageUrl: csvBook["Book Image"] || csvBook.bookImage || "", // Map Book Image to imageUrl
           genre: "General", // Default genre since not in CSV
           condition: "New",
           price: 0, // Default price for library books
@@ -1462,8 +1463,7 @@ export class DatabaseStorage implements IStorage {
           publicationYear: parseInt(csvBook["Year of Publishing"] || csvBook.yearOfPublish) || new Date().getFullYear(),
           language: "English",
           pages: 200, // Default page count
-          isAvailable: true,
-          edition: csvBook["Edition"] || csvBook.edition || "1st Edition"
+          isAvailable: true
         };
 
         try {
