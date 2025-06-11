@@ -107,7 +107,7 @@ export default function LibraryBrowse() {
     if (!libraryBooks) return [];
     
     return libraryBooks.filter((book: any) =>
-      book.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.author?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       book.category?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -123,7 +123,7 @@ export default function LibraryBrowse() {
 
   const handleBorrowBook = (book: any) => {
     // Navigate to checkout page for membership/borrowing process
-    setLocation(`/vyronaread-checkout?type=borrow&bookId=${book.id}&bookName=${encodeURIComponent(book.name)}&author=${encodeURIComponent(book.author || 'Unknown Author')}`);
+    setLocation(`/vyronaread-checkout?type=borrow&bookId=${book.id}&bookName=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author || 'Unknown Author')}`);
   };
 
   return (
@@ -331,7 +331,7 @@ export default function LibraryBrowse() {
                         <Book className="h-12 w-12 text-gray-400" />
                       )}
                     </div>
-                    <CardTitle className="text-base line-clamp-2">{book.name}</CardTitle>
+                    <CardTitle className="text-base line-clamp-2">{book.title}</CardTitle>
                     <CardDescription className="text-sm">
                       by {book.author || "Unknown Author"}
                     </CardDescription>
