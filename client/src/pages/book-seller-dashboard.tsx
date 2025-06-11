@@ -478,7 +478,7 @@ export default function BookSellerDashboard() {
           isbn: book.ISBN || `AUTO-${Date.now()}-${i}`,
           category: book.Category,
           description: book.Description || '',
-          price: parseFloat(book.Price) || 299,
+          fixedCostPrice: parseFloat(book.Price) || 299,
           rentalPrice: parseFloat(book['Rental Price']) || 49,
           imageUrl: book['Image URL'] || '',
           copies: parseInt(book.Copies) || 5,
@@ -487,7 +487,7 @@ export default function BookSellerDashboard() {
           publicationYear: book.Year || new Date().getFullYear().toString(),
         };
 
-        await apiRequest('/api/vyronaread/books', 'POST', bookData);
+        await apiRequest('POST', '/api/vyronaread/books', bookData);
 
         setImportProgress(Math.round(((i + 1) / csvPreview.length) * 100));
       }
