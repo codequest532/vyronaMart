@@ -475,50 +475,51 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  {sellerBooks && sellerBooks.length > 0 ? (
+                  {(libraryBooks && libraryBooks.length > 0) || (sellerBooks && sellerBooks.length > 0) ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {sellerBooks.slice(0, 6).map((book: any) => (
+                      {/* Show library books first, then seller books */}
+                      {[...libraryBooks.slice(0, 3), ...sellerBooks.slice(0, 3)].slice(0, 6).map((book: any) => (
                         <div key={book.id} className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4 hover:shadow-lg transition-all duration-300">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
                               <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">{book.title}</h4>
-                              <p className="text-xs text-gray-600 mb-1">{book.author}</p>
-                              <p className="text-xs text-gray-500">{book.genre} • {book.pages} pages</p>
+                              <p className="text-xs text-gray-600 mb-1">by {book.author}</p>
+                              <p className="text-xs text-gray-500">{book.category || book.genre || 'General'} • {book.publisher || 'Published'}</p>
                             </div>
-                            <Badge variant={book.type === 'physical' ? 'default' : 'secondary'} className="text-xs">
-                              {book.type === 'physical' ? 'Physical' : 'Digital'}
+                            <Badge variant={book.libraryId ? 'outline' : 'default'} className="text-xs">
+                              {book.libraryId ? 'Library' : 'Store'}
                             </Badge>
                           </div>
                           
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="text-lg font-bold text-purple-600">₹{book.price}</span>
-                              {book.type === 'digital' && (
-                                <span className="text-xs text-gray-500">or rent ₹2.99</span>
+                              {book.libraryId ? (
+                                <span className="text-sm font-medium text-green-600">Available for borrow</span>
+                              ) : (
+                                <span className="text-lg font-bold text-purple-600">₹{book.price || 299}</span>
                               )}
                             </div>
                             <div className="flex gap-1">
-                              <Button 
-                                size="sm" 
-                                className="text-xs bg-purple-600 hover:bg-purple-700"
-                                onClick={() => {
-                                  showNotification(`Purchased "${book.title}" successfully! +15 VyronaCoins`, "success");
-                                  updateCoins(15);
-                                }}
-                              >
-                                Buy
-                              </Button>
-                              {book.type === 'digital' && (
+                              {book.libraryId ? (
                                 <Button 
                                   size="sm" 
-                                  variant="outline" 
-                                  className="text-xs border-purple-300 text-purple-600"
+                                  className="text-xs bg-green-600 hover:bg-green-700"
                                   onClick={() => {
-                                    showNotification(`Rented "${book.title}" for 30 days! +10 VyronaCoins`, "success");
-                                    updateCoins(10);
+                                    showNotification(`Borrow request sent for "${book.title}"! Visit library to collect.`, "success");
                                   }}
                                 >
-                                  Rent
+                                  Borrow
+                                </Button>
+                              ) : (
+                                <Button 
+                                  size="sm" 
+                                  className="text-xs bg-purple-600 hover:bg-purple-700"
+                                  onClick={() => {
+                                    showNotification(`Purchased "${book.title}" successfully! +15 VyronaCoins`, "success");
+                                    updateCoins(15);
+                                  }}
+                                >
+                                  Buy
                                 </Button>
                               )}
                             </div>
