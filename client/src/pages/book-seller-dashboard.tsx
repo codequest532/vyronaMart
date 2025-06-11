@@ -156,7 +156,7 @@ export default function BookSellerDashboard() {
   // Update order status mutation with email workflow
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      const response = await apiRequest(`/api/seller/orders/${orderId}/status`, "PATCH", {
+      const response = await apiRequest("PATCH", `/api/seller/orders/${orderId}/status`, {
         status
       });
       return response.json();
@@ -2060,6 +2060,227 @@ export default function BookSellerDashboard() {
                   Submit Integration Request
                 </Button>
               </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Order Details Modal */}
+          <Dialog open={showOrderDetails} onOpenChange={setShowOrderDetails}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${
+                    selectedOrder?.module === 'library_membership' ? 'bg-purple-100' : 
+                    selectedOrder?.module === 'vyronahub' ? 'bg-green-100' : 
+                    selectedOrder?.module === 'vyronasocial' ? 'bg-blue-100' : 'bg-gray-100'
+                  }`}>
+                    {selectedOrder?.module === 'library_membership' ? (
+                      <Book className="h-5 w-5 text-purple-600" />
+                    ) : selectedOrder?.module === 'vyronahub' ? (
+                      <Store className="h-5 w-5 text-green-600" />
+                    ) : selectedOrder?.module === 'vyronasocial' ? (
+                      <Users className="h-5 w-5 text-blue-600" />
+                    ) : (
+                      <ShoppingCart className="h-5 w-5 text-gray-600" />
+                    )}
+                  </div>
+                  {selectedOrder?.module === 'library_membership' ? 'Library Membership' : 'Order'} #{selectedOrder?.order_id || selectedOrder?.id} Details
+                  <Badge variant="outline" className="ml-auto">
+                    {selectedOrder?.module === 'library_membership' ? 'Library' : selectedOrder?.module || 'VyronaRead'}
+                  </Badge>
+                </DialogTitle>
+              </DialogHeader>
+              
+              {selectedOrder && (
+                <div className="space-y-6">
+                  {/* Customer Information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="h-5 w-5" />
+                        Customer Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Customer Name</label>
+                          <p className="text-sm font-semibold">
+                            {selectedOrder.customer_name || 
+                             selectedOrder.metadata?.fullName || 
+                             selectedOrder.metadata?.customerName || 'N/A'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Email</label>
+                          <p className="text-sm">
+                            {selectedOrder.customer_email || 
+                             selectedOrder.metadata?.email || 
+                             selectedOrder.metadata?.customerEmail || 'N/A'}
+                          </p>
+                        </div>
+                        {selectedOrder.metadata?.phone && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Phone</label>
+                            <p className="text-sm">{selectedOrder.metadata.phone}</p>
+                          </div>
+                        )}
+                        {selectedOrder.metadata?.address && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Address</label>
+                            <p className="text-sm">{selectedOrder.metadata.address}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Order Information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Package className="h-5 w-5" />
+                        Order Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Order ID</label>
+                          <p className="text-sm font-mono">#{selectedOrder.order_id || selectedOrder.id}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Status</label>
+                          <Badge variant={
+                            (selectedOrder.order_status || selectedOrder.metadata?.status) === 'delivered' ? 'default' :
+                            (selectedOrder.order_status || selectedOrder.metadata?.status) === 'shipped' ? 'secondary' :
+                            (selectedOrder.order_status || selectedOrder.metadata?.status) === 'processing' ? 'outline' : 'destructive'
+                          }>
+                            {selectedOrder.order_status || selectedOrder.metadata?.status || 'pending'}
+                          </Badge>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Amount</label>
+                          <p className="text-sm font-semibold">₹{((selectedOrder.total_amount || 0) / 100).toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-600">Date</label>
+                          <p className="text-sm">{new Date(selectedOrder.created_at).toLocaleDateString()}</p>
+                        </div>
+                        {selectedOrder.module === 'library_membership' && selectedOrder.metadata?.membershipFee && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-600">Membership Fee</label>
+                            <p className="text-sm font-semibold">₹{selectedOrder.metadata.membershipFee}</p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Library Membership Details */}
+                  {selectedOrder.module === 'library_membership' && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Building className="h-5 w-5" />
+                          Library Membership Details
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {selectedOrder.metadata?.libraryId && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Library ID</label>
+                              <p className="text-sm">{selectedOrder.metadata.libraryId}</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.applicationDate && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Application Date</label>
+                              <p className="text-sm">{new Date(selectedOrder.metadata.applicationDate).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {selectedOrder.metadata?.bookTitle && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-600">Requested Book</label>
+                              <p className="text-sm">{selectedOrder.metadata.bookTitle}</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Status Workflow */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Clock className="h-5 w-5" />
+                        Status Management & Email Workflow
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-sm text-gray-600">
+                          {selectedOrder.module === 'library_membership' ? 
+                            'Progress through the 4-stage library membership workflow. Each status change sends an automated email to the customer.' :
+                            'Update order status to progress through the fulfillment workflow. Automated emails are sent at each stage.'
+                          }
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {['processing', 'shipped', 'out_for_delivery', 'delivered'].map((status) => {
+                            const currentStatus = selectedOrder.order_status || selectedOrder.metadata?.status || 'pending';
+                            const isCurrentStatus = currentStatus === status;
+                            const isPastStatus = ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(currentStatus) > 
+                                                ['processing', 'shipped', 'out_for_delivery', 'delivered'].indexOf(status);
+                            
+                            const statusLabels = selectedOrder.module === 'library_membership' ? {
+                              processing: 'Approve Membership',
+                              shipped: 'Activate Membership', 
+                              out_for_delivery: 'Ready for Collection',
+                              delivered: 'Books Collected'
+                            } : {
+                              processing: 'Start Processing',
+                              shipped: 'Mark Shipped',
+                              out_for_delivery: 'Out for Delivery', 
+                              delivered: 'Mark Delivered'
+                            };
+
+                            return (
+                              <Button
+                                key={status}
+                                size="sm"
+                                variant={isCurrentStatus ? "default" : isPastStatus ? "secondary" : "outline"}
+                                disabled={isPastStatus || updateOrderStatusMutation.isPending}
+                                onClick={() => updateOrderStatusMutation.mutate({
+                                  orderId: selectedOrder.order_id || selectedOrder.id,
+                                  status: status
+                                })}
+                                className={isCurrentStatus ? "bg-blue-600 text-white" : ""}
+                              >
+                                {isPastStatus ? '✓' : ''} {statusLabels[status]}
+                              </Button>
+                            );
+                          })}
+                        </div>
+
+                        {updateOrderStatusMutation.isPending && (
+                          <div className="flex items-center gap-2 text-sm text-blue-600">
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+                            Updating status and sending email...
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <div className="flex justify-end gap-2 pt-4 border-t">
+                    <Button variant="outline" onClick={() => setShowOrderDetails(false)}>
+                      Close
+                    </Button>
+                  </div>
+                </div>
+              )}
             </DialogContent>
           </Dialog>
         </div>
