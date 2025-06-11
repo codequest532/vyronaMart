@@ -26,7 +26,6 @@ import Cart from "@/pages/cart";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import SellerDashboard from "@/pages/seller-dashboard";
-import BookManagementDashboard from "@/pages/book-management-dashboard";
 import EbookReader from "@/pages/ebook-reader";
 
 import NotFound from "@/pages/not-found";
@@ -61,9 +60,7 @@ function Router() {
       <Route path="/seller" component={SellerDashboard} />
       <Route path="/seller-dashboard" component={SellerDashboard} />
       
-      {/* Book Management Interface */}
-      <Route path="/book-management" component={BookManagementDashboard} />
-      <Route path="/book-management-dashboard" component={BookManagementDashboard} />
+
       
       {/* Customer Interface (Default) */}
       {user ? (
