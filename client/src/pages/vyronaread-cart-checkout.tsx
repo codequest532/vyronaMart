@@ -262,10 +262,10 @@ export default function VyronaReadCartCheckout() {
                             <Clock className="mr-1 h-3 w-3" />
                             {(() => {
                               const itemKey = `${item.book.id}-${item.type}`;
-                              const periods = rentalDurations[itemKey] || 1;
-                              if (periods === 1) return "15 Days";
-                              else if (periods === 2) return "30 Days";
-                              else return "45 Days";
+                              const periods = rentalDurations[itemKey] || 2;
+                              if (periods === 1) return "7 Days";
+                              else if (periods === 2) return "15 Days";
+                              else return "30 Days";
                             })()}
                           </Badge>
                         )}
@@ -284,7 +284,80 @@ export default function VyronaReadCartCheckout() {
             </CardContent>
           </Card>
 
-
+          {/* Rental Duration Selection */}
+          {cartItems.some(item => item.type === 'rent') && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="mr-2 h-5 w-5" />
+                  Rental Duration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {cartItems.filter(item => item.type === 'rent').map((item) => {
+                  const itemKey = `${item.book.id}-${item.type}`;
+                  const selectedPeriod = rentalDurations[itemKey] || 2;
+                  
+                  return (
+                    <div key={itemKey} className="space-y-3">
+                      <h4 className="font-medium text-gray-900">{item.book.name || item.book.title}</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[
+                          { periods: 1, days: '7 days', price: 99 },
+                          { periods: 2, days: '15 days', price: 199 },
+                          { periods: 3, days: '30 days', price: 399 }
+                        ].map(({ periods, days, price }) => (
+                          <label
+                            key={periods}
+                            className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${
+                              selectedPeriod === periods
+                                ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-500'
+                                : 'border-gray-300 bg-white hover:bg-gray-50'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`rental-duration-${itemKey}`}
+                              value={periods}
+                              checked={selectedPeriod === periods}
+                              onChange={() => {
+                                setRentalDurations(prev => ({
+                                  ...prev,
+                                  [itemKey]: periods
+                                }));
+                              }}
+                              className="sr-only"
+                            />
+                            <div className="flex w-full items-center justify-between">
+                              <div className="flex items-center">
+                                <div className="text-sm">
+                                  <div className={`font-medium ${selectedPeriod === periods ? 'text-purple-900' : 'text-gray-900'}`}>
+                                    {days}
+                                  </div>
+                                  <div className={`${selectedPeriod === periods ? 'text-purple-700' : 'text-gray-500'}`}>
+                                    ₹{price}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className={`h-4 w-4 rounded-full border-2 ${
+                                selectedPeriod === periods
+                                  ? 'border-purple-500 bg-purple-500'
+                                  : 'border-gray-300'
+                              }`}>
+                                {selectedPeriod === periods && (
+                                  <div className="h-2 w-2 rounded-full bg-white m-0.5" />
+                                )}
+                              </div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Shipping Information */}
           <Card>
