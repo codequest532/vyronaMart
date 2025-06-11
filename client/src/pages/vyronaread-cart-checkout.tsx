@@ -90,13 +90,13 @@ export default function VyronaReadCartCheckout() {
       const bookPrice = item.book.price ? Math.floor(item.book.price / 100) : 299;
       
       // Dynamic rental pricing based on percentage of sale price
-      // 7 days = 25% of sale price, 15 days = 40% of sale price, 30 days = 60% of sale price
+      // 7 days = 20% of sale price, 15 days = 40% of sale price, 30 days = 80% of sale price
       if (periods === 1) {
-        return Math.max(Math.floor(bookPrice * 0.25), 49); // 7 days, minimum ₹49
+        return Math.max(Math.floor(bookPrice * 0.20), 49); // 7 days, minimum ₹49
       } else if (periods === 2) {
         return Math.max(Math.floor(bookPrice * 0.40), 89); // 15 days, minimum ₹89
       } else {
-        return Math.max(Math.floor(bookPrice * 0.60), 149); // 30 days, minimum ₹149
+        return Math.max(Math.floor(bookPrice * 0.80), 149); // 30 days, minimum ₹149
       }
     }
   };
