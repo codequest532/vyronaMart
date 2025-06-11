@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
@@ -52,6 +53,7 @@ const membershipSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   address: z.string().min(10, "Please enter your complete address"),
+  paymentMethod: z.string().min(1, "Please select a payment method"),
   agreeToTerms: z.boolean().refine(val => val === true, "You must agree to the terms and conditions")
 });
 
@@ -69,6 +71,7 @@ export default function LibraryBrowse() {
       email: "",
       phone: "",
       address: "",
+      paymentMethod: "",
       agreeToTerms: false
     }
   });
@@ -256,6 +259,30 @@ export default function LibraryBrowse() {
                               <FormControl>
                                 <Input placeholder="Enter your complete address" {...field} />
                               </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="paymentMethod"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Payment Method</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select payment method" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="card">Credit/Debit Card</SelectItem>
+                                  <SelectItem value="upi">UPI Payment</SelectItem>
+                                  <SelectItem value="wallet">Digital Wallet</SelectItem>
+                                  <SelectItem value="cod">Cash on Delivery (COD)</SelectItem>
+                                </SelectContent>
+                              </Select>
                               <FormMessage />
                             </FormItem>
                           )}
