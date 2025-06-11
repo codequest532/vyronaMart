@@ -532,9 +532,7 @@ export default function SellerDashboard() {
     setShowAnalyticsDialog(true);
   };
 
-  const { data: sellerProducts = [] } = useQuery({
-    queryKey: ["/api/seller/products"],
-  });
+
 
 
 
@@ -1007,6 +1005,92 @@ export default function SellerDashboard() {
                   </Card>
                 ))}
               </div>
+
+              {/* Recent Products Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Your Products Overview
+                  </CardTitle>
+                  <CardDescription>
+                    Recent products from your VyronaHub catalog
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {sellerProducts && sellerProducts.length > 0 ? (
+                    <div className="space-y-4">
+                      <div className="grid gap-4">
+                        {sellerProducts.slice(0, 6).map((product: any) => (
+                          <div key={product.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start">
+                              <div className="flex gap-4 flex-1">
+                                {product.imageUrl && (
+                                  <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img 
+                                      src={product.imageUrl} 
+                                      alt={product.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-gray-900 truncate">
+                                    {product.name}
+                                  </h4>
+                                  <p className="text-sm text-gray-600 line-clamp-2 mt-1">
+                                    {product.description}
+                                  </p>
+                                  <div className="flex items-center gap-3 mt-2">
+                                    <Badge variant="outline" className="text-xs">
+                                      {product.category}
+                                    </Badge>
+                                    <span className="text-sm font-medium text-green-600">
+                                      ₹{product.price}
+                                    </span>
+                                    <Badge 
+                                      variant={product.module === 'vyronahub' ? 'default' : 'secondary'}
+                                      className="text-xs"
+                                    >
+                                      {product.module === 'vyronahub' ? 'VyronaHub' : product.module}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {sellerProducts.length > 6 && (
+                        <div className="text-center pt-4 border-t">
+                          <Button variant="outline" onClick={() => setActiveTab("products")}>
+                            View All {sellerProducts.length} Products
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-600 mb-2">No Products Yet</h3>
+                      <p className="text-gray-500 mb-4">Start building your VyronaHub catalog</p>
+                      <Button onClick={() => setShowAddProductDialog(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add First Product
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Quick Actions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
