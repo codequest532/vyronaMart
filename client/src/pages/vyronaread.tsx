@@ -250,10 +250,7 @@ export default function VyronaRead() {
   const getFilteredBooks = () => {
     let allBooks = [...(Array.isArray(sellerBooks) ? sellerBooks : [])];
     
-    // Add library books to the pool
-    if (Array.isArray(libraryBooks)) {
-      allBooks = [...allBooks, ...libraryBooks];
-    }
+    // Only use seller books - library books are for library browsing only
 
     // Collection-based filtering
     if (selectedCollection) {
