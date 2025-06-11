@@ -473,7 +473,22 @@ export default function VyronaReadCheckout() {
     );
   }
 
-  if (!bookDetails && checkoutType !== 'cart') {
+  // Handle library cart checkout
+  if (checkoutType === 'borrow' && source === 'library-cart' && libraryCartItems.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">No items in library cart</p>
+          <Button onClick={() => setLocation('/vyronaread')}>
+            Back to VyronaRead
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle individual book checkout
+  if (!bookDetails && checkoutType !== 'cart' && !(checkoutType === 'borrow' && source === 'library-cart')) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -993,6 +1008,21 @@ export default function VyronaReadCheckout() {
                           }
                         </span>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              ) : checkoutType === 'borrow' && source === 'library-cart' ? (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium">Books to Borrow:</div>
+                  {libraryCartItems.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium">{item.book.title}</div>
+                        <div className="text-xs text-gray-500">by {item.book.author}</div>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        Borrow
+                      </Badge>
                     </div>
                   ))}
                 </div>
