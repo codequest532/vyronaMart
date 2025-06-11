@@ -18,6 +18,17 @@ interface OrderEmailData {
   deliveryAddress?: string;
 }
 
+interface LibraryMembershipData {
+  membershipId: string;
+  customerName: string;
+  customerEmail: string;
+  membershipType: string;
+  membershipFee: number;
+  expiryDate: string;
+  libraries: string[];
+  benefits: string[];
+}
+
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 const ADMIN_EMAIL = 'mgmags25@gmail.com';
 const ADMIN_NAME = 'Vyrona Platform';
