@@ -5856,6 +5856,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Seller registration endpoint
+  app.post("/api/seller/register", async (req: Request, res: Response) => {
+    try {
+      const registrationData = req.body;
+      
+      // Generate unique email and password for VyronaRead sellers
+      if (registrationData.sellerType === "vyronaread") {
+        const email = `${registrationData.businessName.toLowerCase().replace(/\s+/g, '')}@vyronaread.com`;
+        const password = `vyread${Math.random().toString(36).substring(2, 8)}`;
+        
+        // Create VyronaRead seller account
+        const newSeller = await db
+          .insert(users)
+          .values({
+            username: registrationData.ownerName,
+            email: email,
+            mobile: registrationData.phone,
+            role: 'seller',
+            password: password
+          })
+          .returning({ id: users.id });
+        
+        const sellerId = newSeller[0].id;
+        
+        // Store additional seller metadata (you could create a sellers table for this)
+        console.log("VyronaRead seller registered:", {
+          sellerId,
+          businessName: registrationData.businessName,
+          category: registrationData.businessCategory,
+          storeLibraryName: registrationData.storeLibraryName,
+          address: registrationData.businessAddress
+        });
+        
+        return res.json({
+          success: true,
+          sellerId: sellerId,
+          credentials: {
+            email: email,
+            password: password
+          },
+          message: "VyronaRead seller registration successful"
+        });
+      } else {
+        // Handle other seller types (existing logic)
+        console.log("General seller registration:", registrationData);
+        
+        return res.json({
+          success: true,
+          message: "Seller registration submitted for review"
+        });
+      }
+      
+    } catch (error) {
+      console.error("Seller registration error:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Registration failed. Please try again." 
+      });
+    }
+  });
+
   // Helper function to create demo VyronaRead seller data
   async function createDemoReadSellerData(sellerId: any) {
     try {

@@ -1129,7 +1129,21 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
 
   const handleSubmit = async () => {
     try {
-      // For now, we'll simulate the registration process
+      // Submit registration data to backend
+      const response = await fetch("/api/seller/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Registration failed");
+      }
+
+      const result = await response.json();
+      
       toast({
         title: "Registration Successful!",
         description: `Your ${sellerTypes.find(t => t.id === formData.sellerType)?.title} seller application has been submitted.`,
@@ -1138,24 +1152,47 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
       // Close the modal
       onClose();
       
-      // Redirect based on seller type
-      if (formData.sellerType === "vyronaread") {
-        // Redirect VyronaRead sellers to their dedicated dashboard
-        setLocation("/vyronaread-seller-dashboard");
+      // For VyronaRead sellers, automatically log them in and redirect to book seller dashboard
+      if (formData.sellerType === "vyronaread" && result.credentials) {
+        // Auto-login the VyronaRead seller
+        const loginResponse = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: result.credentials.email,
+            password: result.credentials.password,
+          }),
+        });
+
+        if (loginResponse.ok) {
+          setLocation("/book-seller-dashboard");
+          setTimeout(() => {
+            toast({
+              title: "Welcome to VyronaRead!",
+              description: "You've been automatically logged in. Start by adding your first book or setting up library partnerships!",
+            });
+          }, 1000);
+        } else {
+          setLocation("/login");
+          setTimeout(() => {
+            toast({
+              title: "Registration Complete",
+              description: `Please login with your credentials: ${result.credentials.email}`,
+            });
+          }, 1000);
+        }
       } else {
         // Redirect other sellers to the general seller dashboard
         setLocation("/seller-dashboard");
+        setTimeout(() => {
+          toast({
+            title: "Welcome to VyronaMart!",
+            description: "You've been redirected to your seller dashboard. Start setting up your store!",
+          });
+        }, 1000);
       }
-      
-      // Show success message with specific guidance
-      setTimeout(() => {
-        toast({
-          title: "Welcome to VyronaMart!",
-          description: formData.sellerType === "vyronaread" 
-            ? "You've been redirected to your VyronaRead book seller dashboard. Start by adding your first book!"
-            : "You've been redirected to your seller dashboard. Start setting up your store!",
-        });
-      }, 1000);
       
     } catch (error) {
       toast({
