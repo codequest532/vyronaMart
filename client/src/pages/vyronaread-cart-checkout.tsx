@@ -284,75 +284,7 @@ export default function VyronaReadCartCheckout() {
             </CardContent>
           </Card>
 
-          {/* Rental Duration Section */}
-          {cartItems.some(item => item.type === 'rent') && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Rental Duration
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">Rental durations are set individually for each item above.</p>
-                <div className="space-y-4">
-                  {cartItems.filter(item => item.type === 'rent').map((item, index) => {
-                    const itemKey = `${item.book.id}-${item.type}`;
-                    const currentDuration = rentalDurations[itemKey] || 1;
-                    
-                    return (
-                      <div key={index} className="p-4 border rounded-lg bg-gray-50">
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="font-medium text-gray-900">{item.book.title || item.book.name}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {currentDuration === 1 ? "7 days" : currentDuration === 2 ? "15 days" : "30 days"}
-                          </Badge>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          {[
-                            { periods: 1, days: 7, price: 99, label: "7 days" },
-                            { periods: 2, days: 15, price: 199, label: "15 days" },
-                            { periods: 3, days: 30, price: 399, label: "30 days" }
-                          ].map((option) => {
-                            const isSelected = currentDuration === option.periods;
-                            
-                            return (
-                              <div
-                                key={option.periods}
-                                className={`flex items-center justify-between p-3 border rounded cursor-pointer transition-colors ${
-                                  isSelected 
-                                    ? 'border-purple-500 bg-purple-50' 
-                                    : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => updateRentalDuration(itemKey, option.periods)}
-                              >
-                                <div className="flex items-center">
-                                  <div
-                                    className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
-                                      isSelected 
-                                        ? 'border-purple-500 bg-purple-500' 
-                                        : 'border-gray-300'
-                                    }`}
-                                  >
-                                    {isSelected && (
-                                      <div className="w-2 h-2 rounded-full bg-white" />
-                                    )}
-                                  </div>
-                                  <span className="text-sm font-medium">{option.label}</span>
-                                </div>
-                                <span className="text-sm font-semibold text-purple-600">₹{option.price}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+
 
           {/* Shipping Information */}
           <Card>
