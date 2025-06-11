@@ -82,14 +82,20 @@ export default function VyronaReadCartCheckout() {
       const price = item.book.price || 29900; // Price in paise
       return Math.floor(price / 100); // Convert to rupees
     } else {
-      // For rental, calculate based on book price dynamically, multiplied by duration
+      // For rental, calculate based on book price dynamically, with different pricing tiers
       const itemKey = `${item.book.id}-${item.type}`;
-      const duration = rentalDurations[itemKey] || 1;
+      const periods = rentalDurations[itemKey] || 1;
       const bookPrice = item.book.price || 29900; // Price in paise
       const basePrice = Math.floor(bookPrice / 100); // Convert to rupees
-      // New pricing: 1 period = 15 days = 40% of book price
-      const baseRentalPrice = Math.floor(basePrice * 0.4);
-      return baseRentalPrice * duration;
+      
+      // Pricing: 1 period (15 days) = 40%, 2 periods (30 days) = 60%, 3+ periods = 80%
+      if (periods === 1) {
+        return Math.floor(basePrice * 0.4); // 15 days - 40%
+      } else if (periods === 2) {
+        return Math.floor(basePrice * 0.6); // 30 days - 60%
+      } else {
+        return Math.floor(basePrice * 0.8); // 45+ days - 80%
+      }
     }
   };
 
@@ -253,7 +259,13 @@ export default function VyronaReadCartCheckout() {
                         {item.type === 'rent' && (
                           <Badge variant="outline" className="text-xs">
                             <Clock className="mr-1 h-3 w-3" />
-                            15 Days
+                            {(() => {
+                              const itemKey = `${item.book.id}-${item.type}`;
+                              const periods = rentalDurations[itemKey] || 1;
+                              if (periods === 1) return "15 Days";
+                              else if (periods === 2) return "30 Days";
+                              else return "45 Days";
+                            })()}
                           </Badge>
                         )}
                       </div>
@@ -275,10 +287,21 @@ export default function VyronaReadCartCheckout() {
                           onChange={(e) => updateRentalDuration(`${item.book.id}-${item.type}`, parseInt(e.target.value))}
                           className="mt-1 block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-purple-500"
                         >
-                          <option value={1}>1 period (15 days)</option>
-                          <option value={2}>2 periods (30 days)</option>
-                          <option value={3}>3 periods (45 days)</option>
-                          <option value={4}>4 periods (60 days)</option>
+                          <option value={1}>1 period (15 days) - ₹{(() => {
+                            const bookPrice = item.book.price || 29900;
+                            const basePrice = Math.floor(bookPrice / 100);
+                            return Math.floor(basePrice * 0.4);
+                          })()}</option>
+                          <option value={2}>2 periods (30 days) - ₹{(() => {
+                            const bookPrice = item.book.price || 29900;
+                            const basePrice = Math.floor(bookPrice / 100);
+                            return Math.floor(basePrice * 0.6);
+                          })()}</option>
+                          <option value={3}>3 periods (45 days) - ₹{(() => {
+                            const bookPrice = item.book.price || 29900;
+                            const basePrice = Math.floor(bookPrice / 100);
+                            return Math.floor(basePrice * 0.8);
+                          })()}</option>
                         </select>
                       </div>
                     )}
