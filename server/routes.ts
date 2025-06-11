@@ -2878,14 +2878,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin - Update Library Integration Request Status
   app.patch("/api/admin/library-requests/:id", async (req, res) => {
     try {
+      // Get authenticated user ID
+      const userId = req.session?.user?.id;
+      
+      console.log("Admin library request update - Session data:", {
+        sessionExists: !!req.session,
+        userExists: !!req.session?.user,
+        userId: userId,
+        userEmail: req.session?.user?.email,
+        userRole: req.session?.user?.role
+      });
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const { id } = req.params;
       const { status, adminNotes } = req.body;
-      const processedBy = 2; // Default admin ID
+
+      console.log("Updating library request with processedBy:", userId);
 
       const updatedRequest = await storage.updateLibraryIntegrationRequestStatus(
         parseInt(id),
         status,
-        processedBy,
+        userId, // Use authenticated user ID
         adminNotes
       );
 
