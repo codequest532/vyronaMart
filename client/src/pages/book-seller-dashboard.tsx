@@ -1294,17 +1294,49 @@ export default function BookSellerDashboard() {
                               const reader = new FileReader();
                               reader.onload = (event) => {
                                 const csvText = event.target?.result as string;
-                                const lines = csvText.split('\n');
-                                const headers = lines[0].split(',').map(h => h.trim());
-                                const books = lines.slice(1).filter(line => line.trim()).map(line => {
-                                  const values = line.split(',').map(v => v.trim());
+                                const lines = csvText.split('\n').filter(line => line.trim());
+                                
+                                if (lines.length === 0) {
+                                  setCsvBooksList([]);
+                                  return;
+                                }
+                                
+                                // Parse CSV properly handling quoted fields
+                                const parseCSVLine = (line: string): string[] => {
+                                  const result = [];
+                                  let current = '';
+                                  let inQuotes = false;
+                                  
+                                  for (let i = 0; i < line.length; i++) {
+                                    const char = line[i];
+                                    if (char === '"') {
+                                      inQuotes = !inQuotes;
+                                    } else if (char === ',' && !inQuotes) {
+                                      result.push(current.trim());
+                                      current = '';
+                                    } else {
+                                      current += char;
+                                    }
+                                  }
+                                  result.push(current.trim());
+                                  return result;
+                                };
+                                
+                                const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim());
+                                const books = lines.slice(1).map(line => {
+                                  const values = parseCSVLine(line).map(v => v.replace(/"/g, '').trim());
                                   const book: any = {};
                                   headers.forEach((header, index) => {
                                     book[header] = values[index] || '';
                                   });
                                   return book;
+                                }).filter(book => {
+                                  // Filter out empty rows or rows with no book name
+                                  return book["Book Name"] || book.bookName || book.title;
                                 });
+                                
                                 setCsvBooksList(books);
+                                console.log(`CSV parsed: ${books.length} valid books found`);
                               };
                               reader.readAsText(file);
                             }
