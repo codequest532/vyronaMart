@@ -458,7 +458,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" className="text-purple-600">View All Books</Button>
+                    <Button variant="ghost" className="text-purple-600" onClick={() => setLocation('/library-browse')}>View All Books</Button>
                     <Button variant="outline" className="text-purple-600 border-purple-300" onClick={() => setLocation('/ebook-reader')}>
                       <Book className="h-4 w-4 mr-1" />
                       E-Reader
