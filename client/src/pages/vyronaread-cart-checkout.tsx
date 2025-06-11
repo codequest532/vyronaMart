@@ -535,15 +535,6 @@ export default function VyronaReadCartCheckout() {
                 <span>Items ({cartItems.length})</span>
                 <span>₹{subtotal}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Delivery Charges</span>
-                <span>{deliveryCharges === 0 ? 'FREE' : `₹${deliveryCharges}`}</span>
-              </div>
-              {deliveryCharges === 0 && (
-                <div className="text-sm text-green-600">
-                  Free delivery on orders above ₹500
-                </div>
-              )}
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total Amount</span>
