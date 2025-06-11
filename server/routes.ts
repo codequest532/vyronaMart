@@ -3825,10 +3825,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: { membershipId: membership.id, bookId: membershipData.bookId }
       });
 
+      // Send library membership confirmation email
+      try {
+        const { sendLibraryMembershipEmail } = await import('./library-membership-email');
+        
+        // Get library names for the email
+        const libraries = ["Aringar Anna Library"]; // Default library, should be dynamic
+        
+        const membershipEmailData = {
+          membershipId: `VRL-${membership.id}-${Date.now()}`,
+          customerName: membershipData.fullName,
+          customerEmail: membershipData.email,
+          membershipType: membershipData.membershipType || "annual",
+          membershipFee: membershipData.fee || 2000,
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN'),
+          libraries: libraries,
+          benefits: [
+            "Unlimited book borrowing for one year",
+            "14-day borrowing period per book",
+            "Access to all partner libraries",
+            "Priority booking for new releases",
+            "Online book reservation system",
+            "Extended borrowing on request"
+          ]
+        };
+        
+        const emailSent = await sendLibraryMembershipEmail(membershipEmailData);
+        console.log(`Library membership confirmation email sent: ${emailSent}`);
+      } catch (emailError) {
+        console.error("Error sending library membership email:", emailError);
+        // Don't fail the membership creation if email fails
+      }
+
       res.json(membership);
     } catch (error) {
       console.error("Error creating library membership:", error);
       res.status(500).json({ message: "Failed to create library membership" });
+    }
+  });
+
+  // Handle library membership from checkout (when "New User" is selected)
+  app.post("/api/library-membership", async (req, res) => {
+    try {
+      const membershipData = req.body;
+      
+      // Send library membership confirmation email
+      try {
+        const { sendLibraryMembershipEmail } = await import('./library-membership-email');
+        
+        // Get library names for the email
+        const libraries = ["Aringar Anna Library"]; // Default library, should be dynamic
+        
+        const membershipEmailData = {
+          membershipId: `VRL-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+          customerName: membershipData.fullName,
+          customerEmail: membershipData.email,
+          membershipType: membershipData.membershipType || "annual",
+          membershipFee: membershipData.fee || 2000,
+          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN'),
+          libraries: libraries,
+          benefits: [
+            "Unlimited book borrowing for one year",
+            "14-day borrowing period per book",
+            "Access to all partner libraries",
+            "Priority booking for new releases",
+            "Online book reservation system",
+            "Extended borrowing on request"
+          ]
+        };
+        
+        const emailSent = await sendLibraryMembershipEmail(membershipEmailData);
+        console.log(`Library membership confirmation email sent: ${emailSent}`);
+        
+        res.json({ 
+          success: true, 
+          membershipId: membershipEmailData.membershipId,
+          message: "Library membership confirmed and email sent",
+          emailSent: emailSent
+        });
+      } catch (emailError) {
+        console.error("Error sending library membership email:", emailError);
+        res.json({ 
+          success: true, 
+          membershipId: `VRL-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+          message: "Library membership confirmed but email failed",
+          emailSent: false
+        });
+      }
+    } catch (error) {
+      console.error("Error processing library membership:", error);
+      res.status(500).json({ message: "Failed to process library membership" });
     }
   });
 
