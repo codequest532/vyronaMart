@@ -120,7 +120,8 @@ export default function BookSellerDashboard() {
     publicationYear: "",
     copies: 1,
     language: "English",
-    description: ""
+    description: "",
+    imageUrl: ""
   });
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -248,7 +249,8 @@ export default function BookSellerDashboard() {
       publicationYear: "",
       copies: 1,
       language: "English",
-      description: ""
+      description: "",
+      imageUrl: ""
     });
   };
 
@@ -484,6 +486,45 @@ export default function BookSellerDashboard() {
                           <SelectItem value="Punjabi">Punjabi</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
+                    
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="imageUrl">Book Cover Image URL</Label>
+                      <Input
+                        id="imageUrl"
+                        value={newBook.imageUrl}
+                        onChange={(e) => handleInputChange("imageUrl", e.target.value)}
+                        placeholder="Enter Google Drive link or direct image URL"
+                      />
+                      <p className="text-sm text-gray-500">
+                        Paste a Google Drive share link or direct image URL. Google Drive links will be automatically converted for display.
+                      </p>
+                      {newBook.imageUrl && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+                          <img 
+                            src={newBook.imageUrl.includes('drive.google.com') 
+                              ? newBook.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) 
+                                ? `https://drive.google.com/thumbnail?id=${newBook.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1]}&sz=w200`
+                                : newBook.imageUrl
+                              : newBook.imageUrl
+                            }
+                            alt="Book cover preview"
+                            className="w-24 h-32 object-cover rounded border"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const sibling = target.nextElementSibling as HTMLElement;
+                              if (sibling) {
+                                sibling.style.display = 'block';
+                              }
+                            }}
+                          />
+                          <div className="w-24 h-32 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-500 hidden">
+                            Invalid URL
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="space-y-2 md:col-span-2">
