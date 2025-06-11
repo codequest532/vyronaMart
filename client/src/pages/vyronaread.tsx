@@ -339,10 +339,9 @@ export default function VyronaRead() {
     queryKey: ["/api/admin/library-requests"],
   });
 
-  // Combine all authentic book sources for Browse Books section
+  // Only show seller books in Browse Books section - library books are for library browsing only
   const combinedBooks = [
-    ...(Array.isArray(sellerBooks) ? sellerBooks : []),
-    ...(Array.isArray(libraryBooks) ? libraryBooks : [])
+    ...(Array.isArray(sellerBooks) ? sellerBooks : [])
   ].filter((book, index, self) => 
     index === self.findIndex((b) => b.id === book.id)
   );
