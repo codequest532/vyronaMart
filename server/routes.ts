@@ -315,7 +315,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: sellerId,
           email: 'seller@vyronahub.com',
           username: 'VyronaHub Demo Seller',
-          role: 'seller'
+          role: 'seller',
+          sellerType: 'vyronahub'
         };
         
         return res.json({
@@ -360,7 +361,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           id: readSellerId,
           email: 'seller@vyronaread.com',
           username: 'VyronaRead Demo Seller',
-          role: 'seller'
+          role: 'seller',
+          sellerType: 'vyronaread'
         };
         
         // Always ensure demo data exists for VyronaRead seller
@@ -1005,6 +1007,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Seller-specific products route for data isolation
+  app.get("/api/seller/products", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' && authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Access denied. Seller role required." });
+      }
+      
+      // Get products for the authenticated seller only
+      const products = await storage.getProductsBySeller(authenticatedUser.id);
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching seller products:", error);
+      res.status(500).json({ message: "Failed to fetch seller products" });
+    }
+  });
+
   // Product routes - VyronaHub (individual buy enabled products)
   app.get("/api/products", async (req, res) => {
     try {
@@ -1088,14 +1112,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const sellerId = authenticatedUser.id;
       
-      // Add seller ID to product metadata
+      // Add seller ID directly to product data for proper ownership tracking
       const productData = {
         ...req.body,
+        sellerId: sellerId, // Direct seller ID assignment for data isolation
         metadata: {
           ...req.body.metadata,
-          sellerId: sellerId.toString(),
           sellerName: authenticatedUser.username,
-          sellerEmail: authenticatedUser.email
+          sellerEmail: authenticatedUser.email,
+          sellerType: authenticatedUser.sellerType
         }
       };
       
@@ -1130,8 +1155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if the seller owns this product (unless admin)
       if (authenticatedUser.role !== 'admin') {
-        const productSellerId = product.metadata?.sellerId;
-        if (productSellerId !== authenticatedUser.id.toString()) {
+        if (product.sellerId !== authenticatedUser.id) {
           return res.status(403).json({ message: "Access denied. You can only delete your own products." });
         }
       }

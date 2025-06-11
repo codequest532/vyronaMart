@@ -7,6 +7,7 @@ declare module 'express-session' {
       email: string;
       username: string;
       role: 'customer' | 'seller' | 'admin';
+      sellerType?: string;
     };
   }
 }
