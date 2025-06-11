@@ -39,12 +39,14 @@ export default function VyronaReadCheckout() {
   
   // State management
   const [bookDetails, setBookDetails] = useState<any>(null);
+  const [cartItems, setCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [rentalDuration, setRentalDuration] = useState('15'); // 15 days default
   const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [userType, setUserType] = useState<'new' | 'existing' | null>(null);
+  const [itemRentalDurations, setItemRentalDurations] = useState<{[key: number]: number}>({});
   
   // Customer information
   const [customerInfo, setCustomerInfo] = useState({
@@ -70,6 +72,23 @@ export default function VyronaReadCheckout() {
   const fetchBookDetails = async () => {
     try {
       setLoading(true);
+      
+      // Handle cart checkout - load cart items from sessionStorage
+      if (checkoutType === 'cart') {
+        const cartData = sessionStorage.getItem('vyronaread_cart');
+        if (cartData) {
+          const items = JSON.parse(cartData);
+          setCartItems(items);
+          
+          // Initialize rental durations for each cart item
+          const initialDurations: {[key: number]: number} = {};
+          items.forEach((item: any) => {
+            initialDurations[item.book.id] = 1; // Default to 1 period (15 days)
+          });
+          setItemRentalDurations(initialDurations);
+        }
+        return;
+      }
       
       // For borrow type, use URL parameters instead of API call
       if (checkoutType === 'borrow' && bookName && author) {
@@ -412,25 +431,74 @@ export default function VyronaReadCheckout() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                Book Details
+                {checkoutType === 'cart' ? 'Cart Items' : 'Book Details'}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4">
-                <div className="w-16 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded flex items-center justify-center flex-shrink-0">
-                  <BookOpen className="text-purple-600 h-8 w-8" />
+              {checkoutType === 'cart' ? (
+                <div className="space-y-4">
+                  {cartItems.map((item, index) => (
+                    <div key={index} className="flex gap-4 p-4 border rounded-lg">
+                      <div className="w-16 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded flex items-center justify-center flex-shrink-0">
+                        <BookOpen className="text-purple-600 h-8 w-8" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-lg">{item.book.title || item.book.name}</h3>
+                        <p className="text-gray-600 mb-2">by {item.book.author || "Unknown Author"}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant={item.type === 'buy' ? 'default' : 'secondary'}>
+                            {item.type === 'buy' ? 'Purchase' : 'Rental'}
+                          </Badge>
+                          <span className="text-sm text-gray-500">
+                            ₹{item.type === 'buy' ? Math.floor(item.book.price || 299) : Math.floor((item.book.price || 299) * 0.1)}
+                            {item.type === 'rent' && ' per 15-day period'}
+                          </span>
+                        </div>
+                        {item.type === 'rent' && (
+                          <div className="mt-3">
+                            <Label className="text-sm font-medium">Rental Duration:</Label>
+                            <div className="flex gap-2 mt-2">
+                              {[1, 2, 3, 4].map((periods) => (
+                                <Button
+                                  key={periods}
+                                  size="sm"
+                                  variant={itemRentalDurations[item.book.id] === periods ? 'default' : 'outline'}
+                                  onClick={() => setItemRentalDurations(prev => ({
+                                    ...prev,
+                                    [item.book.id]: periods
+                                  }))}
+                                  className="text-xs"
+                                >
+                                  {periods} period{periods > 1 ? 's' : ''} ({periods * 15} days)
+                                </Button>
+                              ))}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Total: ₹{Math.floor((item.book.price || 299) * 0.1) * (itemRentalDurations[item.book.id] || 1)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg">{bookDetails.title || bookDetails.name}</h3>
-                  <p className="text-gray-600 mb-2">by {bookDetails.metadata?.author || bookDetails.author || "Unknown Author"}</p>
-                  {(bookDetails.metadata?.isbn || bookDetails.isbn) && (
-                    <p className="text-sm text-gray-500">ISBN: {bookDetails.metadata?.isbn || bookDetails.isbn}</p>
-                  )}
-                  {(bookDetails.metadata?.genre || bookDetails.category) && (
-                    <Badge variant="secondary" className="mt-2">{bookDetails.metadata?.genre || bookDetails.category}</Badge>
-                  )}
+              ) : (
+                <div className="flex gap-4">
+                  <div className="w-16 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded flex items-center justify-center flex-shrink-0">
+                    <BookOpen className="text-purple-600 h-8 w-8" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg">{bookDetails?.title || bookDetails?.name}</h3>
+                    <p className="text-gray-600 mb-2">by {bookDetails?.metadata?.author || bookDetails?.author || "Unknown Author"}</p>
+                    {(bookDetails?.metadata?.isbn || bookDetails?.isbn) && (
+                      <p className="text-sm text-gray-500">ISBN: {bookDetails?.metadata?.isbn || bookDetails?.isbn}</p>
+                    )}
+                    {(bookDetails?.metadata?.genre || bookDetails?.category) && (
+                      <Badge variant="secondary" className="mt-2">{bookDetails?.metadata?.genre || bookDetails?.category}</Badge>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
 
