@@ -938,7 +938,7 @@ export default function VyronaReadCheckout() {
           )}
 
           {/* Payment Method */}
-          {(checkoutType === 'buy' || checkoutType === 'rent' || checkoutType === 'cart') && (
+          {(checkoutType === 'buy' || checkoutType === 'rent' || checkoutType === 'cart' || (checkoutType === 'borrow' && userType === 'new')) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
