@@ -109,8 +109,7 @@ export default function VyronaReadCartCheckout() {
     return cartItems.reduce((total, item) => total + calculateItemPrice(item), 0);
   }, [cartItems, rentalDurations]);
   
-  const deliveryCharges = subtotal > 500 ? 0 : 40;
-  const total = subtotal + deliveryCharges;
+  const total = subtotal;
 
   // Submit order mutation
   const submitOrderMutation = useMutation({
