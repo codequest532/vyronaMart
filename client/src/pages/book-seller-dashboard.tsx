@@ -2283,6 +2283,46 @@ export default function BookSellerDashboard() {
                               </div>
                             ))}
                           </div>
+                        ) : selectedOrder.metadata?.bookId || selectedOrder.metadata?.bookTitle ? (
+                          // Show single book from metadata for old format orders
+                          <div className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                            <div className="flex items-center gap-3 mb-3">
+                              <BookOpen className="h-5 w-5 text-blue-600" />
+                              <h4 className="font-semibold text-blue-800">Book Requested for Borrowing</h4>
+                            </div>
+                            <div className="bg-white p-4 rounded border">
+                              <div className="flex justify-between items-start">
+                                <div className="space-y-2">
+                                  <p className="font-medium text-gray-900">
+                                    {selectedOrder.metadata?.bookTitle || 'Book Title Not Available'}
+                                  </p>
+                                  {selectedOrder.metadata?.bookId && (
+                                    <p className="text-sm text-gray-600">Book ID: {selectedOrder.metadata.bookId}</p>
+                                  )}
+                                  {selectedOrder.metadata?.borrowingInfo && (
+                                    <div className="text-sm text-gray-600">
+                                      <strong>Borrowing Details:</strong>
+                                      <div className="mt-1 pl-2 border-l-2 border-gray-200">
+                                        {Object.entries(selectedOrder.metadata.borrowingInfo).map(([key, value]) => (
+                                          <p key={key} className="text-xs">
+                                            <span className="capitalize">{key.replace(/([A-Z])/g, ' $1')}:</span> {String(value)}
+                                          </p>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  {selectedOrder.metadata?.status === 'activated' || selectedOrder.order_status === 'completed' 
+                                    ? 'Ready for Collection' 
+                                    : 'Pending Activation'}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="mt-3 text-xs text-blue-600">
+                              Customer can collect this book from the library after membership activation
+                            </div>
+                          </div>
                         ) : (
                           <div className="text-center py-8 text-gray-500">
                             <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
