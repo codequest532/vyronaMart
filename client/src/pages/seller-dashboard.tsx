@@ -961,14 +961,7 @@ export default function SellerDashboard() {
               <TrendingUp className="h-4 w-4 mr-2" />
               Social Analytics
             </Button>
-            <Button
-              variant={activeTab === "books" ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setActiveTab("books")}
-            >
-              <Library className="h-4 w-4 mr-2" />
-              Books Management
-            </Button>
+
             <Button
               variant={activeTab === "customers" ? "default" : "ghost"}
               className="w-full justify-start"
@@ -1486,15 +1479,6 @@ export default function SellerDashboard() {
               </Card>
             </div>
           )}
-
-          {activeTab === "books" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">VyronaRead - Complete Book Ecosystem</h2>
-                  <p className="text-gray-600 dark:text-gray-300">Manage physical library, sell e-books, and provide digital reading services</p>
-                </div>
-                <div className="flex gap-2">
                   <Button variant="outline" onClick={handleSearchBooks}>
                     <Search className="h-4 w-4 mr-2" />
                     Search Library
