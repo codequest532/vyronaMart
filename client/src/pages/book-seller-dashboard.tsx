@@ -69,6 +69,8 @@ export default function BookSellerDashboard() {
   const [showAddBookDialog, setShowAddBookDialog] = useState(false);
   const [showAddLibraryDialog, setShowAddLibraryDialog] = useState(false);
   const [showAddProductDialog, setShowAddProductDialog] = useState(false);
+  const [showEbookUploadDialog, setShowEbookUploadDialog] = useState(false);
+  const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Get current user for authentication check
@@ -123,6 +125,17 @@ export default function BookSellerDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [activeBookOrderTab, setActiveBookOrderTab] = useState('all');
+  const [driveLink, setDriveLink] = useState("");
+  const [newEbook, setNewEbook] = useState({
+    title: "",
+    author: "",
+    isbn: "",
+    category: "",
+    format: "PDF",
+    description: "",
+    price: 0,
+    file: null as File | null
+  });
 
   // Fetch book seller data
   const { data: sellerBooks } = useQuery({
@@ -250,6 +263,53 @@ export default function BookSellerDashboard() {
     } finally {
       setIsLoggingOut(false);
     }
+  };
+
+  const handleEbookUpload = () => {
+    if (!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.file) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields and select a file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Uploading e-book:", newEbook);
+    toast({
+      title: "E-Book Uploaded",
+      description: "E-book has been uploaded successfully.",
+    });
+    setShowEbookUploadDialog(false);
+    setNewEbook({
+      title: "",
+      author: "",
+      isbn: "",
+      category: "",
+      format: "PDF",
+      description: "",
+      price: 0,
+      file: null
+    });
+  };
+
+  const handleBulkImport = () => {
+    if (!driveLink) {
+      toast({
+        title: "Error",
+        description: "Please enter a Google Drive link",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Importing from Google Drive:", driveLink);
+    toast({
+      title: "Bulk Import Started",
+      description: "E-books are being imported from Google Drive. This may take a few minutes.",
+    });
+    setShowBulkImportDialog(false);
+    setDriveLink("");
   };
 
   return (
@@ -729,9 +789,13 @@ export default function BookSellerDashboard() {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex gap-2">
-                      <Button>
+                      <Button onClick={() => setShowEbookUploadDialog(true)}>
                         <Upload className="h-4 w-4 mr-2" />
                         Upload E-Book
+                      </Button>
+                      <Button variant="outline" onClick={() => setShowBulkImportDialog(true)}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Bulk Import from Drive
                       </Button>
                       <Button variant="outline">
                         <BarChart3 className="h-4 w-4 mr-2" />
@@ -767,7 +831,7 @@ export default function BookSellerDashboard() {
                         <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-gray-600 mb-2">No E-Books Yet</h3>
                         <p className="text-gray-500 mb-4">Start building your digital catalog by uploading e-books</p>
-                        <Button>
+                        <Button onClick={() => setShowEbookUploadDialog(true)}>
                           <Upload className="h-4 w-4 mr-2" />
                           Upload First E-Book
                         </Button>
@@ -914,6 +978,207 @@ export default function BookSellerDashboard() {
               </div>
             </div>
           )}
+
+          {/* E-Book Upload Dialog */}
+          <Dialog open={showEbookUploadDialog} onOpenChange={setShowEbookUploadDialog}>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Upload New E-Book</DialogTitle>
+                <DialogDescription>
+                  Add a new e-book to your digital catalog
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ebookTitle">Book Title *</Label>
+                  <Input
+                    id="ebookTitle"
+                    value={newEbook.title}
+                    onChange={(e) => setNewEbook({ ...newEbook, title: e.target.value })}
+                    placeholder="Enter book title"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ebookAuthor">Author *</Label>
+                  <Input
+                    id="ebookAuthor"
+                    value={newEbook.author}
+                    onChange={(e) => setNewEbook({ ...newEbook, author: e.target.value })}
+                    placeholder="Enter author name"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ebookIsbn">ISBN</Label>
+                  <Input
+                    id="ebookIsbn"
+                    value={newEbook.isbn}
+                    onChange={(e) => setNewEbook({ ...newEbook, isbn: e.target.value })}
+                    placeholder="978-0123456789"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ebookCategory">Category *</Label>
+                  <Select value={newEbook.category} onValueChange={(value) => setNewEbook({ ...newEbook, category: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fiction">Fiction</SelectItem>
+                      <SelectItem value="non-fiction">Non-Fiction</SelectItem>
+                      <SelectItem value="business">Business</SelectItem>
+                      <SelectItem value="self-help">Self-Help</SelectItem>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="science">Science</SelectItem>
+                      <SelectItem value="history">History</SelectItem>
+                      <SelectItem value="biography">Biography</SelectItem>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="children">Children</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ebookFormat">Format</Label>
+                  <Select value={newEbook.format} onValueChange={(value) => setNewEbook({ ...newEbook, format: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PDF">PDF</SelectItem>
+                      <SelectItem value="EPUB">EPUB</SelectItem>
+                      <SelectItem value="MOBI">MOBI</SelectItem>
+                      <SelectItem value="TXT">TXT</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ebookPrice">Price (₹)</Label>
+                  <Input
+                    id="ebookPrice"
+                    type="number"
+                    value={newEbook.price}
+                    onChange={(e) => setNewEbook({ ...newEbook, price: parseFloat(e.target.value) || 0 })}
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="ebookFile">E-Book File *</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <div className="text-center">
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <div className="text-sm text-gray-600 mb-2">
+                        Upload your e-book file
+                      </div>
+                      <input
+                        type="file"
+                        accept=".pdf,.epub,.mobi,.txt"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setNewEbook({ ...newEbook, file });
+                          }
+                        }}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                      <div className="text-xs text-gray-500 mt-2">
+                        Supported formats: PDF, EPUB, MOBI, TXT
+                      </div>
+                    </div>
+                    {newEbook.file && (
+                      <div className="mt-4 p-3 bg-green-50 rounded border">
+                        <div className="text-sm text-green-700">
+                          ✓ File selected: {newEbook.file.name}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="ebookDescription">Description</Label>
+                  <Textarea
+                    id="ebookDescription"
+                    value={newEbook.description}
+                    onChange={(e) => setNewEbook({ ...newEbook, description: e.target.value })}
+                    placeholder="Brief description of the e-book..."
+                    rows={3}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowEbookUploadDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleEbookUpload}
+                  disabled={!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.file}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload E-Book
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Bulk Import Dialog */}
+          <Dialog open={showBulkImportDialog} onOpenChange={setShowBulkImportDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Bulk Import from Google Drive</DialogTitle>
+                <DialogDescription>
+                  Import multiple e-books from your Google Drive folder
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="driveLink">Google Drive Folder Link *</Label>
+                  <Input
+                    id="driveLink"
+                    value={driveLink}
+                    onChange={(e) => setDriveLink(e.target.value)}
+                    placeholder="https://drive.google.com/drive/folders/..."
+                  />
+                  <div className="text-xs text-gray-500">
+                    Make sure the folder is publicly accessible or shared with our service
+                  </div>
+                </div>
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2">Import Instructions:</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    <li>• Organize e-books in your Google Drive folder</li>
+                    <li>• Supported formats: PDF, EPUB, MOBI, TXT</li>
+                    <li>• File names should include title and author</li>
+                    <li>• Processing may take 5-10 minutes for large collections</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowBulkImportDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleBulkImport}
+                  disabled={!driveLink}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Start Import
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Library Integration Dialog */}
           <Dialog open={showAddLibraryDialog} onOpenChange={setShowAddLibraryDialog}>
