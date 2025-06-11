@@ -1294,53 +1294,71 @@ export default function BookSellerDashboard() {
                               const reader = new FileReader();
                               reader.onload = (event) => {
                                 const csvText = event.target?.result as string;
-                                console.log('Raw CSV text length:', csvText.length);
-                                console.log('Raw CSV preview:', csvText.substring(0, 200));
-                                
-                                const allLines = csvText.split('\n');
-                                console.log('Total lines after split:', allLines.length);
-                                
-                                const lines = allLines.filter(line => line.trim());
-                                console.log('Non-empty lines:', lines.length);
-                                console.log('First 5 lines:', lines.slice(0, 5));
+                                const lines = csvText.split('\n').filter(line => line.trim());
                                 
                                 if (lines.length === 0) {
                                   setCsvBooksList([]);
                                   return;
                                 }
                                 
-                                // Simple CSV parsing for comma-separated values
                                 const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
                                 console.log('CSV Headers:', headers);
                                 
                                 const books = [];
+                                const seenBooks = new Set(); // Track unique books by ISBN
+                                
                                 for (let i = 1; i < lines.length; i++) {
                                   const line = lines[i].trim();
                                   if (!line) continue;
                                   
-                                  const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
-                                  console.log(`Row ${i}: [${values.join(' | ')}]`);
+                                  // Parse CSV line properly handling quoted fields
+                                  const values = [];
+                                  let current = '';
+                                  let inQuotes = false;
                                   
-                                  if (values.length >= 3 && values[0]) { // Must have at least book name, author, isbn
+                                  for (let j = 0; j < line.length; j++) {
+                                    const char = line[j];
+                                    if (char === '"') {
+                                      inQuotes = !inQuotes;
+                                    } else if (char === ',' && !inQuotes) {
+                                      values.push(current.trim().replace(/"/g, ''));
+                                      current = '';
+                                    } else {
+                                      current += char;
+                                    }
+                                  }
+                                  values.push(current.trim().replace(/"/g, ''));
+                                  
+                                  // Only process rows with valid book data
+                                  if (values.length >= 7 && values[0] && values[1] && values[2]) {
+                                    const isbn = values[2];
+                                    
+                                    // Skip if we've already seen this book (by ISBN)
+                                    if (seenBooks.has(isbn)) {
+                                      console.log(`Skipping duplicate book with ISBN: ${isbn}`);
+                                      continue;
+                                    }
+                                    
                                     const book: any = {};
                                     book["Book Name"] = values[0] || '';
                                     book["Author"] = values[1] || '';
                                     book["ISBN Number"] = values[2] || '';
-                                    book["Book Image"] = values[3] && values[3] !== '1st' ? values[3] : '';
-                                    book["Year of Publishing"] = values[4] || '';
-                                    book["Genre"] = "General";
-                                    book["Publisher"] = "Unknown Publisher";
-                                    book["Language"] = "English";
+                                    book["Year of Publishing"] = values[3] || '';
+                                    book["Genre"] = values[4] || 'General';
+                                    book["Publisher"] = values[5] || 'Unknown Publisher';
+                                    book["Language"] = values[6] || 'English';
+                                    book["Book Image"] = values[7] || '';
                                     
-                                    if (book["Book Name"]) {
+                                    if (book["Book Name"] && book["Author"]) {
                                       books.push(book);
-                                      console.log(`Added book: "${book["Book Name"]}"`);
+                                      seenBooks.add(isbn);
+                                      console.log(`Added book: "${book["Book Name"]}" by ${book["Author"]}`);
                                     }
                                   }
                                 }
                                 
                                 setCsvBooksList(books);
-                                console.log(`Final result: ${books.length} valid books parsed`);
+                                console.log(`Final result: ${books.length} unique books parsed`);
                               };
                               reader.readAsText(file);
                             }
