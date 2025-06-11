@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -107,7 +107,10 @@ export default function VyronaReadCartCheckout() {
     }));
   };
 
-  const subtotal = cartItems.reduce((total, item) => total + calculateItemPrice(item), 0);
+  const subtotal = useMemo(() => {
+    return cartItems.reduce((total, item) => total + calculateItemPrice(item), 0);
+  }, [cartItems, rentalDurations]);
+  
   const deliveryCharges = subtotal > 500 ? 0 : 40;
   const total = subtotal + deliveryCharges;
 
