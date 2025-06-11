@@ -79,13 +79,16 @@ export default function VyronaReadCartCheckout() {
   // Calculate totals
   const calculateItemPrice = (item: any) => {
     if (item.type === 'buy') {
-      return Math.floor(item.book.price || 299);
+      const price = item.book.price || 29900; // Price in paise
+      return Math.floor(price / 100); // Convert to rupees
     } else {
       // For rental, calculate based on book price dynamically, multiplied by duration
       const itemKey = `${item.book.id}-${item.type}`;
       const duration = rentalDurations[itemKey] || 1;
-      const bookPrice = item.book.price || 299;
-      const baseRentalPrice = Math.floor(bookPrice / 10); // 10% of book price per 15-day period
+      const bookPrice = item.book.price || 29900; // Price in paise
+      const basePrice = Math.floor(bookPrice / 100); // Convert to rupees
+      // New pricing: 1 period = 15 days = 40% of book price
+      const baseRentalPrice = Math.floor(basePrice * 0.4);
       return baseRentalPrice * duration;
     }
   };
