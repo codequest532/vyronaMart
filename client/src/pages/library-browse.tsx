@@ -280,7 +280,6 @@ export default function LibraryBrowse() {
                                   <SelectItem value="card">Credit/Debit Card</SelectItem>
                                   <SelectItem value="upi">UPI Payment</SelectItem>
                                   <SelectItem value="wallet">Digital Wallet</SelectItem>
-                                  <SelectItem value="cod">Cash on Delivery (COD)</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
