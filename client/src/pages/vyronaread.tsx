@@ -513,7 +513,13 @@ export default function VyronaRead() {
                       <div className="absolute inset-0 bg-black/20"></div>
                       {book.imageUrl ? (
                         <img 
-                          src={book.imageUrl} 
+                          src={(() => {
+                            if (book.imageUrl.includes('drive.google.com/file/d/')) {
+                              const fileId = book.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+                              return fileId ? `https://drive.google.com/uc?id=${fileId}` : book.imageUrl;
+                            }
+                            return book.imageUrl;
+                          })()} 
                           alt={book.name || book.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {

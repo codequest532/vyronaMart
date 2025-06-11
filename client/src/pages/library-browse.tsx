@@ -320,16 +320,29 @@ export default function LibraryBrowse() {
               {filteredBooks.map((book: any) => (
                 <Card key={book.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-3">
-                    <div className="aspect-[3/4] bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 flex items-center justify-center">
+                    <div className="aspect-[3/4] bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 flex items-center justify-center relative">
                       {book.imageUrl ? (
                         <img 
-                          src={book.imageUrl} 
+                          src={(() => {
+                            if (book.imageUrl.includes('drive.google.com/file/d/')) {
+                              const fileId = book.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+                              return fileId ? `https://drive.google.com/uc?id=${fileId}` : book.imageUrl;
+                            }
+                            return book.imageUrl;
+                          })()} 
                           alt={book.title}
                           className="w-full h-full object-cover rounded-lg"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.parentElement?.querySelector('.book-fallback') as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
                         />
-                      ) : (
+                      ) : null}
+                      <div className={`book-fallback absolute inset-0 flex items-center justify-center ${book.imageUrl ? 'hidden' : 'flex'}`}>
                         <Book className="h-12 w-12 text-gray-400" />
-                      )}
+                      </div>
                     </div>
                     <CardTitle className="text-base line-clamp-2">{book.title}</CardTitle>
                     <CardDescription className="text-sm">
