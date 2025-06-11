@@ -204,9 +204,15 @@ export default function BookSellerDashboard() {
       return;
     }
 
-    // Include parsed CSV data in the submission
+    // Map frontend field names to backend field names
     const libraryData = {
-      ...newLibrary,
+      libraryName: newLibrary.name,
+      libraryType: newLibrary.type,
+      address: newLibrary.address,
+      contactPerson: newLibrary.contact,
+      phone: newLibrary.phone,
+      email: newLibrary.email,
+      description: newLibrary.description,
       booksListCsv: csvBooksList.length > 0 ? csvBooksList : null
     };
 
