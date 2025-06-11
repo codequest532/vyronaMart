@@ -672,12 +672,12 @@ export default function VyronaRead() {
                         {/* Pricing */}
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="text-lg font-bold text-purple-600">₹{Math.floor(book.price || 299)}</span>
+                            <span className="text-lg font-bold text-purple-600">₹{Math.floor((book.price || 29900) / 100)}</span>
                             <span className="text-xs text-gray-500 ml-1">to buy</span>
                           </div>
                           <div className="text-right">
                             <div className="text-xs text-gray-500">or rent</div>
-                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) * 0.4)}/15 days</div>
+                            <div className="text-sm font-medium text-green-600">₹{Math.floor(((book.price || 29900) / 100) * 0.4)}/15 days</div>
                           </div>
                         </div>
 
