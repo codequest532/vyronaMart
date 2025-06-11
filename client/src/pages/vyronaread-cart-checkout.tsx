@@ -280,32 +280,51 @@ export default function VyronaReadCartCheckout() {
                       {item.type === 'rent' && <span className="text-sm"> total</span>}
                     </div>
                     {item.type === 'rent' && (
-                      <div className="mt-2">
-                        <Label htmlFor={`duration-${item.book.id}`} className="text-xs text-gray-600">
-                          Rental Duration:
+                      <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                        <Label className="text-sm font-medium text-gray-700 mb-3 block">
+                          Select Rental Duration:
                         </Label>
-                        <select
-                          id={`duration-${item.book.id}`}
-                          value={rentalDurations[`${item.book.id}-${item.type}`] || 1}
-                          onChange={(e) => updateRentalDuration(`${item.book.id}-${item.type}`, parseInt(e.target.value))}
-                          className="mt-1 block w-full px-2 py-1 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-purple-500"
-                        >
-                          <option value={1}>1 period (15 days) - ₹{(() => {
+                        <div className="space-y-2">
+                          {[
+                            { periods: 1, days: 15, percentage: 0.4, label: "15 days" },
+                            { periods: 2, days: 30, percentage: 0.6, label: "30 days" },
+                            { periods: 3, days: 45, percentage: 0.8, label: "45 days" }
+                          ].map((option) => {
                             const bookPrice = item.book.price || 29900;
                             const basePrice = Math.floor(bookPrice / 100);
-                            return Math.floor(basePrice * 0.4);
-                          })()}</option>
-                          <option value={2}>2 periods (30 days) - ₹{(() => {
-                            const bookPrice = item.book.price || 29900;
-                            const basePrice = Math.floor(bookPrice / 100);
-                            return Math.floor(basePrice * 0.6);
-                          })()}</option>
-                          <option value={3}>3 periods (45 days) - ₹{(() => {
-                            const bookPrice = item.book.price || 29900;
-                            const basePrice = Math.floor(bookPrice / 100);
-                            return Math.floor(basePrice * 0.8);
-                          })()}</option>
-                        </select>
+                            const price = Math.floor(basePrice * option.percentage);
+                            const itemKey = `${item.book.id}-${item.type}`;
+                            const isSelected = (rentalDurations[itemKey] || 1) === option.periods;
+                            
+                            return (
+                              <div
+                                key={option.periods}
+                                className={`flex items-center justify-between p-2 border rounded cursor-pointer transition-colors ${
+                                  isSelected 
+                                    ? 'border-purple-500 bg-purple-50' 
+                                    : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                                onClick={() => updateRentalDuration(itemKey, option.periods)}
+                              >
+                                <div className="flex items-center">
+                                  <div
+                                    className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
+                                      isSelected 
+                                        ? 'border-purple-500 bg-purple-500' 
+                                        : 'border-gray-300'
+                                    }`}
+                                  >
+                                    {isSelected && (
+                                      <div className="w-2 h-2 rounded-full bg-white" />
+                                    )}
+                                  </div>
+                                  <span className="text-sm font-medium">{option.label}</span>
+                                </div>
+                                <span className="text-sm font-semibold text-purple-600">₹{price}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
