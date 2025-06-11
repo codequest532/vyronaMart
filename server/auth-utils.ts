@@ -5,6 +5,7 @@ export interface AuthenticatedUser {
   email: string;
   username: string;
   role: 'customer' | 'seller' | 'admin';
+  sellerType?: string; // 'vyronaread', 'vyronahub', 'vyronainstastore', etc.
 }
 
 export interface AuthenticatedRequest extends Request {
@@ -64,6 +65,33 @@ export function canAccessRoom(req: Request, roomCreatorId: number): boolean {
   return user.id === roomCreatorId;
 }
 
+// Check if user is a VyronaRead seller
+export function isVyronaReadSeller(req: Request): boolean {
+  const user = getAuthenticatedUser(req);
+  return user?.role === 'seller' && user?.sellerType === 'vyronaread';
+}
+
+// Check if user can access seller-specific data
+export function canAccessSellerData(req: Request, sellerId: number): boolean {
+  const user = getAuthenticatedUser(req);
+  if (!user) return false;
+  
+  // Admin can access all data
+  if (user.role === 'admin') return true;
+  
+  // Sellers can only access their own data
+  return user.role === 'seller' && user.id === sellerId;
+}
+
+// Get seller ID with validation
+export function getSellerIdOrFail(req: Request): number {
+  const user = getAuthenticatedUser(req);
+  if (!user || user.role !== 'seller') {
+    throw new Error('Unauthorized: Seller access required');
+  }
+  return user.id;
+}
+
 // Log authentication info for debugging
 export function logAuthInfo(req: Request, context: string): void {
   const user = getAuthenticatedUser(req);
@@ -72,6 +100,7 @@ export function logAuthInfo(req: Request, context: string): void {
     userInSession: !!req.session?.user,
     userId: user?.id,
     userRole: user?.role,
-    userEmail: user?.email
+    userEmail: user?.email,
+    sellerType: user?.sellerType
   });
 }

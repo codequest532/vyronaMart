@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   mobile: text("mobile"),
   password: text("password").notNull(),
   role: text("role").notNull().default("customer"), // 'customer', 'seller', 'admin'
+  sellerType: text("seller_type"), // 'vyronaread', 'vyronahub', 'vyronainstastore', etc.
   vyronaCoins: integer("vyrona_coins").notNull().default(0),
   walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).notNull().default("0.00"),
   xp: integer("xp").notNull().default(0),
@@ -35,6 +36,7 @@ export const products = pgTable("products", {
   price: integer("price").notNull(), // in cents
   category: text("category").notNull(),
   module: text("module").notNull(), // 'social', 'space', 'read', 'mall'
+  sellerId: integer("seller_id"), // Track which seller owns this product
   imageUrl: text("image_url"),
   imageUrls: text("image_urls").array(), // Array of multiple image URLs
   storeId: integer("store_id"),
