@@ -777,11 +777,20 @@ export default function BookSellerDashboard() {
                         </Button>
                         <Button 
                           onClick={handleAddBook}
-                          disabled={!newBook.title || !newBook.author || !newBook.category}
+                          disabled={!newBook.title || !newBook.author || !newBook.category || !newBook.salePrice || !newBook.rentPrice || addBookMutation.isPending}
                           className="bg-blue-600 hover:bg-blue-700"
                         >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Book
+                          {addBookMutation.isPending ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Adding...
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Book
+                            </>
+                          )}
                         </Button>
                       </div>
                     </TabsContent>
