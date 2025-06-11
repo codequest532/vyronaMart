@@ -810,22 +810,44 @@ export default function VyronaReadCheckout() {
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Book:</span>
-                  <span className="font-medium">{bookDetails.title || bookDetails.name}</span>
+              {checkoutType === 'cart' ? (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium">Items in Cart:</div>
+                  {cartItems.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span className="text-sm">{item.book.title || item.book.name}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={item.type === 'buy' ? 'default' : 'secondary'} className="text-xs">
+                          {item.type === 'buy' ? 'Purchase' : 'Rental'}
+                        </Badge>
+                        <span className="text-sm font-medium">
+                          ₹{item.type === 'buy' 
+                            ? Math.floor(item.book.price || 299)
+                            : Math.floor((item.book.price || 299) * 0.1) * (itemRentalDurations[item.book.id] || 1)
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span>Type:</span>
-                  <Badge variant="outline" className="capitalize">{checkoutType}</Badge>
-                </div>
-                {checkoutType === 'rent' && (
+              ) : (
+                <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>Duration:</span>
-                    <span>{rentalDuration} days</span>
+                    <span>Book:</span>
+                    <span className="font-medium">{bookDetails?.title || bookDetails?.name || "Book"}</span>
                   </div>
-                )}
-              </div>
+                  <div className="flex justify-between">
+                    <span>Type:</span>
+                    <Badge variant="outline" className="capitalize">{checkoutType}</Badge>
+                  </div>
+                </div>
+              )}
+              {checkoutType === 'rent' && (
+                <div className="flex justify-between">
+                  <span>Duration:</span>
+                  <span>{rentalDuration} days</span>
+                </div>
+              )}
 
               <Separator />
 
