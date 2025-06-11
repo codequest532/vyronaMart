@@ -965,8 +965,15 @@ export default function VyronaReadCheckout() {
                         </Badge>
                         <span className="text-sm font-medium">
                           ₹{item.type === 'buy' 
-                            ? Math.floor(item.book.price || 299)
-                            : Math.floor((item.book.price || 299) * 0.1) * (itemRentalDurations[item.book.id] || 1)
+                            ? Math.floor((item.book.price || 29900) / 100)
+                            : (() => {
+                                const bookPrice = item.book.price || 29900;
+                                const basePrice = Math.floor(bookPrice / 100);
+                                const days = itemRentalDurations[item.book.id] || 15;
+                                if (days === 7) return Math.floor(basePrice * 0.2);
+                                else if (days === 15) return Math.floor(basePrice * 0.4);
+                                else return Math.floor(basePrice * 0.8);
+                              })()
                           }
                         </span>
                       </div>
