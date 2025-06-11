@@ -2768,13 +2768,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get authenticated user ID
       const userId = req.session?.user?.id;
       
-      console.log("Library integration request - Session data:", {
-        sessionExists: !!req.session,
-        userExists: !!req.session?.user,
-        userId: userId,
-        userEmail: req.session?.user?.email
-      });
-      
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
@@ -2790,8 +2783,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || null,
         booksListCsv: req.body.booksListCsv || null,
       };
-
-      console.log("Creating library integration request with data:", requestData);
 
       // Create the request in the database
       const newRequest = await storage.createLibraryIntegrationRequest(requestData);
