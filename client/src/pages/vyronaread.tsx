@@ -59,7 +59,7 @@ function convertGoogleDriveUrl(url: string): string {
 }
 
 // Component to display featured books from a specific library
-function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; libraryName: string }) {
+function LibraryBooksSection({ libraryId, libraryName, addToLibraryCart }: { libraryId: number; libraryName: string; addToLibraryCart: (book: any) => void }) {
   const [location, setLocation] = useLocation();
   
   const { data: rawLibraryBooks, isLoading } = useQuery({
@@ -118,13 +118,23 @@ function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; li
               </div>
               <h6 className="font-medium text-sm text-gray-900 mb-1 truncate">{book.title || book.name}</h6>
               <p className="text-xs text-gray-500 mb-2 truncate">by {book.author || "Unknown Author"}</p>
-              <Button 
-                size="sm" 
-                className="w-full h-7 text-xs bg-green-600 hover:bg-green-700"
-                onClick={() => handleBorrowBook(book)}
-              >
-                Borrow
-              </Button>
+              <div className="flex gap-1">
+                <Button 
+                  size="sm" 
+                  className="flex-1 h-7 text-xs bg-green-600 hover:bg-green-700"
+                  onClick={() => handleBorrowBook(book)}
+                >
+                  Borrow
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="flex-1 h-7 text-xs border-green-600 text-green-600 hover:bg-green-50"
+                  onClick={() => addToLibraryCart(book)}
+                >
+                  Add to Cart
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -202,6 +212,10 @@ export default function VyronaRead() {
   // Cart state management
   const [cart, setCart] = useState<any[]>([]);
   const [showCart, setShowCart] = useState(false);
+  
+  // Library cart state management
+  const [libraryCart, setLibraryCart] = useState<any[]>([]);
+  const [showLibraryCart, setShowLibraryCart] = useState(false);
 
   // Load cart from session storage on component mount
   useEffect(() => {
@@ -209,6 +223,11 @@ export default function VyronaRead() {
       const savedCart = sessionStorage.getItem('vyronaread_cart');
       if (savedCart) {
         setCart(JSON.parse(savedCart));
+      }
+      
+      const savedLibraryCart = sessionStorage.getItem('vyronaread_library_cart');
+      if (savedLibraryCart) {
+        setLibraryCart(JSON.parse(savedLibraryCart));
       }
     } catch (error) {
       console.error('Error loading cart from session storage:', error);
@@ -223,6 +242,15 @@ export default function VyronaRead() {
       console.error('Error saving cart to session storage:', error);
     }
   }, [cart]);
+
+  // Save library cart to session storage whenever library cart changes
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('vyronaread_library_cart', JSON.stringify(libraryCart));
+    } catch (error) {
+      console.error('Error saving library cart to session storage:', error);
+    }
+  }, [libraryCart]);
 
   // Cart handler functions
   const addToCart = (book: any, type: 'buy' | 'rent') => {
@@ -279,6 +307,91 @@ export default function VyronaRead() {
 
     // Navigate to checkout (cart is already persisted in session storage)
     setLocation('/vyronaread-cart-checkout');
+  };
+
+  // Library cart handler functions
+  const addToLibraryCart = (book: any) => {
+    const cartItem = {
+      id: `library-${book.id}`,
+      book,
+      type: 'borrow',
+      libraryId: book.libraryId,
+      addedAt: new Date().toISOString()
+    };
+
+    // Check if item already exists in library cart
+    const existingItem = libraryCart.find(item => item.id === cartItem.id);
+    if (existingItem) {
+      toast({
+        title: "Already in Library Cart",
+        description: `${book.title || book.name} is already in your library cart.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLibraryCart(prev => [...prev, cartItem]);
+    toast({
+      title: "Added to Library Cart",
+      description: `${book.title || book.name} added to library cart for borrowing.`,
+    });
+  };
+
+  const removeFromLibraryCart = (itemId: string) => {
+    setLibraryCart(prev => prev.filter(item => item.id !== itemId));
+    toast({
+      title: "Removed from Library Cart",
+      description: "Item removed from library cart.",
+    });
+  };
+
+  const clearLibraryCart = () => {
+    setLibraryCart([]);
+    toast({
+      title: "Library Cart Cleared",
+      description: "All items removed from library cart.",
+    });
+  };
+
+  const submitBulkBorrowRequests = async () => {
+    if (libraryCart.length === 0) {
+      toast({
+        title: "Empty Library Cart",
+        description: "Please add library books to cart before submitting borrow requests.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Submit borrow requests for all items in library cart
+      for (const item of libraryCart) {
+        await apiRequest("POST", "/api/book-loans", {
+          bookId: item.book.id,
+          borrowerName: "VyronaRead User", // This could be made dynamic
+          borrowerEmail: "user@vyronaread.com", // This could be made dynamic
+          borrowerPhone: "1234567890", // This could be made dynamic
+          requestDate: new Date().toISOString(),
+          module: "VyronaRead"
+        });
+      }
+
+      toast({
+        title: "Borrow Requests Submitted",
+        description: `${libraryCart.length} borrow requests have been sent to the libraries for approval.`,
+      });
+
+      // Clear library cart after successful submission
+      clearLibraryCart();
+      setShowLibraryCart(false);
+    } catch (error) {
+      console.error("Error submitting bulk borrow requests:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit borrow requests. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Handler functions for buy/rent/borrow operations
@@ -531,6 +644,19 @@ export default function VyronaRead() {
                 {cart.length > 0 && (
                   <Badge className="absolute -top-2 -right-2 bg-red-500 text-white min-w-5 h-5 flex items-center justify-center text-xs rounded-full">
                     {cart.length}
+                  </Badge>
+                )}
+              </Button>
+              <Button 
+                variant="outline" 
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20 relative"
+                onClick={() => setShowLibraryCart(true)}
+              >
+                <Library className="h-5 w-5 mr-2" />
+                Library Cart
+                {libraryCart.length > 0 && (
+                  <Badge className="absolute -top-2 -right-2 bg-green-500 text-white min-w-5 h-5 flex items-center justify-center text-xs rounded-full">
+                    {libraryCart.length}
                   </Badge>
                 )}
               </Button>
