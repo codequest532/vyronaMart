@@ -47,9 +47,12 @@ import {
 function convertGoogleDriveUrl(url: string): string {
   if (!url || !url.includes('drive.google.com')) return url;
   
+  // Handle both /file/d/ID/view and /file/d/ID formats
   const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (fileIdMatch) {
-    return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
+    const fileId = fileIdMatch[1];
+    // Use the thumbnail format which works more reliably for direct image display
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
   }
   return url;
 }
