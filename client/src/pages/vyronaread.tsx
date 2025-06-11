@@ -723,7 +723,12 @@ export default function VyronaRead() {
                         <div>
                           <div className="flex items-center justify-between mb-4">
                             <h5 className="font-semibold text-gray-900">Featured Books</h5>
-                            <Button variant="ghost" size="sm" className="text-green-600">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-green-600"
+                              onClick={() => setLocation("/library-browse")}
+                            >
                               View All Books
                             </Button>
                           </div>
