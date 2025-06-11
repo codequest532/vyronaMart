@@ -160,6 +160,68 @@ export default function VyronaRead() {
     rating: 0
   });
 
+  // Cart state management
+  const [cart, setCart] = useState<any[]>([]);
+  const [showCart, setShowCart] = useState(false);
+
+  // Cart handler functions
+  const addToCart = (book: any, type: 'buy' | 'rent') => {
+    const cartItem = {
+      id: `${book.id}-${type}`,
+      book,
+      type,
+      addedAt: new Date().toISOString()
+    };
+
+    // Check if item already exists in cart
+    const existingItem = cart.find(item => item.id === cartItem.id);
+    if (existingItem) {
+      toast({
+        title: "Already in Cart",
+        description: `${book.title || book.name} (${type}) is already in your cart.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCart(prev => [...prev, cartItem]);
+    toast({
+      title: "Added to Cart",
+      description: `${book.title || book.name} added to cart for ${type}.`,
+    });
+  };
+
+  const removeFromCart = (itemId: string) => {
+    setCart(prev => prev.filter(item => item.id !== itemId));
+    toast({
+      title: "Removed from Cart",
+      description: "Item removed from cart.",
+    });
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    toast({
+      title: "Cart Cleared",
+      description: "All items removed from cart.",
+    });
+  };
+
+  const goToCartCheckout = () => {
+    if (cart.length === 0) {
+      toast({
+        title: "Empty Cart",
+        description: "Please add items to cart before checkout.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Store cart data and navigate to checkout
+    sessionStorage.setItem('vyronaread_cart', JSON.stringify(cart));
+    setLocation('/vyronaread-cart-checkout');
+  };
+
   // Handler functions for buy/rent/borrow operations
   const handleBuyBook = async (book: any) => {
     // Navigate to VyronaRead checkout page with buy parameters
@@ -395,8 +457,27 @@ export default function VyronaRead() {
       {/* Header */}
       <Card className="vyrona-gradient-read text-white mb-6">
         <CardContent className="p-6">
-          <h1 className="text-3xl font-bold mb-2">VyronaRead</h1>
-          <p className="text-lg opacity-90">Read. Return. Repeat. - Your smart reading ecosystem</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">VyronaRead</h1>
+              <p className="text-lg opacity-90">Read. Return. Repeat. - Your smart reading ecosystem</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline" 
+                className="bg-white/10 border-white/30 text-white hover:bg-white/20 relative"
+                onClick={() => setShowCart(true)}
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                Book Cart
+                {cart.length > 0 && (
+                  <Badge className="absolute -top-2 -right-2 bg-red-500 text-white min-w-5 h-5 flex items-center justify-center text-xs rounded-full">
+                    {cart.length}
+                  </Badge>
+                )}
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -601,23 +682,42 @@ export default function VyronaRead() {
 
                         {/* Action Buttons */}
                         <div className="space-y-2">
-                          <Button 
-                            size="sm" 
-                            className="w-full bg-purple-600 hover:bg-purple-700"
-                            onClick={() => handleBuyBook(book)}
-                          >
-                            <ShoppingCart className="mr-2 h-4 w-4" />
-                            Buy Now
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="w-full"
-                            onClick={() => handleRentBook(book)}
-                          >
-                            <Clock className="mr-1 h-3 w-3" />
-                            Rent
-                          </Button>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button 
+                              size="sm" 
+                              className="bg-purple-600 hover:bg-purple-700"
+                              onClick={() => handleBuyBook(book)}
+                            >
+                              Buy Now
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleRentBook(book)}
+                            >
+                              Rent
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                              onClick={() => addToCart(book, 'buy')}
+                            >
+                              <ShoppingCart className="mr-1 h-3 w-3" />
+                              Add to Cart
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="text-green-600 border-green-600 hover:bg-green-50"
+                              onClick={() => addToCart(book, 'rent')}
+                            >
+                              <ShoppingCart className="mr-1 h-3 w-3" />
+                              Cart (Rent)
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -1481,6 +1581,108 @@ export default function VyronaRead() {
                 Apply Filters
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Book Cart Modal */}
+      <Dialog open={showCart} onOpenChange={setShowCart}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span className="flex items-center">
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                Book Cart ({cart.length} items)
+              </span>
+              {cart.length > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearCart}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  Clear All
+                </Button>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            {cart.length === 0 ? (
+              <div className="text-center py-8">
+                <ShoppingCart className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Your cart is empty</h3>
+                <p className="text-gray-500">Add books to your cart to get started</p>
+              </div>
+            ) : (
+              <>
+                {cart.map((item) => (
+                  <Card key={item.id} className="border border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded flex items-center justify-center flex-shrink-0">
+                            <Book className="text-purple-600 h-6 w-6" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{item.book.name || item.book.title}</h4>
+                            <p className="text-sm text-gray-600">by {item.book.author || "Unknown Author"}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant={item.type === 'buy' ? 'default' : 'secondary'}>
+                                {item.type === 'buy' ? 'Purchase' : 'Rental'}
+                              </Badge>
+                              <span className="text-sm font-medium text-purple-600">
+                                ₹{item.type === 'buy' ? Math.floor(item.book.price || 299) : Math.floor((item.book.price || 299) / 10)}
+                                {item.type === 'rent' && '/week'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removeFromCart(item.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                <div className="border-t pt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-lg font-semibold">Total Amount:</span>
+                    <span className="text-xl font-bold text-purple-600">
+                      ₹{cart.reduce((total, item) => {
+                        const price = item.type === 'buy' 
+                          ? Math.floor(item.book.price || 299)
+                          : Math.floor((item.book.price || 299) / 10);
+                        return total + price;
+                      }, 0)}
+                    </span>
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => setShowCart(false)}
+                    >
+                      Continue Shopping
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                      onClick={goToCartCheckout}
+                    >
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      Proceed to Checkout
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
