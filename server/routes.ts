@@ -2765,8 +2765,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VyronaRead Books - Library Integration Requests
   app.post("/api/library-integration-requests", async (req, res) => {
     try {
+      // Get authenticated user ID
+      const userId = req.session?.user?.id;
+      
+      console.log("Library integration request - Session data:", {
+        sessionExists: !!req.session,
+        userExists: !!req.session?.user,
+        userId: userId,
+        userEmail: req.session?.user?.email
+      });
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
       const requestData = {
-        sellerId: 3, // Default seller ID for now
+        sellerId: userId,
         libraryName: req.body.libraryName || req.body.name,
         libraryType: req.body.libraryType || req.body.type,
         address: req.body.address,
@@ -2776,6 +2790,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description || null,
         booksListCsv: req.body.booksListCsv || null,
       };
+
+      console.log("Creating library integration request with data:", requestData);
 
       // Create the request in the database
       const newRequest = await storage.createLibraryIntegrationRequest(requestData);
