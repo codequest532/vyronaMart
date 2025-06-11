@@ -677,7 +677,7 @@ export default function VyronaRead() {
                           </div>
                           <div className="text-right">
                             <div className="text-xs text-gray-500">or rent</div>
-                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) / 10)}/15 days</div>
+                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) * 0.1)}/15 days</div>
                           </div>
                         </div>
 
