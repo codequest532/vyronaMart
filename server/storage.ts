@@ -1897,10 +1897,10 @@ export class DatabaseStorage implements IStorage {
 
     // For now, we'll store in a notifications-like structure since we don't have a dedicated membership table
     const [newMembership] = await db.insert(notifications).values({
-      userId: membership.libraryId,
+      userId: membership.libraryId || 1, // Use libraryId or default to admin user (1)
       type: 'library_membership_request',
       title: 'New Library Membership Application',
-      message: `Membership application from ${membership.fullName} for "${membership.bookTitle}"`,
+      message: `Membership application from ${membership.fullName} for "${membership.bookTitle || 'Library Access'}"`,
       isRead: false,
       createdAt: new Date(),
       metadata: membership

@@ -3814,15 +3814,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/library/membership", async (req, res) => {
     try {
       const membershipData = req.body;
-      const membership = await storage.createLibraryMembership(membershipData);
+      
+      // Enhanced membership data with proper defaults
+      const enhancedMembershipData = {
+        fullName: membershipData.fullName,
+        email: membershipData.email,
+        phone: membershipData.phone,
+        address: membershipData.address || "Not provided",
+        membershipType: membershipData.membershipType || "annual",
+        membershipFee: membershipData.fee || 2000,
+        libraryId: membershipData.libraryId || 28, // Default to Aringar Anna Library
+        bookId: membershipData.bookId,
+        bookTitle: membershipData.bookTitle || 'Library Access',
+        borrowingInfo: membershipData.borrowingInfo
+      };
+      
+      const membership = await storage.createLibraryMembership(enhancedMembershipData);
       
       // Create notification for admin and seller
       await storage.createNotification({
-        userId: membershipData.libraryId, // Seller/Library ID
+        userId: enhancedMembershipData.libraryId, // Seller/Library ID
         type: "library_membership_request",
         title: "New Library Membership Application",
-        message: `New membership application from ${membershipData.fullName} for book "${membershipData.bookTitle}"`,
-        metadata: { membershipId: membership.id, bookId: membershipData.bookId }
+        message: `New membership application from ${enhancedMembershipData.fullName} for book "${enhancedMembershipData.bookTitle}"`,
+        metadata: { membershipId: membership.id, bookId: enhancedMembershipData.bookId }
       });
 
       // Send library membership confirmation email
@@ -3834,10 +3849,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const membershipEmailData = {
           membershipId: `VRL-${membership.id}-${Date.now()}`,
-          customerName: membershipData.fullName,
-          customerEmail: membershipData.email,
-          membershipType: membershipData.membershipType || "annual",
-          membershipFee: membershipData.fee || 2000,
+          customerName: enhancedMembershipData.fullName,
+          customerEmail: enhancedMembershipData.email,
+          membershipType: enhancedMembershipData.membershipType,
+          membershipFee: enhancedMembershipData.membershipFee,
           expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN'),
           libraries: libraries,
           benefits: [
@@ -3857,7 +3872,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the membership creation if email fails
       }
 
-      res.json(membership);
+      res.json({
+        success: true,
+        membershipId: membership.id,
+        message: "Library membership created successfully",
+        membership: membership
+      });
     } catch (error) {
       console.error("Error creating library membership:", error);
       res.status(500).json({ message: "Failed to create library membership" });
