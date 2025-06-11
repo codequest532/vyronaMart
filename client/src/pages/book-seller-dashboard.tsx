@@ -1294,49 +1294,53 @@ export default function BookSellerDashboard() {
                               const reader = new FileReader();
                               reader.onload = (event) => {
                                 const csvText = event.target?.result as string;
-                                const lines = csvText.split('\n').filter(line => line.trim());
+                                console.log('Raw CSV text length:', csvText.length);
+                                console.log('Raw CSV preview:', csvText.substring(0, 200));
+                                
+                                const allLines = csvText.split('\n');
+                                console.log('Total lines after split:', allLines.length);
+                                
+                                const lines = allLines.filter(line => line.trim());
+                                console.log('Non-empty lines:', lines.length);
+                                console.log('First 5 lines:', lines.slice(0, 5));
                                 
                                 if (lines.length === 0) {
                                   setCsvBooksList([]);
                                   return;
                                 }
                                 
-                                // Parse CSV properly handling quoted fields
-                                const parseCSVLine = (line: string): string[] => {
-                                  const result = [];
-                                  let current = '';
-                                  let inQuotes = false;
+                                // Simple CSV parsing for comma-separated values
+                                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                                console.log('CSV Headers:', headers);
+                                
+                                const books = [];
+                                for (let i = 1; i < lines.length; i++) {
+                                  const line = lines[i].trim();
+                                  if (!line) continue;
                                   
-                                  for (let i = 0; i < line.length; i++) {
-                                    const char = line[i];
-                                    if (char === '"') {
-                                      inQuotes = !inQuotes;
-                                    } else if (char === ',' && !inQuotes) {
-                                      result.push(current.trim());
-                                      current = '';
-                                    } else {
-                                      current += char;
+                                  const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+                                  console.log(`Row ${i}: [${values.join(' | ')}]`);
+                                  
+                                  if (values.length >= 3 && values[0]) { // Must have at least book name, author, isbn
+                                    const book: any = {};
+                                    book["Book Name"] = values[0] || '';
+                                    book["Author"] = values[1] || '';
+                                    book["ISBN Number"] = values[2] || '';
+                                    book["Book Image"] = values[3] && values[3] !== '1st' ? values[3] : '';
+                                    book["Year of Publishing"] = values[4] || '';
+                                    book["Genre"] = "General";
+                                    book["Publisher"] = "Unknown Publisher";
+                                    book["Language"] = "English";
+                                    
+                                    if (book["Book Name"]) {
+                                      books.push(book);
+                                      console.log(`Added book: "${book["Book Name"]}"`);
                                     }
                                   }
-                                  result.push(current.trim());
-                                  return result;
-                                };
-                                
-                                const headers = parseCSVLine(lines[0]).map(h => h.replace(/"/g, '').trim());
-                                const books = lines.slice(1).map(line => {
-                                  const values = parseCSVLine(line).map(v => v.replace(/"/g, '').trim());
-                                  const book: any = {};
-                                  headers.forEach((header, index) => {
-                                    book[header] = values[index] || '';
-                                  });
-                                  return book;
-                                }).filter(book => {
-                                  // Filter out empty rows or rows with no book name
-                                  return book["Book Name"] || book.bookName || book.title;
-                                });
+                                }
                                 
                                 setCsvBooksList(books);
-                                console.log(`CSV parsed: ${books.length} valid books found`);
+                                console.log(`Final result: ${books.length} valid books parsed`);
                               };
                               reader.readAsText(file);
                             }
@@ -1344,7 +1348,7 @@ export default function BookSellerDashboard() {
                           className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         />
                         <div className="text-xs text-gray-500 mt-2">
-                          Expected columns: Book Name, Author, ISBN Number, Year of Publishing, Genre, Publisher, Language, Book Image
+                          Expected columns: Book Name, Author, ISBN Number, Book Image, Year of Publishing
                         </div>
                       </div>
                       {csvBooksList.length > 0 && (
