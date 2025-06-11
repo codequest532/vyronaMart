@@ -75,6 +75,7 @@ export default function BookSellerDashboard() {
   const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+
   // Get current user for authentication check
   const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ["/api/current-user"],
@@ -134,8 +135,8 @@ export default function BookSellerDashboard() {
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvPreview, setCsvPreview] = useState<any[]>([]);
-  const [importProgress, setImportProgress] = useState(0);
   const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
   const [newEbook, setNewEbook] = useState({
     title: "",
     author: "",
@@ -316,27 +317,25 @@ export default function BookSellerDashboard() {
       const lines = text.split('\n');
       const headers = lines[0].split(',').map(h => h.trim());
       
-      // Expected headers: Title, Author, Category, Description, Price, Rental Price, Image URL, Copies, Language
-      const expectedHeaders = ['Title', 'Author', 'Category', 'Description', 'Price', 'Rental Price', 'Image URL', 'Copies', 'Language'];
-      const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
-      
-      if (missingHeaders.length > 0) {
-        toast({
-          title: "Invalid CSV Format",
-          description: `Missing required columns: ${missingHeaders.join(', ')}`,
-          variant: "destructive",
-        });
-        return;
-      }
-
+      // For the provided CSV format: Book Name,Author,ISBN Number,Year of Publishing,Genre,Publisher,Language,Book Image
       const books = [];
       for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',').map(v => v.trim());
-        if (values.length === headers.length && values[0]) {
-          const book = {};
-          headers.forEach((header, index) => {
-            book[header] = values[index];
-          });
+        if (values.length >= 8 && values[0]) { // At least 8 columns and first column not empty
+          const book = {
+            'Title': values[0],
+            'Author': values[1],
+            'ISBN': values[2],
+            'Year': values[3],
+            'Category': values[4],
+            'Publisher': values[5],
+            'Language': values[6],
+            'Image URL': values[7],
+            'Price': '299', // Default price
+            'Rental Price': '49', // Default rental price
+            'Copies': '5', // Default copies
+            'Description': `${values[4]} book by ${values[1]}` // Auto-generated description
+          };
           books.push(book);
         }
       }
@@ -367,21 +366,19 @@ export default function BookSellerDashboard() {
       for (let i = 0; i < csvPreview.length; i++) {
         const book = csvPreview[i];
         
-        // Generate ISBN if not provided
-        const isbn = `AUTO-${Date.now()}-${i}`;
-        
         const bookData = {
           title: book.Title,
           author: book.Author,
-          isbn: isbn,
+          isbn: book.ISBN || `AUTO-${Date.now()}-${i}`,
           category: book.Category,
           description: book.Description || '',
-          price: parseFloat(book.Price) || 0,
-          rentalPrice: parseFloat(book['Rental Price']) || 0,
+          price: parseFloat(book.Price) || 299,
+          rentalPrice: parseFloat(book['Rental Price']) || 49,
           imageUrl: book['Image URL'] || '',
-          copies: parseInt(book.Copies) || 1,
+          copies: parseInt(book.Copies) || 5,
           language: book.Language || 'English',
-          publisher: 'Unknown', // Default since not in CSV
+          publisher: book.Publisher || 'Unknown',
+          publicationYear: book.Year || new Date().getFullYear().toString(),
         };
 
         await apiRequest('/api/vyronaread/books', 'POST', bookData);
@@ -395,7 +392,7 @@ export default function BookSellerDashboard() {
       });
       
       // Reset state and refresh data
-      setShowBulkImport(false);
+      setShowAddBookDialog(false);
       setCsvFile(null);
       setCsvPreview([]);
       queryClient.invalidateQueries({ queryKey: ['/api/vyronaread/seller-books'] });
