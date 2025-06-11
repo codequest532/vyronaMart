@@ -164,9 +164,10 @@ export default function VyronaReadCheckout() {
     if (checkoutType === 'cart') {
       return cartItems.reduce((total, item) => {
         if (item.type === 'buy') {
-          return total + Math.floor(item.book.price || 299);
+          const price = (item.book.price || 29900) / 100; // Convert from paise to rupees
+          return total + Math.floor(price);
         } else if (item.type === 'rent') {
-          const bookPrice = item.book.price || 299;
+          const bookPrice = (item.book.price || 29900) / 100; // Convert from paise to rupees
           const periods = itemRentalDurations[item.book.id] || 1;
           // New pricing: 7 days = 20%, 15 days = 40%, 30 days = 80%
           let rentalPrice;
@@ -184,10 +185,11 @@ export default function VyronaReadCheckout() {
     
     switch (checkoutType) {
       case 'buy':
-        return bookDetails.price || bookDetails.buyPrice || 0;
+        const buyPrice = (bookDetails.price || bookDetails.buyPrice || 29900) / 100; // Convert from paise to rupees
+        return Math.floor(buyPrice);
       case 'rent':
         // New pricing structure: 7 days = 20%, 15 days = 40%, 30 days = 80%
-        const bookPrice = bookDetails.price || 299;
+        const bookPrice = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
         const days = parseInt(rentalDuration);
         if (days <= 7) return Math.floor(bookPrice * 0.2);
         else if (days <= 15) return Math.floor(bookPrice * 0.4);
@@ -620,21 +622,24 @@ export default function VyronaReadCheckout() {
                       <RadioGroupItem value="7" id="7days" />
                       <Label htmlFor="7days">7 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        return Math.floor((bookDetails.price || 299) * 0.2);
+                        const price = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
+                        return Math.floor(price * 0.2);
                       })()}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="15" id="15days" />
                       <Label htmlFor="15days">15 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        return Math.floor((bookDetails.price || 299) * 0.4);
+                        const price = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
+                        return Math.floor(price * 0.4);
                       })()} (Recommended)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="30" id="30days" />
                       <Label htmlFor="30days">30 days - ₹{(() => {
                         if (!bookDetails) return 0;
-                        return Math.floor((bookDetails.price || 299) * 0.8);
+                        const price = (bookDetails.price || 29900) / 100; // Convert from paise to rupees
+                        return Math.floor(price * 0.8);
                       })()}</Label>
                     </div>
                   </RadioGroup>
@@ -1009,7 +1014,7 @@ export default function VyronaReadCheckout() {
                   <>
                     <div className="flex justify-between">
                       <span>Amount:</span>
-                      <span className="font-bold">₹{Math.floor(calculatePrice() / 100)}</span>
+                      <span className="font-bold">₹{calculatePrice()}</span>
                     </div>
                     <div className="flex justify-between text-sm text-gray-500">
                       <span>Processing Fee:</span>
@@ -1018,7 +1023,7 @@ export default function VyronaReadCheckout() {
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total:</span>
-                      <span>₹{Math.floor(calculatePrice() / 100)}</span>
+                      <span>₹{calculatePrice()}</span>
                     </div>
                   </>
                 )}
