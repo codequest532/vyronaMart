@@ -104,7 +104,7 @@ export default function Login() {
         if (data.user.email === "seller@vyronaread.com") {
           setLocation("/vyronaread-seller-dashboard");
         } else if (data.user.email === "bookseller@vyronaread.com") {
-          setLocation("/book-seller-dashboard");
+          setLocation("/vyronaread-dashboard");
         } else {
           setLocation("/seller-dashboard");
         }

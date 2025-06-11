@@ -1167,7 +1167,7 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
         });
 
         if (loginResponse.ok) {
-          setLocation("/book-seller-dashboard");
+          setLocation("/vyronaread-dashboard");
           setTimeout(() => {
             toast({
               title: "Welcome to VyronaRead!",
