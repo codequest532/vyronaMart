@@ -324,7 +324,7 @@ export default function LibraryBrowse() {
                       {book.imageUrl ? (
                         <img 
                           src={book.imageUrl} 
-                          alt={book.name}
+                          alt={book.title}
                           className="w-full h-full object-cover rounded-lg"
                         />
                       ) : (
