@@ -424,6 +424,7 @@ export default function SellerDashboard() {
         description: "",
         booksListCsv: null
       });
+      setCsvBooksList([]);
     },
     onError: (error) => {
       toast({
@@ -477,7 +478,13 @@ export default function SellerDashboard() {
       return;
     }
 
-    createLibraryRequestMutation.mutate(newLibrary);
+    // Include parsed CSV data in the submission
+    const libraryData = {
+      ...newLibrary,
+      booksListCsv: csvBooksList.length > 0 ? csvBooksList : null
+    };
+
+    createLibraryRequestMutation.mutate(libraryData);
   };
 
 
@@ -3483,6 +3490,60 @@ export default function SellerDashboard() {
                 onChange={(e) => setNewLibrary({ ...newLibrary, description: e.target.value })}
                 rows={3}
               />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="booksListCsv">Books List (CSV Upload)</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <div className="text-center">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <div className="text-sm text-gray-600 mb-2">
+                    Upload CSV file with your book collection
+                  </div>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setNewLibrary({ ...newLibrary, booksListCsv: file });
+                        // Parse CSV file
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          const csvText = event.target?.result as string;
+                          const lines = csvText.split('\n');
+                          const headers = lines[0].split(',').map(h => h.trim());
+                          const books = lines.slice(1).filter(line => line.trim()).map(line => {
+                            const values = line.split(',').map(v => v.trim());
+                            const book: any = {};
+                            headers.forEach((header, index) => {
+                              book[header] = values[index] || '';
+                            });
+                            return book;
+                          });
+                          setCsvBooksList(books);
+                        };
+                        reader.readAsText(file);
+                      }
+                    }}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  <div className="text-xs text-gray-500 mt-2">
+                    Expected columns: bookName, author, isbn, yearOfPublish, edition
+                  </div>
+                </div>
+                {csvBooksList.length > 0 && (
+                  <div className="mt-4 p-3 bg-green-50 rounded border">
+                    <div className="text-sm text-green-700">
+                      ✓ CSV parsed successfully: {csvBooksList.length} books found
+                    </div>
+                    <div className="text-xs text-green-600 mt-1">
+                      Preview: {csvBooksList.slice(0, 3).map(book => book.bookName || book.title).join(', ')}
+                      {csvBooksList.length > 3 && '...'}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             </div>
           </div>
