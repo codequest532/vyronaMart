@@ -656,6 +656,17 @@ export default function VyronaReadCheckout() {
                     <RadioGroupItem value="wallet" id="wallet" />
                     <Label htmlFor="wallet">Digital Wallet</Label>
                   </div>
+                  <div className="flex items-center space-x-2 p-3 rounded-lg border">
+                    <RadioGroupItem value="cod" id="cod" />
+                    <Label htmlFor="cod" className="flex-1 cursor-pointer">
+                      <div>
+                        <span className="font-medium">Cash on Delivery (COD)</span>
+                        <p className="text-sm text-gray-600">
+                          Pay with cash when your book is delivered to your address
+                        </p>
+                      </div>
+                    </Label>
+                  </div>
                 </RadioGroup>
               </CardContent>
             </Card>
