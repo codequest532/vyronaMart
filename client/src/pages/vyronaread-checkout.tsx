@@ -67,7 +67,7 @@ export default function VyronaReadCheckout() {
 
   useEffect(() => {
     fetchBookDetails();
-  }, [bookId]);
+  }, [bookId, checkoutType]);
 
   const fetchBookDetails = async () => {
     try {
@@ -426,11 +426,24 @@ export default function VyronaReadCheckout() {
     );
   }
 
-  if (!bookDetails) {
+  if (!bookDetails && checkoutType !== 'cart') {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <p className="text-gray-500 mb-4">Book not found</p>
+          <Button onClick={() => setLocation('/vyronaread')}>
+            Back to VyronaRead
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (checkoutType === 'cart' && cartItems.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <p className="text-gray-500 mb-4">No items in cart</p>
           <Button onClick={() => setLocation('/vyronaread')}>
             Back to VyronaRead
           </Button>
