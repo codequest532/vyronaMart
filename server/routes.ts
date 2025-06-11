@@ -2793,6 +2793,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Recreate library books with corrected genre mapping
+  app.post("/api/recreate-library-books/:libraryId", async (req, res) => {
+    try {
+      const libraryId = parseInt(req.params.libraryId);
+      
+      // Get the library request data with CSV
+      const libraryRequest = await storage.getLibraryIntegrationRequestById(libraryId);
+      if (!libraryRequest) {
+        return res.status(404).json({ message: "Library not found" });
+      }
+
+      // Delete existing books for this library
+      await db.execute(sql`DELETE FROM physical_books WHERE library_id = ${libraryId}`);
+      
+      // Recreate books with corrected mapping
+      await storage.createLibraryBooks(libraryId, libraryRequest);
+      
+      res.json({ message: "Library books recreated successfully" });
+    } catch (error) {
+      console.error("Error recreating library books:", error);
+      res.status(500).json({ message: "Failed to recreate library books" });
+    }
+  });
+
   // VyronaRead Books - Book Loan Management
   app.post("/api/book-loans", async (req, res) => {
     try {

@@ -1333,6 +1333,11 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(libraryIntegrationRequests);
   }
 
+  async getLibraryIntegrationRequestById(id: number): Promise<any> {
+    const [request] = await db.select().from(libraryIntegrationRequests).where(eq(libraryIntegrationRequests.id, id));
+    return request;
+  }
+
   async updateLibraryIntegrationRequestStatus(id: number, status: string, processedBy: number, adminNotes?: string): Promise<any | null> {
     const [updatedRequest] = await db
       .update(libraryIntegrationRequests)
