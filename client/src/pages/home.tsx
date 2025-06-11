@@ -948,12 +948,11 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Combine all authentic book sources */}
+                {/* Only show seller books - no library integration books */}
                 {(() => {
                   const allBooks = [
                     ...(Array.isArray(sellerEBooks) ? sellerEBooks : []),
-                    ...(Array.isArray(sellerBooks) ? sellerBooks : []),
-                    ...(Array.isArray(libraryBooks) ? libraryBooks : [])
+                    ...(Array.isArray(sellerBooks) ? sellerBooks : [])
                   ];
                   
                   const filteredBooks = allBooks.filter(book => 
@@ -1144,35 +1143,13 @@ export default function Home() {
                             </Button>
                           </div>
 
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                            {libraryBooks && Array.isArray(libraryBooks) && libraryBooks.length > 0 ? (
-                              libraryBooks.map((book: any) => (
-                                <div key={book.id} className="bg-gray-50 rounded-lg p-3">
-                                  <h5 className="font-medium text-gray-900 mb-1">{book.title}</h5>
-                                  <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
-                                  <div className="flex items-center justify-between">
-                                    <Badge variant={book.status === 'available' ? "default" : "destructive"} className="text-xs">
-                                      {book.status === 'available' ? "Available" : "Borrowed"}
-                                    </Badge>
-                                    {book.status === 'available' && (
-                                      <Button 
-                                        size="sm" 
-                                        onClick={() => {
-                                          updateCoins(25);
-                                          showNotification("Book Borrowed!", `Borrowed from ${library.libraryName}. Earned 25 coins!`, "success");
-                                        }}
-                                      >
-                                        Borrow
-                                      </Button>
-                                    )}
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="col-span-full text-center py-4 text-gray-500">
-                                No books available in this library yet
-                              </div>
-                            )}
+                          <div className="text-center py-4">
+                            <p className="text-sm text-gray-600 mb-3">
+                              Visit this library to browse their complete book collection
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              Library books are available for borrowing at the physical location
+                            </p>
                           </div>
                         </div>
                       ))
