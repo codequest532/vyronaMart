@@ -21,6 +21,7 @@ export default function LibraryCartCheckout() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [libraryCart, setLibraryCart] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     borrowerName: "",
     borrowerEmail: "",
@@ -33,17 +34,23 @@ export default function LibraryCartCheckout() {
   useEffect(() => {
     try {
       const savedLibraryCart = sessionStorage.getItem('vyronaread_library_cart');
+      console.log('Loading library cart from session storage:', savedLibraryCart);
       if (savedLibraryCart) {
-        setLibraryCart(JSON.parse(savedLibraryCart));
+        const cartData = JSON.parse(savedLibraryCart);
+        console.log('Parsed library cart data:', cartData);
+        setLibraryCart(cartData);
       }
     } catch (error) {
       console.error('Error loading library cart:', error);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  // Redirect if cart is empty
+  // Redirect if cart is empty after loading
   useEffect(() => {
-    if (libraryCart.length === 0) {
+    if (!isLoading && libraryCart.length === 0) {
+      console.log('Library cart is empty after loading, redirecting...');
       toast({
         title: "Empty Library Cart",
         description: "Your library cart is empty. Redirecting back to VyronaRead.",
@@ -51,7 +58,7 @@ export default function LibraryCartCheckout() {
       });
       setLocation('/vyronaread');
     }
-  }, [libraryCart, setLocation, toast]);
+  }, [libraryCart, isLoading, setLocation, toast]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -119,6 +126,20 @@ export default function LibraryCartCheckout() {
     acc[libraryId].push(item);
     return acc;
   }, {} as Record<string, any[]>);
+
+  // Show loading state while checking cart
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading library cart...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (libraryCart.length === 0) {
     return null; // Will redirect via useEffect
