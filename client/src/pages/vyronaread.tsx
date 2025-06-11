@@ -444,15 +444,14 @@ export default function VyronaRead() {
     <div className="container mx-auto px-4 py-6">
       {/* Back Button */}
       <div className="mb-6">
-        <Link href="/home">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </Link>
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => setLocation('/dashboard')}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
       </div>
 
       {/* Header */}
