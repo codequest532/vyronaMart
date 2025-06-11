@@ -2134,6 +2134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sellerId = authenticatedUser.id;
       
       // Enhanced seller orders with customer details - FILTERED BY SELLER ID
+      // This includes both regular orders and library membership requests
       const sellerOrders = await db.execute(sql`
         SELECT 
           o.id as order_id,
@@ -2146,6 +2147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           u.username as customer_name,
           u.email as customer_email,
           u.mobile as customer_phone,
+          'order' as record_type,
           CASE 
             WHEN o.module = 'vyronahub' THEN 
               COALESCE(o.metadata->>'shippingAddress', '{}')::jsonb
@@ -2169,7 +2171,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           OR (o.module = 'vyronaread' AND o.metadata->>'sellerId' = ${sellerId.toString()})
           OR (${authenticatedUser.role === 'admin'})
         )
-        ORDER BY o.created_at DESC
+        
+        UNION ALL
+        
+        SELECT 
+          n.id as order_id,
+          n.user_id,
+          COALESCE((n.metadata->>'membershipFee')::integer * 100, 200000) as total_amount,
+          'pending' as order_status,
+          'library_membership' as module,
+          n.metadata,
+          n.created_at,
+          n.metadata->>'fullName' as customer_name,
+          n.metadata->>'email' as customer_email,
+          n.metadata->>'phone' as customer_phone,
+          'membership' as record_type,
+          NULL as shipping_address,
+          'Library Membership Payment' as payment_method,
+          NULL as order_items
+        FROM notifications n
+        WHERE n.type = 'library_membership_request'
+          AND (n.user_id = ${sellerId} OR ${authenticatedUser.role === 'admin'})
+        
+        ORDER BY created_at DESC
         LIMIT 50
       `);
 
@@ -2196,6 +2220,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } catch (e) {
             orderItems = [];
           }
+        }
+
+        // Handle library membership orders
+        if (order.module === 'library_membership') {
+          const metadata = order.metadata;
+          return {
+            ...order,
+            shipping_address: null,
+            order_items: [],
+            formatted_total: `₹${(order.total_amount / 100).toFixed(2)}`,
+            formatted_date: new Date(order.created_at).toLocaleDateString('en-IN', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            // Library-specific details
+            library_details: {
+              bookTitle: metadata?.bookTitle || 'Library Access',
+              membershipType: metadata?.membershipType || 'annual',
+              customerAddress: metadata?.address || 'Not provided',
+              bookId: metadata?.bookId
+            }
+          };
         }
 
         return {
