@@ -131,6 +131,11 @@ export default function BookSellerDashboard() {
   const [driveLink, setDriveLink] = useState("");
   const [selectedLibraryId, setSelectedLibraryId] = useState<number | null>(null);
   const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvPreview, setCsvPreview] = useState<any[]>([]);
+  const [importProgress, setImportProgress] = useState(0);
+  const [isImporting, setIsImporting] = useState(false);
   const [newEbook, setNewEbook] = useState({
     title: "",
     author: "",
@@ -290,6 +295,124 @@ export default function BookSellerDashboard() {
     setSelectedLibraryBooks([]);
   };
 
+  const handleCsvFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/csv') {
+      setCsvFile(file);
+      parseCsvFile(file);
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please select a valid CSV file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const parseCsvFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      
+      // Expected headers: Title, Author, Category, Description, Price, Rental Price, Image URL, Copies, Language
+      const expectedHeaders = ['Title', 'Author', 'Category', 'Description', 'Price', 'Rental Price', 'Image URL', 'Copies', 'Language'];
+      const missingHeaders = expectedHeaders.filter(h => !headers.includes(h));
+      
+      if (missingHeaders.length > 0) {
+        toast({
+          title: "Invalid CSV Format",
+          description: `Missing required columns: ${missingHeaders.join(', ')}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const books = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length === headers.length && values[0]) {
+          const book = {};
+          headers.forEach((header, index) => {
+            book[header] = values[index];
+          });
+          books.push(book);
+        }
+      }
+      
+      setCsvPreview(books);
+      toast({
+        title: "CSV Parsed Successfully",
+        description: `Found ${books.length} books to import`,
+      });
+    };
+    reader.readAsText(file);
+  };
+
+  const handleBulkImport = async () => {
+    if (!csvPreview.length) {
+      toast({
+        title: "No Data",
+        description: "Please upload a CSV file first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    setImportProgress(0);
+
+    try {
+      for (let i = 0; i < csvPreview.length; i++) {
+        const book = csvPreview[i];
+        
+        // Generate ISBN if not provided
+        const isbn = `AUTO-${Date.now()}-${i}`;
+        
+        const bookData = {
+          title: book.Title,
+          author: book.Author,
+          isbn: isbn,
+          category: book.Category,
+          description: book.Description || '',
+          price: parseFloat(book.Price) || 0,
+          rentalPrice: parseFloat(book['Rental Price']) || 0,
+          imageUrl: book['Image URL'] || '',
+          copies: parseInt(book.Copies) || 1,
+          language: book.Language || 'English',
+          publisher: 'Unknown', // Default since not in CSV
+        };
+
+        await apiRequest('/api/vyronaread/books', 'POST', bookData);
+
+        setImportProgress(Math.round(((i + 1) / csvPreview.length) * 100));
+      }
+
+      toast({
+        title: "Import Successful",
+        description: `Successfully imported ${csvPreview.length} books`,
+      });
+      
+      // Reset state and refresh data
+      setShowBulkImport(false);
+      setCsvFile(null);
+      setCsvPreview([]);
+      queryClient.invalidateQueries({ queryKey: ['/api/vyronaread/seller-books'] });
+      
+    } catch (error) {
+      console.error('Bulk import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import books. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+      setImportProgress(0);
+    }
+  };
+
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
@@ -330,24 +453,7 @@ export default function BookSellerDashboard() {
     });
   };
 
-  const handleBulkImport = () => {
-    if (!driveLink) {
-      toast({
-        title: "Error",
-        description: "Please enter a Google Drive link",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    console.log("Importing from Google Drive:", driveLink);
-    toast({
-      title: "Bulk Import Started",
-      description: "E-books are being imported from Google Drive. This may take a few minutes.",
-    });
-    setShowBulkImportDialog(false);
-    setDriveLink("");
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -401,15 +507,22 @@ export default function BookSellerDashboard() {
                     Add Book
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Add New Book to Library</DialogTitle>
+                    <DialogTitle>Add Books to Library</DialogTitle>
                     <DialogDescription>
-                      Add a new book to your VyronaRead library inventory
+                      Add books to your VyronaRead library inventory - single entry or bulk import via CSV
                     </DialogDescription>
                   </DialogHeader>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+                  <Tabs defaultValue="single" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="single">Single Book Entry</TabsTrigger>
+                      <TabsTrigger value="bulk">Bulk CSV Import</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="single" className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                     <div className="space-y-2">
                       <Label htmlFor="title">Book Title *</Label>
                       <Input
@@ -568,19 +681,94 @@ export default function BookSellerDashboard() {
                     </div>
                   </div>
                   
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setShowAddBookDialog(false)}>
-                      Cancel
-                    </Button>
-                    <Button 
-                      onClick={handleAddBook}
-                      disabled={!newBook.title || !newBook.author || !newBook.category}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Book
-                    </Button>
-                  </div>
+                      <div className="flex justify-end gap-2 pt-4">
+                        <Button variant="outline" onClick={() => setShowAddBookDialog(false)}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleAddBook}
+                          disabled={!newBook.title || !newBook.author || !newBook.category}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Book
+                        </Button>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="bulk" className="space-y-4">
+                      <div className="space-y-4">
+                        <div className="text-sm text-gray-600">
+                          Upload a CSV file with the following columns: Title, Author, Category, Description, Price, Rental Price, Image URL, Copies, Language
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="csvFile">Select CSV File</Label>
+                          <Input
+                            id="csvFile"
+                            type="file"
+                            accept=".csv"
+                            onChange={handleCsvFileChange}
+                            className="cursor-pointer"
+                          />
+                        </div>
+                        
+                        {csvPreview.length > 0 && (
+                          <div className="space-y-4">
+                            <div className="text-sm font-medium">Preview ({csvPreview.length} books found):</div>
+                            <div className="max-h-40 overflow-y-auto border rounded p-2">
+                              {csvPreview.slice(0, 5).map((book: any, index) => (
+                                <div key={index} className="text-xs p-2 border-b last:border-b-0">
+                                  <strong>{book.Title}</strong> by {book.Author} - {book.Category} - ₹{book.Price}
+                                </div>
+                              ))}
+                              {csvPreview.length > 5 && (
+                                <div className="text-xs text-gray-500 p-2">
+                                  And {csvPreview.length - 5} more books...
+                                </div>
+                              )}
+                            </div>
+                            
+                            {isImporting && (
+                              <div className="space-y-2">
+                                <div className="text-sm">Importing books... {importProgress}%</div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div 
+                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                    style={{ width: `${importProgress}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                  setCsvFile(null);
+                                  setCsvPreview([]);
+                                }}
+                                disabled={isImporting}
+                              >
+                                Clear
+                              </Button>
+                              <Button 
+                                onClick={handleBulkImport}
+                                disabled={isImporting || csvPreview.length === 0}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {isImporting ? 'Importing...' : `Import ${csvPreview.length} Books`}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs text-gray-500 mt-4">
+                          <strong>Note:</strong> ISBN and Publisher fields will be auto-generated if not provided in CSV.
+                        </div>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </DialogContent>
               </Dialog>
             </div>
