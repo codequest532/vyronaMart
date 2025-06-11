@@ -125,7 +125,9 @@ export default function BookSellerDashboard() {
     copies: 1,
     language: "English",
     description: "",
-    imageUrl: ""
+    imageUrl: "",
+    salePrice: "",
+    rentPrice: ""
   });
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -239,34 +241,98 @@ export default function BookSellerDashboard() {
     setNewBook(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleAddBook = () => {
-    if (!newBook.title || !newBook.author || !newBook.category) {
+  // Add book mutation
+  const addBookMutation = useMutation({
+    mutationFn: async (bookData: any) => {
+      return await apiRequest("POST", "/api/products", bookData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Book Added",
+        description: "Book has been added to your library successfully.",
+      });
+      setShowAddBookDialog(false);
+      setNewBook({
+        title: "",
+        author: "",
+        isbn: "",
+        category: "",
+        publisher: "",
+        publicationYear: "",
+        copies: 1,
+        language: "English",
+        description: "",
+        imageUrl: "",
+        salePrice: "",
+        rentPrice: ""
+      });
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaread/seller-books"] });
+    },
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Failed to add book. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddBook = () => {
+    if (!newBook.title || !newBook.author || !newBook.category || !newBook.salePrice || !newBook.rentPrice) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields including sale price and rent price",
         variant: "destructive",
       });
       return;
     }
 
-    console.log("Adding book:", newBook);
-    toast({
-      title: "Book Added",
-      description: "Book has been added to your library successfully.",
-    });
-    setShowAddBookDialog(false);
-    setNewBook({
-      title: "",
-      author: "",
-      isbn: "",
-      category: "",
-      publisher: "",
-      publicationYear: "",
-      copies: 1,
-      language: "English",
-      description: "",
-      imageUrl: ""
-    });
+    // Convert prices to numbers and validate
+    const salePrice = parseFloat(newBook.salePrice);
+    const rentPrice = parseFloat(newBook.rentPrice);
+    
+    if (isNaN(salePrice) || salePrice <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid sale price",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (isNaN(rentPrice) || rentPrice <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid rent price",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prepare book data for API
+    const bookData = {
+      name: newBook.title,
+      description: newBook.description,
+      price: Math.round(salePrice * 100), // Convert to cents
+      category: "books",
+      module: "vyronaread",
+      imageUrl: newBook.imageUrl,
+      metadata: {
+        author: newBook.author,
+        isbn: newBook.isbn,
+        genre: newBook.category,
+        publisher: newBook.publisher,
+        publicationYear: newBook.publicationYear,
+        language: newBook.language,
+        copies: newBook.copies,
+        rentalPrice: rentPrice
+      }
+    };
+
+    console.log("Adding book:", bookData);
+    addBookMutation.mutate(bookData);
   };
 
   const handleSearchBooks = () => {
@@ -604,6 +670,32 @@ export default function BookSellerDashboard() {
                         onChange={(e) => handleInputChange("copies", parseInt(e.target.value) || 1)}
                         placeholder="1"
                         min="1"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="salePrice">Sale Price (₹) *</Label>
+                      <Input
+                        id="salePrice"
+                        type="number"
+                        value={newBook.salePrice}
+                        onChange={(e) => handleInputChange("salePrice", e.target.value)}
+                        placeholder="299"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="rentPrice">Rent Price (₹/month) *</Label>
+                      <Input
+                        id="rentPrice"
+                        type="number"
+                        value={newBook.rentPrice}
+                        onChange={(e) => handleInputChange("rentPrice", e.target.value)}
+                        placeholder="49"
+                        min="0"
+                        step="0.01"
                       />
                     </div>
                     
