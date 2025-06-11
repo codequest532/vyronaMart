@@ -189,13 +189,13 @@ export default function VyronaReadCheckout() {
         const buyPrice = (bookDetails.price || bookDetails.buyPrice || 29900); // Price already in paise
         return Math.floor(buyPrice / 100);
       case 'rent':
-        // New pricing structure: 7 days = 20%, 15 days = 40%, 30 days = 80%
+        // Dynamic rental pricing based on percentage of sale price (matching cart checkout)
         const bookPrice = (bookDetails.price || 29900); // Price already in paise
         const basePrice = Math.floor(bookPrice / 100); // Convert to rupees
         const days = parseInt(rentalDuration);
-        if (days <= 7) return Math.floor(basePrice * 0.2);
-        else if (days <= 15) return Math.floor(basePrice * 0.4);
-        else return Math.floor(basePrice * 0.8);
+        if (days <= 7) return Math.max(Math.floor(basePrice * 0.25), 49); // 7 days = 25%, minimum ₹49
+        else if (days <= 15) return Math.max(Math.floor(basePrice * 0.40), 89); // 15 days = 40%, minimum ₹89
+        else return Math.max(Math.floor(basePrice * 0.60), 149); // 30 days = 60%, minimum ₹149
       case 'borrow':
         // If user doesn't have membership, charge membership fee
         return hasMembership ? 0 : 2000; // ₹2000 annual membership
@@ -544,9 +544,9 @@ export default function VyronaReadCheckout() {
                               const bookPrice = item.book.price || 29900;
                               const basePrice = Math.floor(bookPrice / 100);
                               const days = itemRentalDurations[item.book.id] || 15;
-                              if (days === 7) return Math.floor(basePrice * 0.2);
-                              else if (days === 15) return Math.floor(basePrice * 0.4);
-                              else return Math.floor(basePrice * 0.8);
+                              if (days === 7) return Math.max(Math.floor(basePrice * 0.25), 49);
+                              else if (days === 15) return Math.max(Math.floor(basePrice * 0.40), 89);
+                              else return Math.max(Math.floor(basePrice * 0.60), 149);
                             })()}
                             {item.type === 'rent' && ` for ${itemRentalDurations[item.book.id] || 15} days`}
                           </span>
@@ -579,9 +579,9 @@ export default function VyronaReadCheckout() {
                                 const bookPrice = item.book.price || 29900;
                                 const basePrice = Math.floor(bookPrice / 100);
                                 const days = itemRentalDurations[item.book.id] || 15;
-                                if (days === 7) return Math.floor(basePrice * 0.2);
-                                else if (days === 15) return Math.floor(basePrice * 0.4);
-                                else return Math.floor(basePrice * 0.8);
+                                if (days === 7) return Math.max(Math.floor(basePrice * 0.25), 49);
+                                else if (days === 15) return Math.max(Math.floor(basePrice * 0.40), 89);
+                                else return Math.max(Math.floor(basePrice * 0.60), 149);
                               })()}
                             </p>
                           </div>
@@ -628,7 +628,7 @@ export default function VyronaReadCheckout() {
                         if (!bookDetails) return 0;
                         const price = bookDetails.price || 29900; // Price already in paise
                         const basePrice = Math.floor(price / 100); // Convert to rupees
-                        return Math.floor(basePrice * 0.2);
+                        return Math.max(Math.floor(basePrice * 0.25), 49);
                       })()}</Label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -637,7 +637,7 @@ export default function VyronaReadCheckout() {
                         if (!bookDetails) return 0;
                         const price = bookDetails.price || 29900; // Price already in paise
                         const basePrice = Math.floor(price / 100); // Convert to rupees
-                        return Math.floor(basePrice * 0.4);
+                        return Math.max(Math.floor(basePrice * 0.40), 89);
                       })()} (Recommended)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -646,7 +646,7 @@ export default function VyronaReadCheckout() {
                         if (!bookDetails) return 0;
                         const price = bookDetails.price || 29900; // Price already in paise
                         const basePrice = Math.floor(price / 100); // Convert to rupees
-                        return Math.floor(basePrice * 0.8);
+                        return Math.max(Math.floor(basePrice * 0.60), 149);
                       })()}</Label>
                     </div>
                   </RadioGroup>

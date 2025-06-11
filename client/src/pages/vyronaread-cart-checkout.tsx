@@ -82,17 +82,21 @@ export default function VyronaReadCartCheckout() {
       const price = item.book.price || 29900; // Price in paise
       return Math.floor(price / 100); // Convert to rupees
     } else {
-      // For rental, use fixed pricing based on duration
+      // For rental, calculate dynamically based on book's sale price
       const itemKey = `${item.book.id}-${item.type}`;
       const periods = rentalDurations[itemKey] || 1;
       
-      // Fixed pricing: 1 period (7 days) = ₹99, 2 periods (15 days) = ₹199, 3 periods (30 days) = ₹399
+      // Get book's sale price in rupees
+      const bookPrice = item.book.price ? Math.floor(item.book.price / 100) : 299;
+      
+      // Dynamic rental pricing based on percentage of sale price
+      // 7 days = 25% of sale price, 15 days = 40% of sale price, 30 days = 60% of sale price
       if (periods === 1) {
-        return 99; // 7 days
+        return Math.max(Math.floor(bookPrice * 0.25), 49); // 7 days, minimum ₹49
       } else if (periods === 2) {
-        return 199; // 15 days
+        return Math.max(Math.floor(bookPrice * 0.40), 89); // 15 days, minimum ₹89
       } else {
-        return 399; // 30 days
+        return Math.max(Math.floor(bookPrice * 0.60), 149); // 30 days, minimum ₹149
       }
     }
   };
