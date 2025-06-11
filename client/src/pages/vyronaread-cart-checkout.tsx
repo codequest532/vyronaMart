@@ -277,54 +277,7 @@ export default function VyronaReadCartCheckout() {
                       ₹{calculateItemPrice(item)}
                       {item.type === 'rent' && <span className="text-sm"> total</span>}
                     </div>
-                    {item.type === 'rent' && (
-                      <div className="mt-3">
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Rental Duration:
-                        </Label>
-                        <div className="flex flex-col gap-2">
-                          {[
-                            { periods: 1, days: 7, price: 99, label: "7 days" },
-                            { periods: 2, days: 15, price: 199, label: "15 days" },
-                            { periods: 3, days: 30, price: 399, label: "30 days" }
-                          ].map((option) => {
-                            const itemKey = `${item.book.id}-${item.type}`;
-                            const isSelected = (rentalDurations[itemKey] || 1) === option.periods;
-                            
-                            return (
-                              <div
-                                key={`rental-${option.periods}-${item.book.id}`}
-                                className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-all duration-200 ${
-                                  isSelected 
-                                    ? 'border-purple-500 bg-purple-50 shadow-sm' 
-                                    : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25'
-                                }`}
-                                onClick={() => updateRentalDuration(itemKey, option.periods)}
-                              >
-                                <div className="flex items-center">
-                                  <div
-                                    className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center transition-all ${
-                                      isSelected 
-                                        ? 'border-purple-500 bg-purple-500' 
-                                        : 'border-gray-300'
-                                    }`}
-                                  >
-                                    {isSelected && (
-                                      <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                                    )}
-                                  </div>
-                                  <span className="text-sm font-medium">{option.label}</span>
-                                </div>
-                                <span className="text-sm font-semibold text-purple-600">₹{option.price}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs text-gray-600 mt-1">
-                          Total: ₹{calculateItemPrice(item)}
-                        </p>
-                      </div>
-                    )}
+
                   </div>
                 </div>
               ))}
