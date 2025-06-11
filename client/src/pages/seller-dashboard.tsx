@@ -93,13 +93,15 @@ export default function SellerDashboard() {
     queryKey: ["/api/current-user"],
   });
 
-  // Redirect VyronaRead sellers to their specialized dashboard
+  // Redirect specialized sellers to their dedicated dashboards
   useEffect(() => {
     if (!userLoading && currentUser) {
       if (currentUser.role !== "seller") {
         setLocation("/login");
       } else if (currentUser.email === "seller@vyronaread.com") {
         setLocation("/vyronaread-seller-dashboard");
+      } else if (currentUser.email === "bookseller@vyronaread.com") {
+        setLocation("/book-seller-dashboard");
       }
     }
   }, [currentUser, userLoading, setLocation]);
@@ -116,8 +118,8 @@ export default function SellerDashboard() {
     return null;
   }
 
-  // Prevent VyronaRead sellers from accessing this dashboard
-  if (currentUser.email === "seller@vyronaread.com") {
+  // Prevent specialized sellers from accessing this dashboard
+  if (currentUser.email === "seller@vyronaread.com" || currentUser.email === "bookseller@vyronaread.com") {
     return null;
   }
   const [bookSection, setBookSection] = useState("overview");
