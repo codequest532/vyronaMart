@@ -2190,8 +2190,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Library Membership Payment' as payment_method,
           NULL as order_items
         FROM notifications n
+        LEFT JOIN library_integration_requests l ON l.id = n.user_id
         WHERE n.type = 'library_membership_request'
-          AND (n.user_id = ${sellerId} OR ${authenticatedUser.role === 'admin'})
+          AND (l.seller_id = ${sellerId} OR ${authenticatedUser.role === 'admin'})
         
         ORDER BY created_at DESC
         LIMIT 50
