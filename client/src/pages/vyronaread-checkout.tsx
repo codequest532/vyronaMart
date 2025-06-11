@@ -87,6 +87,7 @@ export default function VyronaReadCheckout() {
           });
           setItemRentalDurations(initialDurations);
         }
+        setLoading(false);
         return;
       }
       
@@ -396,6 +397,8 @@ export default function VyronaReadCheckout() {
         return "Book purchased successfully! You now have lifetime access.";
       case 'rent':
         return `Book rented successfully for ${rentalDuration} days!`;
+      case 'cart':
+        return "Cart checkout completed successfully! Your orders have been processed.";
       case 'borrow':
         return "Borrow request submitted successfully! Please wait for library approval.";
       default:
@@ -547,7 +550,7 @@ export default function VyronaReadCheckout() {
                     <BookOpen className="text-purple-600 h-8 w-8" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg">{bookDetails?.title || bookDetails?.name}</h3>
+                    <h3 className="font-bold text-lg">{bookDetails?.title || bookDetails?.name || "Book"}</h3>
                     <p className="text-gray-600 mb-2">by {bookDetails?.metadata?.author || bookDetails?.author || "Unknown Author"}</p>
                     {(bookDetails?.metadata?.isbn || bookDetails?.isbn) && (
                       <p className="text-sm text-gray-500">ISBN: {bookDetails?.metadata?.isbn || bookDetails?.isbn}</p>
