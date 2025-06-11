@@ -1417,44 +1417,58 @@ export default function BookSellerDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingCart className="h-5 w-5" />
-                    VyronaRead Order Management
+                    Order Management
                   </CardTitle>
-                  <CardDescription>Manage book rentals, library loans, and e-book purchases</CardDescription>
+                  <CardDescription>Manage book rentals, library loans, membership requests, and e-book purchases</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {(() => {
-                    const vyronareadOrders = sellerOrders?.filter((order: any) => order.module === 'vyronaread') || [];
+                    const allOrders = sellerOrders?.filter((order: any) => 
+                      order.module === 'vyronaread' || order.module === 'library_membership'
+                    ) || [];
                     
-                    if (vyronareadOrders.length === 0) {
+                    if (allOrders.length === 0) {
                       return (
                         <div className="text-center py-12">
                           <ShoppingCart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                          <h3 className="text-xl font-semibold text-gray-600 mb-2">No Book Orders Yet</h3>
-                          <p className="text-gray-500">VyronaRead orders will appear here once customers start using your library</p>
+                          <h3 className="text-xl font-semibold text-gray-600 mb-2">No Orders Yet</h3>
+                          <p className="text-gray-500">Library membership requests and book orders will appear here</p>
                         </div>
                       );
                     }
 
                     return (
                       <div className="space-y-4">
-                        {vyronareadOrders.map((order: any) => (
-                          <div key={order.id} className="border rounded-lg p-4 space-y-3">
+                        {allOrders.map((order: any) => (
+                          <div key={order.order_id} className="border rounded-lg p-4 space-y-3">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
                                 <div>
-                                  <p className="font-medium">Order #{order.id}</p>
+                                  <p className="font-medium">Order #{order.order_id}</p>
                                   <p className="text-sm text-gray-600">
                                     {order.customer_name || 'Customer'} • {order.customer_email}
                                   </p>
+                                  {order.customer_phone && (
+                                    <p className="text-xs text-gray-500">
+                                      Phone: {order.customer_phone}
+                                    </p>
+                                  )}
                                 </div>
-                                <Badge variant="outline" className="border-blue-500 text-blue-700">
-                                  VyronaRead
+                                <Badge variant="outline" className={
+                                  order.module === 'library_membership' 
+                                    ? "border-green-500 text-green-700" 
+                                    : "border-blue-500 text-blue-700"
+                                }>
+                                  {order.module === 'library_membership' ? 'Library Membership' : 'VyronaRead'}
                                 </Badge>
                               </div>
                               <div className="text-right">
                                 <p className="font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
                                 <p className="text-sm text-gray-500">
                                   {new Date(order.created_at).toLocaleDateString()}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Status: {order.order_status || 'Pending'}
                                 </p>
                               </div>
                             </div>
