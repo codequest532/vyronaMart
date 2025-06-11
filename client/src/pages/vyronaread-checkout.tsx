@@ -564,8 +564,8 @@ export default function VyronaReadCheckout() {
             </CardContent>
           </Card>
 
-          {/* Rental Duration (for rent only) */}
-          {checkoutType === 'rent' && (
+          {/* Rental Duration */}
+          {(checkoutType === 'rent' || (checkoutType === 'cart' && cartItems.some(item => item.type === 'rent'))) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -574,34 +574,132 @@ export default function VyronaReadCheckout() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={rentalDuration} onValueChange={setRentalDuration}>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="15" id="15days" />
-                    <Label htmlFor="15days">15 days - ₹{(() => {
-                      if (!bookDetails) return 0;
-                      const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
-                      const dailyRate = monthlyRentPrice / 30;
-                      return Math.round(dailyRate * 15);
-                    })()} (Recommended)</Label>
+                {checkoutType === 'rent' ? (
+                  <RadioGroup value={rentalDuration} onValueChange={setRentalDuration}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="15" id="15days" />
+                      <Label htmlFor="15days">1 period (15 days) - ₹{(() => {
+                        if (!bookDetails) return 0;
+                        return Math.floor((bookDetails.price || 299) * 0.1);
+                      })()} (Recommended)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="30" id="30days" />
+                      <Label htmlFor="30days">2 periods (30 days) - ₹{(() => {
+                        if (!bookDetails) return 0;
+                        return Math.floor((bookDetails.price || 299) * 0.1) * 2;
+                      })()}</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="45" id="45days" />
+                      <Label htmlFor="45days">3 periods (45 days) - ₹{(() => {
+                        if (!bookDetails) return 0;
+                        return Math.floor((bookDetails.price || 299) * 0.1) * 3;
+                      })()}</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="60" id="60days" />
+                      <Label htmlFor="60days">4 periods (60 days) - ₹{(() => {
+                        if (!bookDetails) return 0;
+                        return Math.floor((bookDetails.price || 299) * 0.1) * 4;
+                      })()}</Label>
+                    </div>
+                  </RadioGroup>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">Rental durations are set individually for each item above.</p>
+                    {cartItems.filter(item => item.type === 'rent').map((item, index) => (
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <span className="font-medium">{item.book.title || item.book.name}</span>
+                        <span className="text-sm text-gray-600">
+                          {itemRentalDurations[item.book.id] || 1} period{(itemRentalDurations[item.book.id] || 1) > 1 ? 's' : ''} 
+                          ({(itemRentalDurations[item.book.id] || 1) * 15} days)
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="30" id="30days" />
-                    <Label htmlFor="30days">30 days - ₹{(() => {
-                      if (!bookDetails) return 0;
-                      const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
-                      return Math.round(monthlyRentPrice);
-                    })()}</Label>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Shipping Address */}
+          {(checkoutType === 'buy' || checkoutType === 'rent' || checkoutType === 'cart') && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Shipping Address
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="fullName">Full Name *</Label>
+                    <Input
+                      id="fullName"
+                      value={shippingAddress.fullName}
+                      onChange={(e) => handleShippingAddressChange('fullName', e.target.value)}
+                      placeholder="Enter your full name"
+                    />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="60" id="60days" />
-                    <Label htmlFor="60days">60 days - ₹{(() => {
-                      if (!bookDetails) return 0;
-                      const monthlyRentPrice = bookDetails.metadata?.rentalPrice || bookDetails.rentPrice || 0;
-                      const dailyRate = monthlyRentPrice / 30;
-                      return Math.round(dailyRate * 60);
-                    })()}</Label>
+                  <div>
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      value={shippingAddress.phone}
+                      onChange={(e) => handleShippingAddressChange('phone', e.target.value)}
+                      placeholder="Enter your phone number"
+                    />
                   </div>
-                </RadioGroup>
+                </div>
+                <div>
+                  <Label htmlFor="addressLine1">Address Line 1 *</Label>
+                  <Input
+                    id="addressLine1"
+                    value={shippingAddress.addressLine1}
+                    onChange={(e) => handleShippingAddressChange('addressLine1', e.target.value)}
+                    placeholder="House/Flat number, Building name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="addressLine2">Address Line 2</Label>
+                  <Input
+                    id="addressLine2"
+                    value={shippingAddress.addressLine2}
+                    onChange={(e) => handleShippingAddressChange('addressLine2', e.target.value)}
+                    placeholder="Street name, Area"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                      id="city"
+                      value={shippingAddress.city}
+                      onChange={(e) => handleShippingAddressChange('city', e.target.value)}
+                      placeholder="Enter city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State *</Label>
+                    <Input
+                      id="state"
+                      value={shippingAddress.state}
+                      onChange={(e) => handleShippingAddressChange('state', e.target.value)}
+                      placeholder="Enter state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pincode">PIN Code *</Label>
+                    <Input
+                      id="pincode"
+                      value={shippingAddress.pincode}
+                      onChange={(e) => handleShippingAddressChange('pincode', e.target.value)}
+                      placeholder="Enter PIN code"
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -763,8 +861,8 @@ export default function VyronaReadCheckout() {
             </Card>
           )}
 
-          {/* Payment Method (for buy/rent only) */}
-          {(checkoutType === 'buy' || checkoutType === 'rent') && (
+          {/* Payment Method */}
+          {(checkoutType === 'buy' || checkoutType === 'rent' || checkoutType === 'cart') && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
