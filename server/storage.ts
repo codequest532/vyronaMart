@@ -1454,7 +1454,7 @@ export class DatabaseStorage implements IStorage {
           author: csvBook["Author"] || csvBook.author || "Unknown Author", 
           isbn: csvBook["ISBN Number"] || csvBook.isbn || "",
           imageUrl: csvBook["Book Image"] || csvBook.bookImage || "", // Map Book Image to imageUrl
-          genre: csvBook["Genre"] || csvBook.genre || "General", // Now from CSV
+          category: csvBook["Genre"] || csvBook.genre || "General", // Map Genre to category field
           condition: "New",
           price: 0, // Default price for library books
           availability: "Available",
