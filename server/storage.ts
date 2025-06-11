@@ -1450,20 +1450,20 @@ export class DatabaseStorage implements IStorage {
       // Create physical books from CSV data
       for (const csvBook of libraryData.booksListCsv) {
         const physicalBook = {
-          title: csvBook.bookName || "Unknown Title",
-          author: csvBook.author || "Unknown Author",
-          isbn: csvBook.isbn || "",
+          title: csvBook["Book Name"] || csvBook.bookName || "Unknown Title",
+          author: csvBook["Author"] || csvBook.author || "Unknown Author", 
+          isbn: csvBook["ISBN Number"] || csvBook.isbn || "",
           genre: "General", // Default genre since not in CSV
           condition: "New",
           price: 0, // Default price for library books
           availability: "Available",
           libraryId: requestId,
           publisher: "Unknown Publisher",
-          publicationYear: parseInt(csvBook.yearOfPublish) || new Date().getFullYear(),
+          publicationYear: parseInt(csvBook["Year of Publishing"] || csvBook.yearOfPublish) || new Date().getFullYear(),
           language: "English",
           pages: 200, // Default page count
           isAvailable: true,
-          edition: csvBook.edition || "1st Edition"
+          edition: csvBook["Edition"] || csvBook.edition || "1st Edition"
         };
 
         try {
