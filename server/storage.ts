@@ -1449,8 +1449,6 @@ export class DatabaseStorage implements IStorage {
       
       // Create physical books from CSV data
       for (const csvBook of libraryData.booksListCsv) {
-        console.log('Processing CSV book data:', JSON.stringify(csvBook, null, 2));
-        
         const physicalBook = {
           title: csvBook["Book Name"] || csvBook.bookName || "Unknown Title",
           author: csvBook["Author"] || csvBook.author || "Unknown Author", 
@@ -1467,8 +1465,6 @@ export class DatabaseStorage implements IStorage {
           pages: 200, // Default page count
           isAvailable: true
         };
-        
-        console.log('Mapped physical book:', JSON.stringify(physicalBook, null, 2));
 
         try {
           await this.createPhysicalBook(physicalBook);
