@@ -2192,6 +2192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         FROM notifications n
         LEFT JOIN library_integration_requests l ON l.id = n.user_id
         WHERE n.type = 'library_membership_request'
+          AND n.metadata->>'fullName' IS NOT NULL
           AND (l.seller_id = ${sellerId} OR ${authenticatedUser.role === 'admin'})
         
         ORDER BY created_at DESC
