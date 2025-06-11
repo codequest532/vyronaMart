@@ -40,7 +40,8 @@ import {
   FileText,
   Library,
   Building,
-  Edit
+  Edit,
+  X
 } from "lucide-react";
 
 // Google Drive URL conversion function
