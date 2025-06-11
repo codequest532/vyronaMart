@@ -124,34 +124,11 @@ export default function BookSellerDashboard() {
     file: null as File | null
   });
 
-  // Get current user for authentication check
+  // All useQuery hooks must be at top level before any conditional logic
   const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ["/api/current-user"],
   });
 
-  // Redirect non-book sellers
-  useEffect(() => {
-    if (!userLoading && currentUser) {
-      if (currentUser.role !== "seller") {
-        setLocation("/login");
-      } else if (currentUser.email !== "bookseller@vyronaread.com") {
-        setLocation("/seller-dashboard");
-      }
-    }
-  }, [currentUser, userLoading, setLocation]);
-
-  if (userLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Fetch book seller data
   const { data: sellerBooks } = useQuery({
     queryKey: ["/api/vyronaread/seller-books"],
   });
@@ -176,7 +153,7 @@ export default function BookSellerDashboard() {
     queryKey: ["/api/seller/analytics"],
   });
 
-  // Library integration request mutation
+  // All useMutation hooks must also be at top level
   const createLibraryRequestMutation = useMutation({
     mutationFn: async (libraryData: any) => {
       return await apiRequest("POST", "/api/library-integration-requests", libraryData);
@@ -208,40 +185,7 @@ export default function BookSellerDashboard() {
     },
   });
 
-  const handleAddLibrary = () => {
-    setShowAddLibraryDialog(true);
-  };
-
-  const handleSubmitLibrary = () => {
-    if (!newLibrary.name || !newLibrary.type || !newLibrary.address || !newLibrary.contact) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Map frontend field names to backend field names
-    const libraryData = {
-      libraryName: newLibrary.name,
-      libraryType: newLibrary.type,
-      address: newLibrary.address,
-      contactPerson: newLibrary.contact,
-      phone: newLibrary.phone,
-      email: newLibrary.email,
-      description: newLibrary.description,
-      booksListCsv: csvBooksList.length > 0 ? csvBooksList : null
-    };
-
-    createLibraryRequestMutation.mutate(libraryData);
-  };
-
-  const handleInputChange = (field: string, value: any) => {
-    setNewBook(prev => ({ ...prev, [field]: value }));
-  };
-
-  // Add book mutation
+  // Add book mutation - move to top level
   const addBookMutation = useMutation({
     mutationFn: async (bookData: any) => {
       return await apiRequest("POST", "/api/products", bookData);
@@ -278,6 +222,63 @@ export default function BookSellerDashboard() {
       });
     },
   });
+
+  // Authentication logic after all hooks
+  useEffect(() => {
+    if (!userLoading && currentUser) {
+      if (currentUser.role !== "seller") {
+        setLocation("/login");
+      } else if (currentUser.email !== "bookseller@vyronaread.com") {
+        setLocation("/seller-dashboard");
+      }
+    }
+  }, [currentUser, userLoading, setLocation]);
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleAddLibrary = () => {
+    setShowAddLibraryDialog(true);
+  };
+
+  const handleSubmitLibrary = () => {
+    if (!newLibrary.name || !newLibrary.type || !newLibrary.address || !newLibrary.contact) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Map frontend field names to backend field names
+    const libraryData = {
+      libraryName: newLibrary.name,
+      libraryType: newLibrary.type,
+      address: newLibrary.address,
+      contactPerson: newLibrary.contact,
+      phone: newLibrary.phone,
+      email: newLibrary.email,
+      description: newLibrary.description,
+      booksListCsv: csvBooksList.length > 0 ? csvBooksList : null
+    };
+
+    createLibraryRequestMutation.mutate(libraryData);
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    setNewBook(prev => ({ ...prev, [field]: value }));
+  };
+
+
 
   const handleAddBook = () => {
     if (!newBook.title || !newBook.author || !newBook.category || !newBook.salePrice || !newBook.rentPrice) {
