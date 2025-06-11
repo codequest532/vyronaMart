@@ -372,6 +372,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "VyronaRead seller login successful"
         });
       }
+
+      // Check Book Seller credentials
+      if (email === "bookseller@vyronaread.com" && password === "demo123") {
+        // Create or get existing Book Seller account
+        const existingBookSellers = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, 'bookseller@vyronaread.com'))
+          .limit(1);
+        
+        let bookSellerId;
+        if (existingBookSellers.length === 0) {
+          // Create demo Book Seller account
+          const newBookSeller = await db
+            .insert(users)
+            .values({
+              username: 'VyronaRead Book Specialist',
+              email: 'bookseller@vyronaread.com',
+              mobile: '+91-9876543212',
+              role: 'seller',
+              password: 'demo123'
+            })
+            .returning({ id: users.id });
+          
+          bookSellerId = newBookSeller[0].id;
+          
+          // Create demo book seller data
+          await createDemoReadSellerData(bookSellerId);
+        } else {
+          bookSellerId = existingBookSellers[0].id;
+        }
+        
+        req.session.user = {
+          id: bookSellerId,
+          email: 'bookseller@vyronaread.com',
+          username: 'VyronaRead Book Specialist',
+          role: 'seller'
+        };
+        
+        // Always ensure demo data exists for Book Seller
+        await createDemoReadSellerData(bookSellerId);
+        
+        return res.json({
+          success: true,
+          user: req.session.user,
+          message: "Book seller login successful"
+        });
+      }
       
       // Check admin credentials
       if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
