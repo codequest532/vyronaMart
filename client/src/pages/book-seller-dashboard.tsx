@@ -2323,20 +2323,50 @@ export default function BookSellerDashboard() {
                             <div className="bg-white p-4 rounded border">
                               <div className="flex justify-between items-start">
                                 <div className="space-y-2">
-                                  <p className="font-medium text-gray-900">
-                                    {selectedOrder.metadata?.bookTitle || 'General Library Access'}
-                                  </p>
-                                  <p className="text-sm text-gray-600">
-                                    Customer: {selectedOrder.metadata?.fullName || selectedOrder.customer_name || 'N/A'}
-                                  </p>
-                                  <p className="text-sm text-gray-600">
-                                    Email: {selectedOrder.metadata?.email || selectedOrder.customer_email || 'N/A'}
-                                  </p>
-                                  {selectedOrder.metadata?.phone && (
-                                    <p className="text-sm text-gray-600">
-                                      Phone: {selectedOrder.metadata.phone}
-                                    </p>
+                                  {selectedOrder.metadata?.bookTitle && selectedOrder.metadata.bookTitle !== 'Unknown Book' ? (
+                                    <div className="border-l-4 border-blue-500 pl-4 mb-4">
+                                      <p className="font-semibold text-gray-900 text-lg">Book Requested for Borrowing:</p>
+                                      <p className="font-medium text-blue-900 text-xl">{selectedOrder.metadata.bookTitle}</p>
+                                      {selectedOrder.metadata?.bookId && (
+                                        <p className="text-sm text-gray-600">Book ID: {selectedOrder.metadata.bookId}</p>
+                                      )}
+                                      <div className="mt-2 p-2 bg-blue-50 rounded">
+                                        <p className="text-sm text-blue-800">
+                                          <strong>Action Required:</strong> Prepare this book for customer collection after membership activation
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="border-l-4 border-gray-400 pl-4 mb-4">
+                                      <p className="font-medium text-gray-900">General Library Access</p>
+                                      <p className="text-sm text-gray-600">No specific book requested - general membership</p>
+                                    </div>
                                   )}
+                                  
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                                    <div>
+                                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Customer Name</label>
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {selectedOrder.metadata?.fullName || selectedOrder.customer_name || 'N/A'}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Email</label>
+                                      <p className="text-sm text-gray-900">
+                                        {selectedOrder.metadata?.email || selectedOrder.customer_email || 'N/A'}
+                                      </p>
+                                    </div>
+                                    {selectedOrder.metadata?.phone && (
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Phone</label>
+                                        <p className="text-sm text-gray-900">{selectedOrder.metadata.phone}</p>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Order Date</label>
+                                      <p className="text-sm text-gray-900">{new Date(selectedOrder.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                  </div>
                                   <div className="mt-3 p-2 bg-gray-50 rounded text-sm">
                                     <p><strong>Library Access Details:</strong></p>
                                     <p>• Annual membership: ₹{selectedOrder.metadata?.membershipFee || 2000}</p>
