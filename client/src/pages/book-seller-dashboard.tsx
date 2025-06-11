@@ -76,34 +76,7 @@ export default function BookSellerDashboard() {
   const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-
-  // Get current user for authentication check
-  const { data: currentUser, isLoading: userLoading } = useQuery({
-    queryKey: ["/api/current-user"],
-  });
-
-  // Redirect non-book sellers
-  useEffect(() => {
-    if (!userLoading && currentUser) {
-      if (currentUser.role !== "seller") {
-        setLocation("/login");
-      } else if (currentUser.email !== "bookseller@vyronaread.com") {
-        setLocation("/seller-dashboard");
-      }
-    }
-  }, [currentUser, userLoading, setLocation]);
-
-  if (userLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Move all useState hooks to the top before any conditional logic
   const [newLibrary, setNewLibrary] = useState({
     name: "",
     type: "",
@@ -150,6 +123,33 @@ export default function BookSellerDashboard() {
     price: 0,
     file: null as File | null
   });
+
+  // Get current user for authentication check
+  const { data: currentUser, isLoading: userLoading } = useQuery({
+    queryKey: ["/api/current-user"],
+  });
+
+  // Redirect non-book sellers
+  useEffect(() => {
+    if (!userLoading && currentUser) {
+      if (currentUser.role !== "seller") {
+        setLocation("/login");
+      } else if (currentUser.email !== "bookseller@vyronaread.com") {
+        setLocation("/seller-dashboard");
+      }
+    }
+  }, [currentUser, userLoading, setLocation]);
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch book seller data
   const { data: sellerBooks } = useQuery({
@@ -382,27 +382,65 @@ export default function BookSellerDashboard() {
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const lines = text.split('\n');
-      const headers = lines[0].split(',').map(h => h.trim());
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9]/g, ''));
       
-      // For the provided CSV format: Book Name,Author,ISBN Number,Year of Publishing,Genre,Publisher,Language,Book Image
+      console.log('CSV Headers:', headers);
+      
       const books = [];
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        if (values.length >= 8 && values[0]) { // At least 8 columns and first column not empty
-          const book = {
-            'Title': values[0],
-            'Author': values[1],
-            'ISBN': values[2],
-            'Year': values[3],
-            'Category': values[4],
-            'Publisher': values[5],
-            'Language': values[6],
-            'Image URL': values[7],
-            'Price': '299', // Default price
-            'Rental Price': '49', // Default rental price
-            'Copies': '5', // Default copies
-            'Description': `${values[4]} book by ${values[1]}` // Auto-generated description
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        // Parse CSV line properly handling quoted fields
+        for (let j = 0; j < line.length; j++) {
+          const char = line[j];
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            values.push(current.trim().replace(/"/g, ''));
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        values.push(current.trim().replace(/"/g, ''));
+        
+        if (values.length > 0 && values[0]) {
+          // Map common header variations to standard names
+          const getValueByHeader = (possibleNames: string[]) => {
+            for (const name of possibleNames) {
+              const index = headers.findIndex(h => h.includes(name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+              if (index !== -1 && values[index]) {
+                return values[index];
+              }
+            }
+            return '';
           };
+          
+          const book = {
+            'Title': getValueByHeader(['bookname', 'title', 'name']) || values[0],
+            'Author': getValueByHeader(['author']) || values[1] || 'Unknown Author',
+            'ISBN': getValueByHeader(['isbn', 'isbnnumber']) || values[2] || '',
+            'Year': getValueByHeader(['year', 'yearofpublishing', 'publicationyear']) || values[3] || new Date().getFullYear().toString(),
+            'Category': getValueByHeader(['genre', 'category']) || values[4] || 'General',
+            'Publisher': getValueByHeader(['publisher']) || values[5] || 'Unknown Publisher',
+            'Language': getValueByHeader(['language']) || values[6] || 'English',
+            'Image URL': getValueByHeader(['bookimage', 'imageurl', 'image']) || values[7] || '',
+            'Price': getValueByHeader(['price', 'saleprice', 'cost']) || getValueByHeader(['price']) || '299',
+            'Rental Price': getValueByHeader(['rentalprice', 'rentprice', 'rent']) || '49',
+            'Copies': getValueByHeader(['copies', 'quantity', 'stock']) || '5',
+            'Description': getValueByHeader(['description', 'desc']) || `${getValueByHeader(['genre', 'category']) || 'General'} book by ${getValueByHeader(['author']) || values[1] || 'Unknown Author'}`
+          };
+          
+          // Clean up price values - remove currency symbols and parse as numbers
+          book['Price'] = book['Price'].replace(/[₹$£€,]/g, '').trim() || '299';
+          book['Rental Price'] = book['Rental Price'].replace(/[₹$£€,]/g, '').trim() || '49';
+          book['Copies'] = book['Copies'].replace(/[^0-9]/g, '') || '5';
+          
           books.push(book);
         }
       }
@@ -410,7 +448,7 @@ export default function BookSellerDashboard() {
       setCsvPreview(books);
       toast({
         title: "CSV Parsed Successfully",
-        description: `Found ${books.length} books to import`,
+        description: `Found ${books.length} books to import with prices`,
       });
     };
     reader.readAsText(file);
@@ -797,8 +835,28 @@ export default function BookSellerDashboard() {
                     
                     <TabsContent value="bulk" className="space-y-4">
                       <div className="space-y-4">
-                        <div className="text-sm text-gray-600">
-                          Upload a CSV file with the following columns: Title, Author, Category, Description, Price, Rental Price, Image URL, Copies, Language
+                        <div className="space-y-2">
+                          <div className="text-sm font-medium text-gray-700">CSV Format Guide:</div>
+                          <div className="text-xs text-gray-600 bg-gray-50 p-3 rounded border">
+                            <div className="font-medium mb-2">Supported columns (flexible headers):</div>
+                            <div className="grid grid-cols-2 gap-1 text-xs">
+                              <div>• <strong>Title/Book Name</strong> (required)</div>
+                              <div>• <strong>Author</strong> (required)</div>
+                              <div>• <strong>Price/Sale Price</strong> (₹299)</div>
+                              <div>• <strong>Rental Price/Rent</strong> (₹49)</div>
+                              <div>• <strong>Category/Genre</strong></div>
+                              <div>• <strong>Copies/Quantity</strong></div>
+                              <div>• <strong>ISBN/ISBN Number</strong></div>
+                              <div>• <strong>Publisher</strong></div>
+                              <div>• <strong>Language</strong></div>
+                              <div>• <strong>Image URL/Book Image</strong></div>
+                              <div>• <strong>Year/Publication Year</strong></div>
+                              <div>• <strong>Description</strong></div>
+                            </div>
+                            <div className="mt-2 text-xs text-blue-600">
+                              Note: Prices can include currency symbols (₹, $) - they will be automatically cleaned
+                            </div>
+                          </div>
                         </div>
                         
                         <div className="space-y-2">
