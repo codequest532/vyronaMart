@@ -729,10 +729,6 @@ export default function BookSellerDashboard() {
                         <Plus className="h-4 w-4 mr-2" />
                         Add Library Partnership
                       </Button>
-                      <Button variant="outline">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Bulk Import Books
-                      </Button>
                     </div>
                     
                     {libraryBooks && libraryBooks.length > 0 ? (
