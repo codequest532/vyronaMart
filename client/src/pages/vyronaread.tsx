@@ -61,7 +61,7 @@ function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; li
     const params = new URLSearchParams({
       type: 'borrow',
       bookId: book.id.toString(),
-      bookName: encodeURIComponent(book.name || book.title || 'Unknown Title'),
+      bookName: encodeURIComponent(book.title || book.name || 'Unknown Title'),
       author: encodeURIComponent(book.author || 'Unknown Author')
     });
     setLocation(`/vyronaread-checkout?${params.toString()}`);
@@ -101,7 +101,7 @@ function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; li
                   <BookOpen className="h-8 w-8 text-green-600" />
                 )}
               </div>
-              <h6 className="font-medium text-sm text-gray-900 mb-1 truncate">{book.name || book.title}</h6>
+              <h6 className="font-medium text-sm text-gray-900 mb-1 truncate">{book.title || book.name}</h6>
               <p className="text-xs text-gray-500 mb-2 truncate">by {book.author || "Unknown Author"}</p>
               <Button 
                 size="sm" 
