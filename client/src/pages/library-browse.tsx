@@ -24,6 +24,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
+// Google Drive URL conversion function
+function convertGoogleDriveUrl(url: string): string {
+  if (!url || !url.includes('drive.google.com')) return url;
+  
+  const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileIdMatch) {
+    return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
+  }
+  return url;
+}
+
 // Format price in Indian Rupees
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('en-IN', {
@@ -323,13 +334,7 @@ export default function LibraryBrowse() {
                     <div className="aspect-[3/4] bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 flex items-center justify-center relative">
                       {book.imageUrl ? (
                         <img 
-                          src={(() => {
-                            if (book.imageUrl.includes('drive.google.com/file/d/')) {
-                              const fileId = book.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-                              return fileId ? `https://drive.google.com/uc?id=${fileId}` : book.imageUrl;
-                            }
-                            return book.imageUrl;
-                          })()} 
+                          src={convertGoogleDriveUrl(book.imageUrl)} 
                           alt={book.title}
                           className="w-full h-full object-cover rounded-lg"
                           onError={(e) => {

@@ -43,6 +43,17 @@ import {
   Edit
 } from "lucide-react";
 
+// Google Drive URL conversion function
+function convertGoogleDriveUrl(url: string): string {
+  if (!url || !url.includes('drive.google.com')) return url;
+  
+  const fileIdMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (fileIdMatch) {
+    return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
+  }
+  return url;
+}
+
 // Component to display featured books from a specific library
 function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; libraryName: string }) {
   const [location, setLocation] = useLocation();
@@ -93,7 +104,7 @@ function LibraryBooksSection({ libraryId, libraryName }: { libraryId: number; li
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 mb-2 h-32 flex items-center justify-center group-hover:shadow-md transition-shadow">
                 {book.imageUrl ? (
                   <img 
-                    src={book.imageUrl} 
+                    src={convertGoogleDriveUrl(book.imageUrl)} 
                     alt={book.name || book.title}
                     className="w-full h-full object-cover rounded"
                   />
@@ -513,13 +524,7 @@ export default function VyronaRead() {
                       <div className="absolute inset-0 bg-black/20"></div>
                       {book.imageUrl ? (
                         <img 
-                          src={(() => {
-                            if (book.imageUrl.includes('drive.google.com/file/d/')) {
-                              const fileId = book.imageUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)?.[1];
-                              return fileId ? `https://drive.google.com/uc?id=${fileId}` : book.imageUrl;
-                            }
-                            return book.imageUrl;
-                          })()} 
+                          src={convertGoogleDriveUrl(book.imageUrl)} 
                           alt={book.name || book.title}
                           className="w-full h-full object-cover"
                           onError={(e) => {
