@@ -527,12 +527,11 @@ export default function VyronaRead() {
   });
 
   const { data: sellerBooks = [] } = useQuery({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/products", "vyronaread", "books"],
+    queryFn: () => apiRequest("GET", "/api/products?module=vyronaread&category=books"),
     select: (data) => {
-      // Filter to only show VyronaRead books (products with module: "vyronaread" and category: "books")
-      return Array.isArray(data) ? data.filter((product: any) => 
-        product.module === "vyronaread" && product.category === "books"
-      ).map((product: any) => ({
+      // Transform the already filtered VyronaRead books data
+      return Array.isArray(data) ? data.map((product: any) => ({
         id: product.id,
         name: product.name,
         title: product.name, // Map name to title for consistency

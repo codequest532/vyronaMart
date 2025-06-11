@@ -88,7 +88,8 @@ export default function VyronaHub() {
   });
 
   const { data: products = [], isLoading } = useQuery({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/products", "vyronahub"],
+    queryFn: () => apiRequest("GET", "/api/products?module=vyronahub"),
   });
 
   const { data: groupBuyProducts = [] } = useQuery({
