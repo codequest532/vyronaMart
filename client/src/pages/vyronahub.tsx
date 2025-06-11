@@ -55,11 +55,12 @@ export default function VyronaHub() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   
   // Cart query for item count
-  const { data: cartItems = [] } = useQuery({
+  const { data: rawCartItems = [] } = useQuery({
     queryKey: ["/api/cart"],
     retry: false,
   });
   
+  const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
   const cartItemCount = cartItems.length;
 
   const { data: user } = useQuery({
@@ -87,18 +88,23 @@ export default function VyronaHub() {
     },
   });
 
-  const { data: products = [], isLoading } = useQuery({
+  const { data: rawProducts = [], isLoading } = useQuery({
     queryKey: ["/api/products", "vyronahub"],
     queryFn: () => apiRequest("GET", "/api/products?module=vyronahub"),
   });
 
-  const { data: groupBuyProducts = [] } = useQuery({
+  const { data: rawGroupBuyProducts = [] } = useQuery({
     queryKey: ["/api/group-buy/products"],
   });
 
-  const { data: groupBuyCampaigns = [] } = useQuery({
+  const { data: rawGroupBuyCampaigns = [] } = useQuery({
     queryKey: ["/api/group-buy/campaigns"],
   });
+
+  // Ensure all data is always an array
+  const products = Array.isArray(rawProducts) ? rawProducts : [];
+  const groupBuyProducts = Array.isArray(rawGroupBuyProducts) ? rawGroupBuyProducts : [];
+  const groupBuyCampaigns = Array.isArray(rawGroupBuyCampaigns) ? rawGroupBuyCampaigns : [];
 
   const handleAddToCart = (product: any, isGroupBuy = false) => {
     addToCartMutation.mutate({
@@ -110,9 +116,7 @@ export default function VyronaHub() {
     setIsProductModalOpen(false);
   };
 
-
-
-  const filteredProducts = (products as any[])
+  const filteredProducts = products
     .filter((product: any) => {
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
