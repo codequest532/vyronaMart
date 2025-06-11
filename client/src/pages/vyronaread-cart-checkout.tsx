@@ -306,11 +306,14 @@ export default function VyronaReadCartCheckout() {
                       <h4 className="font-medium text-gray-900">{item.book.name || item.book.title}</h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {[
-                          { periods: 1, days: '7 days', price: 99 },
-                          { periods: 2, days: '15 days', price: 199 },
-                          { periods: 3, days: '30 days', price: 399 }
-                        ].map(({ periods, days, price }) => (
-                          <label
+                          { periods: 1, days: '7 days', percentage: 0.20 },
+                          { periods: 2, days: '15 days', percentage: 0.40 },
+                          { periods: 3, days: '30 days', percentage: 0.80 }
+                        ].map(({ periods, days, percentage }) => {
+                          const bookPrice = item.book.price ? Math.floor(item.book.price / 100) : 299;
+                          const dynamicPrice = Math.max(Math.floor(bookPrice * percentage), periods === 1 ? 49 : periods === 2 ? 89 : 149);
+                          return (
+                            <label
                             key={periods}
                             className={`relative flex cursor-pointer rounded-lg border p-4 focus:outline-none ${
                               selectedPeriod === periods
@@ -338,7 +341,7 @@ export default function VyronaReadCartCheckout() {
                                     {days}
                                   </div>
                                   <div className={`${selectedPeriod === periods ? 'text-purple-700' : 'text-gray-500'}`}>
-                                    ₹{price}
+                                    ₹{dynamicPrice}
                                   </div>
                                 </div>
                               </div>
@@ -353,7 +356,8 @@ export default function VyronaReadCartCheckout() {
                               </div>
                             </div>
                           </label>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   );
