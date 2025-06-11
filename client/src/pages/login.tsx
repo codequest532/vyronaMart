@@ -285,46 +285,16 @@ export default function Login() {
 
                 {/* Demo Credentials */}
                 <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
-                  <h4 className="font-semibold text-blue-900 mb-3">Demo Account Access</h4>
+                  <h4 className="font-semibold text-blue-900 mb-3">Admin Access</h4>
                   <div className="space-y-3 text-sm">
-                    <div className="p-3 bg-white rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Store className="h-4 w-4 text-blue-600" />
-                        <span className="font-medium text-blue-900">VyronaHub & VyronaSocial Seller</span>
-                      </div>
-                      <div className="text-blue-700 space-y-1">
-                        <p><strong>Email:</strong> seller@vyronahub.com</p>
-                        <p><strong>Password:</strong> demo123</p>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-white rounded-lg border border-orange-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BookOpen className="h-4 w-4 text-orange-600" />
-                        <span className="font-medium text-orange-900">VyronaRead Book Seller</span>
-                      </div>
-                      <div className="text-orange-700 space-y-1">
-                        <p><strong>Email:</strong> seller@vyronaread.com</p>
-                        <p><strong>Password:</strong> demo123</p>
-                      </div>
-                    </div>
                     <div className="p-3 bg-white rounded-lg border border-blue-100">
                       <div className="flex items-center gap-2 mb-2">
                         <Shield className="h-4 w-4 text-green-600" />
                         <span className="font-medium text-green-900">Admin Account</span>
                       </div>
                       <div className="text-green-700 space-y-1">
-                        <p><strong>Email:</strong> admin@vyronamart.com</p>
-                        <p><strong>Password:</strong> admin123</p>
-                      </div>
-                    </div>
-                    <div className="p-3 bg-white rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-2 mb-2">
-                        <User className="h-4 w-4 text-purple-600" />
-                        <span className="font-medium text-purple-900">Customer Account</span>
-                      </div>
-                      <div className="text-purple-700 space-y-1">
-                        <p><strong>Email:</strong> Any valid email</p>
-                        <p><strong>Password:</strong> Any password</p>
+                        <p><strong>Email:</strong> mgmags25@gmail.com</p>
+                        <p><strong>Password:</strong> 12345678</p>
                       </div>
                     </div>
                   </div>
