@@ -1858,6 +1858,7 @@ export class DatabaseStorage implements IStorage {
       title: book.title,
       author: book.author,
       isbn: book.isbn,
+      imageUrl: book.image_url,
       publisher: book.publisher,
       publicationYear: book.publication_year,
       category: book.category,

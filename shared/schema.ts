@@ -360,6 +360,7 @@ export const physicalBooks = pgTable("physical_books", {
   title: varchar("title", { length: 255 }).notNull(),
   author: varchar("author", { length: 255 }).notNull(),
   isbn: varchar("isbn", { length: 50 }),
+  imageUrl: text("image_url"), // Google Drive image URLs from CSV
   category: varchar("category", { length: 100 }),
   copies: integer("copies").notNull().default(1),
   available: integer("available").notNull().default(1),
