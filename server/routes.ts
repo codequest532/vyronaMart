@@ -2881,22 +2881,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get authenticated user ID
       const userId = req.session?.user?.id;
       
-      console.log("Admin library request update - Session data:", {
-        sessionExists: !!req.session,
-        userExists: !!req.session?.user,
-        userId: userId,
-        userEmail: req.session?.user?.email,
-        userRole: req.session?.user?.role
-      });
-      
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
 
       const { id } = req.params;
       const { status, adminNotes } = req.body;
-
-      console.log("Updating library request with processedBy:", userId);
 
       const updatedRequest = await storage.updateLibraryIntegrationRequestStatus(
         parseInt(id),
