@@ -154,6 +154,12 @@ export default function BookSellerDashboard() {
     queryKey: ["/api/seller/analytics"],
   });
 
+  // Fetch requested books for library membership orders
+  const { data: requestedBooksData } = useQuery({
+    queryKey: ['/api/orders', selectedOrder?.order_id || selectedOrder?.id, 'requested-books'],
+    enabled: !!selectedOrder && selectedOrder.module === 'library_membership',
+  });
+
   // Update order status mutation with email workflow
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
@@ -2200,13 +2206,90 @@ export default function BookSellerDashboard() {
                               <p className="text-sm">{new Date(selectedOrder.metadata.applicationDate).toLocaleDateString()}</p>
                             </div>
                           )}
-                          {selectedOrder.metadata?.bookTitle && (
-                            <div>
-                              <label className="text-sm font-medium text-gray-600">Requested Book</label>
-                              <p className="text-sm">{selectedOrder.metadata.bookTitle}</p>
-                            </div>
-                          )}
                         </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Requested Books for Borrowing */}
+                  {selectedOrder.module === 'library_membership' && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BookOpen className="h-5 w-5" />
+                          Books Requested for Borrowing
+                          {requestedBooksData?.totalBooks > 0 && (
+                            <Badge variant="secondary">{requestedBooksData.totalBooks} books</Badge>
+                          )}
+                        </CardTitle>
+                        <CardDescription>
+                          Books the customer wants to borrow - prepare these for dispatch after membership approval
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {requestedBooksData?.requestedBooks?.length > 0 ? (
+                          <div className="space-y-4">
+                            {requestedBooksData.requestedBooks.map((book: any, index: number) => (
+                              <div key={book.id} className="border rounded-lg p-4 bg-gray-50">
+                                <div className="flex gap-4">
+                                  {book.imageUrl && (
+                                    <img 
+                                      src={book.imageUrl} 
+                                      alt={book.title}
+                                      className="w-16 h-20 object-cover rounded"
+                                    />
+                                  )}
+                                  <div className="flex-1 space-y-2">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600">Title</label>
+                                        <p className="text-sm font-semibold">{book.title}</p>
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600">Author</label>
+                                        <p className="text-sm">{book.author}</p>
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600">ISBN</label>
+                                        <p className="text-sm font-mono">{book.isbn}</p>
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600">Category</label>
+                                        <p className="text-sm">{book.category}</p>
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600">Publisher</label>
+                                        <p className="text-sm">{book.publisher}</p>
+                                      </div>
+                                      <div>
+                                        <label className="text-xs font-medium text-gray-600">Language</label>
+                                        <p className="text-sm">{book.language}</p>
+                                      </div>
+                                      {book.rentalDuration && (
+                                        <div>
+                                          <label className="text-xs font-medium text-gray-600">Rental Duration</label>
+                                          <p className="text-sm">{book.rentalDuration} days</p>
+                                        </div>
+                                      )}
+                                      {book.pricePerDay && (
+                                        <div>
+                                          <label className="text-xs font-medium text-gray-600">Daily Rate</label>
+                                          <p className="text-sm">₹{book.pricePerDay}/day</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                            <p>No specific books requested</p>
+                            <p className="text-sm">Customer applied for general library membership</p>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   )}
