@@ -3475,11 +3475,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title,
         author,
         isbn: isbn || null,
+        imageUrl: imageUrl || null, // Include the book cover image URL
         category: category || null,
         copies: copies || 1,
         available: copies || 1,
         publisher: publisher || null,
         publicationYear: publicationYear || null,
+        description: description || null,
         language: language || "English",
         location: null,
         fixedCostPrice: parseFloat(fixedCostPrice).toString() || "0.00",
