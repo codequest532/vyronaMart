@@ -314,7 +314,31 @@ export default function VyronaRead() {
   });
 
   const { data: sellerBooks = [] } = useQuery({
-    queryKey: ["/api/vyronaread/seller-books"],
+    queryKey: ["/api/products"],
+    select: (data) => {
+      // Filter to only show VyronaRead books (products with module: "vyronaread" and category: "books")
+      return Array.isArray(data) ? data.filter((product: any) => 
+        product.module === "vyronaread" && product.category === "books"
+      ).map((product: any) => ({
+        id: product.id,
+        name: product.name,
+        title: product.name, // Map name to title for consistency
+        author: product.metadata?.author || "Unknown Author",
+        category: product.metadata?.genre || product.metadata?.category || "General",
+        price: product.price / 100, // Convert from cents to dollars
+        rentalPrice: product.metadata?.rentalPrice || 0,
+        imageUrl: product.imageUrl,
+        isAvailable: true,
+        copies: 1,
+        description: product.description,
+        isbn: product.metadata?.isbn,
+        publisher: product.metadata?.publisher,
+        publicationYear: product.metadata?.publicationYear,
+        language: product.metadata?.language || "English",
+        rating: 4.5, // Default rating
+        createdAt: product.createdAt
+      })) : [];
+    }
   });
 
   const { data: libraryBooks = [] } = useQuery({
