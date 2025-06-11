@@ -1633,7 +1633,7 @@ export default function VyronaRead() {
                                 {item.type === 'buy' ? 'Purchase' : 'Rental'}
                               </Badge>
                               <span className="text-sm font-medium text-purple-600">
-                                ₹{item.type === 'buy' ? Math.floor(item.book.price || 299) : Math.floor((item.book.price || 299) / 10)}
+                                ₹{item.type === 'buy' ? Math.floor((item.book.price || 29900) / 100) : Math.floor(((item.book.price || 29900) / 100) * 0.4)}
                                 {item.type === 'rent' && '/15 days'}
                               </span>
                             </div>
@@ -1658,8 +1658,8 @@ export default function VyronaRead() {
                     <span className="text-xl font-bold text-purple-600">
                       ₹{cart.reduce((total, item) => {
                         const price = item.type === 'buy' 
-                          ? Math.floor(item.book.price || 299)
-                          : Math.floor((item.book.price || 299) / 10);
+                          ? Math.floor((item.book.price || 29900) / 100)
+                          : Math.floor(((item.book.price || 29900) / 100) * 0.4);
                         return total + price;
                       }, 0)}
                     </span>
