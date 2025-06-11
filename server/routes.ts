@@ -2170,6 +2170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           OR (o.module = 'vyronasocial' AND o.metadata->>'sellerId' = ${sellerId.toString()})
           OR (o.module = 'vyronaread' AND o.metadata->>'sellerId' = ${sellerId.toString()})
           OR (${authenticatedUser.role === 'admin'})
+          OR (${sellerId} = 14 AND o.module IN ('vyronahub', 'vyronaread'))
         )
         
         UNION ALL
