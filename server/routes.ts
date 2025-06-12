@@ -3709,7 +3709,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Connect Instagram account
+  // Connect Instagram account with real API integration
   app.post("/api/vyronainstastore/connect", async (req, res) => {
     try {
       const authenticatedUser = getAuthenticatedUser(req);
@@ -3717,22 +3717,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
       }
 
-      const { instagramUsername, storeName, storeDescription } = req.body;
+      const { instagramUsername, accessToken, storeName, storeDescription } = req.body;
+
+      if (!accessToken) {
+        return res.status(400).json({ 
+          message: "Instagram Business API access token required for real integration. Please obtain a token from Instagram Basic Display API or Instagram Graph API." 
+        });
+      }
+
+      const { instagramAPI } = await import('./instagram-api');
+
+      // Fetch real Instagram business account data
+      const businessAccount = await instagramAPI.getBusinessAccount(accessToken);
+      
+      // Get media posts to extract products
+      const mediaPosts = await instagramAPI.getMediaPosts(accessToken, 50);
+      
+      // Extract products from captions and media
+      const extractedProducts = instagramAPI.extractProductsFromMedia(mediaPosts);
+
+      // Try to get official product catalog (for Instagram Shopping)
+      const catalogProducts = await instagramAPI.getProductCatalog(accessToken, businessAccount.id);
 
       const storeData = {
         userId: authenticatedUser.id,
-        instagramUsername,
-        storeName,
-        storeDescription,
+        instagramUsername: businessAccount.username,
+        instagramUserId: businessAccount.id,
+        accessToken,
+        storeName: storeName || businessAccount.name,
+        storeDescription: storeDescription || businessAccount.biography,
+        profilePictureUrl: businessAccount.profile_picture_url,
+        followersCount: businessAccount.followers_count,
         isActive: true,
         connectedAt: new Date(),
+        lastSyncAt: new Date()
       };
 
       const store = await storage.createInstagramStore(storeData);
-      res.json({ success: true, store });
-    } catch (error) {
+
+      // Sync products from both sources
+      const allProducts = [...catalogProducts, ...extractedProducts];
+      const syncedProducts = [];
+
+      for (const product of allProducts) {
+        try {
+          const productData = instagramAPI.convertToOurProductFormat(product, store.id);
+          const syncedProduct = await storage.createInstagramProduct(productData);
+          syncedProducts.push(syncedProduct);
+        } catch (productError) {
+          console.error("Error syncing individual product:", productError);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        store: {
+          ...store,
+          productCount: syncedProducts.length,
+          followersCount: businessAccount.followers_count
+        },
+        syncedProducts: syncedProducts.length,
+        message: `Successfully connected @${businessAccount.username} and synced ${syncedProducts.length} products`
+      });
+
+    } catch (error: any) {
       console.error("Error connecting Instagram store:", error);
-      res.status(500).json({ message: "Failed to connect Instagram account" });
+      
+      if (error.message.includes('Invalid access token') || error.message.includes('access token')) {
+        return res.status(401).json({ 
+          message: "Invalid Instagram access token. Please provide a valid Instagram Business API token from developers.facebook.com." 
+        });
+      }
+      
+      res.status(500).json({ 
+        message: "Failed to connect Instagram account: " + (error.message || "Unknown error") 
+      });
     }
   });
 

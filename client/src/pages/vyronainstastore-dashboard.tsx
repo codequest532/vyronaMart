@@ -24,6 +24,7 @@ import { useLocation } from "wouter";
 // Schemas for form validation
 const instagramConnectSchema = z.object({
   instagramUsername: z.string().min(1, "Instagram username is required"),
+  accessToken: z.string().min(1, "Instagram Business API access token is required"),
   storeName: z.string().min(2, "Store name must be at least 2 characters"),
   storeDescription: z.string().optional(),
 });
@@ -108,6 +109,7 @@ export default function VyronaInstaStoreDashboard() {
     resolver: zodResolver(instagramConnectSchema),
     defaultValues: {
       instagramUsername: "",
+      accessToken: "",
       storeName: "",
       storeDescription: "",
     },
@@ -302,6 +304,26 @@ export default function VyronaInstaStoreDashboard() {
                         <FormControl>
                           <Input placeholder="@yourinstagram" {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={connectForm.control}
+                    name="accessToken"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Instagram Business API Token</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="password" 
+                            placeholder="Get token from developers.facebook.com" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormDescription className="text-xs">
+                          Obtain your Instagram Business API access token from Meta Developers to sync real products
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
