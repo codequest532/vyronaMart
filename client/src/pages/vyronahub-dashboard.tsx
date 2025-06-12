@@ -94,15 +94,31 @@ export default function SellerDashboard() {
     queryKey: ["/api/current-user"],
   });
 
-  // Check authentication and redirect if not authenticated
+  // Check authentication and redirect if not authenticated or wrong seller type
   useEffect(() => {
-    if (!userLoading && (!currentUser || currentUser.role !== 'seller')) {
+    if (!userLoading && !currentUser) {
       setLocation('/login');
       toast({
         title: "Authentication Required",
         description: "Please log in as a seller to access this dashboard.",
         variant: "destructive",
       });
+    } else if (!userLoading && currentUser) {
+      if (currentUser.role !== 'seller') {
+        setLocation('/login');
+        toast({
+          title: "Authentication Required",
+          description: "Please log in as a seller to access this dashboard.",
+          variant: "destructive",
+        });
+      } else if (currentUser.sellerType === 'vyronaread') {
+        // Redirect VyronaRead sellers to their dashboard
+        setLocation('/vyronaread-dashboard');
+        toast({
+          title: "Redirecting",
+          description: "Redirecting to VyronaRead dashboard...",
+        });
+      }
     }
   }, [currentUser, userLoading, setLocation, toast]);
 
