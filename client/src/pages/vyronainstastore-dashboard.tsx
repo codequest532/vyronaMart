@@ -46,6 +46,16 @@ const productSchema = z.object({
   categoryTag: z.string().optional(),
   hashtags: z.string().optional(),
   productUrl: z.string().url("Must be a valid URL").optional(),
+  imageUrl: z.string().url("Must be a valid URL").optional(),
+});
+
+const bulkImportSchema = z.object({
+  csvData: z.string().min(1, "CSV data is required"),
+});
+
+const profileImportSchema = z.object({
+  profileUrl: z.string().url("Must be a valid Instagram profile URL"),
+  maxProducts: z.number().min(1).max(50).default(20),
 });
 
 const orderStatusSchema = z.object({
@@ -55,6 +65,8 @@ const orderStatusSchema = z.object({
 
 type InstagramConnectFormData = z.infer<typeof instagramConnectSchema>;
 type ProductFormData = z.infer<typeof productSchema>;
+type BulkImportFormData = z.infer<typeof bulkImportSchema>;
+type ProfileImportFormData = z.infer<typeof profileImportSchema>;
 type OrderStatusFormData = z.infer<typeof orderStatusSchema>;
 
 export default function VyronaInstaStoreDashboard() {
@@ -135,6 +147,22 @@ export default function VyronaInstaStoreDashboard() {
       categoryTag: "",
       hashtags: "",
       productUrl: "",
+      imageUrl: "",
+    },
+  });
+
+  const bulkImportForm = useForm<BulkImportFormData>({
+    resolver: zodResolver(bulkImportSchema),
+    defaultValues: {
+      csvData: "",
+    },
+  });
+
+  const profileImportForm = useForm<ProfileImportFormData>({
+    resolver: zodResolver(profileImportSchema),
+    defaultValues: {
+      profileUrl: "",
+      maxProducts: 20,
     },
   });
 
