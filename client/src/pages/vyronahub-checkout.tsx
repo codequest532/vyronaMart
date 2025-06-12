@@ -20,6 +20,7 @@ import { useCartStore } from "@/lib/cart-store";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
+  email: z.string().email("Valid email address is required"),
   phoneNumber: z.string().min(10, "Valid phone number is required"),
   address: z.string().min(10, "Complete address is required"),
   city: z.string().min(2, "City is required"),
@@ -52,6 +53,7 @@ export default function VyronaHubCheckout() {
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: "",
+      email: "",
       phoneNumber: "",
       address: "",
       city: "",
@@ -301,6 +303,19 @@ export default function VyronaHubCheckout() {
                               <FormLabel>Full Name</FormLabel>
                               <FormControl>
                                 <Input placeholder="Enter your full name" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email Address</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="Enter your email address" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>

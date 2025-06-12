@@ -273,7 +273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const orderEmailData = {
           orderId: orderId,
           customerName: shippingAddress.fullName,
-          customerEmail: "customer@example.com",
+          customerEmail: shippingAddress.email,
           orderTotal: orderTotal,
           orderItems: items.map((item: any) => ({
             name: item.name,
@@ -286,7 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const emailTemplate = generateOrderProcessingEmail(orderEmailData);
         await sendBrevoEmail(
-          "customer@example.com",
+          shippingAddress.email,
           emailTemplate.subject,
           emailTemplate.htmlContent
         );
