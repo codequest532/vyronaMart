@@ -126,7 +126,8 @@ export default function BookSellerDashboard() {
     publisher: "",
     publicationYear: "",
     language: "English",
-    file: null as File | null
+    file: null as File | null,
+    coverImage: null as File | null
   });
 
   // All useQuery hooks must be at top level before any conditional logic
