@@ -375,15 +375,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (user) {
-        // Determine seller type for VyronaRead sellers
+        // Use seller type from database for sellers, fallback to vyronahub if not set
         let sellerType;
         if (user.role === 'seller') {
-          // Check if this is a VyronaRead seller based on email or seller ID
-          if (user.email === 'ganesan.sixphrase@gmail.com' || user.id === 15) {
-            sellerType = 'vyronaread';
-          } else {
-            sellerType = 'vyronahub'; // Default for other sellers
-          }
+          sellerType = user.sellerType || 'vyronahub';
         }
 
         req.session.user = {

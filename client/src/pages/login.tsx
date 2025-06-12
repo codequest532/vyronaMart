@@ -103,6 +103,8 @@ export default function Login() {
         // Route sellers based on their seller type
         if (data.user.sellerType === "vyronaread") {
           setLocation("/vyronaread-dashboard");
+        } else if (data.user.sellerType === "vyronainstastore") {
+          setLocation("/vyronainstastore-dashboard");
         } else {
           setLocation("/vyronahub-dashboard");
         }
