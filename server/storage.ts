@@ -183,6 +183,11 @@ export interface IStorage {
   getBookById(id: number): Promise<any>;
   createBookOrder(order: any): Promise<any>;
 
+  // VyronaRead Order Management for 4-Stage Email System
+  getOrder(orderId: number): Promise<any>;
+  updateOrderStatus(orderId: number, updates: any): Promise<any>;
+  getOrdersByModule(module: string, filters?: any): Promise<any[]>;
+
   // VyronaSocial - Group Buy Products
   createGroupBuyProduct(product: InsertGroupBuyProduct): Promise<GroupBuyProduct>;
   getGroupBuyProducts(sellerId?: number): Promise<GroupBuyProduct[]>;
@@ -1612,6 +1617,56 @@ export class DatabaseStorage implements IStorage {
         type: 'book_order'
       }
     });
+  }
+
+  // VyronaRead Order Management for 4-Stage Email System
+  async getOrder(orderId: number): Promise<any> {
+    try {
+      const [order] = await db.select().from(orders).where(eq(orders.id, orderId));
+      return order;
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      return undefined;
+    }
+  }
+
+  async updateOrderStatus(orderId: number, updates: any): Promise<any> {
+    try {
+      const [updatedOrder] = await db
+        .update(orders)
+        .set({
+          status: updates.status,
+          trackingNumber: updates.trackingNumber,
+          deliveryAddress: updates.deliveryAddress,
+          updatedAt: new Date()
+        })
+        .where(eq(orders.id, orderId))
+        .returning();
+      return updatedOrder;
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      return undefined;
+    }
+  }
+
+  async getOrdersByModule(module: string, filters?: any): Promise<any[]> {
+    try {
+      let query = db.select().from(orders).where(eq(orders.module, module));
+      
+      if (filters?.status) {
+        query = query.where(eq(orders.status, filters.status));
+      }
+      
+      const result = await query
+        .limit(filters?.limit || 50)
+        .offset(filters?.offset || 0)
+        .orderBy(orders.createdAt);
+      
+      return result;
+    } catch (error) {
+      console.error("Error fetching orders by module:", error);
+      return [];
+    }
   }
 
   // Seed initial data when needed

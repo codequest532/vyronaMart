@@ -5227,6 +5227,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaRead Order Status Management API for 4-Stage Email System
+  app.put("/api/vyronaread/orders/:orderId/status", async (req, res) => {
+    try {
+      const { orderId } = req.params;
+      const { status, trackingNumber, deliveryAddress } = req.body;
+      
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronaread') {
+        return res.status(401).json({ message: "VyronaRead seller authentication required" });
+      }
+
+      // Validate status
+      const validStatuses = ['processing', 'shipped', 'out for delivery', 'delivered', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid order status" });
+      }
+
+      // Get order details
+      const order = await storage.getOrder(parseInt(orderId));
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Verify order belongs to VyronaRead module
+      if (order.module !== 'vyronaread') {
+        return res.status(403).json({ message: "This order is not from VyronaRead" });
+      }
+
+      // Update order status
+      const updatedOrder = await storage.updateOrderStatus(parseInt(orderId), {
+        status,
+        trackingNumber: trackingNumber || order.trackingNumber,
+        deliveryAddress: deliveryAddress || order.deliveryAddress,
+        statusUpdatedAt: new Date().toISOString()
+      });
+
+      if (!updatedOrder) {
+        return res.status(500).json({ message: "Failed to update order status" });
+      }
+
+      // Extract customer info from order metadata
+      const customerInfo = order.metadata?.customerInfo;
+      if (!customerInfo || !customerInfo.email) {
+        console.warn(`No customer email found for order #${orderId}`);
+        return res.json({
+          success: true,
+          message: "Order status updated successfully (no email sent - missing customer info)",
+          order: updatedOrder
+        });
+      }
+
+      // Prepare order data for email
+      const orderData = {
+        orderId: parseInt(orderId),
+        customerName: customerInfo.name || 'Valued Customer',
+        customerEmail: customerInfo.email,
+        orderTotal: order.totalAmount || 0,
+        orderDate: order.createdAt || new Date().toISOString(),
+        trackingNumber: trackingNumber || order.trackingNumber,
+        deliveryAddress: deliveryAddress || order.deliveryAddress || customerInfo.address,
+        orderItems: order.metadata?.bookId ? [{
+          name: order.metadata.ebookTitle || `Book ID: ${order.metadata.bookId}`,
+          author: order.metadata.ebookAuthor || 'Unknown Author',
+          quantity: 1,
+          price: order.totalAmount || 0,
+          type: order.metadata.transactionType || order.metadata.purchaseType || 'Purchase'
+        }] : []
+      };
+
+      // Send customer status update email using VyronaRead email system
+      try {
+        const { sendVyronaReadOrderStatusUpdate } = await import('./vyronaread-emails');
+        
+        const emailResult = await sendVyronaReadOrderStatusUpdate(
+          customerInfo.email,
+          orderData,
+          status
+        );
+
+        if (emailResult.success) {
+          console.log(`VyronaRead order status email sent successfully to ${customerInfo.email} for order #${orderId} - Status: ${status}`);
+        } else {
+          console.error(`Failed to send VyronaRead order status email:`, emailResult.error);
+        }
+      } catch (emailError) {
+        console.error("VyronaRead order status email error:", emailError);
+      }
+
+      res.json({
+        success: true,
+        message: `Order status updated to ${status} and customer notification sent`,
+        order: updatedOrder,
+        emailSent: true
+      });
+
+    } catch (error) {
+      console.error("Error updating VyronaRead order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Get VyronaRead orders for seller dashboard with filtering
+  app.get("/api/vyronaread/orders", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronaread') {
+        return res.status(401).json({ message: "VyronaRead seller authentication required" });
+      }
+
+      const { status, limit = 50, offset = 0 } = req.query;
+
+      // Get VyronaRead orders
+      const orders = await storage.getOrdersByModule('vyronaread', {
+        status: status as string,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+
+      // Format orders for seller dashboard
+      const formattedOrders = orders.map(order => ({
+        id: order.id,
+        orderId: order.id,
+        customerName: order.metadata?.customerInfo?.name || 'Unknown Customer',
+        customerEmail: order.metadata?.customerInfo?.email || '',
+        customerPhone: order.metadata?.customerInfo?.phone || '',
+        orderType: order.metadata?.type || 'purchase',
+        bookTitle: order.metadata?.ebookTitle || `Book ID: ${order.metadata?.bookId}`,
+        bookAuthor: order.metadata?.ebookAuthor || 'Unknown Author',
+        transactionType: order.metadata?.transactionType || order.metadata?.purchaseType || 'buy',
+        amount: order.totalAmount || 0,
+        status: order.status || 'pending',
+        orderDate: order.createdAt || new Date().toISOString(),
+        trackingNumber: order.trackingNumber || '',
+        deliveryAddress: order.deliveryAddress || order.metadata?.customerInfo?.address || '',
+        canCancel: order.metadata?.cancellationRequested || false,
+        metadata: order.metadata
+      }));
+
+      res.json({
+        success: true,
+        orders: formattedOrders,
+        total: formattedOrders.length
+      });
+
+    } catch (error) {
+      console.error("Error fetching VyronaRead orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
   // Setup working room creation routes
   setupRoomRoutes(app);
   
