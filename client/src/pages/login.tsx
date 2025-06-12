@@ -97,16 +97,23 @@ export default function Login() {
       });
       
       // Redirect based on role and seller type
+      console.log("Login successful, user data:", data.user);
+      console.log("Seller type:", data.user.sellerType);
+      
       if (data.user.role === "admin") {
+        console.log("Redirecting to admin dashboard");
         setLocation("/admin-dashboard");
       } else if (data.user.role === "seller") {
         // Route sellers based on their seller type
         if (data.user.sellerType === "vyronaread") {
+          console.log("Redirecting VyronaRead seller to vyronaread-dashboard");
           setLocation("/vyronaread-dashboard");
         } else {
+          console.log("Redirecting regular seller to vyronahub-dashboard");
           setLocation("/vyronahub-dashboard");
         }
       } else {
+        console.log("Redirecting to home");
         setLocation("/");
       }
     },
