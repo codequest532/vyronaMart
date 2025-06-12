@@ -42,7 +42,8 @@ import {
   Building,
   Edit,
   X,
-  Send
+  Send,
+  Calendar
 } from "lucide-react";
 
 // Google Drive URL conversion function
@@ -155,11 +156,8 @@ export default function VyronaRead() {
   const [readingMode, setReadingMode] = useState("light");
   const [fontSize, setFontSize] = useState("medium");
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
-  const [selectedEBook, setSelectedEBook] = useState<any>(null);
   const [showBorrowModal, setShowBorrowModal] = useState(false);
   const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<any>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showEReader, setShowEReader] = useState(false);
   const { toast } = useToast();
 
   // Authentication check
@@ -389,12 +387,6 @@ export default function VyronaRead() {
     setShowBorrowModal(true);
   };
 
-  const handleReadEBook = (ebook: any) => {
-    setSelectedEBook(ebook);
-    setShowEReader(true);
-    setCurrentPage(1);
-  };
-
   const submitBorrowRequest = async (formData: any) => {
     try {
       await apiRequest("POST", "/api/book-loans", {
@@ -419,17 +411,18 @@ export default function VyronaRead() {
     }
   };
 
-  const proceedToEBookCheckout = async (ebook?: any) => {
-    const targetEBook = ebook || selectedEBook;
-    if (!targetEBook) return;
+  const proceedToEBookCheckout = async (ebook: any, type: 'buy' | 'rent' = 'buy') => {
+    if (!ebook) return;
     
-    // Navigate directly to the dedicated e-book checkout page
+    // Navigate to VyronaRead checkout page with appropriate parameters
     const params = new URLSearchParams({
-      bookId: targetEBook.id.toString(),
-      bookName: encodeURIComponent(targetEBook.name || targetEBook.title || 'Unknown Title'),
-      price: (targetEBook.price || 1999).toString()
+      type: type,
+      bookId: ebook.id.toString(),
+      bookName: encodeURIComponent(ebook.name || ebook.title || 'Unknown Title'),
+      author: encodeURIComponent(ebook.author || 'Unknown Author'),
+      format: 'ebook'
     });
-    setLocation(`/ebook-checkout?${params.toString()}`);
+    setLocation(`/vyronaread-checkout?${params.toString()}`);
   };
 
   // Filter and collection handlers
@@ -1193,20 +1186,20 @@ export default function VyronaRead() {
                       <div className="space-y-2">
                         <Button 
                           size="sm" 
-                          variant="outline"
-                          className="w-full border-blue-200 text-blue-700 hover:bg-blue-50"
-                          onClick={() => handleReadEBook(ebook)}
+                          className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
+                          onClick={() => proceedToEBookCheckout(ebook, 'buy')}
                         >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Preview E-Reader
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          Buy - ₹{ebook.salePrice || ebook.price || '9.99'}
                         </Button>
                         <Button 
                           size="sm" 
-                          className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
-                          onClick={() => proceedToEBookCheckout(ebook)}
+                          variant="outline"
+                          className="w-full border-orange-200 text-orange-700 hover:bg-orange-50"
+                          onClick={() => proceedToEBookCheckout(ebook, 'rent')}
                         >
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          Buy Now - ₹{Math.floor(ebook.price || 1999)}
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Rent - ₹{ebook.rentalPrice || '2.99'}
                         </Button>
                       </div>
 
