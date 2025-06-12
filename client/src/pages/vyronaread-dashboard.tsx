@@ -1467,7 +1467,11 @@ export default function BookSellerDashboard() {
                     <CardDescription>Manage your e-book catalog</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setShowEbookUploadDialog(true)}
+                    >
                       <Upload className="h-4 w-4 mr-2" />
                       Upload E-Book
                     </Button>
@@ -1483,7 +1487,11 @@ export default function BookSellerDashboard() {
                     <CardDescription>Track your book business metrics</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => setActiveTab("analytics")}
+                    >
                       <Eye className="h-4 w-4 mr-2" />
                       View Analytics
                     </Button>
