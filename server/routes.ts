@@ -5426,6 +5426,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test endpoint for retrieving VyronaRead orders (bypasses authentication)
+  app.get("/api/test/vyronaread/orders", async (req, res) => {
+    try {
+      console.log("Testing VyronaRead orders retrieval");
+
+      const { status, limit = 50, offset = 0 } = req.query;
+
+      // Get VyronaRead orders
+      const orders = await storage.getOrdersByModule('vyronaread', {
+        status: status as string,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+
+      // Format orders for display
+      const formattedOrders = orders.map(order => ({
+        id: order.id,
+        orderId: order.id,
+        customerName: order.metadata?.customerInfo?.name || 'Unknown Customer',
+        customerEmail: order.metadata?.customerInfo?.email || '',
+        customerPhone: order.metadata?.customerInfo?.phone || '',
+        orderType: order.metadata?.type || 'purchase',
+        bookTitle: order.metadata?.ebookTitle || `Book ID: ${order.metadata?.bookId}`,
+        bookAuthor: order.metadata?.ebookAuthor || 'Unknown Author',
+        transactionType: order.metadata?.transactionType || order.metadata?.purchaseType || 'buy',
+        amount: order.totalAmount || 0,
+        status: JSON.parse(order.status || '{}')?.status || 'pending',
+        orderDate: order.createdAt || new Date().toISOString(),
+        trackingNumber: JSON.parse(order.status || '{}')?.trackingNumber || '',
+        deliveryAddress: JSON.parse(order.status || '{}')?.deliveryAddress || order.metadata?.customerInfo?.address || '',
+        metadata: order.metadata
+      }));
+
+      res.json({
+        success: true,
+        orders: formattedOrders,
+        total: formattedOrders.length
+      });
+
+    } catch (error) {
+      console.error("Error fetching VyronaRead orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
   // Get VyronaRead orders for seller dashboard with filtering
   app.get("/api/vyronaread/orders", async (req, res) => {
     try {
