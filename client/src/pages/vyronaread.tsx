@@ -531,7 +531,10 @@ export default function VyronaRead() {
 
   const { data: sellerBooks = [] } = useQuery({
     queryKey: ["/api/products", "vyronaread", "books"],
-    queryFn: () => apiRequest("GET", "/api/products?module=vyronaread&category=books"),
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/products?module=vyronaread&category=books");
+      return await response.json();
+    },
     select: (data) => {
       console.log("VyronaRead - Raw API response:", data);
       console.log("VyronaRead - Is array?", Array.isArray(data));
