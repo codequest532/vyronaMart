@@ -1374,7 +1374,7 @@ export default function SellerDashboard() {
                                 <p className="text-sm text-gray-600">Products: {order.metadata.product_names}</p>
                               )}
                               <p className="text-sm font-medium text-green-600">
-                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
+                                ₹{(order.total_amount || order.totalAmount || 0).toLocaleString()}
                               </p>
                               <p className="text-xs text-gray-500">
                                 Ordered: {new Date(order.created_at).toLocaleDateString()}
@@ -1469,7 +1469,7 @@ export default function SellerDashboard() {
                                 <p className="text-sm text-gray-600">Products: {order.metadata.product_names}</p>
                               )}
                               <p className="text-sm font-medium text-purple-600">
-                                ₹{((order.total_amount || order.totalAmount) / 100).toLocaleString()}
+                                ₹{(order.total_amount || order.totalAmount || 0).toLocaleString()}
                               </p>
                               <p className="text-xs text-gray-500">
                                 Ordered: {new Date(order.created_at).toLocaleDateString()}
@@ -1603,7 +1603,7 @@ export default function SellerDashboard() {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Total Amount:</span>
                       <span className="font-medium text-green-600">
-                        ₹{((selectedOrder?.total_amount || selectedOrder?.totalAmount || 0) / 100).toLocaleString()}
+                        ₹{(selectedOrder?.total_amount || selectedOrder?.totalAmount || 0).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -1640,7 +1640,7 @@ export default function SellerDashboard() {
                           <p className="font-medium">{item.name}</p>
                           <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                         </div>
-                        <p className="font-medium">₹{((item.price || 0) / 100).toLocaleString()}</p>
+                        <p className="font-medium">₹{(item.price || 0).toLocaleString()}</p>
                       </div>
                     ))}
                   </div>

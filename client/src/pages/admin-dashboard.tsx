@@ -1230,7 +1230,7 @@ export default function AdminDashboard() {
                                     {product.description || "No description available"}
                                   </p>
                                   <div className="flex items-center gap-4">
-                                    <span className="font-bold text-xl text-green-600">₹{(product.price / 100).toLocaleString()}</span>
+                                    <span className="font-bold text-xl text-green-600">₹{(product.price || 0).toLocaleString()}</span>
                                     <span className="text-sm text-gray-500">ID: {product.id}</span>
                                   </div>
                                 </div>

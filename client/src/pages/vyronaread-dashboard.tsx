@@ -2275,7 +2275,7 @@ export default function BookSellerDashboard() {
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Amount</label>
-                          <p className="text-sm font-semibold">₹{((selectedOrder.total_amount || 0) / 100).toFixed(2)}</p>
+                          <p className="text-sm font-semibold">₹{(selectedOrder.total_amount || 0).toFixed(2)}</p>
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Date</label>
