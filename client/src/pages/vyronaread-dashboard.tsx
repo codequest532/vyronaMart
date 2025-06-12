@@ -1191,7 +1191,7 @@ export default function BookSellerDashboard() {
                                       {product.category}
                                     </Badge>
                                     <span className="text-sm font-medium text-green-600">
-                                      ₹{product.price}
+                                      ₹{Math.floor((product.price || 0) / 100)}
                                     </span>
                                     <Badge 
                                       variant={product.module === 'vyronaread' ? 'default' : 'secondary'}

@@ -461,10 +461,7 @@ export default function VyronaRead() {
 
   // Filter books based on selected criteria
   const getFilteredBooks = () => {
-    console.log("VyronaRead getFilteredBooks - sellerBooks:", sellerBooks);
-    console.log("VyronaRead getFilteredBooks - sellerBooks length:", sellerBooks?.length);
     let allBooks: any[] = [...(Array.isArray(sellerBooks) ? sellerBooks : [])];
-    console.log("VyronaRead getFilteredBooks - allBooks after copy:", allBooks.length);
     
     // Only use seller books - library books are for library browsing only
 
@@ -536,10 +533,8 @@ export default function VyronaRead() {
       return await response.json();
     },
     select: (data) => {
-      console.log("VyronaRead - Raw API response:", data);
-      console.log("VyronaRead - Is array?", Array.isArray(data));
       // Transform the already filtered VyronaRead books data
-      const transformed = Array.isArray(data) ? data.map((product: any) => ({
+      return Array.isArray(data) ? data.map((product: any) => ({
         id: product.id,
         name: product.name,
         title: product.name, // Map name to title for consistency
@@ -563,9 +558,6 @@ export default function VyronaRead() {
         staffPick: false,
         isEbook: product.metadata?.format === "digital"
       })) : [];
-      console.log("VyronaRead - Transformed data:", transformed);
-      console.log("VyronaRead - Transformed data length:", transformed.length);
-      return transformed;
     }
   });
 
