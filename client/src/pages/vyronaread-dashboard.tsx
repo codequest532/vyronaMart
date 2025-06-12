@@ -1141,7 +1141,7 @@ export default function BookSellerDashboard() {
                       <div>
                         <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                         <p className="text-3xl font-bold text-orange-600">
-                          ₹{sellerOrders?.reduce((total: number, order: any) => total + (order.total_amount / 100), 0).toLocaleString() || 0}
+                          ₹{sellerOrders?.reduce((total: number, order: any) => total + (order.total_amount || 0), 0).toLocaleString() || 0}
                         </p>
                         <p className="text-xs text-orange-500">All time</p>
                       </div>
@@ -1191,7 +1191,7 @@ export default function BookSellerDashboard() {
                                       {product.category}
                                     </Badge>
                                     <span className="text-sm font-medium text-green-600">
-                                      ₹{Math.floor((product.price || 0) / 100)}
+                                      ₹{product.price || 0}
                                     </span>
                                     <Badge 
                                       variant={product.module === 'vyronaread' ? 'default' : 'secondary'}
@@ -1601,7 +1601,7 @@ export default function BookSellerDashboard() {
                                   </Badge>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-bold">₹{(order.total_amount / 100).toFixed(2)}</p>
+                                  <p className="font-bold">₹{(order.total_amount || 0).toFixed(2)}</p>
                                   <p className="text-sm text-gray-500">
                                     {new Date(order.created_at).toLocaleDateString()}
                                   </p>
