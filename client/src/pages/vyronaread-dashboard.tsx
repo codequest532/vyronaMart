@@ -603,7 +603,11 @@ export default function BookSellerDashboard() {
       category: "",
       format: "PDF",
       description: "",
-      price: 0,
+      salePrice: "",
+      rentalPrice: "",
+      publisher: "",
+      publicationYear: "",
+      language: "English",
       file: null
     });
   };
@@ -1840,15 +1844,95 @@ export default function BookSellerDashboard() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="ebookPrice">Price (₹)</Label>
+                  <Label htmlFor="ebookPublisher">Publisher</Label>
                   <Input
-                    id="ebookPrice"
-                    type="number"
-                    value={newEbook.price}
-                    onChange={(e) => setNewEbook({ ...newEbook, price: parseFloat(e.target.value) || 0 })}
-                    placeholder="0"
-                    min="0"
+                    id="ebookPublisher"
+                    value={newEbook.publisher}
+                    onChange={(e) => setNewEbook({ ...newEbook, publisher: e.target.value })}
+                    placeholder="Publisher name"
                   />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ebookYear">Publication Year</Label>
+                  <Input
+                    id="ebookYear"
+                    value={newEbook.publicationYear}
+                    onChange={(e) => setNewEbook({ ...newEbook, publicationYear: e.target.value })}
+                    placeholder="2024"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="ebookLanguage">Language</Label>
+                  <Select value={newEbook.language} onValueChange={(value) => setNewEbook({ ...newEbook, language: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="English">English</SelectItem>
+                      <SelectItem value="Hindi">Hindi</SelectItem>
+                      <SelectItem value="Tamil">Tamil</SelectItem>
+                      <SelectItem value="Telugu">Telugu</SelectItem>
+                      <SelectItem value="Malayalam">Malayalam</SelectItem>
+                      <SelectItem value="Kannada">Kannada</SelectItem>
+                      <SelectItem value="Bengali">Bengali</SelectItem>
+                      <SelectItem value="Gujarati">Gujarati</SelectItem>
+                      <SelectItem value="Marathi">Marathi</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Pricing Section */}
+                <div className="md:col-span-2">
+                  <div className="border rounded-lg p-4 bg-blue-50">
+                    <h3 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      E-Book Pricing Control
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="ebookSalePrice">Sale Price (₹) *</Label>
+                        <Input
+                          id="ebookSalePrice"
+                          type="number"
+                          value={newEbook.salePrice}
+                          onChange={(e) => setNewEbook({ ...newEbook, salePrice: e.target.value })}
+                          placeholder="299"
+                          min="0"
+                          step="0.01"
+                        />
+                        <p className="text-xs text-gray-600">Price for customers to purchase and own the e-book</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="ebookRentalPrice">Rental Price (₹) *</Label>
+                        <Input
+                          id="ebookRentalPrice"
+                          type="number"
+                          value={newEbook.rentalPrice}
+                          onChange={(e) => setNewEbook({ ...newEbook, rentalPrice: e.target.value })}
+                          placeholder="49"
+                          min="0"
+                          step="0.01"
+                        />
+                        <p className="text-xs text-gray-600">Price for 15-day rental access</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 p-3 bg-white rounded border">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Pricing Preview:</h4>
+                      <div className="flex justify-between text-sm">
+                        <span>Sale Price: <strong>₹{newEbook.salePrice || '0'}</strong></span>
+                        <span>Rental (15 days): <strong>₹{newEbook.rentalPrice || '0'}</strong></span>
+                      </div>
+                      {newEbook.salePrice && newEbook.rentalPrice && (
+                        <p className="text-xs text-green-600 mt-1">
+                          Rental is {Math.round((parseFloat(newEbook.rentalPrice) / parseFloat(newEbook.salePrice)) * 100)}% of sale price
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="space-y-2 md:col-span-2">
@@ -1902,7 +1986,7 @@ export default function BookSellerDashboard() {
                 </Button>
                 <Button 
                   onClick={handleEbookUpload}
-                  disabled={!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.file}
+                  disabled={!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.salePrice || !newEbook.rentalPrice || !newEbook.file}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   <Upload className="h-4 w-4 mr-2" />

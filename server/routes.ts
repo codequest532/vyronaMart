@@ -3440,6 +3440,181 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // E-Book API endpoints with enhanced pricing control
+  app.post("/api/ebooks", upload.single('file'), async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller') {
+        return res.status(401).json({ message: "Seller authentication required" });
+      }
+
+      const {
+        title,
+        author,
+        isbn,
+        category,
+        format,
+        description,
+        salePrice,
+        rentalPrice,
+        publisher,
+        publicationYear,
+        language
+      } = req.body;
+
+      // Validate required fields
+      if (!title || !author || !category || !salePrice || !rentalPrice || !req.file) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Validate pricing
+      const salePriceNum = parseFloat(salePrice);
+      const rentalPriceNum = parseFloat(rentalPrice);
+      
+      if (isNaN(salePriceNum) || salePriceNum <= 0 || isNaN(rentalPriceNum) || rentalPriceNum <= 0) {
+        return res.status(400).json({ message: "Invalid pricing values" });
+      }
+
+      // Create e-book record
+      const ebookData = {
+        title,
+        author,
+        isbn: isbn || null,
+        category,
+        format: format || 'PDF',
+        description: description || '',
+        salePrice: Math.round(salePriceNum * 100), // Store in cents
+        rentalPrice: Math.round(rentalPriceNum * 100), // Store in cents
+        publisher: publisher || '',
+        publicationYear: publicationYear || '',
+        language: language || 'English',
+        filePath: req.file.path,
+        fileName: req.file.filename,
+        fileSize: req.file.size,
+        sellerId: authenticatedUser.id,
+        status: 'active' as const
+      };
+
+      const ebook = await storage.createEbook(ebookData);
+
+      res.json({
+        success: true,
+        ebook: {
+          ...ebook,
+          salePrice: ebook.salePrice / 100, // Convert back to rupees for display
+          rentalPrice: ebook.rentalPrice / 100
+        },
+        message: "E-book uploaded successfully"
+      });
+    } catch (error) {
+      console.error("E-book upload error:", error);
+      res.status(500).json({ message: "Failed to upload e-book" });
+    }
+  });
+
+  // Get seller's e-books
+  app.get("/api/ebooks/seller/:sellerId", async (req, res) => {
+    try {
+      const sellerId = parseInt(req.params.sellerId);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser || (authenticatedUser.role !== 'seller' && authenticatedUser.role !== 'admin')) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Sellers can only see their own e-books, admins can see all
+      if (authenticatedUser.role === 'seller' && authenticatedUser.id !== sellerId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const ebooks = await storage.getSellerEbooks(sellerId);
+      
+      // Convert pricing from cents to rupees for display
+      const formattedEbooks = ebooks.map(ebook => ({
+        ...ebook,
+        salePrice: ebook.salePrice / 100,
+        rentalPrice: ebook.rentalPrice / 100
+      }));
+
+      res.json(formattedEbooks);
+    } catch (error) {
+      console.error("Error fetching seller e-books:", error);
+      res.status(500).json({ message: "Failed to fetch e-books" });
+    }
+  });
+
+  // Get e-books for customers (VyronaRead customer interface)
+  app.get("/api/ebooks", async (req, res) => {
+    try {
+      const { category, search, limit = 50, offset = 0 } = req.query;
+      
+      const ebooks = await storage.getEbooks({
+        category: category as string,
+        search: search as string,
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+
+      // Convert pricing from cents to rupees for display
+      const formattedEbooks = ebooks.map(ebook => ({
+        ...ebook,
+        salePrice: ebook.salePrice / 100,
+        rentalPrice: ebook.rentalPrice / 100
+      }));
+
+      res.json(formattedEbooks);
+    } catch (error) {
+      console.error("Error fetching e-books:", error);
+      res.status(500).json({ message: "Failed to fetch e-books" });
+    }
+  });
+
+  // Update e-book pricing
+  app.patch("/api/ebooks/:id/pricing", async (req, res) => {
+    try {
+      const ebookId = parseInt(req.params.id);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser || authenticatedUser.role !== 'seller') {
+        return res.status(401).json({ message: "Seller authentication required" });
+      }
+
+      const { salePrice, rentalPrice } = req.body;
+
+      // Validate pricing
+      const salePriceNum = parseFloat(salePrice);
+      const rentalPriceNum = parseFloat(rentalPrice);
+      
+      if (isNaN(salePriceNum) || salePriceNum <= 0 || isNaN(rentalPriceNum) || rentalPriceNum <= 0) {
+        return res.status(400).json({ message: "Invalid pricing values" });
+      }
+
+      // Check if seller owns this e-book
+      const ebook = await storage.getEbook(ebookId);
+      if (!ebook || ebook.sellerId !== authenticatedUser.id) {
+        return res.status(404).json({ message: "E-book not found or access denied" });
+      }
+
+      const updatedEbook = await storage.updateEbookPricing(ebookId, {
+        salePrice: Math.round(salePriceNum * 100),
+        rentalPrice: Math.round(rentalPriceNum * 100)
+      });
+
+      res.json({
+        success: true,
+        ebook: {
+          ...updatedEbook,
+          salePrice: updatedEbook.salePrice / 100,
+          rentalPrice: updatedEbook.rentalPrice / 100
+        },
+        message: "E-book pricing updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating e-book pricing:", error);
+      res.status(500).json({ message: "Failed to update pricing" });
+    }
+  });
+
   // Get user's rental history with billing details
   app.get("/api/rentals/user/:userId", async (req, res) => {
     try {
