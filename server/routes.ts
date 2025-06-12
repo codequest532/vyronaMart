@@ -3555,7 +3555,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // E-Book API endpoints with enhanced pricing control
-  app.post("/api/ebooks", upload.single('file'), async (req, res) => {
+  app.post("/api/ebooks", upload.fields([
+    { name: 'file', maxCount: 1 },
+    { name: 'coverImage', maxCount: 1 }
+  ]), async (req, res) => {
     try {
       const authenticatedUser = getAuthenticatedUser(req);
       if (!authenticatedUser || authenticatedUser.role !== 'seller') {
@@ -3576,9 +3579,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         language
       } = req.body;
 
-      // Validate required fields
-      if (!title || !author || !category || !salePrice || !rentalPrice || !req.file) {
-        return res.status(400).json({ message: "Missing required fields" });
+      // Extract uploaded files
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const ebookFile = files?.file?.[0];
+      const coverImageFile = files?.coverImage?.[0];
+
+      // Validate required fields including cover image
+      if (!title || !author || !category || !salePrice || !rentalPrice || !ebookFile || !coverImageFile) {
+        return res.status(400).json({ message: "Missing required fields including e-book file and cover image" });
       }
 
       // Validate pricing
@@ -3589,7 +3597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid pricing values" });
       }
 
-      // Create e-book record
+      // Create e-book record with both file and cover image
       const ebookData = {
         title,
         author,
@@ -3602,9 +3610,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publisher: publisher || '',
         publicationYear: publicationYear || '',
         language: language || 'English',
-        filePath: req.file.path,
-        fileName: req.file.filename,
-        fileSize: req.file.size,
+        filePath: ebookFile.path,
+        fileName: ebookFile.filename,
+        fileSize: ebookFile.size,
+        coverImagePath: coverImageFile.path,
+        coverImageName: coverImageFile.filename,
         sellerId: authenticatedUser.id,
         status: 'active' as const
       };

@@ -582,11 +582,11 @@ export default function BookSellerDashboard() {
   };
 
   const handleEbookUpload = async () => {
-    // Validate required fields including pricing
-    if (!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.salePrice || !newEbook.rentalPrice || !newEbook.file) {
+    // Validate required fields including pricing and cover image
+    if (!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.salePrice || !newEbook.rentalPrice || !newEbook.file || !newEbook.coverImage) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields including sale price, rental price, and select a file",
+        description: "Please fill in all required fields including title, author, category, pricing, e-book file, and cover image",
         variant: "destructive",
       });
       return;
@@ -618,6 +618,7 @@ export default function BookSellerDashboard() {
       // Prepare form data for file upload
       const formData = new FormData();
       formData.append('file', newEbook.file);
+      formData.append('coverImage', newEbook.coverImage);
       formData.append('title', newEbook.title);
       formData.append('author', newEbook.author);
       formData.append('isbn', newEbook.isbn);
