@@ -321,11 +321,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (user) {
+        // Determine seller type for VyronaRead sellers
+        let sellerType;
+        if (user.role === 'seller') {
+          // Check if this is a VyronaRead seller based on email or seller ID
+          if (user.email === 'ganesan.sixphrase@gmail.com' || user.id === 15) {
+            sellerType = 'vyronaread';
+          } else {
+            sellerType = 'vyronahub'; // Default for other sellers
+          }
+        }
+
         req.session.user = {
           id: user.id,
           email: user.email,
           username: user.username,
-          role: user.role as 'customer' | 'seller' | 'admin'
+          role: user.role as 'customer' | 'seller' | 'admin',
+          sellerType
         };
         
         res.json({
@@ -888,7 +900,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Product routes - VyronaHub (individual buy enabled products)
+  // VyronaRead-specific products route for VyronaRead sellers
+  app.get("/api/vyronaread/seller-books", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronaread') {
+        return res.status(403).json({ message: "Access denied. VyronaRead seller access required." });
+      }
+      
+      // Get only VyronaRead books for this seller
+      const products = await storage.getProducts('vyronaread', 'books');
+      const sellerBooks = products.filter(product => 
+        product.metadata?.sellerId === authenticatedUser.id
+      );
+      
+      res.json(sellerBooks);
+    } catch (error) {
+      console.error("Error fetching VyronaRead seller books:", error);
+      res.status(500).json({ message: "Failed to fetch VyronaRead books" });
+    }
+  });
+
+  // Product routes - VyronaHub (individual buy enabled products, excluding VyronaRead)
   app.get("/api/products", async (req, res) => {
     try {
       const { module, category } = req.query;
@@ -896,12 +934,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         module as string,
         category as string
       );
-      // Filter products that have individual buy enabled (including those with both enabled)
-      const individualBuyProducts = products.filter(product => 
-        product.enableIndividualBuy !== false
+      
+      // Filter out VyronaRead products for VyronaHub interface
+      // Only show products that are NOT vyronaread module
+      const hubProducts = products.filter(product => 
+        product.enableIndividualBuy !== false && 
+        product.module !== 'vyronaread'
       );
       
-      res.json(individualBuyProducts);
+      res.json(hubProducts);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
     }

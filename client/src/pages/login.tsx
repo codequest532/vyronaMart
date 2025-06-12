@@ -100,13 +100,11 @@ export default function Login() {
       if (data.user.role === "admin") {
         setLocation("/admin-dashboard");
       } else if (data.user.role === "seller") {
-        // Check seller type based on email
-        if (data.user.email === "seller@vyronaread.com") {
-          setLocation("/vyronaread-seller-dashboard");
-        } else if (data.user.email === "bookseller@vyronaread.com") {
+        // Route sellers based on their seller type
+        if (data.user.sellerType === "vyronaread") {
           setLocation("/vyronaread-dashboard");
         } else {
-          setLocation("/seller-dashboard");
+          setLocation("/vyronahub-dashboard");
         }
       } else {
         setLocation("/");
