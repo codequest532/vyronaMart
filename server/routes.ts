@@ -6240,28 +6240,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         WHERE metadata->>'sellerId' = ${sellerId.toString()}
       `);
 
-      // Get and remove seller's stores (find stores that might be owned by this seller)
-      const sellerStores = await db.execute(sql`
-        SELECT id FROM stores 
-        WHERE metadata->>'sellerId' = ${sellerId.toString()}
-           OR metadata->>'ownerId' = ${sellerId.toString()}
+      // Remove products by seller_id column (VyronaRead specific)
+      await db.execute(sql`
+        DELETE FROM products WHERE seller_id = ${sellerId}
       `);
 
-      if (sellerStores.rows.length > 0) {
-        // Remove products from seller's stores
-        for (const store of sellerStores.rows) {
-          await db.execute(sql`
-            DELETE FROM products WHERE store_id = ${store.id}
-          `);
-        }
-        
-        // Remove the stores themselves
-        for (const store of sellerStores.rows) {
-          await db.execute(sql`
-            DELETE FROM stores WHERE id = ${store.id}
-          `);
-        }
-      }
+      // Remove VyronaRead specific data - physical books
+      await db.execute(sql`
+        DELETE FROM physical_books WHERE library_id = ${sellerId}
+      `);
+
+      // Remove VyronaRead specific data - e-books
+      await db.execute(sql`
+        DELETE FROM e_books WHERE seller_id = ${sellerId}
+      `);
+
+      // Remove VyronaRead specific data - book loans
+      await db.execute(sql`
+        DELETE FROM book_loans WHERE library_id = ${sellerId}
+      `);
 
       // Finally remove the seller user account
       await db.execute(sql`
