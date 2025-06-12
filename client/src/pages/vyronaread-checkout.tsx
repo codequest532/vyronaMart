@@ -134,6 +134,9 @@ export default function VyronaReadCheckout() {
       let response;
       if (checkoutType === 'borrow') {
         response = await fetch(`/api/vyronaread/library-books/${bookId}`);
+      } else if (urlParams.get('format') === 'ebook') {
+        // For e-books, fetch from the e-books endpoint
+        response = await fetch(`/api/vyronaread/ebooks/${bookId}`);
       } else {
         response = await fetch(`/api/products/${bookId}`);
       }

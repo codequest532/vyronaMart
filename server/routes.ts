@@ -559,6 +559,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get individual e-book by ID for checkout
+  app.get("/api/vyronaread/ebooks/:id", async (req, res) => {
+    try {
+      const ebookId = parseInt(req.params.id);
+      if (isNaN(ebookId)) {
+        return res.status(400).json({ message: "Invalid e-book ID" });
+      }
+      
+      const ebook = await storage.getEbook(ebookId);
+      if (!ebook) {
+        return res.status(404).json({ message: "E-book not found" });
+      }
+      
+      res.json(ebook);
+    } catch (error) {
+      console.error("Error fetching e-book:", error);
+      res.status(500).json({ message: "Failed to fetch e-book" });
+    }
+  });
+
   app.get("/api/vyronaread/seller-books", async (req, res) => {
     try {
       const sellerId = req.query.sellerId;
