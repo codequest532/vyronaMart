@@ -3481,6 +3481,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // E-Book bulk CSV import endpoint for VyronaRead sellers
+  app.post("/api/vyronaread/ebooks", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronaread') {
+        return res.status(401).json({ message: "VyronaRead seller authentication required" });
+      }
+
+      const {
+        title,
+        author,
+        isbn,
+        category,
+        format,
+        description,
+        salePrice,
+        rentalPrice,
+        publisher,
+        publicationYear,
+        language,
+        status
+      } = req.body;
+
+      // Validate required fields
+      if (!title || !author || !category || !salePrice || !rentalPrice) {
+        return res.status(400).json({ message: "Missing required fields: title, author, category, salePrice, rentalPrice" });
+      }
+
+      // Validate pricing
+      const salePriceNum = parseFloat(salePrice);
+      const rentalPriceNum = parseFloat(rentalPrice);
+      
+      if (isNaN(salePriceNum) || salePriceNum <= 0 || isNaN(rentalPriceNum) || rentalPriceNum <= 0) {
+        return res.status(400).json({ message: "Invalid pricing values" });
+      }
+
+      // Create e-book record
+      const ebookData = {
+        title,
+        author,
+        isbn: isbn || `AUTO-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        category: category.toLowerCase(),
+        format: format || 'PDF',
+        description: description || '',
+        salePrice: Math.round(salePriceNum * 100), // Store in cents
+        rentalPrice: Math.round(rentalPriceNum * 100), // Store in cents
+        publisher: publisher || 'Unknown Publisher',
+        publicationYear: publicationYear || new Date().getFullYear().toString(),
+        language: language || 'English',
+        filePath: '', // Will be set when file is uploaded
+        fileName: '',
+        fileSize: 0,
+        sellerId: authenticatedUser.id,
+        status: status || 'active'
+      };
+
+      const ebook = await storage.createEbook(ebookData);
+
+      res.json({
+        success: true,
+        ebook: {
+          ...ebook,
+          salePrice: ebook.salePrice / 100, // Convert back to rupees for display
+          rentalPrice: ebook.rentalPrice / 100
+        },
+        message: "E-book created successfully"
+      });
+    } catch (error) {
+      console.error("E-book creation error:", error);
+      res.status(500).json({ message: "Failed to create e-book" });
+    }
+  });
+
   // E-Book API endpoints with enhanced pricing control
   app.post("/api/ebooks", upload.single('file'), async (req, res) => {
     try {
