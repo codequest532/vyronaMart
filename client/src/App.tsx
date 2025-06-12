@@ -62,6 +62,19 @@ function Router() {
       {/* Seller Interface */}
       <Route path="/vyronahub-dashboard" component={VyronaHubDashboard} />
       
+      {/* Legacy seller routes - redirect to appropriate dashboard */}
+      <Route path="/seller-dashboard">
+        {() => {
+          const { user } = useUserData();
+          if (user?.role === 'seller' && user?.sellerType === 'vyronaread') {
+            window.location.href = '/vyronaread-dashboard';
+          } else {
+            window.location.href = '/vyronahub-dashboard';
+          }
+          return null;
+        }}
+      </Route>
+      
       {/* VyronaRead Interface */}
       <Route path="/book-seller-dashboard" component={VyronaReadDashboard} />
       <Route path="/vyronaread-dashboard" component={VyronaReadDashboard} />
