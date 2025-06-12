@@ -659,7 +659,8 @@ export default function BookSellerDashboard() {
         publisher: "",
         publicationYear: "",
         language: "English",
-        file: null
+        file: null,
+        coverImage: null
       });
 
       // Refresh the product list to show the new e-book
@@ -2063,6 +2064,50 @@ export default function BookSellerDashboard() {
                         </p>
                       )}
                     </div>
+                  </div>
+                </div>
+
+                {/* Book Cover Upload Section */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="ebookCover">Book Cover Image *</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                    <div className="text-center">
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <div className="text-sm text-gray-600 mb-2">
+                        Upload book cover image
+                      </div>
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setNewEbook({ ...newEbook, coverImage: file });
+                          }
+                        }}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                      <div className="text-xs text-gray-500 mt-2">
+                        Supported formats: JPG, PNG, WebP (Max: 5MB)
+                      </div>
+                    </div>
+                    {newEbook.coverImage && (
+                      <div className="mt-4 p-3 bg-green-50 rounded border">
+                        <div className="text-sm text-green-700 flex items-center gap-2">
+                          <div className="w-16 h-20 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                            <img 
+                              src={URL.createObjectURL(newEbook.coverImage)} 
+                              alt="Cover preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-medium">✓ Cover image selected</div>
+                            <div className="text-xs text-gray-600">{newEbook.coverImage.name}</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 
