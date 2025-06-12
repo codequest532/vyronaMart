@@ -121,7 +121,11 @@ export default function BookSellerDashboard() {
     category: "",
     format: "PDF",
     description: "",
-    price: 0,
+    salePrice: "",
+    rentalPrice: "",
+    publisher: "",
+    publicationYear: "",
+    language: "English",
     file: null as File | null
   });
 
