@@ -675,7 +675,67 @@ export default function BookSellerDashboard() {
     }
   };
 
+  const handleEbookBulkImport = async () => {
+    if (!csvPreview.length) {
+      toast({
+        title: "No Data",
+        description: "Please upload a CSV file first",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setIsImporting(true);
+    setImportProgress(0);
+
+    try {
+      for (let i = 0; i < csvPreview.length; i++) {
+        const ebook = csvPreview[i];
+        
+        const ebookData = {
+          title: ebook.Title,
+          author: ebook.Author,
+          isbn: ebook.ISBN || `AUTO-${Date.now()}-${i}`,
+          category: ebook.Category.toLowerCase(),
+          format: ebook.Format,
+          publisher: ebook.Publisher,
+          publicationYear: ebook.PublicationYear,
+          language: ebook.Language,
+          salePrice: ebook.SalePrice,
+          rentalPrice: ebook.RentalPrice,
+          description: ebook.Description || '',
+          status: 'active'
+        };
+
+        await apiRequest('POST', '/api/vyronaread/ebooks', ebookData);
+
+        setImportProgress(Math.round(((i + 1) / csvPreview.length) * 100));
+      }
+
+      toast({
+        title: "Import Successful",
+        description: `Successfully imported ${csvPreview.length} e-books`,
+      });
+      
+      // Reset state and refresh data
+      setShowEbookUploadDialog(false);
+      setCsvFile(null);
+      setCsvPreview([]);
+      queryClient.invalidateQueries({ queryKey: ['/api/vyronaread/ebooks'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      
+    } catch (error) {
+      console.error('E-book bulk import error:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to import e-books. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+      setImportProgress(0);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -1831,15 +1891,22 @@ export default function BookSellerDashboard() {
 
           {/* E-Book Upload Dialog */}
           <Dialog open={showEbookUploadDialog} onOpenChange={setShowEbookUploadDialog}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Upload New E-Book</DialogTitle>
+                <DialogTitle>Upload E-Books</DialogTitle>
                 <DialogDescription>
-                  Add a new e-book to your digital catalog
+                  Add e-books individually or import multiple books from CSV
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+              <Tabs defaultValue="single" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="single">Single Upload</TabsTrigger>
+                  <TabsTrigger value="bulk">Bulk CSV Import</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="single">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="ebookTitle">Book Title *</Label>
                   <Input
@@ -2056,6 +2123,217 @@ export default function BookSellerDashboard() {
                   Upload E-Book
                 </Button>
               </div>
+                </TabsContent>
+                
+                <TabsContent value="bulk">
+                  <div className="space-y-4 py-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h3 className="font-semibold text-blue-800 mb-2">Bulk E-Book Import via CSV</h3>
+                      <p className="text-sm text-blue-700 mb-3">
+                        Upload a CSV file containing multiple e-books with their details and pricing information.
+                      </p>
+                      <div className="text-xs text-blue-600">
+                        <strong>Required CSV Columns:</strong>
+                        <br />Title, Author, ISBN, Category, Format, Publisher, PublicationYear, Language, SalePrice, RentalPrice, Description
+                      </div>
+                    </div>
+                    
+                    {!csvFile ? (
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8">
+                        <div className="text-center">
+                          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-gray-700 mb-2">Upload E-Books CSV File</h3>
+                          <p className="text-gray-500 mb-4">
+                            Select a CSV file containing your e-book collection data
+                          </p>
+                          <input
+                            type="file"
+                            accept=".csv"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setCsvFile(file);
+                                // Parse CSV file
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  const csvText = event.target?.result as string;
+                                  const lines = csvText.split('\n').filter(line => line.trim());
+                                  
+                                  if (lines.length === 0) {
+                                    setCsvPreview([]);
+                                    return;
+                                  }
+                                  
+                                  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                                  console.log('CSV Headers:', headers);
+                                  
+                                  const ebooks = [];
+                                  const seenEbooks = new Set();
+                                  
+                                  for (let i = 1; i < lines.length; i++) {
+                                    const line = lines[i].trim();
+                                    if (!line) continue;
+                                    
+                                    // Parse CSV line properly handling quoted fields
+                                    const values = [];
+                                    let current = '';
+                                    let inQuotes = false;
+                                    
+                                    for (let j = 0; j < line.length; j++) {
+                                      const char = line[j];
+                                      if (char === '"') {
+                                        inQuotes = !inQuotes;
+                                      } else if (char === ',' && !inQuotes) {
+                                        values.push(current.trim().replace(/"/g, ''));
+                                        current = '';
+                                      } else {
+                                        current += char;
+                                      }
+                                    }
+                                    values.push(current.trim().replace(/"/g, ''));
+                                    
+                                    // Only process rows with valid e-book data
+                                    if (values.length >= 8 && values[0] && values[1] && values[8] && values[9]) {
+                                      const isbn = values[2] || `AUTO-${Date.now()}-${i}`;
+                                      
+                                      // Skip if we've already seen this e-book
+                                      if (seenEbooks.has(isbn)) {
+                                        console.log(`Skipping duplicate e-book with ISBN: ${isbn}`);
+                                        continue;
+                                      }
+                                      
+                                      const ebook: any = {};
+                                      ebook["Title"] = values[0] || '';
+                                      ebook["Author"] = values[1] || '';
+                                      ebook["ISBN"] = values[2] || isbn;
+                                      ebook["Category"] = values[3] || 'fiction';
+                                      ebook["Format"] = values[4] || 'PDF';
+                                      ebook["Publisher"] = values[5] || 'Unknown Publisher';
+                                      ebook["PublicationYear"] = values[6] || '2024';
+                                      ebook["Language"] = values[7] || 'English';
+                                      ebook["SalePrice"] = values[8] || '';
+                                      ebook["RentalPrice"] = values[9] || '';
+                                      ebook["Description"] = values[10] || '';
+                                      
+                                      if (ebook["Title"] && ebook["Author"] && ebook["SalePrice"] && ebook["RentalPrice"]) {
+                                        ebooks.push(ebook);
+                                        seenEbooks.add(isbn);
+                                        console.log(`Added e-book: "${ebook["Title"]}" by ${ebook["Author"]}`);
+                                      }
+                                    }
+                                  }
+                                  
+                                  setCsvPreview(ebooks);
+                                  console.log(`Final result: ${ebooks.length} unique e-books parsed`);
+                                };
+                                reader.readAsText(file);
+                              }
+                            }}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                          />
+                          <div className="text-xs text-gray-500 mt-2">
+                            Expected format: Title,Author,ISBN,Category,Format,Publisher,PublicationYear,Language,SalePrice,RentalPrice,Description
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span className="font-medium text-green-800">CSV File Loaded</span>
+                          </div>
+                          <div className="text-sm text-green-600">
+                            {csvFile.name} • {csvPreview.length} e-books found
+                          </div>
+                        </div>
+                        
+                        {csvPreview.length > 0 && (
+                          <div className="space-y-4">
+                            <h4 className="font-semibold text-gray-800">E-Books Preview ({csvPreview.length} items)</h4>
+                            <div className="max-h-64 overflow-y-auto border rounded-lg">
+                              <table className="w-full text-sm">
+                                <thead className="bg-gray-50 sticky top-0">
+                                  <tr>
+                                    <th className="px-3 py-2 text-left font-medium text-gray-600">Title</th>
+                                    <th className="px-3 py-2 text-left font-medium text-gray-600">Author</th>
+                                    <th className="px-3 py-2 text-left font-medium text-gray-600">Category</th>
+                                    <th className="px-3 py-2 text-left font-medium text-gray-600">Format</th>
+                                    <th className="px-3 py-2 text-left font-medium text-gray-600">Sale Price</th>
+                                    <th className="px-3 py-2 text-left font-medium text-gray-600">Rental Price</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {csvPreview.slice(0, 10).map((ebook: any, index: number) => (
+                                    <tr key={index} className="border-t hover:bg-gray-50">
+                                      <td className="px-3 py-2 font-medium">{ebook["Title"]}</td>
+                                      <td className="px-3 py-2">{ebook["Author"]}</td>
+                                      <td className="px-3 py-2">{ebook["Category"]}</td>
+                                      <td className="px-3 py-2">{ebook["Format"]}</td>
+                                      <td className="px-3 py-2">₹{ebook["SalePrice"]}</td>
+                                      <td className="px-3 py-2">₹{ebook["RentalPrice"]}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                              {csvPreview.length > 10 && (
+                                <div className="p-2 text-center text-sm text-gray-500 bg-gray-50">
+                                  ... and {csvPreview.length - 10} more e-books
+                                </div>
+                              )}
+                            </div>
+                            
+                            {isImporting && (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span>Importing e-books...</span>
+                                  <span>{importProgress}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div 
+                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                    style={{ width: `${importProgress}%` }}
+                                  ></div>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                  setCsvFile(null);
+                                  setCsvPreview([]);
+                                }}
+                                disabled={isImporting}
+                              >
+                                Clear
+                              </Button>
+                              <Button 
+                                onClick={handleEbookBulkImport}
+                                disabled={isImporting || csvPreview.length === 0}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {isImporting ? 'Importing...' : `Import ${csvPreview.length} E-Books`}
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs text-gray-500 mt-4">
+                          <strong>Note:</strong> ISBN fields will be auto-generated if not provided in CSV.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 pt-4 border-t">
+                    <Button variant="outline" onClick={() => setShowEbookUploadDialog(false)}>
+                      Close
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </DialogContent>
           </Dialog>
 
