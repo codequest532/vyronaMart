@@ -200,10 +200,7 @@ export default function VyronaInstaStoreDashboard() {
 
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, data }: { orderId: number; data: OrderStatusFormData }) => {
-      return apiRequest(`/api/vyronainstastore/orders/${orderId}/status`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("PUT", `/api/vyronainstastore/orders/${orderId}/status`, data);
     },
     onSuccess: () => {
       toast({
@@ -224,9 +221,7 @@ export default function VyronaInstaStoreDashboard() {
 
   const syncInstagramMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/vyronainstastore/sync", {
-        method: "POST",
-      });
+      return apiRequest("POST", "/api/vyronainstastore/sync", {});
     },
     onSuccess: () => {
       toast({
