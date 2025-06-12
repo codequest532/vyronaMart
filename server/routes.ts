@@ -930,6 +930,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const { module, category } = req.query;
+      
+      // If specifically requesting VyronaRead products, return them directly
+      if (module === 'vyronaread') {
+        const vyronareadProducts = await storage.getProducts('vyronaread', category as string);
+        return res.json(vyronareadProducts);
+      }
+      
       const products = await storage.getProducts(
         module as string,
         category as string
