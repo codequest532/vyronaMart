@@ -579,6 +579,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // E-book purchase endpoint with email notifications
+  app.post("/api/vyronaread/ebook-purchase", async (req, res) => {
+    try {
+      const { ebookId, customerInfo, transactionType, paymentMethod, duration } = req.body;
+      
+      if (!ebookId || !customerInfo || !transactionType) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Get e-book details
+      const ebook = await storage.getEbook(parseInt(ebookId));
+      if (!ebook) {
+        return res.status(404).json({ message: "E-book not found" });
+      }
+
+      // Calculate amount based on transaction type
+      const amount = transactionType === 'buy' 
+        ? ebook.salePrice / 100 
+        : ebook.rentalPrice / 100;
+
+      // Calculate rental expiry if applicable
+      let expiryDate = null;
+      if (transactionType === 'rent' && duration) {
+        const currentDate = new Date();
+        expiryDate = new Date(currentDate.getTime() + (duration * 24 * 60 * 60 * 1000));
+      }
+
+      // Create order record
+      const order = await storage.createOrder({
+        userId: 1, // Default user for now
+        totalAmount: amount,
+        status: "completed",
+        module: "vyronaread",
+        metadata: {
+          type: "ebook_purchase",
+          ebookId: parseInt(ebookId),
+          ebookTitle: ebook.title,
+          ebookAuthor: ebook.author,
+          customerInfo,
+          paymentMethod,
+          transactionType,
+          accessType: transactionType === 'buy' ? 'lifetime' : 'temporary',
+          duration: duration || null,
+          rentalExpiry: expiryDate ? expiryDate.toISOString() : null
+        }
+      });
+
+      // Send seller notification email
+      try {
+        const { sendBrevoEmail } = await import('./brevo-email');
+        const sellerEmail = 'ganesan.sixphrase@gmail.com';
+        const sellerName = 'MSR';
+        
+        const emailResult = await sendBrevoEmail(
+          sellerEmail,
+          `New E-book ${transactionType === 'buy' ? 'Purchase' : 'Rental'} - VyronaRead`,
+          `<h2>New E-book ${transactionType === 'buy' ? 'Purchase' : 'Rental'} Notification</h2>
+            <p>Dear ${sellerName},</p>
+            <p>A customer has ${transactionType === 'buy' ? 'purchased' : 'rented'} an e-book from VyronaRead (Order #${order.id}).</p>
+            <h3>E-book Details:</h3>
+            <ul>
+              <li>Title: ${ebook.title}</li>
+              <li>Author: ${ebook.author}</li>
+              <li>ISBN: ${ebook.isbn}</li>
+              <li>Amount: ₹${amount.toFixed(2)}</li>
+              <li>Transaction Type: ${transactionType === 'buy' ? 'Purchase (Lifetime Access)' : `Rental (${duration} days)`}</li>
+              <li>Payment Method: ${paymentMethod.toUpperCase()}</li>
+              ${transactionType === 'rent' ? `<li>Rental Expires: ${expiryDate?.toLocaleDateString()}</li>` : ''}
+            </ul>
+            <h3>Customer Details:</h3>
+            <p>
+              Name: ${customerInfo.name}<br>
+              Email: ${customerInfo.email}<br>
+              Phone: ${customerInfo.phone}
+            </p>
+            <p>Please log in to your VyronaRead seller dashboard to view this transaction.</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (emailResult.success) {
+          console.log(`E-book ${transactionType} notification sent successfully to ${sellerEmail}`);
+        } else {
+          console.error(`Failed to send e-book ${transactionType} notification:`, emailResult.error);
+        }
+      } catch (emailError) {
+        console.error("E-book seller email notification failed:", emailError);
+      }
+
+      // Send customer confirmation email
+      try {
+        const { sendBrevoEmail } = await import('./brevo-email');
+        
+        const customerEmailResult = await sendBrevoEmail(
+          customerInfo.email,
+          `E-book ${transactionType === 'buy' ? 'Purchase' : 'Rental'} Confirmation - VyronaRead`,
+          `<h2>Your e-book ${transactionType === 'buy' ? 'purchase' : 'rental'} is confirmed!</h2>
+            <p>Dear ${customerInfo.name},</p>
+            <p>Thank you for your e-book ${transactionType === 'buy' ? 'purchase' : 'rental'} (Order #${order.id}).</p>
+            <h3>E-book Details:</h3>
+            <ul>
+              <li>Title: ${ebook.title}</li>
+              <li>Author: ${ebook.author}</li>
+              <li>Format: ${ebook.format}</li>
+              <li>Amount Paid: ₹${amount.toFixed(2)}</li>
+              <li>Payment Method: ${paymentMethod.toUpperCase()}</li>
+              <li>Access Type: ${transactionType === 'buy' ? 'Lifetime Access' : `${duration} days rental`}</li>
+              ${transactionType === 'rent' ? `<li>Access Expires: ${expiryDate?.toLocaleDateString()}</li>` : ''}
+            </ul>
+            <p>You can now access your e-book from your VyronaRead account${transactionType === 'rent' ? ' until the expiry date' : ''}.</p>
+            <p>Start reading immediately or download for offline access.</p>
+            <p>Thank you for choosing VyronaRead!</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (customerEmailResult.success) {
+          console.log(`Customer e-book ${transactionType} confirmation sent to ${customerInfo.email}`);
+        }
+      } catch (customerEmailError) {
+        console.error("Customer e-book confirmation email failed:", customerEmailError);
+      }
+
+      res.json({
+        success: true,
+        orderId: order.id,
+        message: `E-book ${transactionType === 'buy' ? 'purchased' : 'rented'} successfully`,
+        accessType: transactionType === 'buy' ? 'lifetime' : 'temporary',
+        expiryDate: expiryDate ? expiryDate.toISOString() : null
+      });
+    } catch (error) {
+      console.error("E-book purchase error:", error);
+      res.status(500).json({ message: "Failed to process e-book transaction" });
+    }
+  });
+
   app.get("/api/vyronaread/seller-books", async (req, res) => {
     try {
       const sellerId = req.query.sellerId;
@@ -4841,6 +4975,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("VyronaRead purchase email notification failed:", emailError);
       }
 
+      // Send customer confirmation email
+      try {
+        const { sendBrevoEmail } = await import('./brevo-email');
+        
+        const customerEmailResult = await sendBrevoEmail(
+          customerInfo.email,
+          "Purchase Confirmation - VyronaRead",
+          `<h2>Thank you for your purchase!</h2>
+            <p>Dear ${customerInfo.name},</p>
+            <p>Your book purchase has been confirmed (Order #${order.id}).</p>
+            <h3>Purchase Details:</h3>
+            <ul>
+              <li>Book ID: ${bookId}</li>
+              <li>Amount Paid: ₹${amount.toFixed(2)}</li>
+              <li>Payment Method: ${paymentMethod.toUpperCase()}</li>
+              <li>Access Type: Lifetime</li>
+            </ul>
+            <p>You can access your purchased book from your VyronaRead account.</p>
+            <p>Thank you for choosing VyronaRead!</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (customerEmailResult.success) {
+          console.log(`Customer purchase confirmation sent to ${customerInfo.email}`);
+        }
+      } catch (customerEmailError) {
+        console.error("Customer confirmation email failed:", customerEmailError);
+      }
+
       res.json({
         success: true,
         orderId: order.id,
@@ -4917,6 +5080,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (emailError) {
         console.error("VyronaRead rental email notification failed:", emailError);
+      }
+
+      // Send customer rental confirmation email
+      try {
+        const { sendBrevoEmail } = await import('./brevo-email');
+        
+        const customerEmailResult = await sendBrevoEmail(
+          customerInfo.email,
+          "Rental Confirmation - VyronaRead",
+          `<h2>Your book rental is confirmed!</h2>
+            <p>Dear ${customerInfo.name},</p>
+            <p>Your book rental has been confirmed (Order #${order.id}).</p>
+            <h3>Rental Details:</h3>
+            <ul>
+              <li>Book ID: ${bookId}</li>
+              <li>Rental Amount: ₹${amount.toFixed(2)}</li>
+              <li>Rental Duration: ${duration} days</li>
+              <li>Payment Method: ${paymentMethod.toUpperCase()}</li>
+              <li>Access Expires: ${expiryDate.toLocaleDateString()}</li>
+            </ul>
+            <p>You can access your rented book from your VyronaRead account until the expiry date.</p>
+            <p>Thank you for choosing VyronaRead!</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (customerEmailResult.success) {
+          console.log(`Customer rental confirmation sent to ${customerInfo.email}`);
+        }
+      } catch (customerEmailError) {
+        console.error("Customer rental confirmation email failed:", customerEmailError);
       }
 
       res.json({
