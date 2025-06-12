@@ -280,8 +280,8 @@ export default function BookSellerDashboard() {
     if (!userLoading && currentUser) {
       if (currentUser.role !== "seller") {
         setLocation("/login");
-      } else if (currentUser.email !== "bookseller@vyronaread.com") {
-        setLocation("/seller-dashboard");
+      } else if (currentUser.sellerType !== "vyronaread") {
+        setLocation("/vyronahub-dashboard");
       }
     }
   }, [currentUser, userLoading, setLocation]);

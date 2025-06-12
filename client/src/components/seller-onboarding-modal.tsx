@@ -1185,8 +1185,8 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
               });
             }, 1000);
           } else {
-            // Other seller types go to general dashboard
-            setLocation("/seller-dashboard");
+            // Other seller types go to VyronaHub dashboard
+            setLocation("/vyronahub-dashboard");
             setTimeout(() => {
               toast({
                 title: "Welcome to VyronaMart!",

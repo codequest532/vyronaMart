@@ -2772,7 +2772,13 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => setLocation('/seller-dashboard')}
+                                onClick={() => {
+                                  if (seller.sellerType === 'vyronaread') {
+                                    setLocation('/vyronaread-dashboard');
+                                  } else {
+                                    setLocation('/vyronahub-dashboard');
+                                  }
+                                }}
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>

@@ -158,7 +158,12 @@ export default function Login() {
         title: "Seller Account Created",
         description: "Welcome to Vyrona! Your seller account is ready.",
       });
-      setLocation("/seller-dashboard");
+      // Route based on seller type after registration
+      if (data.user?.sellerType === 'vyronaread') {
+        setLocation("/vyronaread-dashboard");
+      } else {
+        setLocation("/vyronahub-dashboard");
+      }
     },
     onError: (error: any) => {
       toast({
