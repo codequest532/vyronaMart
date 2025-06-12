@@ -4,9 +4,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,9 +25,18 @@ import { useLocation } from "wouter";
 // Schemas for form validation
 const instagramConnectSchema = z.object({
   instagramUsername: z.string().min(1, "Instagram username is required"),
-  accessToken: z.string().min(1, "Instagram Business API access token is required"),
+  accessToken: z.string().optional(),
   storeName: z.string().min(2, "Store name must be at least 2 characters"),
   storeDescription: z.string().optional(),
+  demoMode: z.boolean().optional(),
+}).refine((data) => {
+  if (!data.demoMode && (!data.accessToken || data.accessToken.length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Instagram Business API access token is required unless demo mode is enabled",
+  path: ["accessToken"],
 });
 
 const productSchema = z.object({
@@ -112,6 +122,7 @@ export default function VyronaInstaStoreDashboard() {
       accessToken: "",
       storeName: "",
       storeDescription: "",
+      demoMode: false,
     },
   });
 
@@ -160,12 +171,13 @@ export default function VyronaInstaStoreDashboard() {
     mutationFn: async (data: InstagramConnectFormData) => {
       return apiRequest("POST", "/api/vyronainstastore/connect", data);
     },
-    onSuccess: () => {
+    onSuccess: (response: any) => {
       toast({
         title: "Instagram Connected",
-        description: "Your Instagram account has been connected successfully!",
+        description: response.message || `Successfully connected and synced ${response.syncedProducts || 0} products`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/store"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/products"] });
       setIsConnectDialogOpen(false);
       connectForm.reset();
     },
@@ -173,6 +185,27 @@ export default function VyronaInstaStoreDashboard() {
       toast({
         title: "Connection Failed",
         description: error.message || "Failed to connect Instagram account",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const syncInstagramMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/vyronainstastore/sync", {});
+    },
+    onSuccess: (response: any) => {
+      toast({
+        title: "Sync Complete",
+        description: response.message || "Instagram data synced successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/store"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/products"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync Instagram data",
         variant: "destructive",
       });
     },
@@ -221,25 +254,7 @@ export default function VyronaInstaStoreDashboard() {
     },
   });
 
-  const syncInstagramMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/vyronainstastore/sync", {});
-    },
-    onSuccess: () => {
-      toast({
-        title: "Sync Complete",
-        description: "Instagram data has been synchronized!",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/products"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Sync Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+
 
   // Helper functions
   const formatCurrency = (amount: number) => {
