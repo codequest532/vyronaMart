@@ -463,7 +463,7 @@ export default function VyronaRead() {
   const getFilteredBooks = () => {
     console.log("VyronaRead getFilteredBooks - sellerBooks:", sellerBooks);
     console.log("VyronaRead getFilteredBooks - sellerBooks length:", sellerBooks?.length);
-    let allBooks = [...(Array.isArray(sellerBooks) ? sellerBooks : [])];
+    let allBooks: any[] = [...(Array.isArray(sellerBooks) ? sellerBooks : [])];
     console.log("VyronaRead getFilteredBooks - allBooks after copy:", allBooks.length);
     
     // Only use seller books - library books are for library browsing only
@@ -472,31 +472,31 @@ export default function VyronaRead() {
     if (selectedCollection) {
       switch (selectedCollection) {
         case "bestsellers":
-          allBooks = allBooks.filter(book => book.rating >= 4 || book.popular);
+          allBooks = allBooks.filter((book: any) => (book.rating || 0) >= 4 || book.popular);
           break;
         case "new-arrivals":
-          allBooks = allBooks.filter(book => {
+          allBooks = allBooks.filter((book: any) => {
             const bookDate = new Date(book.createdAt || book.dateAdded || Date.now());
             const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
             return bookDate > thirtyDaysAgo;
           });
           break;
         case "staff-picks":
-          allBooks = allBooks.filter(book => book.featured || book.staffPick);
+          allBooks = allBooks.filter((book: any) => book.featured || book.staffPick);
           break;
       }
     }
 
     // Category filtering
     if (selectedCategory !== "all") {
-      allBooks = allBooks.filter(book => 
+      allBooks = allBooks.filter((book: any) => 
         book.category?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
     // Advanced filters
     if (filters.format !== "all") {
-      allBooks = allBooks.filter(book => {
+      allBooks = allBooks.filter((book: any) => {
         if (filters.format === "physical") return !book.isEbook;
         if (filters.format === "digital") return book.isEbook;
         return true;
@@ -504,19 +504,19 @@ export default function VyronaRead() {
     }
 
     if (filters.availability !== "all") {
-      allBooks = allBooks.filter(book => {
-        if (filters.availability === "available") return book.isAvailable || book.copies > 0;
-        if (filters.availability === "borrowed") return !book.isAvailable && book.copies === 0;
+      allBooks = allBooks.filter((book: any) => {
+        if (filters.availability === "available") return book.isAvailable || (book.copies || 0) > 0;
+        if (filters.availability === "borrowed") return !book.isAvailable && (book.copies || 0) === 0;
         return true;
       });
     }
 
     if (filters.rating > 0) {
-      allBooks = allBooks.filter(book => (book.rating || 0) >= filters.rating);
+      allBooks = allBooks.filter((book: any) => (book.rating || 0) >= filters.rating);
     }
 
     if (filters.language !== "all") {
-      allBooks = allBooks.filter(book => 
+      allBooks = allBooks.filter((book: any) => 
         book.language?.toLowerCase() === filters.language.toLowerCase()
       );
     }
@@ -533,8 +533,10 @@ export default function VyronaRead() {
     queryKey: ["/api/products", "vyronaread", "books"],
     queryFn: () => apiRequest("GET", "/api/products?module=vyronaread&category=books"),
     select: (data) => {
+      console.log("VyronaRead - Raw API response:", data);
+      console.log("VyronaRead - Is array?", Array.isArray(data));
       // Transform the already filtered VyronaRead books data
-      return Array.isArray(data) ? data.map((product: any) => ({
+      const transformed = Array.isArray(data) ? data.map((product: any) => ({
         id: product.id,
         name: product.name,
         title: product.name, // Map name to title for consistency
@@ -551,8 +553,16 @@ export default function VyronaRead() {
         publicationYear: product.metadata?.publicationYear,
         language: product.metadata?.language || "English",
         rating: 4.5, // Default rating
-        createdAt: product.createdAt
+        createdAt: product.createdAt,
+        popular: false,
+        dateAdded: product.createdAt,
+        featured: false,
+        staffPick: false,
+        isEbook: product.metadata?.format === "digital"
       })) : [];
+      console.log("VyronaRead - Transformed data:", transformed);
+      console.log("VyronaRead - Transformed data length:", transformed.length);
+      return transformed;
     }
   });
 
@@ -785,8 +795,8 @@ export default function VyronaRead() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {getFilteredBooks().map((book, index) => (
-                <Card key={index} className="group border-2 border-gray-200 hover:border-purple-300 transition-all hover:shadow-lg">
+              {getFilteredBooks().map((book: any, index: number) => (
+                <Card key={`book-${book.id}-${index}`} className="group border-2 border-gray-200 hover:border-purple-300 transition-all hover:shadow-lg">
                   <div className="relative">
                     {/* Book Cover */}
                     <div className="h-48 bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800 relative overflow-hidden rounded-t-lg">
