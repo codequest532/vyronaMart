@@ -1184,23 +1184,43 @@ export default function VyronaRead() {
 
                       {/* Action Buttons */}
                       <div className="space-y-2">
-                        <Button 
-                          size="sm" 
-                          className="w-full bg-blue-600 hover:bg-blue-700 group-hover:bg-blue-700 transition-colors"
-                          onClick={() => proceedToEBookCheckout(ebook, 'buy')}
-                        >
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          Buy - ₹{ebook.salePrice || ebook.price || '9.99'}
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          className="w-full border-orange-200 text-orange-700 hover:bg-orange-50"
-                          onClick={() => proceedToEBookCheckout(ebook, 'rent')}
-                        >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Rent - ₹{ebook.rentalPrice || '2.99'}
-                        </Button>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            size="sm" 
+                            className="bg-blue-600 hover:bg-blue-700"
+                            onClick={() => proceedToEBookCheckout(ebook, 'buy')}
+                          >
+                            Buy - ₹{ebook.salePrice || ebook.price || '9.99'}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="border-orange-200 text-orange-700 hover:bg-orange-50"
+                            onClick={() => proceedToEBookCheckout(ebook, 'rent')}
+                          >
+                            Rent - ₹{ebook.rentalPrice || '2.99'}
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                            onClick={() => addToCart(ebook, 'buy')}
+                          >
+                            <ShoppingCart className="mr-1 h-3 w-3" />
+                            Add to Cart
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-green-600 border-green-600 hover:bg-green-50"
+                            onClick={() => addToCart(ebook, 'rent')}
+                          >
+                            <Calendar className="mr-1 h-3 w-3" />
+                            Add to Rent Cart
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Features */}
