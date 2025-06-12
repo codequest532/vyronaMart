@@ -25,18 +25,9 @@ import { useLocation } from "wouter";
 // Schemas for form validation
 const instagramConnectSchema = z.object({
   instagramUsername: z.string().min(1, "Instagram username is required"),
-  accessToken: z.string().optional(),
   storeName: z.string().min(2, "Store name must be at least 2 characters"),
   storeDescription: z.string().optional(),
   demoMode: z.boolean().optional(),
-}).refine((data) => {
-  if (!data.demoMode && (!data.accessToken || data.accessToken.length === 0)) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Instagram Business API access token is required unless demo mode is enabled",
-  path: ["accessToken"],
 });
 
 const productSchema = z.object({
@@ -131,10 +122,9 @@ export default function VyronaInstaStoreDashboard() {
     resolver: zodResolver(instagramConnectSchema),
     defaultValues: {
       instagramUsername: "",
-      accessToken: "",
       storeName: "",
       storeDescription: "",
-      demoMode: false,
+      demoMode: true, // Default to demo mode for easier onboarding
     },
   });
 
@@ -383,17 +373,23 @@ export default function VyronaInstaStoreDashboard() {
             <p className="text-xl text-gray-600">Connect your Instagram account to start selling</p>
           </div>
 
-          <Card className="max-w-md mx-auto">
+          <Card className="max-w-lg mx-auto">
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center">
                 <Instagram className="h-6 w-6 mr-2 text-pink-500" />
-                Connect Instagram
+                Setup Your VyronaInstaStore
               </CardTitle>
               <CardDescription>
-                Link your Instagram account to create your VyronaInstaStore
+                Get started quickly with demo mode or connect your real Instagram Business API
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <h4 className="font-medium text-green-900 mb-2">🚀 Quick Start Recommended</h4>
+                <p className="text-sm text-green-700">
+                  Enable demo mode below to start immediately with sample products. Perfect for testing and getting familiar with the platform!
+                </p>
+              </div>
               <Form {...connectForm}>
                 <form onSubmit={connectForm.handleSubmit((data) => connectInstagramMutation.mutate(data))} className="space-y-4">
                   <FormField
@@ -409,26 +405,7 @@ export default function VyronaInstaStoreDashboard() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={connectForm.control}
-                    name="accessToken"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Instagram Business API Token</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Get token from developers.facebook.com" 
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormDescription className="text-xs">
-                          Obtain your Instagram Business API access token from Meta Developers to sync real products
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
                   <FormField
                     control={connectForm.control}
                     name="storeName"
@@ -459,19 +436,20 @@ export default function VyronaInstaStoreDashboard() {
                     control={connectForm.control}
                     name="demoMode"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border-2 border-green-200 bg-green-50 p-4">
                         <FormControl>
                           <Checkbox
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                            className="data-[state=checked]:bg-green-600"
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Demo Mode
+                          <FormLabel className="text-green-900 font-medium">
+                            ✨ Demo Mode (Recommended)
                           </FormLabel>
-                          <FormDescription>
-                            Enable demo mode to test without real Instagram API tokens. Demo data will be used instead.
+                          <FormDescription className="text-green-700">
+                            Start immediately with sample products. Perfect for testing and learning the platform without needing Instagram Business API tokens.
                           </FormDescription>
                         </div>
                       </FormItem>
