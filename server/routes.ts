@@ -5185,6 +5185,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("VyronaRead borrowing email notification failed:", emailError);
       }
 
+      // Send customer confirmation email for borrowing request
+      try {
+        const { sendBrevoEmail } = await import('./brevo-email');
+        
+        const customerEmailResult = await sendBrevoEmail(
+          customerInfo.email,
+          "Borrowing Request Submitted - VyronaRead",
+          `<h2>Your borrowing request has been submitted!</h2>
+            <p>Dear ${customerInfo.name},</p>
+            <p>Your book borrowing request has been submitted successfully (Request #${order.id}).</p>
+            <h3>Request Details:</h3>
+            <ul>
+              <li>Book ID: ${bookId}</li>
+              <li>Request Type: Library Borrowing</li>
+              <li>Status: Pending Approval</li>
+              <li>Expected Duration: ${borrowingInfo?.duration || 'Not specified'} days</li>
+              <li>Library ID: ${borrowingInfo?.libraryId || 'Not provided'}</li>
+            </ul>
+            <p>We will notify you once your borrowing request is approved by the seller.</p>
+            <p>You can check the status of your request in your VyronaRead account.</p>
+            <p>Thank you for using VyronaRead!</p>
+            <p>Best regards,<br>VyronaRead Team</p>`
+        );
+        
+        if (customerEmailResult.success) {
+          console.log(`Customer borrowing confirmation sent to ${customerInfo.email}`);
+        }
+      } catch (customerEmailError) {
+        console.error("Customer borrowing confirmation email failed:", customerEmailError);
+      }
+
       res.json({
         success: true,
         orderId: order.id,
