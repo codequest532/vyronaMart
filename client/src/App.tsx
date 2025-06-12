@@ -60,8 +60,6 @@ function Router() {
       <Route path="/admin-dashboard" component={AdminDashboard} />
       
       {/* Seller Interface */}
-      <Route path="/seller" component={VyronaHubDashboard} />
-      <Route path="/seller-dashboard" component={VyronaHubDashboard} />
       <Route path="/vyronahub-dashboard" component={VyronaHubDashboard} />
       
       {/* VyronaRead Interface */}
