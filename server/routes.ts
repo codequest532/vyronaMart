@@ -3517,7 +3517,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid pricing values" });
       }
 
-      // Create e-book record
+      // Handle Google Drive URLs or file paths
+      const { coverImageUrl, fileUrl } = req.body;
+      
+      // Create e-book record with Google Drive URL support
       const ebookData = {
         title,
         author,
@@ -3530,9 +3533,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publisher: publisher || 'Unknown Publisher',
         publicationYear: publicationYear || new Date().getFullYear().toString(),
         language: language || 'English',
-        filePath: '', // Will be set when file is uploaded
-        fileName: '',
-        fileSize: 0,
+        fileUrl: fileUrl || '', // Google Drive URL for e-book file
+        fileName: fileUrl ? fileUrl.split('/').pop() || 'ebook-file' : '',
+        fileSize: 0, // Size unknown for Google Drive files
+        coverImageUrl: coverImageUrl || '', // Google Drive URL for cover image
+        coverImageName: coverImageUrl ? coverImageUrl.split('/').pop() || 'cover-image' : '',
         sellerId: authenticatedUser.id,
         status: status || 'active'
       };

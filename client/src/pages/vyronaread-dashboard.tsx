@@ -508,6 +508,74 @@ export default function BookSellerDashboard() {
     reader.readAsText(file);
   };
 
+  const downloadCsvTemplate = () => {
+    const headers = [
+      'Title',
+      'Author', 
+      'ISBN',
+      'Category',
+      'Format',
+      'Publisher',
+      'Year',
+      'Language',
+      'Book Cover URL',
+      'Upload Book URL',
+      'Sale Price',
+      'Rental Price',
+      'Description'
+    ];
+
+    const sampleData = [
+      [
+        'Digital Marketing Essentials',
+        'John Smith',
+        '9781234567890',
+        'Business',
+        'PDF',
+        'Tech Publications',
+        '2024',
+        'English',
+        'https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz/view',
+        'https://drive.google.com/file/d/1ZyXwVuTsRqPoNmLkJiHgFeDcBa/view',
+        '299',
+        '49',
+        'Comprehensive guide to modern digital marketing strategies'
+      ],
+      [
+        'Python Programming Guide',
+        'Jane Doe',
+        '9780987654321',
+        'Technology',
+        'PDF',
+        'Code Masters',
+        '2024',
+        'English',
+        'https://drive.google.com/file/d/1BcDeFgHiJkLmNoPqRsTuVwXyZ/view',
+        'https://drive.google.com/file/d/1YxWvUtSrQpOnMlKjIhGfEdCbA/view',
+        '399',
+        '59',
+        'Complete Python programming tutorial for beginners'
+      ]
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      ...sampleData.map(row => 
+        row.map(cell => `"${cell}"`).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'ebook_bulk_import_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleBulkImport = async () => {
     if (!csvPreview.length) {
       toast({
@@ -2180,9 +2248,30 @@ export default function BookSellerDashboard() {
                       <p className="text-sm text-blue-700 mb-3">
                         Upload a CSV file containing multiple e-books with their details and pricing information.
                       </p>
-                      <div className="text-xs text-blue-600">
-                        <strong>Required CSV Columns:</strong>
-                        <br />Title, Author, ISBN, Category, Format, Publisher, PublicationYear, Language, SalePrice, RentalPrice, Description
+                      <div className="text-xs text-blue-600 space-y-2">
+                        <div>
+                          <strong>Required CSV Columns:</strong>
+                          <br />Title, Author, ISBN, Category, Format, Publisher, Year, Language, <strong>Book Cover URL</strong>, <strong>Upload Book URL</strong>, Sale Price, Rental Price, Description
+                        </div>
+                        <div className="bg-white p-3 rounded border border-blue-200">
+                          <strong className="text-blue-800">New Google Drive Support:</strong>
+                          <ul className="mt-1 space-y-1 text-blue-700">
+                            <li>• <strong>Book Cover URL:</strong> Google Drive link to book cover image</li>
+                            <li>• <strong>Upload Book URL:</strong> Google Drive link to PDF/EPUB file</li>
+                          </ul>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={downloadCsvTemplate}
+                          className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download CSV Template
+                        </Button>
                       </div>
                     </div>
                     
