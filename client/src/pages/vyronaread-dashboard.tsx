@@ -580,36 +580,99 @@ export default function BookSellerDashboard() {
     }
   };
 
-  const handleEbookUpload = () => {
-    if (!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.file) {
+  const handleEbookUpload = async () => {
+    // Validate required fields including pricing
+    if (!newEbook.title || !newEbook.author || !newEbook.category || !newEbook.salePrice || !newEbook.rentalPrice || !newEbook.file) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields and select a file",
+        description: "Please fill in all required fields including sale price, rental price, and select a file",
         variant: "destructive",
       });
       return;
     }
 
-    console.log("Uploading e-book:", newEbook);
-    toast({
-      title: "E-Book Uploaded",
-      description: "E-book has been uploaded successfully.",
-    });
-    setShowEbookUploadDialog(false);
-    setNewEbook({
-      title: "",
-      author: "",
-      isbn: "",
-      category: "",
-      format: "PDF",
-      description: "",
-      salePrice: "",
-      rentalPrice: "",
-      publisher: "",
-      publicationYear: "",
-      language: "English",
-      file: null
-    });
+    // Validate pricing values
+    const salePrice = parseFloat(newEbook.salePrice);
+    const rentalPrice = parseFloat(newEbook.rentalPrice);
+    
+    if (isNaN(salePrice) || salePrice <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid sale price",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (isNaN(rentalPrice) || rentalPrice <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid rental price",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Prepare form data for file upload
+      const formData = new FormData();
+      formData.append('file', newEbook.file);
+      formData.append('title', newEbook.title);
+      formData.append('author', newEbook.author);
+      formData.append('isbn', newEbook.isbn);
+      formData.append('category', newEbook.category);
+      formData.append('format', newEbook.format);
+      formData.append('description', newEbook.description);
+      formData.append('salePrice', newEbook.salePrice);
+      formData.append('rentalPrice', newEbook.rentalPrice);
+      formData.append('publisher', newEbook.publisher);
+      formData.append('publicationYear', newEbook.publicationYear);
+      formData.append('language', newEbook.language);
+
+      const response = await fetch('/api/ebooks', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to upload e-book');
+      }
+
+      toast({
+        title: "E-Book Uploaded Successfully",
+        description: `${newEbook.title} is now available with sale price ₹${newEbook.salePrice} and rental price ₹${newEbook.rentalPrice}`,
+      });
+
+      setShowEbookUploadDialog(false);
+      setNewEbook({
+        title: "",
+        author: "",
+        isbn: "",
+        category: "",
+        format: "PDF",
+        description: "",
+        salePrice: "",
+        rentalPrice: "",
+        publisher: "",
+        publicationYear: "",
+        language: "English",
+        file: null
+      });
+
+      // Refresh the product list to show the new e-book
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/ebooks"] });
+
+    } catch (error) {
+      console.error("E-book upload error:", error);
+      toast({
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Failed to upload e-book. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
 

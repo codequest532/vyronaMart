@@ -165,10 +165,12 @@ export interface IStorage {
   updatePhysicalBook(id: number, updates: Partial<InsertPhysicalBook>): Promise<PhysicalBook | undefined>;
   deletePhysicalBook(id: number): Promise<boolean>;
 
-  // VyronaRead Books - E-Books
-  createEBook(ebook: InsertEBook): Promise<EBook>;
-  getEBooks(sellerId: number): Promise<EBook[]>;
-  updateEBook(id: number, updates: Partial<InsertEBook>): Promise<EBook | undefined>;
+  // VyronaRead Books - E-Books with Enhanced Pricing
+  createEbook(ebook: any): Promise<any>;
+  getSellerEbooks(sellerId: number): Promise<any[]>;
+  getEbooks(filters: { category?: string; search?: string; limit: number; offset: number }): Promise<any[]>;
+  getEbook(id: number): Promise<any | undefined>;
+  updateEbookPricing(id: number, pricing: { salePrice: number; rentalPrice: number }): Promise<any>;
   deleteEBook(id: number): Promise<boolean>;
 
   // VyronaRead Books - Book Loans
@@ -1411,6 +1413,78 @@ export class DatabaseStorage implements IStorage {
       .where(eq(eBooks.id, id))
       .returning();
     return updatedEBook || null;
+  }
+
+  // Enhanced E-book methods with pricing control
+  async createEbook(ebook: any): Promise<any> {
+    const [newEbook] = await db
+      .insert(eBooks)
+      .values({
+        ...ebook,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newEbook;
+  }
+
+  async getSellerEbooks(sellerId: number): Promise<any[]> {
+    try {
+      return await db.select().from(eBooks).where(eq(eBooks.sellerId, sellerId));
+    } catch (error) {
+      console.error("Error fetching seller e-books:", error);
+      return [];
+    }
+  }
+
+  async getEbooks(filters: { category?: string; search?: string; limit: number; offset: number }): Promise<any[]> {
+    try {
+      let query = db.select().from(eBooks);
+      
+      // Add category filter if provided
+      if (filters.category) {
+        query = query.where(eq(eBooks.category, filters.category));
+      }
+      
+      // Add search filter if provided (search in title, author, or description)
+      if (filters.search) {
+        const searchTerm = `%${filters.search}%`;
+        query = query.where(
+          sql`${eBooks.title} ILIKE ${searchTerm} OR ${eBooks.author} ILIKE ${searchTerm} OR ${eBooks.description} ILIKE ${searchTerm}`
+        );
+      }
+      
+      // Add pagination
+      query = query.limit(filters.limit).offset(filters.offset);
+      
+      return await query;
+    } catch (error) {
+      console.error("Error fetching e-books:", error);
+      return [];
+    }
+  }
+
+  async getEbook(id: number): Promise<any | undefined> {
+    try {
+      const [ebook] = await db.select().from(eBooks).where(eq(eBooks.id, id));
+      return ebook;
+    } catch (error) {
+      console.error("Error fetching e-book:", error);
+      return undefined;
+    }
+  }
+
+  async updateEbookPricing(id: number, pricing: { salePrice: number; rentalPrice: number }): Promise<any> {
+    const [updatedEbook] = await db
+      .update(eBooks)
+      .set({ 
+        salePrice: pricing.salePrice,
+        rentalPrice: pricing.rentalPrice,
+        updatedAt: new Date() 
+      })
+      .where(eq(eBooks.id, id))
+      .returning();
+    return updatedEbook;
   }
 
   async createBookLoan(loan: any): Promise<any> {
