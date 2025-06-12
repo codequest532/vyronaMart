@@ -95,7 +95,12 @@ export default function Landing() {
       if (data.user?.role === 'admin') {
         setLocation("/admin");
       } else if (data.user?.role === 'seller') {
-        setLocation("/seller");
+        // Route sellers based on their seller type
+        if (data.user.sellerType === 'vyronaread') {
+          setLocation("/vyronaread-dashboard");
+        } else {
+          setLocation("/vyronahub-dashboard");
+        }
       } else {
         setLocation("/");
       }
