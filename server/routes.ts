@@ -4000,6 +4000,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create VyronaInstaStore seller account
+  app.post("/api/create-vyronainstastore-seller", async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const existingEmail = await storage.getUserByEmail(email);
+      if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists" });
+      }
+
+      // Create VyronaInstaStore seller user
+      const userData = {
+        username,
+        email,
+        password,
+        role: 'seller',
+        sellerType: 'vyronainstastore'
+      };
+
+      const newUser = await storage.createUser(userData);
+      
+      res.json({ 
+        success: true, 
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+          role: newUser.role,
+          sellerType: newUser.sellerType
+        },
+        message: "VyronaInstaStore seller account created successfully" 
+      });
+    } catch (error) {
+      console.error("Error creating VyronaInstaStore seller:", error);
+      res.status(500).json({ message: "Failed to create seller account" });
+    }
+  });
+
   // E-Book bulk CSV import endpoint for VyronaRead sellers
   app.post("/api/vyronaread/ebooks", async (req, res) => {
     try {
