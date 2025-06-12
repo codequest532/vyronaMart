@@ -131,6 +131,9 @@ export interface IStorage {
   getWalletTransactions(userId: number): Promise<any[]>;
 
   // VyronaInstaShop - Instagram Store Management
+  createInstagramStore(storeData: InsertInstagramStore): Promise<InstagramStore>;
+  getInstagramStoreByUserId(userId: number): Promise<InstagramStore | undefined>;
+  updateInstagramStore(id: number, updates: Partial<InsertInstagramStore>): Promise<InstagramStore | undefined>;
   connectInstagramStore(store: InsertInstagramStore): Promise<InstagramStore>;
   getUserInstagramStores(userId: number): Promise<InstagramStore[]>;
   getInstagramStore(id: number): Promise<InstagramStore | undefined>;
@@ -138,6 +141,8 @@ export interface IStorage {
   disconnectInstagramStore(id: number): Promise<boolean>;
 
   // VyronaInstaShop - Instagram Products
+  createInstagramProduct(product: InsertInstagramProduct): Promise<InstagramProduct>;
+  getInstagramProduct(id: number): Promise<InstagramProduct | undefined>;
   syncInstagramProducts(storeId: number, products: InsertInstagramProduct[]): Promise<InstagramProduct[]>;
   getInstagramProducts(storeId: number): Promise<InstagramProduct[]>;
   updateInstagramProduct(id: number, updates: Partial<InsertInstagramProduct>): Promise<InstagramProduct | undefined>;
@@ -2385,6 +2390,11 @@ export class DatabaseStorage implements IStorage {
 
   async markOtpAsVerified(id: number): Promise<void> {
     await db.update(otpVerifications).set({ isVerified: true }).where(eq(otpVerifications.id, id));
+  }
+
+  async createInstagramStore(storeData: InsertInstagramStore): Promise<InstagramStore> {
+    const [newStore] = await db.insert(instagramStores).values(storeData).returning();
+    return newStore;
   }
 
   async connectInstagramStore(store: InsertInstagramStore): Promise<InstagramStore> {
