@@ -282,6 +282,64 @@ export default function VyronaInstaStoreDashboard() {
     },
   });
 
+  const bulkImportMutation = useMutation({
+    mutationFn: async (data: BulkImportFormData) => {
+      // Parse CSV data into products array
+      const lines = data.csvData.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      const products = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        const product: any = {};
+        
+        headers.forEach((header, index) => {
+          product[header] = values[index] || '';
+        });
+        
+        products.push(product);
+      }
+
+      return apiRequest("POST", "/api/vyronainstastore/products/bulk-import", { products });
+    },
+    onSuccess: (response: any) => {
+      toast({
+        title: "Bulk Import Complete",
+        description: response.message || `Successfully imported ${response.importedCount} products`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/products"] });
+      bulkImportForm.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Bulk Import Failed",
+        description: error.message || "Failed to import products",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const profileImportMutation = useMutation({
+    mutationFn: async (data: ProfileImportFormData) => {
+      return apiRequest("POST", "/api/vyronainstastore/import-from-profile", data);
+    },
+    onSuccess: (response: any) => {
+      toast({
+        title: "Profile Import Complete",
+        description: response.message || `Successfully imported ${response.importedCount} products from Instagram profile`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/products"] });
+      profileImportForm.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Profile Import Failed",
+        description: error.message || "Failed to import from Instagram profile",
+        variant: "destructive",
+      });
+    },
+  });
+
 
 
   // Helper functions
@@ -459,13 +517,173 @@ export default function VyronaInstaStoreDashboard() {
                 <Zap className="h-4 w-4 mr-2" />
                 {syncInstagramMutation.isPending ? "Syncing..." : "Sync Instagram"}
               </Button>
+              <div className="flex gap-2">
+                <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Product
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+                
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Package className="h-4 w-4 mr-2" />
+                      Bulk Import
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                      <DialogTitle>Bulk Product Import</DialogTitle>
+                      <DialogDescription>
+                        Import multiple products using CSV data or Instagram profile scraping
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Tabs defaultValue="csv" className="w-full">
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="csv">CSV Upload</TabsTrigger>
+                        <TabsTrigger value="profile">Instagram Profile</TabsTrigger>
+                        <TabsTrigger value="template">CSV Template</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="csv" className="space-y-4">
+                        <div className="p-4 border rounded-lg bg-blue-50">
+                          <h4 className="font-medium text-blue-900 mb-2">CSV Format Instructions</h4>
+                          <p className="text-sm text-blue-700 mb-2">
+                            Use the following headers: productName, description, price, categoryTag, hashtags, productUrl, imageUrl
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            Example: Handmade Jewelry, Beautiful handcrafted necklace, 45.99, accessories, #jewelry #handmade, https://instagram.com/p/example, https://example.com/image.jpg
+                          </p>
+                        </div>
+                        <Form {...bulkImportForm}>
+                          <form onSubmit={bulkImportForm.handleSubmit((data) => bulkImportMutation.mutate(data))} className="space-y-4">
+                            <FormField
+                              control={bulkImportForm.control}
+                              name="csvData"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>CSV Data</FormLabel>
+                                  <FormControl>
+                                    <textarea
+                                      placeholder="Paste your CSV data here..."
+                                      className="min-h-[200px] w-full p-3 border rounded-md resize-y"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button 
+                              type="submit" 
+                              disabled={bulkImportMutation.isPending}
+                              className="w-full"
+                            >
+                              {bulkImportMutation.isPending ? "Importing..." : "Import Products"}
+                            </Button>
+                          </form>
+                        </Form>
+                      </TabsContent>
+                      
+                      <TabsContent value="profile" className="space-y-4">
+                        <div className="p-4 border rounded-lg bg-green-50">
+                          <h4 className="font-medium text-green-900 mb-2">Instagram Profile Import</h4>
+                          <p className="text-sm text-green-700 mb-2">
+                            Import products by analyzing your Instagram profile posts
+                          </p>
+                          <p className="text-xs text-green-600">
+                            Note: This simulates profile scraping and creates sample products for demonstration
+                          </p>
+                        </div>
+                        <Form {...profileImportForm}>
+                          <form onSubmit={profileImportForm.handleSubmit((data) => profileImportMutation.mutate(data))} className="space-y-4">
+                            <FormField
+                              control={profileImportForm.control}
+                              name="profileUrl"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Instagram Profile URL</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      placeholder="https://instagram.com/your_username"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={profileImportForm.control}
+                              name="maxProducts"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Maximum Products to Import</FormLabel>
+                                  <FormControl>
+                                    <Input 
+                                      type="number"
+                                      min="1"
+                                      max="50"
+                                      {...field}
+                                      onChange={(e) => field.onChange(Number(e.target.value))}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button 
+                              type="submit" 
+                              disabled={profileImportMutation.isPending}
+                              className="w-full"
+                            >
+                              {profileImportMutation.isPending ? "Importing..." : "Import from Profile"}
+                            </Button>
+                          </form>
+                        </Form>
+                      </TabsContent>
+                      
+                      <TabsContent value="template" className="space-y-4">
+                        <div className="p-4 border rounded-lg bg-purple-50">
+                          <h4 className="font-medium text-purple-900 mb-4">CSV Template</h4>
+                          <div className="bg-white p-4 border rounded text-sm font-mono">
+                            <div className="border-b pb-2 mb-2 font-semibold">
+                              productName,description,price,categoryTag,hashtags,productUrl,imageUrl
+                            </div>
+                            <div className="space-y-1 text-gray-600">
+                              <div>Handmade Jewelry,Beautiful handcrafted necklace,45.99,accessories,#jewelry #handmade,https://instagram.com/p/example1,https://example.com/image1.jpg</div>
+                              <div>Vintage Sunglasses,Classic retro style sunglasses,25.50,fashion,#vintage #sunglasses,https://instagram.com/p/example2,https://example.com/image2.jpg</div>
+                              <div>Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,https://instagram.com/p/example3,https://example.com/image3.jpg</div>
+                            </div>
+                          </div>
+                          <Button 
+                            onClick={() => {
+                              const csvTemplate = `productName,description,price,categoryTag,hashtags,productUrl,imageUrl
+Handmade Jewelry,Beautiful handcrafted necklace,45.99,accessories,#jewelry #handmade,https://instagram.com/p/example1,https://example.com/image1.jpg
+Vintage Sunglasses,Classic retro style sunglasses,25.50,fashion,#vintage #sunglasses,https://instagram.com/p/example2,https://example.com/image2.jpg
+Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,https://instagram.com/p/example3,https://example.com/image3.jpg`;
+                              navigator.clipboard.writeText(csvTemplate);
+                              toast({
+                                title: "Template Copied",
+                                description: "CSV template has been copied to clipboard",
+                              });
+                            }}
+                            className="mt-4 w-full"
+                            variant="outline"
+                          >
+                            Copy Template to Clipboard
+                          </Button>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              
               <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Product
-                  </Button>
-                </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Add New Product</DialogTitle>
