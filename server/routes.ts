@@ -3610,10 +3610,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publisher: publisher || '',
         publicationYear: publicationYear || '',
         language: language || 'English',
-        filePath: ebookFile.path,
+        fileUrl: ebookFile.path,
         fileName: ebookFile.filename,
         fileSize: ebookFile.size,
-        coverImagePath: coverImageFile.path,
+        coverImageUrl: coverImageFile.path,
         coverImageName: coverImageFile.filename,
         sellerId: authenticatedUser.id,
         status: 'active' as const

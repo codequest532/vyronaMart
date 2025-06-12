@@ -386,6 +386,8 @@ export const eBooks = pgTable("e_books", {
   format: varchar("format", { length: 50 }).notNull(), // PDF, EPUB, MOBI
   fileUrl: text("file_url").notNull(),
   fileSize: integer("file_size"),
+  coverImageUrl: text("cover_image_url"), // Cover image file path
+  coverImageName: varchar("cover_image_name", { length: 255 }), // Cover image filename
   salePrice: decimal("sale_price", { precision: 10, scale: 2 }),
   rentalPrice: decimal("rental_price", { precision: 10, scale: 2 }),
   description: text("description"),
