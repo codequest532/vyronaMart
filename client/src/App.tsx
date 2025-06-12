@@ -69,6 +69,12 @@ function Router() {
       <Route path="/book-seller-dashboard" component={VyronaReadDashboard} />
       <Route path="/vyronaread-dashboard" component={VyronaReadDashboard} />
       
+      {/* VyronaInstaStore Interface */}
+      <Route path="/vyronainstastore-dashboard" component={VyronaInstaStoreDashboard} />
+      
+      {/* Customer Interface route for existing instashop */}
+      <Route path="/vyronainstastore-customer" component={VyronaInstaStoreDashboard} />
+      
 
       
       {/* Customer Interface (Default) */}

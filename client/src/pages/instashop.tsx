@@ -54,7 +54,12 @@ export default function VyronaInstaShop() {
 
   // Fetch Instagram products for customers
   const { data: instagramProducts = [], isLoading: productsLoading } = useQuery({
-    queryKey: ["/api/instashop/products"],
+    queryKey: ["/api/instagram/products"],
+  });
+
+  // Fetch Instagram stores
+  const { data: instagramStores = [], isLoading: storesLoading } = useQuery({
+    queryKey: ["/api/instagram/stores"],
   });
 
   // Add to cart mutation
@@ -270,30 +275,40 @@ export default function VyronaInstaShop() {
     { value: "newest", label: "Newest First" }
   ];
 
-  const filteredProducts = mockInstagramProducts.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.seller.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+  // Use real data from API or fall back to empty array
+  const productsToShow = Array.isArray(instagramProducts) && instagramProducts.length > 0 
+    ? instagramProducts 
+    : mockInstagramProducts;
+
+  const filteredProducts = productsToShow.filter(product => {
+    const productName = product.productName || product.name || '';
+    const productSeller = product.instagramUsername || product.seller || '';
+    const productCategory = product.categoryTag || product.category || '';
+    const productPrice = product.price || 0;
+
+    const matchesSearch = productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         productSeller.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || productCategory === selectedCategory;
     const matchesPrice = priceRange === "all" || (
-      priceRange === "0-500" ? product.price <= 500 :
-      priceRange === "500-1000" ? product.price > 500 && product.price <= 1000 :
-      priceRange === "1000-2000" ? product.price > 1000 && product.price <= 2000 :
-      priceRange === "2000+" ? product.price > 2000 : true
+      priceRange === "0-500" ? (productPrice / 100) <= 500 :
+      priceRange === "500-1000" ? (productPrice / 100) > 500 && (productPrice / 100) <= 1000 :
+      priceRange === "1000-2000" ? (productPrice / 100) > 1000 && (productPrice / 100) <= 2000 :
+      priceRange === "2000+" ? (productPrice / 100) > 2000 : true
     );
     
     return matchesSearch && matchesCategory && matchesPrice;
   }).sort((a, b) => {
     switch (sortBy) {
       case "rating":
-        return b.rating - a.rating;
+        return (b.rating || 0) - (a.rating || 0);
       case "price-low":
-        return a.price - b.price;
+        return (a.price || 0) - (b.price || 0);
       case "price-high":
-        return b.price - a.price;
+        return (b.price || 0) - (a.price || 0);
       case "newest":
-        return b.id - a.id;
+        return (b.id || 0) - (a.id || 0);
       default: // popular
-        return b.reviews - a.reviews;
+        return (b.reviews || b.likesCount || 0) - (a.reviews || a.likesCount || 0);
     }
   });
 
@@ -322,6 +337,15 @@ export default function VyronaInstaShop() {
               <Badge variant="outline" className="text-purple-600 border-purple-200">
                 {filteredProducts.length} Products
               </Badge>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => window.open('/vyronainstastore-dashboard', '_blank')}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              >
+                <Instagram className="h-4 w-4 mr-2" />
+                Sell on Instagram
+              </Button>
               <div className="flex items-center space-x-2">
                 <Button
                   variant={viewMode === "grid" ? "default" : "outline"}

@@ -3923,6 +3923,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer-facing Instagram API endpoints (public)
+  
+  // Get all public Instagram products for customer browsing
+  app.get("/api/instagram/products", async (req, res) => {
+    try {
+      // Get all Instagram products from all active stores
+      const products = await db
+        .select({
+          id: instagramProducts.id,
+          productName: instagramProducts.productName,
+          description: instagramProducts.description,
+          price: instagramProducts.price,
+          categoryTag: instagramProducts.categoryTag,
+          hashtags: instagramProducts.hashtags,
+          imageUrl: instagramProducts.imageUrl,
+          productUrl: instagramProducts.productUrl,
+          isAvailable: instagramProducts.isAvailable,
+          likesCount: instagramProducts.likesCount,
+          commentsCount: instagramProducts.commentsCount,
+          viewsCount: instagramProducts.viewsCount,
+          instagramUsername: instagramStores.instagramUsername,
+          storeName: instagramStores.storeName,
+          storeId: instagramProducts.storeId,
+        })
+        .from(instagramProducts)
+        .innerJoin(instagramStores, eq(instagramProducts.storeId, instagramStores.id))
+        .where(and(
+          eq(instagramProducts.isAvailable, true),
+          eq(instagramStores.isActive, true)
+        ));
+
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching public Instagram products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  // Get all public Instagram stores for customer browsing
+  app.get("/api/instagram/stores", async (req, res) => {
+    try {
+      const stores = await db
+        .select({
+          id: instagramStores.id,
+          instagramUsername: instagramStores.instagramUsername,
+          storeName: instagramStores.storeName,
+          storeDescription: instagramStores.storeDescription,
+          followersCount: instagramStores.followersCount,
+          isVerified: instagramStores.isVerified,
+          profileImageUrl: instagramStores.profileImageUrl,
+        })
+        .from(instagramStores)
+        .where(eq(instagramStores.isActive, true));
+
+      // Add product counts for each store
+      const storesWithCounts = await Promise.all(stores.map(async (store) => {
+        const productCount = await db
+          .select({ count: sql`count(*)` })
+          .from(instagramProducts)
+          .where(and(
+            eq(instagramProducts.storeId, store.id),
+            eq(instagramProducts.isAvailable, true)
+          ));
+
+        return {
+          ...store,
+          totalProducts: Number(productCount[0]?.count || 0),
+        };
+      }));
+
+      res.json(storesWithCounts);
+    } catch (error) {
+      console.error("Error fetching public Instagram stores:", error);
+      res.status(500).json({ message: "Failed to fetch stores" });
+    }
+  });
+
   // E-Book bulk CSV import endpoint for VyronaRead sellers
   app.post("/api/vyronaread/ebooks", async (req, res) => {
     try {
