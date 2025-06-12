@@ -112,6 +112,12 @@ export default function SellerDashboard() {
         setLocation('/vyronaread-dashboard');
         return;
       }
+      
+      if (currentUser.sellerType === 'vyronainstastore') {
+        // Redirect VyronaInstaStore sellers to their dashboard
+        setLocation('/vyronainstastore-dashboard');
+        return;
+      }
     } else if (!userLoading && !currentUser) {
       setLocation('/login');
       toast({
