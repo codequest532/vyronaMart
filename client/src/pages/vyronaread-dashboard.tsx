@@ -483,17 +483,17 @@ export default function BookSellerDashboard() {
             'Category': getValueByHeader(['genre', 'category']) || values[4] || 'General',
             'Publisher': getValueByHeader(['publisher']) || values[5] || 'Unknown Publisher',
             'Language': getValueByHeader(['language']) || values[6] || 'English',
-            'Image URL': getValueByHeader(['bookimage', 'imageurl', 'image']) || values[7] || '',
-            'Price': getValueByHeader(['price', 'saleprice', 'cost']) || getValueByHeader(['price']) || '299',
+            'Format': getValueByHeader(['format', 'filetype']) || 'PDF',
+            'Book Cover URL': getValueByHeader(['bookcover', 'coverurl', 'coverimage', 'cover']) || '',
+            'Upload Book URL': getValueByHeader(['uploadbook', 'bookfile', 'fileurl', 'ebookurl', 'googledriveurl']) || '',
+            'Sale Price': getValueByHeader(['price', 'saleprice', 'cost']) || '299',
             'Rental Price': getValueByHeader(['rentalprice', 'rentprice', 'rent']) || '49',
-            'Copies': getValueByHeader(['copies', 'quantity', 'stock']) || '5',
             'Description': getValueByHeader(['description', 'desc']) || `${getValueByHeader(['genre', 'category']) || 'General'} book by ${getValueByHeader(['author']) || values[1] || 'Unknown Author'}`
           };
           
           // Clean up price values - remove currency symbols and parse as numbers
-          book['Price'] = book['Price'].replace(/[₹$£€,]/g, '').trim() || '299';
+          book['Sale Price'] = book['Sale Price'].replace(/[₹$£€,]/g, '').trim() || '299';
           book['Rental Price'] = book['Rental Price'].replace(/[₹$£€,]/g, '').trim() || '49';
-          book['Copies'] = book['Copies'].replace(/[^0-9]/g, '') || '5';
           
           books.push(book);
         }
@@ -525,22 +525,23 @@ export default function BookSellerDashboard() {
       for (let i = 0; i < csvPreview.length; i++) {
         const book = csvPreview[i];
         
-        const bookData = {
+        const ebookData = {
           title: book.Title,
           author: book.Author,
           isbn: book.ISBN || `AUTO-${Date.now()}-${i}`,
           category: book.Category,
+          format: book.Format || 'PDF',
           description: book.Description || '',
-          fixedCostPrice: parseFloat(book.Price) || 299,
+          salePrice: parseFloat(book['Sale Price']) || 299,
           rentalPrice: parseFloat(book['Rental Price']) || 49,
-          imageUrl: book['Image URL'] || '',
-          copies: parseInt(book.Copies) || 5,
           language: book.Language || 'English',
           publisher: book.Publisher || 'Unknown',
           publicationYear: book.Year || new Date().getFullYear().toString(),
+          coverImageUrl: book['Book Cover URL'] || '',
+          fileUrl: book['Upload Book URL'] || '',
         };
 
-        await apiRequest('POST', '/api/vyronaread/books', bookData);
+        await apiRequest('POST', '/api/vyronaread/ebooks', ebookData);
 
         setImportProgress(Math.round(((i + 1) / csvPreview.length) * 100));
       }
