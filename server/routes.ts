@@ -3696,6 +3696,233 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaInstaStore API Endpoints
+  
+  // Get Instagram store for authenticated VyronaInstaStore seller
+  app.get("/api/vyronainstastore/store", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const store = await storage.getInstagramStoreByUserId(authenticatedUser.id);
+      res.json(store);
+    } catch (error) {
+      console.error("Error fetching Instagram store:", error);
+      res.status(500).json({ message: "Failed to fetch Instagram store" });
+    }
+  });
+
+  // Connect Instagram account
+  app.post("/api/vyronainstastore/connect", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const { instagramUsername, storeName, storeDescription } = req.body;
+
+      const storeData = {
+        userId: authenticatedUser.id,
+        instagramUsername,
+        storeName,
+        storeDescription,
+        isActive: true,
+        connectedAt: new Date(),
+      };
+
+      const store = await storage.createInstagramStore(storeData);
+      res.json({ success: true, store });
+    } catch (error) {
+      console.error("Error connecting Instagram store:", error);
+      res.status(500).json({ message: "Failed to connect Instagram account" });
+    }
+  });
+
+  // Get Instagram products for authenticated seller
+  app.get("/api/vyronainstastore/products", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const store = await storage.getInstagramStoreByUserId(authenticatedUser.id);
+      if (!store) {
+        return res.status(404).json({ message: "Instagram store not found" });
+      }
+
+      const products = await storage.getInstagramProducts(store.id);
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching Instagram products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  // Add new Instagram product
+  app.post("/api/vyronainstastore/products", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const store = await storage.getInstagramStoreByUserId(authenticatedUser.id);
+      if (!store) {
+        return res.status(404).json({ message: "Instagram store not found" });
+      }
+
+      const { productName, description, price, categoryTag, hashtags, productUrl } = req.body;
+
+      const productData = {
+        storeId: store.id,
+        instagramMediaId: `manual_${Date.now()}`,
+        productName,
+        description,
+        price: Math.round(price * 100), // Convert to cents
+        categoryTag,
+        hashtags: hashtags ? hashtags.split('#').filter((tag: string) => tag.trim()).map((tag: string) => tag.trim()) : [],
+        productUrl,
+        isAvailable: true,
+      };
+
+      const product = await storage.createInstagramProduct(productData);
+      res.json({ success: true, product });
+    } catch (error) {
+      console.error("Error adding Instagram product:", error);
+      res.status(500).json({ message: "Failed to add product" });
+    }
+  });
+
+  // Get Instagram orders for authenticated seller
+  app.get("/api/vyronainstastore/orders", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const store = await storage.getInstagramStoreByUserId(authenticatedUser.id);
+      if (!store) {
+        return res.status(404).json({ message: "Instagram store not found" });
+      }
+
+      const orders = await storage.getInstagramOrders(store.id);
+      
+      // Enhance orders with product details
+      const enhancedOrders = await Promise.all(orders.map(async (order: any) => {
+        const product = await storage.getInstagramProduct(order.productId);
+        return {
+          ...order,
+          productName: product?.productName || 'Unknown Product',
+          productImage: product?.imageUrl,
+        };
+      }));
+
+      res.json(enhancedOrders);
+    } catch (error) {
+      console.error("Error fetching Instagram orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Update Instagram order status
+  app.put("/api/vyronainstastore/orders/:orderId/status", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const { orderId } = req.params;
+      const { status, orderNotes } = req.body;
+
+      const updatedOrder = await storage.updateInstagramOrderStatus(
+        parseInt(orderId), 
+        status
+      );
+
+      if (!updatedOrder) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      res.json({ success: true, order: updatedOrder });
+    } catch (error) {
+      console.error("Error updating Instagram order:", error);
+      res.status(500).json({ message: "Failed to update order" });
+    }
+  });
+
+  // Get Instagram analytics
+  app.get("/api/vyronainstastore/analytics", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const store = await storage.getInstagramStoreByUserId(authenticatedUser.id);
+      if (!store) {
+        return res.status(404).json({ message: "Instagram store not found" });
+      }
+
+      // Get last 30 days of analytics
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+
+      const analytics = await storage.getInstagramAnalytics(store.id, startDate, endDate);
+      
+      // Aggregate analytics data
+      const aggregatedAnalytics = analytics.reduce((acc, day) => ({
+        impressions: acc.impressions + (day.impressions || 0),
+        reach: acc.reach + (day.reach || 0),
+        profileViews: acc.profileViews + (day.profileViews || 0),
+        websiteClicks: acc.websiteClicks + (day.websiteClicks || 0),
+        ordersCount: acc.ordersCount + (day.ordersCount || 0),
+        revenue: acc.revenue + (day.revenue || 0),
+      }), {
+        impressions: 0,
+        reach: 0,
+        profileViews: 0,
+        websiteClicks: 0,
+        ordersCount: 0,
+        revenue: 0,
+      });
+
+      res.json(aggregatedAnalytics);
+    } catch (error) {
+      console.error("Error fetching Instagram analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Sync Instagram data (placeholder for actual Instagram API integration)
+  app.post("/api/vyronainstastore/sync", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'vyronainstastore') {
+        return res.status(401).json({ message: "VyronaInstaStore seller authentication required" });
+      }
+
+      const store = await storage.getInstagramStoreByUserId(authenticatedUser.id);
+      if (!store) {
+        return res.status(404).json({ message: "Instagram store not found" });
+      }
+
+      // Update last sync time
+      await storage.updateInstagramStore(store.id, { lastSyncAt: new Date() });
+
+      res.json({ success: true, message: "Instagram data synced successfully" });
+    } catch (error) {
+      console.error("Error syncing Instagram data:", error);
+      res.status(500).json({ message: "Failed to sync Instagram data" });
+    }
+  });
+
   // E-Book bulk CSV import endpoint for VyronaRead sellers
   app.post("/api/vyronaread/ebooks", async (req, res) => {
     try {

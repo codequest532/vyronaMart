@@ -2461,10 +2461,35 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(instagramAnalytics.storeId, storeId),
-          sql`${instagramAnalytics.createdAt} >= ${startDate}`,
-          sql`${instagramAnalytics.createdAt} <= ${endDate}`
+          sql`${instagramAnalytics.date} >= ${startDate}`,
+          sql`${instagramAnalytics.date} <= ${endDate}`
         )
       );
+  }
+
+  // Additional Instagram store methods
+  async getInstagramStoreByUserId(userId: number): Promise<InstagramStore | undefined> {
+    const [store] = await db.select().from(instagramStores).where(eq(instagramStores.userId, userId));
+    return store;
+  }
+
+  async updateInstagramStore(id: number, updates: Partial<InsertInstagramStore>): Promise<InstagramStore | undefined> {
+    const [updatedStore] = await db
+      .update(instagramStores)
+      .set(updates)
+      .where(eq(instagramStores.id, id))
+      .returning();
+    return updatedStore;
+  }
+
+  async createInstagramProduct(product: InsertInstagramProduct): Promise<InstagramProduct> {
+    const [newProduct] = await db.insert(instagramProducts).values(product).returning();
+    return newProduct;
+  }
+
+  async getInstagramProduct(id: number): Promise<InstagramProduct | undefined> {
+    const [product] = await db.select().from(instagramProducts).where(eq(instagramProducts.id, id));
+    return product;
   }
 }
 

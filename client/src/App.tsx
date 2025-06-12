@@ -29,6 +29,7 @@ import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import VyronaHubDashboard from "@/pages/vyronahub-dashboard";
 import VyronaReadDashboard from "@/pages/vyronaread-dashboard";
+import VyronaInstaStoreDashboard from "@/pages/vyronainstastore-dashboard";
 import EbookReader from "@/pages/ebook-reader";
 
 import NotFound from "@/pages/not-found";
