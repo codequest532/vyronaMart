@@ -18,6 +18,8 @@ import {
   Clock, CheckCircle, XCircle, Truck, AlertTriangle, Plus, Edit, Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserData } from "@/hooks/use-user-data";
+import { useLocation } from "wouter";
 
 // Schemas for form validation
 const instagramConnectSchema = z.object({
@@ -47,9 +49,59 @@ type OrderStatusFormData = z.infer<typeof orderStatusSchema>;
 export default function VyronaInstaStoreDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const { user: currentUser, isLoading: userLoading } = useUserData();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [isConnectDialogOpen, setIsConnectDialogOpen] = useState(false);
+
+  // Authentication check
+  useEffect(() => {
+    if (!userLoading && currentUser) {
+      if (currentUser.role !== 'seller') {
+        setLocation('/login');
+        toast({
+          title: "Authentication Required",
+          description: "Please log in as a seller to access this dashboard.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (currentUser.sellerType !== 'vyronainstastore') {
+        // Redirect to appropriate dashboard based on seller type
+        if (currentUser.sellerType === 'vyronaread') {
+          setLocation('/vyronaread-dashboard');
+        } else {
+          setLocation('/vyronahub-dashboard');
+        }
+        return;
+      }
+    } else if (!userLoading && !currentUser) {
+      setLocation('/login');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in as a VyronaInstaStore seller to access this dashboard.",
+        variant: "destructive",
+      });
+      return;
+    }
+  }, [currentUser, userLoading, setLocation, toast]);
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading VyronaInstaStore...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser || currentUser.role !== "seller" || currentUser.sellerType !== "vyronainstastore") {
+    return null;
+  }
 
   // Form hooks
   const connectForm = useForm<InstagramConnectFormData>({
@@ -104,10 +156,7 @@ export default function VyronaInstaStoreDashboard() {
   // Mutations
   const connectInstagramMutation = useMutation({
     mutationFn: async (data: InstagramConnectFormData) => {
-      return apiRequest("/api/vyronainstastore/connect", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("POST", "/api/vyronainstastore/connect", data);
     },
     onSuccess: () => {
       toast({
@@ -129,10 +178,7 @@ export default function VyronaInstaStoreDashboard() {
 
   const addProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      return apiRequest("/api/vyronainstastore/products", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      return apiRequest("POST", "/api/vyronainstastore/products", data);
     },
     onSuccess: () => {
       toast({
