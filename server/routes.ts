@@ -174,45 +174,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send seller notifications for each item
       console.log("Starting email notification process...");
       try {
-        const sellerEmails = new Set<string>();
+        const sellerNotifications = new Map<string, { 
+          sellerInfo: any, 
+          orderItems: any[], 
+          totalAmount: number 
+        }>();
 
         console.log("Processing items for email notifications:", items.length);
         
-        // Send seller notification for all items to ganesan.sixphrase@gmail.com
-        const sellerEmail = 'ganesan.sixphrase@gmail.com';
-        const sellerName = 'MSR';
-        
-        console.log(`Sending consolidated order notification to: ${sellerEmail}`);
-        
-        const orderItems = items.map((item: any) => 
-          `<li>${item.name} - Quantity: ${item.quantity} - Price: ₹${item.price.toFixed(2)}</li>`
-        ).join('');
-        
-        const emailResult = await sendBrevoEmail(
-          sellerEmail,
-          "New Order Received - VyronaHub",
-          `<h2>New Order Notification</h2>
-            <p>Dear ${sellerName},</p>
-            <p>You have received a new order (Order #${orderId}) from VyronaHub.</p>
-            <h3>Order Details:</h3>
-            <ul>${orderItems}</ul>
-            <p><strong>Total Amount: ₹${orderTotal.toFixed(2)}</strong></p>
-            <h3>Customer Details:</h3>
-            <p>
-              Name: ${shippingAddress.fullName}<br>
-              Phone: ${shippingAddress.phoneNumber}<br>
-              Address: ${shippingAddress.address}<br>
-              ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
-            </p>
-            <p>Payment Method: ${paymentMethod.toUpperCase()}</p>
-            <p>Please log in to your seller dashboard to process this order.</p>
-            <p>Best regards,<br>VyronaHub Team</p>`
-        );
-        
-        if (emailResult.success) {
-          console.log(`Seller notification email sent successfully to ${sellerEmail}`);
-        } else {
-          console.error(`Failed to send seller notification email:`, emailResult.error);
+        // Group items by seller
+        for (const item of items) {
+          try {
+            // Get product information to find the seller
+            const productResult = await db
+              .select()
+              .from(products)
+              .where(eq(products.id, item.productId))
+              .limit(1);
+            
+            if (productResult.length === 0) {
+              console.warn(`Product not found for item: ${item.name} (ID: ${item.productId})`);
+              continue;
+            }
+            
+            const product = productResult[0];
+            
+            // Get seller information
+            const sellerResult = await db
+              .select()
+              .from(users)
+              .where(eq(users.id, product.sellerId))
+              .limit(1);
+            
+            if (sellerResult.length === 0) {
+              console.warn(`Seller not found for product: ${product.name} (Seller ID: ${product.sellerId})`);
+              continue;
+            }
+            
+            const seller = sellerResult[0];
+            const sellerKey = `${seller.id}-${seller.email}`;
+            
+            if (!sellerNotifications.has(sellerKey)) {
+              sellerNotifications.set(sellerKey, {
+                sellerInfo: seller,
+                orderItems: [],
+                totalAmount: 0
+              });
+            }
+            
+            const notification = sellerNotifications.get(sellerKey)!;
+            notification.orderItems.push(item);
+            notification.totalAmount += item.price * item.quantity;
+            
+          } catch (itemError) {
+            console.error(`Error processing item ${item.name}:`, itemError);
+          }
+        }
+
+        // Send notifications to each seller
+        for (const [sellerKey, notification] of sellerNotifications) {
+          const { sellerInfo, orderItems, totalAmount } = notification;
+          
+          console.log(`Sending order notification to seller: ${sellerInfo.email} (${sellerInfo.username})`);
+          
+          const itemsList = orderItems.map((item: any) => 
+            `<li>${item.name} - Quantity: ${item.quantity} - Price: ₹${item.price.toFixed(2)}</li>`
+          ).join('');
+          
+          const emailResult = await sendBrevoEmail(
+            sellerInfo.email,
+            "New Order Received - VyronaHub",
+            `<h2>New Order Notification</h2>
+              <p>Dear ${sellerInfo.username},</p>
+              <p>You have received a new order (Order #${orderId}) from VyronaHub for your products.</p>
+              <h3>Your Products in this Order:</h3>
+              <ul>${itemsList}</ul>
+              <p><strong>Your Revenue from this Order: ₹${totalAmount.toFixed(2)}</strong></p>
+              <h3>Customer Details:</h3>
+              <p>
+                Name: ${shippingAddress.fullName}<br>
+                Phone: ${shippingAddress.phoneNumber}<br>
+                Address: ${shippingAddress.address}<br>
+                ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
+              </p>
+              <p>Payment Method: ${paymentMethod.toUpperCase()}</p>
+              <p>Please log in to your VyronaHub seller dashboard to process this order.</p>
+              <p>Best regards,<br>VyronaHub Team</p>`
+          );
+          
+          if (emailResult.success) {
+            console.log(`Seller notification email sent successfully to ${sellerInfo.email}`);
+          } else {
+            console.error(`Failed to send seller notification email to ${sellerInfo.email}:`, emailResult.error);
+          }
         }
 
         // Send customer confirmation email
