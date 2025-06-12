@@ -461,7 +461,10 @@ export default function VyronaRead() {
 
   // Filter books based on selected criteria
   const getFilteredBooks = () => {
+    console.log("VyronaRead getFilteredBooks - sellerBooks:", sellerBooks);
+    console.log("VyronaRead getFilteredBooks - sellerBooks length:", sellerBooks?.length);
     let allBooks = [...(Array.isArray(sellerBooks) ? sellerBooks : [])];
+    console.log("VyronaRead getFilteredBooks - allBooks after copy:", allBooks.length);
     
     // Only use seller books - library books are for library browsing only
 
