@@ -772,46 +772,59 @@ export default function VyronaSpace() {
               </div>
 
               <h3 className="text-xl font-bold text-gray-900 mb-4">Order History</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockOrders.map(order => (
+              {ordersLoading ? (
+                <div className="flex items-center justify-center p-8">
+                  <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"></div>
+                </div>
+              ) : (userOrders as any[]).length === 0 ? (
+                <div className="text-center p-8 bg-white/90 rounded-xl">
+                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h4>
+                  <p className="text-gray-600">Start shopping to see your orders here</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {(userOrders as any[]).map((order: any) => (
                   <Card key={order.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-bold text-gray-900">Order #{order.id}</h3>
                         <Badge className={`${
                           order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                          order.status === 'out-for-delivery' ? 'bg-blue-100 text-blue-700' :
+                          order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
                           order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                          order.status === 'pending' ? 'bg-orange-100 text-orange-700' :
                           'bg-gray-100 text-gray-700'
                         }`}>
-                          {order.status}
+                          {order.status || 'pending'}
                         </Badge>
                       </div>
                       
                       <div className="space-y-3 mb-4">
-                        {order.items.map((item, idx) => (
-                          <div key={idx} className="flex justify-between text-sm">
-                            <span className="text-gray-600">{item.quantity}x {item.name}</span>
-                            <span className="font-semibold">₹{item.price}</span>
-                          </div>
-                        ))}
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Order from {order.module || 'VyronaSpace'}</span>
+                          <span className="font-semibold">₹{order.totalAmount || order.total || 0}</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(order.createdAt || Date.now()).toLocaleDateString()}
+                        </div>
                       </div>
                       
                       <div className="border-t border-gray-200 pt-3 mb-4">
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-lg">Total</span>
-                          <span className="font-bold text-lg text-emerald-600">₹{order.total}</span>
+                          <span className="font-bold text-lg text-emerald-600">₹{order.totalAmount || order.total || 0}</span>
                         </div>
                       </div>
                       
                       <div className="space-y-2 text-sm text-gray-600">
                         <div className="flex items-center">
                           <Truck className="h-4 w-4 mr-2 text-emerald-600" />
-                          <span>ETA: {order.estimatedDelivery}</span>
+                          <span>Status: {order.status || 'Processing'}</span>
                         </div>
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 mr-2 text-teal-600" />
-                          <span>{order.currentLocation}</span>
+                          <span>Delivery Address</span>
                         </div>
                       </div>
                       
@@ -820,12 +833,13 @@ export default function VyronaSpace() {
                         variant="outline" 
                         className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50"
                       >
-                        Track Order
+                        View Details
                       </Button>
                     </CardContent>
                   </Card>
                 ))}
-              </div>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -842,8 +856,14 @@ export default function VyronaSpace() {
                     <p className="text-emerald-100">Available balance</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold">2,450</div>
-                    <div className="text-emerald-100">≈ ₹245</div>
+                    {balanceLoading ? (
+                      <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+                    ) : (
+                      <>
+                        <div className="text-3xl font-bold">{Math.round(walletBalance.balance * 10)}</div>
+                        <div className="text-emerald-100">≈ ₹{walletBalance.balance}</div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
