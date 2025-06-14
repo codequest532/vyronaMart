@@ -207,10 +207,19 @@ export default function VyronaSpace() {
   const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
 
   const getFilteredStores = () => {
-    return stores.filter((store: any) => {
+    return (stores as any[]).filter((store: any) => {
       const matchesSearch = store.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          store.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || store.category === selectedCategory;
+                          store.address?.toLowerCase().includes(searchQuery.toLowerCase());
+      const categoryMap: { [key: string]: string } = {
+        "Grocery": "kirana",
+        "Pharmacy": "pharmacy", 
+        "Fashion": "fashion",
+        "Electronics": "electronics",
+        "Books": "books",
+        "Home & Garden": "lifestyle"
+      };
+      const storeType = categoryMap[selectedCategory] || selectedCategory.toLowerCase();
+      const matchesCategory = selectedCategory === "All" || store.type === storeType;
       
       return matchesSearch && matchesCategory;
     });
@@ -230,45 +239,13 @@ export default function VyronaSpace() {
   };
 
   const getStoreProducts = (storeId: number) => {
-    const storeProductsMap: { [key: number]: Array<{ id: number; name: string; price: number; unit: string; inStock: number }> } = {
-      1: [ // FreshMart Express
-        { id: 101, name: "Fresh Bananas", price: 45, unit: "1 dozen", inStock: 25 },
-        { id: 102, name: "Organic Apples", price: 120, unit: "1 kg", inStock: 18 },
-        { id: 103, name: "Green Vegetables Mix", price: 80, unit: "500g", inStock: 12 },
-        { id: 104, name: "Fresh Milk", price: 55, unit: "1 liter", inStock: 30 }
-      ],
-      2: [ // MedPlus Essentials
-        { id: 201, name: "Pain Relief Tablets", price: 85, unit: "10 tablets", inStock: 50 },
-        { id: 202, name: "Multi Vitamins", price: 320, unit: "30 capsules", inStock: 25 },
-        { id: 203, name: "First Aid Kit", price: 450, unit: "1 kit", inStock: 8 },
-        { id: 204, name: "Hand Sanitizer", price: 65, unit: "250ml", inStock: 40 }
-      ],
-      3: [ // TechHub Electronics
-        { id: 301, name: "Smartphone Charger", price: 450, unit: "1 piece", inStock: 15 },
-        { id: 302, name: "Wireless Headphones", price: 1299, unit: "1 pair", inStock: 6 },
-        { id: 303, name: "Power Bank", price: 899, unit: "1 piece", inStock: 12 },
-        { id: 304, name: "Phone Case", price: 299, unit: "1 piece", inStock: 20 }
-      ],
-      4: [ // Fashion District
-        { id: 401, name: "Cotton T-Shirt", price: 599, unit: "1 piece", inStock: 25 },
-        { id: 402, name: "Denim Jeans", price: 1299, unit: "1 piece", inStock: 18 },
-        { id: 403, name: "Casual Sneakers", price: 1899, unit: "1 pair", inStock: 10 },
-        { id: 404, name: "Baseball Cap", price: 399, unit: "1 piece", inStock: 15 }
-      ],
-      5: [ // BookWorld Cafe
-        { id: 501, name: "Bestseller Novel", price: 350, unit: "1 book", inStock: 12 },
-        { id: 502, name: "Notebook Set", price: 120, unit: "3 notebooks", inStock: 25 },
-        { id: 503, name: "Coffee Beans", price: 450, unit: "250g", inStock: 8 },
-        { id: 504, name: "Pen Set", price: 180, unit: "5 pens", inStock: 30 }
-      ],
-      6: [ // HomeMart Essentials
-        { id: 601, name: "Indoor Plant", price: 299, unit: "1 pot", inStock: 15 },
-        { id: 602, name: "Garden Tools Set", price: 699, unit: "1 set", inStock: 8 },
-        { id: 603, name: "Wall Decor", price: 450, unit: "1 piece", inStock: 12 },
-        { id: 604, name: "LED Bulb", price: 120, unit: "1 piece", inStock: 40 }
-      ]
-    };
-    return storeProductsMap[storeId] || [];
+    return (products as any[]).filter((product: any) => product.storeId === storeId).map((product: any) => ({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      unit: product.description || "1 unit",
+      inStock: 25 // Default stock level
+    }));
   };
 
   const updateCartQuantity = (itemId: number, change: number) => {
@@ -432,34 +409,33 @@ export default function VyronaSpace() {
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center">
                             <Clock className="h-3 w-3 mr-1 text-emerald-600" />
-                            <span className="text-xs text-emerald-600 font-medium">{store.deliveryTime}</span>
+                            <span className="text-xs text-emerald-600 font-medium">8 min</span>
                           </div>
                           <div className="flex items-center">
                             <MapPin className="h-3 w-3 mr-1 text-teal-600" />
-                            <span className="text-xs text-gray-600">{store.distance}</span>
+                            <span className="text-xs text-gray-600">0.5 km</span>
                           </div>
                         </div>
                         <div className="flex items-center">
                           <Star className="h-3 w-3 mr-1 text-yellow-400 fill-current" />
-                          <span className="text-xs text-gray-600">{store.rating}</span>
-                          <span className="text-xs text-gray-500 ml-1">({store.reviewCount})</span>
+                          <span className="text-xs text-gray-600">{(store.rating / 100).toFixed(1)} ({store.reviewCount})</span>
                         </div>
                       </div>
 
                       <div className="mb-4">
-                        <p className="text-sm text-gray-600 mb-2">Featured Products:</p>
+                        <p className="text-sm text-gray-600 mb-2">Store Type:</p>
                         <div className="flex flex-wrap gap-1">
-                          {store.featuredProducts.slice(0, 3).map((product, index) => (
-                            <Badge key={index} variant="outline" className="text-xs border-emerald-200 text-emerald-700">
-                              {product}
-                            </Badge>
-                          ))}
+                          <Badge variant="outline" className="text-xs border-emerald-200 text-emerald-700">
+                            {store.type === 'kirana' ? 'Grocery Store' : 
+                             store.type === 'pharmacy' ? 'Pharmacy' : 
+                             store.type === 'fashion' ? 'Fashion Store' : store.type}
+                          </Badge>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-sm text-gray-600">
-                          {store.totalProducts} products available
+                          {getStoreProducts(store.id).length} products available
                         </span>
                       </div>
 
