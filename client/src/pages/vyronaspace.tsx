@@ -1173,7 +1173,11 @@ export default function VyronaSpace() {
                         <span>Primary address</span>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50">
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50"
+                      onClick={() => setShowManageAddresses(true)}
+                    >
                       Manage Addresses
                     </Button>
                   </CardContent>
@@ -1277,6 +1281,154 @@ export default function VyronaSpace() {
           </div>
         )}
       </div>
+
+      {/* Edit Profile Modal */}
+      <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="username">Full Name</Label>
+              <Input
+                id="username"
+                value={profileForm.username}
+                onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                placeholder="Enter your full name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={profileForm.email}
+                onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                placeholder="Enter your email"
+              />
+            </div>
+            <div>
+              <Label htmlFor="mobile">Phone Number</Label>
+              <Input
+                id="mobile"
+                value={profileForm.mobile}
+                onChange={(e) => setProfileForm({ ...profileForm, mobile: e.target.value })}
+                placeholder="Enter your phone number"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowEditProfile(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => updateProfileMutation.mutate(profileForm)}
+              disabled={updateProfileMutation.isPending}
+              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+            >
+              {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Addresses Modal */}
+      <Dialog open={showManageAddresses} onOpenChange={setShowManageAddresses}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Manage Addresses</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  value={newAddress.name}
+                  onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
+                  placeholder="Full name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={newAddress.phone}
+                  onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
+                  placeholder="Phone number"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                value={newAddress.address}
+                onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
+                placeholder="House/Flat No, Building, Street"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={newAddress.city}
+                  onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                  placeholder="City"
+                />
+              </div>
+              <div>
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={newAddress.state}
+                  onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                  placeholder="State"
+                />
+              </div>
+              <div>
+                <Label htmlFor="pincode">Pincode</Label>
+                <Input
+                  id="pincode"
+                  value={newAddress.pincode}
+                  onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
+                  placeholder="Pincode"
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isDefault"
+                checked={newAddress.isDefault}
+                onChange={(e) => setNewAddress({ ...newAddress, isDefault: e.target.checked })}
+                className="rounded"
+              />
+              <Label htmlFor="isDefault">Set as default address</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowManageAddresses(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => addAddressMutation.mutate(newAddress)}
+              disabled={addAddressMutation.isPending}
+              className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+            >
+              {addAddressMutation.isPending ? "Adding..." : "Add Address"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
