@@ -8386,6 +8386,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           message: "VyronaRead seller registration successful"
         });
+      } else if (registrationData.sellerType === "vyronainstastore") {
+        // Generate unique email and password for VyronaInstaStore sellers
+        const email = `${registrationData.businessName.toLowerCase().replace(/\s+/g, '')}@vyronainstastore.com`;
+        const password = `vyinsta${Math.random().toString(36).substring(2, 8)}`;
+        
+        // Create VyronaInstaStore seller account
+        const newSeller = await db
+          .insert(users)
+          .values({
+            username: registrationData.ownerName,
+            email: email,
+            mobile: registrationData.phone,
+            role: 'seller',
+            sellerType: 'vyronainstastore',
+            password: password
+          })
+          .returning({ id: users.id });
+        
+        const sellerId = newSeller[0].id;
+        
+        console.log("VyronaInstaStore seller registered:", {
+          sellerId,
+          businessName: registrationData.businessName,
+          instagramHandle: registrationData.instagramHandle,
+          category: registrationData.businessCategory
+        });
+        
+        return res.json({
+          success: true,
+          sellerId: sellerId,
+          credentials: {
+            email: email,
+            password: password
+          },
+          message: "VyronaInstaStore seller registration successful"
+        });
       } else {
         // Handle other seller types (existing logic)
         console.log("General seller registration:", registrationData);

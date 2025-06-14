@@ -1175,8 +1175,17 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
                 description: "You've been automatically logged in. Start by adding your first book or setting up library partnerships!",
               });
             }, 1000);
-          } else if (formData.sellerType === "vyronahub" || formData.sellerType === "vyronainstastore") {
-            // General e-commerce sellers go to VyronaHub dashboard
+          } else if (formData.sellerType === "vyronainstastore") {
+            // VyronaInstaStore sellers go to Instagram seller dashboard
+            setLocation("/vyronainstastore-dashboard");
+            setTimeout(() => {
+              toast({
+                title: "Welcome to VyronaInstaStore!",
+                description: "You've been automatically logged in. Connect your Instagram account and start selling!",
+              });
+            }, 1000);
+          } else if (formData.sellerType === "vyronahub") {
+            // VyronaHub sellers go to VyronaHub dashboard
             setLocation("/vyronahub-dashboard");
             setTimeout(() => {
               toast({
