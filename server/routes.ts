@@ -8007,6 +8007,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         DELETE FROM book_loans WHERE library_id = ${sellerId}
       `);
 
+      // Remove Instagram specific data - get Instagram store first
+      const instagramStore = await db.execute(sql`
+        SELECT id FROM instagram_stores WHERE user_id = ${sellerId}
+      `);
+
+      if (instagramStore.rows.length > 0) {
+        const storeId = instagramStore.rows[0].id;
+        console.log(`Removing Instagram data for store ID ${storeId}`);
+
+        // Remove Instagram orders for this store
+        await db.execute(sql`
+          DELETE FROM instagram_orders WHERE store_id = ${storeId}
+        `);
+
+        // Remove Instagram products for this store
+        await db.execute(sql`
+          DELETE FROM instagram_products WHERE store_id = ${storeId}
+        `);
+
+        // Remove Instagram analytics for this store
+        await db.execute(sql`
+          DELETE FROM instagram_analytics WHERE store_id = ${storeId}
+        `);
+
+        // Remove the Instagram store itself
+        await db.execute(sql`
+          DELETE FROM instagram_stores WHERE id = ${storeId}
+        `);
+
+        console.log(`Removed all Instagram data for store ID ${storeId}`);
+      }
+
       // Finally remove the seller user account
       await db.execute(sql`
         DELETE FROM users WHERE id = ${sellerId}
