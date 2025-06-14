@@ -272,7 +272,7 @@ export default function SocialProductDetails({ productId }: SocialProductDetails
               <div className="space-y-3">
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl font-bold text-purple-600">₹{product.price}</span>
-                  <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.25}</span>
+                  <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.25)}</span>
                   <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm">
                     Group Discount Applied
                   </Badge>
