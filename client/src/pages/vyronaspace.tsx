@@ -1010,10 +1010,10 @@ export default function VyronaSpace() {
                 </div>
               )}
             </div>
-          </TabsContent>
+            </TabsContent>
 
-          {/* Rewards Tab - VyronaCoins System */}
-          <TabsContent value="rewards" className="space-y-6">
+            {/* Rewards Tab - VyronaCoins System */}
+            <TabsContent value="rewards" className="space-y-6">
             <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">VyronaCoins & Rewards</h2>
               
@@ -1107,10 +1107,10 @@ export default function VyronaSpace() {
                 </div>
               </div>
             </div>
-          </TabsContent>
+            </TabsContent>
 
-          {/* Profile Tab - Customer Management */}
-          <TabsContent value="profile" className="space-y-6">
+            {/* Profile Tab - Customer Management */}
+            <TabsContent value="profile" className="space-y-6">
             <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Customer Profile</h2>
               
@@ -1236,8 +1236,8 @@ export default function VyronaSpace() {
                 </div>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
       </div>
 
       {/* Fixed Position Quick Cart Button */}
@@ -1305,7 +1305,6 @@ export default function VyronaSpace() {
             </div>
           </div>
           )}
-          </Tabs>
         </div>
       </div>
 
