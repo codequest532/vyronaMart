@@ -4119,12 +4119,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Product ${item.id} not found`);
         }
 
+        // Convert price from rupees to paisa for database storage
+        const priceInPaisa = Math.round(item.price * 100);
+        const totalAmountInPaisa = priceInPaisa * item.quantity;
+
         const orderData = {
           buyerId: authenticatedUser.id,
           storeId: product.storeId,
           productId: item.id,
           quantity: item.quantity,
-          totalAmount: item.price * item.quantity,
+          totalAmount: totalAmountInPaisa,
           status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
           shippingAddress: shippingAddress,
           contactInfo: {
@@ -4384,7 +4388,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         );
 
-      res.json(products);
+      // Convert prices from paisa to rupees (divide by 100) and round to whole numbers
+      const productsWithRupeePrice = products.map(product => ({
+        ...product,
+        price: Math.round((product.price || 0) / 100)
+      }));
+
+      res.json(productsWithRupeePrice);
     } catch (error) {
       console.error("Error fetching public Instagram products:", error);
       res.status(500).json({ message: "Failed to fetch products" });
@@ -4441,6 +4451,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { productId, quantity = 1, price } = req.body;
       
+      // Convert price to integer (paisa) - ensure it's a whole number
+      const priceInPaisa = Math.round(parseFloat(price) * 100);
+      
       // Check if item already exists in cart
       const existingItem = await storage.getInstagramCartItem(authenticatedUser.id, productId);
       
@@ -4453,7 +4466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: authenticatedUser.id,
           productId,
           quantity,
-          price
+          price: priceInPaisa
         });
       }
 

@@ -2552,7 +2552,11 @@ export class DatabaseStorage implements IStorage {
         ))
         .limit(50); // Add limit for performance
       
-      return items;
+      // Convert prices from paisa to rupees (divide by 100) and round to whole numbers
+      return items.map(item => ({
+        ...item,
+        price: Math.round((item.price || 0) / 100)
+      }));
     } catch (error) {
       console.error("Error fetching Instagram cart items:", error);
       return [];
