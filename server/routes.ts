@@ -4069,7 +4069,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           instagramMediaId: `scraped_${Date.now()}_${i}`,
           productName: `${template.name} ${variation}`,
           description: `Beautiful ${template.name.toLowerCase()} from Instagram post`,
-          price: Math.round((template.basePrice + Math.random() * 20) * 100), // Convert to cents
+          price: Math.round(template.basePrice + Math.random() * 20), // Store as direct rupees
           categoryTag: template.category,
           hashtags: [`${template.category}`, "handmade", "instagram", "shop"],
           productUrl: `https://instagram.com/p/scraped_${Date.now()}_${i}`,
@@ -4868,8 +4868,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category: category.toLowerCase(),
         format: format || 'PDF',
         description: description || '',
-        salePrice: Math.round(salePriceNum * 100), // Store in cents
-        rentalPrice: Math.round(rentalPriceNum * 100), // Store in cents
+        salePrice: Math.round(salePriceNum), // Store in cents
+        rentalPrice: Math.round(rentalPriceNum), // Store in cents
         publisher: publisher || 'Unknown Publisher',
         publicationYear: publicationYear || new Date().getFullYear().toString(),
         language: language || 'English',
@@ -4950,8 +4950,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category,
         format: format || 'PDF',
         description: description || '',
-        salePrice: Math.round(salePriceNum * 100), // Store in cents
-        rentalPrice: Math.round(rentalPriceNum * 100), // Store in cents
+        salePrice: Math.round(salePriceNum), // Store in cents
+        rentalPrice: Math.round(rentalPriceNum), // Store in cents
         publisher: publisher || '',
         publicationYear: publicationYear || '',
         language: language || 'English',
@@ -5065,8 +5065,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedEbook = await storage.updateEbookPricing(ebookId, {
-        salePrice: Math.round(salePriceNum * 100),
-        rentalPrice: Math.round(rentalPriceNum * 100)
+        salePrice: Math.round(salePriceNum),
+        rentalPrice: Math.round(rentalPriceNum)
       });
 
       res.json({
@@ -5195,7 +5195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const productData = {
         name: title,
         description: `${author} - ${category || 'General'}`,
-        price: Math.round((parseFloat(fixedCostPrice) || 0) * 100), // Convert to cents
+        price: Math.round(parseFloat(fixedCostPrice) || 0), // Convert to cents
         category: "books",
         module: "vyronaread",
         imageUrl: imageUrl || `https://picsum.photos/300/400?random=${Date.now()}`,
