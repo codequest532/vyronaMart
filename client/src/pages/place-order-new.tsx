@@ -286,7 +286,7 @@ export default function PlaceOrderNew() {
       if (amount > remainingAmount) {
         toast({
           title: "Invalid Amount",
-          description: `Maximum contribution for this item is ₹${remainingAmount)}`,
+          description: `Maximum contribution for this item is ₹${remainingAmount}`,
           variant: "destructive",
         });
         return;
@@ -384,7 +384,7 @@ export default function PlaceOrderNew() {
                 ...item,
                 contributedAmount: item.contributedAmount + amount,
                 contributors: [...item.contributors, newContributor],
-                isFullyFunded: (item.contributedAmount + amount) >= item.targetAmount
+                isFullyFunded: (item.contributedAmount + amount >= item.targetAmount)
               }
             : item
         );
@@ -395,8 +395,8 @@ export default function PlaceOrderNew() {
                 ...target,
                 currentAmount: target.currentAmount + amount,
                 remainingAmount: target.remainingAmount - amount,
-                progress: ((target.currentAmount + amount) / target.targetAmount) * 100,
-                isComplete: (target.currentAmount + amount) >= target.targetAmount
+                progress: ((target.currentAmount + amount / target.targetAmount) * 100,
+                isComplete: (target.currentAmount + amount >= target.targetAmount
               }
             : target
         );
@@ -871,7 +871,7 @@ export default function PlaceOrderNew() {
                                       {contributor.username}
                                     </span>
                                     <span className="flex items-center gap-2">
-                                      ₹{contributor.amount)}
+                                      ₹{contributor.amount}
                                       <Badge variant="outline" className="text-xs">
                                         {contributor.paymentMethod}
                                       </Badge>

@@ -322,7 +322,7 @@ export default function PlaceOrder() {
                 ...item,
                 contributedAmount: item.contributedAmount + amount,
                 contributors: [...item.contributors, newContributor],
-                isFullyFunded: (item.contributedAmount + amount) >= item.targetAmount
+                isFullyFunded: (item.contributedAmount + amount >= item.targetAmount
               }
             : item
         );
@@ -333,9 +333,9 @@ export default function PlaceOrder() {
                 ...target,
                 currentAmount: target.currentAmount + amount,
                 remainingAmount: target.remainingAmount - amount,
-                progress: ((target.currentAmount + amount) / target.targetAmount) * 100,
-                isComplete: (target.currentAmount + amount) >= target.targetAmount,
-                canPlaceOrder: (target.currentAmount + amount) >= target.targetAmount
+                progress: ((target.currentAmount + amount / target.targetAmount) * 100,
+                isComplete: (target.currentAmount + amount >= target.targetAmount,
+                canPlaceOrder: (target.currentAmount + amount >= target.targetAmount
               }
             : target
         );
@@ -852,7 +852,7 @@ export default function PlaceOrder() {
                                     <div className="flex items-center gap-3">
                                       {contribution.status === 'contributed' ? (
                                         <div className="flex items-center gap-2">
-                                          <span className="font-medium">₹{contribution.amount)}</span>
+                                          <span className="font-medium">₹{contribution.amount}</span>
                                           <Badge variant="default" className="bg-green-500">
                                             <Check className="h-3 w-3 mr-1" />
                                             Contributed
@@ -927,7 +927,7 @@ export default function PlaceOrder() {
                                 <div className="text-right">
                                   <p className="font-medium">₹{Math.round(item.price * item.quantity)}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    ₹{item.price)} each
+                                    ₹{item.price} each
                                   </p>
                                 </div>
                               </div>
@@ -1193,7 +1193,7 @@ export default function PlaceOrder() {
                 </div>
                 <div>
                   <span className="text-green-600 dark:text-green-400">Split Total:</span>
-                  <p className="font-bold text-lg">₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0))}</p>
+                  <p className="font-bold text-lg">₹{Object.values(customSplitAmounts).reduce((sum, amount => sum + (parseFloat(amount || 0), 0))}</p>
                 </div>
               </div>
             </div>
@@ -1257,16 +1257,16 @@ export default function PlaceOrder() {
               <div className="mt-3 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs">
                 <div className="flex justify-between">
                   <span>Total Split:</span>
-                  <span>₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0))}</span>
+                  <span>₹{Object.values(customSplitAmounts).reduce((sum, amount => sum + (parseFloat(amount || 0), 0))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Required:</span>
                   <span>₹{finalTotal)}</span>
                 </div>
-                {Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0) !== finalTotal && (
+                {Object.values(customSplitAmounts).reduce((sum, amount => sum + (parseFloat(amount || 0), 0) !== finalTotal && (
                   <div className="flex justify-between text-red-600">
                     <span>Difference:</span>
-                    <span>₹{Math.round(finalTotal - Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0))}</span>
+                    <span>₹{Math.round(finalTotal - Object.values(customSplitAmounts).reduce((sum, amount => sum + (parseFloat(amount || 0), 0))}</span>
                   </div>
                 )}
               </div>
@@ -1309,7 +1309,7 @@ export default function PlaceOrder() {
               </Button>
               <Button
                 onClick={() => {
-                  const totalSplit = Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
+                  const totalSplit = Object.values(customSplitAmounts).reduce((sum, amount => sum + (parseFloat(amount || 0), 0);
                   
                   if (Math.abs(totalSplit - finalTotal) > 0.01) {
                     toast({
@@ -1322,7 +1322,7 @@ export default function PlaceOrder() {
                   
                   // Generate Google Pay Groups URL with custom amounts
                   const splitData = Object.entries(customSplitAmounts)
-                    .filter(([_, amount]) => parseFloat(amount) > 0)
+                    .filter(([_, amount]) => parseFloat(amount > 0)
                     .map(([index, amount]) => `member${parseInt(index) + 1}:${amount}`)
                     .join(',');
                   
@@ -1330,8 +1330,8 @@ export default function PlaceOrder() {
                   
                   // Apply custom split to contributions
                   Object.entries(customSplitAmounts).forEach(([index, amount]) => {
-                    if (parseFloat(amount) > 0) {
-                      updateContribution(parseInt(index) + 1, parseFloat(amount), 'upi');
+                    if (parseFloat(amount > 0) {
+                      updateContribution(parseInt(index) + 1, parseFloat(amount, 'upi');
                     }
                   });
                   
@@ -1341,7 +1341,7 @@ export default function PlaceOrder() {
                     description: `Custom split payment requests sent to all members.`,
                   });
                 }}
-                disabled={Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0) === 0}
+                disabled={Object.values(customSplitAmounts).reduce((sum, amount => sum + (parseFloat(amount || 0), 0) === 0}
                 className="flex-1 bg-green-600 hover:bg-green-700"
               >
                 <Smartphone className="h-4 w-4 mr-2" />

@@ -307,7 +307,7 @@ export default function ModernCheckout() {
 
       toast({
         title: "Contribution Added!",
-        description: `Successfully contributed ₹${amount)} via ${paymentMethod.name}`,
+        description: `Successfully contributed ₹${amount} via ${paymentMethod.name}`,
       });
 
       setIsContributionModalOpen(false);
@@ -591,7 +591,7 @@ export default function ModernCheckout() {
                             <h3 className="text-2xl font-bold text-gray-900">{item.name}</h3>
                             <div className="flex items-center gap-4 mt-2">
                               <Badge variant="outline" className="text-purple-600 border-purple-300">
-                                ₹{item.price)}
+                                ₹{item.price}
                               </Badge>
                               <Badge variant="outline" className="text-blue-600 border-blue-300">
                                 Qty: {item.quantity}
@@ -651,7 +651,7 @@ export default function ModernCheckout() {
                                       <span className="font-medium">{contributor.username}</span>
                                     </div>
                                     <div className="text-right">
-                                      <div className="font-bold text-green-600">₹{contributor.amount)}</div>
+                                      <div className="font-bold text-green-600">₹{contributor.amount}</div>
                                       <Badge variant="outline" className="text-xs">
                                         {contributor.paymentMethod}
                                       </Badge>

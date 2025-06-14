@@ -1698,7 +1698,7 @@ export default function Home() {
                             <p className={`font-semibold ${
                               transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount))}
+                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount)}
                             </p>
                             <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
                               {transaction.status}

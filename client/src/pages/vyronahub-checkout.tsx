@@ -187,9 +187,9 @@ export default function VyronaHubCheckout() {
         items: typedCartItems.map((item: CheckoutCartItem) => ({
           productId: item.id,
           quantity: item.quantity,
-          price: Math.round(item.price), // Amount in rupees
+          price: Math.round(item.price, // Amount in rupees
         })),
-        totalAmount: Math.round(total), // Amount in rupees
+        totalAmount: Math.round(total, // Amount in rupees
         shippingAddress: {
           fullName: addressData.fullName,
           phoneNumber: addressData.phoneNumber,
@@ -202,7 +202,7 @@ export default function VyronaHubCheckout() {
         module: "vyronahub",
         metadata: {
           deliveryFee: Math.round(deliveryFee), // Amount in rupees
-          subtotal: Math.round(subtotal), // Amount in rupees
+          subtotal: Math.round(subtotal, // Amount in rupees
         },
       };
 
@@ -587,7 +587,7 @@ export default function VyronaHubCheckout() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>{formatCurrency(subtotal)}</span>
+                    <span>{formatCurrency(subtotal}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Delivery Fee</span>
@@ -600,7 +600,7 @@ export default function VyronaHubCheckout() {
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span>{formatCurrency(total)}</span>
+                  <span>{formatCurrency(total}</span>
                 </div>
               </CardContent>
             </Card>

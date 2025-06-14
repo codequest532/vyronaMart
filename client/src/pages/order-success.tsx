@@ -206,7 +206,7 @@ export default function OrderSuccess() {
                             ₹{Math.round(item.price * item.quantity)}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            ₹{item.price)} each
+                            ₹{item.price} each
                           </p>
                         </div>
                       </div>

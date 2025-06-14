@@ -1039,7 +1039,7 @@ export default function VyronaHub() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-2xl font-bold text-green-600">
-                              {formatCurrency(product.price)}
+                              {formatCurrency(product.price}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="outline" className="text-xs">
@@ -1130,7 +1130,7 @@ export default function VyronaHub() {
                         </div>
                       </div>
                       <p className="text-3xl font-bold text-green-600 mb-4">
-                        {formatCurrency(selectedProduct.price)}
+                        {formatCurrency(selectedProduct.price}
                       </p>
                       <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                         {selectedProduct.description}

@@ -45,7 +45,7 @@ const formatPrice = (price: number) => {
     style: 'currency',
     currency: 'INR',
     minimumFractionDigits: 0
-  }).format(price);
+  }).format(price;
 };
 
 const membershipSchema = z.object({

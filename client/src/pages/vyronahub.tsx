@@ -460,7 +460,7 @@ export default function VyronaHub() {
                     
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-lg font-bold text-purple-600">₹{product.price)}</span>
+                        <span className="text-lg font-bold text-purple-600">₹{product.price}</span>
                         {product.originalPrice && product.originalPrice > product.price && (
                           <span className="text-xs text-gray-500 line-through">₹{product.originalPrice)}</span>
                         )}
