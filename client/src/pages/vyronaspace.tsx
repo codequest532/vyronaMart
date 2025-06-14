@@ -204,6 +204,26 @@ export default function VyronaSpace() {
     queryKey: ["/api/achievements/1"],
   });
 
+  // Fetch user subscriptions
+  const { data: subscriptions = [], isLoading: subscriptionsLoading } = useQuery({
+    queryKey: ["/api/subscriptions/1"]
+  });
+
+  // Fetch user reorder history
+  const { data: reorderHistory = [], isLoading: reorderLoading } = useQuery({
+    queryKey: ["/api/reorder-history/1"]
+  });
+
+  // Fetch user addresses
+  const { data: userAddresses = [], isLoading: addressesLoading } = useQuery({
+    queryKey: ["/api/addresses/1"]
+  });
+
+  // Fetch user profile
+  const { data: userProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ["/api/profile/1"]
+  });
+
   const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
 
   const getFilteredStores = () => {
@@ -951,18 +971,28 @@ export default function VyronaSpace() {
                   <CardContent className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
                     <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Full Name</label>
-                        <p className="text-gray-900">Alex Johnson</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Email</label>
-                        <p className="text-gray-900">alex.johnson@email.com</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Phone</label>
-                        <p className="text-gray-900">+91 98765 43210</p>
-                      </div>
+                      {profileLoading ? (
+                        <div className="animate-pulse space-y-3">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                        </div>
+                      ) : (
+                        <>
+                          <div>
+                            <label className="text-sm font-medium text-gray-700">Full Name</label>
+                            <p className="text-gray-900">{(userProfile as any)?.username || 'Not provided'}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-700">Email</label>
+                            <p className="text-gray-900">{(userProfile as any)?.email || 'Not provided'}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-700">Phone</label>
+                            <p className="text-gray-900">{(userProfile as any)?.mobile || 'Not provided'}</p>
+                          </div>
+                        </>
+                      )}
                     </div>
                     <Button variant="outline" className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50">
                       Edit Profile
@@ -974,10 +1004,36 @@ export default function VyronaSpace() {
                   <CardContent className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-4">Delivery Address</h3>
                     <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Home</label>
-                        <p className="text-gray-900">123 Green Street, Koramangala, Bangalore - 560034</p>
-                      </div>
+                      {addressesLoading ? (
+                        <div className="animate-pulse space-y-3">
+                          <div className="h-4 bg-gray-200 rounded w-full"></div>
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        </div>
+                      ) : (userAddresses as any[]).length > 0 ? (
+                        <>
+                          {(userAddresses as any[]).filter((addr: any) => addr.isPrimary).map((address: any) => (
+                            <div key={address.id}>
+                              <label className="text-sm font-medium text-gray-700">{address.type}</label>
+                              <p className="text-gray-900">
+                                {address.addressLine1}, {address.city}, {address.state} - {address.pincode}
+                              </p>
+                            </div>
+                          ))}
+                          {(userAddresses as any[]).filter((addr: any) => addr.isPrimary).length === 0 && (
+                            <div>
+                              <label className="text-sm font-medium text-gray-700">{(userAddresses as any[])[0]?.type || 'Primary'}</label>
+                              <p className="text-gray-900">
+                                {(userAddresses as any[])[0]?.addressLine1 || 'No address'}, {(userAddresses as any[])[0]?.city || ''}, {(userAddresses as any[])[0]?.state || ''} - {(userAddresses as any[])[0]?.pincode || ''}
+                              </p>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">No addresses found</label>
+                          <p className="text-gray-900">Please add a delivery address</p>
+                        </div>
+                      )}
                       <div className="flex items-center text-sm text-emerald-600">
                         <MapPin className="h-4 w-4 mr-1" />
                         <span>Primary address</span>

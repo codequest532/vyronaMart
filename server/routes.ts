@@ -8678,6 +8678,245 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create demo data" });
     }
   });
+
+  // VyronaSpace Subscriptions Management
+  app.get("/api/subscriptions/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const result = await db.execute(sql`
+        SELECT s.*, st.name as store_name
+        FROM subscriptions s
+        LEFT JOIN stores st ON s.store_id = st.id
+        WHERE s.user_id = ${userId} AND s.is_active = true
+        ORDER BY s.created_at DESC
+      `);
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
+  app.post("/api/subscriptions", async (req, res) => {
+    try {
+      const { userId, title, description, frequency, nextDelivery, amount, storeId, items } = req.body;
+      
+      const result = await db.execute(sql`
+        INSERT INTO subscriptions (user_id, title, description, frequency, next_delivery, amount, store_id, items)
+        VALUES (${userId}, ${title}, ${description}, ${frequency}, ${nextDelivery}, ${amount}, ${storeId}, ${JSON.stringify(items)})
+        RETURNING *
+      `);
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error creating subscription:", error);
+      res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  app.patch("/api/subscriptions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { isActive, nextDelivery } = req.body;
+      
+      const result = await db.execute(sql`
+        UPDATE subscriptions 
+        SET is_active = ${isActive}, next_delivery = ${nextDelivery}, updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING *
+      `);
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error updating subscription:", error);
+      res.status(500).json({ message: "Failed to update subscription" });
+    }
+  });
+
+  app.delete("/api/subscriptions/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db.execute(sql`DELETE FROM subscriptions WHERE id = ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting subscription:", error);
+      res.status(500).json({ message: "Failed to delete subscription" });
+    }
+  });
+
+  // VyronaSpace Reorder Functionality
+  app.get("/api/reorder-history/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const result = await db.execute(sql`
+        SELECT r.*, s.name as store_name
+        FROM reorder_history r
+        LEFT JOIN stores s ON r.store_id = s.id
+        WHERE r.user_id = ${userId}
+        ORDER BY r.last_ordered_at DESC
+        LIMIT 10
+      `);
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching reorder history:", error);
+      res.status(500).json({ message: "Failed to fetch reorder history" });
+    }
+  });
+
+  app.post("/api/reorder", async (req, res) => {
+    try {
+      const { userId, title, storeId, items, totalAmount } = req.body;
+      
+      // Check if this reorder combination exists
+      const existing = await db.execute(sql`
+        SELECT * FROM reorder_history 
+        WHERE user_id = ${userId} AND title = ${title} AND store_id = ${storeId}
+      `);
+
+      if (existing.rows.length > 0) {
+        // Update existing reorder
+        const result = await db.execute(sql`
+          UPDATE reorder_history 
+          SET last_ordered_at = NOW(), order_count = order_count + 1, total_amount = ${totalAmount}
+          WHERE id = ${(existing.rows[0] as any).id}
+          RETURNING *
+        `);
+        res.json(result.rows[0]);
+      } else {
+        // Create new reorder history
+        const result = await db.execute(sql`
+          INSERT INTO reorder_history (user_id, title, store_id, items, total_amount)
+          VALUES (${userId}, ${title}, ${storeId}, ${JSON.stringify(items)}, ${totalAmount})
+          RETURNING *
+        `);
+        res.json(result.rows[0]);
+      }
+    } catch (error) {
+      console.error("Error processing reorder:", error);
+      res.status(500).json({ message: "Failed to process reorder" });
+    }
+  });
+
+  // User Address Management
+  app.get("/api/addresses/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const result = await db.execute(sql`
+        SELECT * FROM user_addresses 
+        WHERE user_id = ${userId}
+        ORDER BY is_primary DESC, created_at DESC
+      `);
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+      res.status(500).json({ message: "Failed to fetch addresses" });
+    }
+  });
+
+  app.post("/api/addresses", async (req, res) => {
+    try {
+      const { userId, type, name, addressLine1, addressLine2, city, state, pincode, phone, isPrimary } = req.body;
+      
+      // If setting as primary, unset other primary addresses
+      if (isPrimary) {
+        await db.execute(sql`
+          UPDATE user_addresses SET is_primary = false WHERE user_id = ${userId}
+        `);
+      }
+      
+      const result = await db.execute(sql`
+        INSERT INTO user_addresses (user_id, type, name, address_line1, address_line2, city, state, pincode, phone, is_primary)
+        VALUES (${userId}, ${type}, ${name}, ${addressLine1}, ${addressLine2}, ${city}, ${state}, ${pincode}, ${phone}, ${isPrimary})
+        RETURNING *
+      `);
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error creating address:", error);
+      res.status(500).json({ message: "Failed to create address" });
+    }
+  });
+
+  app.patch("/api/addresses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { name, addressLine1, addressLine2, city, state, pincode, phone, isPrimary } = req.body;
+      
+      // If setting as primary, unset other primary addresses for this user
+      if (isPrimary) {
+        const address = await db.execute(sql`SELECT user_id FROM user_addresses WHERE id = ${id}`);
+        if (address.rows.length > 0) {
+          await db.execute(sql`
+            UPDATE user_addresses SET is_primary = false WHERE user_id = ${(address.rows[0] as any).user_id}
+          `);
+        }
+      }
+      
+      const result = await db.execute(sql`
+        UPDATE user_addresses 
+        SET name = ${name}, address_line1 = ${addressLine1}, address_line2 = ${addressLine2},
+            city = ${city}, state = ${state}, pincode = ${pincode}, phone = ${phone}, is_primary = ${isPrimary}
+        WHERE id = ${id}
+        RETURNING *
+      `);
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error updating address:", error);
+      res.status(500).json({ message: "Failed to update address" });
+    }
+  });
+
+  app.delete("/api/addresses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db.execute(sql`DELETE FROM user_addresses WHERE id = ${id}`);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting address:", error);
+      res.status(500).json({ message: "Failed to delete address" });
+    }
+  });
+
+  // User Profile Management
+  app.get("/api/profile/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const result = await db.execute(sql`
+        SELECT id, username, email, mobile, created_at 
+        FROM users 
+        WHERE id = ${userId}
+      `);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      res.status(500).json({ message: "Failed to fetch profile" });
+    }
+  });
+
+  app.patch("/api/profile/:userId", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { username, email, mobile } = req.body;
+      
+      const result = await db.execute(sql`
+        UPDATE users 
+        SET username = ${username}, email = ${email}, mobile = ${mobile}
+        WHERE id = ${userId}
+        RETURNING id, username, email, mobile, created_at
+      `);
+      
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
   
   return httpServer;
 }
