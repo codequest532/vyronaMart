@@ -138,6 +138,10 @@ export default function Home() {
       setLocation("/social");
       return;
     }
+    if (tab === "space") {
+      setLocation("/vyronaspace");
+      return;
+    }
     if (tab === "read") {
       setLocation("/vyronaread");
       return;
