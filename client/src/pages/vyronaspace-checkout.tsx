@@ -703,11 +703,15 @@ export default function VyronaSpaceCheckout() {
                         </Button>
                         <Button 
                           type="button" 
-                          onClick={handleFinalSubmit}
+                          onClick={(e) => {
+                            console.log("🔥 Place Order button clicked!");
+                            console.log("Event:", e);
+                            handleFinalSubmit();
+                          }}
                           disabled={isSubmitting}
-                          className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
+                          className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 rounded-xl shadow-md"
                         >
-                          {isSubmitting ? "Placing Order..." : "Place Order"}
+                          {isSubmitting ? "Placing Order..." : (form.getValues("enableSubscription") ? "Create Subscription" : "Place Order")}
                         </Button>
                       </div>
                     </CardContent>
