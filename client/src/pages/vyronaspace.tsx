@@ -341,8 +341,8 @@ export default function VyronaSpace() {
                         <div className="flex items-center space-x-4">
                           <span className="text-sm text-gray-600">{product.storeName}</span>
                           <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1 text-green-600" />
-                            <span className="text-xs text-green-600 font-medium">{product.deliveryTime}</span>
+                            <Clock className="h-3 w-3 mr-1 text-emerald-600" />
+                            <span className="text-xs text-emerald-600 font-medium">{product.deliveryTime}</span>
                           </div>
                         </div>
                         <div className="flex items-center">
@@ -389,7 +389,7 @@ export default function VyronaSpace() {
                           <Button 
                             onClick={() => addToCart(product)}
                             disabled={product.inStock === 0}
-                            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl"
+                            className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
                           >
                             <ShoppingCart className="h-4 w-4 mr-2" />
                             Add to Cart
@@ -401,13 +401,13 @@ export default function VyronaSpace() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-white/80 backdrop-blur-sm rounded-2xl">
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ShoppingBag className="h-8 w-8 text-gray-400" />
+              <div className="text-center py-16 bg-emerald-50/80 backdrop-blur-sm rounded-2xl border border-emerald-200/50">
+                <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <ShoppingBag className="h-8 w-8 text-emerald-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
                 <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
-                <Button onClick={clearFilters} variant="outline" className="rounded-xl">
+                <Button onClick={clearFilters} variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
                   Clear Filters
                 </Button>
               </div>
@@ -415,17 +415,17 @@ export default function VyronaSpace() {
 
             {/* Cart Summary */}
             {cart.length > 0 && (
-              <div className="fixed bottom-4 left-4 right-4 bg-white rounded-2xl shadow-xl border p-4 z-50">
+              <div className="fixed bottom-4 left-4 right-4 bg-emerald-50 rounded-2xl shadow-xl border border-emerald-200 p-4 z-50">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-bold text-lg">₹{getCartTotal()}</div>
-                    <div className="text-sm text-gray-600">{getCartItemCount()} items in cart</div>
+                    <div className="font-bold text-lg text-emerald-900">₹{getCartTotal()}</div>
+                    <div className="text-sm text-emerald-700">{getCartItemCount()} items in cart</div>
                   </div>
                   <div className="flex space-x-2">
-                    <Button variant="outline" onClick={() => setCart([])} className="rounded-xl">
+                    <Button variant="outline" onClick={() => setCart([])} className="rounded-xl border-emerald-200 hover:bg-emerald-100">
                       Clear
                     </Button>
-                    <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 rounded-xl">
+                    <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl">
                       Checkout
                     </Button>
                   </div>
@@ -438,7 +438,7 @@ export default function VyronaSpace() {
           <TabsContent value="orders" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
-              <Button variant="outline" className="rounded-xl">
+              <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
@@ -446,7 +446,7 @@ export default function VyronaSpace() {
 
             <div className="space-y-6">
               {mockOrders.map(order => (
-                <Card key={order.id} className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all">
+                <Card key={order.id} className="rounded-2xl border-0 bg-emerald-50/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all border border-emerald-200/50">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-6">
                       <div>
@@ -455,7 +455,7 @@ export default function VyronaSpace() {
                           {order.items.length} items • ₹{order.total}
                         </p>
                       </div>
-                      <Badge className={order.status === "Delivered" ? "bg-green-500 text-white" : "bg-blue-500 text-white"}>
+                      <Badge className={order.status === "Delivered" ? "bg-emerald-500 text-white" : "bg-teal-500 text-white"}>
                         {order.status}
                       </Badge>
                     </div>
@@ -472,15 +472,15 @@ export default function VyronaSpace() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center">
-                          <Truck className="h-4 w-4 mr-2 text-blue-600" />
+                          <Truck className="h-4 w-4 mr-2 text-teal-600" />
                           <span className="text-sm text-gray-600">{order.deliveryPartner}</span>
                         </div>
                         <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 text-green-600" />
+                          <MapPin className="h-4 w-4 mr-2 text-emerald-600" />
                           <span className="text-sm text-gray-600">{order.currentLocation}</span>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm" className="rounded-xl">
+                      <Button variant="outline" size="sm" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
                         Track Order
                       </Button>
                     </div>
@@ -498,33 +498,33 @@ export default function VyronaSpace() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="rounded-2xl border-0 bg-gradient-to-br from-yellow-50 to-orange-50 shadow-lg">
+              <Card className="rounded-2xl border-0 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg border border-emerald-200/50">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Trophy className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="font-bold text-xl mb-2">1,250</h3>
-                  <p className="text-gray-600">VyronaCoins</p>
+                  <h3 className="font-bold text-xl mb-2 text-emerald-800">1,250</h3>
+                  <p className="text-emerald-600">VyronaCoins</p>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-2xl border-0 bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg">
+              <Card className="rounded-2xl border-0 bg-gradient-to-br from-emerald-50 to-green-50 shadow-lg border border-emerald-200/50">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Target className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="font-bold text-xl mb-2">Gold</h3>
-                  <p className="text-gray-600">Member Status</p>
+                  <h3 className="font-bold text-xl mb-2 text-emerald-800">Gold</h3>
+                  <p className="text-emerald-600">Member Status</p>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-2xl border-0 bg-gradient-to-br from-green-50 to-teal-50 shadow-lg">
+              <Card className="rounded-2xl border-0 bg-gradient-to-br from-teal-50 to-emerald-50 shadow-lg border border-emerald-200/50">
                 <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-teal-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Gift className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="font-bold text-xl mb-2">5</h3>
-                  <p className="text-gray-600">Available Rewards</p>
+                  <h3 className="font-bold text-xl mb-2 text-emerald-800">5</h3>
+                  <p className="text-emerald-600">Available Rewards</p>
                 </CardContent>
               </Card>
             </div>
@@ -537,21 +537,21 @@ export default function VyronaSpace() {
               <p className="text-gray-600">Manage your account and preferences</p>
             </div>
 
-            <Card className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+            <Card className="rounded-2xl border-0 bg-emerald-50/80 backdrop-blur-sm shadow-lg border border-emerald-200/50">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-10 w-10 text-blue-600" />
+                  <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-10 w-10 text-emerald-600" />
                   </div>
-                  <h3 className="font-bold text-xl mb-2">Welcome to VyronaSpace</h3>
-                  <p className="text-gray-600 mb-6">Quick commerce at your fingertips</p>
+                  <h3 className="font-bold text-xl mb-2 text-emerald-900">Welcome to VyronaSpace</h3>
+                  <p className="text-emerald-700 mb-6">Quick commerce at your fingertips</p>
                   
                   <div className="space-y-4">
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl">
+                    <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl">
                       <Phone className="h-4 w-4 mr-2" />
                       Contact Support
                     </Button>
-                    <Button variant="outline" className="w-full rounded-xl">
+                    <Button variant="outline" className="w-full rounded-xl border-emerald-200 hover:bg-emerald-100">
                       <MessageCircle className="h-4 w-4 mr-2" />
                       Give Feedback
                     </Button>
