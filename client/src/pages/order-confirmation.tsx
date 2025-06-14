@@ -12,7 +12,7 @@ export default function OrderConfirmation() {
   const source = urlParams.get("source");
 
   const { data: order, isLoading } = useQuery({
-    queryKey: ["/api/orders", orderId],
+    queryKey: [`/api/order/${orderId}`],
     enabled: !!orderId,
   });
 

@@ -5003,7 +5003,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Customer-facing order endpoint for order confirmation page
-  app.get("/api/orders/:orderId", async (req: Request, res: Response) => {
+  app.get("/api/order/:orderId", async (req: Request, res: Response) => {
     try {
       const orderId = parseInt(req.params.orderId);
       if (isNaN(orderId)) {
