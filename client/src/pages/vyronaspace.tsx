@@ -261,7 +261,7 @@ export default function VyronaSpace() {
             </div>
             <div className="flex items-center">
               <Star className="h-4 w-4 mr-2 text-emerald-600" />
-              <span className="font-medium">Top Rated Products</span>
+              <span className="font-medium">Verified Stores</span>
             </div>
           </div>
         </div>
@@ -295,7 +295,7 @@ export default function VyronaSpace() {
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
-                    placeholder="Search products, brands, or stores..."
+                    placeholder="Search stores by name or category..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10 rounded-xl border-0 bg-white/70"
