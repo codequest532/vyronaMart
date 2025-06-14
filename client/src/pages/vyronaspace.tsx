@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -844,13 +844,25 @@ export default function VyronaSpace() {
                         </div>
                       </div>
                       
-                      <Button 
-                        onClick={() => setSelectedOrder(order)} 
-                        variant="outline" 
-                        className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50"
-                      >
-                        View Details
-                      </Button>
+                      <div className="flex space-x-2 mt-4">
+                        <Button 
+                          onClick={() => setSelectedOrder(order)} 
+                          variant="outline" 
+                          className="flex-1 rounded-xl border-emerald-200 hover:bg-emerald-50"
+                        >
+                          View Details
+                        </Button>
+                        {(order.status === 'processing' || order.status === 'shipped' || order.status === 'out for delivery' || order.status === 'delivered') && (
+                          <Link to={`/track-order/${order.id}`}>
+                            <Button 
+                              className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
+                            >
+                              <Truck className="h-4 w-4 mr-2" />
+                              Track Order
+                            </Button>
+                          </Link>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

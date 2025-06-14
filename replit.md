@@ -219,4 +219,9 @@ Changelog:
 - June 14, 2025: Successfully restored complete tab functionality (orders, rewards, profile) while maintaining full-page store browsing
 - June 14, 2025: Fixed JSX structure errors and implemented seamless navigation between store discovery and individual store pages
 - June 14, 2025: VyronaSpace now combines comprehensive tab content with modal-free store browsing experience
+- June 14, 2025: Implemented real-time order tracking with map-based delivery partner tracking similar to Swiggy
+- June 14, 2025: Added comprehensive order tracking page with live map, delivery partner info, and status timeline
+- June 14, 2025: Created backend API endpoint for real-time tracking data including delivery partner location updates
+- June 14, 2025: Updated VyronaSpace orders section with "Track Order" buttons for live delivery tracking
+- June 14, 2025: Integrated Swiggy-style delivery experience with partner communication and real-time positioning
 - June 14, 2025: Initial setup
