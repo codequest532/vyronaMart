@@ -4109,8 +4109,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Shipping address is required" });
       }
 
-      // Process each item as separate Instagram orders (current schema limitation)
-      const createdOrders = [];
+      // Group items by store to create consolidated orders per store
+      const itemsByStore = new Map();
       
       for (const item of items) {
         // Get the product to find its storeId
@@ -4119,16 +4119,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Product ${item.id} not found`);
         }
 
-        // Store prices directly in rupees (no conversion needed)
+        const storeId = product.storeId;
+        if (!itemsByStore.has(storeId)) {
+          itemsByStore.set(storeId, {
+            storeId,
+            items: [],
+            totalAmount: 0
+          });
+        }
+
+        const storeGroup = itemsByStore.get(storeId);
+        storeGroup.items.push({
+          ...item,
+          product
+        });
+        
+        // Calculate total amount for this store
         const priceInRupees = Math.round(item.price);
-        const totalAmountInRupees = priceInRupees * item.quantity;
+        storeGroup.totalAmount += priceInRupees * item.quantity;
+      }
+
+      // Create one consolidated order per store
+      const createdOrders = [];
+      
+      for (const [storeId, storeGroup] of itemsByStore) {
+        // Create order with multiple items as JSON in orderNotes
+        const itemsDetails = storeGroup.items.map(item => ({
+          productId: item.id,
+          productName: item.product.productName,
+          quantity: item.quantity,
+          price: Math.round(item.price),
+          total: Math.round(item.price) * item.quantity
+        }));
 
         const orderData = {
           buyerId: authenticatedUser.id,
-          storeId: product.storeId,
-          productId: item.id,
-          quantity: item.quantity,
-          totalAmount: totalAmountInRupees,
+          storeId: storeId,
+          productId: storeGroup.items[0].id, // Primary product (for compatibility)
+          quantity: storeGroup.items.reduce((sum, item) => sum + item.quantity, 0), // Total quantity
+          totalAmount: storeGroup.totalAmount,
           status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
           shippingAddress: shippingAddress,
           contactInfo: {
@@ -4136,11 +4165,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             paymentMethod: paymentMethod,
             upiTransactionId: paymentMethod === 'upi' ? `UPI_${Date.now()}_${authenticatedUser.id}` : null
           },
-          orderNotes: `Instagram order - Payment: ${paymentMethod}`
+          orderNotes: `Multi-item Instagram order - ${storeGroup.items.length} items - Payment: ${paymentMethod} - Items: ${JSON.stringify(itemsDetails)}`
         };
 
         const order = await storage.createInstagramOrder(orderData);
-        createdOrders.push(order);
+        createdOrders.push({
+          ...order,
+          itemsDetails // Add for email notification
+        });
       }
 
       const mainOrder = createdOrders[0]; // Use first order for response

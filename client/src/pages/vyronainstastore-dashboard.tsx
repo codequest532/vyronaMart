@@ -889,7 +889,22 @@ Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,http
                             <div>
                               <p className="font-medium">Order #{order.id}</p>
                               <p className="text-sm text-gray-600">
-                                {order.productName} × {order.quantity}
+                                {(() => {
+                                  try {
+                                    // Check if this is a multi-item order
+                                    if (order.orderNotes && order.orderNotes.includes('Multi-item Instagram order')) {
+                                      const itemsMatch = order.orderNotes.match(/Items: (\[.*\])/);
+                                      if (itemsMatch) {
+                                        const items = JSON.parse(itemsMatch[1]);
+                                        return `${items.length} items (Total: ${order.quantity} qty)`;
+                                      }
+                                    }
+                                    // Single item order
+                                    return `${order.productName} × ${order.quantity}`;
+                                  } catch (e) {
+                                    return `${order.productName} × ${order.quantity}`;
+                                  }
+                                })()}
                               </p>
                               <p className="text-sm text-gray-500">
                                 {new Date(order.createdAt).toLocaleDateString()}

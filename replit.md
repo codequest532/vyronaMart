@@ -132,6 +132,9 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Fixed Instagram cart orders to consolidate multiple items into single orders instead of creating separate orders per item
+- June 14, 2025: Updated seller dashboard to properly display multi-item orders with consolidated item counts and totals
+- June 14, 2025: Modified order placement logic to group cart items by store and create one order per store
 - June 14, 2025: Fixed Instagram seller dashboard pricing to display whole rupees consistently with customer interface
 - June 14, 2025: Updated formatCurrency function in seller dashboard to remove decimal places and paisa conversion
 - June 14, 2025: Converted Instagram pricing system to whole rupees without decimals (8999 paisa → ₹89, 4550 paisa → ₹45)
