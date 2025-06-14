@@ -110,6 +110,120 @@ async function initializeVyronaReadBooks() {
   }
 }
 
+async function initializeVyronaSpaceData() {
+  try {
+    // Check if VyronaSpace stores already exist
+    const existingStores = await storage.getStores();
+    if (existingStores.length > 0) {
+      log("VyronaSpace stores already initialized");
+      return;
+    }
+
+    log("Initializing VyronaSpace hyperlocal delivery stores and products");
+
+    // Create VyronaSpace stores
+    const stores = [
+      {
+        name: "FreshMart Express",
+        type: "kirana",
+        address: "123 Green Valley Road, Koramangala",
+        latitude: "12.9352",
+        longitude: "77.6245",
+        isOpen: true,
+        rating: 480, // 4.8 out of 5.0
+        reviewCount: 1250
+      },
+      {
+        name: "MedPlus Essentials", 
+        type: "pharmacy",
+        address: "456 Health Street, Indiranagar",
+        latitude: "12.9716",
+        longitude: "77.6412",
+        isOpen: true,
+        rating: 470, // 4.7 out of 5.0
+        reviewCount: 890
+      },
+      {
+        name: "Fashion District",
+        type: "fashion",
+        address: "789 Style Avenue, Brigade Road",
+        latitude: "12.9716",
+        longitude: "77.6103",
+        isOpen: true,
+        rating: 460, // 4.6 out of 5.0
+        reviewCount: 567
+      }
+    ];
+
+    // Insert stores
+    for (const storeData of stores) {
+      const store = await storage.createStore(storeData);
+      log(`Created store: ${store.name} (ID: ${store.id})`);
+
+      // Create products for each store
+      if (store.name === "FreshMart Express") {
+        const groceryProducts = [
+          { name: "Fresh Bananas", price: 45, category: "Fruits", description: "Fresh yellow bananas - 1 dozen" },
+          { name: "Organic Milk", price: 85, category: "Dairy", description: "Fresh organic milk - 1 liter" },
+          { name: "Whole Wheat Bread", price: 35, category: "Bakery", description: "Freshly baked whole wheat bread" },
+          { name: "Premium Rice", price: 120, category: "Grains", description: "Premium basmati rice - 1 kg" },
+          { name: "Green Vegetables", price: 60, category: "Vegetables", description: "Mixed fresh green vegetables" },
+          { name: "Organic Apples", price: 180, category: "Fruits", description: "Fresh organic apples - 1 kg" }
+        ];
+
+        for (const productData of groceryProducts) {
+          await storage.createProduct({
+            ...productData,
+            module: "space",
+            storeId: store.id,
+            sellerId: null
+          });
+        }
+      }
+
+      if (store.name === "MedPlus Essentials") {
+        const pharmacyProducts = [
+          { name: "Paracetamol Tablets", price: 25, category: "Medicine", description: "Pain relief tablets - 10 count" },
+          { name: "Vitamin C Supplements", price: 150, category: "Supplements", description: "Vitamin C tablets - 30 count" },
+          { name: "Hand Sanitizer", price: 75, category: "Health Care", description: "Alcohol-based sanitizer - 100ml" },
+          { name: "Digital Thermometer", price: 350, category: "Medical Equipment", description: "Digital fever thermometer" }
+        ];
+
+        for (const productData of pharmacyProducts) {
+          await storage.createProduct({
+            ...productData,
+            module: "space",
+            storeId: store.id,
+            sellerId: null
+          });
+        }
+      }
+
+      if (store.name === "Fashion District") {
+        const fashionProducts = [
+          { name: "Cotton T-Shirt", price: 499, category: "Clothing", description: "Premium cotton t-shirt" },
+          { name: "Denim Jeans", price: 1299, category: "Clothing", description: "Classic fit denim jeans" },
+          { name: "Sneakers", price: 2499, category: "Footwear", description: "Comfortable running sneakers" },
+          { name: "Leather Wallet", price: 899, category: "Accessories", description: "Genuine leather wallet" }
+        ];
+
+        for (const productData of fashionProducts) {
+          await storage.createProduct({
+            ...productData,
+            module: "space",
+            storeId: store.id,
+            sellerId: null
+          });
+        }
+      }
+    }
+
+    log("VyronaSpace initialization completed successfully");
+  } catch (error) {
+    log(`Error initializing VyronaSpace data: ${error}`);
+  }
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -167,6 +281,9 @@ app.use((req, res, next) => {
   
   // Initialize VyronaRead sample books for customer interface
   await initializeVyronaReadBooks();
+  
+  // Initialize VyronaSpace stores and products for hyperlocal delivery
+  await initializeVyronaSpaceData();
 
   const server = await registerRoutes(app);
 

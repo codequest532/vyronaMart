@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
   Star, ShoppingCart, ShoppingBag, Plus, Minus, Truck, Phone,
@@ -182,15 +183,33 @@ export default function VyronaSpace() {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [viewMode, setViewMode] = useState<"stores" | "store-products">("stores");
 
+  // Real API calls replacing mock data
+  const { data: stores = [], isLoading: storesLoading } = useQuery({
+    queryKey: ["/api/stores"],
+  });
+
+  const { data: products = [], isLoading: productsLoading } = useQuery({
+    queryKey: ["/api/products"],
+  });
+
+  const { data: userOrders = [], isLoading: ordersLoading } = useQuery({
+    queryKey: ["/api/orders/user/1"],
+  });
+
+  const { data: walletBalance = { balance: 0 }, isLoading: balanceLoading } = useQuery({
+    queryKey: ["/api/wallet/balance/1"],
+  });
+
+  const { data: achievements = [], isLoading: achievementsLoading } = useQuery({
+    queryKey: ["/api/achievements/1"],
+  });
+
   const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
 
   const getFilteredStores = () => {
-    return mockStores.filter(store => {
-      const matchesSearch = store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          store.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          store.featuredProducts.some((product: string) => 
-                            product.toLowerCase().includes(searchQuery.toLowerCase())
-                          );
+    return stores.filter((store: any) => {
+      const matchesSearch = store.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          store.description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === "All" || store.category === selectedCategory;
       
       return matchesSearch && matchesCategory;
