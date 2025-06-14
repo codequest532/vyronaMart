@@ -58,6 +58,7 @@ export default function VyronaSpace() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [newLocation, setNewLocation] = useState("");
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const { toast } = useToast();
 
   // Enhanced mock data for modern design
@@ -219,6 +220,82 @@ export default function VyronaSpace() {
     }, 1000);
   };
 
+  const detectCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support location detection",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          // Use reverse geocoding to get readable address
+          const response = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+          );
+          const data = await response.json();
+          
+          const detectedLocation = data.locality 
+            ? `${data.locality}, ${data.city}, ${data.principalSubdivision}`
+            : `${data.city}, ${data.principalSubdivision}`;
+            
+          setNewLocation(detectedLocation);
+          setIsDetectingLocation(false);
+          
+          toast({
+            title: "Location detected",
+            description: `Found your location: ${detectedLocation}`,
+          });
+        } catch (error) {
+          // Fallback to coordinates if reverse geocoding fails
+          const coordinateLocation = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          setNewLocation(coordinateLocation);
+          setIsDetectingLocation(false);
+          
+          toast({
+            title: "Location detected",
+            description: "Location detected using coordinates",
+          });
+        }
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        let errorMessage = "Unable to detect location";
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location access denied by user";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out";
+            break;
+        }
+        
+        toast({
+          title: "Location detection failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
+  };
+
   const updateLocation = () => {
     if (!newLocation.trim()) {
       toast({
@@ -325,12 +402,29 @@ export default function VyronaSpace() {
                       <label className="text-sm font-medium text-gray-700 mb-2 block">
                         Enter your location
                       </label>
-                      <Input
-                        placeholder="Enter area, city, or landmark..."
-                        value={newLocation}
-                        onChange={(e) => setNewLocation(e.target.value)}
-                        className="rounded-xl"
-                      />
+                      <div className="flex space-x-3">
+                        <Input
+                          placeholder="Enter area, city, or landmark..."
+                          value={newLocation}
+                          onChange={(e) => setNewLocation(e.target.value)}
+                          className="flex-1 rounded-xl"
+                        />
+                        <Button
+                          onClick={detectCurrentLocation}
+                          disabled={isDetectingLocation}
+                          variant="outline"
+                          className="px-4 rounded-xl border-blue-200 text-blue-600 hover:bg-blue-50"
+                        >
+                          {isDetectingLocation ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Navigation className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Click the GPS icon to detect your current location automatically
+                      </p>
                     </div>
                     <div className="bg-blue-50 rounded-xl p-4">
                       <div className="flex items-center text-blue-600 mb-2">
