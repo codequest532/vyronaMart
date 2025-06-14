@@ -62,30 +62,30 @@ export default function VyronaInstaShop() {
     queryKey: ["/api/instagram/stores"],
   });
 
-  // Fetch cart items
+  // Fetch Instagram cart items
   const { data: cartItems = [] } = useQuery({
-    queryKey: ["/api/cart"],
+    queryKey: ["/api/instacart"],
   });
 
   // Type-safe cart items
   const safeCartItems = Array.isArray(cartItems) ? cartItems : [];
 
-  // Add to cart mutation
+  // Add to Instagram cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async (productData: any) => {
-      return await apiRequest("POST", "/api/cart/add", productData);
+      return await apiRequest("POST", "/api/instacart/add", productData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/instacart"] });
       toast({
-        title: "Added to Cart",
-        description: "Product added to your cart successfully!",
+        title: "Added to Instagram Cart",
+        description: "Product added to your Instagram cart successfully!",
       });
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to add product to cart. Please try again.",
+        description: "Failed to add product to Instagram cart. Please try again.",
         variant: "destructive",
       });
     },
@@ -350,7 +350,7 @@ export default function VyronaInstaShop() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.location.href = '/cart'}
+                onClick={() => window.location.href = '/instacart'}
                 className="relative text-pink-600 border-pink-300 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-400"
               >
                 <ShoppingBag className="h-4 w-4 mr-2" />

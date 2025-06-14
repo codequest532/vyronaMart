@@ -156,6 +156,14 @@ export interface IStorage {
   recordInstagramAnalytics(analytics: InsertInstagramAnalytics): Promise<InstagramAnalytics>;
   getInstagramAnalytics(storeId: number, startDate: Date, endDate: Date): Promise<InstagramAnalytics[]>;
 
+  // VyronaInstaShop - Instagram Cart
+  getInstagramCartItems(userId: number): Promise<any[]>;
+  getInstagramCartItem(userId: number, productId: number): Promise<any | undefined>;
+  addInstagramCartItem(cartItem: any): Promise<any>;
+  updateInstagramCartItem(userId: number, productId: number, quantity: number): Promise<void>;
+  removeInstagramCartItem(userId: number, productId: number): Promise<void>;
+  clearInstagramCart(userId: number): Promise<void>;
+
   // VyronaRead Books - Library Integration Requests
   createLibraryIntegrationRequest(request: InsertLibraryIntegrationRequest): Promise<LibraryIntegrationRequest>;
   getLibraryIntegrationRequests(): Promise<LibraryIntegrationRequest[]>;

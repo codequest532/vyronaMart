@@ -25,6 +25,7 @@ import LibraryBrowse from "@/pages/library-browse";
 import LibraryCartCheckout from "@/pages/library-cart-checkout";
 import MyVyrona from "@/pages/myvyrona";
 import Cart from "@/pages/cart";
+import InstaCart from "@/pages/instacart";
 import Login from "@/pages/login";
 import AdminDashboard from "@/pages/admin-dashboard";
 import VyronaHubDashboard from "@/pages/vyronahub-dashboard";
@@ -113,6 +114,7 @@ function Router() {
       <Route path="/library-browse" component={LibraryBrowse} />
       <Route path="/myvyrona" component={MyVyrona} />
       <Route path="/cart" component={Cart} />
+      <Route path="/instacart" component={InstaCart} />
       <Route path="/ebook-reader" component={EbookReader} />
       
       {/* 404 Not Found */}

@@ -4293,6 +4293,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Instagram Cart API endpoints
+  
+  // Get Instagram cart items
+  app.get("/api/instacart", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const cartItems = await storage.getInstagramCartItems(authenticatedUser.id);
+      res.json(cartItems);
+    } catch (error) {
+      console.error("Error fetching Instagram cart:", error);
+      res.status(500).json({ message: "Failed to fetch cart items" });
+    }
+  });
+
+  // Add item to Instagram cart
+  app.post("/api/instacart/add", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { productId, quantity = 1, price } = req.body;
+      
+      // Check if item already exists in cart
+      const existingItem = await storage.getInstagramCartItem(authenticatedUser.id, productId);
+      
+      if (existingItem) {
+        // Update quantity
+        await storage.updateInstagramCartItem(authenticatedUser.id, productId, existingItem.quantity + quantity);
+      } else {
+        // Add new item
+        await storage.addInstagramCartItem({
+          userId: authenticatedUser.id,
+          productId,
+          quantity,
+          price
+        });
+      }
+
+      res.json({ success: true, message: "Item added to cart" });
+    } catch (error) {
+      console.error("Error adding to Instagram cart:", error);
+      res.status(500).json({ message: "Failed to add item to cart" });
+    }
+  });
+
+  // Update Instagram cart item quantity
+  app.put("/api/instacart/:productId", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { productId } = req.params;
+      const { quantity } = req.body;
+
+      await storage.updateInstagramCartItem(authenticatedUser.id, parseInt(productId), quantity);
+      res.json({ success: true, message: "Cart updated" });
+    } catch (error) {
+      console.error("Error updating Instagram cart:", error);
+      res.status(500).json({ message: "Failed to update cart" });
+    }
+  });
+
+  // Remove item from Instagram cart
+  app.delete("/api/instacart/:productId", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { productId } = req.params;
+      await storage.removeInstagramCartItem(authenticatedUser.id, parseInt(productId));
+      res.json({ success: true, message: "Item removed from cart" });
+    } catch (error) {
+      console.error("Error removing from Instagram cart:", error);
+      res.status(500).json({ message: "Failed to remove item from cart" });
+    }
+  });
+
+  // Clear Instagram cart
+  app.delete("/api/instacart/clear", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      await storage.clearInstagramCart(authenticatedUser.id);
+      res.json({ success: true, message: "Cart cleared" });
+    } catch (error) {
+      console.error("Error clearing Instagram cart:", error);
+      res.status(500).json({ message: "Failed to clear cart" });
+    }
+  });
+
+  // Apply promo code to Instagram cart
+  app.post("/api/instacart/promo", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { code } = req.body;
+      
+      // Simple promo code logic - can be expanded
+      const promoDiscounts: { [key: string]: number } = {
+        'INSTA10': 10,
+        'WELCOME15': 15,
+        'SOCIAL20': 20
+      };
+
+      const discount = promoDiscounts[code.toUpperCase()];
+      if (!discount) {
+        return res.status(400).json({ message: "Invalid promo code" });
+      }
+
+      res.json({ success: true, discount, message: `${discount}% discount applied!` });
+    } catch (error) {
+      console.error("Error applying promo code:", error);
+      res.status(500).json({ message: "Failed to apply promo code" });
+    }
+  });
+
   // Create VyronaInstaStore seller account
   app.post("/api/create-vyronainstastore-seller", async (req, res) => {
     try {
