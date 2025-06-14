@@ -1304,17 +1304,15 @@ export default function VyronaSpace() {
             </div>
           </div>
           )}
-        </div>
-      </div>
 
-      {/* Edit Profile Modal */}
-      <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
-        <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Edit Profile</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-            <div>
+          {/* Edit Profile Modal */}
+          <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Edit Profile</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
               <Label htmlFor="username">Full Name</Label>
               <Input
                 id="username"
@@ -1454,6 +1452,8 @@ export default function VyronaSpace() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </div>
+      </div>
     </div>
   );
 }
