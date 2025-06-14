@@ -26,6 +26,7 @@ import EBookCheckout from "@/pages/ebook-checkout";
 import LibraryBrowse from "@/pages/library-browse";
 import LibraryCartCheckout from "@/pages/library-cart-checkout";
 import VyronaSpace from "@/pages/vyronaspace";
+import OrderTracking from "@/pages/order-tracking";
 import MyVyrona from "@/pages/myvyrona";
 import Cart from "@/pages/cart";
 import InstaCart from "@/pages/instacart";
@@ -118,6 +119,9 @@ function Router() {
       <Route path="/ebook-checkout" component={EBookCheckout} />
       <Route path="/library-browse" component={LibraryBrowse} />
       <Route path="/vyronaspace" component={VyronaSpace} />
+      <Route path="/track-order/:orderId">
+        {(params) => <OrderTracking />}
+      </Route>
       <Route path="/myvyrona" component={MyVyrona} />
       <Route path="/cart" component={Cart} />
       <Route path="/instacart" component={InstaCart} />
