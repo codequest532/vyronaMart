@@ -175,6 +175,7 @@ const mockOrders: Order[] = [
 ];
 
 export default function VyronaSpace() {
+  const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("discover");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -299,14 +300,32 @@ export default function VyronaSpace() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Back to Home Button */}
-        <div className="mb-6">
+        {/* Header Navigation */}
+        <div className="flex items-center justify-between mb-6">
           <Link href="/">
             <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50 text-emerald-700">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
           </Link>
+          
+          {/* Quick Cart Button */}
+          {cart.length > 0 && (
+            <Button 
+              onClick={() => {
+                // Save cart to sessionStorage for checkout page
+                sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
+                setLocation('/vyronaspace-checkout');
+              }}
+              className="relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Cart
+              <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-5 flex items-center justify-center">
+                {getCartItemCount()}
+              </Badge>
+            </Button>
+          )}
         </div>
 
         {/* Header */}
