@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ShoppingCart, CreditCard, Smartphone, Wallet, Truck, MapPin, User, Phone, Mail, Clock } from "lucide-react";
+import { ArrowLeft, ShoppingCart, CreditCard, Smartphone, Wallet, Truck, MapPin, User, Phone, Mail, Clock, RefreshCw, Calendar } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +27,11 @@ const checkoutSchema = z.object({
   pincode: z.string().min(6, "Pincode must be 6 digits"),
   paymentMethod: z.enum(["upi", "wallet", "credit_debit", "cod"]),
   specialInstructions: z.string().optional(),
+  enableSubscription: z.boolean().default(false),
+  subscriptionFrequency: z.enum(["daily", "weekly"]).optional(),
+  subscriptionDayOfWeek: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]).optional(),
+  subscriptionTime: z.string().optional(),
+  subscriptionStartDate: z.string().optional(),
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -60,6 +66,11 @@ export default function VyronaSpaceCheckout() {
       pincode: "",
       paymentMethod: "upi",
       specialInstructions: "",
+      enableSubscription: false,
+      subscriptionFrequency: "daily",
+      subscriptionDayOfWeek: "monday",
+      subscriptionTime: "09:00",
+      subscriptionStartDate: "",
     },
   });
 
@@ -380,6 +391,162 @@ export default function VyronaSpaceCheckout() {
                           </FormItem>
                         )}
                       />
+
+                      {/* Subscription Options */}
+                      <div className="border border-emerald-200 rounded-xl p-4 bg-emerald-50/50">
+                        <FormField
+                          control={form.control}
+                          name="enableSubscription"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="flex items-center gap-2">
+                                  <RefreshCw className="h-4 w-4 text-emerald-600" />
+                                  Enable Auto-Subscription
+                                </FormLabel>
+                                <p className="text-sm text-gray-600">
+                                  Get this order delivered automatically on a schedule
+                                </p>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+
+                        {form.watch("enableSubscription") && (
+                          <div className="mt-4 space-y-4 pl-7">
+                            <FormField
+                              control={form.control}
+                              name="subscriptionFrequency"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Delivery Frequency</FormLabel>
+                                  <FormControl>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <SelectTrigger className="rounded-xl">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="daily">Daily</SelectItem>
+                                        <SelectItem value="weekly">Weekly</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            {form.watch("subscriptionFrequency") === "weekly" && (
+                              <FormField
+                                control={form.control}
+                                name="subscriptionDayOfWeek"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Day of Week</FormLabel>
+                                    <FormControl>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="rounded-xl">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="monday">Monday</SelectItem>
+                                          <SelectItem value="tuesday">Tuesday</SelectItem>
+                                          <SelectItem value="wednesday">Wednesday</SelectItem>
+                                          <SelectItem value="thursday">Thursday</SelectItem>
+                                          <SelectItem value="friday">Friday</SelectItem>
+                                          <SelectItem value="saturday">Saturday</SelectItem>
+                                          <SelectItem value="sunday">Sunday</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <FormField
+                                control={form.control}
+                                name="subscriptionTime"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Preferred Time</FormLabel>
+                                    <FormControl>
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger className="rounded-xl">
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="06:00">6:00 AM</SelectItem>
+                                          <SelectItem value="07:00">7:00 AM</SelectItem>
+                                          <SelectItem value="08:00">8:00 AM</SelectItem>
+                                          <SelectItem value="09:00">9:00 AM</SelectItem>
+                                          <SelectItem value="10:00">10:00 AM</SelectItem>
+                                          <SelectItem value="11:00">11:00 AM</SelectItem>
+                                          <SelectItem value="12:00">12:00 PM</SelectItem>
+                                          <SelectItem value="13:00">1:00 PM</SelectItem>
+                                          <SelectItem value="14:00">2:00 PM</SelectItem>
+                                          <SelectItem value="15:00">3:00 PM</SelectItem>
+                                          <SelectItem value="16:00">4:00 PM</SelectItem>
+                                          <SelectItem value="17:00">5:00 PM</SelectItem>
+                                          <SelectItem value="18:00">6:00 PM</SelectItem>
+                                          <SelectItem value="19:00">7:00 PM</SelectItem>
+                                          <SelectItem value="20:00">8:00 PM</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="subscriptionStartDate"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Start Date</FormLabel>
+                                    <FormControl>
+                                      <Input 
+                                        {...field} 
+                                        type="date" 
+                                        className="rounded-xl"
+                                        min={new Date().toISOString().split('T')[0]}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+
+                            <div className="bg-emerald-100 p-3 rounded-lg text-sm text-emerald-800">
+                              <div className="flex items-center gap-2 font-medium mb-1">
+                                <Calendar className="h-4 w-4" />
+                                Subscription Summary
+                              </div>
+                              <p>
+                                {form.watch("subscriptionFrequency") === "daily" ? (
+                                  `Delivered daily at ${form.watch("subscriptionTime") ? new Date(`1970-01-01T${form.watch("subscriptionTime")}`).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "9:00 AM"}`
+                                ) : (
+                                  `Delivered every ${form.watch("subscriptionDayOfWeek")} at ${form.watch("subscriptionTime") ? new Date(`1970-01-01T${form.watch("subscriptionTime")}`).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "9:00 AM"}`
+                                )}
+                                {form.watch("subscriptionStartDate") && ` starting ${new Date(form.watch("subscriptionStartDate") || "").toLocaleDateString()}`}
+                              </p>
+                              <p className="text-xs mt-1 opacity-75">
+                                You can pause, modify, or cancel anytime from your profile
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                       
                       <div className="flex gap-4">
                         <Button type="button" variant="outline" onClick={() => setStep("address")} className="flex-1 rounded-xl">
@@ -428,6 +595,39 @@ export default function VyronaSpaceCheckout() {
                           <h3 className="font-semibold mb-2">Special Instructions</h3>
                           <div className="bg-emerald-50 p-4 rounded-xl">
                             <p>{form.getValues("specialInstructions")}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Subscription Summary */}
+                      {form.getValues("enableSubscription") && (
+                        <div>
+                          <h3 className="font-semibold mb-2 flex items-center gap-2">
+                            <RefreshCw className="h-4 w-4 text-emerald-600" />
+                            Subscription Details
+                          </h3>
+                          <div className="bg-emerald-50 p-4 rounded-xl">
+                            <div className="space-y-2">
+                              <p className="font-medium text-emerald-800">
+                                {form.getValues("subscriptionFrequency") === "daily" ? "Daily Delivery" : "Weekly Delivery"}
+                              </p>
+                              <p className="text-sm text-emerald-700">
+                                {form.getValues("subscriptionFrequency") === "daily" ? (
+                                  `Every day at ${form.getValues("subscriptionTime") ? new Date(`1970-01-01T${form.getValues("subscriptionTime")}`).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "9:00 AM"}`
+                                ) : (
+                                  `Every ${form.getValues("subscriptionDayOfWeek")} at ${form.getValues("subscriptionTime") ? new Date(`1970-01-01T${form.getValues("subscriptionTime")}`).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "9:00 AM"}`
+                                )}
+                              </p>
+                              {form.getValues("subscriptionStartDate") && (
+                                <p className="text-sm text-emerald-700">
+                                  Starting: {new Date(form.getValues("subscriptionStartDate") || "").toLocaleDateString()}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 text-xs text-emerald-600 mt-2">
+                                <Calendar className="h-3 w-3" />
+                                <span>Auto-renewal enabled • Manage from profile</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       )}
