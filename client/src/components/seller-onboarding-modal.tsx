@@ -37,6 +37,8 @@ interface FormData {
   ownerName: string;
   email: string;
   phone: string;
+  password?: string;
+  confirmPassword?: string;
   businessCategory: string;
   businessDescription: string;
   
@@ -277,6 +279,28 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
                   value={formData.phone}
                   onChange={(e) => updateFormData({ phone: e.target.value })}
                   placeholder="Enter phone number"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={formData.password || ""}
+                  onChange={(e) => updateFormData({ password: e.target.value })}
+                  placeholder="Create a secure password"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={formData.confirmPassword || ""}
+                  onChange={(e) => updateFormData({ confirmPassword: e.target.value })}
+                  placeholder="Confirm your password"
                 />
               </div>
 
@@ -1103,7 +1127,9 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
       case 1:
         return formData.sellerType !== null;
       case 2:
-        return formData.businessName && formData.ownerName && formData.email && formData.phone && formData.businessCategory;
+        return formData.businessName && formData.ownerName && formData.email && formData.phone && 
+               formData.password && formData.confirmPassword && formData.businessCategory &&
+               formData.password === formData.confirmPassword;
       case 3:
         if (formData.sellerType === "vyronainstastore") {
           return formData.instagramHandle;
