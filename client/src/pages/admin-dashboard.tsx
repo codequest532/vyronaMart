@@ -112,8 +112,8 @@ export default function AdminDashboard() {
     mutationFn: async (data: z.infer<typeof productSchema>) => {
       const productData = {
         ...data,
-        price: Math.round(data.price * 100)) // Convert to cents
-        originalPrice: data.originalPrice ? Math.round(data.originalPrice * 100) : undefined)
+        price: Math.round(data.price * 100), // Convert to cents
+        originalPrice: data.originalPrice ? Math.round(data.originalPrice * 100) : undefined,
         metadata: {
           brand: data.brand,
           weight: data.weight,
