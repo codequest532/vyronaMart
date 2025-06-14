@@ -298,12 +298,12 @@ export default function VyronaSpace() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header Navigation */}
         <div className="flex items-center justify-between mb-6">
           <Link href="/">
-            <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50 text-emerald-700">
+            <Button variant="outline" className="rounded-xl border-orange-200 hover:bg-orange-50 text-orange-700">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Home
             </Button>
@@ -313,28 +313,28 @@ export default function VyronaSpace() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
               <Zap className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
                 VyronaSpace
               </h1>
-              <p className="text-lg text-gray-600">Ultra-Fast Hyperlocal Delivery</p>
+              <p className="text-lg text-gray-700">Ultra-Fast Hyperlocal Delivery</p>
             </div>
           </div>
           
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+          <div className="flex items-center justify-center space-x-6 text-sm text-gray-700">
             <div className="flex items-center">
-              <Clock className="h-4 w-4 mr-2 text-emerald-600" />
+              <Clock className="h-4 w-4 mr-2 text-orange-600" />
               <span className="font-medium">5-15 Min Delivery</span>
             </div>
             <div className="flex items-center">
-              <MapPin className="h-4 w-4 mr-2 text-teal-600" />
+              <MapPin className="h-4 w-4 mr-2 text-pink-600" />
               <span className="font-medium">Nearby Stores</span>
             </div>
             <div className="flex items-center">
-              <Star className="h-4 w-4 mr-2 text-emerald-600" />
+              <Star className="h-4 w-4 mr-2 text-purple-600" />
               <span className="font-medium">Verified Stores</span>
             </div>
           </div>
@@ -342,20 +342,20 @@ export default function VyronaSpace() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-emerald-200/50">
-            <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
+          <TabsList className="grid w-full grid-cols-4 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
+            <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
               <Sparkles className="h-4 w-4 mr-2" />
               Discover
             </TabsTrigger>
-            <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
+            <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
               <Package className="h-4 w-4 mr-2" />
               Orders
             </TabsTrigger>
-            <TabsTrigger value="rewards" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
+            <TabsTrigger value="rewards" className="rounded-xl py-3 data-[state=active]:bg-pink-100 data-[state=active]:shadow-md data-[state=active]:text-pink-800">
               <Award className="h-4 w-4 mr-2" />
               Rewards
             </TabsTrigger>
-            <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
+            <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-purple-100 data-[state=active]:shadow-md data-[state=active]:text-purple-800">
               <Users className="h-4 w-4 mr-2" />
               Profile
             </TabsTrigger>
