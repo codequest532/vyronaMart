@@ -8387,9 +8387,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "VyronaRead seller registration successful"
         });
       } else if (registrationData.sellerType === "vyronainstastore") {
-        // Use seller's actual email and generate password for VyronaInstaStore sellers
+        // Use seller's actual email and password from registration form
         const email = registrationData.email;
-        const password = `vyinsta${Math.random().toString(36).substring(2, 8)}`;
+        const password = registrationData.password; // Use password from form
         
         // Create VyronaInstaStore seller account
         const newSeller = await db
