@@ -497,9 +497,9 @@ export default function VyronaInstaStoreDashboard() {
               </Button>
               <Button
                 onClick={() => {
-                  // Clear local storage and redirect to login
+                  // Clear local storage and redirect to landing page
                   localStorage.removeItem('user');
-                  setLocation('/login');
+                  setLocation('/');
                 }}
                 variant="outline"
                 className="text-red-600 hover:text-red-700 hover:border-red-300"
