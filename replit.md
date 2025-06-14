@@ -176,8 +176,9 @@ Changelog:
 - June 14, 2025: Resolved Instagram cart loading delays (95-120ms → <2ms response time)
 - June 14, 2025: Optimized Instagram cart database queries with INNER JOINs and LIMIT
 - June 14, 2025: Fixed database schema mismatches in Instagram API endpoints
-- June 14, 2025: Fixed VyronaInstaStore seller registration routing to redirect to dedicated Instagram seller dashboard
-- June 14, 2025: Updated backend seller registration endpoint to properly handle VyronaInstaStore sellers with correct sellerType assignment
+- June 14, 2025: Fixed VyronaInstaStore seller registration to use actual seller email addresses instead of auto-generated ones
+- June 14, 2025: Updated VyronaInstaStore registration routing to redirect to dedicated Instagram seller dashboard
+- June 14, 2025: Enhanced backend seller registration endpoint to properly handle VyronaInstaStore sellers with correct sellerType assignment
 - June 14, 2025: Separated VyronaInstaStore from VyronaHub dashboard routing ensuring complete module isolation
 - June 14, 2025: Removed all VyronaRead sample books and disabled automatic book initialization
 - June 14, 2025: VyronaRead section now displays only authentic books created by actual VyronaRead sellers

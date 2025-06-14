@@ -8387,8 +8387,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "VyronaRead seller registration successful"
         });
       } else if (registrationData.sellerType === "vyronainstastore") {
-        // Generate unique email and password for VyronaInstaStore sellers
-        const email = `${registrationData.businessName.toLowerCase().replace(/\s+/g, '')}@vyronainstastore.com`;
+        // Use seller's actual email and generate password for VyronaInstaStore sellers
+        const email = registrationData.email;
         const password = `vyinsta${Math.random().toString(36).substring(2, 8)}`;
         
         // Create VyronaInstaStore seller account
@@ -8410,7 +8410,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sellerId,
           businessName: registrationData.businessName,
           instagramHandle: registrationData.instagramHandle,
-          category: registrationData.businessCategory
+          category: registrationData.businessCategory,
+          email: email
         });
         
         return res.json({
