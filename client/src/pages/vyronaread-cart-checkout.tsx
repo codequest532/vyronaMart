@@ -277,7 +277,7 @@ export default function VyronaReadCartCheckout() {
                   </div>
                   <div className="text-right">
                     <div className="text-lg font-semibold text-purple-600">
-                      ₹{calculateItemPrice(item}
+                      ₹{calculateItemPrice(item)}
                       {item.type === 'rent' && <span className="text-sm"> total</span>}
                     </div>
 

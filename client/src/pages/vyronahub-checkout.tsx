@@ -587,7 +587,7 @@ export default function VyronaHubCheckout() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>{formatCurrency(subtotal}</span>
+                    <span>{formatCurrency(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Delivery Fee</span>
@@ -600,7 +600,7 @@ export default function VyronaHubCheckout() {
                 <Separator />
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
-                  <span>{formatCurrency(total}</span>
+                  <span>{formatCurrency(total)}</span>
                 </div>
               </CardContent>
             </Card>
