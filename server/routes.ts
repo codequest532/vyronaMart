@@ -5015,6 +5015,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid order ID" });
       }
 
+      console.log(`Looking for order ${orderId} for user ${user.id}`);
+
       // First, try to get VyronaHub order
       try {
         const hubOrder = await db
@@ -5033,24 +5035,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(and(eq(orders.id, orderId), eq(orders.customerId, user.id)))
           .limit(1);
 
+        console.log(`VyronaHub order check: found ${hubOrder.length} orders`);
         if (hubOrder.length > 0) {
           return res.json(hubOrder[0]);
         }
       } catch (hubError) {
-        console.log("Not a VyronaHub order, checking Instagram orders");
+        console.log("VyronaHub order error:", hubError);
       }
 
       // If not VyronaHub, try Instagram orders
       try {
+        // First check if any Instagram orders exist for this ID
+        const allInstaOrders = await db
+          .select()
+          .from(instagramOrders)
+          .where(eq(instagramOrders.id, orderId))
+          .limit(1);
+        
+        console.log(`Instagram order check: found ${allInstaOrders.length} orders with ID ${orderId}`);
+        if (allInstaOrders.length > 0) {
+          console.log(`Instagram order buyer ID: ${allInstaOrders[0].buyerId}, user ID: ${user.id}`);
+        }
+
         const instaOrder = await db
           .select({
             id: instagramOrders.id,
-            buyerId: instagramOrders.buyerId,
+            customerId: instagramOrders.buyerId,
             totalAmount: instagramOrders.totalAmount,
-            paymentMethod: instagramOrders.paymentMethod,
+            paymentMethod: sql<string>`'online'`.as('paymentMethod'),
             status: instagramOrders.status,
             shippingAddress: instagramOrders.shippingAddress,
-            trackingNumber: instagramOrders.trackingNumber,
+            trackingNumber: sql<string>`NULL`.as('trackingNumber'),
             createdAt: instagramOrders.createdAt,
             orderType: sql<string>`'instagram'`.as('orderType')
           })
@@ -5058,11 +5073,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(and(eq(instagramOrders.id, orderId), eq(instagramOrders.buyerId, user.id)))
           .limit(1);
 
+        console.log(`Instagram order with user filter: found ${instaOrder.length} orders`);
         if (instaOrder.length > 0) {
           return res.json(instaOrder[0]);
         }
       } catch (instaError) {
-        console.log("Not an Instagram order, checking VyronaRead orders");
+        console.log("Instagram order error:", instaError);
       }
 
       // If not Instagram, try VyronaRead orders (book loans)
@@ -5070,7 +5086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const readOrder = await db
           .select({
             id: bookLoans.id,
-            userId: bookLoans.userId,
+            customerId: bookLoans.userId,
             totalAmount: sql<number>`CASE 
               WHEN ${bookLoans.loanType} = 'rental' THEN ${bookLoans.rentalFee}
               WHEN ${bookLoans.loanType} = 'purchase' THEN ${bookLoans.purchasePrice}
@@ -5087,13 +5103,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .where(and(eq(bookLoans.id, orderId), eq(bookLoans.userId, user.id)))
           .limit(1);
 
+        console.log(`VyronaRead order check: found ${readOrder.length} orders`);
         if (readOrder.length > 0) {
           return res.json(readOrder[0]);
         }
       } catch (readError) {
-        console.log("Not a VyronaRead order");
+        console.log("VyronaRead order error:", readError);
       }
 
+      console.log(`No order found with ID ${orderId} for user ${user.id}`);
       return res.status(404).json({ message: "Order not found" });
     } catch (error) {
       console.error("Error fetching order:", error);
