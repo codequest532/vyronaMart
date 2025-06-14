@@ -86,6 +86,8 @@ export const cartItems = pgTable("cart_items", {
   userId: integer("user_id").notNull(),
   productId: integer("product_id").notNull(),
   quantity: integer("quantity").notNull().default(1),
+  price: integer("price"), // Store price at time of adding to cart
+  module: text("module").default("vyronahub"), // 'vyronahub', 'instagram', 'vyronaread'
   roomId: integer("room_id"), // null for individual cart, set for room cart
   addedAt: timestamp("added_at").defaultNow(),
 });

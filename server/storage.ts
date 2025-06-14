@@ -2509,6 +2509,114 @@ export class DatabaseStorage implements IStorage {
     const [product] = await db.select().from(instagramProducts).where(eq(instagramProducts.id, id));
     return product;
   }
+
+  // Instagram Cart Implementation
+  async getInstagramCartItems(userId: number): Promise<any[]> {
+    try {
+      const items = await db
+        .select({
+          id: cartItems.id,
+          productId: cartItems.productId,
+          quantity: cartItems.quantity,
+          price: cartItems.price,
+          productName: instagramProducts.productName,
+          imageUrl: instagramProducts.imageUrl,
+          seller: instagramStores.instagramUsername
+        })
+        .from(cartItems)
+        .leftJoin(instagramProducts, eq(cartItems.productId, instagramProducts.id))
+        .leftJoin(instagramStores, eq(instagramProducts.storeId, instagramStores.id))
+        .where(and(
+          eq(cartItems.userId, userId),
+          eq(cartItems.module, 'instagram')
+        ));
+      return items;
+    } catch (error) {
+      console.error("Error fetching Instagram cart items:", error);
+      return [];
+    }
+  }
+
+  async getInstagramCartItem(userId: number, productId: number): Promise<any | undefined> {
+    try {
+      const [item] = await db
+        .select()
+        .from(cartItems)
+        .where(and(
+          eq(cartItems.userId, userId),
+          eq(cartItems.productId, productId),
+          eq(cartItems.module, 'instagram')
+        ));
+      return item;
+    } catch (error) {
+      console.error("Error fetching Instagram cart item:", error);
+      return undefined;
+    }
+  }
+
+  async addInstagramCartItem(cartItem: any): Promise<any> {
+    try {
+      const [newItem] = await db
+        .insert(cartItems)
+        .values({
+          userId: cartItem.userId,
+          productId: cartItem.productId,
+          quantity: cartItem.quantity,
+          price: cartItem.price,
+          module: 'instagram'
+        })
+        .returning();
+      return newItem;
+    } catch (error) {
+      console.error("Error adding Instagram cart item:", error);
+      throw error;
+    }
+  }
+
+  async updateInstagramCartItem(userId: number, productId: number, quantity: number): Promise<void> {
+    try {
+      await db
+        .update(cartItems)
+        .set({ quantity })
+        .where(and(
+          eq(cartItems.userId, userId),
+          eq(cartItems.productId, productId),
+          eq(cartItems.module, 'instagram')
+        ));
+    } catch (error) {
+      console.error("Error updating Instagram cart item:", error);
+      throw error;
+    }
+  }
+
+  async removeInstagramCartItem(userId: number, productId: number): Promise<void> {
+    try {
+      await db
+        .delete(cartItems)
+        .where(and(
+          eq(cartItems.userId, userId),
+          eq(cartItems.productId, productId),
+          eq(cartItems.module, 'instagram')
+        ));
+    } catch (error) {
+      console.error("Error removing Instagram cart item:", error);
+      throw error;
+    }
+  }
+
+  async clearInstagramCart(userId: number): Promise<void> {
+    try {
+      await db
+        .delete(cartItems)
+        .where(and(
+          eq(cartItems.userId, userId),
+          eq(cartItems.module, 'instagram')
+        ));
+    } catch (error) {
+      console.error("Error clearing Instagram cart:", error);
+      throw error;
+    }
+  }
 }
 
 // Use DatabaseStorage instead of MemStorage
