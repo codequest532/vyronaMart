@@ -2109,7 +2109,7 @@ export default function AdminDashboard() {
                               <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                 <p className="text-2xl font-bold text-green-600">
                                   ₹{(orders?.filter((order: any) => order.user_id === customer.id)
-                                    .reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0) || 0).toLocaleString())}
+                                    .reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0) || 0).toLocaleString()}
                                 </p>
                                 <p className="text-sm text-gray-600">Total Spent</p>
                               </div>

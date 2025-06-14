@@ -369,7 +369,7 @@ export default function BookSellerDashboard() {
     const bookData = {
       name: newBook.title,
       description: newBook.description,
-      price: Math.round(salePrice * 100)) // Convert to cents
+      price: Math.round(salePrice * 100), // Convert to cents
       category: "books",
       module: "vyronaread",
       imageUrl: newBook.imageUrl,
