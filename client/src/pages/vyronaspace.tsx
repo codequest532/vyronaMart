@@ -418,35 +418,35 @@ export default function VyronaSpace() {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-              <Zap className="h-8 w-8 text-white" />
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
+                  VyronaSpace
+                </h1>
+                <p className="text-lg text-gray-700">Ultra-Fast Hyperlocal Delivery</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent">
-                VyronaSpace
-              </h1>
-              <p className="text-lg text-gray-700">Ultra-Fast Hyperlocal Delivery</p>
+            
+            <div className="flex items-center justify-center space-x-6 text-sm text-gray-700">
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 mr-2 text-orange-600" />
+                <span className="font-medium">5-15 Min Delivery</span>
+              </div>
+              <div className="flex items-center">
+                <MapPin className="h-4 w-4 mr-2 text-pink-600" />
+                <span className="font-medium">Nearby Stores</span>
+              </div>
+              <div className="flex items-center">
+                <Star className="h-4 w-4 mr-2 text-purple-600" />
+                <span className="font-medium">Verified Stores</span>
+              </div>
             </div>
           </div>
-          
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-700">
-            <div className="flex items-center">
-              <Clock className="h-4 w-4 mr-2 text-orange-600" />
-              <span className="font-medium">5-15 Min Delivery</span>
-            </div>
-            <div className="flex items-center">
-              <MapPin className="h-4 w-4 mr-2 text-pink-600" />
-              <span className="font-medium">Nearby Stores</span>
-            </div>
-            <div className="flex items-center">
-              <Star className="h-4 w-4 mr-2 text-purple-600" />
-              <span className="font-medium">Verified Stores</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          {/* Navigation Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-4 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
             <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
               <Sparkles className="h-4 w-4 mr-2" />
@@ -1304,8 +1304,8 @@ export default function VyronaSpace() {
               </div>
             </div>
           </div>
-        )}
-        </div>
+          )}
+        </Tabs>
       </div>
 
       {/* Edit Profile Modal */}
