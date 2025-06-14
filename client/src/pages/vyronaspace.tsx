@@ -660,7 +660,7 @@ export default function VyronaSpace() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
-                          <UserIcon className="h-5 w-5 text-emerald-600" />
+                          <User className="h-5 w-5 text-emerald-600" />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Managed by Rajesh Kumar</p>
@@ -1020,9 +1020,9 @@ export default function VyronaSpace() {
             <TabsContent value="rewards" className="space-y-6">
               <div className="container mx-auto px-4 py-8">
                 <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">VyronaCoins & Rewards</h2>
-              
-              {/* Current Points */}
+                  <h2 className="text-3xl font-bold text-gray-900 mb-6">VyronaCoins & Rewards</h2>
+                  
+                  {/* Current Points */}
               <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -1112,7 +1112,6 @@ export default function VyronaSpace() {
                 </div>
               </div>
             </div>
-              </div>
             </TabsContent>
 
             {/* Profile Tab - Customer Management */}
