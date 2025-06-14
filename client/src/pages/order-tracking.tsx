@@ -52,6 +52,8 @@ export default function OrderTracking() {
   const orderId = params?.orderId;
   const [mapCenter, setMapCenter] = useState<[number, number]>([12.9716, 77.6412]); // Bangalore coordinates
   const [route, setRoute] = useState<[number, number][]>([]);
+  const [routeDistance, setRouteDistance] = useState<number>(0);
+  const [routeDuration, setRouteDuration] = useState<number>(0);
 
   const { data: orderTracking, isLoading } = useQuery({
     queryKey: ["/api/orders/track", orderId],
@@ -99,6 +101,43 @@ export default function OrderTracking() {
     popupAnchor: [0, -32]
   });
 
+  // Calculate real route using OpenRouteService API
+  const calculateRoute = async (start: [number, number], end: [number, number]) => {
+    try {
+      const response = await fetch(`https://api.openrouteservice.org/v2/directions/driving-car?api_key=${import.meta.env.VITE_OPENROUTESERVICE_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          coordinates: [
+            [start[1], start[0]], // OpenRouteService uses [lng, lat]
+            [end[1], end[0]]
+          ],
+          format: 'geojson'
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const coordinates = data.features[0].geometry.coordinates;
+        const routePoints = coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+        
+        // Get distance and duration
+        const properties = data.features[0].properties;
+        setRouteDistance(properties.segments[0].distance / 1000); // Convert to km
+        setRouteDuration(properties.segments[0].duration / 60); // Convert to minutes
+        
+        return routePoints;
+      }
+    } catch (error) {
+      console.error('Route calculation failed:', error);
+    }
+    
+    // Fallback to straight line if API fails
+    return [start, end];
+  };
+
   // Calculate route when delivery partner data is available
   useEffect(() => {
     if (orderTracking && typeof orderTracking === 'object' && 'deliveryPartner' in orderTracking && orderTracking.deliveryPartner) {
@@ -107,8 +146,10 @@ export default function OrderTracking() {
       const deliveryCoords: [number, number] = [partner.currentLat, partner.currentLng];
       const customerCoords: [number, number] = [12.9667, 77.6378]; // Customer location
       
-      // Create route path
-      setRoute([storeCoords, deliveryCoords, customerCoords]);
+      // Calculate real route from delivery partner to customer
+      calculateRoute(deliveryCoords, customerCoords).then(routePoints => {
+        setRoute(routePoints);
+      });
       
       // Center map on delivery partner location
       setMapCenter(deliveryCoords);
@@ -282,6 +323,24 @@ export default function OrderTracking() {
                     </Button>
                   </div>
                 </div>
+                
+                {/* Route Information */}
+                {routeDistance > 0 && (
+                  <div className="mt-4 p-3 bg-white rounded-lg border border-emerald-200">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-emerald-600" />
+                        <span className="text-gray-600">Distance:</span>
+                        <span className="font-medium">{routeDistance.toFixed(1)} km</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-emerald-600" />
+                        <span className="text-gray-600">ETA:</span>
+                        <span className="font-medium">{Math.round(routeDuration)} min</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
