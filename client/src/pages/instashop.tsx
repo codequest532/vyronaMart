@@ -62,10 +62,18 @@ export default function VyronaInstaShop() {
     queryKey: ["/api/instagram/stores"],
   });
 
+  // Fetch cart items
+  const { data: cartItems = [] } = useQuery({
+    queryKey: ["/api/cart"],
+  });
+
+  // Type-safe cart items
+  const safeCartItems = Array.isArray(cartItems) ? cartItems : [];
+
   // Add to cart mutation
   const addToCartMutation = useMutation({
-    mutationFn: async (productData) => {
-      return await apiRequest("/api/cart/add", "POST", productData);
+    mutationFn: async (productData: any) => {
+      return await apiRequest("POST", "/api/cart/add", productData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
@@ -337,6 +345,25 @@ export default function VyronaInstaShop() {
               <Badge variant="outline" className="text-purple-600 border-purple-200">
                 {filteredProducts.length} Products
               </Badge>
+              
+              {/* Instagram Cart Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = '/cart'}
+                className="relative text-pink-600 border-pink-300 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-400"
+              >
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                Insta Cart
+                {safeCartItems.length > 0 && (
+                  <Badge 
+                    className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs bg-pink-500 hover:bg-pink-600 flex items-center justify-center"
+                  >
+                    {safeCartItems.length}
+                  </Badge>
+                )}
+              </Button>
+              
               <Button
                 variant="default"
                 size="sm"
