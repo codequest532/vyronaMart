@@ -3663,8 +3663,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rentalStartDate: new Date(),
         currentBillingCycle: 1,
         nextBillingDate,
-        rentalPricePerCycle: Math.round(rentalPricePerCycle * 100), // Convert to cents
-        totalAmountPaid: Math.round(rentalPricePerCycle * 100), // First cycle payment
+        rentalPricePerCycle: Math.round(rentalPricePerCycle), // Store as direct rupees
+        totalAmountPaid: Math.round(rentalPricePerCycle), // First cycle payment
         status: 'active',
         autoRenewal: true,
         sellerId,
@@ -3679,7 +3679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rentalId: rental.id,
         billingCycle: 1,
         billingDate: new Date(),
-        amount: Math.round(rentalPricePerCycle * 100),
+        amount: Math.round(rentalPricePerCycle),
         paymentStatus: 'paid',
         paymentMethod: 'default',
         transactionId: `txn_${Date.now()}`
@@ -3940,7 +3940,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         instagramMediaId: `manual_${Date.now()}`,
         productName,
         description,
-        price: Math.round(price * 100), // Convert to cents
+        price: Math.round(price), // Store as direct rupees
         categoryTag,
         hashtags: hashtags ? hashtags.split('#').filter((tag: string) => tag.trim()).map((tag: string) => tag.trim()) : [],
         productUrl,
@@ -3993,7 +3993,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             instagramMediaId: `bulk_${Date.now()}_${i}`,
             productName: product.productName.trim(),
             description: product.description || '',
-            price: Math.round(parseFloat(product.price) * 100), // Convert to cents
+            price: Math.round(parseFloat(product.price)), // Store as direct rupees
             categoryTag: product.categoryTag || 'general',
             hashtags: product.hashtags ? 
               product.hashtags.split(/[#,\s]+/).filter((tag: string) => tag.trim()).map((tag: string) => tag.trim()) : 
@@ -4136,8 +4136,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           product
         });
         
-        // Calculate total amount for this store
-        const priceInRupees = Math.round(item.price);
+        // Calculate total amount for this store (prices already in rupees)
+        const priceInRupees = item.price;
         storeGroup.totalAmount += priceInRupees * item.quantity;
       }
 
