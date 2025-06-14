@@ -15,7 +15,7 @@ import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { 
   Instagram, Store, Package, TrendingUp, Eye, Heart, MessageCircle, Users, 
-  DollarSign, BarChart3, Calendar, Zap, Link, Camera, Hash, ShoppingBag,
+  DollarSign, BarChart3, Calendar, Zap, Link, Camera, Hash, ShoppingBag, User, MapPin,
   Clock, CheckCircle, XCircle, Truck, AlertTriangle, Plus, Edit, Trash2, LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -1146,32 +1146,161 @@ Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,http
         {/* Order Management Modal */}
         {selectedOrder && (
           <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Manage Order #{selectedOrder.id}</DialogTitle>
+                <DialogTitle className="flex items-center gap-2">
+                  <ShoppingBag className="h-5 w-5" />
+                  Order #{selectedOrder.id} Details
+                </DialogTitle>
                 <DialogDescription>
-                  Update order status and add notes
+                  Complete order information and management
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Customer</label>
-                    <p className="font-medium">{selectedOrder.contactInfo?.name || "N/A"}</p>
+                {/* Order Summary */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3">Order Summary</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Order ID</label>
+                      <p className="font-medium">#{selectedOrder.id}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Status</label>
+                      <Badge variant={getStatusBadgeVariant(selectedOrder.status)} className="mt-1">
+                        {getStatusIcon(selectedOrder.status)}
+                        <span className="ml-1">{selectedOrder.status}</span>
+                      </Badge>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Order Date</label>
+                      <p className="font-medium">{new Date(selectedOrder.createdAt).toLocaleDateString('en-IN', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Total Amount</label>
+                      <p className="font-medium text-green-600 text-lg">{formatCurrency(selectedOrder.totalAmount)}</p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Total Amount</label>
-                    <p className="font-medium">{formatCurrency(selectedOrder.totalAmount)}</p>
+                </div>
+
+                {/* Customer Information */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Customer Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Customer Name</label>
+                      <p className="font-medium">{selectedOrder.shippingAddress?.name || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Email</label>
+                      <p className="font-medium">{selectedOrder.shippingAddress?.email || selectedOrder.contactInfo?.email || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Phone</label>
+                      <p className="font-medium">{selectedOrder.shippingAddress?.phone || "Not provided"}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">Payment Method</label>
+                      <p className="font-medium capitalize">{selectedOrder.contactInfo?.paymentMethod || "Not specified"}</p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Product</label>
-                    <p className="font-medium">{selectedOrder.productName}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Quantity</label>
-                    <p className="font-medium">{selectedOrder.quantity}</p>
-                  </div>
+                </div>
+
+                {/* Order Items */}
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Order Items
+                  </h3>
+                  {(() => {
+                    try {
+                      // Check if this is a multi-item order
+                      if (selectedOrder.orderNotes && selectedOrder.orderNotes.includes('Multi-item Instagram order')) {
+                        const itemsMatch = selectedOrder.orderNotes.match(/Items: (\[.*\])/);
+                        if (itemsMatch) {
+                          const items = JSON.parse(itemsMatch[1]);
+                          return (
+                            <div className="space-y-3">
+                              {items.map((item: any, index: number) => (
+                                <div key={index} className="bg-white p-3 rounded border flex justify-between items-center">
+                                  <div>
+                                    <p className="font-medium">{item.productName}</p>
+                                    <p className="text-sm text-gray-600">Quantity: {item.quantity} × ₹{item.price}</p>
+                                  </div>
+                                  <p className="font-medium text-green-600">₹{item.total}</p>
+                                </div>
+                              ))}
+                              <div className="bg-white p-3 rounded border border-green-200">
+                                <div className="flex justify-between items-center font-semibold">
+                                  <span>Total ({items.length} items)</span>
+                                  <span className="text-green-600 text-lg">₹{selectedOrder.totalAmount}</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                      }
+                      // Single item order
+                      return (
+                        <div className="bg-white p-3 rounded border">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{selectedOrder.productName}</p>
+                              <p className="text-sm text-gray-600">Quantity: {selectedOrder.quantity}</p>
+                            </div>
+                            <p className="font-medium text-green-600">₹{selectedOrder.totalAmount}</p>
+                          </div>
+                        </div>
+                      );
+                    } catch (e) {
+                      return (
+                        <div className="bg-white p-3 rounded border">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium">{selectedOrder.productName}</p>
+                              <p className="text-sm text-gray-600">Quantity: {selectedOrder.quantity}</p>
+                            </div>
+                            <p className="font-medium text-green-600">₹{selectedOrder.totalAmount}</p>
+                          </div>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+
+                {/* Shipping Address */}
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Shipping Address
+                  </h3>
+                  {selectedOrder.shippingAddress ? (
+                    <div className="bg-white p-3 rounded border">
+                      <p className="font-medium">{selectedOrder.shippingAddress.name}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {selectedOrder.shippingAddress.addressLine1}
+                        {selectedOrder.shippingAddress.addressLine2 && (
+                          <><br />{selectedOrder.shippingAddress.addressLine2}</>
+                        )}
+                        <br />
+                        {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} - {selectedOrder.shippingAddress.pincode}
+                        <br />
+                        Phone: {selectedOrder.shippingAddress.phone}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No shipping address provided</p>
+                  )}
                 </div>
 
                 <Form {...orderStatusForm}>
