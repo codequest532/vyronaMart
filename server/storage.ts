@@ -4,6 +4,7 @@ import {
   instagramStores, instagramProducts, instagramOrders, instagramAnalytics,
   groupBuyProducts, groupBuyCampaigns, groupBuyParticipants, groupCarts, groupCartContributions,
   libraryIntegrationRequests, physicalBooks, eBooks, bookLoans, bookRentals, bookReturnRequests,
+  subscriptions, reorderHistory, userAddresses,
   type User, type InsertUser, type Product, type InsertProduct, 
   type Store, type InsertStore, type ShoppingRoom, type InsertShoppingRoom,
   type CartItem, type InsertCartItem, type Order, type InsertOrder,
@@ -19,7 +20,8 @@ import {
   type GroupBuyParticipant, type InsertGroupBuyParticipant,
   type LibraryIntegrationRequest, type InsertLibraryIntegrationRequest,
   type PhysicalBook, type InsertPhysicalBook, type EBook, type InsertEBook,
-  type BookLoan, type InsertBookLoan
+  type BookLoan, type InsertBookLoan, type Subscription, type InsertSubscription,
+  type ReorderHistory, type InsertReorderHistory, type UserAddress, type InsertUserAddress
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, isNull, sql, desc } from "drizzle-orm";
@@ -237,6 +239,24 @@ export interface IStorage {
   getLibraries(): Promise<any[]>;
   getLibraryBooks(libraryId?: number): Promise<any[]>;
   createLibraryMembership(membershipData: any): Promise<any>;
+
+  // Subscriptions for recurring deliveries
+  getUserSubscriptions(userId: number): Promise<Subscription[]>;
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  updateSubscription(id: number, updates: Partial<Subscription>): Promise<Subscription | undefined>;
+  deleteSubscription(id: number): Promise<void>;
+
+  // Reorder functionality
+  getUserReorderHistory(userId: number): Promise<ReorderHistory[]>;
+  createReorderHistory(reorder: InsertReorderHistory): Promise<ReorderHistory>;
+  updateReorderHistory(id: number, updates: Partial<ReorderHistory>): Promise<ReorderHistory | undefined>;
+
+  // User address management
+  getUserAddresses(userId: number): Promise<UserAddress[]>;
+  createUserAddress(address: InsertUserAddress): Promise<UserAddress>;
+  updateUserAddress(id: number, updates: Partial<UserAddress>): Promise<UserAddress | undefined>;
+  deleteUserAddress(id: number): Promise<void>;
+  setPrimaryAddress(userId: number, addressId: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {

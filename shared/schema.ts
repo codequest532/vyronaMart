@@ -777,6 +777,86 @@ export const insertWalletTransactionSchema = createInsertSchema(walletTransactio
   createdAt: true,
 });
 
+// Subscriptions table for recurring deliveries
+export const subscriptions = pgTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  frequency: text("frequency").notNull(), // 'weekly', 'monthly', 'daily'
+  nextDelivery: timestamp("next_delivery").notNull(),
+  amount: integer("amount").notNull(),
+  storeId: integer("store_id"),
+  items: jsonb("items").notNull(), // Array of product IDs and quantities
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Reorder history for quick reordering
+export const reorderHistory = pgTable("reorder_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  storeId: integer("store_id").notNull(),
+  items: jsonb("items").notNull(), // Array of product IDs and quantities
+  totalAmount: integer("total_amount").notNull(),
+  lastOrderedAt: timestamp("last_ordered_at").defaultNow(),
+  orderCount: integer("order_count").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User addresses for delivery
+export const userAddresses = pgTable("user_addresses", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // 'home', 'work', 'other'
+  name: text("name").notNull(),
+  addressLine1: text("address_line1").notNull(),
+  addressLine2: text("address_line2"),
+  city: text("city").notNull(),
+  state: text("state").notNull(),
+  pincode: text("pincode").notNull(),
+  phone: text("phone"),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions, {
+  userId: z.number(),
+  title: z.string().min(1),
+  frequency: z.enum(['weekly', 'monthly', 'daily']),
+  nextDelivery: z.date(),
+  amount: z.number().min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertReorderHistorySchema = createInsertSchema(reorderHistory, {
+  userId: z.number(),
+  title: z.string().min(1),
+  storeId: z.number(),
+  totalAmount: z.number().min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAddressSchema = createInsertSchema(userAddresses, {
+  userId: z.number(),
+  type: z.enum(['home', 'work', 'other']),
+  name: z.string().min(1),
+  addressLine1: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().min(1),
+  pincode: z.string().min(1),
+}).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -788,6 +868,12 @@ export type ShoppingRoom = typeof shoppingRooms.$inferSelect;
 export type InsertShoppingRoom = z.infer<typeof insertShoppingRoomSchema>;
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = z.infer<typeof insertCartItemSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type ReorderHistory = typeof reorderHistory.$inferSelect;
+export type InsertReorderHistory = z.infer<typeof insertReorderHistorySchema>;
+export type UserAddress = typeof userAddresses.$inferSelect;
+export type InsertUserAddress = z.infer<typeof insertUserAddressSchema>;
 
 // Group Cart Types
 export type GroupCart = typeof groupCarts.$inferSelect;
