@@ -4119,16 +4119,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Product ${item.id} not found`);
         }
 
-        // Convert price from rupees to paisa for database storage
-        const priceInPaisa = Math.round(item.price * 100);
-        const totalAmountInPaisa = priceInPaisa * item.quantity;
+        // Store prices directly in rupees (no conversion needed)
+        const priceInRupees = Math.round(item.price);
+        const totalAmountInRupees = priceInRupees * item.quantity;
 
         const orderData = {
           buyerId: authenticatedUser.id,
           storeId: product.storeId,
           productId: item.id,
           quantity: item.quantity,
-          totalAmount: totalAmountInPaisa,
+          totalAmount: totalAmountInRupees,
           status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
           shippingAddress: shippingAddress,
           contactInfo: {
@@ -4388,13 +4388,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )
         );
 
-      // Convert prices from paisa to rupees (divide by 100) and round to whole numbers
-      const productsWithRupeePrice = products.map(product => ({
-        ...product,
-        price: Math.round((product.price || 0) / 100)
-      }));
-
-      res.json(productsWithRupeePrice);
+      // Return products with prices as stored (already in whole rupees)
+      res.json(products);
     } catch (error) {
       console.error("Error fetching public Instagram products:", error);
       res.status(500).json({ message: "Failed to fetch products" });
@@ -4451,8 +4446,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { productId, quantity = 1, price } = req.body;
       
-      // Convert price to integer (paisa) - ensure it's a whole number
-      const priceInPaisa = Math.round(parseFloat(price) * 100);
+      // Store price directly as received (already in rupees)
+      const priceInRupees = Math.round(parseFloat(price));
       
       // Check if item already exists in cart
       const existingItem = await storage.getInstagramCartItem(authenticatedUser.id, productId);
@@ -4466,7 +4461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: authenticatedUser.id,
           productId,
           quantity,
-          price: priceInPaisa
+          price: priceInRupees
         });
       }
 
