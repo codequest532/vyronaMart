@@ -117,7 +117,7 @@ export default function VyronaHubCheckout() {
   const total = subtotal + deliveryFee;
 
   const formatCurrency = (amount: number): string => {
-    return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `₹${amount.toLocaleString()'en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const createOrderMutation = useMutation({

@@ -844,7 +844,7 @@ Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,http
                 <div>
                   <p className="text-sm font-medium text-gray-600">Followers</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {instagramStore?.followersCount?.toLocaleString() || 0}
+                    {instagramStore?.followersCount?.toLocaleString()) || 0}
                   </p>
                 </div>
                 <Users className="h-8 w-8 text-pink-500" />
@@ -1029,21 +1029,21 @@ Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,http
                         <Eye className="h-5 w-5 text-blue-500 mr-2" />
                         <span className="font-medium">Profile Views</span>
                       </div>
-                      <span className="font-bold">{analytics?.profileViews?.toLocaleString() || 0}</span>
+                      <span className="font-bold">{analytics?.profileViews?.toLocaleString()) || 0}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                       <div className="flex items-center">
                         <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
                         <span className="font-medium">Reach</span>
                       </div>
-                      <span className="font-bold">{analytics?.reach?.toLocaleString() || 0}</span>
+                      <span className="font-bold">{analytics?.reach?.toLocaleString()) || 0}</span>
                     </div>
                     <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
                       <div className="flex items-center">
                         <Link className="h-5 w-5 text-purple-500 mr-2" />
                         <span className="font-medium">Website Clicks</span>
                       </div>
-                      <span className="font-bold">{analytics?.websiteClicks?.toLocaleString() || 0}</span>
+                      <span className="font-bold">{analytics?.websiteClicks?.toLocaleString()) || 0}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -1125,7 +1125,7 @@ Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,http
                       <h3 className="font-medium">Last Sync</h3>
                       <p className="text-sm text-gray-600">
                         {instagramStore?.lastSyncAt 
-                          ? new Date(instagramStore.lastSyncAt).toLocaleString()
+                          ? new Date(instagramStore.lastSyncAt).toLocaleString())
                           : "Never"
                         }
                       </p>

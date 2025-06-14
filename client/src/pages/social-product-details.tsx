@@ -341,7 +341,7 @@ export default function SocialProductDetails({ productId }: SocialProductDetails
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                     <Users className="h-5 w-5 mr-3" />
-                    Add to Group Cart • ₹{(product.price * quantity).toLocaleString(}
+                    Add to Group Cart • ₹{(product.price * quantity).toLocaleString()}
                   </Button>
                   
                   <div className="grid grid-cols-2 gap-3">

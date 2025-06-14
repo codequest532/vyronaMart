@@ -378,7 +378,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                       className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
                     >
                       <Download className="h-5 w-5 mr-3" />
-                      Download E-Book • ₹{(product.price * quantity).toLocaleString(}
+                      Download E-Book • ₹{(product.price * quantity).toLocaleString()}
                     </Button>
                   </div>
                 ) : (
@@ -389,7 +389,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                       className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
                     >
                       <ShoppingCart className="h-5 w-5 mr-3" />
-                      Buy Book • ₹{(product.price * quantity).toLocaleString(}
+                      Buy Book • ₹{(product.price * quantity).toLocaleString()}
                     </Button>
                     
                     <div className="grid grid-cols-2 gap-3">

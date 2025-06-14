@@ -589,7 +589,7 @@ export default function Home() {
                       </div>
                       <div className="p-3">
                         <h4 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2">{product.name}</h4>
-                        <p className="text-blue-600 font-bold text-lg">₹{(product.price / 100).toLocaleString(}</p>
+                        <p className="text-blue-600 font-bold text-lg">₹{Math.round(product.price / 100)}</p>
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-xs text-gray-500">Free shipping</span>
                           <Button size="sm" className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700">
@@ -732,7 +732,7 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-bold text-green-600">₹{(room.totalCart / 100).toLocaleString(}</div>
+                            <div className="text-lg font-bold text-green-600">₹{(room.totalCart / 100).toLocaleString()}</div>
                             <div className="text-xs text-gray-500">Group discount: 15% off</div>
                           </div>
                         </div>
@@ -998,11 +998,11 @@ export default function Home() {
                             <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
                             <div className="flex items-center justify-between mb-3">
                               <div className="text-lg font-bold text-indigo-600">
-                                ₹{book.price ? (book.price / 100).toFixed(0) : "Free"}
+                                ₹{book.price ? Math.round(book.price / 100) : "Free"}
                               </div>
                               {book.rentPrice && (
                                 <div className="text-sm text-purple-600">
-                                  ₹{(book.rentPrice / 100).toFixed(0}/week
+                                  ₹{Math.round(book.rentPrice / 100)}/week
                                 </div>
                               )}
                             </div>
@@ -1078,7 +1078,7 @@ export default function Home() {
                           <div className="flex items-center space-x-2 mt-2">
                             <Badge variant="secondary">
                               <BookOpen className="h-3 w-3 mr-1" />
-                              {selectedLibrary.totalBooks.toLocaleString()} Books
+                              {selectedLibrary.totalBooks.toLocaleString())} Books
                             </Badge>
                             <Badge variant="outline" className="text-green-600">
                               <Heart className="h-3 w-3 mr-1" />
@@ -1379,7 +1379,7 @@ export default function Home() {
                         className="w-full h-40 object-cover rounded-lg mb-3 group-hover:scale-105 transition-transform"
                       />
                       <h4 className="font-semibold text-sm">{product.name}</h4>
-                      <p className="text-blue-600 font-bold">₹{(product.price / 100).toLocaleString(}</p>
+                      <p className="text-blue-600 font-bold">₹{(product.price / 100).toLocaleString()}</p>
                       <Badge variant="secondary" className="mt-1 text-green-600 bg-green-50">
                         +{Math.floor(product.price / 10000)} coins
                       </Badge>
@@ -1409,11 +1409,11 @@ export default function Home() {
                       <div className="flex items-center space-x-4 mt-2">
                         <div className="flex items-center space-x-1">
                           <Coins className="text-amber-300 h-4 w-4" />
-                          <span className="font-semibold">{(user.vyronaCoins || 0).toLocaleString()}</span>
+                          <span className="font-semibold">{(user.vyronaCoins || 0).toLocaleString())}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Star className="text-yellow-300 h-4 w-4" />
-                          <span className="font-semibold">{(user.xp || 0).toLocaleString()} XP</span>
+                          <span className="font-semibold">{(user.xp || 0).toLocaleString())} XP</span>
                         </div>
                       </div>
                     </div>

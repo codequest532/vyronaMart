@@ -301,7 +301,7 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
                 <p className="text-sm text-gray-600">Inclusive of all taxes • Free delivery on orders above ₹499</p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-green-600 font-medium">✓ Best price guaranteed</span>
-                  <span className="text-sm text-blue-600">• EMI starting ₹{Math.floor(product.price / 12}/month</span>
+                  <span className="text-sm text-blue-600">• EMI starting ₹{Math.floor(product.price / 12)}/month</span>
                 </div>
               </div>
             </div>
@@ -350,7 +350,7 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
                   ) : (
                     <>
                       <ShoppingCart className="h-5 w-5 mr-3" />
-                      Add to Cart • ₹{(product.price * quantity).toLocaleString(}
+                      Add to Cart • ₹{(product.price * quantity).toLocaleString()}
                     </>
                   )}
                 </Button>
