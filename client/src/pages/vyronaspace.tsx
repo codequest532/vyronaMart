@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
@@ -184,6 +189,60 @@ export default function VyronaSpace() {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [viewMode, setViewMode] = useState<"stores" | "store-products">("stores");
   const [isSubscriptionMode, setIsSubscriptionMode] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showManageAddresses, setShowManageAddresses] = useState(false);
+  const [profileForm, setProfileForm] = useState({ username: "", email: "", mobile: "" });
+  const [newAddress, setNewAddress] = useState({ 
+    name: "", address: "", city: "", state: "", pincode: "", phone: "", isDefault: false 
+  });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: { username: string; email: string; mobile: string }) => {
+      return await apiRequest("PUT", "/api/profile/1", profileData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile/1"] });
+      setShowEditProfile(false);
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Add address mutation
+  const addAddressMutation = useMutation({
+    mutationFn: async (addressData: any) => {
+      return await apiRequest("POST", "/api/addresses", { ...addressData, userId: 1 });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/addresses/1"] });
+      setShowManageAddresses(false);
+      setNewAddress({ name: "", address: "", city: "", state: "", pincode: "", phone: "", isDefault: false });
+      toast({
+        title: "Address Added",
+        description: "Your address has been added successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to add address. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Real API calls replacing mock data
   const { data: stores = [], isLoading: storesLoading } = useQuery({
@@ -1058,7 +1117,18 @@ export default function VyronaSpace() {
                         </>
                       )}
                     </div>
-                    <Button variant="outline" className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50">
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50"
+                      onClick={() => {
+                        setProfileForm({
+                          username: (userProfile as any)?.username || "",
+                          email: (userProfile as any)?.email || "",
+                          mobile: (userProfile as any)?.mobile || ""
+                        });
+                        setShowEditProfile(true);
+                      }}
+                    >
                       Edit Profile
                     </Button>
                   </CardContent>
