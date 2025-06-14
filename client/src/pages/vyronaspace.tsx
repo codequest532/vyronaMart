@@ -59,6 +59,19 @@ export default function VyronaSpace() {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [newLocation, setNewLocation] = useState("");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [userProfile, setUserProfile] = useState({
+    name: "John Doe",
+    email: "john.doe@email.com",
+    phone: "+91 98765 43210",
+    address: currentLocation,
+    preferredPayment: "UPI",
+    notifications: {
+      orderUpdates: true,
+      promotions: true,
+      newStores: false
+    }
+  });
   const { toast } = useToast();
 
   // Enhanced mock data for modern design
@@ -341,6 +354,14 @@ export default function VyronaSpace() {
     
     // Switch to orders tab to show the new order
     setActiveTab("orders");
+  };
+
+  const saveProfile = () => {
+    toast({
+      title: "Profile updated",
+      description: "Your profile settings have been saved successfully",
+    });
+    setShowProfileModal(false);
   };
 
   const categories = [
@@ -920,15 +941,284 @@ export default function VyronaSpace() {
 
           {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
-            <div className="text-center py-12">
-              <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Profile Settings</h3>
-              <p className="text-gray-600 mb-6">Manage your preferences and account settings</p>
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
-                <Users className="h-4 w-4 mr-2" />
-                Setup Profile
-              </Button>
+            {/* Profile Header */}
+            <Card className="rounded-2xl border-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-2xl">
+              <CardContent className="p-8">
+                <div className="flex items-center space-x-6">
+                  <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+                    <Users className="h-10 w-10 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-3xl font-bold mb-2">{userProfile.name}</h2>
+                    <p className="text-white/80 mb-1">{userProfile.email}</p>
+                    <p className="text-white/80">{userProfile.phone}</p>
+                  </div>
+                  <Dialog open={showProfileModal} onOpenChange={setShowProfileModal}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-white text-blue-600 hover:bg-white/90 rounded-xl font-bold">
+                        <Users className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl rounded-2xl">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl">Profile Settings</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-6">
+                        {/* Personal Information */}
+                        <div className="space-y-4">
+                          <h3 className="font-bold text-lg">Personal Information</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 mb-2 block">Full Name</label>
+                              <Input
+                                value={userProfile.name}
+                                onChange={(e) => setUserProfile({...userProfile, name: e.target.value})}
+                                className="rounded-xl"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-700 mb-2 block">Phone Number</label>
+                              <Input
+                                value={userProfile.phone}
+                                onChange={(e) => setUserProfile({...userProfile, phone: e.target.value})}
+                                className="rounded-xl"
+                              />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="text-sm font-medium text-gray-700 mb-2 block">Email Address</label>
+                              <Input
+                                value={userProfile.email}
+                                onChange={(e) => setUserProfile({...userProfile, email: e.target.value})}
+                                className="rounded-xl"
+                              />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="text-sm font-medium text-gray-700 mb-2 block">Default Address</label>
+                              <Input
+                                value={userProfile.address}
+                                onChange={(e) => setUserProfile({...userProfile, address: e.target.value})}
+                                className="rounded-xl"
+                                placeholder="Enter your default delivery address"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Preferences */}
+                        <div className="space-y-4">
+                          <h3 className="font-bold text-lg">Preferences</h3>
+                          <div>
+                            <label className="text-sm font-medium text-gray-700 mb-2 block">Preferred Payment Method</label>
+                            <select
+                              value={userProfile.preferredPayment}
+                              onChange={(e) => setUserProfile({...userProfile, preferredPayment: e.target.value})}
+                              className="w-full p-3 border border-gray-300 rounded-xl"
+                            >
+                              <option value="UPI">UPI</option>
+                              <option value="Cards">Credit/Debit Cards</option>
+                              <option value="COD">Cash on Delivery</option>
+                              <option value="Wallet">Digital Wallet</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* Notification Settings */}
+                        <div className="space-y-4">
+                          <h3 className="font-bold text-lg">Notification Settings</h3>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <div>
+                                <div className="font-medium">Order Updates</div>
+                                <div className="text-sm text-gray-600">Get notified about order status changes</div>
+                              </div>
+                              <input
+                                type="checkbox"
+                                checked={userProfile.notifications.orderUpdates}
+                                onChange={(e) => setUserProfile({
+                                  ...userProfile,
+                                  notifications: {...userProfile.notifications, orderUpdates: e.target.checked}
+                                })}
+                                className="rounded"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <div>
+                                <div className="font-medium">Promotions & Offers</div>
+                                <div className="text-sm text-gray-600">Receive special deals and discounts</div>
+                              </div>
+                              <input
+                                type="checkbox"
+                                checked={userProfile.notifications.promotions}
+                                onChange={(e) => setUserProfile({
+                                  ...userProfile,
+                                  notifications: {...userProfile.notifications, promotions: e.target.checked}
+                                })}
+                                className="rounded"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                              <div>
+                                <div className="font-medium">New Stores</div>
+                                <div className="text-sm text-gray-600">Get notified when new stores join your area</div>
+                              </div>
+                              <input
+                                type="checkbox"
+                                checked={userProfile.notifications.newStores}
+                                onChange={(e) => setUserProfile({
+                                  ...userProfile,
+                                  notifications: {...userProfile.notifications, newStores: e.target.checked}
+                                })}
+                                className="rounded"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex space-x-3">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setShowProfileModal(false)}
+                            className="flex-1 rounded-xl"
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={saveProfile}
+                            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-bold"
+                          >
+                            Save Changes
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Account Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Package className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-2xl text-gray-900 mb-1">
+                    {recentOrders.length}
+                  </h3>
+                  <p className="text-gray-600">Total Orders</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Award className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-2xl text-gray-900 mb-1">1,250</h3>
+                  <p className="text-gray-600">VyronaCoins</p>
+                </CardContent>
+              </Card>
+
+              <Card className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Heart className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-2xl text-gray-900 mb-1">
+                    {localStores.length}
+                  </h3>
+                  <p className="text-gray-600">Favorite Stores</p>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Quick Actions */}
+            <Card className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-xl mb-6">Quick Actions</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col space-y-2 rounded-xl border-blue-200 hover:bg-blue-50"
+                    onClick={() => setActiveTab("orders")}
+                  >
+                    <Package className="h-6 w-6 text-blue-600" />
+                    <span className="text-sm">My Orders</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col space-y-2 rounded-xl border-yellow-200 hover:bg-yellow-50"
+                    onClick={() => setActiveTab("rewards")}
+                  >
+                    <Award className="h-6 w-6 text-yellow-600" />
+                    <span className="text-sm">Rewards</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col space-y-2 rounded-xl border-green-200 hover:bg-green-50"
+                    onClick={() => setShowLocationModal(true)}
+                  >
+                    <MapPin className="h-6 w-6 text-green-600" />
+                    <span className="text-sm">Addresses</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-20 flex-col space-y-2 rounded-xl border-purple-200 hover:bg-purple-50"
+                  >
+                    <Phone className="h-6 w-6 text-purple-600" />
+                    <span className="text-sm">Support</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Account Settings */}
+            <Card className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-xl mb-6">Account Settings</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center space-x-3">
+                      <Shield className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <div className="font-medium">Privacy & Security</div>
+                        <div className="text-sm text-gray-600">Manage your account security settings</div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <ArrowLeft className="h-4 w-4 rotate-180" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center space-x-3">
+                      <CreditCard className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <div className="font-medium">Payment Methods</div>
+                        <div className="text-sm text-gray-600">Manage saved payment options</div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">
+                      <ArrowLeft className="h-4 w-4 rotate-180" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center space-x-3">
+                      <Bell className="h-5 w-5 text-gray-600" />
+                      <div>
+                        <div className="font-medium">Notification Preferences</div>
+                        <div className="text-sm text-gray-600">Control how you receive notifications</div>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setShowProfileModal(true)}>
+                      <ArrowLeft className="h-4 w-4 rotate-180" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
