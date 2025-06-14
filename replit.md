@@ -224,4 +224,7 @@ Changelog:
 - June 14, 2025: Created backend API endpoint for real-time tracking data including delivery partner location updates
 - June 14, 2025: Updated VyronaSpace orders section with "Track Order" buttons for live delivery tracking
 - June 14, 2025: Integrated Swiggy-style delivery experience with partner communication and real-time positioning
+- June 14, 2025: Completed OpenRouteService integration for live positioning instead of placeholder maps
+- June 14, 2025: Added interactive Leaflet maps with custom SVG icons and real-time delivery partner tracking
+- June 14, 2025: Implemented dynamic route visualization with polylines showing store→partner→customer path
 - June 14, 2025: Initial setup

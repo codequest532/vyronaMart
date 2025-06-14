@@ -101,9 +101,10 @@ export default function OrderTracking() {
 
   // Calculate route when delivery partner data is available
   useEffect(() => {
-    if (orderTracking && 'deliveryPartner' in orderTracking && orderTracking.deliveryPartner) {
+    if (orderTracking && typeof orderTracking === 'object' && 'deliveryPartner' in orderTracking && orderTracking.deliveryPartner) {
+      const partner = orderTracking.deliveryPartner as DeliveryPartner;
       const storeCoords: [number, number] = [12.9352, 77.6245]; // FreshMart Express
-      const deliveryCoords: [number, number] = [orderTracking.deliveryPartner.currentLat, orderTracking.deliveryPartner.currentLng];
+      const deliveryCoords: [number, number] = [partner.currentLat, partner.currentLng];
       const customerCoords: [number, number] = [12.9667, 77.6378]; // Customer location
       
       // Create route path
@@ -180,7 +181,7 @@ export default function OrderTracking() {
         </div>
 
         {/* Live Map Tracking - Only show when delivery partner is assigned */}
-        {tracking?.deliveryPartner && (
+        {tracking && 'deliveryPartner' in tracking && tracking.deliveryPartner && (
           <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-lg">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Live Tracking</h3>
@@ -207,18 +208,23 @@ export default function OrderTracking() {
                   </Marker>
                   
                   {/* Delivery Partner Location */}
-                  <Marker 
-                    position={[tracking.deliveryPartner.currentLat, tracking.deliveryPartner.currentLng]} 
-                    icon={deliveryIcon}
-                  >
-                    <Popup>
-                      <div className="text-center">
-                        <strong>{tracking.deliveryPartner.name}</strong><br/>
-                        <span className="text-sm text-gray-600">{tracking.deliveryPartner.vehicleType}</span><br/>
-                        <span className="text-xs text-gray-500">{tracking.deliveryPartner.vehicleNumber}</span>
-                      </div>
-                    </Popup>
-                  </Marker>
+                  {(() => {
+                    const partner = tracking.deliveryPartner as DeliveryPartner;
+                    return (
+                      <Marker 
+                        position={[partner.currentLat, partner.currentLng]} 
+                        icon={deliveryIcon}
+                      >
+                        <Popup>
+                          <div className="text-center">
+                            <strong>{partner.name}</strong><br/>
+                            <span className="text-sm text-gray-600">{partner.vehicleType}</span><br/>
+                            <span className="text-xs text-gray-500">{partner.vehicleNumber}</span>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    );
+                  })()}
                   
                   {/* Customer Location */}
                   <Marker position={[12.9667, 77.6378]} icon={customerIcon}>
