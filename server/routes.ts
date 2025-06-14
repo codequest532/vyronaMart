@@ -5006,35 +5006,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/orders/:orderId", async (req: Request, res: Response) => {
     try {
       const user = getAuthenticatedUser(req);
-      if (!user) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
+      
       const orderId = parseInt(req.params.orderId);
       if (isNaN(orderId)) {
         return res.status(400).json({ message: "Invalid order ID" });
       }
 
-      console.log(`Looking for order ${orderId} for user ${user.id}`);
+      console.log(`Looking for order ${orderId}, user: ${user ? user.id : 'not authenticated'}`);
 
+      // For unauthenticated users, still try to find the order but with limited access
+      let userId = user?.id;
+      
       // First, try to get VyronaHub order
       try {
-        const hubOrder = await db
-          .select({
-            id: orders.id,
-            customerId: orders.customerId,
-            totalAmount: orders.totalAmount,
-            paymentMethod: orders.paymentMethod,
-            status: orders.status,
-            shippingAddress: orders.shippingAddress,
-            trackingNumber: orders.trackingNumber,
-            createdAt: orders.createdAt,
-            orderType: sql<string>`'vyronahub'`.as('orderType')
-          })
-          .from(orders)
-          .where(and(eq(orders.id, orderId), eq(orders.customerId, user.id)))
-          .limit(1);
+        const hubOrderQuery = userId 
+          ? db.select({
+              id: orders.id,
+              customerId: orders.customerId,
+              totalAmount: orders.totalAmount,
+              paymentMethod: orders.paymentMethod,
+              status: orders.status,
+              shippingAddress: orders.shippingAddress,
+              trackingNumber: orders.trackingNumber,
+              createdAt: orders.createdAt,
+              orderType: sql<string>`'vyronahub'`.as('orderType')
+            })
+            .from(orders)
+            .where(and(eq(orders.id, orderId), eq(orders.customerId, userId)))
+            .limit(1)
+          : db.select({
+              id: orders.id,
+              customerId: orders.customerId,
+              totalAmount: orders.totalAmount,
+              paymentMethod: orders.paymentMethod,
+              status: orders.status,
+              shippingAddress: sql<object>`NULL`.as('shippingAddress'),
+              trackingNumber: orders.trackingNumber,
+              createdAt: orders.createdAt,
+              orderType: sql<string>`'vyronahub'`.as('orderType')
+            })
+            .from(orders)
+            .where(eq(orders.id, orderId))
+            .limit(1);
 
+        const hubOrder = await hubOrderQuery;
         console.log(`VyronaHub order check: found ${hubOrder.length} orders`);
         if (hubOrder.length > 0) {
           return res.json(hubOrder[0]);
@@ -5045,35 +5060,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If not VyronaHub, try Instagram orders
       try {
-        // First check if any Instagram orders exist for this ID
-        const allInstaOrders = await db
-          .select()
-          .from(instagramOrders)
-          .where(eq(instagramOrders.id, orderId))
-          .limit(1);
-        
-        console.log(`Instagram order check: found ${allInstaOrders.length} orders with ID ${orderId}`);
-        if (allInstaOrders.length > 0) {
-          console.log(`Instagram order buyer ID: ${allInstaOrders[0].buyerId}, user ID: ${user.id}`);
-        }
+        const instaOrderQuery = userId
+          ? db.select({
+              id: instagramOrders.id,
+              customerId: instagramOrders.buyerId,
+              totalAmount: instagramOrders.totalAmount,
+              paymentMethod: sql<string>`'online'`.as('paymentMethod'),
+              status: instagramOrders.status,
+              shippingAddress: instagramOrders.shippingAddress,
+              trackingNumber: sql<string>`NULL`.as('trackingNumber'),
+              createdAt: instagramOrders.createdAt,
+              orderType: sql<string>`'instagram'`.as('orderType')
+            })
+            .from(instagramOrders)
+            .where(and(eq(instagramOrders.id, orderId), eq(instagramOrders.buyerId, userId)))
+            .limit(1)
+          : db.select({
+              id: instagramOrders.id,
+              customerId: instagramOrders.buyerId,
+              totalAmount: instagramOrders.totalAmount,
+              paymentMethod: sql<string>`'online'`.as('paymentMethod'),
+              status: instagramOrders.status,
+              shippingAddress: sql<object>`NULL`.as('shippingAddress'),
+              trackingNumber: sql<string>`NULL`.as('trackingNumber'),
+              createdAt: instagramOrders.createdAt,
+              orderType: sql<string>`'instagram'`.as('orderType')
+            })
+            .from(instagramOrders)
+            .where(eq(instagramOrders.id, orderId))
+            .limit(1);
 
-        const instaOrder = await db
-          .select({
-            id: instagramOrders.id,
-            customerId: instagramOrders.buyerId,
-            totalAmount: instagramOrders.totalAmount,
-            paymentMethod: sql<string>`'online'`.as('paymentMethod'),
-            status: instagramOrders.status,
-            shippingAddress: instagramOrders.shippingAddress,
-            trackingNumber: sql<string>`NULL`.as('trackingNumber'),
-            createdAt: instagramOrders.createdAt,
-            orderType: sql<string>`'instagram'`.as('orderType')
-          })
-          .from(instagramOrders)
-          .where(and(eq(instagramOrders.id, orderId), eq(instagramOrders.buyerId, user.id)))
-          .limit(1);
-
-        console.log(`Instagram order with user filter: found ${instaOrder.length} orders`);
+        const instaOrder = await instaOrderQuery;
+        console.log(`Instagram order check: found ${instaOrder.length} orders`);
         if (instaOrder.length > 0) {
           return res.json(instaOrder[0]);
         }
@@ -5083,26 +5101,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If not Instagram, try VyronaRead orders (book loans)
       try {
-        const readOrder = await db
-          .select({
-            id: bookLoans.id,
-            customerId: bookLoans.userId,
-            totalAmount: sql<number>`CASE 
-              WHEN ${bookLoans.loanType} = 'rental' THEN ${bookLoans.rentalFee}
-              WHEN ${bookLoans.loanType} = 'purchase' THEN ${bookLoans.purchasePrice}
-              ELSE 0
-            END`.as('totalAmount'),
-            paymentMethod: sql<string>`'online'`.as('paymentMethod'),
-            status: bookLoans.status,
-            shippingAddress: sql<string>`NULL`.as('shippingAddress'),
-            trackingNumber: sql<string>`NULL`.as('trackingNumber'),
-            createdAt: bookLoans.createdAt,
-            orderType: sql<string>`'vyronaread'`.as('orderType')
-          })
-          .from(bookLoans)
-          .where(and(eq(bookLoans.id, orderId), eq(bookLoans.userId, user.id)))
-          .limit(1);
+        const readOrderQuery = userId
+          ? db.select({
+              id: bookLoans.id,
+              customerId: bookLoans.userId,
+              totalAmount: sql<number>`CASE 
+                WHEN ${bookLoans.loanType} = 'rental' THEN ${bookLoans.rentalFee}
+                WHEN ${bookLoans.loanType} = 'purchase' THEN ${bookLoans.purchasePrice}
+                ELSE 0
+              END`.as('totalAmount'),
+              paymentMethod: sql<string>`'online'`.as('paymentMethod'),
+              status: bookLoans.status,
+              shippingAddress: sql<object>`NULL`.as('shippingAddress'),
+              trackingNumber: sql<string>`NULL`.as('trackingNumber'),
+              createdAt: bookLoans.createdAt,
+              orderType: sql<string>`'vyronaread'`.as('orderType')
+            })
+            .from(bookLoans)
+            .where(and(eq(bookLoans.id, orderId), eq(bookLoans.userId, userId)))
+            .limit(1)
+          : db.select({
+              id: bookLoans.id,
+              customerId: bookLoans.userId,
+              totalAmount: sql<number>`CASE 
+                WHEN ${bookLoans.loanType} = 'rental' THEN ${bookLoans.rentalFee}
+                WHEN ${bookLoans.loanType} = 'purchase' THEN ${bookLoans.purchasePrice}
+                ELSE 0
+              END`.as('totalAmount'),
+              paymentMethod: sql<string>`'online'`.as('paymentMethod'),
+              status: bookLoans.status,
+              shippingAddress: sql<object>`NULL`.as('shippingAddress'),
+              trackingNumber: sql<string>`NULL`.as('trackingNumber'),
+              createdAt: bookLoans.createdAt,
+              orderType: sql<string>`'vyronaread'`.as('orderType')
+            })
+            .from(bookLoans)
+            .where(eq(bookLoans.id, orderId))
+            .limit(1);
 
+        const readOrder = await readOrderQuery;
         console.log(`VyronaRead order check: found ${readOrder.length} orders`);
         if (readOrder.length > 0) {
           return res.json(readOrder[0]);
@@ -5111,7 +5148,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("VyronaRead order error:", readError);
       }
 
-      console.log(`No order found with ID ${orderId} for user ${user.id}`);
+      console.log(`No order found with ID ${orderId}`);
       return res.status(404).json({ message: "Order not found" });
     } catch (error) {
       console.error("Error fetching order:", error);
