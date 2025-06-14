@@ -15,6 +15,7 @@ import SimpleCheckout from "@/pages/checkout-simple";
 
 import VyronaInstaShop from "@/pages/instashop";
 import InstagramCheckout from "@/pages/instagram-checkout";
+import OrderConfirmation from "@/pages/order-confirmation";
 import VyronaHub from "@/pages/vyronahub";
 import VyronaHubCheckout from "@/pages/vyronahub-checkout";
 import OrderSuccess from "@/pages/order-success";

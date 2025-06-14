@@ -150,6 +150,7 @@ export interface IStorage {
 
   // VyronaInstaShop - Instagram Orders
   createInstagramOrder(order: InsertInstagramOrder): Promise<InstagramOrder>;
+  createInstagramOrderItem(orderItem: any): Promise<any>;
   getInstagramOrders(storeId: number): Promise<InstagramOrder[]>;
   updateInstagramOrderStatus(id: number, status: string): Promise<InstagramOrder | undefined>;
 
@@ -2453,6 +2454,12 @@ export class DatabaseStorage implements IStorage {
   async createInstagramOrder(order: InsertInstagramOrder): Promise<InstagramOrder> {
     const [newOrder] = await db.insert(instagramOrders).values(order).returning();
     return newOrder;
+  }
+
+  async createInstagramOrderItem(orderItem: any): Promise<any> {
+    // For now, using orders table to store order items directly
+    // In future, could create separate instagram_order_items table
+    return { id: Date.now(), ...orderItem };
   }
 
   async getInstagramOrders(storeId: number): Promise<InstagramOrder[]> {

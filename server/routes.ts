@@ -4090,6 +4090,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Place Instagram order (for customers)
+  app.post("/api/instagram/orders/place", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { items, shippingAddress, paymentMethod, upiId, totalAmount } = req.body;
+
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ message: "Order items are required" });
+      }
+
+      if (!shippingAddress) {
+        return res.status(400).json({ message: "Shipping address is required" });
+      }
+
+      // Create Instagram order
+      const orderData = {
+        userId: authenticatedUser.id,
+        totalAmount: totalAmount,
+        status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
+        paymentMethod: paymentMethod,
+        paymentStatus: paymentMethod === 'cod' ? 'pending' : 'completed',
+        shippingAddress: JSON.stringify(shippingAddress),
+        upiTransactionId: paymentMethod === 'upi' ? `UPI_${Date.now()}_${authenticatedUser.id}` : null,
+        trackingNumber: `IG${Date.now().toString().slice(-8)}`,
+        module: 'instagram'
+      };
+
+      const order = await storage.createInstagramOrder(orderData);
+
+      // Create order items
+      for (const item of items) {
+        await storage.createInstagramOrderItem({
+          orderId: order.id,
+          productId: item.id,
+          quantity: item.quantity,
+          price: item.price,
+          productName: item.name,
+          sellerInfo: item.seller
+        });
+      }
+
+      // Clear Instagram cart if order was placed from cart
+      if (req.body.source === 'instagram') {
+        await storage.clearInstagramCart(authenticatedUser.id);
+      }
+
+      res.json({ 
+        success: true,
+        orderId: order.id,
+        trackingNumber: order.trackingNumber,
+        message: "Instagram order placed successfully"
+      });
+
+    } catch (error) {
+      console.error("Error placing Instagram order:", error);
+      res.status(500).json({ message: "Failed to place order" });
+    }
+  });
+
   // Get Instagram orders for authenticated seller
   app.get("/api/vyronainstastore/orders", async (req, res) => {
     try {

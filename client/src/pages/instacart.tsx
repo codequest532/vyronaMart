@@ -154,7 +154,7 @@ export default function InstaCart() {
       source: 'instagram'
     };
 
-    setLocation(`/checkout-simple?data=${encodeURIComponent(JSON.stringify(checkoutData))}`);
+    setLocation(`/instagram-checkout?data=${encodeURIComponent(JSON.stringify(checkoutData))}`);
   };
 
   if (isLoading) {
