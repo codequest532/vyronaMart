@@ -17,7 +17,16 @@ export default function OrderConfirmation() {
     totalAmount: number;
     paymentMethod: string;
     status: string;
-    shippingAddress: any;
+    shippingAddress: {
+      name: string;
+      addressLine1: string;
+      addressLine2?: string;
+      city: string;
+      state: string;
+      pincode: string;
+      phone: string;
+      email: string;
+    };
     trackingNumber: string | null;
     createdAt: string;
     orderType: string;
@@ -105,17 +114,17 @@ export default function OrderConfirmation() {
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Order ID:</span>
-              <span className="font-mono font-semibold">#{order?.id}</span>
+              <span className="font-mono font-semibold">#{order.id}</span>
             </div>
             
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Status:</span>
-              <Badge className={getStatusColor(order?.status || '')}>
-                {order?.status?.charAt(0).toUpperCase() + order?.status?.slice(1)}
+              <Badge className={getStatusColor(order.status)}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
               </Badge>
             </div>
 
-            {order?.trackingNumber && (
+            {order.trackingNumber && (
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 dark:text-gray-400">Tracking Number:</span>
                 <span className="font-mono font-semibold">{order.trackingNumber}</span>
@@ -124,17 +133,17 @@ export default function OrderConfirmation() {
 
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Total Amount:</span>
-              <span className="font-bold text-lg">{formatPrice(order?.totalAmount || 0)}</span>
+              <span className="font-bold text-lg">{formatPrice(order.totalAmount)}</span>
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Payment Method:</span>
-              <span className="capitalize">{order?.paymentMethod}</span>
+              <span className="capitalize">{order.paymentMethod}</span>
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">Order Date:</span>
-              <span>{order?.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}</span>
+              <span>{new Date(order.createdAt).toLocaleDateString()}</span>
             </div>
           </CardContent>
         </Card>
@@ -150,16 +159,12 @@ export default function OrderConfirmation() {
             </CardHeader>
             <CardContent>
               <div className="text-gray-700 dark:text-gray-300">
-                {typeof order.shippingAddress === 'string' ? (
-                  <pre className="whitespace-pre-wrap font-sans">
-                    {JSON.parse(order.shippingAddress).fullName}<br />
-                    {JSON.parse(order.shippingAddress).address}<br />
-                    {JSON.parse(order.shippingAddress).city}, {JSON.parse(order.shippingAddress).state} {JSON.parse(order.shippingAddress).pincode}<br />
-                    Phone: {JSON.parse(order.shippingAddress).phone}
-                  </pre>
-                ) : (
-                  <p>Address information not available</p>
-                )}
+                <p className="font-semibold">{order.shippingAddress.name}</p>
+                <p>{order.shippingAddress.addressLine1}</p>
+                {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
+                <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}</p>
+                <p className="mt-2">📞 {order.shippingAddress.phone}</p>
+                <p>✉️ {order.shippingAddress.email}</p>
               </div>
             </CardContent>
           </Card>
