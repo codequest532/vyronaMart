@@ -376,8 +376,7 @@ export default function VyronaSpace() {
   };
 
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
         <div className="container mx-auto px-4 py-8">
           {/* Header Navigation */}
           <div className="flex items-center justify-between mb-6">
@@ -1311,10 +1310,10 @@ export default function VyronaSpace() {
       {/* Edit Profile Modal */}
       <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>Edit Profile</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
             <div>
               <Label htmlFor="username">Full Name</Label>
               <Input
@@ -1455,6 +1454,6 @@ export default function VyronaSpace() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
