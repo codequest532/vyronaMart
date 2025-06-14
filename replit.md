@@ -132,6 +132,10 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Implemented automated email notifications for Instagram order status updates using Brevo service
+- June 14, 2025: Created comprehensive order status update email templates with dynamic content based on status
+- June 14, 2025: Enhanced backend order status update endpoint to trigger automated customer notifications
+- June 14, 2025: Updated frontend order status mutation to confirm email delivery to sellers
 - June 14, 2025: Enhanced Instagram seller dashboard order management modal with comprehensive details
 - June 14, 2025: Updated order status dropdown to include: Confirmed, Shipped, Out for Delivery, Delivered, Cancelled
 - June 14, 2025: Added detailed customer information, order items breakdown, and shipping address display in order modal

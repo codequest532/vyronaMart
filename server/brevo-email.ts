@@ -415,6 +415,156 @@ export function generateInstagramSellerNotificationEmail(data: InstagramOrderDat
   return { subject, htmlContent };
 }
 
+// Instagram Order Status Update Email Templates
+export function generateInstagramOrderStatusEmail(data: InstagramOrderData): { subject: string; htmlContent: string } {
+  const statusMessages = {
+    confirmed: {
+      title: "Order Confirmed",
+      message: "Great news! Your order has been confirmed and is being prepared for shipment.",
+      nextSteps: [
+        "Your seller is preparing your order",
+        "You'll receive another update when your order ships",
+        "Keep your phone handy for delivery updates"
+      ]
+    },
+    shipped: {
+      title: "Order Shipped",
+      message: "Your order is on its way! Your package has been shipped and is heading to your delivery address.",
+      nextSteps: [
+        "Track your package using the details below",
+        "Ensure someone is available at the delivery address",
+        "Contact us if you don't receive it within expected timeframe"
+      ]
+    },
+    out_for_delivery: {
+      title: "Out for Delivery",
+      message: "Exciting news! Your order is out for delivery and will arrive today.",
+      nextSteps: [
+        "Please be available at your delivery address",
+        "Keep your phone accessible for delivery calls",
+        "Have a valid ID ready if required"
+      ]
+    },
+    delivered: {
+      title: "Order Delivered",
+      message: "Your order has been successfully delivered! We hope you love your purchase.",
+      nextSteps: [
+        "Check your package and ensure everything is in order",
+        "Contact the seller if you have any issues",
+        "Consider leaving a review to help other customers"
+      ]
+    },
+    cancelled: {
+      title: "Order Cancelled",
+      message: "Your order has been cancelled. If you didn't request this cancellation, please contact the seller immediately.",
+      nextSteps: [
+        "Any payment will be refunded within 3-5 business days",
+        "Contact the seller for more information",
+        "Feel free to browse other products from this store"
+      ]
+    }
+  };
+
+  const statusInfo = statusMessages[data.orderStatus as keyof typeof statusMessages] || statusMessages.confirmed;
+  
+  const subject = `${statusInfo.title} - Order #${data.orderId} from ${data.storeName}`;
+  
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${statusInfo.title}</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4;">
+      <div style="max-width: 600px; margin: 0 auto; background: white; padding: 0; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 100%); 
+                    color: white; 
+                    padding: 30px; 
+                    text-align: center; 
+                    border-radius: 10px 10px 0 0;">
+          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">${statusInfo.title}</h1>
+          <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Order #${data.orderId}</p>
+        </div>
+        
+        <!-- Status Message -->
+        <div style="padding: 30px; text-align: center;">
+          <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h2 style="color: #2e7d32; margin-top: 0;">Order Status Update</h2>
+            <p style="font-size: 16px; color: #333; margin: 0;">${statusInfo.message}</p>
+          </div>
+        </div>
+        
+        <!-- Order Details -->
+        <div style="padding: 0 30px;">
+          <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
+            <h3 style="color: #333; margin-top: 0; border-bottom: 2px solid #e1306c; padding-bottom: 10px;">Order Information</h3>
+            <div style="display: grid; gap: 10px;">
+              <p style="margin: 5px 0;"><strong>Order ID:</strong> #${data.orderId}</p>
+              <p style="margin: 5px 0;"><strong>Store:</strong> ${data.storeName}</p>
+              <p style="margin: 5px 0;"><strong>Product:</strong> ${data.productName}</p>
+              <p style="margin: 5px 0;"><strong>Quantity:</strong> ${data.quantity}</p>
+              <p style="margin: 5px 0;"><strong>Total Amount:</strong> ₹${(data.totalAmount / 100).toLocaleString('en-IN')}</p>
+              <p style="margin: 5px 0;"><strong>Order Date:</strong> ${data.orderDate}</p>
+              <p style="margin: 5px 0;"><strong>Current Status:</strong> <span style="background: #e1306c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; text-transform: uppercase;">${data.orderStatus.replace('_', ' ')}</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Shipping Address -->
+        <div style="padding: 0 30px;">
+          <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
+            <h3 style="color: #333; margin-top: 0; border-bottom: 2px solid #e1306c; padding-bottom: 10px;">Delivery Address</h3>
+            <div style="color: #555; line-height: 1.8;">
+              <strong>${data.shippingAddress.name}</strong><br>
+              ${data.shippingAddress.addressLine1}<br>
+              ${data.shippingAddress.addressLine2 ? data.shippingAddress.addressLine2 + '<br>' : ''}
+              ${data.shippingAddress.city}, ${data.shippingAddress.state} ${data.shippingAddress.pincode}<br>
+              Phone: ${data.shippingAddress.phone}
+            </div>
+          </div>
+        </div>
+        
+        <!-- Next Steps -->
+        <div style="padding: 0 30px;">
+          <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+            <h3 style="color: #7b1fa2; margin-top: 0;">What's Next?</h3>
+            <ul style="color: #555; line-height: 1.8; padding-left: 20px;">
+              ${statusInfo.nextSteps.map(step => `<li>${step}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div style="padding: 0 30px 30px;">
+          <div style="background: #fff3e0; padding: 20px; border-radius: 8px; text-align: center;">
+            <h4 style="color: #f57c00; margin-top: 0;">Need Help?</h4>
+            <p style="margin: 10px 0; color: #555;">
+              Contact the seller: <strong>${data.sellerEmail}</strong><br>
+              Or reach out to our support team for assistance
+            </p>
+          </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background: #f5f5f5; padding: 20px; text-align: center; border-radius: 0 0 10px 10px; border-top: 1px solid #e0e0e0;">
+          <p style="margin: 0; color: #666; font-size: 14px;">
+            Thank you for shopping with ${data.storeName} on VyronaMart<br>
+            <a href="${process.env.FRONTEND_URL || 'https://vyronamart.com'}" style="color: #e1306c; text-decoration: none;">Visit VyronaMart</a>
+          </p>
+        </div>
+        
+      </div>
+    </body>
+    </html>
+  `;
+  
+  return { subject, htmlContent };
+}
+
 export function generateInstagramCustomerConfirmationEmail(data: any): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

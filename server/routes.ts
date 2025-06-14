@@ -15,7 +15,8 @@ import {
   generateOrderOutForDeliveryEmail, 
   generateOrderDeliveredEmail,
   generateInstagramSellerNotificationEmail,
-  generateInstagramCustomerConfirmationEmail 
+  generateInstagramCustomerConfirmationEmail,
+  generateInstagramOrderStatusEmail
 } from "./brevo-email";
 import { db, pool } from "./db";
 import Razorpay from "razorpay";
@@ -4383,13 +4384,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { orderId } = req.params;
       const { status, orderNotes } = req.body;
 
+      // Get current order details before updating
+      const currentOrder = await db
+        .select()
+        .from(instagramOrders)
+        .where(eq(instagramOrders.id, parseInt(orderId)))
+        .limit(1);
+
+      if (!currentOrder.length) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      const order = currentOrder[0];
+
+      // Get product details
+      const product = await storage.getInstagramProduct(order.productId);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      // Get store details
+      const store = await storage.getInstagramStoreById(order.storeId);
+      if (!store) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      // Get seller details
+      const seller = await storage.getUser(store.userId);
+      if (!seller) {
+        return res.status(404).json({ message: "Seller not found" });
+      }
+
+      // Update order status
       const updatedOrder = await storage.updateInstagramOrderStatus(
         parseInt(orderId), 
         status
       );
 
       if (!updatedOrder) {
-        return res.status(404).json({ message: "Order not found" });
+        return res.status(404).json({ message: "Failed to update order" });
+      }
+
+      // Send automated email notification to customer
+      try {
+        const emailData = {
+          orderId: updatedOrder.id,
+          sellerName: seller.username,
+          sellerEmail: seller.email,
+          storeName: store.storeName || store.instagramUsername,
+          customerName: updatedOrder.shippingAddress.name,
+          customerEmail: updatedOrder.shippingAddress.email,
+          customerPhone: updatedOrder.shippingAddress.phone,
+          productName: product.productName,
+          productPrice: product.price,
+          quantity: updatedOrder.quantity,
+          totalAmount: updatedOrder.totalAmount,
+          paymentMethod: updatedOrder.contactInfo?.paymentMethod || 'Not specified',
+          shippingAddress: updatedOrder.shippingAddress,
+          orderDate: updatedOrder.createdAt?.toLocaleDateString() || new Date().toLocaleDateString(),
+          orderStatus: status
+        };
+
+        const { subject, htmlContent } = generateInstagramOrderStatusEmail(emailData);
+        
+        await sendBrevoEmail({
+          to: updatedOrder.shippingAddress.email,
+          subject,
+          htmlContent
+        });
+
+        console.log(`Order status update email sent to: ${updatedOrder.shippingAddress.email}`);
+      } catch (emailError) {
+        console.error("Failed to send order status email:", emailError);
+        // Don't fail the order update if email fails
       }
 
       res.json({ success: true, order: updatedOrder });

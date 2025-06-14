@@ -253,12 +253,13 @@ export default function VyronaInstaStoreDashboard() {
 
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, data }: { orderId: number; data: OrderStatusFormData }) => {
-      return apiRequest("PUT", `/api/vyronainstastore/orders/${orderId}/status`, data);
+      const response = await apiRequest("PUT", `/api/vyronainstastore/orders/${orderId}/status`, data);
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast({
         title: "Order Updated",
-        description: "Order status has been updated successfully!",
+        description: "Order status updated successfully. Customer has been notified via email.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/vyronainstastore/orders"] });
       setSelectedOrder(null);
@@ -266,7 +267,7 @@ export default function VyronaInstaStoreDashboard() {
     onError: (error: any) => {
       toast({
         title: "Update Failed",
-        description: error.message,
+        description: error.message || "Failed to update order status",
         variant: "destructive",
       });
     },
