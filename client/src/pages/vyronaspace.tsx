@@ -376,6 +376,7 @@ export default function VyronaSpace() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
         <div className="container mx-auto px-4 py-8">
           {/* Header Navigation */}
@@ -1307,8 +1308,10 @@ export default function VyronaSpace() {
                   </div>
                 </div>
             </TabsContent>
+          </Tabs>
+        </div>
 
-          {/* Edit Profile Modal */}
+        {/* Edit Profile Modal */}
           <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
@@ -1455,7 +1458,7 @@ export default function VyronaSpace() {
           </DialogFooter>
         </DialogContent>
         </Dialog>
-      </Tabs>
     </div>
+    </>
   );
 }
