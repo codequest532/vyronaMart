@@ -4141,6 +4141,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const mainOrder = createdOrders[0]; // Use first order for response
 
+      // Send email notifications to sellers for each order
+      for (const order of createdOrders) {
+        try {
+          // Get store and seller information
+          const store = await storage.getInstagramStoreById(order.storeId);
+          if (!store) continue;
+
+          const seller = await storage.getUser(store.userId);
+          if (!seller || !seller.email) continue;
+
+          // Get product information
+          const product = await storage.getInstagramProduct(order.productId);
+          if (!product) continue;
+
+          // Get customer information
+          const customer = await storage.getUser(order.buyerId);
+          if (!customer) continue;
+
+          // Prepare email data for Instagram seller notification
+          const emailData = {
+            orderId: order.id,
+            sellerName: seller.username,
+            sellerEmail: seller.email,
+            storeName: store.storeName || store.instagramUsername,
+            customerName: customer.username,
+            customerEmail: customer.email,
+            customerPhone: shippingAddress.phone || customer.mobile || 'Not provided',
+            productName: product.productName,
+            productPrice: product.price, // Price in cents
+            quantity: order.quantity,
+            totalAmount: order.totalAmount, // Total in cents
+            paymentMethod: paymentMethod,
+            shippingAddress: {
+              name: shippingAddress.name,
+              addressLine1: shippingAddress.addressLine1,
+              addressLine2: shippingAddress.addressLine2 || '',
+              city: shippingAddress.city,
+              state: shippingAddress.state,
+              pincode: shippingAddress.pincode,
+              phone: shippingAddress.phone,
+              email: shippingAddress.email || customer.email
+            },
+            orderDate: new Date().toISOString(),
+            orderStatus: order.status
+          };
+
+          // Generate and send Instagram seller notification email
+          const { subject, htmlContent } = generateInstagramSellerNotificationEmail(emailData);
+          
+          await sendBrevoEmail({
+            to: seller.email,
+            subject,
+            htmlContent
+          });
+
+          console.log(`Instagram seller notification sent to ${seller.email} for order #${order.id}`);
+        } catch (emailError) {
+          console.error(`Failed to send seller notification for order #${order.id}:`, emailError);
+          // Don't fail the order if email fails
+        }
+      }
+
       // Clear Instagram cart if order was placed from cart
       if (req.body.source === 'instagram') {
         await storage.clearInstagramCart(authenticatedUser.id);

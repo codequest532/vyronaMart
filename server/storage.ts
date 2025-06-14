@@ -134,6 +134,7 @@ export interface IStorage {
   // VyronaInstaShop - Instagram Store Management
   createInstagramStore(storeData: InsertInstagramStore): Promise<InstagramStore>;
   getInstagramStoreByUserId(userId: number): Promise<InstagramStore | undefined>;
+  getInstagramStoreById(id: number): Promise<InstagramStore | undefined>;
   updateInstagramStore(id: number, updates: Partial<InsertInstagramStore>): Promise<InstagramStore | undefined>;
   connectInstagramStore(store: InsertInstagramStore): Promise<InstagramStore>;
   getUserInstagramStores(userId: number): Promise<InstagramStore[]>;
@@ -2501,6 +2502,11 @@ export class DatabaseStorage implements IStorage {
   // Additional Instagram store methods
   async getInstagramStoreByUserId(userId: number): Promise<InstagramStore | undefined> {
     const [store] = await db.select().from(instagramStores).where(eq(instagramStores.userId, userId));
+    return store;
+  }
+
+  async getInstagramStoreById(id: number): Promise<InstagramStore | undefined> {
+    const [store] = await db.select().from(instagramStores).where(eq(instagramStores.id, id));
     return store;
   }
 
