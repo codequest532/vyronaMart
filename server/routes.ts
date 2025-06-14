@@ -5011,14 +5011,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check Instagram orders
+      console.log(`Searching for Instagram order with ID: ${orderId}`);
       const instaOrders = await db
         .select()
         .from(instagramOrders)
         .where(eq(instagramOrders.id, orderId));
 
+      console.log(`Instagram orders found: ${instaOrders.length}`, instaOrders);
       if (instaOrders.length > 0) {
         const order = instaOrders[0];
-        return res.json({
+        const response = {
           id: order.id,
           customerId: order.buyerId,
           totalAmount: order.totalAmount,
@@ -5028,7 +5030,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           trackingNumber: null,
           createdAt: order.createdAt,
           orderType: 'instagram'
-        });
+        };
+        console.log(`Returning Instagram order:`, response);
+        return res.json(response);
       }
 
       // Check VyronaHub orders
