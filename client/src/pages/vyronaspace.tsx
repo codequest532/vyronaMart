@@ -366,7 +366,7 @@ export default function VyronaSpace() {
             {viewMode === "stores" ? (
               <>
                 {/* Search and Filters */}
-                <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 space-y-4 border border-emerald-200/50">
+                <div className="bg-orange-50/80 backdrop-blur-sm rounded-2xl p-6 space-y-4 border border-orange-200/50">
               <div className="flex space-x-4">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -377,7 +377,7 @@ export default function VyronaSpace() {
                     className="pl-10 rounded-xl border-0 bg-white/70"
                   />
                 </div>
-                <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
+                <Button variant="outline" className="rounded-xl border-orange-200 hover:bg-orange-50">
                   <Filter className="h-4 w-4 mr-2" />
                   Filters
                 </Button>
@@ -392,8 +392,8 @@ export default function VyronaSpace() {
                     onClick={() => setSelectedCategory(category)}
                     className={`whitespace-nowrap rounded-xl ${
                       selectedCategory === category 
-                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                        : 'border-emerald-200 hover:bg-emerald-50 text-emerald-700'
+                        ? 'bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white shadow-md' 
+                        : 'border-orange-200 hover:bg-orange-50 text-orange-700'
                     }`}
                   >
                     {category}
@@ -406,17 +406,17 @@ export default function VyronaSpace() {
             {getFilteredStores().length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {getFilteredStores().map(store => (
-                  <Card key={store.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all hover:border-emerald-200 hover:bg-emerald-50/30">
+                  <Card key={store.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-xl transition-all hover:border-orange-200 hover:bg-orange-50/30 group">
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4 mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
-                          <ShoppingBag className="h-6 w-6 text-emerald-600" />
+                        <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-pink-100 rounded-xl flex items-center justify-center group-hover:from-orange-200 group-hover:to-pink-200 transition-colors">
+                          <ShoppingBag className="h-6 w-6 text-orange-600" />
                         </div>
                         <div className="flex-1">
                           <h4 className="font-bold text-lg text-gray-900">{store.name}</h4>
                           <p className="text-sm text-gray-600">{store.description}</p>
                           <div className="flex items-center space-x-2 mt-2">
-                            <Badge className="bg-emerald-100 text-emerald-700 text-xs">
+                            <Badge className="bg-orange-100 text-orange-700 text-xs">
                               {store.category}
                             </Badge>
                             <Badge className={`${store.isOpen ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} text-xs`}>
@@ -467,7 +467,7 @@ export default function VyronaSpace() {
                             setSelectedStore(store);
                             setViewMode("store-products");
                           }}
-                          className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl disabled:opacity-50"
+                          className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 rounded-xl disabled:opacity-50 shadow-md"
                         >
                           <ShoppingCart className="h-4 w-4 mr-2" />
                           Browse Store
@@ -475,7 +475,7 @@ export default function VyronaSpace() {
                         <Button 
                           variant="outline"
                           size="sm"
-                          className="rounded-xl border-emerald-200 hover:bg-emerald-50"
+                          className="rounded-xl border-orange-200 hover:bg-orange-50"
                         >
                           <Phone className="h-4 w-4" />
                         </Button>
@@ -485,13 +485,13 @@ export default function VyronaSpace() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-16 bg-emerald-50/80 backdrop-blur-sm rounded-2xl border border-emerald-200/50">
-                <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <ShoppingBag className="h-8 w-8 text-emerald-600" />
+              <div className="text-center py-16 bg-orange-50/80 backdrop-blur-sm rounded-2xl border border-orange-200/50">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <ShoppingBag className="h-8 w-8 text-orange-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No stores found</h3>
                 <p className="text-gray-600 mb-4">Try adjusting your category filter or search terms</p>
-                <Button onClick={clearFilters} variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
+                <Button onClick={clearFilters} variant="outline" className="rounded-xl border-orange-200 hover:bg-orange-50">
                   Clear Filters
                 </Button>
               </div>

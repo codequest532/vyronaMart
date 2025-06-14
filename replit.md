@@ -234,4 +234,7 @@ Changelog:
 - June 14, 2025: Added wallet balance validation to ensure sufficient funds for subscription purchases
 - June 14, 2025: Updated subscription UI to display wallet balance information and prevent non-wallet payments
 - June 14, 2025: Modified backend order creation to force wallet payment method for all subscription orders
+- June 14, 2025: Redesigned VyronaSpace with customer-appealing warm color palette (orange, pink, purple) replacing green theme
+- June 14, 2025: Updated all UI elements including backgrounds, buttons, cards, tabs, and interactive components with vibrant orange-pink gradients
+- June 14, 2025: Enhanced visual appeal with improved shadows, hover effects, and gradient transitions throughout VyronaSpace interface
 - June 14, 2025: Initial setup
