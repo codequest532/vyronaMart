@@ -16,7 +16,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { 
   Instagram, Store, Package, TrendingUp, Eye, Heart, MessageCircle, Users, 
   DollarSign, BarChart3, Calendar, Zap, Link, Camera, Hash, ShoppingBag,
-  Clock, CheckCircle, XCircle, Truck, AlertTriangle, Plus, Edit, Trash2
+  Clock, CheckCircle, XCircle, Truck, AlertTriangle, Plus, Edit, Trash2, LogOut
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUserData } from "@/hooks/use-user-data";
@@ -494,6 +494,18 @@ export default function VyronaInstaStoreDashboard() {
               >
                 <Zap className="h-4 w-4 mr-2" />
                 {syncInstagramMutation.isPending ? "Syncing..." : "Sync Instagram"}
+              </Button>
+              <Button
+                onClick={() => {
+                  // Clear local storage and redirect to login
+                  localStorage.removeItem('user');
+                  setLocation('/login');
+                }}
+                variant="outline"
+                className="text-red-600 hover:text-red-700 hover:border-red-300"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
               <div className="flex gap-2">
                 <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
