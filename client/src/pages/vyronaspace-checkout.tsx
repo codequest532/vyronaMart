@@ -283,6 +283,21 @@ export default function VyronaSpaceCheckout() {
           </Button>
         </div>
 
+        {/* Subscription Mode Banner */}
+        {form.watch("enableSubscription") && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-orange-100 to-pink-100 border border-orange-200 rounded-2xl">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
+                <RefreshCw className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-orange-800">Subscription Order Setup</h3>
+                <p className="text-sm text-orange-700">Setting up your recurring delivery with VyronaWallet payment</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-4">

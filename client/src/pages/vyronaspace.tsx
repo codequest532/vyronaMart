@@ -10,7 +10,7 @@ import {
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
   Star, ShoppingCart, ShoppingBag, Plus, Minus, Truck, Phone,
   MessageCircle, RefreshCw, Trophy, Target, Zap, Gift, ArrowLeft,
-  Calendar, Repeat, Camera, User as UserIcon, Store, Bell
+  Calendar, Repeat, Camera, User as UserIcon, Store, Bell, X
 } from "lucide-react";
 
 interface Store {
@@ -1148,6 +1148,12 @@ export default function VyronaSpace() {
               if (cart.length > 0) {
                 // Save cart to sessionStorage for checkout page
                 sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
+                
+                // Set subscription mode flag if in subscription mode
+                if (isSubscriptionMode) {
+                  sessionStorage.setItem('subscription-mode', 'true');
+                }
+                
                 setLocation('/vyronaspace-checkout');
               }
             }}
@@ -1184,6 +1190,12 @@ export default function VyronaSpace() {
                   onClick={() => {
                     // Save cart to sessionStorage for checkout page
                     sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
+                    
+                    // Set subscription mode flag if in subscription mode
+                    if (isSubscriptionMode) {
+                      sessionStorage.setItem('subscription-mode', 'true');
+                    }
+                    
                     setLocation('/vyronaspace-checkout');
                   }}
                   className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
