@@ -227,4 +227,7 @@ Changelog:
 - June 14, 2025: Completed OpenRouteService integration for live positioning instead of placeholder maps
 - June 14, 2025: Added interactive Leaflet maps with custom SVG icons and real-time delivery partner tracking
 - June 14, 2025: Implemented dynamic route visualization with polylines showing store→partner→customer path
+- June 14, 2025: Enhanced OpenRouteService integration with real-time route calculation and accurate ETA estimates
+- June 14, 2025: Added route distance and duration display showing kilometers and minutes from live API data
+- June 14, 2025: Completed professional delivery tracking with authentic Swiggy-style experience using OpenRouteService API
 - June 14, 2025: Initial setup
