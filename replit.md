@@ -132,6 +132,9 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Fixed pricing inconsistency between Instagram seller dashboard and customer shop (now using consistent database pricing in cents)
+- June 14, 2025: Enhanced Instagram products API with store information and proper JOIN queries for customer browsing
+- June 14, 2025: Removed fallback mock data from Instagram shop to ensure authentic pricing display
 - June 14, 2025: Fixed Instagram cart authentication error handling with automatic login redirect
 - June 14, 2025: Optimized Instagram shop to cart navigation using client-side routing (eliminated 92-105ms delay)
 - June 14, 2025: Resolved Instagram cart loading delays (95-120ms → <2ms response time)
