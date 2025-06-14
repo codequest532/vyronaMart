@@ -373,7 +373,7 @@ export default function InstaCart() {
                   {shipping > 0 && (
                     <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
                       <Truck className="h-4 w-4 inline mr-2" />
-                      Add ₹{Math.round(500 - subtotal} more for free shipping
+                      Add ₹{Math.round(500 - subtotal)} more for free shipping
                     </div>
                   )}
 
