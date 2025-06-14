@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function VyronaInstaShop() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
@@ -350,7 +352,7 @@ export default function VyronaInstaShop() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.location.href = '/instacart'}
+                onClick={() => setLocation('/instacart')}
                 className="relative text-pink-600 border-pink-300 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-400"
               >
                 <ShoppingBag className="h-4 w-4 mr-2" />
