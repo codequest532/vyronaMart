@@ -1240,7 +1240,7 @@ export default function VyronaSpace() {
       </div>
 
       {/* Fixed Position Quick Cart Button */}
-        <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50">
           <Button 
             onClick={() => {
               if (cart.length > 0) {
@@ -1270,10 +1270,10 @@ export default function VyronaSpace() {
               </Badge>
             )}
           </Button>
-        </div>
+      </div>
 
-        {/* Cart Summary (appears when items are added) */}
-        {cart.length > 0 && (
+      {/* Cart Summary (appears when items are added) */}
+      {cart.length > 0 && (
           <div className="fixed bottom-4 left-4 right-20 bg-emerald-50 rounded-2xl shadow-xl border border-emerald-200 p-4 z-40">
             <div className="flex items-center justify-between">
               <div>
@@ -1305,9 +1305,10 @@ export default function VyronaSpace() {
           </div>
         )}
       </div>
+    </div>
 
-      {/* Edit Profile Modal */}
-      <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+    {/* Edit Profile Modal */}
+    <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
