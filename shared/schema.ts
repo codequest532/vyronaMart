@@ -156,6 +156,14 @@ export const orders = pgTable("orders", {
   status: text("status").notNull().default("pending"), // 'pending', 'delivered', 'cancelled'
   module: text("module").notNull(),
   metadata: jsonb("metadata"), // order details, delivery info, etc.
+  // Subscription fields
+  isSubscription: boolean("is_subscription").default(false),
+  subscriptionFrequency: text("subscription_frequency"), // 'daily', 'weekly'
+  subscriptionDayOfWeek: text("subscription_day_of_week"), // for weekly subscriptions
+  subscriptionTime: text("subscription_time"), // preferred delivery time
+  subscriptionStartDate: timestamp("subscription_start_date"),
+  subscriptionActive: boolean("subscription_active").default(true),
+  nextDeliveryDate: timestamp("next_delivery_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -620,7 +620,7 @@ export default function VyronaSpaceCheckout() {
                               </p>
                               {form.getValues("subscriptionStartDate") && (
                                 <p className="text-sm text-emerald-700">
-                                  Starting: {new Date(form.getValues("subscriptionStartDate") || "").toLocaleDateString()}
+                                  Starting: {new Date(form.getValues("subscriptionStartDate")!).toLocaleDateString()}
                                 </p>
                               )}
                               <div className="flex items-center gap-2 text-xs text-emerald-600 mt-2">
