@@ -308,31 +308,6 @@ export default function VyronaSpace() {
               Back to Home
             </Button>
           </Link>
-          
-          {/* Quick Cart Button */}
-          <Button 
-            onClick={() => {
-              if (cart.length > 0) {
-                // Save cart to sessionStorage for checkout page
-                sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
-                setLocation('/vyronaspace-checkout');
-              }
-            }}
-            disabled={cart.length === 0}
-            className={`relative rounded-xl ${
-              cart.length > 0 
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700' 
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Cart
-            {cart.length > 0 && (
-              <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-5 flex items-center justify-center">
-                {getCartItemCount()}
-              </Badge>
-            )}
-          </Button>
         </div>
 
         {/* Header */}
@@ -1111,9 +1086,36 @@ export default function VyronaSpace() {
 
 
 
-        {/* Cart Summary */}
+        {/* Fixed Position Quick Cart Button */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button 
+            onClick={() => {
+              if (cart.length > 0) {
+                // Save cart to sessionStorage for checkout page
+                sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
+                setLocation('/vyronaspace-checkout');
+              }
+            }}
+            disabled={cart.length === 0}
+            className={`relative h-14 w-14 rounded-full shadow-2xl border-2 border-white transition-all duration-300 hover:scale-105 ${
+              cart.length > 0 
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white' 
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed hover:scale-100'
+            }`}
+            title={cart.length > 0 ? `${getCartItemCount()} items in cart - ₹${getCartTotal()}` : 'Cart is empty'}
+          >
+            <ShoppingCart className="h-6 w-6" />
+            {cart.length > 0 && (
+              <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-2 py-1 rounded-full min-w-[1.5rem] h-6 flex items-center justify-center font-bold shadow-lg">
+                {getCartItemCount()}
+              </Badge>
+            )}
+          </Button>
+        </div>
+
+        {/* Cart Summary (appears when items are added) */}
         {cart.length > 0 && (
-          <div className="fixed bottom-4 left-4 right-4 bg-emerald-50 rounded-2xl shadow-xl border border-emerald-200 p-4 z-50">
+          <div className="fixed bottom-4 left-4 right-20 bg-emerald-50 rounded-2xl shadow-xl border border-emerald-200 p-4 z-40">
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-bold text-lg text-emerald-900">₹{getCartTotal()}</div>
