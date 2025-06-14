@@ -91,7 +91,7 @@ export default function VyronaSpace() {
       rating: 4.8,
       reviewCount: 324,
       distance: "0.3 km",
-      estimatedDelivery: "15-20 min",
+      estimatedDelivery: "8 min",
       isOpen: true,
       badges: ["verified", "top_rated", "fast_delivery"],
       minimumOrder: 100,
@@ -110,7 +110,7 @@ export default function VyronaSpace() {
       rating: 4.9,
       reviewCount: 156,
       distance: "0.5 km",
-      estimatedDelivery: "10-15 min",
+      estimatedDelivery: "6 min",
       isOpen: true,
       badges: ["verified", "24x7", "prescription"],
       minimumOrder: 50,
@@ -129,7 +129,7 @@ export default function VyronaSpace() {
       rating: 4.6,
       reviewCount: 89,
       distance: "0.8 km",
-      estimatedDelivery: "25-30 min",
+      estimatedDelivery: "15 min",
       isOpen: true,
       badges: ["verified", "trending", "premium"],
       minimumOrder: 500,
@@ -540,7 +540,7 @@ export default function VyronaSpace() {
               </Button>
               <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0">
                 <Zap className="h-3 w-3 mr-1" />
-                15-30 min delivery
+                5-15 min delivery
               </Badge>
             </div>
           </div>
@@ -556,7 +556,7 @@ export default function VyronaSpace() {
             <p className="text-xl opacity-90 mb-6">Discover nearby stores, order instantly, and get delivery in minutes</p>
             <div className="flex justify-center space-x-8 text-center">
               <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 min-w-[120px]">
-                <div className="text-2xl font-bold">15-30</div>
+                <div className="text-2xl font-bold">5-15</div>
                 <div className="text-sm opacity-80">Min Delivery</div>
               </div>
               <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 min-w-[120px]">
@@ -630,16 +630,16 @@ export default function VyronaSpace() {
 
                     {/* Delivery Time Filter */}
                     <div className="space-y-3">
-                      <label className="text-sm font-medium text-gray-700">Delivery Time</label>
+                      <label className="text-sm font-medium text-gray-700">Quick Delivery</label>
                       <select
                         value={filters.deliveryTime}
                         onChange={(e) => setFilters({...filters, deliveryTime: e.target.value})}
                         className="w-full p-3 border border-gray-300 rounded-xl"
                       >
                         <option value="all">Any delivery time</option>
+                        <option value="5">Within 5 minutes</option>
+                        <option value="10">Within 10 minutes</option>
                         <option value="15">Within 15 minutes</option>
-                        <option value="30">Within 30 minutes</option>
-                        <option value="60">Within 1 hour</option>
                       </select>
                     </div>
 
