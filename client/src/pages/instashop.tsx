@@ -552,51 +552,84 @@ export default function VyronaInstaShop() {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex items-center space-x-2">
-                      <Button 
-                        size="sm" 
-                        className="flex-1 bg-purple-600 hover:bg-purple-700"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCartMutation.mutate({
-                            productId: product.id,
-                            quantity: 1,
-                            price: product.price
-                          });
-                        }}
-                        disabled={addToCartMutation.isPending}
-                      >
-                        <ShoppingCart className="mr-1 h-3 w-3" />
-                        {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="border-green-200 text-green-600 hover:bg-green-50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startChat({
-                            name: product.seller,
-                            id: product.sellerId || `seller_${product.id}`,
-                            products: [product],
-                            avatar: product.sellerAvatar,
-                            verified: product.verified
-                          });
-                        }}
-                      >
-                        <MessageCircle className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="border-purple-200 text-purple-600 hover:bg-purple-50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedProduct(product);
-                        }}
-                      >
-                        <Eye className="h-3 w-3" />
-                      </Button>
+                    <div className="space-y-2">
+                      {/* Main Action Buttons */}
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          size="sm" 
+                          className="flex-1 bg-purple-600 hover:bg-purple-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addToCartMutation.mutate({
+                              productId: product.id,
+                              quantity: 1,
+                              price: product.price
+                            });
+                          }}
+                          disabled={addToCartMutation.isPending}
+                        >
+                          <ShoppingCart className="mr-1 h-3 w-3" />
+                          {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Create checkout URL with product details
+                            const checkoutData = {
+                              items: [{
+                                id: product.id,
+                                name: product.name || product.productName,
+                                price: product.price,
+                                quantity: 1,
+                                image: product.imageUrl,
+                                seller: product.seller
+                              }],
+                              total: product.price,
+                              source: 'instagram'
+                            };
+                            // Navigate to checkout with product data
+                            window.location.href = `/checkout-simple?data=${encodeURIComponent(JSON.stringify(checkoutData))}`;
+                          }}
+                        >
+                          <CreditCard className="mr-1 h-3 w-3" />
+                          Buy Now
+                        </Button>
+                      </div>
+                      {/* Secondary Action Buttons */}
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1 border-green-200 text-green-600 hover:bg-green-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            startChat({
+                              name: product.seller,
+                              id: product.sellerId || `seller_${product.id}`,
+                              products: [product],
+                              avatar: product.sellerAvatar,
+                              verified: product.verified
+                            });
+                          }}
+                        >
+                          <MessageCircle className="mr-1 h-3 w-3" />
+                          Chat
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex-1 border-purple-200 text-purple-600 hover:bg-purple-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProduct(product);
+                          }}
+                        >
+                          <Eye className="mr-1 h-3 w-3" />
+                          View
+                        </Button>
+                      </div>
                     </div>
 
                     {/* Seller Info */}
@@ -783,22 +816,47 @@ export default function VyronaInstaShop() {
 
                 {/* Actions */}
                 <div className="space-y-4">
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-purple-600 hover:bg-purple-700 h-14 text-lg"
-                    onClick={() => {
-                      addToCartMutation.mutate({
-                        productId: selectedProduct.id,
-                        quantity: 1,
-                        price: selectedProduct.price
-                      });
-                      setSelectedProduct(null);
-                    }}
-                    disabled={addToCartMutation.isPending}
-                  >
-                    <ShoppingCart className="mr-3 h-5 w-5" />
-                    {addToCartMutation.isPending ? "Adding to Cart..." : `Add to Cart - ₹${selectedProduct.price}`}
-                  </Button>
+                  {/* Primary Action Buttons */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button 
+                      size="lg" 
+                      className="bg-purple-600 hover:bg-purple-700 h-14 text-lg"
+                      onClick={() => {
+                        addToCartMutation.mutate({
+                          productId: selectedProduct.id,
+                          quantity: 1,
+                          price: selectedProduct.price
+                        });
+                        setSelectedProduct(null);
+                      }}
+                      disabled={addToCartMutation.isPending}
+                    >
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
+                    </Button>
+                    <Button 
+                      size="lg" 
+                      className="bg-green-600 hover:bg-green-700 h-14 text-lg text-white"
+                      onClick={() => {
+                        const checkoutData = {
+                          items: [{
+                            id: selectedProduct.id,
+                            name: selectedProduct.name || selectedProduct.productName,
+                            price: selectedProduct.price,
+                            quantity: 1,
+                            image: selectedProduct.imageUrl,
+                            seller: selectedProduct.seller
+                          }],
+                          total: selectedProduct.price,
+                          source: 'instagram'
+                        };
+                        window.location.href = `/checkout-simple?data=${encodeURIComponent(JSON.stringify(checkoutData))}`;
+                      }}
+                    >
+                      <CreditCard className="mr-2 h-5 w-5" />
+                      Buy Now
+                    </Button>
+                  </div>
                   
                   <div className="grid grid-cols-2 gap-3">
                     <Button 
@@ -915,13 +973,36 @@ export default function VyronaInstaShop() {
                           <p className="text-xs font-medium text-gray-900 truncate">{product.name}</p>
                           <p className="text-xs text-purple-600">₹{product.price}</p>
                         </div>
-                        <Button
-                          size="sm"
-                          className="h-6 px-2 text-xs bg-purple-600 hover:bg-purple-700"
-                          onClick={() => addToCartFromChat(product)}
-                        >
-                          <ShoppingBag className="h-3 w-3" />
-                        </Button>
+                        <div className="flex space-x-1">
+                          <Button
+                            size="sm"
+                            className="h-6 px-2 text-xs bg-purple-600 hover:bg-purple-700"
+                            onClick={() => addToCartFromChat(product)}
+                          >
+                            <ShoppingBag className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700"
+                            onClick={() => {
+                              const checkoutData = {
+                                items: [{
+                                  id: product.id,
+                                  name: product.name || product.productName,
+                                  price: product.price,
+                                  quantity: 1,
+                                  image: product.imageUrl,
+                                  seller: product.seller
+                                }],
+                                total: product.price,
+                                source: 'instagram'
+                              };
+                              window.location.href = `/checkout-simple?data=${encodeURIComponent(JSON.stringify(checkoutData))}`;
+                            }}
+                          >
+                            <CreditCard className="h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
