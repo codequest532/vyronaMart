@@ -134,6 +134,7 @@ Preferred communication style: Simple, everyday language.
 Changelog:
 - June 14, 2025: Fixed data integrity issue where Instagram products remained visible after seller deletion
 - June 14, 2025: Added complete Instagram data cleanup to seller deletion process (stores, products, orders, analytics)
+- June 14, 2025: Manually cleaned up orphaned Instagram store and 8 products from deleted seller
 - June 14, 2025: Secured Instagram seller dashboard with complete data isolation between sellers
 - June 14, 2025: Added ownership verification to order status updates preventing cross-seller access
 - June 14, 2025: Enhanced seller authentication checks across all Instagram endpoints
