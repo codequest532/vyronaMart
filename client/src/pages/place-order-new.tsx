@@ -395,8 +395,8 @@ export default function PlaceOrderNew() {
                 ...target,
                 currentAmount: target.currentAmount + amount,
                 remainingAmount: target.remainingAmount - amount,
-                progress: ((target.currentAmount + amount / target.targetAmount) * 100,
-                isComplete: (target.currentAmount + amount >= target.targetAmount
+                progress: ((target.currentAmount + amount) / target.targetAmount) * 100,
+                isComplete: (target.currentAmount + amount >= target.targetAmount)
               }
             : target
         );
@@ -703,10 +703,10 @@ export default function PlaceOrderNew() {
                 {/* Main Progress Display */}
                 <div className="text-center space-y-3">
                   <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    ₹{checkoutState.totalContributed)}
+                    ₹{checkoutState.totalContributed}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    of ₹{checkoutState.totalCartValue)} contributed
+                    of ₹{checkoutState.totalCartValue} contributed
                   </div>
                   <Progress 
                     value={(checkoutState.totalContributed / checkoutState.totalCartValue) * 100} 
@@ -776,7 +776,7 @@ export default function PlaceOrderNew() {
                             <div>
                               <h3 className="font-semibold">{item.name}</h3>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Quantity: {item.quantity} • Target: ₹{item.targetAmount)}
+                                Quantity: {item.quantity} • Target: ₹{item.targetAmount}
                               </p>
                             </div>
                             <div className="text-right">

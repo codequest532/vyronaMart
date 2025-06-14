@@ -1836,7 +1836,7 @@ export default function VyronaSocial() {
                                   setSelectedFile(file);
                                   toast({
                                     title: "File Selected",
-                                    description: `${file.name} (${(file.size / 1024 / 1024))}MB)`,
+                                    description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
                                   });
                                 }
                               };
