@@ -1078,7 +1078,7 @@ export default function Home() {
                           <div className="flex items-center space-x-2 mt-2">
                             <Badge variant="secondary">
                               <BookOpen className="h-3 w-3 mr-1" />
-                              {selectedLibrary.totalBooks.toLocaleString())} Books
+                              {selectedLibrary.totalBooks.toLocaleString()} Books
                             </Badge>
                             <Badge variant="outline" className="text-green-600">
                               <Heart className="h-3 w-3 mr-1" />
@@ -1409,11 +1409,11 @@ export default function Home() {
                       <div className="flex items-center space-x-4 mt-2">
                         <div className="flex items-center space-x-1">
                           <Coins className="text-amber-300 h-4 w-4" />
-                          <span className="font-semibold">{(user.vyronaCoins || 0).toLocaleString())}</span>
+                          <span className="font-semibold">{(user.vyronaCoins || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Star className="text-yellow-300 h-4 w-4" />
-                          <span className="font-semibold">{(user.xp || 0).toLocaleString())} XP</span>
+                          <span className="font-semibold">{(user.xp || 0).toLocaleString()} XP</span>
                         </div>
                       </div>
                     </div>
@@ -1698,7 +1698,7 @@ export default function Home() {
                             <p className={`font-semibold ${
                               transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount}
+                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount)}
                             </p>
                             <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
                               {transaction.status}
