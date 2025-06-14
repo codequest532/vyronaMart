@@ -414,3 +414,90 @@ export function generateInstagramSellerNotificationEmail(data: InstagramOrderDat
   
   return { subject, htmlContent };
 }
+
+export function generateInstagramCustomerConfirmationEmail(data: any): string {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">Order Confirmed!</h1>
+        <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Thank you for your Instagram order #${data.orderId}</p>
+      </div>
+      
+      <div style="padding: 30px; background: #f8f9fa;">
+        <h2 style="color: #333; margin-top: 0;">Hello ${data.customerName},</h2>
+        <p style="color: #555; line-height: 1.6;">
+          Your order has been confirmed and is being processed. Here are your order details:
+        </p>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #833ab4;">
+          <h3 style="color: #333; margin-top: 0;">Order Summary</h3>
+          <p><strong>Order ID:</strong> #${data.orderId}</p>
+          <p><strong>Order Date:</strong> ${new Date(data.orderDate).toLocaleDateString('en-IN', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
+          <p><strong>Payment Method:</strong> ${data.paymentMethod.toUpperCase()}</p>
+          <p><strong>Tracking Number:</strong> ${data.trackingNumber}</p>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #333; margin-top: 0;">Items Ordered</h3>
+          ${data.items.map((item: any) => `
+            <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <p style="margin: 0; font-weight: bold; color: #333;">${item.productName}</p>
+                  <p style="margin: 5px 0; color: #666; font-size: 14px;">Qty: ${item.quantity} × ₹${item.price}</p>
+                </div>
+                <div style="text-align: right;">
+                  <p style="margin: 0; font-weight: bold; color: #2e7d32;">₹${item.total}</p>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+          
+          <div style="border-top: 2px solid #833ab4; padding-top: 15px; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <p style="margin: 0; font-size: 18px; font-weight: bold; color: #333;">Total Amount:</p>
+              <p style="margin: 0; font-size: 20px; font-weight: bold; color: #2e7d32;">₹${data.totalAmount}</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #333; margin-top: 0;">Shipping Address</h3>
+          <p style="color: #555; margin: 5px 0; line-height: 1.6;">
+            ${data.shippingAddress.name}<br>
+            ${data.shippingAddress.addressLine1}<br>
+            ${data.shippingAddress.addressLine2 ? data.shippingAddress.addressLine2 + '<br>' : ''}
+            ${data.shippingAddress.city}, ${data.shippingAddress.state} - ${data.shippingAddress.pincode}<br>
+            Phone: ${data.shippingAddress.phone}
+          </p>
+        </div>
+
+        <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+          <h4 style="color: #1976d2; margin-top: 0;">What happens next?</h4>
+          <p style="color: #555; margin-bottom: 0;">
+            • Your order is being prepared by the seller<br>
+            • You'll receive tracking updates via email<br>
+            • Estimated delivery: 3-7 business days
+          </p>
+        </div>
+        
+        <p style="color: #555; line-height: 1.6;">
+          If you have any questions about your order, please contact our support team with your order number.
+        </p>
+        
+        <div style="text-align: center; margin-top: 30px;">
+          <p style="color: #888; font-size: 14px;">
+            Thank you for shopping with VyronaInstaStore!<br>
+            This is an automated message, please do not reply to this email.
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+}

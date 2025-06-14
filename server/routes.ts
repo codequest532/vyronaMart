@@ -14,7 +14,8 @@ import {
   generateOrderShippedEmail, 
   generateOrderOutForDeliveryEmail, 
   generateOrderDeliveredEmail,
-  generateInstagramSellerNotificationEmail 
+  generateInstagramSellerNotificationEmail,
+  generateInstagramCustomerConfirmationEmail 
 } from "./brevo-email";
 import { db, pool } from "./db";
 import Razorpay from "razorpay";
@@ -4237,6 +4238,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error(`Failed to send seller notification for order #${order.id}:`, emailError);
           // Don't fail the order if email fails
         }
+      }
+
+      // Send customer confirmation email
+      try {
+        const customer = await storage.getUser(authenticatedUser.id);
+        if (customer && (shippingAddress.email || customer.email)) {
+          // Prepare customer email data
+          const customerEmailData = {
+            orderId: mainOrder.id,
+            customerName: customer.username,
+            customerEmail: shippingAddress.email || customer.email,
+            items: [],
+            totalAmount: createdOrders.reduce((sum, order) => sum + order.totalAmount, 0),
+            paymentMethod: paymentMethod,
+            shippingAddress: {
+              name: shippingAddress.name,
+              addressLine1: shippingAddress.addressLine1,
+              addressLine2: shippingAddress.addressLine2 || '',
+              city: shippingAddress.city,
+              state: shippingAddress.state,
+              pincode: shippingAddress.pincode,
+              phone: shippingAddress.phone
+            },
+            orderDate: new Date().toISOString(),
+            trackingNumber: `IG${Date.now().toString().slice(-8)}`
+          };
+
+          // Extract items from orderNotes for multi-item orders
+          for (const order of createdOrders) {
+            try {
+              if (order.orderNotes && order.orderNotes.includes('Multi-item Instagram order')) {
+                const itemsMatch = order.orderNotes.match(/Items: (\[.*\])/);
+                if (itemsMatch) {
+                  const items = JSON.parse(itemsMatch[1]);
+                  customerEmailData.items.push(...items);
+                } else {
+                  // Fallback for single item
+                  const product = await storage.getInstagramProduct(order.productId);
+                  customerEmailData.items.push({
+                    productName: product?.productName || 'Product',
+                    quantity: order.quantity,
+                    price: Math.round(order.totalAmount / order.quantity),
+                    total: order.totalAmount
+                  });
+                }
+              } else {
+                // Single item order
+                const product = await storage.getInstagramProduct(order.productId);
+                customerEmailData.items.push({
+                  productName: product?.productName || 'Product',
+                  quantity: order.quantity,
+                  price: Math.round(order.totalAmount / order.quantity),
+                  total: order.totalAmount
+                });
+              }
+            } catch (parseError) {
+              console.error('Error parsing order items:', parseError);
+              // Fallback
+              const product = await storage.getInstagramProduct(order.productId);
+              customerEmailData.items.push({
+                productName: product?.productName || 'Product',
+                quantity: order.quantity,
+                price: Math.round(order.totalAmount / order.quantity),
+                total: order.totalAmount
+              });
+            }
+          }
+
+          // Generate customer confirmation email
+          const customerEmailSubject = `Order Confirmation #${mainOrder.id} - VyronaInstaStore`;
+          const customerEmailContent = generateInstagramCustomerConfirmationEmail(customerEmailData);
+
+          await sendBrevoEmail({
+            to: shippingAddress.email || customer.email,
+            subject: customerEmailSubject,
+            htmlContent: customerEmailContent
+          });
+
+          console.log(`Instagram order confirmation sent to ${shippingAddress.email || customer.email} for order #${mainOrder.id}`);
+        }
+      } catch (emailError) {
+        console.error(`Failed to send Instagram customer confirmation for order #${mainOrder.id}:`, emailError);
       }
 
       // Clear Instagram cart if order was placed from cart

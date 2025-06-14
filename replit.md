@@ -132,6 +132,9 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Added customer confirmation emails for Instagram orders using Brevo email service
+- June 14, 2025: Enhanced email system to send order confirmations to customer's shipping address email
+- June 14, 2025: Created Instagram customer confirmation email template with order details and tracking info
 - June 14, 2025: Fixed Instagram cart orders to consolidate multiple items into single orders instead of creating separate orders per item
 - June 14, 2025: Updated seller dashboard to properly display multi-item orders with consolidated item counts and totals
 - June 14, 2025: Modified order placement logic to group cart items by store and create one order per store
