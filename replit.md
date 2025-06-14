@@ -230,4 +230,8 @@ Changelog:
 - June 14, 2025: Enhanced OpenRouteService integration with real-time route calculation and accurate ETA estimates
 - June 14, 2025: Added route distance and duration display showing kilometers and minutes from live API data
 - June 14, 2025: Completed professional delivery tracking with authentic Swiggy-style experience using OpenRouteService API
+- June 14, 2025: Enhanced subscription system to enforce VyronaWallet-only payment method for subscription orders
+- June 14, 2025: Added wallet balance validation to ensure sufficient funds for subscription purchases
+- June 14, 2025: Updated subscription UI to display wallet balance information and prevent non-wallet payments
+- June 14, 2025: Modified backend order creation to force wallet payment method for all subscription orders
 - June 14, 2025: Initial setup

@@ -193,6 +193,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const orderId = orderResult[0].id;
 
+      // Process wallet payment for subscription orders
+      if (enableSubscription && finalPaymentMethod === "wallet") {
+        try {
+          await storage.deductWalletBalance(userId, orderTotal, `VyronaSpace subscription order #${orderId}`);
+          console.log(`Wallet payment processed for subscription order: ₹${orderTotal}`);
+        } catch (walletError) {
+          console.error("Wallet payment failed:", walletError);
+          // Delete the order if wallet payment fails
+          await db.delete(orders).where(eq(orders.id, orderId));
+          return res.status(400).json({ 
+            error: "Wallet payment failed. Order cancelled." 
+          });
+        }
+      }
+
       // Send seller notifications for each item
       console.log("Starting email notification process...");
       try {
