@@ -377,7 +377,7 @@ export default function VyronaSpace() {
 
   return (
     <>
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
         <div className="container mx-auto px-4 py-8">
           {/* Header Navigation */}
           <div className="flex items-center justify-between mb-6">
@@ -1528,8 +1528,8 @@ export default function VyronaSpace() {
           </DialogFooter>
         </DialogContent>
         </Dialog>
+        </div>
       </div>
-    </div>
     </>
   );
 }
