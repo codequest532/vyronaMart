@@ -93,11 +93,12 @@ export default function InstagramCheckout() {
 
   const placeOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      return await apiRequest("POST", "/api/instagram/orders/place", orderData);
+      const response = await apiRequest("POST", "/api/instagram/orders/place", orderData);
+      return await response.json();
     },
-    onSuccess: (response) => {
-      console.log("Order response:", response);
-      const orderId = response.orderId || response.id;
+    onSuccess: (data) => {
+      console.log("Order response:", data);
+      const orderId = data.orderId || data.id;
       toast({
         title: "Order Placed Successfully!",
         description: `Your Instagram order #${orderId} has been placed.`,
