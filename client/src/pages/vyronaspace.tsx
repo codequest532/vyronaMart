@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
   Star, ShoppingCart, ShoppingBag, Plus, Minus, Truck, Phone,
-  MessageCircle, RefreshCw, Trophy, Target, Zap, Gift
+  MessageCircle, RefreshCw, Trophy, Target, Zap, Gift, ArrowLeft
 } from "lucide-react";
 
 interface Store {
@@ -236,6 +237,16 @@ export default function VyronaSpace() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Back to Home Button */}
+        <div className="mb-6">
+          <Link href="/">
+            <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50 text-emerald-700">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
