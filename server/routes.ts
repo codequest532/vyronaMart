@@ -4224,20 +4224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all Instagram products from all active stores
       // Get all Instagram products from active stores
       const products = await db
-        .select({
-          id: instagramProducts.id,
-          productName: instagramProducts.productName,
-          description: instagramProducts.description,
-          price: instagramProducts.price,
-          categoryTag: instagramProducts.categoryTag,
-          hashtags: instagramProducts.hashtags,
-          imageUrl: instagramProducts.imageUrl,
-          productUrl: instagramProducts.productUrl,
-          isAvailable: instagramProducts.isAvailable,
-          likesCount: instagramProducts.likesCount,
-          commentsCount: instagramProducts.commentsCount,
-          storeId: instagramProducts.storeId,
-        })
+        .select()
         .from(instagramProducts)
         .where(eq(instagramProducts.isAvailable, true));
 
