@@ -60,6 +60,7 @@ export default function VyronaSpace() {
   const [newLocation, setNewLocation] = useState("");
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [userProfile, setUserProfile] = useState({
     name: "John Doe",
     email: "john.doe@email.com",
@@ -71,6 +72,13 @@ export default function VyronaSpace() {
       promotions: true,
       newStores: false
     }
+  });
+  const [filters, setFilters] = useState({
+    distance: "all",
+    rating: "all",
+    deliveryTime: "all",
+    openNow: false,
+    offers: false
   });
   const { toast } = useToast();
 
@@ -364,6 +372,61 @@ export default function VyronaSpace() {
     setShowProfileModal(false);
   };
 
+  const applyFilters = () => {
+    toast({
+      title: "Filters applied",
+      description: "Store results have been updated based on your preferences",
+    });
+    setShowFilterModal(false);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      distance: "all",
+      rating: "all",
+      deliveryTime: "all",
+      openNow: false,
+      offers: false
+    });
+    toast({
+      title: "Filters cleared",
+      description: "All filters have been reset",
+    });
+  };
+
+  // Filter stores based on applied filters
+  const getFilteredStores = () => {
+    return localStores.filter(store => {
+      // Distance filter
+      if (filters.distance !== "all") {
+        const maxDistance = parseInt(filters.distance);
+        const storeDistance = parseFloat(store.distance);
+        if (storeDistance > maxDistance) return false;
+      }
+      
+      // Rating filter
+      if (filters.rating !== "all") {
+        const minRating = parseFloat(filters.rating);
+        if (store.rating < minRating) return false;
+      }
+      
+      // Delivery time filter (using estimatedDelivery)
+      if (filters.deliveryTime !== "all") {
+        const maxDeliveryTime = parseInt(filters.deliveryTime);
+        const deliveryMinutes = parseInt(store.estimatedDelivery);
+        if (deliveryMinutes > maxDeliveryTime) return false;
+      }
+      
+      // Open now filter
+      if (filters.openNow && !store.isOpen) return false;
+      
+      // Offers filter
+      if (filters.offers && (!store.offers || store.offers.length === 0)) return false;
+      
+      return true;
+    });
+  };
+
   const categories = [
     { id: "all", name: "All", icon: Home, count: localStores.length, color: "bg-gradient-to-r from-blue-500 to-purple-600" },
     { id: "grocery", name: "Grocery", icon: ShoppingBag, count: 1, color: "bg-gradient-to-r from-green-500 to-emerald-600" },
@@ -523,10 +586,110 @@ export default function VyronaSpace() {
               className="pl-12 pr-16 py-4 text-lg rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg focus:shadow-xl transition-all"
             />
             <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
-              <Button size="sm" className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
+              <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filter
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-2xl">Filter Stores</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-6">
+                    {/* Distance Filter */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700">Distance</label>
+                      <select
+                        value={filters.distance}
+                        onChange={(e) => setFilters({...filters, distance: e.target.value})}
+                        className="w-full p-3 border border-gray-300 rounded-xl"
+                      >
+                        <option value="all">Any distance</option>
+                        <option value="1">Within 1 km</option>
+                        <option value="2">Within 2 km</option>
+                        <option value="5">Within 5 km</option>
+                      </select>
+                    </div>
+
+                    {/* Rating Filter */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700">Minimum Rating</label>
+                      <select
+                        value={filters.rating}
+                        onChange={(e) => setFilters({...filters, rating: e.target.value})}
+                        className="w-full p-3 border border-gray-300 rounded-xl"
+                      >
+                        <option value="all">Any rating</option>
+                        <option value="4.5">4.5+ stars</option>
+                        <option value="4.0">4.0+ stars</option>
+                        <option value="3.5">3.5+ stars</option>
+                      </select>
+                    </div>
+
+                    {/* Delivery Time Filter */}
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700">Delivery Time</label>
+                      <select
+                        value={filters.deliveryTime}
+                        onChange={(e) => setFilters({...filters, deliveryTime: e.target.value})}
+                        className="w-full p-3 border border-gray-300 rounded-xl"
+                      >
+                        <option value="all">Any delivery time</option>
+                        <option value="15">Within 15 minutes</option>
+                        <option value="30">Within 30 minutes</option>
+                        <option value="60">Within 1 hour</option>
+                      </select>
+                    </div>
+
+                    {/* Toggle Filters */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div>
+                          <div className="font-medium">Open Now</div>
+                          <div className="text-sm text-gray-600">Show only stores currently open</div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={filters.openNow}
+                          onChange={(e) => setFilters({...filters, openNow: e.target.checked})}
+                          className="rounded"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div>
+                          <div className="font-medium">Special Offers</div>
+                          <div className="text-sm text-gray-600">Show only stores with active offers</div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={filters.offers}
+                          onChange={(e) => setFilters({...filters, offers: e.target.checked})}
+                          className="rounded"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-3">
+                      <Button 
+                        variant="outline" 
+                        onClick={clearFilters}
+                        className="flex-1 rounded-xl"
+                      >
+                        Clear All
+                      </Button>
+                      <Button 
+                        onClick={applyFilters}
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-bold"
+                      >
+                        Apply Filters
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
@@ -578,7 +741,7 @@ export default function VyronaSpace() {
 
             {/* Enhanced Store Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredStores.map(store => (
+              {getFilteredStores().map(store => (
                 <Card key={store.id} className="group overflow-hidden rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
                   <div className="relative h-48 overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
