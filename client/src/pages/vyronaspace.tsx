@@ -603,20 +603,234 @@ export default function VyronaSpace() {
             ) : null}
           </TabsContent>
 
-          {/* Other tabs placeholder */}
+          {/* Orders Tab - Complete Functionality */}
           <TabsContent value="orders" className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
-            <p className="text-gray-600">Order history will appear here</p>
+            <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">Your Orders</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mockOrders.map(order => (
+                  <Card key={order.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-gray-900">Order #{order.id}</h3>
+                        <Badge className={`${
+                          order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                          order.status === 'out-for-delivery' ? 'bg-blue-100 text-blue-700' :
+                          order.status === 'processing' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {order.status}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-3 mb-4">
+                        {order.items.map((item, idx) => (
+                          <div key={idx} className="flex justify-between text-sm">
+                            <span className="text-gray-600">{item.quantity}x {item.name}</span>
+                            <span className="font-semibold">₹{item.price}</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="border-t border-gray-200 pt-3 mb-4">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold text-lg">Total</span>
+                          <span className="font-bold text-lg text-emerald-600">₹{order.total}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <Truck className="h-4 w-4 mr-2 text-emerald-600" />
+                          <span>ETA: {order.estimatedDelivery}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-2 text-teal-600" />
+                          <span>{order.currentLocation}</span>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        onClick={() => setSelectedOrder(order)} 
+                        variant="outline" 
+                        className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50"
+                      >
+                        Track Order
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
           </TabsContent>
 
+          {/* Rewards Tab - VyronaCoins System */}
           <TabsContent value="rewards" className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900">VyronaCoins & Rewards</h2>
-            <p className="text-gray-600">Rewards system coming soon</p>
+            <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">VyronaCoins & Rewards</h2>
+              
+              {/* Current Points */}
+              <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">Your VyronaCoins</h3>
+                    <p className="text-emerald-100">Available balance</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold">2,450</div>
+                    <div className="text-emerald-100">≈ ₹245</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Achievements */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                  <CardContent className="p-4 text-center">
+                    <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                    <h4 className="font-bold text-gray-900">First Purchase</h4>
+                    <p className="text-sm text-gray-600">+100 VyronaCoins</p>
+                    <Badge className="bg-green-100 text-green-700 mt-2">Completed</Badge>
+                  </CardContent>
+                </Card>
+                
+                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                  <CardContent className="p-4 text-center">
+                    <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                    <h4 className="font-bold text-gray-900">Local Explorer</h4>
+                    <p className="text-sm text-gray-600">Shop from 5 different stores</p>
+                    <Badge className="bg-yellow-100 text-yellow-700 mt-2">3/5 Progress</Badge>
+                  </CardContent>
+                </Card>
+                
+                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                  <CardContent className="p-4 text-center">
+                    <Zap className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                    <h4 className="font-bold text-gray-900">Speed Shopper</h4>
+                    <p className="text-sm text-gray-600">Order within 15 minutes</p>
+                    <Badge className="bg-gray-100 text-gray-700 mt-2">Locked</Badge>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Rewards Store */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Redeem Rewards</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-bold text-gray-900">₹50 Off Coupon</h4>
+                          <p className="text-sm text-gray-600">Valid on orders above ₹500</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-emerald-600">500 Coins</div>
+                          <Button size="sm" className="mt-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                            Redeem
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-bold text-gray-900">Free Delivery</h4>
+                          <p className="text-sm text-gray-600">Next 3 orders</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-emerald-600">300 Coins</div>
+                          <Button size="sm" className="mt-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                            Redeem
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
+          {/* Profile Tab - Customer Management */}
           <TabsContent value="profile" className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900">Customer Profile</h2>
-            <p className="text-gray-600">Profile management</p>
+            <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">Customer Profile</h2>
+              
+              {/* Profile Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Full Name</label>
+                        <p className="text-gray-900">Alex Johnson</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Email</label>
+                        <p className="text-gray-900">alex.johnson@email.com</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Phone</label>
+                        <p className="text-gray-900">+91 98765 43210</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50">
+                      Edit Profile
+                    </Button>
+                  </CardContent>
+                </Card>
+                
+                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                  <CardContent className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Delivery Address</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Home</label>
+                        <p className="text-gray-900">123 Green Street, Koramangala, Bangalore - 560034</p>
+                      </div>
+                      <div className="flex items-center text-sm text-emerald-600">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        <span>Primary address</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50">
+                      Manage Addresses
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Quick Actions */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
+                    <RefreshCw className="h-6 w-6 mb-2 text-emerald-600" />
+                    <span className="text-sm">Reorder</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
+                    <Phone className="h-6 w-6 mb-2 text-emerald-600" />
+                    <span className="text-sm">Support</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
+                    <MessageCircle className="h-6 w-6 mb-2 text-emerald-600" />
+                    <span className="text-sm">Feedback</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
+                    <Gift className="h-6 w-6 mb-2 text-emerald-600" />
+                    <span className="text-sm">Refer & Earn</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
