@@ -15,7 +15,7 @@ import {
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
   Star, ShoppingCart, ShoppingBag, Plus, Minus, Truck, Phone,
   MessageCircle, RefreshCw, Trophy, Target, Zap, Gift, ArrowLeft,
-  Calendar, Repeat, Camera, User as UserIcon, Store, Bell, X
+  Calendar, Repeat, Camera, User, Store, Bell, X, Edit, Wallet, Settings
 } from "lucide-react";
 
 interface Store {
@@ -1242,9 +1242,77 @@ export default function VyronaSpace() {
                   </Button>
                 </div>
               </div>
+              </div>
+              </div>
+            </TabsContent>
+            
+            {/* Profile Tab - Customer Profile */}
+            <TabsContent value="profile" className="space-y-6">
+              <div className="container mx-auto px-4 py-8">
+                <div className="bg-orange-50/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-200/50">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-bold text-gray-900">Customer Profile</h2>
+                    <div className="flex space-x-3">
+                      <Button 
+                        onClick={() => setShowEditProfile(true)}
+                        className="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 rounded-xl"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                      <Button 
+                        onClick={() => setShowManageAddresses(true)}
+                        variant="outline" 
+                        className="rounded-xl border-orange-200 hover:bg-orange-50"
+                      >
+                        <MapPin className="h-4 w-4 mr-2" />
+                        Manage Addresses
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-center space-x-4">
+                          <User className="h-10 w-10 text-orange-600" />
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Personal Information</h3>
+                            <p className="text-sm text-gray-600">Manage your account details</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-center space-x-4">
+                          <Wallet className="h-10 w-10 text-pink-600" />
+                          <div>
+                            <h3 className="font-semibold text-gray-900">VyronaWallet</h3>
+                            <p className="text-sm text-gray-600">Balance: ₹500</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50">
+                      <CardContent className="p-6">
+                        <div className="flex items-center space-x-4">
+                          <Settings className="h-10 w-10 text-purple-600" />
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Preferences</h3>
+                            <p className="text-sm text-gray-600">App settings & notifications</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
-      </div>
+        </div>
 
       {/* Fixed Position Quick Cart Button */}
       <div className="fixed bottom-6 right-6 z-50">
@@ -1311,8 +1379,6 @@ export default function VyronaSpace() {
             </div>
           </div>
           )}
-            </TabsContent>
-          </Tabs>
         </div>
 
         {/* Edit Profile Modal */}
