@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShoppingCart, CreditCard, Smartphone, Wallet, Truck, MapPin, User, Phone, Mail, Clock, RefreshCw, Calendar } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -53,6 +53,12 @@ export default function VyronaSpaceCheckout() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [addressData, setAddressData] = useState<Partial<CheckoutFormData> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch wallet balance for subscription validation
+  const { data: walletBalance } = useQuery({
+    queryKey: ["/api/wallet/balance/1"],
+    enabled: true,
+  });
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -150,6 +156,16 @@ export default function VyronaSpaceCheckout() {
   const handleFinalSubmit = async () => {
     if (!addressData) return;
     
+    // Validate wallet balance for subscription orders
+    if (form.getValues("enableSubscription") && (walletBalance?.balance || 0) < finalTotal) {
+      toast({
+        title: "Insufficient Wallet Balance",
+        description: "Please top up your VyronaWallet to place subscription orders.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     const orderData = {
@@ -162,7 +178,7 @@ export default function VyronaSpaceCheckout() {
       totalAmount: finalTotal,
       deliveryFee: calculateDeliveryFee(),
       shippingAddress: addressData,
-      paymentMethod: form.getValues("paymentMethod"),
+      paymentMethod: form.getValues("enableSubscription") ? "wallet" : form.getValues("paymentMethod"),
       specialInstructions: form.getValues("specialInstructions"),
       module: "vyronaspace",
       // Subscription data
@@ -426,6 +442,27 @@ export default function VyronaSpaceCheckout() {
 
                         {form.watch("enableSubscription") && (
                           <div className="mt-4 space-y-4 pl-7">
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                              <div className="flex items-center gap-2 text-blue-800 text-sm font-medium">
+                                <Wallet className="h-4 w-4" />
+                                Payment Method for Subscriptions
+                              </div>
+                              <p className="text-blue-700 text-xs mt-1">
+                                Subscription orders will be automatically charged to your VyronaWallet balance on each delivery date.
+                              </p>
+                              <div className="mt-2 flex items-center justify-between">
+                                <span className="text-xs text-blue-600">Current Wallet Balance:</span>
+                                <span className="text-sm font-medium text-blue-800">
+                                  ₹{walletBalance?.balance || 0}
+                                </span>
+                              </div>
+                              {walletBalance?.balance < finalTotal && (
+                                <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+                                  ⚠️ Insufficient wallet balance for subscription. Please top up your wallet to enable subscriptions.
+                                </div>
+                              )}
+                            </div>
+
                             <FormField
                               control={form.control}
                               name="subscriptionFrequency"

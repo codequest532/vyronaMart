@@ -141,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order submission endpoint for VyronaHub checkout flow - MUST BE FIRST
   app.post("/api/orders", async (req: Request, res: Response) => {
     try {
-      console.log("VyronaHub Order request body:", JSON.stringify(req.body, null, 2));
+      console.log("Order request body:", JSON.stringify(req.body, null, 2));
       
       const { 
         items, shippingAddress, paymentMethod, totalAmount, total,
@@ -151,14 +151,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = 1; // Default user for demo
       const orderTotal = totalAmount || total;
 
+      // Force wallet payment for subscription orders
+      let finalPaymentMethod = paymentMethod;
+      if (enableSubscription) {
+        finalPaymentMethod = "wallet";
+        
+        // Validate wallet balance for subscription orders
+        const walletBalance = await storage.getWalletBalance(userId);
+        if (walletBalance < orderTotal) {
+          return res.status(400).json({ 
+            error: "Insufficient wallet balance for subscription order. Please top up your VyronaWallet." 
+          });
+        }
+      }
+
       console.log("Extracted values:", { 
         items: !!items, 
         shippingAddress: !!shippingAddress, 
-        paymentMethod: !!paymentMethod, 
-        orderTotal: !!orderTotal 
+        paymentMethod: finalPaymentMethod, 
+        orderTotal: !!orderTotal,
+        enableSubscription: !!enableSubscription
       });
 
-      if (!items || !shippingAddress || !paymentMethod || !orderTotal) {
+      if (!items || !shippingAddress || !finalPaymentMethod || !orderTotal) {
         console.log("Missing required fields validation failed");
         return res.status(400).json({ error: "Missing required order information" });
       }
