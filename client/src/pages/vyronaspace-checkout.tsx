@@ -28,10 +28,21 @@ const checkoutSchema = z.object({
   paymentMethod: z.enum(["upi", "wallet", "credit_debit", "cod"]),
   specialInstructions: z.string().optional(),
   enableSubscription: z.boolean().default(false),
-  subscriptionFrequency: z.enum(["daily", "weekly"]).optional(),
-  subscriptionDayOfWeek: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]).optional(),
-  subscriptionTime: z.string().optional(),
-  subscriptionStartDate: z.string().optional(),
+  subscriptionFrequency: z.enum(["daily", "weekly"]).default("daily"),
+  subscriptionDayOfWeek: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]).default("monday"),
+  subscriptionTime: z.string().default("09:00"),
+  subscriptionStartDate: z.string().default(""),
+}).refine((data) => {
+  // If subscription is enabled, validate subscription fields
+  if (data.enableSubscription) {
+    if (!data.subscriptionTime) return false;
+    if (data.subscriptionFrequency === "weekly" && !data.subscriptionDayOfWeek) return false;
+    if (!data.subscriptionStartDate) return false;
+  }
+  return true;
+}, {
+  message: "Please complete all subscription fields when subscription is enabled",
+  path: ["enableSubscription"]
 });
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
@@ -55,7 +66,7 @@ export default function VyronaSpaceCheckout() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch wallet balance for subscription validation
-  const { data: walletBalance } = useQuery({
+  const { data: walletBalance } = useQuery<{ balance: number }>({
     queryKey: ["/api/wallet/balance/1"],
     enabled: true,
   });
@@ -154,10 +165,20 @@ export default function VyronaSpaceCheckout() {
   };
 
   const handleFinalSubmit = async () => {
-    if (!addressData) return;
+    console.log("🎯 Final submit triggered");
+    console.log("📍 Address data:", addressData);
+    console.log("📋 Form values:", form.getValues());
+    console.log("💰 Wallet balance:", walletBalance);
+    console.log("💵 Final total:", finalTotal);
+    
+    if (!addressData) {
+      console.log("❌ No address data, aborting");
+      return;
+    }
     
     // Validate wallet balance for subscription orders
-    if (form.getValues("enableSubscription") && (walletBalance?.balance || 0) < finalTotal) {
+    if (form.getValues("enableSubscription") && ((walletBalance?.balance ?? 0) < finalTotal)) {
+      console.log("❌ Insufficient wallet balance for subscription");
       toast({
         title: "Insufficient Wallet Balance",
         description: "Please top up your VyronaWallet to place subscription orders.",
@@ -166,6 +187,7 @@ export default function VyronaSpaceCheckout() {
       return;
     }
     
+    console.log("✅ Validation passed, setting submitting state");
     setIsSubmitting(true);
     
     const orderData = {
@@ -453,10 +475,10 @@ export default function VyronaSpaceCheckout() {
                               <div className="mt-2 flex items-center justify-between">
                                 <span className="text-xs text-blue-600">Current Wallet Balance:</span>
                                 <span className="text-sm font-medium text-blue-800">
-                                  ₹{walletBalance?.balance || 0}
+                                  ₹{walletBalance?.balance ?? 0}
                                 </span>
                               </div>
-                              {walletBalance?.balance < finalTotal && (
+                              {(walletBalance?.balance ?? 0) < finalTotal && (
                                 <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
                                   ⚠️ Insufficient wallet balance for subscription. Please top up your wallet to enable subscriptions.
                                 </div>
