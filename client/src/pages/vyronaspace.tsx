@@ -446,7 +446,8 @@ export default function VyronaSpace() {
           </div>
 
           {/* Navigation Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <div>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-4 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
             <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
               <Sparkles className="h-4 w-4 mr-2" />
@@ -1306,6 +1307,7 @@ export default function VyronaSpace() {
           </div>
           )}
         </Tabs>
+        </div>
       </div>
 
       {/* Edit Profile Modal */}
