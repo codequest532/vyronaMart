@@ -55,6 +55,9 @@ export default function VyronaSpace() {
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [activeTab, setActiveTab] = useState("discover");
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [newLocation, setNewLocation] = useState("");
   const { toast } = useToast();
 
   // Enhanced mock data for modern design
@@ -216,6 +219,53 @@ export default function VyronaSpace() {
     }, 1000);
   };
 
+  const updateLocation = () => {
+    if (!newLocation.trim()) {
+      toast({
+        title: "Please enter a location",
+        description: "Enter your delivery location to continue",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setCurrentLocation(newLocation);
+    setShowLocationModal(false);
+    setNewLocation("");
+    toast({
+      title: "Location updated",
+      description: `Delivery location changed to ${newLocation}`,
+    });
+  };
+
+  const proceedToCheckout = () => {
+    if (cart.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Add some items to your cart before checkout",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const deliveryFee = selectedStore?.deliveryFee || 25;
+    const totalAmount = cartTotal + deliveryFee;
+
+    toast({
+      title: "Order placed successfully!",
+      description: `Your order of ₹${totalAmount} has been confirmed. Expected delivery: 20-25 minutes`,
+    });
+
+    // Clear cart and close modals
+    setCart([]);
+    setSelectedStore(null);
+    setShowCheckoutModal(false);
+    
+    // Switch to orders tab to show the new order
+    setActiveTab("orders");
+  };
+
   const categories = [
     { id: "all", name: "All", icon: Home, count: localStores.length, color: "bg-gradient-to-r from-blue-500 to-purple-600" },
     { id: "grocery", name: "Grocery", icon: ShoppingBag, count: 1, color: "bg-gradient-to-r from-green-500 to-emerald-600" },
@@ -259,10 +309,54 @@ export default function VyronaSpace() {
             </div>
             
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" className="bg-white/50 border-white/20 hover:bg-white/80">
-                <Navigation className="h-4 w-4 mr-2" />
-                Update Location
-              </Button>
+              <Dialog open={showLocationModal} onOpenChange={setShowLocationModal}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="bg-white/50 border-white/20 hover:bg-white/80">
+                    <Navigation className="h-4 w-4 mr-2" />
+                    Update Location
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle className="text-xl">Update Delivery Location</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Enter your location
+                      </label>
+                      <Input
+                        placeholder="Enter area, city, or landmark..."
+                        value={newLocation}
+                        onChange={(e) => setNewLocation(e.target.value)}
+                        className="rounded-xl"
+                      />
+                    </div>
+                    <div className="bg-blue-50 rounded-xl p-4">
+                      <div className="flex items-center text-blue-600 mb-2">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        <span className="text-sm font-medium">Current Location</span>
+                      </div>
+                      <p className="text-blue-800 font-medium">{currentLocation}</p>
+                    </div>
+                    <div className="flex space-x-3">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowLocationModal(false)}
+                        className="flex-1 rounded-xl"
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        onClick={updateLocation}
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl"
+                      >
+                        Update Location
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
               <Button variant="outline" size="sm" className="bg-white/50 border-white/20 hover:bg-white/80">
                 <Bell className="h-4 w-4" />
               </Button>
@@ -910,10 +1004,92 @@ export default function VyronaSpace() {
                         <Button variant="outline" onClick={() => setCart([])} className="bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-xl">
                           Clear Cart
                         </Button>
-                        <Button className="bg-white text-blue-600 hover:bg-white/90 rounded-xl font-bold px-6">
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Checkout
-                        </Button>
+                        <Dialog open={showCheckoutModal} onOpenChange={setShowCheckoutModal}>
+                          <DialogTrigger asChild>
+                            <Button className="bg-white text-blue-600 hover:bg-white/90 rounded-xl font-bold px-6">
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Checkout
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl rounded-2xl">
+                            <DialogHeader>
+                              <DialogTitle className="text-2xl">Checkout</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-6">
+                              {/* Order Summary */}
+                              <div className="bg-gray-50 rounded-2xl p-6">
+                                <h3 className="font-bold text-lg mb-4">Order Summary</h3>
+                                <div className="space-y-3">
+                                  {cart.map(item => (
+                                    <div key={item.id} className="flex justify-between">
+                                      <span>{item.name} x {item.quantity}</span>
+                                      <span className="font-medium">₹{item.price * item.quantity}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="border-t mt-4 pt-4 space-y-2">
+                                  <div className="flex justify-between">
+                                    <span>Subtotal</span>
+                                    <span>₹{cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Delivery Fee</span>
+                                    <span>₹{selectedStore?.deliveryFee || 25}</span>
+                                  </div>
+                                  <div className="flex justify-between font-bold text-lg">
+                                    <span>Total</span>
+                                    <span>₹{cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + (selectedStore?.deliveryFee || 25)}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Delivery Address */}
+                              <div className="bg-blue-50 rounded-2xl p-6">
+                                <div className="flex items-center text-blue-600 mb-3">
+                                  <MapPin className="h-5 w-5 mr-2" />
+                                  <span className="font-medium">Delivery Address</span>
+                                </div>
+                                <p className="text-blue-800 font-medium">{currentLocation}</p>
+                                <p className="text-blue-600 text-sm">Expected delivery: 20-25 minutes</p>
+                              </div>
+
+                              {/* Payment Method */}
+                              <div className="space-y-3">
+                                <h4 className="font-medium">Payment Method</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="border-2 border-green-200 bg-green-50 rounded-xl p-4 text-center">
+                                    <CreditCard className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                                    <div className="font-medium text-green-800">UPI</div>
+                                    <div className="text-sm text-green-600">Pay on delivery</div>
+                                  </div>
+                                  <div className="border rounded-xl p-4 text-center hover:border-gray-300">
+                                    <ShoppingCart className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                                    <div className="font-medium text-gray-600">Cash</div>
+                                    <div className="text-sm text-gray-500">Cash on delivery</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex space-x-3">
+                                <Button 
+                                  variant="outline" 
+                                  onClick={() => setShowCheckoutModal(false)}
+                                  className="flex-1 rounded-xl"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  onClick={proceedToCheckout}
+                                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl font-bold"
+                                >
+                                  <ShoppingCart className="h-4 w-4 mr-2" />
+                                  Place Order
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </div>
                     </div>
                   </div>
