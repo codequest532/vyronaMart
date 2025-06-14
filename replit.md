@@ -132,6 +132,8 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Fixed Instagram cart authentication error handling with automatic login redirect
+- June 14, 2025: Optimized Instagram shop to cart navigation using client-side routing (eliminated 92-105ms delay)
 - June 14, 2025: Resolved Instagram cart loading delays (95-120ms → <2ms response time)
 - June 14, 2025: Optimized Instagram cart database queries with INNER JOINs and LIMIT
 - June 14, 2025: Fixed database schema mismatches in Instagram API endpoints

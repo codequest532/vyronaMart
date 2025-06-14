@@ -84,12 +84,23 @@ export default function VyronaInstaShop() {
         description: "Product added to your Instagram cart successfully!",
       });
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to add product to Instagram cart. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      if (error.message?.includes("Authentication required") || error.message?.includes("401")) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to add items to your cart",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          setLocation('/login');
+        }, 1500);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to add product to Instagram cart. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
