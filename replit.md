@@ -132,6 +132,10 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Converted Instagram pricing system to whole rupees without decimals (8999 paisa → ₹89, 4550 paisa → ₹45)
+- June 14, 2025: Fixed order confirmation redirect by handling response structure variations (orderId vs id)
+- June 14, 2025: Updated all frontend price displays to use Math.round() instead of .toFixed(2) for whole rupee display
+- June 14, 2025: Removed unnecessary price conversions throughout Instagram shop, cart, and checkout systems
 - June 14, 2025: Fixed pricing inconsistency between Instagram seller dashboard and customer shop (now using consistent database pricing in cents)
 - June 14, 2025: Enhanced Instagram products API with store information and proper JOIN queries for customer browsing
 - June 14, 2025: Removed fallback mock data from Instagram shop to ensure authentic pricing display

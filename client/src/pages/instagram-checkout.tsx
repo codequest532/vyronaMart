@@ -96,15 +96,17 @@ export default function InstagramCheckout() {
       return await apiRequest("POST", "/api/instagram/orders/place", orderData);
     },
     onSuccess: (response) => {
+      console.log("Order response:", response);
+      const orderId = response.orderId || response.id;
       toast({
         title: "Order Placed Successfully!",
-        description: `Your Instagram order #${response.orderId} has been placed.`,
+        description: `Your Instagram order #${orderId} has been placed.`,
       });
       // Clear the cart if order came from cart
       if (checkoutData?.source === 'instagram') {
         queryClient.invalidateQueries({ queryKey: ["/api/instacart"] });
       }
-      setLocation(`/order-confirmation?orderId=${response.orderId}&source=instagram`);
+      setLocation(`/order-confirmation?orderId=${orderId}&source=instagram`);
     },
     onError: (error: any) => {
       if (error.message?.includes("Authentication required") || error.message?.includes("401")) {
