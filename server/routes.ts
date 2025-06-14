@@ -4521,6 +4521,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clean up orphaned Instagram products (admin only)
+  app.post("/api/admin/cleanup-orphaned-instagram-products", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      if (!authenticatedUser || authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Find and remove products that don't have a corresponding store
+      const orphanedProducts = await db.execute(sql`
+        DELETE FROM instagram_products 
+        WHERE store_id NOT IN (
+          SELECT id FROM instagram_stores
+        )
+        RETURNING id, product_name
+      `);
+
+      const deletedCount = orphanedProducts.rows.length;
+      console.log(`Admin cleanup: Removed ${deletedCount} orphaned Instagram products`);
+
+      res.json({ 
+        success: true, 
+        deletedCount,
+        message: `Successfully removed ${deletedCount} orphaned Instagram products`
+      });
+    } catch (error: any) {
+      console.error('Error cleaning up orphaned products:', error);
+      res.status(500).json({ message: "Failed to cleanup orphaned products" });
+    }
+  });
+
   // Sync Instagram data (placeholder for actual Instagram API integration)
   app.post("/api/vyronainstastore/sync", async (req, res) => {
     try {
