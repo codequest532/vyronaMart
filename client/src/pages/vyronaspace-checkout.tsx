@@ -91,17 +91,60 @@ export default function VyronaSpaceCheckout() {
     },
   });
 
-  // Load cart from sessionStorage
+  // Load cart from sessionStorage and check for subscription mode
   useEffect(() => {
     const savedCart = sessionStorage.getItem('vyronaspace-cart');
+    const subscriptionMode = sessionStorage.getItem('subscription-mode');
+    
     if (savedCart) {
       const parsedCart = JSON.parse(savedCart);
       setCartItems(parsedCart);
-    } else {
-      // No cart items, redirect back
+    } 
+    
+    // Check if in subscription mode
+    if (subscriptionMode === 'true') {
+      console.log("🔔 Subscription mode detected - enabling subscription defaults");
+      form.setValue('enableSubscription', true);
+      form.setValue('subscriptionFrequency', 'weekly');
+      form.setValue('subscriptionTime', '09:00');
+      form.setValue('subscriptionDayOfWeek', 'monday');
+      // Set start date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      form.setValue('subscriptionStartDate', tomorrow.toISOString().split('T')[0]);
+      // Clear subscription mode flag
+      sessionStorage.removeItem('subscription-mode');
+    }
+    
+    // If subscription mode but no cart, add default subscription items
+    if (subscriptionMode === 'true' && !savedCart) {
+      console.log("🔔 Creating default subscription cart for new subscription");
+      const defaultSubscriptionItems = [
+        {
+          id: 1,
+          name: "Fresh Milk (1L)",
+          price: 65,
+          quantity: 1,
+          storeName: "FreshMart Express",
+          storeId: 1
+        },
+        {
+          id: 2, 
+          name: "Daily Bread (400g)",
+          price: 35,
+          quantity: 1,
+          storeName: "FreshMart Express", 
+          storeId: 1
+        }
+      ];
+      setCartItems(defaultSubscriptionItems);
+    }
+    
+    // If no cart and not subscription mode, redirect back
+    if (!savedCart && subscriptionMode !== 'true') {
       setLocation('/vyronaspace');
     }
-  }, [setLocation]);
+  }, [setLocation, form]);
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);

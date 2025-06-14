@@ -782,9 +782,18 @@ export default function VyronaSpace() {
                   </div>
                 )}
                 
-                <Button variant="outline" className="w-full mt-4 border-emerald-200 hover:bg-emerald-50 rounded-xl">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create New Subscription
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    console.log("🔔 Create New Subscription clicked!");
+                    // Set subscription mode and redirect to checkout
+                    sessionStorage.setItem('subscription-mode', 'true');
+                    setLocation('/vyronaspace-checkout');
+                  }}
+                  className="w-full mt-4 border-orange-200 hover:bg-orange-50 rounded-xl bg-gradient-to-r from-orange-50 to-pink-50 hover:from-orange-100 hover:to-pink-100 transition-all shadow-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2 text-orange-600" />
+                  <span className="text-orange-700 font-medium">Create New Subscription</span>
                 </Button>
               </div>
 
