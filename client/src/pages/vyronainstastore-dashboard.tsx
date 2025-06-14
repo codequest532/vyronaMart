@@ -498,10 +498,11 @@ export default function VyronaInstaStoreDashboard() {
               <Button
                 onClick={async () => {
                   try {
-                    // Call logout API endpoint first
-                    await apiRequest('/api/auth/logout', 'POST');
+                    // Call logout API endpoint first (method, url)
+                    await apiRequest('POST', '/api/auth/logout');
                   } catch (error) {
                     // Even if API call fails, continue with logout
+                    console.log('Logout API error:', error);
                   }
                   // Clear local storage
                   localStorage.removeItem('user');
