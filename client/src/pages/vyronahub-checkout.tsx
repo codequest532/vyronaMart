@@ -117,7 +117,7 @@ export default function VyronaHubCheckout() {
   const total = subtotal + deliveryFee;
 
   const formatCurrency = (amount: number): string => {
-    return `₹${amount.toLocaleString()'en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const createOrderMutation = useMutation({
@@ -189,7 +189,7 @@ export default function VyronaHubCheckout() {
           quantity: item.quantity,
           price: Math.round(item.price) // Amount in rupees
         })),
-        totalAmount: Math.round(total)) // Amount in rupees
+        totalAmount: Math.round(total), // Amount in rupees
         shippingAddress: {
           fullName: addressData.fullName,
           phoneNumber: addressData.phoneNumber,
@@ -201,7 +201,7 @@ export default function VyronaHubCheckout() {
         paymentMethod: addressData.paymentMethod,
         module: "vyronahub",
         metadata: {
-          deliveryFee: Math.round(deliveryFee)) // Amount in rupees
+          deliveryFee: Math.round(deliveryFee), // Amount in rupees
           subtotal: Math.round(subtotal) // Amount in rupees
         },
       };
