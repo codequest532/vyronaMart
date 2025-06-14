@@ -844,7 +844,7 @@ Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,http
                 <div>
                   <p className="text-sm font-medium text-gray-600">Followers</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {instagramStore?.followersCount?.toLocaleString()) || 0}
+                    {instagramStore?.followersCount?.toLocaleString() || 0}
                   </p>
                 </div>
                 <Users className="h-8 w-8 text-pink-500" />
