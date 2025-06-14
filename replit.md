@@ -208,6 +208,10 @@ Changelog:
 - June 14, 2025: Added comprehensive store information: ratings, reviews, featured products, delivery fees, and open/closed status
 - June 14, 2025: Changed search functionality to focus on store discovery by name and category
 - June 14, 2025: Updated hero messaging to emphasize local store discovery over product-centric shopping
+- June 14, 2025: Implemented Easy Reorder & Subscriptions system with one-tap repeat orders and weekly/monthly delivery subscriptions
+- June 14, 2025: Added Local Store Stories & Events featuring store owner profiles, hours, photos, and community event promotions
+- June 14, 2025: Enhanced store profile pages with owner introductions, operating hours, and live event notifications
+- June 14, 2025: Created retail subscription management for milk, fruits, medicines with edit/pause functionality
 - June 14, 2025: Successfully restored complete tab functionality (orders, rewards, profile) while maintaining full-page store browsing
 - June 14, 2025: Fixed JSX structure errors and implemented seamless navigation between store discovery and individual store pages
 - June 14, 2025: VyronaSpace now combines comprehensive tab content with modal-free store browsing experience

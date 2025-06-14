@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
   Star, ShoppingCart, ShoppingBag, Plus, Minus, Truck, Phone,
-  MessageCircle, RefreshCw, Trophy, Target, Zap, Gift, ArrowLeft
+  MessageCircle, RefreshCw, Trophy, Target, Zap, Gift, ArrowLeft,
+  Calendar, Repeat, Camera, User as UserIcon, Store, Bell
 } from "lucide-react";
 
 interface Store {
@@ -505,8 +506,8 @@ export default function VyronaSpace() {
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
-                      <ShoppingBag className="h-8 w-8 text-emerald-600" />
+                    <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
+                      <ShoppingBag className="h-10 w-10 text-emerald-600" />
                     </div>
                     <div className="flex-1">
                       <h2 className="text-3xl font-bold text-gray-900">{selectedStore.name}</h2>
@@ -524,6 +525,66 @@ export default function VyronaSpace() {
                           <Star className="h-4 w-4 mr-1 text-yellow-400 fill-current" />
                           <span className="text-sm text-gray-600">{selectedStore.rating} ({selectedStore.reviewCount} reviews)</span>
                         </div>
+                      </div>
+                    </div>
+                    <Button variant="outline" className="border-emerald-200 hover:bg-emerald-50 rounded-xl">
+                      <Store className="h-4 w-4 mr-2" />
+                      Store Profile
+                    </Button>
+                  </div>
+
+                  {/* Store Owner & Hours Info */}
+                  <div className="mt-4 p-4 bg-white/70 rounded-xl border border-emerald-100">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                          <UserIcon className="h-5 w-5 text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">Managed by Rajesh Kumar</p>
+                          <p className="text-sm text-gray-600">Open: 7:00 AM - 10:00 PM • Family-owned since 2015</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" className="border-blue-200 hover:bg-blue-50 rounded-lg">
+                          <Camera className="h-4 w-4 mr-1" />
+                          Photos
+                        </Button>
+                        <Button size="sm" variant="outline" className="border-orange-200 hover:bg-orange-50 rounded-lg">
+                          <Bell className="h-4 w-4 mr-1" />
+                          Events
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Local Events & Promotions */}
+                  <div className="mt-4 p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-bold text-gray-900 flex items-center">
+                        <Calendar className="h-4 w-4 mr-2 text-orange-600" />
+                        Store Events & Offers
+                      </h4>
+                      <Badge className="bg-orange-100 text-orange-700">Live Now</Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">Weekend Fresh Fruit Tasting</p>
+                          <p className="text-sm text-gray-600">Free samples of seasonal fruits • Today 2-6 PM</p>
+                        </div>
+                        <Button size="sm" className="bg-orange-500 hover:bg-orange-600 rounded-lg text-white">
+                          Join Event
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">25% Off Organic Vegetables</p>
+                          <p className="text-sm text-gray-600">Valid till Dec 20 • Limited stock</p>
+                        </div>
+                        <Button size="sm" variant="outline" className="border-orange-200 hover:bg-orange-50 rounded-lg">
+                          View Deals
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -606,7 +667,116 @@ export default function VyronaSpace() {
           {/* Orders Tab - Complete Functionality */}
           <TabsContent value="orders" className="space-y-6">
             <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Your Orders</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
+                <div className="flex space-x-3">
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 rounded-xl">
+                    <Repeat className="h-4 w-4 mr-2" />
+                    Quick Reorder
+                  </Button>
+                  <Button variant="outline" className="border-emerald-200 hover:bg-emerald-50 rounded-xl">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Subscriptions
+                  </Button>
+                </div>
+              </div>
+
+              {/* Quick Reorder Section */}
+              <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Easy Reorder</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="rounded-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Last Week's Groceries</h4>
+                          <p className="text-sm text-gray-600">8 items • ₹450 • FreshMart</p>
+                        </div>
+                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          Reorder
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="rounded-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Daily Medicines</h4>
+                          <p className="text-sm text-gray-600">3 items • ₹280 • MedPlus</p>
+                        </div>
+                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          Reorder
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Active Subscriptions */}
+              <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Active Subscriptions</h3>
+                <div className="space-y-3">
+                  <Card className="rounded-xl border-0 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <Repeat className="h-6 w-6 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">Weekly Milk & Fruits</h4>
+                            <p className="text-sm text-gray-600">Every Monday • Next: Dec 18 • ₹320/week</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" className="border-blue-200 hover:bg-blue-50 rounded-lg">
+                            Edit
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-gray-200 hover:bg-gray-50 rounded-lg">
+                            Pause
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="rounded-xl border-0 bg-gradient-to-r from-purple-50 to-pink-50 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <Repeat className="h-6 w-6 text-purple-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">Monthly Medicine Refill</h4>
+                            <p className="text-sm text-gray-600">Every 1st • Next: Jan 1 • ₹450/month</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" className="border-purple-200 hover:bg-purple-50 rounded-lg">
+                            Edit
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-gray-200 hover:bg-gray-50 rounded-lg">
+                            Pause
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Button variant="outline" className="w-full mt-4 border-emerald-200 hover:bg-emerald-50 rounded-xl">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Subscription
+                </Button>
+              </div>
+
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Order History</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {mockOrders.map(order => (
                   <Card key={order.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all">
