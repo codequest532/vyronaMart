@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -183,6 +183,7 @@ export default function VyronaSpace() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [viewMode, setViewMode] = useState<"stores" | "store-products">("stores");
+  const [isSubscriptionMode, setIsSubscriptionMode] = useState(false);
 
   // Real API calls replacing mock data
   const { data: stores = [], isLoading: storesLoading } = useQuery({
@@ -226,6 +227,23 @@ export default function VyronaSpace() {
   });
 
   const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
+
+  // Check for subscription mode on component mount
+  useEffect(() => {
+    const subscriptionMode = sessionStorage.getItem('subscription-cart-mode');
+    if (subscriptionMode === 'true') {
+      setIsSubscriptionMode(true);
+      console.log("🔔 Subscription cart mode activated");
+    }
+  }, []);
+
+  // Clear subscription mode
+  const exitSubscriptionMode = () => {
+    setIsSubscriptionMode(false);
+    sessionStorage.removeItem('subscription-cart-mode');
+    sessionStorage.removeItem('subscription-mode');
+    setCart([]);
+  };
 
   const getFilteredStores = () => {
     return (stores as any[]).filter((store: any) => {
@@ -309,6 +327,32 @@ export default function VyronaSpace() {
             </Button>
           </Link>
         </div>
+
+        {/* Subscription Mode Banner */}
+        {isSubscriptionMode && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-orange-100 to-pink-100 border border-orange-200 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center">
+                  <RefreshCw className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-orange-800">Subscription Mode Active</h3>
+                  <p className="text-sm text-orange-700">Select products for your recurring delivery subscription</p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={exitSubscriptionMode}
+                className="border-orange-300 hover:bg-orange-50 text-orange-700"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Exit
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Header */}
         <div className="text-center mb-12">
@@ -786,9 +830,11 @@ export default function VyronaSpace() {
                   variant="outline" 
                   onClick={() => {
                     console.log("🔔 Create New Subscription clicked!");
-                    // Set subscription mode and redirect to checkout
+                    // Set subscription mode and redirect to main page for product selection
                     sessionStorage.setItem('subscription-mode', 'true');
-                    setLocation('/vyronaspace-checkout');
+                    sessionStorage.setItem('subscription-cart-mode', 'true');
+                    // Switch to the main store browsing tab
+                    setActiveTab('space');
                   }}
                   className="w-full mt-4 border-orange-200 hover:bg-orange-50 rounded-xl bg-gradient-to-r from-orange-50 to-pink-50 hover:from-orange-100 hover:to-pink-100 transition-all shadow-sm"
                 >
