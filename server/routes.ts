@@ -13,7 +13,8 @@ import {
   generateOrderProcessingEmail, 
   generateOrderShippedEmail, 
   generateOrderOutForDeliveryEmail, 
-  generateOrderDeliveredEmail 
+  generateOrderDeliveredEmail,
+  generateInstagramSellerNotificationEmail 
 } from "./brevo-email";
 import { db, pool } from "./db";
 import Razorpay from "razorpay";
