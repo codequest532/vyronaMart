@@ -179,7 +179,6 @@ export default function VyronaSpace() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
-  const [viewMode, setViewMode] = useState<"stores" | "store-products">("stores");
 
   const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
 
@@ -444,10 +443,7 @@ export default function VyronaSpace() {
                       <div className="flex items-center space-x-2">
                         <Button 
                           disabled={!store.isOpen}
-                          onClick={() => {
-                            setSelectedStore(store);
-                            setViewMode("store-products");
-                          }}
+                          onClick={() => setSelectedStore(store)}
                           className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl disabled:opacity-50"
                         >
                           <ShoppingCart className="h-4 w-4 mr-2" />
