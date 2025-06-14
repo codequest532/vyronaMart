@@ -337,7 +337,9 @@ export default function VyronaInstaStoreDashboard() {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-    }).format(amount / 100);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(Math.round(amount));
   };
 
   const getStatusBadgeVariant = (status: string) => {
