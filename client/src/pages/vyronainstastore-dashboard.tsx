@@ -345,7 +345,8 @@ export default function VyronaInstaStoreDashboard() {
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'delivered': return 'success';
-      case 'shipped': return 'secondary';
+      case 'out_for_delivery': return 'secondary';
+      case 'shipped': return 'outline';
       case 'confirmed': return 'default';
       case 'cancelled': return 'destructive';
       default: return 'outline';
@@ -355,7 +356,8 @@ export default function VyronaInstaStoreDashboard() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'delivered': return <CheckCircle className="h-4 w-4" />;
-      case 'shipped': return <Truck className="h-4 w-4" />;
+      case 'out_for_delivery': return <Truck className="h-4 w-4" />;
+      case 'shipped': return <Package className="h-4 w-4" />;
       case 'confirmed': return <Clock className="h-4 w-4" />;
       case 'cancelled': return <XCircle className="h-4 w-4" />;
       default: return <AlertTriangle className="h-4 w-4" />;
@@ -1318,9 +1320,9 @@ Organic Skincare,Natural organic face cream,35.00,beauty,#organic #skincare,http
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
                               <SelectItem value="confirmed">Confirmed</SelectItem>
                               <SelectItem value="shipped">Shipped</SelectItem>
+                              <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
                               <SelectItem value="delivered">Delivered</SelectItem>
                               <SelectItem value="cancelled">Cancelled</SelectItem>
                             </SelectContent>

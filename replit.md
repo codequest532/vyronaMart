@@ -132,6 +132,9 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Enhanced Instagram seller dashboard order management modal with comprehensive details
+- June 14, 2025: Updated order status dropdown to include: Confirmed, Shipped, Out for Delivery, Delivered, Cancelled
+- June 14, 2025: Added detailed customer information, order items breakdown, and shipping address display in order modal
 - June 14, 2025: Added customer confirmation emails for Instagram orders using Brevo email service
 - June 14, 2025: Enhanced email system to send order confirmations to customer's shipping address email
 - June 14, 2025: Created Instagram customer confirmation email template with order details and tracking info
