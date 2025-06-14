@@ -1304,43 +1304,44 @@ export default function VyronaSpace() {
             </div>
           </div>
           )}
+        </TabsContent>
 
-          {/* Edit Profile Modal */}
-          <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+        {/* Edit Profile Modal */}
+        <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Edit Profile</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-              <Label htmlFor="username">Full Name</Label>
-              <Input
-                id="username"
-                value={profileForm.username}
-                onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
-                placeholder="Enter your full name"
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={profileForm.email}
-                onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                placeholder="Enter your email"
-              />
-            </div>
-            <div>
-              <Label htmlFor="mobile">Phone Number</Label>
-              <Input
-                id="mobile"
-                value={profileForm.mobile}
-                onChange={(e) => setProfileForm({ ...profileForm, mobile: e.target.value })}
-                placeholder="Enter your phone number"
-              />
-            </div>
-          </div>
+                  <Label htmlFor="username">Full Name</Label>
+                  <Input
+                    id="username"
+                    value={profileForm.username}
+                    onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={profileForm.email}
+                    onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="mobile">Phone Number</Label>
+                  <Input
+                    id="mobile"
+                    value={profileForm.mobile}
+                    onChange={(e) => setProfileForm({ ...profileForm, mobile: e.target.value })}
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+              </div>
           <DialogFooter>
             <Button 
               variant="outline" 
@@ -1451,9 +1452,8 @@ export default function VyronaSpace() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
-        </div>
-      </div>
+        </Dialog>
+      </Tabs>
     </div>
   );
 }
