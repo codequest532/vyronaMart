@@ -468,10 +468,11 @@ export default function VyronaSpace() {
 
             {/* Discover Tab - Store Discovery */}
             <TabsContent value="discover" className="space-y-8">
-            {viewMode === "stores" ? (
-              <>
-                {/* Search and Filters */}
-                <div className="bg-orange-50/80 backdrop-blur-sm rounded-2xl p-6 space-y-4 border border-orange-200/50">
+              <div className="container mx-auto px-4 py-8">
+                {viewMode === "stores" ? (
+                  <>
+                    {/* Search and Filters */}
+                    <div className="bg-orange-50/80 backdrop-blur-sm rounded-2xl p-6 space-y-4 border border-orange-200/50">
               <div className="flex space-x-4">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -783,6 +784,7 @@ export default function VyronaSpace() {
                 </div>
               </div>
             ) : null}
+              </div>
             </TabsContent>
 
             {/* Orders Tab - Complete Functionality */}
@@ -1011,6 +1013,7 @@ export default function VyronaSpace() {
                 </div>
               )}
             </div>
+              </div>
             </TabsContent>
 
             {/* Rewards Tab - VyronaCoins System */}
@@ -1239,7 +1242,6 @@ export default function VyronaSpace() {
                   </Button>
                 </div>
               </div>
-            </div>
             </TabsContent>
           </Tabs>
       </div>
@@ -1309,8 +1311,6 @@ export default function VyronaSpace() {
             </div>
           </div>
           )}
-                </div>
-              </div>
             </TabsContent>
           </Tabs>
         </div>
