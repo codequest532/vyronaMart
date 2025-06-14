@@ -198,16 +198,16 @@ export default function VyronaSpace() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center">
               <Zap className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                 VyronaSpace
               </h1>
               <p className="text-lg text-gray-600">Ultra-Fast Hyperlocal Delivery</p>
@@ -216,15 +216,15 @@ export default function VyronaSpace() {
           
           <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
             <div className="flex items-center">
-              <Clock className="h-4 w-4 mr-2 text-green-600" />
+              <Clock className="h-4 w-4 mr-2 text-emerald-600" />
               <span className="font-medium">5-15 Min Delivery</span>
             </div>
             <div className="flex items-center">
-              <MapPin className="h-4 w-4 mr-2 text-blue-600" />
+              <MapPin className="h-4 w-4 mr-2 text-teal-600" />
               <span className="font-medium">Nearby Stores</span>
             </div>
             <div className="flex items-center">
-              <Star className="h-4 w-4 mr-2 text-yellow-600" />
+              <Star className="h-4 w-4 mr-2 text-emerald-600" />
               <span className="font-medium">Top Rated Products</span>
             </div>
           </div>
@@ -232,20 +232,20 @@ export default function VyronaSpace() {
 
         {/* Navigation Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-sm rounded-2xl p-2 h-auto">
-            <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
+          <TabsList className="grid w-full grid-cols-4 bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-emerald-200/50">
+            <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
               <Sparkles className="h-4 w-4 mr-2" />
               Discover
             </TabsTrigger>
-            <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
+            <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
               <Package className="h-4 w-4 mr-2" />
               Orders
             </TabsTrigger>
-            <TabsTrigger value="rewards" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
+            <TabsTrigger value="rewards" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
               <Award className="h-4 w-4 mr-2" />
               Rewards
             </TabsTrigger>
-            <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
+            <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-emerald-100 data-[state=active]:shadow-md data-[state=active]:text-emerald-800">
               <Users className="h-4 w-4 mr-2" />
               Profile
             </TabsTrigger>
@@ -254,7 +254,7 @@ export default function VyronaSpace() {
           {/* Discover Tab - Product Discovery */}
           <TabsContent value="discover" className="space-y-8">
             {/* Search and Filters */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 space-y-4">
+            <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 space-y-4 border border-emerald-200/50">
               <div className="flex space-x-4">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -262,10 +262,10 @@ export default function VyronaSpace() {
                     placeholder="Search products, brands, or stores..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 rounded-xl border-0 bg-gray-50"
+                    className="pl-10 rounded-xl border-0 bg-white/70"
                   />
                 </div>
-                <Button variant="outline" className="rounded-xl">
+                <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
                   <Filter className="h-4 w-4 mr-2" />
                   Filters
                 </Button>
@@ -279,13 +279,17 @@ export default function VyronaSpace() {
                       variant={selectedCategory === category ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedCategory(category)}
-                      className="whitespace-nowrap rounded-xl"
+                      className={`whitespace-nowrap rounded-xl ${
+                        selectedCategory === category 
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                          : 'border-emerald-200 hover:bg-emerald-50 text-emerald-700'
+                      }`}
                     >
                       {category}
                     </Button>
                   ))}
                 </div>
-                <div className="border-l border-gray-300 mx-2" />
+                <div className="border-l border-emerald-300 mx-2" />
                 <div className="flex space-x-2">
                   {deliveryTimes.map(time => (
                     <Button
@@ -293,7 +297,11 @@ export default function VyronaSpace() {
                       variant={selectedDeliveryTime === time ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedDeliveryTime(time)}
-                      className="whitespace-nowrap rounded-xl"
+                      className={`whitespace-nowrap rounded-xl ${
+                        selectedDeliveryTime === time 
+                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                          : 'border-emerald-200 hover:bg-emerald-50 text-emerald-700'
+                      }`}
                     >
                       {time}
                     </Button>
@@ -306,11 +314,11 @@ export default function VyronaSpace() {
             {getFilteredProducts().length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {getFilteredProducts().map(product => (
-                  <Card key={product.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all">
+                  <Card key={product.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all hover:border-emerald-200 hover:bg-emerald-50/30">
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4 mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
-                          <ShoppingBag className="h-6 w-6 text-gray-400" />
+                        <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
+                          <ShoppingBag className="h-6 w-6 text-emerald-600" />
                         </div>
                         <div className="flex-1">
                           <h4 className="font-bold text-lg text-gray-900">{product.name}</h4>
