@@ -8349,10 +8349,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const registrationData = req.body;
       
-      // Generate unique email and password for VyronaRead sellers
+      // Use seller's actual email and password from registration form for VyronaRead sellers
       if (registrationData.sellerType === "vyronaread") {
-        const email = `${registrationData.businessName.toLowerCase().replace(/\s+/g, '')}@vyronaread.com`;
-        const password = `vyread${Math.random().toString(36).substring(2, 8)}`;
+        const email = registrationData.email;
+        const password = registrationData.password;
         
         // Create VyronaRead seller account
         const newSeller = await db
@@ -8362,6 +8362,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             email: email,
             mobile: registrationData.phone,
             role: 'seller',
+            sellerType: 'vyronaread',
             password: password
           })
           .returning({ id: users.id });
@@ -8374,7 +8375,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           businessName: registrationData.businessName,
           category: registrationData.businessCategory,
           storeLibraryName: registrationData.storeLibraryName,
-          address: registrationData.businessAddress
+          address: registrationData.businessAddress,
+          email: email
         });
         
         return res.json({
@@ -8389,7 +8391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (registrationData.sellerType === "vyronainstastore") {
         // Use seller's actual email and password from registration form
         const email = registrationData.email;
-        const password = registrationData.password; // Use password from form
+        const password = registrationData.password;
         
         // Create VyronaInstaStore seller account
         const newSeller = await db
@@ -8422,6 +8424,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
             password: password
           },
           message: "VyronaInstaStore seller registration successful"
+        });
+      } else if (registrationData.sellerType === "vyronahub") {
+        // Use seller's actual email and password from registration form
+        const email = registrationData.email;
+        const password = registrationData.password;
+        
+        // Create VyronaHub seller account
+        const newSeller = await db
+          .insert(users)
+          .values({
+            username: registrationData.ownerName,
+            email: email,
+            mobile: registrationData.phone,
+            role: 'seller',
+            sellerType: 'vyronahub',
+            password: password
+          })
+          .returning({ id: users.id });
+        
+        const sellerId = newSeller[0].id;
+        
+        console.log("VyronaHub seller registered:", {
+          sellerId,
+          businessName: registrationData.businessName,
+          category: registrationData.businessCategory,
+          email: email
+        });
+        
+        return res.json({
+          success: true,
+          sellerId: sellerId,
+          credentials: {
+            email: email,
+            password: password
+          },
+          message: "VyronaHub seller registration successful"
+        });
+      } else if (registrationData.sellerType === "vyronaspace") {
+        // Use seller's actual email and password from registration form
+        const email = registrationData.email;
+        const password = registrationData.password;
+        
+        // Create VyronaSpace seller account
+        const newSeller = await db
+          .insert(users)
+          .values({
+            username: registrationData.ownerName,
+            email: email,
+            mobile: registrationData.phone,
+            role: 'seller',
+            sellerType: 'vyronaspace',
+            password: password
+          })
+          .returning({ id: users.id });
+        
+        const sellerId = newSeller[0].id;
+        
+        console.log("VyronaSpace seller registered:", {
+          sellerId,
+          businessName: registrationData.businessName,
+          category: registrationData.businessCategory,
+          email: email
+        });
+        
+        return res.json({
+          success: true,
+          sellerId: sellerId,
+          credentials: {
+            email: email,
+            password: password
+          },
+          message: "VyronaSpace seller registration successful"
+        });
+      } else if (registrationData.sellerType === "vyronamallconnect") {
+        // Use seller's actual email and password from registration form
+        const email = registrationData.email;
+        const password = registrationData.password;
+        
+        // Create VyronaMallConnect seller account
+        const newSeller = await db
+          .insert(users)
+          .values({
+            username: registrationData.ownerName,
+            email: email,
+            mobile: registrationData.phone,
+            role: 'seller',
+            sellerType: 'vyronamallconnect',
+            password: password
+          })
+          .returning({ id: users.id });
+        
+        const sellerId = newSeller[0].id;
+        
+        console.log("VyronaMallConnect seller registered:", {
+          sellerId,
+          businessName: registrationData.businessName,
+          category: registrationData.businessCategory,
+          email: email
+        });
+        
+        return res.json({
+          success: true,
+          sellerId: sellerId,
+          credentials: {
+            email: email,
+            password: password
+          },
+          message: "VyronaMallConnect seller registration successful"
         });
       } else {
         // Handle other seller types (existing logic)
