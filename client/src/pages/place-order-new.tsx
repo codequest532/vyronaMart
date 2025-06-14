@@ -909,7 +909,7 @@ export default function PlaceOrderNew() {
                   </div>
                   <div className="flex justify-between">
                     <span>Remaining</span>
-                    <span className="text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed}</span>
+                    <span className="text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold">
@@ -1076,7 +1076,7 @@ export default function PlaceOrderNew() {
               {selectedItem && (
                 <>
                   Contributing to: <strong>{selectedItem.name}</strong><br />
-                  Remaining amount: <strong>₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount}</strong>
+                  Remaining amount: <strong>₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount)}</strong>
                 </>
               )}
             </DialogDescription>
