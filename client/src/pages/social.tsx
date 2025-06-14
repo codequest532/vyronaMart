@@ -1667,7 +1667,7 @@ export default function VyronaSocial() {
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                           <span className="font-bold text-green-600">₹{product.price}</span>
-                                          <span className="text-xs text-gray-500 line-through">₹{Math.floor(product.price * 1.2}</span>
+                                          <span className="text-xs text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
                                         </div>
                                         <Badge variant="outline" className="text-xs">
                                           20% OFF
@@ -1978,7 +1978,7 @@ export default function VyronaSocial() {
                     
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-purple-600">₹{Math.round(product.price}</span>
+                        <span className="text-xl font-bold text-purple-600">₹{Math.round(product.price)}</span>
                         {product.enableGroupBuy && (
                           <span className="text-sm text-gray-500 line-through">₹{Math.round(product.price * 1.2}</span>
                         )}

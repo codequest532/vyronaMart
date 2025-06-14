@@ -320,7 +320,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                   <span className="text-4xl font-bold text-green-600">₹{product.price}</span>
                   {isPhysicalBook && (
                     <>
-                      <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.2}</span>
+                      <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
                       <Badge className="bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm">
                         Reader's Discount
                       </Badge>
@@ -335,7 +335,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-green-600 font-medium">✓ Best reading price</span>
-                  {isPhysicalBook && <span className="text-sm text-blue-600">• Rental available from ₹{Math.floor(product.price * 0.2}/month</span>}
+                  {isPhysicalBook && <span className="text-sm text-blue-600">• Rental available from ₹{Math.floor(product.price * 0.2)}/month</span>}
                 </div>
               </div>
             </div>
