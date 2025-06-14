@@ -1379,10 +1379,9 @@ export default function VyronaSpace() {
             </div>
           </div>
           )}
-        </div>
 
         {/* Edit Profile Modal */}
-          <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+        <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Edit Profile</DialogTitle>
@@ -1528,7 +1527,6 @@ export default function VyronaSpace() {
           </DialogFooter>
         </DialogContent>
         </Dialog>
-        </div>
       </div>
     </>
   );
