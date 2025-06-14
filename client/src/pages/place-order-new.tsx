@@ -800,7 +800,7 @@ export default function PlaceOrderNew() {
                           {/* Contribution Progress */}
                           <div className="mt-4 space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span>Contributed: ₹{item.contributedAmount)}</span>
+                              <span>Contributed: ₹{item.contributedAmount}</span>
                               <span>Remaining: ₹{Math.round(item.targetAmount - item.contributedAmount)}</span>
                             </div>
                             <Progress 
@@ -901,11 +901,11 @@ export default function PlaceOrderNew() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Items Total</span>
-                    <span>₹{checkoutState.totalCartValue)}</span>
+                    <span>₹{checkoutState.totalCartValue}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Total Contributed</span>
-                    <span className="text-green-600">₹{checkoutState.totalContributed)}</span>
+                    <span className="text-green-600">₹{checkoutState.totalContributed}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Remaining</span>
@@ -914,7 +914,7 @@ export default function PlaceOrderNew() {
                   <Separator />
                   <div className="flex justify-between font-semibold">
                     <span>Order Total</span>
-                    <span>₹{checkoutState.totalCartValue)}</span>
+                    <span>₹{checkoutState.totalCartValue}</span>
                   </div>
                 </div>
               </CardContent>
