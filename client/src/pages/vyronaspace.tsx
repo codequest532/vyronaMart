@@ -1528,6 +1528,7 @@ export default function VyronaSpace() {
           </DialogFooter>
         </DialogContent>
         </Dialog>
+      </div>
     </div>
     </>
   );
