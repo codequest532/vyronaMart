@@ -143,7 +143,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("VyronaHub Order request body:", JSON.stringify(req.body, null, 2));
       
-      const { items, shippingAddress, paymentMethod, totalAmount, total } = req.body;
+      const { 
+        items, shippingAddress, paymentMethod, totalAmount, total,
+        enableSubscription, subscriptionFrequency, subscriptionDayOfWeek,
+        subscriptionTime, subscriptionStartDate, module
+      } = req.body;
       const userId = 1; // Default user for demo
       const orderTotal = totalAmount || total;
 

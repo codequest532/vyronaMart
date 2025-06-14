@@ -161,10 +161,16 @@ export default function VyronaSpaceCheckout() {
       })),
       totalAmount: finalTotal,
       deliveryFee: calculateDeliveryFee(),
-      customerDetails: addressData,
+      shippingAddress: addressData,
       paymentMethod: form.getValues("paymentMethod"),
       specialInstructions: form.getValues("specialInstructions"),
-      module: "space"
+      module: "vyronaspace",
+      // Subscription data
+      enableSubscription: form.getValues("enableSubscription"),
+      subscriptionFrequency: form.getValues("subscriptionFrequency"),
+      subscriptionDayOfWeek: form.getValues("subscriptionDayOfWeek"),
+      subscriptionTime: form.getValues("subscriptionTime"),
+      subscriptionStartDate: form.getValues("subscriptionStartDate")
     };
 
     createOrderMutation.mutate(orderData);
