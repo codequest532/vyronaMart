@@ -1023,95 +1023,96 @@ export default function VyronaSpace() {
                   <h2 className="text-3xl font-bold text-gray-900 mb-6">VyronaCoins & Rewards</h2>
                   
                   {/* Current Points */}
-              <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-bold">Your VyronaCoins</h3>
-                    <p className="text-emerald-100">Available balance</p>
-                  </div>
-                  <div className="text-right">
-                    {balanceLoading ? (
-                      <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
-                    ) : (
-                      <>
-                        <div className="text-3xl font-bold">{Math.round((walletBalance as any)?.balance * 10 || 0)}</div>
-                        <div className="text-emerald-100">≈ ₹{Math.round((walletBalance as any)?.balance || 0)}</div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              {/* Achievements */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                  <CardContent className="p-4 text-center">
-                    <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                    <h4 className="font-bold text-gray-900">First Purchase</h4>
-                    <p className="text-sm text-gray-600">+100 VyronaCoins</p>
-                    <Badge className="bg-green-100 text-green-700 mt-2">Completed</Badge>
-                  </CardContent>
-                </Card>
-                
-                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                  <CardContent className="p-4 text-center">
-                    <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                    <h4 className="font-bold text-gray-900">Local Explorer</h4>
-                    <p className="text-sm text-gray-600">Shop from 5 different stores</p>
-                    <Badge className="bg-yellow-100 text-yellow-700 mt-2">3/5 Progress</Badge>
-                  </CardContent>
-                </Card>
-                
-                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                  <CardContent className="p-4 text-center">
-                    <Zap className="h-8 w-8 text-purple-500 mx-auto mb-2" />
-                    <h4 className="font-bold text-gray-900">Speed Shopper</h4>
-                    <p className="text-sm text-gray-600">Order within 15 minutes</p>
-                    <Badge className="bg-gray-100 text-gray-700 mt-2">Locked</Badge>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Rewards Store */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Redeem Rewards</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-bold text-gray-900">₹50 Off Coupon</h4>
-                          <p className="text-sm text-gray-600">Valid on orders above ₹500</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-emerald-600">500 Coins</div>
-                          <Button size="sm" className="mt-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">
-                            Redeem
-                          </Button>
-                        </div>
+                  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white mb-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-bold">Your VyronaCoins</h3>
+                        <p className="text-emerald-100">Available balance</p>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="text-right">
+                        {balanceLoading ? (
+                          <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
+                        ) : (
+                          <>
+                            <div className="text-3xl font-bold">{Math.round((walletBalance as any)?.balance * 10 || 0)}</div>
+                            <div className="text-emerald-100">≈ ₹{Math.round((walletBalance as any)?.balance || 0)}</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                   
-                  <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-bold text-gray-900">Free Delivery</h4>
-                          <p className="text-sm text-gray-600">Next 3 orders</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-emerald-600">300 Coins</div>
-                          <Button size="sm" className="mt-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">
-                            Redeem
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {/* Achievements */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                      <CardContent className="p-4 text-center">
+                        <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                        <h4 className="font-bold text-gray-900">First Purchase</h4>
+                        <p className="text-sm text-gray-600">+100 VyronaCoins</p>
+                        <Badge className="bg-green-100 text-green-700 mt-2">Completed</Badge>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                      <CardContent className="p-4 text-center">
+                        <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                        <h4 className="font-bold text-gray-900">Local Explorer</h4>
+                        <p className="text-sm text-gray-600">Shop from 5 different stores</p>
+                        <Badge className="bg-yellow-100 text-yellow-700 mt-2">3/5 Progress</Badge>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                      <CardContent className="p-4 text-center">
+                        <Zap className="h-8 w-8 text-purple-500 mx-auto mb-2" />
+                        <h4 className="font-bold text-gray-900">Speed Shopper</h4>
+                        <p className="text-sm text-gray-600">Order within 15 minutes</p>
+                        <Badge className="bg-gray-100 text-gray-700 mt-2">Locked</Badge>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  {/* Rewards Store */}
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Redeem Rewards</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-bold text-gray-900">₹50 Off Coupon</h4>
+                              <p className="text-sm text-gray-600">Valid on orders above ₹500</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-emerald-600">500 Coins</div>
+                              <Button size="sm" className="mt-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                                Redeem
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-bold text-gray-900">Free Delivery</h4>
+                              <p className="text-sm text-gray-600">Next 3 orders</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-emerald-600">300 Coins</div>
+                              <Button size="sm" className="mt-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                                Redeem
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
             </TabsContent>
 
             {/* Profile Tab - Customer Management */}
