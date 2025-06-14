@@ -309,10 +309,10 @@ export default function VyronaInstaShop() {
                          productSeller.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === "all" || productCategory === selectedCategory;
     const matchesPrice = priceRange === "all" || (
-      priceRange === "0-500" ? (productPrice / 100) <= 500 :
-      priceRange === "500-1000" ? (productPrice / 100) > 500 && (productPrice / 100) <= 1000 :
-      priceRange === "1000-2000" ? (productPrice / 100) > 1000 && (productPrice / 100) <= 2000 :
-      priceRange === "2000+" ? (productPrice / 100) > 2000 : true
+      priceRange === "0-500" ? productPrice <= 500 :
+      priceRange === "500-1000" ? productPrice > 500 && productPrice <= 1000 :
+      priceRange === "1000-2000" ? productPrice > 1000 && productPrice <= 2000 :
+      priceRange === "2000+" ? productPrice > 2000 : true
     );
     
     return matchesSearch && matchesCategory && matchesPrice;
@@ -548,11 +548,11 @@ export default function VyronaInstaShop() {
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
                         <span className="text-lg font-bold text-gray-900">
-                          ₹{((product.price || 0) / 100).toFixed(2)}
+                          ₹{Math.round(product.price || 0)}
                         </span>
                         {product.originalPrice && (
                           <span className="text-sm text-gray-500 line-through">
-                            ₹{((product.originalPrice || 0) / 100).toFixed(2)}
+                            ₹{Math.round(product.originalPrice || 0)}
                           </span>
                         )}
                       </div>
@@ -582,7 +582,7 @@ export default function VyronaInstaShop() {
                             addToCartMutation.mutate({
                               productId: product.id,
                               quantity: 1,
-                              price: product.price / 100 // Convert from cents to rupees
+                              price: product.price // Price already in rupees
                             });
                           }}
                           disabled={addToCartMutation.isPending}
