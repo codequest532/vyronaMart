@@ -447,27 +447,27 @@ export default function VyronaSpace() {
 
           {/* Navigation Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
-            <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
-              <Sparkles className="h-4 w-4 mr-2" />
-              Discover
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
-              <Package className="h-4 w-4 mr-2" />
-              Orders
-            </TabsTrigger>
-            <TabsTrigger value="rewards" className="rounded-xl py-3 data-[state=active]:bg-pink-100 data-[state=active]:shadow-md data-[state=active]:text-pink-800">
-              <Award className="h-4 w-4 mr-2" />
-              Rewards
-            </TabsTrigger>
-            <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-purple-100 data-[state=active]:shadow-md data-[state=active]:text-purple-800">
-              <Users className="h-4 w-4 mr-2" />
-              Profile
-            </TabsTrigger>
-          </TabsList>
+            <TabsList className="grid w-full grid-cols-4 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
+              <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Discover
+              </TabsTrigger>
+              <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
+                <Package className="h-4 w-4 mr-2" />
+                Orders
+              </TabsTrigger>
+              <TabsTrigger value="rewards" className="rounded-xl py-3 data-[state=active]:bg-pink-100 data-[state=active]:shadow-md data-[state=active]:text-pink-800">
+                <Award className="h-4 w-4 mr-2" />
+                Rewards
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-purple-100 data-[state=active]:shadow-md data-[state=active]:text-purple-800">
+                <Users className="h-4 w-4 mr-2" />
+                Profile
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Discover Tab - Store Discovery */}
-          <TabsContent value="discover" className="space-y-8">
+            {/* Discover Tab - Store Discovery */}
+            <TabsContent value="discover" className="space-y-8">
             {viewMode === "stores" ? (
               <>
                 {/* Search and Filters */}
@@ -783,10 +783,10 @@ export default function VyronaSpace() {
                 </div>
               </div>
             ) : null}
-          </TabsContent>
+            </TabsContent>
 
-          {/* Orders Tab - Complete Functionality */}
-          <TabsContent value="orders" className="space-y-6">
+            {/* Orders Tab - Complete Functionality */}
+            <TabsContent value="orders" className="space-y-6">
             <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
