@@ -8,14 +8,13 @@ import { storage } from "./storage";
 // Initialize VyronaRead sample books for customer interface
 async function initializeVyronaReadBooks() {
   try {
-    // Check if VyronaRead books already exist
-    const existingBooks = await storage.getProducts('vyronaread', 'books');
-    if (existingBooks.length > 0) {
-      log(`VyronaRead books already initialized (${existingBooks.length} books found)`);
-      return;
-    }
+    // VyronaRead books will only be created by actual VyronaRead sellers
+    // No sample books needed - platform relies on genuine seller content
+    log('VyronaRead initialization skipped - books created by actual sellers only');
+    return;
 
-    // Create sample VyronaRead books
+    // Disabled sample VyronaRead books - uncomment if needed for testing
+    /*
     const vyronaReadBooks = [
       {
         name: "The Great Gatsby",
@@ -105,6 +104,7 @@ async function initializeVyronaReadBooks() {
     }
 
     log(`VyronaRead books initialized successfully (${vyronaReadBooks.length} books created)`);
+    */
   } catch (error) {
     console.error("Error initializing VyronaRead books:", error);
   }
