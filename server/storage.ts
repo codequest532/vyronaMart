@@ -143,9 +143,9 @@ export interface IStorage {
 
   // VyronaInstaShop - Instagram Products
   createInstagramProduct(product: InsertInstagramProduct): Promise<InstagramProduct>;
-  getInstagramProduct(id: number): Promise<InstagramProduct | undefined>;
   syncInstagramProducts(storeId: number, products: InsertInstagramProduct[]): Promise<InstagramProduct[]>;
   getInstagramProducts(storeId: number): Promise<InstagramProduct[]>;
+  getInstagramProduct(id: number): Promise<InstagramProduct | undefined>;
   updateInstagramProduct(id: number, updates: Partial<InsertInstagramProduct>): Promise<InstagramProduct | undefined>;
 
   // VyronaInstaShop - Instagram Orders
@@ -2440,6 +2440,11 @@ export class DatabaseStorage implements IStorage {
 
   async getInstagramProducts(storeId: number): Promise<InstagramProduct[]> {
     return await db.select().from(instagramProducts).where(eq(instagramProducts.storeId, storeId));
+  }
+
+  async getInstagramProduct(id: number): Promise<InstagramProduct | undefined> {
+    const [product] = await db.select().from(instagramProducts).where(eq(instagramProducts.id, id));
+    return product;
   }
 
   async updateInstagramProduct(id: number, updates: Partial<InsertInstagramProduct>): Promise<InstagramProduct | undefined> {

@@ -106,6 +106,7 @@ function Router() {
       <Route path="/checkout-modern/:id" component={SimpleCheckout} />
       <Route path="/instashop" component={VyronaInstaShop} />
       <Route path="/instagram-checkout" component={InstagramCheckout} />
+      <Route path="/order-confirmation" component={OrderConfirmation} />
       <Route path="/vyronahub" component={VyronaHub} />
       <Route path="/vyronahub-checkout" component={VyronaHubCheckout} />
       <Route path="/order-success" component={OrderSuccess} />

@@ -4108,32 +4108,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Shipping address is required" });
       }
 
-      // Create Instagram order
-      const orderData = {
-        userId: authenticatedUser.id,
-        totalAmount: totalAmount,
-        status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
-        paymentMethod: paymentMethod,
-        paymentStatus: paymentMethod === 'cod' ? 'pending' : 'completed',
-        shippingAddress: JSON.stringify(shippingAddress),
-        upiTransactionId: paymentMethod === 'upi' ? `UPI_${Date.now()}_${authenticatedUser.id}` : null,
-        trackingNumber: `IG${Date.now().toString().slice(-8)}`,
-        module: 'instagram'
-      };
-
-      const order = await storage.createInstagramOrder(orderData);
-
-      // Create order items
+      // Process each item as separate Instagram orders (current schema limitation)
+      const createdOrders = [];
+      
       for (const item of items) {
-        await storage.createInstagramOrderItem({
-          orderId: order.id,
+        // Get the product to find its storeId
+        const product = await storage.getInstagramProduct(item.id);
+        if (!product) {
+          throw new Error(`Product ${item.id} not found`);
+        }
+
+        const orderData = {
+          buyerId: authenticatedUser.id,
+          storeId: product.storeId,
           productId: item.id,
           quantity: item.quantity,
-          price: item.price,
-          productName: item.name,
-          sellerInfo: item.seller
-        });
+          totalAmount: item.price * item.quantity,
+          status: paymentMethod === 'cod' ? 'confirmed' : 'pending',
+          shippingAddress: shippingAddress,
+          contactInfo: {
+            email: authenticatedUser.email,
+            paymentMethod: paymentMethod,
+            upiTransactionId: paymentMethod === 'upi' ? `UPI_${Date.now()}_${authenticatedUser.id}` : null
+          },
+          orderNotes: `Instagram order - Payment: ${paymentMethod}`
+        };
+
+        const order = await storage.createInstagramOrder(orderData);
+        createdOrders.push(order);
       }
+
+      const mainOrder = createdOrders[0]; // Use first order for response
 
       // Clear Instagram cart if order was placed from cart
       if (req.body.source === 'instagram') {
@@ -4142,8 +4147,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         success: true,
-        orderId: order.id,
-        trackingNumber: order.trackingNumber,
+        orderId: mainOrder.id,
+        trackingNumber: `IG${Date.now().toString().slice(-8)}`,
         message: "Instagram order placed successfully"
       });
 
