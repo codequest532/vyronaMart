@@ -146,27 +146,28 @@ const mockStores: Store[] = [
 const mockOrders: Order[] = [
   {
     id: 1001,
-    status: "Out for Delivery",
-    estimatedDelivery: "5 min",
+    status: "In Transit",
+    estimatedDelivery: "Today, 4:30 PM",
     trackingNumber: "VYR1001",
     items: [
       { name: "Fresh Bananas", quantity: 2, price: 45 },
       { name: "Organic Milk", quantity: 1, price: 85 }
     ],
     total: 175,
-    deliveryPartner: "Raj Kumar",
-    currentLocation: "Near City Mall"
+    deliveryPartner: "SpeedX",
+    currentLocation: "Near your location"
   },
   {
     id: 1002,
     status: "Delivered",
-    estimatedDelivery: "Completed",
+    estimatedDelivery: "Yesterday, 3:15 PM",
     trackingNumber: "VYR1002",
     items: [
-      { name: "Whole Wheat Bread", quantity: 1, price: 35 }
+      { name: "Whole Wheat Bread", quantity: 1, price: 35 },
+      { name: "Premium Rice", quantity: 1, price: 120 }
     ],
-    total: 35,
-    deliveryPartner: "Priya Singh",
+    total: 155,
+    deliveryPartner: "FastTrack",
     currentLocation: "Delivered"
   }
 ];
@@ -185,7 +186,7 @@ export default function VyronaSpace() {
     return mockStores.filter(store => {
       const matchesSearch = store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           store.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          store.featuredProducts.some(product => 
+                          store.featuredProducts.some((product: string) => 
                             product.toLowerCase().includes(searchQuery.toLowerCase())
                           );
       const matchesCategory = selectedCategory === "All" || store.category === selectedCategory;
@@ -341,7 +342,7 @@ export default function VyronaSpace() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Discover Tab - Product Discovery */}
+          {/* Discover Tab - Store Discovery */}
           <TabsContent value="discover" className="space-y-8">
             {/* Search and Filters */}
             <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 space-y-4 border border-emerald-200/50">
@@ -474,240 +475,108 @@ export default function VyronaSpace() {
             )}
           </TabsContent>
 
-          {/* Orders Tab */}
+          {/* Other tabs placeholder */}
           <TabsContent value="orders" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
-              <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
-
-            {mockOrders.length > 0 ? (
-              <div className="space-y-4">
-                {mockOrders.map(order => (
-                  <Card key={order.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h4 className="font-bold text-lg text-gray-900">Order #{order.id}</h4>
-                          <p className="text-sm text-gray-600">{order.estimatedDelivery}</p>
-                        </div>
-                        <Badge className={`${
-                          order.status === 'Delivered' ? 'bg-green-100 text-green-700' :
-                          order.status === 'In Transit' ? 'bg-blue-100 text-blue-700' :
-                          'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {order.status}
-                        </Badge>
-                      </div>
-                      
-                      <div className="space-y-2 mb-4">
-                        {order.items.map((item, index) => (
-                          <div key={index} className="flex justify-between text-sm">
-                            <span>{item.name} x{item.quantity}</span>
-                            <span>₹{Math.round(item.price * item.quantity)}</span>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                        <span className="font-bold">Total: ₹{Math.round(order.total)}</span>
-                        <Button 
-                          onClick={() => setSelectedOrder(order)}
-                          variant="outline" 
-                          size="sm"
-                          className="rounded-xl border-emerald-200 hover:bg-emerald-50"
-                        >
-                          Track Order
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16 bg-emerald-50/80 backdrop-blur-sm rounded-2xl border border-emerald-200/50">
-                <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Package className="h-8 w-8 text-emerald-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h3>
-                <p className="text-gray-600">Start shopping to see your orders here</p>
-              </div>
-            )}
+            <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
+            <p className="text-gray-600">Order history will appear here</p>
           </TabsContent>
 
-          {/* Rewards Tab */}
           <TabsContent value="rewards" className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">VyronaCoins & Rewards</h2>
-              <p className="text-gray-600 mb-8">Earn coins with every purchase and unlock amazing rewards!</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="rounded-2xl border-0 bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
-                <CardContent className="p-6 text-center">
-                  <Trophy className="h-12 w-12 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold mb-2">2,450</h3>
-                  <p className="text-emerald-100">VyronaCoins Earned</p>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                <CardContent className="p-6 text-center">
-                  <Target className="h-12 w-12 mx-auto mb-4 text-emerald-600" />
-                  <h3 className="text-2xl font-bold mb-2 text-gray-900">8/10</h3>
-                  <p className="text-gray-600">Orders to Next Reward</p>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                <CardContent className="p-6 text-center">
-                  <Gift className="h-12 w-12 mx-auto mb-4 text-emerald-600" />
-                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Gold</h3>
-                  <p className="text-gray-600">Current Tier</p>
-                </CardContent>
-              </Card>
-            </div>
+            <h2 className="text-3xl font-bold text-gray-900">VyronaCoins & Rewards</h2>
+            <p className="text-gray-600">Rewards system coming soon</p>
           </TabsContent>
 
-          {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-6">
-            <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center">
-                    <Users className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">Customer Profile</h3>
-                    <p className="text-gray-600">Manage your VyronaSpace account</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-emerald-50/80 rounded-xl">
-                    <span className="font-medium text-gray-900">Account Settings</span>
-                    <Button variant="outline" size="sm" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
-                      Edit
-                    </Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-emerald-50/80 rounded-xl">
-                    <span className="font-medium text-gray-900">Delivery Addresses</span>
-                    <Button variant="outline" size="sm" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
-                      Manage
-                    </Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-emerald-50/80 rounded-xl">
-                    <span className="font-medium text-gray-900">Payment Methods</span>
-                    <Button variant="outline" size="sm" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
-                      Update
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <h2 className="text-3xl font-bold text-gray-900">Customer Profile</h2>
+            <p className="text-gray-600">Profile management</p>
           </TabsContent>
         </Tabs>
 
-        {/* Store Browsing Modal/View */}
+        {/* Store Browsing Modal */}
         {selectedStore && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
-                        <ShoppingBag className="h-6 w-6 text-emerald-600" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">{selectedStore.name}</h2>
-                        <p className="text-gray-600">{selectedStore.description}</p>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <div className="flex items-center">
-                            <Clock className="h-4 w-4 mr-1 text-emerald-600" />
-                            <span className="text-sm text-emerald-600">{selectedStore.deliveryTime}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 mr-1 text-yellow-400 fill-current" />
-                            <span className="text-sm text-gray-600">{selectedStore.rating} ({selectedStore.reviewCount} reviews)</span>
-                          </div>
-                        </div>
-                      </div>
+            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
+                      <ShoppingBag className="h-6 w-6 text-emerald-600" />
                     </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSelectedStore(null)}
-                      className="rounded-xl"
-                    >
-                      Close
-                    </Button>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">{selectedStore.name}</h2>
+                      <p className="text-gray-600">{selectedStore.description}</p>
+                    </div>
                   </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => setSelectedStore(null)}
+                    className="rounded-xl"
+                  >
+                    Close
+                  </Button>
                 </div>
+              </div>
 
-                <div className="p-6 overflow-y-auto max-h-[60vh]">
-                  <h3 className="text-lg font-semibold mb-4">Available Products</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {getStoreProducts(selectedStore.id).map(product => (
-                      <Card key={product.id} className="rounded-xl border border-gray-200 hover:shadow-md transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-gray-900">{product.name}</h4>
-                              <p className="text-sm text-gray-600">{product.unit}</p>
-                              <div className="flex items-center space-x-2 mt-2">
-                                <span className="font-bold text-lg text-gray-900">₹{product.price}</span>
-                                <span className="text-sm text-gray-500">
-                                  {product.inStock > 0 ? `${product.inStock} in stock` : 'Out of stock'}
-                                </span>
-                              </div>
+              <div className="p-6 overflow-y-auto max-h-[60vh]">
+                <h3 className="text-lg font-semibold mb-4">Available Products</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {getStoreProducts(selectedStore.id).map(product => (
+                    <Card key={product.id} className="rounded-xl border border-gray-200 hover:shadow-md transition-all">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900">{product.name}</h4>
+                            <p className="text-sm text-gray-600">{product.unit}</p>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <span className="font-bold text-lg text-gray-900">₹{product.price}</span>
+                              <span className="text-sm text-gray-500">
+                                {product.inStock > 0 ? `${product.inStock} in stock` : 'Out of stock'}
+                              </span>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            {cart.find(item => item.id === product.id) ? (
-                              <div className="flex items-center space-x-3 flex-1 bg-gray-50 rounded-xl p-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => updateCartQuantity(product.id, -1)}
-                                  className="h-8 w-8 p-0 rounded-lg"
-                                >
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                                <span className="font-semibold">
-                                  {cart.find(item => item.id === product.id)?.quantity || 0}
-                                </span>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => updateCartQuantity(product.id, 1)}
-                                  className="h-8 w-8 p-0 rounded-lg"
-                                >
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ) : (
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          {cart.find(item => item.id === product.id) ? (
+                            <div className="flex items-center space-x-3 flex-1 bg-gray-50 rounded-xl p-2">
                               <Button 
-                                onClick={() => addToCart({...product, storeName: selectedStore.name})}
-                                disabled={product.inStock === 0}
-                                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => updateCartQuantity(product.id, -1)}
+                                className="h-8 w-8 p-0 rounded-lg"
                               >
-                                <ShoppingCart className="h-4 w-4 mr-2" />
-                                Add to Cart
+                                <Minus className="h-4 w-4" />
                               </Button>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                              <span className="font-semibold">
+                                {cart.find(item => item.id === product.id)?.quantity || 0}
+                              </span>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => updateCartQuantity(product.id, 1)}
+                                className="h-8 w-8 p-0 rounded-lg"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button 
+                              onClick={() => addToCart({...product, storeName: selectedStore.name})}
+                              disabled={product.inStock === 0}
+                              className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
+                            >
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Add to Cart
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
             </div>
+          </div>
         )}
 
         {/* Cart Summary */}
@@ -729,136 +598,6 @@ export default function VyronaSpace() {
             </div>
           </div>
         )}
-      </div>
-    </div>
-
-          {/* Orders Tab */}
-          <TabsContent value="orders" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
-              <Button variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
-
-            <div className="space-y-6">
-              {mockOrders.map(order => (
-                <Card key={order.id} className="rounded-2xl border-0 bg-emerald-50/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all border border-emerald-200/50">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-6">
-                      <div>
-                        <h3 className="font-bold text-lg">Order #{order.trackingNumber}</h3>
-                        <p className="text-sm text-gray-600">
-                          {order.items.length} items • ₹{order.total}
-                        </p>
-                      </div>
-                      <Badge className={order.status === "Delivered" ? "bg-emerald-500 text-white" : "bg-teal-500 text-white"}>
-                        {order.status}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-3 mb-6">
-                      {order.items.map((item, index) => (
-                        <div key={index} className="flex justify-between text-sm">
-                          <span>{item.name} x{item.quantity}</span>
-                          <span className="font-medium">₹{item.price * item.quantity}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center">
-                          <Truck className="h-4 w-4 mr-2 text-teal-600" />
-                          <span className="text-sm text-gray-600">{order.deliveryPartner}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-2 text-emerald-600" />
-                          <span className="text-sm text-gray-600">{order.currentLocation}</span>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
-                        Track Order
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Rewards Tab */}
-          <TabsContent value="rewards" className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">VyronaCoins & Rewards</h2>
-              <p className="text-gray-600">Earn coins with every order and unlock amazing rewards</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="rounded-2xl border-0 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-lg border border-emerald-200/50">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-2 text-emerald-800">1,250</h3>
-                  <p className="text-emerald-600">VyronaCoins</p>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl border-0 bg-gradient-to-br from-emerald-50 to-green-50 shadow-lg border border-emerald-200/50">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-600 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Target className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-2 text-emerald-800">Gold</h3>
-                  <p className="text-emerald-600">Member Status</p>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-2xl border-0 bg-gradient-to-br from-teal-50 to-emerald-50 shadow-lg border border-emerald-200/50">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Gift className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-2 text-emerald-800">5</h3>
-                  <p className="text-emerald-600">Available Rewards</p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Profile</h2>
-              <p className="text-gray-600">Manage your account and preferences</p>
-            </div>
-
-            <Card className="rounded-2xl border-0 bg-emerald-50/80 backdrop-blur-sm shadow-lg border border-emerald-200/50">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-10 w-10 text-emerald-600" />
-                  </div>
-                  <h3 className="font-bold text-xl mb-2 text-emerald-900">Welcome to VyronaSpace</h3>
-                  <p className="text-emerald-700 mb-6">Quick commerce at your fingertips</p>
-                  
-                  <div className="space-y-4">
-                    <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl">
-                      <Phone className="h-4 w-4 mr-2" />
-                      Contact Support
-                    </Button>
-                    <Button variant="outline" className="w-full rounded-xl border-emerald-200 hover:bg-emerald-100">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      Give Feedback
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
     </div>
   );
