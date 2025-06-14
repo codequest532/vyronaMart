@@ -4,6 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { Icon } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { 
   ArrowLeft, MapPin, Clock, Phone, MessageCircle, 
   Truck, CheckCircle, Package, User, Star
@@ -47,26 +50,69 @@ interface OrderTracking {
 export default function OrderTracking() {
   const [, params] = useRoute("/track-order/:orderId");
   const orderId = params?.orderId;
-  const [mapInitialized, setMapInitialized] = useState(false);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([12.9716, 77.6412]); // Bangalore coordinates
+  const [route, setRoute] = useState<[number, number][]>([]);
 
   const { data: orderTracking, isLoading } = useQuery({
     queryKey: ["/api/orders/track", orderId],
     refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
 
-  // Initialize map when delivery partner is assigned
-  useEffect(() => {
-    if (orderTracking?.deliveryPartner && !mapInitialized) {
-      initializeMap();
-      setMapInitialized(true);
-    }
-  }, [orderTracking?.deliveryPartner, mapInitialized]);
+  // Custom icons for map markers
+  const storeIcon = new Icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/>
+        <path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.79 1.1L21 9"/>
+        <path d="M12 3v6"/>
+      </svg>
+    `),
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
 
-  const initializeMap = () => {
-    // Initialize Google Maps or Mapbox for real-time tracking
-    // This would integrate with actual mapping service
-    console.log("Initializing map for delivery tracking");
-  };
+  const deliveryIcon = new Icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/>
+        <path d="M15 18H9"/>
+        <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/>
+        <circle cx="17" cy="18" r="2"/>
+        <circle cx="7" cy="18" r="2"/>
+      </svg>
+    `),
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+
+  const customerIcon = new Icon({
+    iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3"/>
+      </svg>
+    `),
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32]
+  });
+
+  // Calculate route when delivery partner data is available
+  useEffect(() => {
+    if (orderTracking && 'deliveryPartner' in orderTracking && orderTracking.deliveryPartner) {
+      const storeCoords: [number, number] = [12.9352, 77.6245]; // FreshMart Express
+      const deliveryCoords: [number, number] = [orderTracking.deliveryPartner.currentLat, orderTracking.deliveryPartner.currentLng];
+      const customerCoords: [number, number] = [12.9667, 77.6378]; // Customer location
+      
+      // Create route path
+      setRoute([storeCoords, deliveryCoords, customerCoords]);
+      
+      // Center map on delivery partner location
+      setMapCenter(deliveryCoords);
+    }
+  }, [orderTracking]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -138,12 +184,65 @@ export default function OrderTracking() {
           <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-lg">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Live Tracking</h3>
-              <div className="bg-gray-100 rounded-xl h-64 flex items-center justify-center mb-4">
-                <div className="text-center">
-                  <MapPin className="h-12 w-12 text-emerald-600 mx-auto mb-2" />
-                  <p className="text-gray-600 mb-2">Real-time map tracking</p>
-                  <p className="text-sm text-gray-500">Your delivery partner is on the way!</p>
-                </div>
+              <div className="rounded-xl h-64 overflow-hidden mb-4">
+                <MapContainer
+                  center={mapCenter}
+                  zoom={13}
+                  style={{ height: '100%', width: '100%' }}
+                  className="rounded-xl"
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  
+                  {/* Store Location */}
+                  <Marker position={[12.9352, 77.6245]} icon={storeIcon}>
+                    <Popup>
+                      <div className="text-center">
+                        <strong>{tracking.storeName}</strong><br/>
+                        <span className="text-sm text-gray-600">Pickup Location</span>
+                      </div>
+                    </Popup>
+                  </Marker>
+                  
+                  {/* Delivery Partner Location */}
+                  <Marker 
+                    position={[tracking.deliveryPartner.currentLat, tracking.deliveryPartner.currentLng]} 
+                    icon={deliveryIcon}
+                  >
+                    <Popup>
+                      <div className="text-center">
+                        <strong>{tracking.deliveryPartner.name}</strong><br/>
+                        <span className="text-sm text-gray-600">{tracking.deliveryPartner.vehicleType}</span><br/>
+                        <span className="text-xs text-gray-500">{tracking.deliveryPartner.vehicleNumber}</span>
+                      </div>
+                    </Popup>
+                  </Marker>
+                  
+                  {/* Customer Location */}
+                  <Marker position={[12.9667, 77.6378]} icon={customerIcon}>
+                    <Popup>
+                      <div className="text-center">
+                        <strong>Delivery Address</strong><br/>
+                        <span className="text-sm text-gray-600">{tracking.deliveryAddress}</span>
+                      </div>
+                    </Popup>
+                  </Marker>
+                  
+                  {/* Route Path */}
+                  {route.length > 0 && (
+                    <Polyline
+                      positions={route}
+                      pathOptions={{
+                        color: '#059669',
+                        weight: 4,
+                        opacity: 0.8,
+                        dashArray: '10, 10'
+                      }}
+                    />
+                  )}
+                </MapContainer>
               </div>
               
               {/* Delivery Partner Info */}
