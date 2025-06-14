@@ -787,7 +787,6 @@ export default function VyronaSpace() {
           {/* Orders Tab - Complete Functionality */}
           <TabsContent value="orders" className="space-y-6">
             <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
-              <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
                 <div className="flex space-x-3">
@@ -1009,7 +1008,6 @@ export default function VyronaSpace() {
               )}
                 </div>
               )}
-              </div>
             </div>
           </TabsContent>
 
@@ -1239,10 +1237,9 @@ export default function VyronaSpace() {
             </div>
           </TabsContent>
         </Tabs>
+      </div>
 
-
-
-        {/* Fixed Position Quick Cart Button */}
+      {/* Fixed Position Quick Cart Button */}
         <div className="fixed bottom-6 right-6 z-50">
           <Button 
             onClick={() => {
