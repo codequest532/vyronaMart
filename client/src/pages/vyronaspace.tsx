@@ -10,24 +10,28 @@ import {
   MessageCircle, RefreshCw, Trophy, Target, Zap, Gift
 } from "lucide-react";
 
-interface Product {
+interface Store {
   id: number;
   name: string;
-  brand: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  unit: string;
-  inStock: number;
   category: string;
-  storeName: string;
-  storeId: number;
-  deliveryTime: string;
   rating: number;
+  reviewCount: number;
+  deliveryTime: string;
+  distance: string;
+  isOpen: boolean;
+  address: string;
+  description: string;
+  featuredProducts: string[];
+  totalProducts: number;
+  deliveryFee: number;
 }
 
-interface CartItem extends Product {
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
   quantity: number;
+  storeName: string;
 }
 
 interface Order {
@@ -45,62 +49,96 @@ interface Order {
   currentLocation: string;
 }
 
-const mockProducts: Product[] = [
+const mockStores: Store[] = [
   {
     id: 1,
-    name: "Fresh Bananas",
-    brand: "FreshMart",
-    price: 45,
-    originalPrice: 60,
-    discount: 25,
-    unit: "1 dozen",
-    inStock: 25,
-    category: "Fruits",
-    storeName: "FreshMart Express",
-    storeId: 1,
+    name: "FreshMart Express",
+    category: "Grocery",
+    rating: 4.8,
+    reviewCount: 1250,
     deliveryTime: "8 min",
-    rating: 4.8
+    distance: "0.5 km",
+    isOpen: true,
+    address: "123 Green Valley Road",
+    description: "Fresh fruits, vegetables, and daily essentials",
+    featuredProducts: ["Fresh Bananas", "Organic Apples", "Green Vegetables"],
+    totalProducts: 450,
+    deliveryFee: 25
   },
   {
     id: 2,
-    name: "Organic Milk",
-    brand: "Dairy Fresh",
-    price: 85,
-    unit: "1 liter",
-    inStock: 12,
-    category: "Dairy",
-    storeName: "MedPlus Essentials",
-    storeId: 2,
+    name: "MedPlus Essentials",
+    category: "Pharmacy",
+    rating: 4.7,
+    reviewCount: 890,
     deliveryTime: "6 min",
-    rating: 4.7
+    distance: "0.3 km",
+    isOpen: true,
+    address: "456 Health Street",
+    description: "Medicines, healthcare products, and wellness items",
+    featuredProducts: ["Pain Relief", "Vitamins", "First Aid"],
+    totalProducts: 320,
+    deliveryFee: 15
   },
   {
     id: 3,
-    name: "Whole Wheat Bread",
-    brand: "Baker's Choice",
-    price: 35,
-    originalPrice: 45,
-    discount: 22,
-    unit: "400g",
-    inStock: 8,
-    category: "Bakery",
-    storeName: "FreshMart Express",
-    storeId: 1,
-    deliveryTime: "8 min",
-    rating: 4.6
+    name: "TechHub Electronics",
+    category: "Electronics",
+    rating: 4.6,
+    reviewCount: 670,
+    deliveryTime: "12 min",
+    distance: "0.8 km",
+    isOpen: true,
+    address: "789 Tech Avenue",
+    description: "Latest gadgets, accessories, and electronics",
+    featuredProducts: ["Smartphones", "Headphones", "Chargers"],
+    totalProducts: 280,
+    deliveryFee: 35
   },
   {
     id: 4,
-    name: "Premium Rice",
-    brand: "Golden Grain",
-    price: 120,
-    unit: "1 kg",
-    inStock: 15,
-    category: "Grains",
-    storeName: "Fashion District Mart",
-    storeId: 3,
+    name: "Fashion District",
+    category: "Fashion",
+    rating: 4.5,
+    reviewCount: 540,
     deliveryTime: "15 min",
-    rating: 4.9
+    distance: "1.2 km",
+    isOpen: true,
+    address: "321 Style Boulevard",
+    description: "Trendy clothing, accessories, and footwear",
+    featuredProducts: ["T-Shirts", "Jeans", "Sneakers"],
+    totalProducts: 890,
+    deliveryFee: 45
+  },
+  {
+    id: 5,
+    name: "BookWorld Cafe",
+    category: "Books",
+    rating: 4.9,
+    reviewCount: 320,
+    deliveryTime: "10 min",
+    distance: "0.7 km",
+    isOpen: false,
+    address: "654 Literature Lane",
+    description: "Books, stationery, and coffee",
+    featuredProducts: ["Bestsellers", "Notebooks", "Coffee"],
+    totalProducts: 150,
+    deliveryFee: 30
+  },
+  {
+    id: 6,
+    name: "HomeMart Essentials",
+    category: "Home & Garden",
+    rating: 4.4,
+    reviewCount: 420,
+    deliveryTime: "14 min",
+    distance: "1.0 km",
+    isOpen: true,
+    address: "987 Garden Grove",
+    description: "Home improvement, garden supplies, and decor",
+    featuredProducts: ["Plants", "Tools", "Decor"],
+    totalProducts: 380,
+    deliveryFee: 40
   }
 ];
 
@@ -136,46 +174,45 @@ export default function VyronaSpace() {
   const [activeTab, setActiveTab] = useState("discover");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedDeliveryTime, setSelectedDeliveryTime] = useState("All");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const categories = ["All", "Fruits", "Vegetables", "Dairy", "Bakery", "Grains", "Snacks"];
-  const deliveryTimes = ["All", "5 min", "10 min", "15 min"];
+  const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
 
-  const getFilteredProducts = () => {
-    return mockProducts.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          product.storeName.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-      const matchesDeliveryTime = selectedDeliveryTime === "All" || product.deliveryTime === selectedDeliveryTime;
+  const getFilteredStores = () => {
+    return mockStores.filter(store => {
+      const matchesSearch = store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          store.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          store.featuredProducts.some(product => 
+                            product.toLowerCase().includes(searchQuery.toLowerCase())
+                          );
+      const matchesCategory = selectedCategory === "All" || store.category === selectedCategory;
       
-      return matchesSearch && matchesCategory && matchesDeliveryTime;
+      return matchesSearch && matchesCategory;
     });
   };
 
-  const addToCart = (product: Product) => {
-    const existingItem = cart.find(item => item.id === product.id);
+  const addToCart = (item: { id: number; name: string; price: number; storeName: string }) => {
+    const existingItem = cart.find(cartItem => cartItem.id === item.id);
     if (existingItem) {
-      setCart(cart.map(item => 
-        item.id === product.id 
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
+      setCart(cart.map(cartItem => 
+        cartItem.id === item.id 
+          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          : cartItem
       ));
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      setCart([...cart, { ...item, quantity: 1 }]);
     }
   };
 
-  const updateCartQuantity = (productId: number, change: number) => {
-    const item = cart.find(item => item.id === productId);
+  const updateCartQuantity = (itemId: number, change: number) => {
+    const item = cart.find(item => item.id === itemId);
     if (item) {
       if (item.quantity + change <= 0) {
-        setCart(cart.filter(item => item.id !== productId));
+        setCart(cart.filter(item => item.id !== itemId));
       } else {
         setCart(cart.map(item => 
-          item.id === productId 
+          item.id === itemId 
             ? { ...item, quantity: item.quantity + change }
             : item
         ));
@@ -186,7 +223,6 @@ export default function VyronaSpace() {
   const clearFilters = () => {
     setSearchQuery("");
     setSelectedCategory("All");
-    setSelectedDeliveryTime("All");
   };
 
   const getCartTotal = () => {
@@ -271,130 +307,102 @@ export default function VyronaSpace() {
                 </Button>
               </div>
 
-              <div className="flex space-x-4 overflow-x-auto pb-2">
-                <div className="flex space-x-2">
-                  {categories.map(category => (
-                    <Button
-                      key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedCategory(category)}
-                      className={`whitespace-nowrap rounded-xl ${
-                        selectedCategory === category 
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                          : 'border-emerald-200 hover:bg-emerald-50 text-emerald-700'
-                      }`}
-                    >
-                      {category}
-                    </Button>
-                  ))}
-                </div>
-                <div className="border-l border-emerald-300 mx-2" />
-                <div className="flex space-x-2">
-                  {deliveryTimes.map(time => (
-                    <Button
-                      key={time}
-                      variant={selectedDeliveryTime === time ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedDeliveryTime(time)}
-                      className={`whitespace-nowrap rounded-xl ${
-                        selectedDeliveryTime === time 
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                          : 'border-emerald-200 hover:bg-emerald-50 text-emerald-700'
-                      }`}
-                    >
-                      {time}
-                    </Button>
-                  ))}
-                </div>
+              <div className="flex space-x-2 overflow-x-auto pb-2">
+                {categories.map(category => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category)}
+                    className={`whitespace-nowrap rounded-xl ${
+                      selectedCategory === category 
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+                        : 'border-emerald-200 hover:bg-emerald-50 text-emerald-700'
+                    }`}
+                  >
+                    {category}
+                  </Button>
+                ))}
               </div>
             </div>
 
-            {/* Products Grid */}
-            {getFilteredProducts().length > 0 ? (
+            {/* Stores Grid */}
+            {getFilteredStores().length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {getFilteredProducts().map(product => (
-                  <Card key={product.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all hover:border-emerald-200 hover:bg-emerald-50/30">
+                {getFilteredStores().map(store => (
+                  <Card key={store.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all hover:border-emerald-200 hover:bg-emerald-50/30">
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4 mb-4">
                         <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-xl flex items-center justify-center">
                           <ShoppingBag className="h-6 w-6 text-emerald-600" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-bold text-lg text-gray-900">{product.name}</h4>
-                          <p className="text-sm text-gray-600">{product.brand} • {product.unit}</p>
+                          <h4 className="font-bold text-lg text-gray-900">{store.name}</h4>
+                          <p className="text-sm text-gray-600">{store.description}</p>
                           <div className="flex items-center space-x-2 mt-2">
-                            <span className="font-bold text-xl text-gray-900">₹{product.price}</span>
-                            {product.originalPrice && (
-                              <>
-                                <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
-                                <Badge className="bg-green-100 text-green-700 text-xs">
-                                  {product.discount}% OFF
-                                </Badge>
-                              </>
-                            )}
+                            <Badge className="bg-emerald-100 text-emerald-700 text-xs">
+                              {store.category}
+                            </Badge>
+                            <Badge className={`${store.isOpen ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} text-xs`}>
+                              {store.isOpen ? 'Open' : 'Closed'}
+                            </Badge>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-4">
-                          <span className="text-sm text-gray-600">{product.storeName}</span>
                           <div className="flex items-center">
                             <Clock className="h-3 w-3 mr-1 text-emerald-600" />
-                            <span className="text-xs text-emerald-600 font-medium">{product.deliveryTime}</span>
+                            <span className="text-xs text-emerald-600 font-medium">{store.deliveryTime}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <MapPin className="h-3 w-3 mr-1 text-teal-600" />
+                            <span className="text-xs text-gray-600">{store.distance}</span>
                           </div>
                         </div>
                         <div className="flex items-center">
                           <Star className="h-3 w-3 mr-1 text-yellow-400 fill-current" />
-                          <span className="text-xs text-gray-600">{product.rating}</span>
+                          <span className="text-xs text-gray-600">{store.rating}</span>
+                          <span className="text-xs text-gray-500 ml-1">({store.reviewCount})</span>
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-600 mb-2">Featured Products:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {store.featuredProducts.slice(0, 3).map((product, index) => (
+                            <Badge key={index} variant="outline" className="text-xs border-emerald-200 text-emerald-700">
+                              {product}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between mb-4">
                         <span className="text-sm text-gray-600">
-                          {product.inStock > 0 ? `${product.inStock} in stock` : 'Out of stock'}
+                          {store.totalProducts} products
                         </span>
-                        {product.inStock <= 5 && product.inStock > 0 && (
-                          <Badge className="bg-orange-100 text-orange-700 text-xs">
-                            Low Stock
-                          </Badge>
-                        )}
+                        <span className="text-sm text-gray-600">
+                          ₹{store.deliveryFee} delivery
+                        </span>
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        {cart.find(item => item.id === product.id) ? (
-                          <div className="flex items-center space-x-3 flex-1 bg-gray-50 rounded-xl p-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => updateCartQuantity(product.id, -1)}
-                              className="h-8 w-8 p-0 rounded-lg"
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="font-semibold">
-                              {cart.find(item => item.id === product.id)?.quantity || 0}
-                            </span>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => updateCartQuantity(product.id, 1)}
-                              className="h-8 w-8 p-0 rounded-lg"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button 
-                            onClick={() => addToCart(product)}
-                            disabled={product.inStock === 0}
-                            className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
-                          >
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            Add to Cart
-                          </Button>
-                        )}
+                        <Button 
+                          disabled={!store.isOpen}
+                          className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl disabled:opacity-50"
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          Browse Store
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl border-emerald-200 hover:bg-emerald-50"
+                        >
+                          <Phone className="h-4 w-4" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -405,8 +413,8 @@ export default function VyronaSpace() {
                 <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <ShoppingBag className="h-8 w-8 text-emerald-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-                <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No stores found</h3>
+                <p className="text-gray-600 mb-4">Try adjusting your category filter or search terms</p>
                 <Button onClick={clearFilters} variant="outline" className="rounded-xl border-emerald-200 hover:bg-emerald-50">
                   Clear Filters
                 </Button>
