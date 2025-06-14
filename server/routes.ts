@@ -4289,12 +4289,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all public Instagram products for customer browsing
   app.get("/api/instagram/products", async (req, res) => {
     try {
-      // Get all Instagram products from all active stores
-      // Get all Instagram products from active stores
+      // Get all Instagram products from active stores with store information
       const products = await db
-        .select()
+        .select({
+          id: instagramProducts.id,
+          storeId: instagramProducts.storeId,
+          instagramMediaId: instagramProducts.instagramMediaId,
+          productName: instagramProducts.productName,
+          description: instagramProducts.description,
+          price: instagramProducts.price,
+          currency: instagramProducts.currency,
+          imageUrl: instagramProducts.imageUrl,
+          productUrl: instagramProducts.productUrl,
+          isAvailable: instagramProducts.isAvailable,
+          categoryTag: instagramProducts.categoryTag,
+          hashtags: instagramProducts.hashtags,
+          likesCount: instagramProducts.likesCount,
+          commentsCount: instagramProducts.commentsCount,
+          createdAt: instagramProducts.createdAt,
+          updatedAt: instagramProducts.updatedAt,
+          // Store information
+          instagramUsername: instagramStores.instagramUsername,
+          storeName: instagramStores.storeName,
+        })
         .from(instagramProducts)
-        .where(eq(instagramProducts.isAvailable, true));
+        .innerJoin(instagramStores, eq(instagramProducts.storeId, instagramStores.id))
+        .where(
+          and(
+            eq(instagramProducts.isAvailable, true),
+            eq(instagramStores.isActive, true)
+          )
+        );
 
       res.json(products);
     } catch (error) {

@@ -296,10 +296,8 @@ export default function VyronaInstaShop() {
     { value: "newest", label: "Newest First" }
   ];
 
-  // Use real data from API or fall back to empty array
-  const productsToShow = Array.isArray(instagramProducts) && instagramProducts.length > 0 
-    ? instagramProducts 
-    : mockInstagramProducts;
+  // Use only real data from API - no fallback to mock data
+  const productsToShow = Array.isArray(instagramProducts) ? instagramProducts : [];
 
   const filteredProducts = productsToShow.filter(product => {
     const productName = product.productName || product.name || '';
@@ -536,10 +534,12 @@ export default function VyronaInstaShop() {
                   {/* Product Details */}
                   <div className="p-4">
                     <div className="mb-2">
-                      <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
+                      <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                        {product.productName || product.name}
+                      </h3>
                       <div className="flex items-center space-x-2">
                         <Instagram className="h-3 w-3 text-purple-600" />
-                        <span className="text-sm text-purple-600">{product.seller}</span>
+                        <span className="text-sm text-purple-600">@{product.instagramUsername || product.seller}</span>
                         {product.verified && <Verified className="h-3 w-3 text-blue-500" />}
                       </div>
                     </div>
@@ -547,20 +547,26 @@ export default function VyronaInstaShop() {
                     {/* Price and Rating */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold text-gray-900">₹{product.price}</span>
-                        <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          ₹{((product.price || 0) / 100).toFixed(2)}
+                        </span>
+                        {product.originalPrice && (
+                          <span className="text-sm text-gray-500 line-through">
+                            ₹{((product.originalPrice || 0) / 100).toFixed(2)}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center space-x-1">
                         <Star className="text-amber-400 h-4 w-4 fill-current" />
-                        <span className="text-sm font-medium">{product.rating}</span>
-                        <span className="text-xs text-gray-500">({product.reviews})</span>
+                        <span className="text-sm font-medium">{product.rating || 4.5}</span>
+                        <span className="text-xs text-gray-500">({product.reviews || product.likesCount || 0})</span>
                       </div>
                     </div>
 
                     {/* Category */}
                     <div className="mb-3">
                       <Badge variant="secondary" className="text-xs bg-purple-50 text-purple-700">
-                        {product.category}
+                        {product.categoryTag || product.category || 'General'}
                       </Badge>
                     </div>
 
@@ -576,7 +582,7 @@ export default function VyronaInstaShop() {
                             addToCartMutation.mutate({
                               productId: product.id,
                               quantity: 1,
-                              price: product.price
+                              price: product.price / 100 // Convert from cents to rupees
                             });
                           }}
                           disabled={addToCartMutation.isPending}
@@ -593,13 +599,13 @@ export default function VyronaInstaShop() {
                             const checkoutData = {
                               items: [{
                                 id: product.id,
-                                name: product.name || product.productName,
-                                price: product.price,
+                                name: product.productName || product.name,
+                                price: product.price / 100, // Convert from cents to rupees
                                 quantity: 1,
                                 image: product.imageUrl,
-                                seller: product.seller
+                                seller: product.instagramUsername || product.seller
                               }],
-                              total: product.price,
+                              total: product.price / 100, // Convert from cents to rupees
                               source: 'instagram'
                             };
                             // Navigate to Instagram checkout with product data
