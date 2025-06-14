@@ -602,8 +602,8 @@ export default function VyronaInstaShop() {
                               total: product.price,
                               source: 'instagram'
                             };
-                            // Navigate to checkout with product data
-                            window.location.href = `/checkout-simple?data=${encodeURIComponent(JSON.stringify(checkoutData))}`;
+                            // Navigate to Instagram checkout with product data
+                            setLocation(`/instagram-checkout?data=${encodeURIComponent(JSON.stringify(checkoutData))}`);
                           }}
                         >
                           <CreditCard className="mr-1 h-3 w-3" />
@@ -863,7 +863,7 @@ export default function VyronaInstaShop() {
                           total: selectedProduct.price,
                           source: 'instagram'
                         };
-                        window.location.href = `/checkout-simple?data=${encodeURIComponent(JSON.stringify(checkoutData))}`;
+                        setLocation(`/instagram-checkout?data=${encodeURIComponent(JSON.stringify(checkoutData))}`);
                       }}
                     >
                       <CreditCard className="mr-2 h-5 w-5" />

@@ -14,6 +14,7 @@ import PlaceOrder from "@/pages/place-order-new";
 import SimpleCheckout from "@/pages/checkout-simple";
 
 import VyronaInstaShop from "@/pages/instashop";
+import InstagramCheckout from "@/pages/instagram-checkout";
 import VyronaHub from "@/pages/vyronahub";
 import VyronaHubCheckout from "@/pages/vyronahub-checkout";
 import OrderSuccess from "@/pages/order-success";
@@ -103,6 +104,7 @@ function Router() {
       <Route path="/place-order-new/:roomId" component={PlaceOrder} />
       <Route path="/checkout-modern/:id" component={SimpleCheckout} />
       <Route path="/instashop" component={VyronaInstaShop} />
+      <Route path="/instagram-checkout" component={InstagramCheckout} />
       <Route path="/vyronahub" component={VyronaHub} />
       <Route path="/vyronahub-checkout" component={VyronaHubCheckout} />
       <Route path="/order-success" component={OrderSuccess} />
