@@ -1058,7 +1058,7 @@ export default function PlaceOrderNew() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  ₹{walletData?.balance?) || '0.00'}
+                  ₹{walletData?.balance || '0'}
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Available Balance</p>
               </CardContent>
