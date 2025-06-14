@@ -479,7 +479,8 @@ export default function VyronaSpace() {
                 </Button>
               </div>
             )}
-            ) : (
+              </>
+            ) : viewMode === "store-products" && selectedStore ? (
               /* Store Products View - Full Page */
               <div className="space-y-6">
                 {/* Store Header with Back Button */}
