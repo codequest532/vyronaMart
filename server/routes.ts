@@ -4384,6 +4384,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { orderId } = req.params;
       const { status, orderNotes } = req.body;
 
+      // Get the seller's store first to verify ownership
+      const sellerStore = await storage.getInstagramStoreByUserId(authenticatedUser.id);
+      if (!sellerStore) {
+        return res.status(404).json({ message: "Instagram store not found for this seller" });
+      }
+
       // Get current order details before updating
       const currentOrder = await db
         .select()
@@ -4396,6 +4402,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const order = currentOrder[0];
+
+      // CRITICAL SECURITY CHECK: Verify the seller owns this order
+      if (order.storeId !== sellerStore.id) {
+        return res.status(403).json({ message: "Access denied. You can only update orders from your own store." });
+      }
 
       // Get product details
       const product = await storage.getInstagramProduct(order.productId);

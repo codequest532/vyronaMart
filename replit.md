@@ -132,6 +132,9 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 14, 2025: Secured Instagram seller dashboard with complete data isolation between sellers
+- June 14, 2025: Added ownership verification to order status updates preventing cross-seller access
+- June 14, 2025: Enhanced seller authentication checks across all Instagram endpoints
 - June 14, 2025: Implemented automated email notifications for Instagram order status updates using Brevo service
 - June 14, 2025: Created comprehensive order status update email templates with dynamic content based on status
 - June 14, 2025: Enhanced backend order status update endpoint to trigger automated customer notifications
