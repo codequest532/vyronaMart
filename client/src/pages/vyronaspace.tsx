@@ -191,6 +191,7 @@ export default function VyronaSpace() {
   const [isSubscriptionMode, setIsSubscriptionMode] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showManageAddresses, setShowManageAddresses] = useState(false);
+  const [ordersViewMode, setOrdersViewMode] = useState<"orders" | "reorder" | "subscriptions">("orders");
   const [profileForm, setProfileForm] = useState({ username: "", email: "", mobile: "" });
   const [newAddress, setNewAddress] = useState({ 
     name: "", address: "", city: "", state: "", pincode: "", phone: "", isDefault: false 
@@ -786,68 +787,87 @@ export default function VyronaSpace() {
           {/* Orders Tab - Complete Functionality */}
           <TabsContent value="orders" className="space-y-6">
             <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
+              <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
                 <div className="flex space-x-3">
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 rounded-xl">
+                  <Button 
+                    onClick={() => setOrdersViewMode("orders")}
+                    variant={ordersViewMode === "orders" ? "default" : "outline"}
+                    className={`rounded-xl ${ordersViewMode === "orders" ? "bg-emerald-600 hover:bg-emerald-700" : "border-emerald-200 hover:bg-emerald-50"}`}
+                  >
+                    <ShoppingBag className="h-4 w-4 mr-2" />
+                    All Orders
+                  </Button>
+                  <Button 
+                    onClick={() => setOrdersViewMode("reorder")}
+                    variant={ordersViewMode === "reorder" ? "default" : "outline"}
+                    className={`rounded-xl ${ordersViewMode === "reorder" ? "bg-emerald-600 hover:bg-emerald-700" : "border-emerald-200 hover:bg-emerald-50"}`}
+                  >
                     <Repeat className="h-4 w-4 mr-2" />
                     Quick Reorder
                   </Button>
-                  <Button variant="outline" className="border-emerald-200 hover:bg-emerald-50 rounded-xl">
+                  <Button 
+                    onClick={() => setOrdersViewMode("subscriptions")}
+                    variant={ordersViewMode === "subscriptions" ? "default" : "outline"}
+                    className={`rounded-xl ${ordersViewMode === "subscriptions" ? "bg-emerald-600 hover:bg-emerald-700" : "border-emerald-200 hover:bg-emerald-50"}`}
+                  >
                     <Calendar className="h-4 w-4 mr-2" />
                     Subscriptions
                   </Button>
                 </div>
               </div>
 
-              {/* Quick Reorder Section */}
-              <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Easy Reorder</h3>
-                {reorderLoading ? (
-                  <div className="animate-pulse space-y-3">
-                    <div className="h-16 bg-gray-200 rounded-xl"></div>
-                    <div className="h-16 bg-gray-200 rounded-xl"></div>
-                  </div>
-                ) : (reorderHistory as any[]).length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(reorderHistory as any[]).slice(0, 2).map((order: any) => (
-                      <Card key={order.id} className="rounded-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-semibold text-gray-900">{order.orderName}</h4>
-                              <p className="text-sm text-gray-600">
-                                {order.itemCount} items • ₹{Math.round(order.totalAmount)} • {order.storeName}
-                              </p>
+              {/* Conditional Content Based on View Mode */}
+              {ordersViewMode === "reorder" && (
+                <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">Easy Reorder</h3>
+                  {reorderLoading ? (
+                    <div className="animate-pulse space-y-3">
+                      <div className="h-16 bg-gray-200 rounded-xl"></div>
+                      <div className="h-16 bg-gray-200 rounded-xl"></div>
+                    </div>
+                  ) : (reorderHistory as any[]).length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(reorderHistory as any[]).slice(0, 4).map((order: any) => (
+                        <Card key={order.id} className="rounded-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-semibold text-gray-900">{order.orderName}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {order.itemCount} items • ₹{Math.round(order.totalAmount)} • {order.storeName}
+                                </p>
+                              </div>
+                              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Reorder
+                              </Button>
                             </div>
-                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-lg">
-                              <RefreshCw className="h-4 w-4 mr-1" />
-                              Reorder
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center p-6 bg-gray-50 rounded-xl">
-                    <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">No previous orders to reorder</p>
-                  </div>
-                )}
-              </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center p-6 bg-gray-50 rounded-xl">
+                      <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">No previous orders to reorder</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
-              {/* Active Subscriptions */}
-              <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
-                <h3 className="text-lg font-bold text-gray-900 mb-3">Active Subscriptions</h3>
-                {subscriptionsLoading ? (
-                  <div className="animate-pulse space-y-3">
-                    <div className="h-20 bg-gray-200 rounded-xl"></div>
-                    <div className="h-20 bg-gray-200 rounded-xl"></div>
-                  </div>
-                ) : (subscriptions as any[]).length > 0 ? (
-                  <div className="space-y-3">
-                    {(subscriptions as any[]).map((subscription: any) => (
+              {ordersViewMode === "subscriptions" && (
+                <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">Active Subscriptions</h3>
+                  {subscriptionsLoading ? (
+                    <div className="animate-pulse space-y-3">
+                      <div className="h-20 bg-gray-200 rounded-xl"></div>
+                      <div className="h-20 bg-gray-200 rounded-xl"></div>
+                    </div>
+                  ) : (subscriptions as any[]).length > 0 ? (
+                    <div className="space-y-3">
+                      {(subscriptions as any[]).map((subscription: any) => (
                       <Card key={subscription.id} className="rounded-xl border-0 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
@@ -901,8 +921,12 @@ export default function VyronaSpace() {
                   <span className="text-orange-700 font-medium">Create New Subscription</span>
                 </Button>
               </div>
+            )}
 
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Order History</h3>
+              {/* Default Orders View */}
+              {ordersViewMode === "orders" && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Order History</h3>
               {ordersLoading ? (
                 <div className="flex items-center justify-center p-8">
                   <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"></div>
@@ -983,6 +1007,9 @@ export default function VyronaSpace() {
                 ))}
                 </div>
               )}
+                </div>
+              )}
+              </div>
             </div>
           </TabsContent>
 
