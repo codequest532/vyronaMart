@@ -50,7 +50,7 @@ export default function LibraryBrowse() {
 
   // Format price in Indian Rupees
   const formatPrice = (priceInPaise: number) => {
-    return `₹${(priceInPaise / 100).toFixed(2)}`;
+    return `₹${(priceInPaise / 100))}`;
   };
 
   // Membership form

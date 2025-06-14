@@ -773,7 +773,7 @@ export default function SellerDashboard() {
       if (!file) return;
       
       const fileName = file.name;
-      const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+      const fileSize = (file.size / 1024 / 1024)); // Convert to MB
       const fileType = file.type;
       
       alert(`File Selected from System:\n\nName: ${fileName}\nSize: ${fileSize}MB\nType: ${fileType}\n\nProcessing file...`);
@@ -810,7 +810,7 @@ export default function SellerDashboard() {
       if (!file) return;
       
       const fileName = file.name;
-      const fileSize = (file.size / 1024 / 1024).toFixed(2); // Convert to MB
+      const fileSize = (file.size / 1024 / 1024)); // Convert to MB
       const fileType = file.type;
       
       alert(`File Selected from System:\n\nName: ${fileName}\nSize: ${fileSize}MB\nType: ${fileType}\n\nProcessing file...`);

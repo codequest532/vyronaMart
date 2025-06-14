@@ -1490,7 +1490,7 @@ export default function Home() {
                           {isLoadingWallet ? (
                             <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
                           ) : (
-                            `₹${walletBalance?.balance?.toFixed(2) || "1,250"}`
+                            `₹${walletBalance?.balance || "1,250"}`
                           )}
                         </p>
                       </div>
@@ -1698,7 +1698,7 @@ export default function Home() {
                             <p className={`font-semibold ${
                               transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount).toFixed(2)}
+                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount))}
                             </p>
                             <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
                               {transaction.status}

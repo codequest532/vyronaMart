@@ -301,11 +301,11 @@ export default function Cart() {
                       
                       <div className="flex items-center gap-3">
                         <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                          ₹{(item.discountedPrice || item.price).toFixed(2)}
+                          ₹{Math.round(item.discountedPrice || item.price)}
                         </span>
                         {item.discountedPrice && (
                           <span className="text-lg text-gray-500 line-through">
-                            ₹{item.price.toFixed(2)}
+                            ₹{item.price)}
                           </span>
                         )}
                         {item.discountedPrice && (
@@ -417,7 +417,7 @@ export default function Cart() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between text-gray-700">
                   <span>Subtotal ({getTotalItems()} items)</span>
-                  <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
+                  <span className="font-semibold">₹{subtotal)}</span>
                 </div>
                 
                 {discount > 0 && (
@@ -426,7 +426,7 @@ export default function Cart() {
                       <Percent className="h-4 w-4" />
                       Discount ({discount}%)
                     </span>
-                    <span className="font-semibold">-₹{discountAmount.toFixed(2)}</span>
+                    <span className="font-semibold">-₹{discountAmount)}</span>
                   </div>
                 )}
                 
@@ -448,7 +448,7 @@ export default function Cart() {
                 
                 <div className="flex justify-between text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   <span>Total</span>
-                  <span>₹{total.toFixed(2)}</span>
+                  <span>₹{total)}</span>
                 </div>
 
                 <Button 

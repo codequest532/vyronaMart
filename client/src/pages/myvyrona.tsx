@@ -100,7 +100,7 @@ export default function MyVyrona() {
   };
 
   const formatPrice = (priceInCents: number) => {
-    return `₹${(priceInCents / 100).toFixed(2)}`;
+    return `₹${(priceInCents / 100))}`;
   };
 
   const getStatusColor = (status: string) => {

@@ -307,7 +307,7 @@ export default function ModernCheckout() {
 
       toast({
         title: "Contribution Added!",
-        description: `Successfully contributed ₹${amount.toFixed(2)} via ${paymentMethod.name}`,
+        description: `Successfully contributed ₹${amount)} via ${paymentMethod.name}`,
       });
 
       setIsContributionModalOpen(false);
@@ -540,8 +540,8 @@ export default function ModernCheckout() {
                     className="h-3 bg-purple-100"
                   />
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>₹{checkoutState.totalContributed.toFixed(2)} contributed</span>
-                    <span>₹{checkoutState.totalCartValue.toFixed(2)} total</span>
+                    <span>₹{checkoutState.totalContributed)} contributed</span>
+                    <span>₹{checkoutState.totalCartValue)} total</span>
                   </div>
                 </div>
               </CardContent>
@@ -591,7 +591,7 @@ export default function ModernCheckout() {
                             <h3 className="text-2xl font-bold text-gray-900">{item.name}</h3>
                             <div className="flex items-center gap-4 mt-2">
                               <Badge variant="outline" className="text-purple-600 border-purple-300">
-                                ₹{item.price.toFixed(2)}
+                                ₹{item.price)}
                               </Badge>
                               <Badge variant="outline" className="text-blue-600 border-blue-300">
                                 Qty: {item.quantity}
@@ -604,7 +604,7 @@ export default function ModernCheckout() {
                               ) : (
                                 <Badge variant="outline" className="text-orange-600 border-orange-300">
                                   <Clock className="h-3 w-3 mr-1" />
-                                  Needs ₹{(item.targetAmount - item.contributedAmount).toFixed(2)}
+                                  Needs ₹{Math.round(item.targetAmount - item.contributedAmount)}
                                 </Badge>
                               )}
                             </div>
@@ -618,8 +618,8 @@ export default function ModernCheckout() {
                             </div>
                             <Progress value={progress} className="h-2" />
                             <div className="flex justify-between text-sm text-gray-600">
-                              <span>₹{item.contributedAmount.toFixed(2)} raised</span>
-                              <span>₹{item.targetAmount.toFixed(2)} goal</span>
+                              <span>₹{item.contributedAmount)} raised</span>
+                              <span>₹{item.targetAmount)} goal</span>
                             </div>
                           </div>
 
@@ -651,7 +651,7 @@ export default function ModernCheckout() {
                                       <span className="font-medium">{contributor.username}</span>
                                     </div>
                                     <div className="text-right">
-                                      <div className="font-bold text-green-600">₹{contributor.amount.toFixed(2)}</div>
+                                      <div className="font-bold text-green-600">₹{contributor.amount)}</div>
                                       <Badge variant="outline" className="text-xs">
                                         {contributor.paymentMethod}
                                       </Badge>
@@ -923,20 +923,20 @@ export default function ModernCheckout() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Items Total</span>
-                    <span className="text-xl font-bold">₹{checkoutState.totalCartValue.toFixed(2)}</span>
+                    <span className="text-xl font-bold">₹{checkoutState.totalCartValue)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Total Contributed</span>
-                    <span className="text-xl font-bold text-green-600">₹{checkoutState.totalContributed.toFixed(2)}</span>
+                    <span className="text-xl font-bold text-green-600">₹{checkoutState.totalContributed)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Remaining</span>
-                    <span className="text-xl font-bold text-orange-600">₹{(checkoutState.totalCartValue - checkoutState.totalContributed).toFixed(2)}</span>
+                    <span className="text-xl font-bold text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold">Order Total</span>
-                    <span className="text-2xl font-bold text-purple-600">₹{checkoutState.totalCartValue.toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-purple-600">₹{checkoutState.totalCartValue)}</span>
                   </div>
                 </div>
 
@@ -949,7 +949,7 @@ export default function ModernCheckout() {
                   <div className="text-center p-4 bg-orange-50 rounded-xl border border-orange-200">
                     <Clock className="h-8 w-8 text-orange-500 mx-auto mb-2" />
                     <p className="text-orange-700 font-medium">Waiting for full funding</p>
-                    <p className="text-sm text-orange-600">₹{(checkoutState.totalCartValue - checkoutState.totalContributed).toFixed(2)} still needed</p>
+                    <p className="text-sm text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed)} still needed</p>
                   </div>
                 )}
               </CardContent>
@@ -990,7 +990,7 @@ export default function ModernCheckout() {
                   />
                 </div>
                 <div className="text-sm text-gray-600">
-                  Remaining: ₹{(selectedItem.targetAmount - selectedItem.contributedAmount).toFixed(2)}
+                  Remaining: ₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount)}
                 </div>
               </div>
 

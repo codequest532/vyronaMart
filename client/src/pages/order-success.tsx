@@ -203,10 +203,10 @@ export default function OrderSuccess() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-gray-900 dark:text-white">
-                            ₹{(item.price * item.quantity).toFixed(2)}
+                            ₹{Math.round(item.price * item.quantity)}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            ₹{item.price.toFixed(2)} each
+                            ₹{item.price)} each
                           </p>
                         </div>
                       </div>
@@ -218,7 +218,7 @@ export default function OrderSuccess() {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
                     <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      ₹{(orderData.totalAmount || 0).toFixed(2)}
+                      ₹{Math.round(orderData.totalAmount || 0)}
                     </span>
                   </div>
                 </CardContent>
@@ -255,7 +255,7 @@ export default function OrderSuccess() {
                         {orderData.items.map((item: any, index: number) => (
                           <div key={index} className="flex justify-between items-center p-3 border rounded">
                             <span>{item.name}</span>
-                            <span>₹{(item.price * (item.quantity || 1)).toFixed(2)}</span>
+                            <span>₹{Math.round(item.price * (item.quantity || 1))}</span>
                           </div>
                         ))}
                       </div>
@@ -266,7 +266,7 @@ export default function OrderSuccess() {
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
                       <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                        ₹{(orderData.totalAmount || orderData.amount || 0).toFixed(2)}
+                        ₹{Math.round(orderData.totalAmount || orderData.amount || 0)}
                       </span>
                     </div>
                   </div>
@@ -320,7 +320,7 @@ export default function OrderSuccess() {
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-semibold text-gray-900 dark:text-white">Total Amount</span>
                       <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        ₹{(orderData.amount || orderData.totalAmount || 0).toFixed(2)}
+                        ₹{Math.round(orderData.amount || orderData.totalAmount || 0)}
                       </span>
                     </div>
                   </div>

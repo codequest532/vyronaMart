@@ -253,7 +253,7 @@ export default function PlaceOrder() {
       if (amount > remainingAmount) {
         toast({
           title: "Invalid Amount",
-          description: `Maximum contribution for this item is ₹${remainingAmount.toFixed(2)}`,
+          description: `Maximum contribution for this item is ₹${remainingAmount)}`,
           variant: "destructive",
         });
         return;
@@ -760,7 +760,7 @@ export default function PlaceOrder() {
                                 <div>
                                   <h4 className="font-medium">VyronaWallet</h4>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Balance: ₹{walletData?.balance?.toFixed(2) || '0.00'}
+                                    Balance: ₹{walletData?.balance?) || '0.00'}
                                   </p>
                                 </div>
                                 <CheckCircle className="h-5 w-5 text-green-500 ml-auto" />
@@ -813,7 +813,7 @@ export default function PlaceOrder() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-2xl font-bold">₹{finalTotal.toFixed(2)}</p>
+                              <p className="text-2xl font-bold">₹{finalTotal)}</p>
                             </div>
                           </div>
 
@@ -822,7 +822,7 @@ export default function PlaceOrder() {
                               <h4 className="font-medium">Contribution Status</h4>
                               <div className="flex items-center gap-2">
                                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                                  ₹{groupCheckout.totalContributed.toFixed(2)} of ₹{finalTotal.toFixed(2)}
+                                  ₹{groupCheckout.totalContributed)} of ₹{finalTotal)}
                                 </span>
                                 <Progress 
                                   value={(groupCheckout.totalContributed / finalTotal) * 100} 
@@ -852,7 +852,7 @@ export default function PlaceOrder() {
                                     <div className="flex items-center gap-3">
                                       {contribution.status === 'contributed' ? (
                                         <div className="flex items-center gap-2">
-                                          <span className="font-medium">₹{contribution.amount.toFixed(2)}</span>
+                                          <span className="font-medium">₹{contribution.amount)}</span>
                                           <Badge variant="default" className="bg-green-500">
                                             <Check className="h-3 w-3 mr-1" />
                                             Contributed
@@ -925,9 +925,9 @@ export default function PlaceOrder() {
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
+                                  <p className="font-medium">₹{Math.round(item.price * item.quantity)}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    ₹{item.price.toFixed(2)} each
+                                    ₹{item.price)} each
                                   </p>
                                 </div>
                               </div>
@@ -945,20 +945,20 @@ export default function PlaceOrder() {
                           <div className="space-y-2">
                             <div className="flex justify-between">
                               <span>Subtotal:</span>
-                              <span>₹{orderTotal.toFixed(2)}</span>
+                              <span>₹{orderTotal)}</span>
                             </div>
                             <div className="flex justify-between">
                               <span>Delivery Fee:</span>
-                              <span>₹{deliveryFee.toFixed(2)}</span>
+                              <span>₹{deliveryFee)}</span>
                             </div>
                             <Separator />
                             <div className="flex justify-between font-bold text-lg">
                               <span>Total:</span>
-                              <span>₹{finalTotal.toFixed(2)}</span>
+                              <span>₹{finalTotal)}</span>
                             </div>
                             <div className="flex justify-between text-sm text-green-600">
                               <span>Total Contributed:</span>
-                              <span>₹{groupCheckout.totalContributed.toFixed(2)}</span>
+                              <span>₹{groupCheckout.totalContributed)}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -1042,21 +1042,21 @@ export default function PlaceOrder() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Subtotal:</span>
-                    <span className="font-medium">₹{orderTotal.toFixed(2)}</span>
+                    <span className="font-medium">₹{orderTotal)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Delivery:</span>
-                    <span className="font-medium">₹{deliveryFee.toFixed(2)}</span>
+                    <span className="font-medium">₹{deliveryFee)}</span>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between font-bold">
                     <span>Total:</span>
-                    <span>₹{finalTotal.toFixed(2)}</span>
+                    <span>₹{finalTotal)}</span>
                   </div>
                   <div className="pt-2">
                     <div className="flex items-center justify-between text-sm">
                       <span>Contributed:</span>
-                      <span className="text-green-600">₹{groupCheckout.totalContributed.toFixed(2)}</span>
+                      <span className="text-green-600">₹{groupCheckout.totalContributed)}</span>
                     </div>
                     <Progress 
                       value={(groupCheckout.totalContributed / finalTotal) * 100} 
@@ -1112,7 +1112,7 @@ export default function PlaceOrder() {
                 step="0.01"
               />
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Remaining: ₹{Math.max(0, finalTotal - groupCheckout.totalContributed).toFixed(2)}
+                Remaining: ₹{Math.max(0, finalTotal - groupCheckout.totalContributed))}
               </p>
             </div>
             
@@ -1189,11 +1189,11 @@ export default function PlaceOrder() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-green-600 dark:text-green-400">Total Amount:</span>
-                  <p className="font-bold text-lg">₹{finalTotal.toFixed(2)}</p>
+                  <p className="font-bold text-lg">₹{finalTotal)}</p>
                 </div>
                 <div>
                   <span className="text-green-600 dark:text-green-400">Split Total:</span>
-                  <p className="font-bold text-lg">₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0).toFixed(2)}</p>
+                  <p className="font-bold text-lg">₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0))}</p>
                 </div>
               </div>
             </div>
@@ -1206,7 +1206,7 @@ export default function PlaceOrder() {
                   size="sm"
                   variant="outline"
                   onClick={() => {
-                    const equalAmount = (finalTotal / room.memberCount).toFixed(2);
+                    const equalAmount = (finalTotal / room.memberCount));
                     const newSplits: { [key: number]: string } = {};
                     for (let i = 0; i < room.memberCount; i++) {
                       newSplits[i] = equalAmount;
@@ -1257,16 +1257,16 @@ export default function PlaceOrder() {
               <div className="mt-3 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs">
                 <div className="flex justify-between">
                   <span>Total Split:</span>
-                  <span>₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0).toFixed(2)}</span>
+                  <span>₹{Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Required:</span>
-                  <span>₹{finalTotal.toFixed(2)}</span>
+                  <span>₹{finalTotal)}</span>
                 </div>
                 {Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0) !== finalTotal && (
                   <div className="flex justify-between text-red-600">
                     <span>Difference:</span>
-                    <span>₹{(finalTotal - Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0)).toFixed(2)}</span>
+                    <span>₹{Math.round(finalTotal - Object.values(customSplitAmounts).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0))}</span>
                   </div>
                 )}
               </div>

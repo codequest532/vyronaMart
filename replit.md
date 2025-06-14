@@ -135,6 +135,9 @@ Changelog:
 - June 14, 2025: Fixed data integrity issue where Instagram products remained visible after seller deletion
 - June 14, 2025: Added complete Instagram data cleanup to seller deletion process (stores, products, orders, analytics)
 - June 14, 2025: Manually cleaned up orphaned Instagram store and 8 products from deleted seller
+- June 14, 2025: Converted entire pricing model across all VyronaMart modules to direct rupees without decimal values
+- June 14, 2025: Updated backend pricing storage from cent-based (x100) to direct rupee storage across all modules
+- June 14, 2025: Modified frontend price displays to use Math.round() instead of .toFixed(2) for whole rupee display
 - June 14, 2025: Secured Instagram seller dashboard with complete data isolation between sellers
 - June 14, 2025: Added ownership verification to order status updates preventing cross-seller access
 - June 14, 2025: Enhanced seller authentication checks across all Instagram endpoints

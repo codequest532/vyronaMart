@@ -218,7 +218,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">{product.name}</h3>
-                  <p className="text-muted-foreground">${(product.price / 100).toFixed(2)}</p>
+                  <p className="text-muted-foreground">${(product.price / 100))}</p>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">{product.description}</p>
@@ -258,7 +258,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                     <div>
                       <h5 className="font-medium">{selectedRoom.name}</h5>
                       <p className="text-sm text-muted-foreground">
-                        {selectedRoom.memberCount} members • ${((selectedRoom.totalCart || 0) / 100).toFixed(2)} total
+                        {selectedRoom.memberCount} members • ${((selectedRoom.totalCart || 0) / 100))} total
                       </p>
                     </div>
                     <Badge variant="secondary">
@@ -442,7 +442,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                               </span>
                               <span className="flex items-center gap-1">
                                 <ShoppingCart className="h-3 w-3" />
-                                ${((room.totalCart || 0) / 100).toFixed(2)}
+                                ${((room.totalCart || 0) / 100))}
                               </span>
                               {room.currentGame && (
                                 <span className="flex items-center gap-1">
@@ -496,7 +496,7 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
                 </div>
                 <div className="text-right">
                   <div className="text-sm text-muted-foreground">Total</div>
-                  <div className="font-semibold">${((product.price / 100) * quantity).toFixed(2)}</div>
+                  <div className="font-semibold">${((product.price / 100) * quantity))}</div>
                 </div>
               </div>
               

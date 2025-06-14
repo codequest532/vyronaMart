@@ -5932,7 +5932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         groupId: Number(groupId),
         cartItemId,
         userId,
-        amount: Math.round(amount * 100), // Convert to cents
+        amount: Math.round(amount), // Convert to cents
         paymentMethod,
         transactionId,
         status: 'completed'
@@ -7255,7 +7255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create Razorpay order
       const options = {
-        amount: Math.round(amount * 100), // Convert to paise
+        amount: Math.round(amount), // Convert to paise
         currency,
         receipt: `wallet_${userId}_${Date.now()}`,
         notes: {
@@ -7557,7 +7557,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           type: "CUSTOM",
           members: Array.from({ length: memberCount }, (_, i) => ({
             userId: `user_${i + 1}`,
-            amount: Math.round((amount / memberCount) * 100)
+            amount: Math.round(amount / memberCount)
           }))
         }
       };

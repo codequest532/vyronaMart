@@ -1439,7 +1439,7 @@ export default function VyronaSocial() {
                                   <div className="flex items-center gap-1">
                                     <ShoppingCart className="w-3 h-3 text-green-600 dark:text-green-400" />
                                     <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                      ₹{group.totalCart.toFixed(2)}
+                                      ₹{group.totalCart)}
                                     </span>
                                   </div>
                                 ) : (
@@ -1836,7 +1836,7 @@ export default function VyronaSocial() {
                                   setSelectedFile(file);
                                   toast({
                                     title: "File Selected",
-                                    description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+                                    description: `${file.name} (${(file.size / 1024 / 1024))}MB)`,
                                   });
                                 }
                               };
@@ -1978,9 +1978,9 @@ export default function VyronaSocial() {
                     
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-purple-600">₹{Number(product.price).toFixed(2)}</span>
+                        <span className="text-xl font-bold text-purple-600">₹{Math.round(product.price)}</span>
                         {product.enableGroupBuy && (
-                          <span className="text-sm text-gray-500 line-through">₹{(product.price * 1.2).toFixed(2)}</span>
+                          <span className="text-sm text-gray-500 line-through">₹{Math.round(product.price * 1.2)}</span>
                         )}
                       </div>
                       {product.enableGroupBuy && (
@@ -2162,8 +2162,8 @@ export default function VyronaSocial() {
                       
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl font-bold text-indigo-600">₹{Number(product.price).toFixed(2)}</span>
-                          <span className="text-sm text-gray-500 line-through">₹{(product.price * 1.2).toFixed(2)}</span>
+                          <span className="text-xl font-bold text-indigo-600">₹{Math.round(product.price)}</span>
+                          <span className="text-sm text-gray-500 line-through">₹{Math.round(product.price * 1.2)}</span>
                         </div>
                         <Badge variant="outline" className="text-xs">
                           20% OFF

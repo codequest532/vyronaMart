@@ -286,7 +286,7 @@ export default function PlaceOrderNew() {
       if (amount > remainingAmount) {
         toast({
           title: "Invalid Amount",
-          description: `Maximum contribution for this item is ₹${remainingAmount.toFixed(2)}`,
+          description: `Maximum contribution for this item is ₹${remainingAmount)}`,
           variant: "destructive",
         });
         return;
@@ -703,10 +703,10 @@ export default function PlaceOrderNew() {
                 {/* Main Progress Display */}
                 <div className="text-center space-y-3">
                   <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    ₹{checkoutState.totalContributed.toFixed(2)}
+                    ₹{checkoutState.totalContributed)}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    of ₹{checkoutState.totalCartValue.toFixed(2)} contributed
+                    of ₹{checkoutState.totalCartValue)} contributed
                   </div>
                   <Progress 
                     value={(checkoutState.totalContributed / checkoutState.totalCartValue) * 100} 
@@ -776,7 +776,7 @@ export default function PlaceOrderNew() {
                             <div>
                               <h3 className="font-semibold">{item.name}</h3>
                               <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Quantity: {item.quantity} • Target: ₹{item.targetAmount.toFixed(2)}
+                                Quantity: {item.quantity} • Target: ₹{item.targetAmount)}
                               </p>
                             </div>
                             <div className="text-right">
@@ -800,8 +800,8 @@ export default function PlaceOrderNew() {
                           {/* Contribution Progress */}
                           <div className="mt-4 space-y-2">
                             <div className="flex justify-between text-sm">
-                              <span>Contributed: ₹{item.contributedAmount.toFixed(2)}</span>
-                              <span>Remaining: ₹{(item.targetAmount - item.contributedAmount).toFixed(2)}</span>
+                              <span>Contributed: ₹{item.contributedAmount)}</span>
+                              <span>Remaining: ₹{Math.round(item.targetAmount - item.contributedAmount)}</span>
                             </div>
                             <Progress 
                               value={target?.progress || 0} 
@@ -871,7 +871,7 @@ export default function PlaceOrderNew() {
                                       {contributor.username}
                                     </span>
                                     <span className="flex items-center gap-2">
-                                      ₹{contributor.amount.toFixed(2)}
+                                      ₹{contributor.amount)}
                                       <Badge variant="outline" className="text-xs">
                                         {contributor.paymentMethod}
                                       </Badge>
@@ -901,20 +901,20 @@ export default function PlaceOrderNew() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Items Total</span>
-                    <span>₹{checkoutState.totalCartValue.toFixed(2)}</span>
+                    <span>₹{checkoutState.totalCartValue)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Total Contributed</span>
-                    <span className="text-green-600">₹{checkoutState.totalContributed.toFixed(2)}</span>
+                    <span className="text-green-600">₹{checkoutState.totalContributed)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Remaining</span>
-                    <span className="text-orange-600">₹{(checkoutState.totalCartValue - checkoutState.totalContributed).toFixed(2)}</span>
+                    <span className="text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold">
                     <span>Order Total</span>
-                    <span>₹{checkoutState.totalCartValue.toFixed(2)}</span>
+                    <span>₹{checkoutState.totalCartValue)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -1058,7 +1058,7 @@ export default function PlaceOrderNew() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  ₹{walletData?.balance?.toFixed(2) || '0.00'}
+                  ₹{walletData?.balance?) || '0.00'}
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Available Balance</p>
               </CardContent>
@@ -1076,7 +1076,7 @@ export default function PlaceOrderNew() {
               {selectedItem && (
                 <>
                   Contributing to: <strong>{selectedItem.name}</strong><br />
-                  Remaining amount: <strong>₹{(selectedItem.targetAmount - selectedItem.contributedAmount).toFixed(2)}</strong>
+                  Remaining amount: <strong>₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount)}</strong>
                 </>
               )}
             </DialogDescription>

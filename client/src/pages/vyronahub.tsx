@@ -315,11 +315,11 @@ export default function VyronaHub() {
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500">Group:</span>
-                        <span className="text-sm font-bold text-purple-600">₹{groupProduct.groupBuyPrice?.toFixed(2) || groupProduct.price?.toFixed(2)}</span>
+                        <span className="text-sm font-bold text-purple-600">₹{groupProduct.groupBuyPrice?) || groupProduct.price?)}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500">Regular:</span>
-                        <span className="text-xs text-gray-500 line-through">₹{groupProduct.originalPrice?.toFixed(2) || (groupProduct.price * 1.2)?.toFixed(2)}</span>
+                        <span className="text-xs text-gray-500 line-through">₹{groupProduct.originalPrice?) || (groupProduct.price * 1.2)?)}</span>
                       </div>
                       <div className="text-center">
                         <Badge variant="secondary" className="text-xs">
@@ -460,9 +460,9 @@ export default function VyronaHub() {
                     
                     <div className="flex items-center justify-between">
                       <div className="flex flex-col">
-                        <span className="text-lg font-bold text-purple-600">₹{product.price.toFixed(2)}</span>
+                        <span className="text-lg font-bold text-purple-600">₹{product.price)}</span>
                         {product.originalPrice && product.originalPrice > product.price && (
-                          <span className="text-xs text-gray-500 line-through">₹{product.originalPrice.toFixed(2)}</span>
+                          <span className="text-xs text-gray-500 line-through">₹{product.originalPrice)}</span>
                         )}
                       </div>
                       <Button 

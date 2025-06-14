@@ -1812,7 +1812,7 @@ export default function BookSellerDashboard() {
                                   </Badge>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-bold">₹{(order.total_amount || 0).toFixed(2)}</p>
+                                  <p className="font-bold">₹{Math.round(order.total_amount || 0)}</p>
                                   <p className="text-sm text-gray-500">
                                     {new Date(order.created_at).toLocaleDateString()}
                                   </p>
@@ -2849,7 +2849,7 @@ export default function BookSellerDashboard() {
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Amount</label>
-                          <p className="text-sm font-semibold">₹{(selectedOrder.total_amount || 0).toFixed(2)}</p>
+                          <p className="text-sm font-semibold">₹{Math.round(selectedOrder.total_amount || 0)}</p>
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-600">Date</label>
