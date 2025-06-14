@@ -32,7 +32,7 @@ async function initializeVyronaReadBooks() {
           publicationYear: "1925",
           language: "English",
           format: "physical",
-          sellerId: 15,
+          sellerId: null,
           rentalPrice: 5,
           fixedCostPrice: 12
         }
@@ -52,7 +52,7 @@ async function initializeVyronaReadBooks() {
           publicationYear: "1960",
           language: "English",
           format: "physical",
-          sellerId: 15,
+          sellerId: null,
           rentalPrice: 6,
           fixedCostPrice: 14
         }
@@ -72,7 +72,7 @@ async function initializeVyronaReadBooks() {
           publicationYear: "1949",
           language: "English",
           format: "physical",
-          sellerId: 15,
+          sellerId: null,
           rentalPrice: 5,
           fixedCostPrice: 13
         }
@@ -92,7 +92,7 @@ async function initializeVyronaReadBooks() {
           publicationYear: "1813",
           language: "English",
           format: "physical",
-          sellerId: 15,
+          sellerId: null,
           rentalPrice: 4,
           fixedCostPrice: 11
         }
