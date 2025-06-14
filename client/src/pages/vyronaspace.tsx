@@ -699,91 +699,87 @@ export default function VyronaSpace() {
               {/* Quick Reorder Section */}
               <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">Easy Reorder</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="rounded-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">Last Week's Groceries</h4>
-                          <p className="text-sm text-gray-600">8 items • ₹450 • FreshMart</p>
-                        </div>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-lg">
-                          <RefreshCw className="h-4 w-4 mr-1" />
-                          Reorder
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="rounded-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-semibold text-gray-900">Daily Medicines</h4>
-                          <p className="text-sm text-gray-600">3 items • ₹280 • MedPlus</p>
-                        </div>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-lg">
-                          <RefreshCw className="h-4 w-4 mr-1" />
-                          Reorder
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                {reorderLoading ? (
+                  <div className="animate-pulse space-y-3">
+                    <div className="h-16 bg-gray-200 rounded-xl"></div>
+                    <div className="h-16 bg-gray-200 rounded-xl"></div>
+                  </div>
+                ) : (reorderHistory as any[]).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(reorderHistory as any[]).slice(0, 2).map((order: any) => (
+                      <Card key={order.id} className="rounded-xl border-0 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-sm">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{order.orderName}</h4>
+                              <p className="text-sm text-gray-600">
+                                {order.itemCount} items • ₹{Math.round(order.totalAmount)} • {order.storeName}
+                              </p>
+                            </div>
+                            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 rounded-lg">
+                              <RefreshCw className="h-4 w-4 mr-1" />
+                              Reorder
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-6 bg-gray-50 rounded-xl">
+                    <RefreshCw className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">No previous orders to reorder</p>
+                  </div>
+                )}
               </div>
 
               {/* Active Subscriptions */}
               <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
                 <h3 className="text-lg font-bold text-gray-900 mb-3">Active Subscriptions</h3>
-                <div className="space-y-3">
-                  <Card className="rounded-xl border-0 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Repeat className="h-6 w-6 text-blue-600" />
+                {subscriptionsLoading ? (
+                  <div className="animate-pulse space-y-3">
+                    <div className="h-20 bg-gray-200 rounded-xl"></div>
+                    <div className="h-20 bg-gray-200 rounded-xl"></div>
+                  </div>
+                ) : (subscriptions as any[]).length > 0 ? (
+                  <div className="space-y-3">
+                    {(subscriptions as any[]).map((subscription: any) => (
+                      <Card key={subscription.id} className="rounded-xl border-0 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <Repeat className="h-6 w-6 text-blue-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900">{subscription.productName}</h4>
+                                <p className="text-sm text-gray-600">
+                                  Every {subscription.frequency} • Next: {new Date(subscription.nextDelivery).toLocaleDateString()} • ₹{Math.round(subscription.amount)}/{subscription.frequency.toLowerCase()}
+                                </p>
+                                <Badge className={`text-xs ${subscription.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                                  {subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1)}
+                                </Badge>
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button size="sm" variant="outline" className="border-blue-200 hover:bg-blue-50 rounded-lg">
+                                Edit
+                              </Button>
+                              <Button size="sm" variant="outline" className="border-gray-200 hover:bg-gray-50 rounded-lg">
+                                {subscription.status === 'active' ? 'Pause' : 'Resume'}
+                              </Button>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-900">Weekly Milk & Fruits</h4>
-                            <p className="text-sm text-gray-600">Every Monday • Next: Dec 18 • ₹320/week</p>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" className="border-blue-200 hover:bg-blue-50 rounded-lg">
-                            Edit
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-gray-200 hover:bg-gray-50 rounded-lg">
-                            Pause
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="rounded-xl border-0 bg-gradient-to-r from-purple-50 to-pink-50 shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <Repeat className="h-6 w-6 text-purple-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-900">Monthly Medicine Refill</h4>
-                            <p className="text-sm text-gray-600">Every 1st • Next: Jan 1 • ₹450/month</p>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" className="border-purple-200 hover:bg-purple-50 rounded-lg">
-                            Edit
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-gray-200 hover:bg-gray-50 rounded-lg">
-                            Pause
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-6 bg-gray-50 rounded-xl">
+                    <Repeat className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">No active subscriptions</p>
+                  </div>
+                )}
                 
                 <Button variant="outline" className="w-full mt-4 border-emerald-200 hover:bg-emerald-50 rounded-xl">
                   <Plus className="h-4 w-4 mr-2" />
@@ -880,8 +876,8 @@ export default function VyronaSpace() {
                       <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
                     ) : (
                       <>
-                        <div className="text-3xl font-bold">{Math.round(walletBalance.balance * 10)}</div>
-                        <div className="text-emerald-100">≈ ₹{walletBalance.balance}</div>
+                        <div className="text-3xl font-bold">{Math.round((walletBalance as any)?.balance * 10 || 0)}</div>
+                        <div className="text-emerald-100">≈ ₹{Math.round((walletBalance as any)?.balance || 0)}</div>
                       </>
                     )}
                   </div>
