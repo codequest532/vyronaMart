@@ -604,7 +604,7 @@ export default function ModernCheckout() {
                               ) : (
                                 <Badge variant="outline" className="text-orange-600 border-orange-300">
                                   <Clock className="h-3 w-3 mr-1" />
-                                  Needs ₹{Math.round(item.targetAmount - item.contributedAmount}
+                                  Needs ₹{Math.round(item.targetAmount - item.contributedAmount)}
                                 </Badge>
                               )}
                             </div>
@@ -931,7 +931,7 @@ export default function ModernCheckout() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Remaining</span>
-                    <span className="text-xl font-bold text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed}</span>
+                    <span className="text-xl font-bold text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
@@ -949,7 +949,7 @@ export default function ModernCheckout() {
                   <div className="text-center p-4 bg-orange-50 rounded-xl border border-orange-200">
                     <Clock className="h-8 w-8 text-orange-500 mx-auto mb-2" />
                     <p className="text-orange-700 font-medium">Waiting for full funding</p>
-                    <p className="text-sm text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed} still needed</p>
+                    <p className="text-sm text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed)} still needed</p>
                   </div>
                 )}
               </CardContent>
@@ -990,7 +990,7 @@ export default function ModernCheckout() {
                   />
                 </div>
                 <div className="text-sm text-gray-600">
-                  Remaining: ₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount}
+                  Remaining: ₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount)}
                 </div>
               </div>
 
