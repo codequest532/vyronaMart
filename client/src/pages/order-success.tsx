@@ -203,7 +203,7 @@ export default function OrderSuccess() {
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-gray-900 dark:text-white">
-                            ₹{Math.round(item.price * item.quantity}
+                            ₹{Math.round(item.price * item.quantity)}
                           </p>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             ₹{item.price} each
@@ -255,7 +255,7 @@ export default function OrderSuccess() {
                         {orderData.items.map((item: any, index: number) => (
                           <div key={index} className="flex justify-between items-center p-3 border rounded">
                             <span>{item.name}</span>
-                            <span>₹{Math.round(item.price * (item.quantity || 1)}</span>
+                            <span>₹{Math.round(item.price * (item.quantity || 1))}</span>
                           </div>
                         ))}
                       </div>

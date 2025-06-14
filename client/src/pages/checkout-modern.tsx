@@ -383,7 +383,7 @@ export default function ModernCheckout() {
         },
         body: JSON.stringify({
           cartItemId: upiPaymentDetails.itemId,
-          amount: Math.round(upiPaymentDetails.amount * 100)) // Convert to cents
+          amount: Math.round(upiPaymentDetails.amount * 100), // Convert to cents
           paymentMethod: 'upi',
           transactionId: referenceId,
           userId: upiPaymentDetails.userId
@@ -500,7 +500,7 @@ export default function ModernCheckout() {
               </div>
               <div className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                 <div className="text-3xl font-bold text-green-300">
-                  ₹{checkoutState.totalContributed.toFixed(0}
+                  ₹{checkoutState.totalContributed.toFixed(0)}
                 </div>
                 <div className="text-sm text-white/80">Contributed</div>
               </div>

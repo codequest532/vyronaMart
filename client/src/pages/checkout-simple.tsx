@@ -447,7 +447,7 @@ export default function SimpleCheckout() {
                   <div className="flex justify-between text-lg font-bold">
                     <span>Remaining</span>
                     <span className={totalContributed >= totalCartValue ? "text-green-600" : "text-red-600"}>
-                      ₹{Math.round((totalCartValue - totalContributed) / 100}
+                      ₹{Math.round((totalCartValue - totalContributed) / 100)}
                     </span>
                   </div>
                 </div>

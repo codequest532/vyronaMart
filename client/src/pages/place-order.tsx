@@ -925,7 +925,7 @@ export default function PlaceOrder() {
                                   </div>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-medium">₹{Math.round(item.price * item.quantity}</p>
+                                  <p className="font-medium">₹{Math.round(item.price * item.quantity)}</p>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
                                     ₹{item.price} each
                                   </p>

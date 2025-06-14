@@ -319,7 +319,7 @@ export default function VyronaHub() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500">Regular:</span>
-                        <span className="text-xs text-gray-500 line-through">₹{groupProduct.originalPrice || (groupProduct.price * 1.2}</span>
+                        <span className="text-xs text-gray-500 line-through">₹{groupProduct.originalPrice || (groupProduct.price * 1.2)}</span>
                       </div>
                       <div className="text-center">
                         <Badge variant="secondary" className="text-xs">

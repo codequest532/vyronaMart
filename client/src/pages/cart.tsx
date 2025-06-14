@@ -301,7 +301,7 @@ export default function Cart() {
                       
                       <div className="flex items-center gap-3">
                         <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                          ₹{Math.round(item.discountedPrice || item.price}
+                          ₹{Math.round(item.discountedPrice || item.price)}
                         </span>
                         {item.discountedPrice && (
                           <span className="text-lg text-gray-500 line-through">
@@ -310,7 +310,7 @@ export default function Cart() {
                         )}
                         {item.discountedPrice && (
                           <Badge variant="secondary" className="bg-red-100 text-red-700">
-                            {Math.round(((item.price - item.discountedPrice) / item.price * 100)}% OFF
+                            {Math.round(((item.price - item.discountedPrice) / item.price * 100))}% OFF
                           </Badge>
                         )}
                       </div>
