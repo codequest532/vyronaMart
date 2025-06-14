@@ -4222,8 +4222,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/instagram/products", async (req, res) => {
     try {
       // Get all Instagram products from all active stores
-      // For now, return empty array since there are no Instagram products yet
-      const products: any[] = [];
+      // Get all Instagram products from active stores
+      const products = await db
+        .select({
+          id: instagramProducts.id,
+          productName: instagramProducts.productName,
+          description: instagramProducts.description,
+          price: instagramProducts.price,
+          categoryTag: instagramProducts.categoryTag,
+          hashtags: instagramProducts.hashtags,
+          imageUrl: instagramProducts.imageUrl,
+          productUrl: instagramProducts.productUrl,
+          isAvailable: instagramProducts.isAvailable,
+          likesCount: instagramProducts.likesCount,
+          commentsCount: instagramProducts.commentsCount,
+          storeId: instagramProducts.storeId,
+        })
+        .from(instagramProducts)
+        .where(eq(instagramProducts.isAvailable, true));
 
       res.json(products);
     } catch (error) {
@@ -4235,8 +4251,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all public Instagram stores for customer browsing
   app.get("/api/instagram/stores", async (req, res) => {
     try {
-      // For now, return empty array since there are no Instagram stores yet
-      const stores: any[] = [];
+      // Get all active Instagram stores
+      const stores = await db
+        .select({
+          id: instagramStores.id,
+          instagramUsername: instagramStores.instagramUsername,
+          storeName: instagramStores.storeName,
+          storeDescription: instagramStores.storeDescription,
+          followersCount: instagramStores.followersCount,
+        })
+        .from(instagramStores)
+        .where(eq(instagramStores.isActive, true));
+
       res.json(stores);
     } catch (error) {
       console.error("Error fetching public Instagram stores:", error);
