@@ -839,7 +839,7 @@ export default function VyronaRead() {
                           </div>
                           <div className="text-right">
                             <div className="text-xs text-gray-500">or rent</div>
-                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) * 0.4)}/15 days</div>
+                            <div className="text-sm font-medium text-green-600">₹{Math.floor((book.price || 299) * 0.4}/15 days</div>
                           </div>
                         </div>
 
@@ -1326,7 +1326,7 @@ export default function VyronaRead() {
                         <Progress value={65} className="h-2" />
                         
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>Amount: ₹{(order.totalAmount / 100).toFixed(0)}</span>
+                          <span>Amount: ₹{(order.totalAmount / 100).toFixed(0}</span>
                           <span>Status: {order.status}</span>
                         </div>
                       </div>
@@ -1545,7 +1545,7 @@ export default function VyronaRead() {
                                 {item.type === 'buy' ? 'Purchase' : 'Rental'}
                               </Badge>
                               <span className="text-sm font-medium text-purple-600">
-                                ₹{item.type === 'buy' ? (item.book.price || 299) : Math.floor((item.book.price || 299) * 0.4)}
+                                ₹{item.type === 'buy' ? (item.book.price || 299) : Math.floor((item.book.price || 299) * 0.4}
                                 {item.type === 'rent' && '/15 days'}
                               </span>
                             </div>

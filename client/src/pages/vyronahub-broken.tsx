@@ -1359,7 +1359,7 @@ export default function VyronaHub() {
                     </p>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-blue-600">
-                        ₹{(product.price / 100).toLocaleString()}
+                        ₹{(product.price / 100).toLocaleString(}
                       </span>
                       <Button
                         size="sm"
@@ -1409,7 +1409,7 @@ export default function VyronaHub() {
                   <div className="space-y-4">
                     <div>
                       <span className="text-3xl font-bold text-blue-600">
-                        ₹{(selectedProduct.price / 100).toLocaleString()}
+                        ₹{(selectedProduct.price / 100).toLocaleString(}
                       </span>
                     </div>
                     

@@ -589,7 +589,7 @@ export default function Home() {
                       </div>
                       <div className="p-3">
                         <h4 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2">{product.name}</h4>
-                        <p className="text-blue-600 font-bold text-lg">₹{(product.price / 100).toLocaleString()}</p>
+                        <p className="text-blue-600 font-bold text-lg">₹{(product.price / 100).toLocaleString(}</p>
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-xs text-gray-500">Free shipping</span>
                           <Button size="sm" className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700">
@@ -732,7 +732,7 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-lg font-bold text-green-600">₹{(room.totalCart / 100).toLocaleString()}</div>
+                            <div className="text-lg font-bold text-green-600">₹{(room.totalCart / 100).toLocaleString(}</div>
                             <div className="text-xs text-gray-500">Group discount: 15% off</div>
                           </div>
                         </div>
@@ -1002,7 +1002,7 @@ export default function Home() {
                               </div>
                               {book.rentPrice && (
                                 <div className="text-sm text-purple-600">
-                                  ₹{(book.rentPrice / 100).toFixed(0)}/week
+                                  ₹{(book.rentPrice / 100).toFixed(0}/week
                                 </div>
                               )}
                             </div>
@@ -1379,7 +1379,7 @@ export default function Home() {
                         className="w-full h-40 object-cover rounded-lg mb-3 group-hover:scale-105 transition-transform"
                       />
                       <h4 className="font-semibold text-sm">{product.name}</h4>
-                      <p className="text-blue-600 font-bold">₹{(product.price / 100).toLocaleString()}</p>
+                      <p className="text-blue-600 font-bold">₹{(product.price / 100).toLocaleString(}</p>
                       <Badge variant="secondary" className="mt-1 text-green-600 bg-green-50">
                         +{Math.floor(product.price / 10000)} coins
                       </Badge>
@@ -1698,7 +1698,7 @@ export default function Home() {
                             <p className={`font-semibold ${
                               transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount)}
+                              {transaction.type === 'credit' ? '+' : '-'}₹{parseFloat(transaction.amount}
                             </p>
                             <Badge variant={transaction.status === 'completed' ? 'default' : 'secondary'}>
                               {transaction.status}

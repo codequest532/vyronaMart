@@ -742,7 +742,7 @@ export default function PlaceOrderNew() {
                       <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                     </div>
                     <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                      ₹{(checkoutState.totalCartValue - checkoutState.totalContributed).toFixed(0)}
+                      ₹{(checkoutState.totalCartValue - checkoutState.totalContributed).toFixed(0}
                     </div>
                     <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">Remaining</div>
                   </div>
@@ -801,7 +801,7 @@ export default function PlaceOrderNew() {
                           <div className="mt-4 space-y-2">
                             <div className="flex justify-between text-sm">
                               <span>Contributed: ₹{item.contributedAmount}</span>
-                              <span>Remaining: ₹{Math.round(item.targetAmount - item.contributedAmount)}</span>
+                              <span>Remaining: ₹{Math.round(item.targetAmount - item.contributedAmount}</span>
                             </div>
                             <Progress 
                               value={target?.progress || 0} 
@@ -909,7 +909,7 @@ export default function PlaceOrderNew() {
                   </div>
                   <div className="flex justify-between">
                     <span>Remaining</span>
-                    <span className="text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed)}</span>
+                    <span className="text-orange-600">₹{Math.round(checkoutState.totalCartValue - checkoutState.totalContributed}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-semibold">
@@ -1076,7 +1076,7 @@ export default function PlaceOrderNew() {
               {selectedItem && (
                 <>
                   Contributing to: <strong>{selectedItem.name}</strong><br />
-                  Remaining amount: <strong>₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount)}</strong>
+                  Remaining amount: <strong>₹{Math.round(selectedItem.targetAmount - selectedItem.contributedAmount}</strong>
                 </>
               )}
             </DialogDescription>

@@ -426,7 +426,7 @@ export default function Cart() {
                       <Percent className="h-4 w-4" />
                       Discount ({discount}%)
                     </span>
-                    <span className="font-semibold">-₹{discountAmount)}</span>
+                    <span className="font-semibold">-₹{discountAmount}</span>
                   </div>
                 )}
                 

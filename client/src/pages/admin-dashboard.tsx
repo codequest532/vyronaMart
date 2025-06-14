@@ -112,8 +112,8 @@ export default function AdminDashboard() {
     mutationFn: async (data: z.infer<typeof productSchema>) => {
       const productData = {
         ...data,
-        price: Math.round(data.price * 100), // Convert to cents
-        originalPrice: data.originalPrice ? Math.round(data.originalPrice * 100) : undefined,
+        price: Math.round(data.price * 100)) // Convert to cents
+        originalPrice: data.originalPrice ? Math.round(data.originalPrice * 100) : undefined)
         metadata: {
           brand: data.brand,
           weight: data.weight,
@@ -1230,7 +1230,7 @@ export default function AdminDashboard() {
                                     {product.description || "No description available"}
                                   </p>
                                   <div className="flex items-center gap-4">
-                                    <span className="font-bold text-xl text-green-600">₹{(product.price || 0).toLocaleString()}</span>
+                                    <span className="font-bold text-xl text-green-600">₹{(product.price || 0).toLocaleString(}</span>
                                     <span className="text-sm text-gray-500">ID: {product.id}</span>
                                   </div>
                                 </div>
@@ -1874,7 +1874,7 @@ export default function AdminDashboard() {
                               <div>
                                 <p className="font-medium">Order #{order.order_id}</p>
                                 <p className="text-sm text-gray-500">
-                                  Customer: {order.customer_email || 'N/A'} • Amount: ₹{(order.total_amount || 0).toLocaleString()}
+                                  Customer: {order.customer_email || 'N/A'} • Amount: ₹{(order.total_amount || 0).toLocaleString(}
                                 </p>
                                 <p className="text-xs text-gray-400">
                                   {new Date(order.createdAt).toLocaleDateString()} • Status: {order.status}
@@ -2233,7 +2233,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Revenue</p>
-                        <p className="text-2xl font-bold text-green-600">₹{(orders?.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0) || 0).toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-green-600">₹{(orders?.reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0) || 0).toLocaleString(}</p>
                       </div>
                       <TrendingUp className="h-8 w-8 text-green-600" />
                     </div>
@@ -2269,7 +2269,7 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="text-right">
-                              <p className="font-semibold">₹{(order.total_amount || 0).toLocaleString()}</p>
+                              <p className="font-semibold">₹{(order.total_amount || 0).toLocaleString(}</p>
                               <Badge variant={order.status === 'completed' ? 'default' : order.status === 'pending' ? 'secondary' : 'destructive'}>
                                 {order.status}
                               </Badge>
@@ -2534,7 +2534,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-gray-600">Platform Revenue</p>
-                        <p className="text-3xl font-bold text-green-600">₹{(orders?.reduce((sum: number, order: any) => sum + ((order.total_amount || 0) * 0.15), 0) || 0).toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-green-600">₹{(orders?.reduce((sum: number, order: any) => sum + ((order.total_amount || 0) * 0.15), 0) || 0).toLocaleString(}</p>
                         <p className="text-xs text-green-500">+12% from last month</p>
                       </div>
                       <TrendingUp className="h-8 w-8 text-green-600" />

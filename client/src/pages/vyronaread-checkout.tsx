@@ -1079,7 +1079,7 @@ export default function VyronaReadCheckout() {
                   <>
                     <div className="flex justify-between">
                       <span>Amount:</span>
-                      <span className="font-bold">₹{calculatePrice()}</span>
+                      <span className="font-bold">₹{calculatePrice(}</span>
                     </div>
                     <div className="flex justify-between text-sm text-gray-500">
                       <span>Processing Fee:</span>
@@ -1088,7 +1088,7 @@ export default function VyronaReadCheckout() {
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total:</span>
-                      <span>₹{calculatePrice()}</span>
+                      <span>₹{calculatePrice(}</span>
                     </div>
                   </>
                 )}

@@ -392,7 +392,7 @@ export default function InstagramCheckout() {
                       <p className="text-sm text-gray-600">by {item.seller}</p>
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-sm text-gray-600">Qty: {item.quantity}</span>
-                        <span className="font-medium">₹{item.price.toLocaleString()}</span>
+                        <span className="font-medium">₹{item.price.toLocaleString(}</span>
                       </div>
                     </div>
                   </div>
@@ -403,22 +403,22 @@ export default function InstagramCheckout() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Subtotal</span>
-                    <span>₹{subtotal.toLocaleString()}</span>
+                    <span>₹{subtotal.toLocaleString(}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Shipping</span>
-                    <span>₹{shipping.toLocaleString()}</span>
+                    <span>₹{shipping.toLocaleString(}</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-sm text-green-600">
                       <span>Discount</span>
-                      <span>-₹{discount.toLocaleString()}</span>
+                      <span>-₹{discount.toLocaleString(}</span>
                     </div>
                   )}
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>₹{total.toLocaleString()}</span>
+                    <span>₹{total.toLocaleString(}</span>
                   </div>
                 </div>
 
@@ -436,7 +436,7 @@ export default function InstagramCheckout() {
                   ) : (
                     <>
                       <Shield className="h-5 w-5 mr-2" />
-                      Place Order - ₹{total.toLocaleString()}
+                      Place Order - ₹{total.toLocaleString(}
                     </>
                   )}
                 </Button>

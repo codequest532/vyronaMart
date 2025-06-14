@@ -352,7 +352,7 @@ export default function InstaCart() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>₹{Math.round(subtotal)}</span>
+                    <span>₹{Math.round(subtotal}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
@@ -361,19 +361,19 @@ export default function InstaCart() {
                   {discountAmount > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount</span>
-                      <span>-₹{Math.round(discountAmount)}</span>
+                      <span>-₹{Math.round(discountAmount}</span>
                     </div>
                   )}
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span>₹{Math.round(total)}</span>
+                    <span>₹{Math.round(total}</span>
                   </div>
                   
                   {shipping > 0 && (
                     <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
                       <Truck className="h-4 w-4 inline mr-2" />
-                      Add ₹{Math.round(500 - subtotal)} more for free shipping
+                      Add ₹{Math.round(500 - subtotal} more for free shipping
                     </div>
                   )}
 

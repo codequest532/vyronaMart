@@ -320,7 +320,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                   <span className="text-4xl font-bold text-green-600">₹{product.price}</span>
                   {isPhysicalBook && (
                     <>
-                      <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
+                      <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.2}</span>
                       <Badge className="bg-gradient-to-r from-green-500 to-teal-500 text-white text-sm">
                         Reader's Discount
                       </Badge>
@@ -335,7 +335,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-green-600 font-medium">✓ Best reading price</span>
-                  {isPhysicalBook && <span className="text-sm text-blue-600">• Rental available from ₹{Math.floor(product.price * 0.2)}/month</span>}
+                  {isPhysicalBook && <span className="text-sm text-blue-600">• Rental available from ₹{Math.floor(product.price * 0.2}/month</span>}
                 </div>
               </div>
             </div>
@@ -378,7 +378,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                       className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
                     >
                       <Download className="h-5 w-5 mr-3" />
-                      Download E-Book • ₹{(product.price * quantity).toLocaleString()}
+                      Download E-Book • ₹{(product.price * quantity).toLocaleString(}
                     </Button>
                   </div>
                 ) : (
@@ -389,7 +389,7 @@ export default function ReadProductDetails({ productId }: ReadProductDetailsProp
                       className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
                     >
                       <ShoppingCart className="h-5 w-5 mr-3" />
-                      Buy Book • ₹{(product.price * quantity).toLocaleString()}
+                      Buy Book • ₹{(product.price * quantity).toLocaleString(}
                     </Button>
                     
                     <div className="grid grid-cols-2 gap-3">

@@ -548,7 +548,7 @@ export default function Landing() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-blue-600 font-bold text-lg">₹{product.price}</p>
-                        <p className="text-sm text-gray-500 line-through">₹{(product.price * 1.3).toFixed(0)}</p>
+                        <p className="text-sm text-gray-500 line-through">₹{(product.price * 1.3).toFixed(0}</p>
                       </div>
                       <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                         <ShoppingCart className="h-4 w-4" />
@@ -749,7 +749,7 @@ export default function Landing() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-blue-600 font-bold text-lg">₹{product.price}</p>
-                            <p className="text-sm text-gray-500 line-through">₹{(product.price * 1.3).toFixed(0)}</p>
+                            <p className="text-sm text-gray-500 line-through">₹{(product.price * 1.3).toFixed(0}</p>
                           </div>
                           <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                             <ShoppingCart className="h-4 w-4" />

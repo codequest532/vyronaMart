@@ -272,7 +272,7 @@ export default function SocialProductDetails({ productId }: SocialProductDetails
               <div className="space-y-3">
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl font-bold text-purple-600">₹{product.price}</span>
-                  <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.25)}</span>
+                  <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.25}</span>
                   <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm">
                     Group Discount Applied
                   </Badge>
@@ -341,7 +341,7 @@ export default function SocialProductDetails({ productId }: SocialProductDetails
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
                   >
                     <Users className="h-5 w-5 mr-3" />
-                    Add to Group Cart • ₹{(product.price * quantity).toLocaleString()}
+                    Add to Group Cart • ₹{(product.price * quantity).toLocaleString(}
                   </Button>
                   
                   <div className="grid grid-cols-2 gap-3">

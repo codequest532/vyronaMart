@@ -343,7 +343,7 @@ export default function SimpleCheckout() {
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Progress</span>
                           <span className="font-medium">
-                            ₹{Math.round(item.contributedAmount / 100)} / ₹{Math.round(item.targetAmount / 100)}
+                            ₹{Math.round(item.contributedAmount / 100} / ₹{Math.round(item.targetAmount / 100}
                           </span>
                         </div>
                         <Progress value={progress} className="h-2" />
@@ -437,17 +437,17 @@ export default function SimpleCheckout() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Cart Value</span>
-                    <span className="font-semibold">₹{Math.round(totalCartValue / 100)}</span>
+                    <span className="font-semibold">₹{Math.round(totalCartValue / 100}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Total Contributed</span>
-                    <span className="font-semibold text-green-600">₹{Math.round(totalContributed / 100)}</span>
+                    <span className="font-semibold text-green-600">₹{Math.round(totalContributed / 100}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Remaining</span>
                     <span className={totalContributed >= totalCartValue ? "text-green-600" : "text-red-600"}>
-                      ₹{Math.round((totalCartValue - totalContributed) / 100)}
+                      ₹{Math.round((totalCartValue - totalContributed) / 100}
                     </span>
                   </div>
                 </div>
@@ -504,8 +504,8 @@ export default function SimpleCheckout() {
                 <p className="text-sm text-blue-700">
                   <strong>Item:</strong> {selectedItem.name}<br />
                   <strong>Price:</strong> ₹{selectedItem.price}<br />
-                  <strong>Already Contributed:</strong> ₹{Math.round(selectedItem.contributedAmount / 100)}<br />
-                  <strong>Remaining:</strong> ₹{Math.round((selectedItem.targetAmount - selectedItem.contributedAmount) / 100)}
+                  <strong>Already Contributed:</strong> ₹{Math.round(selectedItem.contributedAmount / 100}<br />
+                  <strong>Remaining:</strong> ₹{Math.round((selectedItem.targetAmount - selectedItem.contributedAmount) / 100}
                 </p>
               </div>
             )}
