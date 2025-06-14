@@ -98,7 +98,7 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
             {/* VyronaCoins */}
             <Badge className="bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg px-3 py-1">
               <Coins className="mr-1 h-4 w-4" />
-              <span className="font-bold">{user?.vyronaCoins?.toLocaleString()) || '0'}</span>
+              <span className="font-bold">{user?.vyronaCoins?.toLocaleString() || '0'}</span>
             </Badge>
             
             {/* XP Level */}

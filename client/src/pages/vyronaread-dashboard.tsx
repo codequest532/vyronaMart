@@ -1344,7 +1344,7 @@ export default function BookSellerDashboard() {
                       <div>
                         <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                         <p className="text-3xl font-bold text-orange-600">
-                          ₹{sellerOrders?.reduce((total: number, order: any) => total + (order.total_amount || 0), 0).toLocaleString()) || 0}
+                          ₹{sellerOrders?.reduce((total: number, order: any) => total + (order.total_amount || 0), 0).toLocaleString() || 0}
                         </p>
                         <p className="text-xs text-orange-500">All time</p>
                       </div>
