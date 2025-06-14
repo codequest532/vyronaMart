@@ -496,10 +496,17 @@ export default function VyronaInstaStoreDashboard() {
                 {syncInstagramMutation.isPending ? "Syncing..." : "Sync Instagram"}
               </Button>
               <Button
-                onClick={() => {
-                  // Clear local storage and redirect to landing page
+                onClick={async () => {
+                  try {
+                    // Call logout API endpoint first
+                    await apiRequest('/api/auth/logout', 'POST');
+                  } catch (error) {
+                    // Even if API call fails, continue with logout
+                  }
+                  // Clear local storage
                   localStorage.removeItem('user');
-                  setLocation('/');
+                  // Force page reload to landing page
+                  window.location.href = '/';
                 }}
                 variant="outline"
                 className="text-red-600 hover:text-red-700 hover:border-red-300"
