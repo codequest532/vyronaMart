@@ -165,7 +165,9 @@ export default function VyronaSpace() {
     }
   ];
 
-  const storeProducts = selectedStore ? [
+  // All products from all stores combined
+  const allProducts = [
+    // FreshMart Express Products
     {
       id: 1,
       name: "Organic Apples",
@@ -176,7 +178,12 @@ export default function VyronaSpace() {
       inStock: 25,
       category: "fruits",
       brand: "FreshCo",
-      discount: 20
+      discount: 20,
+      storeId: 1,
+      storeName: "FreshMart Express",
+      storeRating: 4.8,
+      estimatedDelivery: "8 min",
+      deliveryFee: 25
     },
     {
       id: 2,
@@ -186,7 +193,12 @@ export default function VyronaSpace() {
       image: "/api/placeholder/80/80",
       inStock: 12,
       category: "dairy",
-      brand: "Nandini"
+      brand: "Nandini",
+      storeId: 1,
+      storeName: "FreshMart Express",
+      storeRating: 4.8,
+      estimatedDelivery: "8 min",
+      deliveryFee: 25
     },
     {
       id: 3,
@@ -196,9 +208,125 @@ export default function VyronaSpace() {
       image: "/api/placeholder/80/80",
       inStock: 8,
       category: "bakery",
-      brand: "Britannia"
+      brand: "Britannia",
+      storeId: 1,
+      storeName: "FreshMart Express",
+      storeRating: 4.8,
+      estimatedDelivery: "8 min",
+      deliveryFee: 25
+    },
+    {
+      id: 4,
+      name: "Bananas",
+      price: 60,
+      unit: "1 kg",
+      image: "/api/placeholder/80/80",
+      inStock: 30,
+      category: "fruits",
+      brand: "Fresh",
+      storeId: 1,
+      storeName: "FreshMart Express",
+      storeRating: 4.8,
+      estimatedDelivery: "8 min",
+      deliveryFee: 25
+    },
+    // MedPlus Pharmacy Products
+    {
+      id: 5,
+      name: "Paracetamol 500mg",
+      price: 25,
+      unit: "10 tablets",
+      image: "/api/placeholder/80/80",
+      inStock: 50,
+      category: "medicine",
+      brand: "Crocin",
+      storeId: 2,
+      storeName: "MedPlus Pharmacy",
+      storeRating: 4.9,
+      estimatedDelivery: "6 min",
+      deliveryFee: 20
+    },
+    {
+      id: 6,
+      name: "Hand Sanitizer",
+      price: 85,
+      unit: "200ml",
+      image: "/api/placeholder/80/80",
+      inStock: 20,
+      category: "healthcare",
+      brand: "Dettol",
+      storeId: 2,
+      storeName: "MedPlus Pharmacy",
+      storeRating: 4.9,
+      estimatedDelivery: "6 min",
+      deliveryFee: 20
+    },
+    {
+      id: 7,
+      name: "Vitamin D3 Tablets",
+      price: 150,
+      unit: "30 tablets",
+      image: "/api/placeholder/80/80",
+      inStock: 15,
+      category: "medicine",
+      brand: "HealthVit",
+      storeId: 2,
+      storeName: "MedPlus Pharmacy",
+      storeRating: 4.9,
+      estimatedDelivery: "6 min",
+      deliveryFee: 20
+    },
+    // Fashion District Products
+    {
+      id: 8,
+      name: "Cotton T-Shirt",
+      price: 599,
+      originalPrice: 799,
+      unit: "1 piece",
+      image: "/api/placeholder/80/80",
+      inStock: 12,
+      category: "clothing",
+      brand: "Levi's",
+      discount: 25,
+      storeId: 3,
+      storeName: "Fashion District",
+      storeRating: 4.6,
+      estimatedDelivery: "15 min",
+      deliveryFee: 50
+    },
+    {
+      id: 9,
+      name: "Jeans",
+      price: 1299,
+      originalPrice: 1799,
+      unit: "1 piece",
+      image: "/api/placeholder/80/80",
+      inStock: 8,
+      category: "clothing",
+      brand: "Wrangler",
+      discount: 28,
+      storeId: 3,
+      storeName: "Fashion District",
+      storeRating: 4.6,
+      estimatedDelivery: "15 min",
+      deliveryFee: 50
+    },
+    {
+      id: 10,
+      name: "Sneakers",
+      price: 2499,
+      unit: "1 pair",
+      image: "/api/placeholder/80/80",
+      inStock: 5,
+      category: "footwear",
+      brand: "Nike",
+      storeId: 3,
+      storeName: "Fashion District",
+      storeRating: 4.6,
+      estimatedDelivery: "15 min",
+      deliveryFee: 50
     }
-  ] : [];
+  ];
 
   const addToCart = (product: any) => {
     const existingItem = cart.find(item => item.id === product.id);
@@ -427,17 +555,62 @@ export default function VyronaSpace() {
     });
   };
 
-  const categories = [
-    { id: "all", name: "All", icon: Home, count: localStores.length, color: "bg-gradient-to-r from-blue-500 to-purple-600" },
-    { id: "grocery", name: "Grocery", icon: ShoppingBag, count: 1, color: "bg-gradient-to-r from-green-500 to-emerald-600" },
-    { id: "pharmacy", name: "Health", icon: Heart, count: 1, color: "bg-gradient-to-r from-red-500 to-pink-600" },
-    { id: "clothing", name: "Fashion", icon: Shirt, count: 1, color: "bg-gradient-to-r from-purple-500 to-indigo-600" },
-    { id: "electronics", name: "Tech", icon: Laptop, count: 0, color: "bg-gradient-to-r from-gray-500 to-slate-600" }
-  ];
+  // Filter products based on search and category
+  const getFilteredProducts = () => {
+    return allProducts.filter(product => {
+      // Search filter
+      if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !product.brand.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !product.storeName.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      // Category filter
+      if (selectedCategory !== "all" && product.category !== selectedCategory) {
+        return false;
+      }
+      
+      // Apply store-level filters through product's store info
+      if (filters.distance !== "all") {
+        const store = localStores.find(s => s.id === product.storeId);
+        if (store) {
+          const maxDistance = parseInt(filters.distance);
+          const storeDistance = parseFloat(store.distance);
+          if (storeDistance > maxDistance) return false;
+        }
+      }
+      
+      if (filters.rating !== "all") {
+        const minRating = parseFloat(filters.rating);
+        if (product.storeRating < minRating) return false;
+      }
+      
+      if (filters.deliveryTime !== "all") {
+        const maxDeliveryTime = parseInt(filters.deliveryTime);
+        const deliveryMinutes = parseInt(product.estimatedDelivery);
+        if (deliveryMinutes > maxDeliveryTime) return false;
+      }
+      
+      if (filters.openNow) {
+        const store = localStores.find(s => s.id === product.storeId);
+        if (store && !store.isOpen) return false;
+      }
+      
+      if (filters.offers && !product.discount) return false;
+      
+      return true;
+    });
+  };
 
-  const filteredStores = selectedCategory === "all" 
-    ? localStores 
-    : localStores.filter(store => store.category === selectedCategory);
+  const categories = [
+    { id: "all", name: "All Items", icon: Home, count: allProducts.length, color: "bg-gradient-to-r from-blue-500 to-purple-600" },
+    { id: "fruits", name: "Fruits", icon: ShoppingBag, count: allProducts.filter(p => p.category === "fruits").length, color: "bg-gradient-to-r from-green-500 to-emerald-600" },
+    { id: "dairy", name: "Dairy", icon: ShoppingBag, count: allProducts.filter(p => p.category === "dairy").length, color: "bg-gradient-to-r from-blue-400 to-blue-600" },
+    { id: "medicine", name: "Medicine", icon: Heart, count: allProducts.filter(p => p.category === "medicine").length, color: "bg-gradient-to-r from-red-500 to-pink-600" },
+    { id: "clothing", name: "Fashion", icon: Shirt, count: allProducts.filter(p => p.category === "clothing").length, color: "bg-gradient-to-r from-purple-500 to-indigo-600" },
+    { id: "bakery", name: "Bakery", icon: ShoppingBag, count: allProducts.filter(p => p.category === "bakery").length, color: "bg-gradient-to-r from-orange-500 to-yellow-600" },
+    { id: "healthcare", name: "Healthcare", icon: Heart, count: allProducts.filter(p => p.category === "healthcare").length, color: "bg-gradient-to-r from-teal-500 to-cyan-600" }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
@@ -715,7 +888,7 @@ export default function VyronaSpace() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Discover Tab - Enhanced Store Discovery */}
+          {/* Discover Tab - Enhanced Product Discovery */}
           <TabsContent value="discover" className="space-y-8">
             
             {/* Modern Category Pills */}
@@ -739,158 +912,103 @@ export default function VyronaSpace() {
               ))}
             </div>
 
-            {/* Enhanced Store Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getFilteredStores().map(store => (
-                <Card key={store.id} className="group overflow-hidden rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                  <div className="relative h-48 overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
-                    <div className="absolute top-4 left-4">
-                      <Badge className={`${
-                        store.isOpen ? 'bg-green-500' : 'bg-red-500'
-                      } text-white border-0`}>
-                        {store.isOpen ? 'Open' : 'Closed'}
-                      </Badge>
+            {/* Product Grid - Direct Item Display */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {getFilteredProducts().map(product => (
+                <Card key={product.id} className="group overflow-hidden rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="relative">
+                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <div className="absolute top-4 right-4 flex space-x-2">
-                      {store.badges.slice(0, 2).map(badge => (
-                        <Badge key={badge} variant="secondary" className="bg-white/90 text-gray-700 border-0 text-xs">
-                          {badge === "verified" && <Shield className="h-3 w-3 mr-1" />}
-                          {badge === "top_rated" && <Star className="h-3 w-3 mr-1" />}
-                          {badge === "fast_delivery" && <Zap className="h-3 w-3 mr-1" />}
-                          {badge === "24x7" && <Clock className="h-3 w-3 mr-1" />}
-                          {badge === "trending" && <TrendingUp className="h-3 w-3 mr-1" />}
-                          {badge.replace("_", " ")}
+                    
+                    {/* Discount Badge */}
+                    {product.discount && (
+                      <div className="absolute top-2 left-2">
+                        <Badge className="bg-red-500 text-white border-0 text-xs">
+                          {product.discount}% OFF
                         </Badge>
-                      ))}
+                      </div>
+                    )}
+                    
+                    {/* Store Rating Badge */}
+                    <div className="absolute top-2 right-2">
+                      <Badge className="bg-green-500 text-white border-0 text-xs">
+                        {product.estimatedDelivery}
+                      </Badge>
                     </div>
                   </div>
 
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4 mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Store className="h-8 w-8 text-blue-600" />
+                  <CardContent className="p-4">
+                    {/* Product Info */}
+                    <div className="mb-3">
+                      <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
+                      <p className="text-xs text-gray-600 mb-1">{product.unit}</p>
+                      <p className="text-xs text-blue-600 font-medium">{product.storeName}</p>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-center space-x-2 mb-3">
+                      <span className="font-bold text-lg text-gray-900">₹{Math.round(product.price)}</span>
+                      {product.originalPrice && (
+                        <span className="text-sm text-gray-500 line-through">₹{Math.round(product.originalPrice)}</span>
+                      )}
+                    </div>
+
+                    {/* Store Rating & Delivery */}
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
+                      <div className="flex items-center">
+                        <Star className="h-3 w-3 text-yellow-400 fill-current mr-1" />
+                        <span>{product.storeRating}</span>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-xl text-gray-900 mb-1">{store.name}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{store.address}</p>
-                        <div className="flex items-center space-x-4 text-sm">
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                            <span className="font-semibold">{store.rating}</span>
-                            <span className="text-gray-500 ml-1">({store.reviewCount})</span>
-                          </div>
-                          <div className="flex items-center text-green-600 font-medium">
-                            <Clock className="h-4 w-4 mr-1" />
-                            {store.estimatedDelivery}
-                          </div>
-                        </div>
+                      <div className="flex items-center">
+                        <Clock className="h-3 w-3 text-green-600 mr-1" />
+                        <span className="text-green-600">{product.estimatedDelivery}</span>
                       </div>
                     </div>
 
-                    {/* Store Specialties */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {store.specialties.map(specialty => (
-                        <Badge key={specialty} variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
-                          {specialty}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    {/* Store Stats */}
-                    <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-xl">
-                      <div className="text-center">
-                        <div className="font-semibold text-gray-900">₹{store.minimumOrder}</div>
-                        <div className="text-xs text-gray-600">Min Order</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-semibold text-gray-900">₹{store.deliveryFee}</div>
-                        <div className="text-xs text-gray-600">Delivery Fee</div>
+                    {/* Stock Status */}
+                    <div className="mb-3">
+                      <div className="text-xs text-gray-600">
+                        {product.inStock > 10 ? (
+                          <span className="text-green-600">In Stock</span>
+                        ) : product.inStock > 0 ? (
+                          <span className="text-orange-600">Only {product.inStock} left</span>
+                        ) : (
+                          <span className="text-red-600">Out of Stock</span>
+                        )}
                       </div>
                     </div>
 
-                    {/* Special Offers */}
-                    {store.offers && store.offers.length > 0 && (
-                      <div className="mb-4">
-                        <div className="flex items-center mb-2">
-                          <Gift className="h-4 w-4 text-orange-500 mr-2" />
-                          <span className="text-sm font-medium text-orange-700">Special Offers</span>
-                        </div>
-                        {store.offers.slice(0, 1).map((offer, index) => (
-                          <div key={index} className="text-xs bg-gradient-to-r from-orange-50 to-red-50 text-orange-700 px-3 py-2 rounded-lg border border-orange-200">
-                            {offer}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex space-x-3">
-                      <Button 
-                        onClick={() => setSelectedStore(store)}
-                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl font-medium"
-                      >
-                        <ShoppingBag className="h-4 w-4 mr-2" />
-                        Shop Now
-                      </Button>
-                      <Button variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-xl">
-                        <Phone className="h-4 w-4" />
-                      </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm" className="border-purple-200 text-purple-600 hover:bg-purple-50 rounded-xl">
-                            <MessageCircle className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-md rounded-2xl">
-                          <DialogHeader>
-                            <DialogTitle className="text-xl">Chat with {store.name}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div className="h-64 border rounded-2xl p-4 overflow-y-auto space-y-3 bg-gray-50">
-                              {chatMessages.length === 0 ? (
-                                <div className="text-center text-gray-500 mt-8">
-                                  <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                                  <p className="font-medium">Start a conversation</p>
-                                  <p className="text-sm">Ask about products, offers, or availability</p>
-                                </div>
-                              ) : (
-                                chatMessages.map(message => (
-                                  <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-xs p-3 rounded-2xl ${
-                                      message.sender === 'customer' 
-                                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
-                                        : 'bg-white text-gray-900 shadow-sm'
-                                    }`}>
-                                      <p className="text-sm">{message.content}</p>
-                                      <p className="text-xs opacity-70 mt-1">
-                                        {message.timestamp.toLocaleTimeString()}
-                                      </p>
-                                    </div>
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                            <div className="flex space-x-2">
-                              <Input
-                                placeholder="Type your message..."
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                                className="flex-1 rounded-xl"
-                              />
-                              <Button onClick={sendMessage} className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600">
-                                Send
-                              </Button>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
+                    {/* Add to Cart Button */}
+                    <Button 
+                      onClick={() => addToCart(product)}
+                      disabled={product.inStock === 0}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl font-medium text-sm py-2"
+                    >
+                      <ShoppingCart className="h-3 w-3 mr-2" />
+                      {product.inStock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Empty State */}
+            {getFilteredProducts().length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ShoppingBag className="h-12 w-12 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
+                <p className="text-gray-600 mb-4">Try adjusting your filters or search terms</p>
+                <Button onClick={clearFilters} variant="outline" className="rounded-xl">
+                  Clear Filters
+                </Button>
+              </div>
           </TabsContent>
 
           {/* Orders Tab - Enhanced Order Tracking */}
@@ -1449,7 +1567,7 @@ export default function VyronaSpace() {
 
                 {/* Products Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {storeProducts.map(product => (
+                  {getFilteredProducts().map(product => (
                     <Card key={product.id} className="rounded-2xl border-0 bg-white shadow-md hover:shadow-lg transition-all">
                       <CardContent className="p-4">
                         <div className="flex items-start space-x-3 mb-4">
