@@ -1097,7 +1097,14 @@ export default function VyronaSpace() {
                 <Button variant="outline" onClick={() => setCart([])} className="rounded-xl border-emerald-200 hover:bg-emerald-100">
                   Clear
                 </Button>
-                <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl">
+                <Button 
+                  onClick={() => {
+                    // Save cart to sessionStorage for checkout page
+                    sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
+                    setLocation('/vyronaspace-checkout');
+                  }}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
+                >
                   Checkout
                 </Button>
               </div>
