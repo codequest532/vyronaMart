@@ -23,6 +23,7 @@ import {
 } from "@shared/schema";
 import { db, pool } from "./db";
 import { eq, and, isNull, sql, desc } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 
 // Wallet tables will be handled through the existing wallet implementation
 
@@ -2513,6 +2514,7 @@ export class DatabaseStorage implements IStorage {
   // Instagram Cart Implementation
   async getInstagramCartItems(userId: number): Promise<any[]> {
     try {
+      // Optimized query using simple joins for better performance
       const items = await db
         .select({
           id: cartItems.id,
@@ -2524,12 +2526,14 @@ export class DatabaseStorage implements IStorage {
           seller: instagramStores.instagramUsername
         })
         .from(cartItems)
-        .leftJoin(instagramProducts, eq(cartItems.productId, instagramProducts.id))
-        .leftJoin(instagramStores, eq(instagramProducts.storeId, instagramStores.id))
+        .innerJoin(instagramProducts, eq(cartItems.productId, instagramProducts.id))
+        .innerJoin(instagramStores, eq(instagramProducts.storeId, instagramStores.id))
         .where(and(
           eq(cartItems.userId, userId),
           eq(cartItems.module, 'instagram')
-        ));
+        ))
+        .limit(50); // Add limit for performance
+      
       return items;
     } catch (error) {
       console.error("Error fetching Instagram cart items:", error);
