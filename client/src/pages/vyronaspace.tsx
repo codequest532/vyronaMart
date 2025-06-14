@@ -179,6 +179,7 @@ export default function VyronaSpace() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [viewMode, setViewMode] = useState<"stores" | "store-products">("stores");
 
   const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
 
