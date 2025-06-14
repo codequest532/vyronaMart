@@ -310,22 +310,29 @@ export default function VyronaSpace() {
           </Link>
           
           {/* Quick Cart Button */}
-          {cart.length > 0 && (
-            <Button 
-              onClick={() => {
+          <Button 
+            onClick={() => {
+              if (cart.length > 0) {
                 // Save cart to sessionStorage for checkout page
                 sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
                 setLocation('/vyronaspace-checkout');
-              }}
-              className="relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Cart
+              }
+            }}
+            disabled={cart.length === 0}
+            className={`relative rounded-xl ${
+              cart.length > 0 
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Cart
+            {cart.length > 0 && (
               <Badge className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-5 flex items-center justify-center">
                 {getCartItemCount()}
               </Badge>
-            </Button>
-          )}
+            )}
+          </Button>
         </div>
 
         {/* Header */}
