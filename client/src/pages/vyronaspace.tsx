@@ -1,46 +1,47 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { 
-  MapPin, 
-  ShoppingBag, 
-  Shirt, 
-  Laptop, 
-  Heart, 
-  Store, 
+import {
+  MapPin,
+  Store,
+  ShoppingBag,
+  Heart,
   Star,
-  ArrowLeft,
-  Search,
-  Filter,
   Clock,
   Phone,
   MessageCircle,
-  Truck,
-  Package,
-  ShoppingCart,
-  Plus,
-  Minus,
-  Timer,
-  MapIcon,
-  Calendar,
-  RefreshCw,
-  Eye,
-  ThumbsUp,
-  Camera,
+  Search,
   Navigation,
   Zap,
+  Package,
+  Calendar,
   Award,
+  Plus,
+  Minus,
+  ShoppingCart,
+  Eye,
+  RefreshCw,
+  Truck,
   Shield,
-  CreditCard,
-  RotateCcw
+  Laptop,
+  Shirt,
+  ArrowLeft,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Target,
+  Gift,
+  Home,
+  Filter,
+  Bell,
+  MapIcon,
+  CreditCard
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -53,15 +54,14 @@ export default function VyronaSpace() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
-  const [activeTab, setActiveTab] = useState("stores");
+  const [activeTab, setActiveTab] = useState("discover");
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  // Mock data for comprehensive demo - would come from APIs in production
+  // Enhanced mock data for modern design
   const localStores = [
     {
       id: 1,
-      name: "Fresh Market",
+      name: "FreshMart Express",
       category: "grocery",
       rating: 4.8,
       reviewCount: 324,
@@ -73,8 +73,10 @@ export default function VyronaSpace() {
       deliveryFee: 25,
       address: "No. 23, Habibullah Road, T. Nagar",
       phone: "+91 98765 43210",
-      image: "/api/placeholder/80/80",
-      offers: ["20% off on fruits", "Free delivery above ₹200"]
+      image: "/api/placeholder/120/120",
+      offers: ["20% off on fruits", "Free delivery above ₹200"],
+      specialties: ["Organic", "Fresh Produce", "24x7"],
+      heroImage: "/api/placeholder/400/200"
     },
     {
       id: 2,
@@ -85,30 +87,34 @@ export default function VyronaSpace() {
       distance: "0.5 km",
       estimatedDelivery: "10-15 min",
       isOpen: true,
-      badges: ["verified", "24x7"],
+      badges: ["verified", "24x7", "prescription"],
       minimumOrder: 50,
       deliveryFee: 20,
       address: "Pondy Bazaar, T. Nagar",
       phone: "+91 98765 43211",
-      image: "/api/placeholder/80/80",
-      offers: ["10% off on prescription medicines"]
+      image: "/api/placeholder/120/120",
+      offers: ["10% off on prescription medicines"],
+      specialties: ["Prescription", "Health Care", "Emergency"],
+      heroImage: "/api/placeholder/400/200"
     },
     {
       id: 3,
-      name: "Fashion Hub",
+      name: "Fashion District",
       category: "clothing",
       rating: 4.6,
       reviewCount: 89,
       distance: "0.8 km",
       estimatedDelivery: "25-30 min",
       isOpen: true,
-      badges: ["verified", "new"],
+      badges: ["verified", "trending", "premium"],
       minimumOrder: 500,
       deliveryFee: 50,
       address: "Ranganathan Street, T. Nagar",
       phone: "+91 98765 43212",
-      image: "/api/placeholder/80/80",
-      offers: ["Buy 2 Get 1 Free", "Flat 30% off on summer collection"]
+      image: "/api/placeholder/120/120",
+      offers: ["Buy 2 Get 1 Free", "Flat 30% off on summer collection"],
+      specialties: ["Latest Fashion", "Designer Wear", "Accessories"],
+      heroImage: "/api/placeholder/400/200"
     }
   ];
 
@@ -116,7 +122,7 @@ export default function VyronaSpace() {
     {
       id: 1,
       orderNumber: "VS2025001",
-      storeName: "Fresh Market",
+      storeName: "FreshMart Express",
       items: ["Organic Apples (1kg)", "Fresh Milk (1L)", "Bread"],
       total: 245,
       status: "out_for_delivery",
@@ -141,17 +147,18 @@ export default function VyronaSpace() {
       price: 120,
       originalPrice: 150,
       unit: "1 kg",
-      image: "/api/placeholder/60/60",
+      image: "/api/placeholder/80/80",
       inStock: 25,
       category: "fruits",
-      brand: "FreshCo"
+      brand: "FreshCo",
+      discount: 20
     },
     {
       id: 2,
       name: "Fresh Milk",
       price: 65,
       unit: "1 L",
-      image: "/api/placeholder/60/60",
+      image: "/api/placeholder/80/80",
       inStock: 12,
       category: "dairy",
       brand: "Nandini"
@@ -161,7 +168,7 @@ export default function VyronaSpace() {
       name: "Whole Wheat Bread",
       price: 45,
       unit: "500g",
-      image: "/api/placeholder/60/60",
+      image: "/api/placeholder/80/80",
       inStock: 8,
       category: "bakery",
       brand: "Britannia"
@@ -198,7 +205,6 @@ export default function VyronaSpace() {
     setChatMessages([...chatMessages, message]);
     setNewMessage("");
     
-    // Simulate store response
     setTimeout(() => {
       const storeResponse = {
         id: Date.now() + 1,
@@ -211,11 +217,11 @@ export default function VyronaSpace() {
   };
 
   const categories = [
-    { id: "all", name: "All Stores", icon: Store, count: localStores.length },
-    { id: "grocery", name: "Grocery", icon: ShoppingBag, count: 1 },
-    { id: "pharmacy", name: "Pharmacy", icon: Heart, count: 1 },
-    { id: "clothing", name: "Fashion", icon: Shirt, count: 1 },
-    { id: "electronics", name: "Electronics", icon: Laptop, count: 0 }
+    { id: "all", name: "All", icon: Home, count: localStores.length, color: "bg-gradient-to-r from-blue-500 to-purple-600" },
+    { id: "grocery", name: "Grocery", icon: ShoppingBag, count: 1, color: "bg-gradient-to-r from-green-500 to-emerald-600" },
+    { id: "pharmacy", name: "Health", icon: Heart, count: 1, color: "bg-gradient-to-r from-red-500 to-pink-600" },
+    { id: "clothing", name: "Fashion", icon: Shirt, count: 1, color: "bg-gradient-to-r from-purple-500 to-indigo-600" },
+    { id: "electronics", name: "Tech", icon: Laptop, count: 0, color: "bg-gradient-to-r from-gray-500 to-slate-600" }
   ];
 
   const filteredStores = selectedCategory === "all" 
@@ -223,32 +229,44 @@ export default function VyronaSpace() {
     : localStores.filter(store => store.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20">
+      
+      {/* Modern Header with Glassmorphism */}
+      <div className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-white/20 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link href="/">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Home
+                  Back
                 </Button>
               </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">VyronaSpace</h1>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {currentLocation}
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Sparkles className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    VyronaSpace
+                  </h1>
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {currentLocation}
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
+            
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm" className="bg-white/50 border-white/20 hover:bg-white/80">
                 <Navigation className="h-4 w-4 mr-2" />
                 Update Location
               </Button>
-              <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              <Button variant="outline" size="sm" className="bg-white/50 border-white/20 hover:bg-white/80">
+                <Bell className="h-4 w-4" />
+              </Button>
+              <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0">
                 <Zap className="h-3 w-3 mr-1" />
                 15-30 min delivery
               </Badge>
@@ -257,152 +275,177 @@ export default function VyronaSpace() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        
-        {/* Search and Filter Bar */}
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search for stores, products, or categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+      {/* Hero Section with Modern Design */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-8 mb-8">
+          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="relative z-10 text-center text-white">
+            <h2 className="text-4xl font-bold mb-4">Your Local Shopping Companion</h2>
+            <p className="text-xl opacity-90 mb-6">Discover nearby stores, order instantly, and get delivery in minutes</p>
+            <div className="flex justify-center space-x-8 text-center">
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 min-w-[120px]">
+                <div className="text-2xl font-bold">15-30</div>
+                <div className="text-sm opacity-80">Min Delivery</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 min-w-[120px]">
+                <div className="text-2xl font-bold">{localStores.length}+</div>
+                <div className="text-sm opacity-80">Local Stores</div>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 min-w-[120px]">
+                <div className="text-2xl font-bold">2KM</div>
+                <div className="text-sm opacity-80">Coverage</div>
+              </div>
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(category => (
-                  <SelectItem key={category.id} value={category.id}>
-                    <div className="flex items-center space-x-2">
-                      <category.icon className="h-4 w-4" />
-                      <span>{category.name} ({category.count})</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          </div>
+          <div className="absolute -top-4 -right-4 w-32 h-32 bg-white/10 rounded-full"></div>
+          <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-white/5 rounded-full"></div>
+        </div>
+
+        {/* Enhanced Search Bar */}
+        <div className="mb-8">
+          <div className="relative max-w-2xl mx-auto">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <Input
+              placeholder="Search for stores, products, or categories..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 pr-16 py-4 text-lg rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg focus:shadow-xl transition-all"
+            />
+            <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
+              <Button size="sm" className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="stores">
-              <Store className="h-4 w-4 mr-2" />
-              Local Stores
+        {/* Modern Navigation Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-sm rounded-2xl p-2 h-auto">
+            <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Discover
             </TabsTrigger>
-            <TabsTrigger value="orders">
+            <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
               <Package className="h-4 w-4 mr-2" />
-              My Orders
+              Orders
             </TabsTrigger>
-            <TabsTrigger value="subscriptions">
-              <Calendar className="h-4 w-4 mr-2" />
-              Subscriptions
-            </TabsTrigger>
-            <TabsTrigger value="rewards">
+            <TabsTrigger value="rewards" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
               <Award className="h-4 w-4 mr-2" />
-              Geo-Rewards
+              Rewards
+            </TabsTrigger>
+            <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <Users className="h-4 w-4 mr-2" />
+              Profile
             </TabsTrigger>
           </TabsList>
 
-          {/* Stores Tab */}
-          <TabsContent value="stores" className="space-y-6">
-            {/* Store Categories */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {/* Discover Tab - Enhanced Store Discovery */}
+          <TabsContent value="discover" className="space-y-8">
+            
+            {/* Modern Category Pills */}
+            <div className="flex space-x-4 overflow-x-auto pb-2">
               {categories.map(category => (
-                <Card 
+                <button
                   key={category.id}
-                  className={`cursor-pointer transition-all hover:shadow-lg ${
-                    selectedCategory === category.id 
-                      ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
                   onClick={() => setSelectedCategory(category.id)}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-full transition-all whitespace-nowrap ${
+                    selectedCategory === category.id 
+                      ? `${category.color} text-white shadow-lg transform scale-105` 
+                      : 'bg-white/60 text-gray-700 hover:bg-white/80 hover:shadow-md'
+                  }`}
                 >
-                  <CardContent className="p-4 text-center">
-                    <category.icon className={`h-8 w-8 mx-auto mb-2 ${
-                      selectedCategory === category.id ? 'text-blue-600' : 'text-gray-600'
-                    }`} />
-                    <h4 className="font-medium text-sm">{category.name}</h4>
-                    <p className="text-xs text-gray-500">{category.count} stores</p>
-                  </CardContent>
-                </Card>
+                  <category.icon className="h-4 w-4" />
+                  <span className="font-medium">{category.name}</span>
+                  <Badge variant="secondary" className="bg-white/20 text-current border-0">
+                    {category.count}
+                  </Badge>
+                </button>
               ))}
             </div>
 
-            {/* Store List */}
+            {/* Enhanced Store Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredStores.map(store => (
-                <Card key={store.id} className="hover:shadow-lg transition-all cursor-pointer group">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4 mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Store className="h-8 w-8 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <h3 className="font-semibold text-lg">{store.name}</h3>
-                          {store.badges.includes("verified") && (
-                            <Shield className="h-4 w-4 text-green-600" />
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 mb-2">{store.address}</p>
-                        <div className="flex items-center space-x-4 text-sm">
-                          <div className="flex items-center">
-                            <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                            <span className="font-medium">{store.rating}</span>
-                            <span className="text-gray-500 ml-1">({store.reviewCount})</span>
-                          </div>
-                          <div className="flex items-center text-green-600">
-                            <Clock className="h-4 w-4 mr-1" />
-                            <span>{store.estimatedDelivery}</span>
-                          </div>
-                        </div>
-                      </div>
+                <Card key={store.id} className="group overflow-hidden rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="relative h-48 overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20"></div>
+                    <div className="absolute top-4 left-4">
+                      <Badge className={`${
+                        store.isOpen ? 'bg-green-500' : 'bg-red-500'
+                      } text-white border-0`}>
+                        {store.isOpen ? 'Open' : 'Closed'}
+                      </Badge>
                     </div>
-
-                    {/* Store Badges */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {store.badges.map(badge => (
-                        <Badge key={badge} variant="secondary" className="text-xs">
+                    <div className="absolute top-4 right-4 flex space-x-2">
+                      {store.badges.slice(0, 2).map(badge => (
+                        <Badge key={badge} variant="secondary" className="bg-white/90 text-gray-700 border-0 text-xs">
                           {badge === "verified" && <Shield className="h-3 w-3 mr-1" />}
                           {badge === "top_rated" && <Star className="h-3 w-3 mr-1" />}
                           {badge === "fast_delivery" && <Zap className="h-3 w-3 mr-1" />}
                           {badge === "24x7" && <Clock className="h-3 w-3 mr-1" />}
-                          {badge === "new" && <Award className="h-3 w-3 mr-1" />}
+                          {badge === "trending" && <TrendingUp className="h-3 w-3 mr-1" />}
                           {badge.replace("_", " ")}
                         </Badge>
                       ))}
                     </div>
+                  </div>
 
-                    {/* Store Info */}
-                    <div className="space-y-2 mb-4 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Distance:</span>
-                        <span className="font-medium">{store.distance}</span>
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-4 mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Store className="h-8 w-8 text-blue-600" />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Min Order:</span>
-                        <span className="font-medium">₹{store.minimumOrder}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Delivery Fee:</span>
-                        <span className="font-medium">₹{store.deliveryFee}</span>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-xl text-gray-900 mb-1">{store.name}</h3>
+                        <p className="text-sm text-gray-600 mb-2">{store.address}</p>
+                        <div className="flex items-center space-x-4 text-sm">
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+                            <span className="font-semibold">{store.rating}</span>
+                            <span className="text-gray-500 ml-1">({store.reviewCount})</span>
+                          </div>
+                          <div className="flex items-center text-green-600 font-medium">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {store.estimatedDelivery}
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Offers */}
+                    {/* Store Specialties */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {store.specialties.map(specialty => (
+                        <Badge key={specialty} variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
+                          {specialty}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    {/* Store Stats */}
+                    <div className="grid grid-cols-2 gap-4 mb-4 p-3 bg-gray-50 rounded-xl">
+                      <div className="text-center">
+                        <div className="font-semibold text-gray-900">₹{store.minimumOrder}</div>
+                        <div className="text-xs text-gray-600">Min Order</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-semibold text-gray-900">₹{store.deliveryFee}</div>
+                        <div className="text-xs text-gray-600">Delivery Fee</div>
+                      </div>
+                    </div>
+
+                    {/* Special Offers */}
                     {store.offers && store.offers.length > 0 && (
                       <div className="mb-4">
-                        <h4 className="text-sm font-medium text-green-600 mb-2">Special Offers</h4>
-                        {store.offers.map((offer, index) => (
-                          <div key={index} className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded mb-1">
+                        <div className="flex items-center mb-2">
+                          <Gift className="h-4 w-4 text-orange-500 mr-2" />
+                          <span className="text-sm font-medium text-orange-700">Special Offers</span>
+                        </div>
+                        {store.offers.slice(0, 1).map((offer, index) => (
+                          <div key={index} className="text-xs bg-gradient-to-r from-orange-50 to-red-50 text-orange-700 px-3 py-2 rounded-lg border border-orange-200">
                             {offer}
                           </div>
                         ))}
@@ -410,41 +453,42 @@ export default function VyronaSpace() {
                     )}
 
                     {/* Action Buttons */}
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-3">
                       <Button 
                         onClick={() => setSelectedStore(store)}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl font-medium"
                       >
                         <ShoppingBag className="h-4 w-4 mr-2" />
-                        Browse Products
+                        Shop Now
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-50 rounded-xl">
                         <Phone className="h-4 w-4" />
                       </Button>
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="border-purple-200 text-purple-600 hover:bg-purple-50 rounded-xl">
                             <MessageCircle className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-md">
+                        <DialogContent className="max-w-md rounded-2xl">
                           <DialogHeader>
-                            <DialogTitle>Chat with {store.name}</DialogTitle>
+                            <DialogTitle className="text-xl">Chat with {store.name}</DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
-                            <div className="h-64 border rounded-lg p-4 overflow-y-auto space-y-3">
+                            <div className="h-64 border rounded-2xl p-4 overflow-y-auto space-y-3 bg-gray-50">
                               {chatMessages.length === 0 ? (
                                 <div className="text-center text-gray-500 mt-8">
-                                  <MessageCircle className="h-8 w-8 mx-auto mb-2" />
-                                  <p>Start a conversation with the store</p>
+                                  <MessageCircle className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                                  <p className="font-medium">Start a conversation</p>
+                                  <p className="text-sm">Ask about products, offers, or availability</p>
                                 </div>
                               ) : (
                                 chatMessages.map(message => (
                                   <div key={message.id} className={`flex ${message.sender === 'customer' ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`max-w-xs p-3 rounded-lg ${
+                                    <div className={`max-w-xs p-3 rounded-2xl ${
                                       message.sender === 'customer' 
-                                        ? 'bg-blue-600 text-white' 
-                                        : 'bg-gray-100 text-gray-900'
+                                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
+                                        : 'bg-white text-gray-900 shadow-sm'
                                     }`}>
                                       <p className="text-sm">{message.content}</p>
                                       <p className="text-xs opacity-70 mt-1">
@@ -461,9 +505,11 @@ export default function VyronaSpace() {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                                className="flex-1"
+                                className="flex-1 rounded-xl"
                               />
-                              <Button onClick={sendMessage}>Send</Button>
+                              <Button onClick={sendMessage} className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600">
+                                Send
+                              </Button>
                             </div>
                           </div>
                         </DialogContent>
@@ -475,28 +521,28 @@ export default function VyronaSpace() {
             </div>
           </TabsContent>
 
-          {/* Orders Tab */}
+          {/* Orders Tab - Enhanced Order Tracking */}
           <TabsContent value="orders" className="space-y-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">My Orders</h2>
-              <Button variant="outline">
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold text-gray-900">Your Orders</h2>
+              <Button variant="outline" className="rounded-xl">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               {recentOrders.map(order => (
-                <Card key={order.id} className="hover:shadow-lg transition-all">
+                <Card key={order.id} className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all">
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start justify-between mb-6">
                       <div>
-                        <h3 className="font-semibold text-lg">{order.storeName}</h3>
-                        <p className="text-sm text-gray-600">Order #{order.orderNumber}</p>
+                        <h3 className="font-bold text-xl text-gray-900">{order.storeName}</h3>
+                        <p className="text-gray-600 font-medium">Order #{order.orderNumber}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-lg">₹{order.total}</p>
-                        <Badge className={`${
+                        <p className="font-bold text-2xl text-gray-900">₹{order.total}</p>
+                        <Badge className={`rounded-full px-3 py-1 ${
                           order.status === 'delivered' ? 'bg-green-100 text-green-700' :
                           order.status === 'out_for_delivery' ? 'bg-blue-100 text-blue-700' :
                           'bg-yellow-100 text-yellow-700'
@@ -506,63 +552,64 @@ export default function VyronaSpace() {
                       </div>
                     </div>
 
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-600 mb-2">Items:</p>
-                      <p className="text-sm">{order.items.join(", ")}</p>
+                    <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                      <h4 className="font-medium text-gray-900 mb-3">Order Items</h4>
+                      <div className="space-y-2">
+                        {order.items.map((item: string, index: number) => (
+                          <div key={index} className="flex justify-between text-sm">
+                            <span className="text-gray-700">{item}</span>
+                            <span className="font-medium text-gray-900">₹{Math.floor(order.total / order.items.length)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {order.status === 'out_for_delivery' && order.deliveryPartner && (
-                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-4">
-                        <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                          <Truck className="h-4 w-4 inline mr-2" />
+                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-6 border border-blue-200">
+                        <h4 className="font-medium text-blue-900 mb-3 flex items-center">
+                          <Truck className="h-5 w-5 mr-2" />
                           Out for Delivery
                         </h4>
-                        <div className="flex items-center justify-between">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <p className="text-sm text-blue-800 dark:text-blue-200">
-                              Delivery Partner: {order.deliveryPartner.name}
-                            </p>
-                            <p className="text-sm text-blue-600 dark:text-blue-300">
-                              Expected by: {order.estimatedDelivery}
-                            </p>
+                            <span className="text-blue-600">Delivery Partner:</span>
+                            <p className="font-medium text-blue-900">{order.deliveryPartner.name}</p>
                           </div>
-                          <div className="flex space-x-2">
-                            <Button size="sm" variant="outline">
-                              <Phone className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <MapIcon className="h-4 w-4" />
-                            </Button>
+                          <div>
+                            <span className="text-blue-600">Expected by:</span>
+                            <p className="font-medium text-blue-900">{order.estimatedDelivery}</p>
                           </div>
+                        </div>
+                        <div className="flex space-x-3 mt-4">
+                          <Button size="sm" variant="outline" className="flex-1 border-blue-200 text-blue-600 rounded-xl">
+                            <Phone className="h-4 w-4 mr-2" />
+                            Call Partner
+                          </Button>
+                          <Button size="sm" variant="outline" className="flex-1 border-blue-200 text-blue-600 rounded-xl">
+                            <MapIcon className="h-4 w-4 mr-2" />
+                            Track Live
+                          </Button>
                         </div>
                       </div>
                     )}
 
-                    {order.status === 'delivered' && (
-                      <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 mb-4">
-                        <p className="text-sm text-green-800 dark:text-green-200">
-                          Delivered on {order.deliveredAt}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-3">
                       <Button 
                         variant="outline" 
-                        size="sm"
                         onClick={() => setSelectedOrder(order)}
+                        className="flex-1 rounded-xl border-gray-200 hover:bg-gray-50"
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View Details
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <RotateCcw className="h-4 w-4 mr-2" />
+                      <Button variant="outline" className="flex-1 rounded-xl border-gray-200 hover:bg-gray-50">
+                        <ShoppingCart className="h-4 w-4 mr-2" />
                         Reorder
                       </Button>
                       {order.status === 'delivered' && (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" className="flex-1 rounded-xl border-yellow-200 text-yellow-600 hover:bg-yellow-50">
                           <Star className="h-4 w-4 mr-2" />
-                          Rate Order
+                          Rate
                         </Button>
                       )}
                     </div>
@@ -572,144 +619,172 @@ export default function VyronaSpace() {
             </div>
           </TabsContent>
 
-          {/* Subscriptions Tab */}
-          <TabsContent value="subscriptions" className="space-y-6">
-            <div className="text-center py-12">
-              <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No Active Subscriptions
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                Set up regular deliveries for your daily essentials and never run out again.
-              </p>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Subscription
-              </Button>
-            </div>
-          </TabsContent>
-
-          {/* Geo-Rewards Tab */}
-          <TabsContent value="rewards" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
-                <CardContent className="p-6 text-center">
-                  <Award className="h-12 w-12 text-yellow-600 mx-auto mb-4" />
-                  <h3 className="font-bold text-xl mb-2">Local Explorer</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Shop from 3 different local stores in your area
-                  </p>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
-                    <p className="text-xs text-gray-500 mb-1">Progress: 2/3 stores</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-yellow-600 h-2 rounded-full" style={{width: '66%'}}></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
-                <CardContent className="p-6 text-center">
-                  <Zap className="h-12 w-12 text-green-600 mx-auto mb-4" />
-                  <h3 className="font-bold text-xl mb-2">Speed Shopper</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Complete 5 orders within 2km radius
-                  </p>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
-                    <p className="text-xs text-gray-500 mb-1">Progress: 3/5 orders</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-green-600 h-2 rounded-full" style={{width: '60%'}}></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
-                <CardContent className="p-6 text-center">
-                  <Heart className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                  <h3 className="font-bold text-xl mb-2">Community Helper</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                    Rate and review 10 local stores
-                  </p>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3">
-                    <p className="text-xs text-gray-500 mb-1">Progress: 7/10 reviews</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-purple-600 h-2 rounded-full" style={{width: '70%'}}></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Rewards Tab - Enhanced Gamification */}
+          <TabsContent value="rewards" className="space-y-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">VyronaCoins & Rewards</h2>
+              <p className="text-gray-600">Earn points for every local purchase and unlock exclusive benefits</p>
             </div>
 
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-bold text-lg mb-4">Your VyronaCoins Balance</h3>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold">VC</span>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">1,250 Coins</p>
-                      <p className="text-sm text-gray-600">≈ ₹125 value</p>
-                    </div>
-                  </div>
-                  <Button>
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Redeem
-                  </Button>
+            {/* Coins Balance Card */}
+            <Card className="rounded-2xl border-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white shadow-2xl">
+              <CardContent className="p-8 text-center">
+                <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl font-bold">VC</span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  <p>• Earn 10 coins for every local order</p>
-                  <p>• Get bonus coins for trying new stores</p>
-                  <p>• Double coins on weekend orders</p>
+                <h3 className="text-4xl font-bold mb-2">1,250 Coins</h3>
+                <p className="text-white/80 mb-6">Worth ₹125 in rewards</p>
+                <Button className="bg-white text-orange-600 hover:bg-white/90 rounded-xl font-bold px-8">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Redeem Now
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Achievement Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  title: "Local Explorer",
+                  description: "Shop from 5 different stores",
+                  progress: 3,
+                  total: 5,
+                  color: "from-blue-500 to-cyan-500",
+                  icon: Target,
+                  reward: "100 VyronaCoins"
+                },
+                {
+                  title: "Speed Shopper",
+                  description: "Complete 10 quick deliveries",
+                  progress: 7,
+                  total: 10,
+                  color: "from-green-500 to-emerald-500",
+                  icon: Zap,
+                  reward: "150 VyronaCoins"
+                },
+                {
+                  title: "Community Helper",
+                  description: "Rate 15 local stores",
+                  progress: 12,
+                  total: 15,
+                  color: "from-purple-500 to-pink-500",
+                  icon: Heart,
+                  reward: "200 VyronaCoins"
+                }
+              ].map((achievement, index) => (
+                <Card key={index} className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all">
+                  <CardContent className="p-6">
+                    <div className={`w-16 h-16 bg-gradient-to-r ${achievement.color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                      <achievement.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <h4 className="font-bold text-xl text-center mb-2">{achievement.title}</h4>
+                    <p className="text-gray-600 text-center text-sm mb-4">{achievement.description}</p>
+                    
+                    <div className="bg-gray-100 rounded-full h-3 mb-3">
+                      <div 
+                        className={`bg-gradient-to-r ${achievement.color} h-3 rounded-full transition-all duration-500`}
+                        style={{width: `${(achievement.progress / achievement.total) * 100}%`}}
+                      ></div>
+                    </div>
+                    
+                    <div className="flex justify-between text-sm mb-4">
+                      <span className="text-gray-600">Progress: {achievement.progress}/{achievement.total}</span>
+                      <span className="font-medium text-gray-900">{Math.round((achievement.progress / achievement.total) * 100)}%</span>
+                    </div>
+                    
+                    <div className="text-center">
+                      <Badge className={`bg-gradient-to-r ${achievement.color} text-white border-0 px-3 py-1`}>
+                        Reward: {achievement.reward}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Earning Opportunities */}
+            <Card className="rounded-2xl border-0 bg-white/80 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <h3 className="font-bold text-xl mb-4">How to Earn VyronaCoins</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { action: "Every local order", coins: "10 coins", icon: ShoppingBag },
+                    { action: "First-time store visit", coins: "25 coins", icon: Store },
+                    { action: "Rate & review stores", coins: "15 coins", icon: Star },
+                    { action: "Refer friends", coins: "100 coins", icon: Users },
+                    { action: "Weekend orders", coins: "20 coins", icon: Calendar },
+                    { action: "Eco-friendly choices", coins: "30 coins", icon: Heart }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
+                      <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                        <item.icon className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900">{item.action}</p>
+                        <p className="text-sm text-gray-600">{item.coins}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6">
+            <div className="text-center py-12">
+              <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Profile Settings</h3>
+              <p className="text-gray-600 mb-6">Manage your preferences and account settings</p>
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl">
+                <Users className="h-4 w-4 mr-2" />
+                Setup Profile
+              </Button>
+            </div>
+          </TabsContent>
         </Tabs>
 
-        {/* Store Product Browser Modal */}
+        {/* Store Product Browser Modal - Enhanced */}
         {selectedStore && (
           <Dialog open={!!selectedStore} onOpenChange={() => setSelectedStore(null)}>
-            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto rounded-2xl">
               <DialogHeader>
-                <DialogTitle className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center">
-                    <Store className="h-6 w-6 text-blue-600" />
+                <DialogTitle className="flex items-center space-x-4 text-2xl">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center">
+                    <Store className="h-8 w-8 text-blue-600" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">{selectedStore.name}</h2>
-                    <p className="text-sm text-gray-600">{selectedStore.address}</p>
+                    <h2 className="font-bold">{selectedStore.name}</h2>
+                    <p className="text-sm text-gray-600 font-normal">{selectedStore.address}</p>
                   </div>
                 </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-6">
                 {/* Store Info Bar */}
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-6">
                       <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
-                        <span className="font-medium">{selectedStore.rating}</span>
-                        <span className="text-gray-500 ml-1">({selectedStore.reviewCount})</span>
+                        <Star className="h-5 w-5 text-yellow-400 fill-current mr-2" />
+                        <span className="font-bold text-lg">{selectedStore.rating}</span>
+                        <span className="text-gray-500 ml-2">({selectedStore.reviewCount} reviews)</span>
                       </div>
-                      <div className="flex items-center text-green-600">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>{selectedStore.estimatedDelivery}</span>
+                      <div className="flex items-center text-green-600 font-medium">
+                        <Clock className="h-5 w-5 mr-2" />
+                        {selectedStore.estimatedDelivery}
                       </div>
                       <div className="text-sm">
                         <span className="text-gray-600">Min Order: </span>
-                        <span className="font-medium">₹{selectedStore.minimumOrder}</span>
+                        <span className="font-bold">₹{selectedStore.minimumOrder}</span>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
+                    <div className="flex items-center space-x-3">
+                      <Button variant="outline" size="sm" className="rounded-xl">
                         <Phone className="h-4 w-4 mr-2" />
                         Call Store
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="rounded-xl">
                         <MessageCircle className="h-4 w-4 mr-2" />
                         Chat
                       </Button>
@@ -718,13 +793,13 @@ export default function VyronaSpace() {
                 </div>
 
                 {/* Product Categories */}
-                <div className="flex space-x-2 overflow-x-auto pb-2">
+                <div className="flex space-x-3 overflow-x-auto pb-2">
                   {["All", "Fruits", "Vegetables", "Dairy", "Bakery", "Snacks"].map(cat => (
                     <Button 
                       key={cat}
                       variant="outline" 
                       size="sm"
-                      className="whitespace-nowrap"
+                      className="whitespace-nowrap rounded-xl bg-white/50 hover:bg-white"
                     >
                       {cat}
                     </Button>
@@ -732,32 +807,37 @@ export default function VyronaSpace() {
                 </div>
 
                 {/* Products Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {storeProducts.map(product => (
-                    <Card key={product.id} className="hover:shadow-lg transition-all">
+                    <Card key={product.id} className="rounded-2xl border-0 bg-white shadow-md hover:shadow-lg transition-all">
                       <CardContent className="p-4">
-                        <div className="flex items-start space-x-3 mb-3">
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <div className="flex items-start space-x-3 mb-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
                             <ShoppingBag className="h-6 w-6 text-gray-400" />
                           </div>
                           <div className="flex-1">
-                            <h4 className="font-semibold">{product.name}</h4>
+                            <h4 className="font-bold text-lg">{product.name}</h4>
                             <p className="text-sm text-gray-600">{product.brand} • {product.unit}</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <span className="font-bold text-lg">₹{product.price}</span>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <span className="font-bold text-xl text-gray-900">₹{product.price}</span>
                               {product.originalPrice && (
-                                <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                                <>
+                                  <span className="text-sm text-gray-500 line-through">₹{product.originalPrice}</span>
+                                  <Badge className="bg-green-100 text-green-700 text-xs">
+                                    {product.discount}% OFF
+                                  </Badge>
+                                </>
                               )}
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-4">
                           <span className="text-sm text-gray-600">
                             {product.inStock > 0 ? `${product.inStock} in stock` : 'Out of stock'}
                           </span>
                           {product.inStock <= 5 && product.inStock > 0 && (
-                            <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
+                            <Badge className="bg-orange-100 text-orange-700 text-xs">
                               Low Stock
                             </Badge>
                           )}
@@ -765,7 +845,7 @@ export default function VyronaSpace() {
 
                         <div className="flex items-center space-x-2">
                           {cart.find(item => item.id === product.id) ? (
-                            <div className="flex items-center space-x-2 flex-1">
+                            <div className="flex items-center space-x-3 flex-1 bg-gray-50 rounded-xl p-2">
                               <Button 
                                 variant="outline" 
                                 size="sm"
@@ -781,16 +861,18 @@ export default function VyronaSpace() {
                                     setCart(cart.filter(cartItem => cartItem.id !== product.id));
                                   }
                                 }}
+                                className="rounded-lg"
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
-                              <span className="font-medium px-3">
+                              <span className="font-bold text-lg px-3">
                                 {cart.find(item => item.id === product.id)?.quantity || 0}
                               </span>
                               <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => addToCart(product)}
+                                className="rounded-lg"
                               >
                                 <Plus className="h-4 w-4" />
                               </Button>
@@ -799,7 +881,7 @@ export default function VyronaSpace() {
                             <Button 
                               onClick={() => addToCart(product)}
                               disabled={product.inStock === 0}
-                              className="flex-1"
+                              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl"
                               size="sm"
                             >
                               <Plus className="h-4 w-4 mr-2" />
@@ -812,25 +894,25 @@ export default function VyronaSpace() {
                   ))}
                 </div>
 
-                {/* Shopping Cart Summary */}
+                {/* Enhanced Shopping Cart Summary */}
                 {cart.length > 0 && (
-                  <div className="sticky bottom-0 bg-white dark:bg-gray-800 border-t p-4 -mx-6 -mb-6">
-                    <div className="flex items-center justify-between mb-3">
+                  <div className="sticky bottom-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl p-6 -mx-6 -mb-6 shadow-2xl">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold">
+                        <p className="font-bold text-lg">
                           {cart.reduce((sum, item) => sum + item.quantity, 0)} items in cart
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-white/80">
                           Total: ₹{cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
                         </p>
                       </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" onClick={() => setCart([])}>
+                      <div className="flex space-x-3">
+                        <Button variant="outline" onClick={() => setCart([])} className="bg-white/20 border-white/30 text-white hover:bg-white/30 rounded-xl">
                           Clear Cart
                         </Button>
-                        <Button className="bg-green-600 hover:bg-green-700">
+                        <Button className="bg-white text-blue-600 hover:bg-white/90 rounded-xl font-bold px-6">
                           <ShoppingCart className="h-4 w-4 mr-2" />
-                          Proceed to Checkout
+                          Checkout
                         </Button>
                       </div>
                     </div>
@@ -841,20 +923,20 @@ export default function VyronaSpace() {
           </Dialog>
         )}
 
-        {/* Order Details Modal */}
+        {/* Order Details Modal - Enhanced */}
         {selectedOrder && (
           <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl rounded-2xl">
               <DialogHeader>
-                <DialogTitle>Order Details</DialogTitle>
+                <DialogTitle className="text-2xl">Order Details</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-semibold text-lg">{selectedOrder.storeName}</h3>
-                    <p className="text-sm text-gray-600">Order #{selectedOrder.orderNumber}</p>
+                    <h3 className="font-bold text-xl">{selectedOrder.storeName}</h3>
+                    <p className="text-gray-600">Order #{selectedOrder.orderNumber}</p>
                   </div>
-                  <Badge className={`${
+                  <Badge className={`rounded-full px-4 py-2 text-sm font-medium ${
                     selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-700' :
                     selectedOrder.status === 'out_for_delivery' ? 'bg-blue-100 text-blue-700' :
                     'bg-yellow-100 text-yellow-700'
@@ -863,18 +945,18 @@ export default function VyronaSpace() {
                   </Badge>
                 </div>
 
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-medium mb-3">Order Items</h4>
-                  <div className="space-y-2">
+                <div className="border rounded-2xl p-6 bg-gray-50">
+                  <h4 className="font-bold mb-4">Order Items</h4>
+                  <div className="space-y-3">
                     {selectedOrder.items.map((item: string, index: number) => (
                       <div key={index} className="flex justify-between">
                         <span>{item}</span>
-                        <span className="text-gray-600">₹{Math.floor(selectedOrder.total / selectedOrder.items.length)}</span>
+                        <span className="font-medium">₹{Math.floor(selectedOrder.total / selectedOrder.items.length)}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="border-t mt-3 pt-3">
-                    <div className="flex justify-between font-semibold">
+                  <div className="border-t mt-4 pt-4">
+                    <div className="flex justify-between font-bold text-lg">
                       <span>Total</span>
                       <span>₹{selectedOrder.total}</span>
                     </div>
@@ -882,26 +964,26 @@ export default function VyronaSpace() {
                 </div>
 
                 {selectedOrder.status === 'out_for_delivery' && selectedOrder.deliveryPartner && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                      <Truck className="h-4 w-4 inline mr-2" />
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-200">
+                    <h4 className="font-bold text-blue-900 mb-4 flex items-center">
+                      <Truck className="h-5 w-5 mr-2" />
                       Delivery Information
                     </h4>
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
-                        <span>Delivery Partner:</span>
+                        <span className="text-blue-600">Delivery Partner:</span>
                         <span className="font-medium">{selectedOrder.deliveryPartner.name}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Phone:</span>
+                        <span className="text-blue-600">Phone:</span>
                         <span className="font-medium">{selectedOrder.deliveryPartner.phone}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Expected Delivery:</span>
+                        <span className="text-blue-600">Expected Delivery:</span>
                         <span className="font-medium">{selectedOrder.estimatedDelivery}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Rating:</span>
+                        <span className="text-blue-600">Rating:</span>
                         <div className="flex items-center">
                           <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
                           <span className="font-medium">{selectedOrder.deliveryPartner.rating}</span>
@@ -911,17 +993,17 @@ export default function VyronaSpace() {
                   </div>
                 )}
 
-                <div className="flex space-x-2">
-                  <Button variant="outline" className="flex-1">
+                <div className="flex space-x-3">
+                  <Button variant="outline" className="flex-1 rounded-xl">
                     <Phone className="h-4 w-4 mr-2" />
                     Call Store
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1 rounded-xl">
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Get Support
                   </Button>
                   {selectedOrder.status === 'delivered' && (
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1 rounded-xl">
                       <Star className="h-4 w-4 mr-2" />
                       Rate Order
                     </Button>
