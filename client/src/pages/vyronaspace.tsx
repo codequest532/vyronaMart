@@ -1110,11 +1110,11 @@ export default function VyronaSpace() {
 
             {/* Profile Tab - Customer Management */}
             <TabsContent value="profile" className="space-y-6">
-            <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Customer Profile</h2>
-              
-              {/* Profile Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-6">Customer Profile</h2>
+                  
+                  {/* Profile Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
                   <CardContent className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
@@ -1304,10 +1304,12 @@ export default function VyronaSpace() {
             </div>
           </div>
           )}
-        </TabsContent>
+                  </div>
+                </div>
+            </TabsContent>
 
-        {/* Edit Profile Modal */}
-        <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+          {/* Edit Profile Modal */}
+          <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Edit Profile</DialogTitle>
