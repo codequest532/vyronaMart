@@ -132,9 +132,10 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
-- June 15, 2025: Implemented automatic order tracking redirection for VyronaSpace customers after individual order placement
-- June 15, 2025: Customers now redirected to live order tracking page instead of static success page for VyronaSpace orders
-- June 15, 2025: Group buy orders continue using existing success page flow (unchanged for VyronaSocial modules)
+- June 15, 2025: Implemented automatic order tracking redirection for ALL VyronaSpace orders (individual and group buy)
+- June 15, 2025: VyronaSpace customers now redirected to live order tracking page instead of static success page
+- June 15, 2025: VyronaSpace group buy orders also redirect to tracking (applies to storeId 6, 7, 8, 9)
+- June 15, 2025: Non-VyronaSpace group buy orders continue using existing success page flow (unchanged for other VyronaSocial modules)
 - June 15, 2025: Enhanced customer experience with immediate access to real-time delivery tracking via OpenRouteService
 - June 15, 2025: Completed VyronaSpace Seller Dashboard with comprehensive store management interface
 - June 15, 2025: Added seller onboarding flow with VyronaSpace platform option for retail partners

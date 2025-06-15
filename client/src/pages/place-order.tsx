@@ -387,35 +387,54 @@ export default function PlaceOrder() {
       return response.json();
     },
     onSuccess: (result) => {
-      // Store order data for success page
-      const orderData = {
-        orderId: result.orderId || result.id,
-        module: 'vyronasocial',
-        orderType: 'collaborative',
-        roomDetails: {
-          id: roomId,
-          name: room?.name || 'Collaborative Room',
-          roomCode: room?.roomCode,
-          memberCount: room?.memberCount || 1
-        },
-        items: cartItems,
-        contributions: groupCheckout.contributions || [],
-        totalAmount: finalTotal,
-        paymentMethod: 'group_contributions',
-        timestamp: new Date().toISOString()
-      };
+      const orderId = result.orderId || result.id;
       
-      sessionStorage.setItem('orderData', JSON.stringify(orderData));
+      // Check if this is a VyronaSpace group buy order
+      const isVyronaSpaceOrder = cartItems?.some((item: any) => 
+        item.module === 'space' || item.storeId === 6 || item.storeId === 7 || item.storeId === 8 || item.storeId === 9
+      );
       
-      toast({
-        title: "Order Placed Successfully",
-        description: "Your group order has been placed and members have been notified.",
-      });
-      
-      // Redirect to order success page
-      setTimeout(() => {
-        setLocation("/order-success");
-      }, 1500);
+      if (isVyronaSpaceOrder && orderId) {
+        // For VyronaSpace group buy orders, redirect to live order tracking
+        toast({
+          title: "Order Placed Successfully",
+          description: "Redirecting to live order tracking...",
+        });
+        
+        setTimeout(() => {
+          setLocation(`/order-tracking?orderId=${orderId}`);
+        }, 1500);
+      } else {
+        // For all other group buy orders, use existing success page flow
+        const orderData = {
+          orderId,
+          module: 'vyronasocial',
+          orderType: 'collaborative',
+          roomDetails: {
+            id: roomId,
+            name: room?.name || 'Collaborative Room',
+            roomCode: room?.roomCode,
+            memberCount: room?.memberCount || 1
+          },
+          items: cartItems,
+          contributions: groupCheckout.contributions || [],
+          totalAmount: finalTotal,
+          paymentMethod: 'group_contributions',
+          timestamp: new Date().toISOString()
+        };
+        
+        sessionStorage.setItem('orderData', JSON.stringify(orderData));
+        
+        toast({
+          title: "Order Placed Successfully",
+          description: "Your group order has been placed and members have been notified.",
+        });
+        
+        // Redirect to order success page
+        setTimeout(() => {
+          setLocation("/order-success");
+        }, 1500);
+      }
     },
     onError: (error: any) => {
       toast({
