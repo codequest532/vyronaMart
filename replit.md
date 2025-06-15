@@ -247,5 +247,8 @@ Changelog:
 - June 14, 2025: Fixed all TabsContent indentation issues and component nesting problems in vyronaspace.tsx
 - June 14, 2025: Corrected closing tag alignment and removed duplicate Tabs closing tags causing compilation failures
 - June 14, 2025: VyronaSpace platform now running stably with all functionality intact (tabs, cart, tracking, profiles)
+- June 15, 2025: Fixed VyronaSpace seller login redirect issue - sellers now properly route to /vyronaspace-seller-dashboard
+- June 15, 2025: Updated VyronaHub dashboard routing logic to include VyronaSpace seller type checks
+- June 15, 2025: VyronaSpace seller dashboard integration fully completed with working demo credentials (vyronaspace_demo/demo123)
 - June 15, 2025: Removed stock number display from VyronaSpace product tile cards for cleaner UI
 - June 14, 2025: Initial setup

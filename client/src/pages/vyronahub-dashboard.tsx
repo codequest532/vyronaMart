@@ -118,6 +118,12 @@ export default function SellerDashboard() {
         setLocation('/vyronainstastore-dashboard');
         return;
       }
+      
+      if (currentUser.sellerType === 'VyronaSpace') {
+        // Redirect VyronaSpace sellers to their dashboard
+        setLocation('/vyronaspace-seller-dashboard');
+        return;
+      }
     } else if (!userLoading && !currentUser) {
       setLocation('/login');
       toast({
