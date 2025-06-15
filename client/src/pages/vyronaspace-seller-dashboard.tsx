@@ -75,8 +75,10 @@ interface Order {
 export default function VyronaSpaceSellerDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showEditProduct, setShowEditProduct] = useState(false);
   const [showStoreEdit, setShowStoreEdit] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [editingProduct, setEditingProduct] = useState<SellerProduct | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -183,6 +185,36 @@ export default function VyronaSpaceSellerDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/vyronaspace/seller/products"] });
+    }
+  });
+
+  // Delete product mutation
+  const deleteProductMutation = useMutation({
+    mutationFn: async (productId: number) => {
+      return apiRequest("DELETE", `/api/vyronaspace/seller/products/${productId}`);
+    },
+    onSuccess: () => {
+      toast({ title: "Product deleted successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaspace/seller/products"] });
+    },
+    onError: () => {
+      toast({ title: "Failed to delete product", variant: "destructive" });
+    }
+  });
+
+  // Update product mutation
+  const updateProductMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      return apiRequest("PUT", `/api/vyronaspace/seller/products/${id}`, data);
+    },
+    onSuccess: () => {
+      toast({ title: "Product updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaspace/seller/products"] });
+      setShowEditProduct(false);
+      setEditingProduct(null);
+    },
+    onError: () => {
+      toast({ title: "Failed to update product", variant: "destructive" });
     }
   });
 
@@ -565,11 +597,36 @@ export default function VyronaSpaceSellerDashboard() {
                         </div>
                         <p className="text-sm text-gray-600 mb-3">Stock: {product.stockQuantity} units</p>
                         <div className="flex items-center space-x-2">
-                          <Button variant="outline" size="sm" className="flex-1 rounded-xl">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1 rounded-xl"
+                            onClick={() => {
+                              setEditingProduct(product);
+                              setProductForm({
+                                name: product.name,
+                                description: product.description,
+                                category: product.category,
+                                price: product.price,
+                                stockQuantity: product.stockQuantity,
+                                isActive: product.isActive
+                              });
+                              setShowEditProduct(true);
+                            }}
+                          >
                             <Edit className="h-4 w-4 mr-2" />
                             Edit
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 rounded-xl">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600 hover:bg-red-50 rounded-xl"
+                            onClick={() => {
+                              if (confirm('Are you sure you want to delete this product?')) {
+                                deleteProductMutation.mutate(product.id);
+                              }
+                            }}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1188,6 +1245,101 @@ export default function VyronaSpaceSellerDashboard() {
                 className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
               >
                 {addProductMutation.isPending ? "Adding..." : "Add Product"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Product Modal */}
+        <Dialog open={showEditProduct} onOpenChange={setShowEditProduct}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-product-name">Product Name</Label>
+                <Input
+                  id="edit-product-name"
+                  value={productForm.name}
+                  onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                  placeholder="Enter product name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-product-description">Description</Label>
+                <Textarea
+                  id="edit-product-description"
+                  value={productForm.description}
+                  onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                  placeholder="Enter product description"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-product-category">Category</Label>
+                  <Select value={productForm.category} onValueChange={(value) => setProductForm({ ...productForm, category: value })}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Grocery">Grocery</SelectItem>
+                      <SelectItem value="Fruits">Fruits</SelectItem>
+                      <SelectItem value="Vegetables">Vegetables</SelectItem>
+                      <SelectItem value="Dairy">Dairy</SelectItem>
+                      <SelectItem value="Snacks">Snacks</SelectItem>
+                      <SelectItem value="Beverages">Beverages</SelectItem>
+                      <SelectItem value="Household">Household</SelectItem>
+                      <SelectItem value="Personal Care">Personal Care</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="edit-product-price">Price (₹)</Label>
+                  <Input
+                    id="edit-product-price"
+                    type="number"
+                    value={productForm.price}
+                    onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit-product-stock">Stock Quantity</Label>
+                <Input
+                  id="edit-product-stock"
+                  type="number"
+                  value={productForm.stockQuantity}
+                  onChange={(e) => setProductForm({ ...productForm, stockQuantity: Number(e.target.value) })}
+                  placeholder="100"
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={productForm.isActive}
+                  onCheckedChange={(checked) => setProductForm({ ...productForm, isActive: checked })}
+                />
+                <Label>Set as active product</Label>
+              </div>
+            </div>
+            <div className="flex space-x-2 mt-6">
+              <Button variant="outline" onClick={() => setShowEditProduct(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (editingProduct) {
+                    updateProductMutation.mutate({ 
+                      id: editingProduct.id, 
+                      data: productForm 
+                    });
+                  }
+                }}
+                disabled={updateProductMutation.isPending}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+              >
+                {updateProductMutation.isPending ? "Updating..." : "Update Product"}
               </Button>
             </div>
           </DialogContent>

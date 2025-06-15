@@ -251,4 +251,8 @@ Changelog:
 - June 15, 2025: Updated VyronaHub dashboard routing logic to include VyronaSpace seller type checks
 - June 15, 2025: VyronaSpace seller dashboard integration fully completed with working demo credentials (vyronaspace_demo/demo123)
 - June 15, 2025: Removed stock number display from VyronaSpace product tile cards for cleaner UI
+- June 15, 2025: Fixed VyronaSpace seller dashboard product management - edit and delete buttons now fully functional
+- June 15, 2025: Added complete product CRUD operations with update/delete mutations and edit product modal
+- June 15, 2025: Implemented comprehensive group buy seller controls with enable/disable toggle working correctly
+- June 15, 2025: Resolved database schema issues for group buy settings using proper store ID mapping
 - June 14, 2025: Initial setup
