@@ -36,6 +36,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import VyronaHubDashboard from "@/pages/vyronahub-dashboard";
 import VyronaReadDashboard from "@/pages/vyronaread-dashboard";
 import VyronaInstaStoreDashboard from "@/pages/vyronainstastore-dashboard";
+import VyronaSpaceSellerDashboard from "@/pages/vyronaspace-seller-dashboard";
 import EbookReader from "@/pages/ebook-reader";
 
 import NotFound from "@/pages/not-found";
@@ -121,6 +122,7 @@ function Router() {
       <Route path="/library-browse" component={LibraryBrowse} />
       <Route path="/vyronaspace" component={VyronaSpace} />
       <Route path="/vyronaspace-checkout" component={VyronaSpaceCheckout} />
+      <Route path="/vyronaspace-seller-dashboard" component={VyronaSpaceSellerDashboard} />
       <Route path="/track-order/:orderId">
         {(params) => <OrderTracking />}
       </Route>

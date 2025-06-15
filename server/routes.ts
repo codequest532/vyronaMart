@@ -8862,6 +8862,333 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // =============================================================================
+  // VYRONASPACE SELLER DASHBOARD API ENDPOINTS
+  // =============================================================================
+
+  // Get seller store profile
+  app.get("/api/vyronaspace/seller/store", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      const result = await db.execute(sql`
+        SELECT * FROM stores WHERE seller_id = ${user.id} AND module = 'space' LIMIT 1
+      `);
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const store = result.rows[0] as any;
+      res.json({
+        id: store.id,
+        name: store.name,
+        description: store.description || "",
+        type: store.type,
+        address: store.address,
+        latitude: store.latitude,
+        longitude: store.longitude,
+        isOpen: store.is_open,
+        rating: Math.round(store.rating / 100) || 4.5,
+        reviewCount: store.review_count || 0,
+        phone: store.phone || "",
+        email: store.email || "",
+        businessHours: store.business_hours || "7:00 AM - 10:00 PM",
+        deliveryTime: store.delivery_time || "15-30 min",
+        deliveryFee: store.delivery_fee || 0,
+        badges: store.badges ? JSON.parse(store.badges) : [],
+        coverImageUrl: store.cover_image_url,
+        logoUrl: store.logo_url
+      });
+    } catch (error) {
+      console.error("Error fetching seller store:", error);
+      res.status(500).json({ message: "Failed to fetch store data" });
+    }
+  });
+
+  // Update seller store profile
+  app.put("/api/vyronaspace/seller/store", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      const { name, description, type, address, phone, email, businessHours, deliveryTime, deliveryFee } = req.body;
+
+      const result = await db.execute(sql`
+        UPDATE stores 
+        SET name = ${name}, 
+            description = ${description},
+            type = ${type},
+            address = ${address},
+            phone = ${phone},
+            email = ${email},
+            business_hours = ${businessHours},
+            delivery_time = ${deliveryTime},
+            delivery_fee = ${deliveryFee},
+            updated_at = NOW()
+        WHERE seller_id = ${user.id} AND module = 'space'
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      res.json({ success: true, store: result.rows[0] });
+    } catch (error) {
+      console.error("Error updating seller store:", error);
+      res.status(500).json({ message: "Failed to update store" });
+    }
+  });
+
+  // Toggle store open/closed status
+  app.patch("/api/vyronaspace/seller/store/status", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      const { isOpen } = req.body;
+
+      const result = await db.execute(sql`
+        UPDATE stores 
+        SET is_open = ${isOpen}, updated_at = NOW()
+        WHERE seller_id = ${user.id} AND module = 'space'
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      res.json({ success: true, isOpen });
+    } catch (error) {
+      console.error("Error updating store status:", error);
+      res.status(500).json({ message: "Failed to update store status" });
+    }
+  });
+
+  // Get seller products
+  app.get("/api/vyronaspace/seller/products", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      // First get the seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id} AND module = 'space' LIMIT 1
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+
+      const result = await db.execute(sql`
+        SELECT * FROM products 
+        WHERE store_id = ${storeId} AND module = 'space'
+        ORDER BY created_at DESC
+      `);
+
+      const products = result.rows.map((product: any) => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        price: Math.round(product.price),
+        isActive: product.enable_individual_buy || true,
+        stockQuantity: 100, // Default stock for VyronaSpace
+        imageUrl: product.image_url,
+        storeId: product.store_id
+      }));
+
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching seller products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  // Add new product
+  app.post("/api/vyronaspace/seller/products", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      // First get the seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id} AND module = 'space' LIMIT 1
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+      const { name, description, category, price, stockQuantity, isActive } = req.body;
+
+      const result = await db.execute(sql`
+        INSERT INTO products (name, description, category, price, store_id, module, enable_individual_buy, enable_group_buy, created_at)
+        VALUES (${name}, ${description}, ${category}, ${price}, ${storeId}, 'space', ${isActive}, false, NOW())
+        RETURNING *
+      `);
+
+      const product = result.rows[0] as any;
+      res.json({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        price: Math.round(product.price),
+        isActive: product.enable_individual_buy,
+        stockQuantity: 100,
+        storeId: product.store_id
+      });
+    } catch (error) {
+      console.error("Error adding product:", error);
+      res.status(500).json({ message: "Failed to add product" });
+    }
+  });
+
+  // Toggle product active status
+  app.patch("/api/vyronaspace/seller/products/:productId", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      const productId = parseInt(req.params.productId);
+      const { isActive } = req.body;
+
+      // Verify product belongs to seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id} AND module = 'space' LIMIT 1
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+
+      const result = await db.execute(sql`
+        UPDATE products 
+        SET enable_individual_buy = ${isActive}, updated_at = NOW()
+        WHERE id = ${productId} AND store_id = ${storeId} AND module = 'space'
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      res.json({ success: true, isActive });
+    } catch (error) {
+      console.error("Error updating product status:", error);
+      res.status(500).json({ message: "Failed to update product status" });
+    }
+  });
+
+  // Get seller orders
+  app.get("/api/vyronaspace/seller/orders", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      // First get the seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id} AND module = 'space' LIMIT 1
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+
+      const result = await db.execute(sql`
+        SELECT o.*, u.username as customer_name, u.email as customer_email, u.mobile as customer_phone
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.id
+        WHERE o.store_id = ${storeId} AND o.module = 'space'
+        ORDER BY o.created_at DESC
+      `);
+
+      const orders = result.rows.map((order: any) => ({
+        id: order.id,
+        customerId: order.user_id,
+        customerName: order.customer_name || "Unknown Customer",
+        customerPhone: order.customer_phone || "Not provided",
+        items: order.items ? JSON.parse(order.items) : [],
+        total: Math.round(order.total_amount),
+        status: order.status || "confirmed",
+        paymentMethod: order.payment_method || "COD",
+        orderDate: order.created_at,
+        deliveryAddress: order.shipping_address ? JSON.parse(order.shipping_address) : "Not provided",
+        deliveryType: "vyrona_delivery"
+      }));
+
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching seller orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Update order status
+  app.patch("/api/vyronaspace/seller/orders/:orderId", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller') {
+        return res.status(401).json({ message: "Unauthorized - seller access required" });
+      }
+
+      const orderId = parseInt(req.params.orderId);
+      const { status } = req.body;
+
+      // Verify order belongs to seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id} AND module = 'space' LIMIT 1
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+
+      const result = await db.execute(sql`
+        UPDATE orders 
+        SET status = ${status}, updated_at = NOW()
+        WHERE id = ${orderId} AND store_id = ${storeId} AND module = 'space'
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      res.json({ success: true, status });
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
   // VyronaSpace Reorder Functionality
   app.get("/api/reorder-history/:userId", async (req, res) => {
     try {

@@ -1,0 +1,73 @@
+VyronaSpace – Seller Dashboard Features (Retail Seller Interface)
+🔹 1. Store Profile & Visibility Management
+Store Info Setup: Add name, logo, cover image, contact, type, and business hours.
+
+Location Pin Drop: Precisely mark store location for geo-targeted listing.
+
+Store Status Toggle: Instantly toggle between Open, Closed, or On Break.
+
+Retail Badges System: Apply for and display trust-building badges:
+
+✔ Verified Retailer
+
+⚡ Fastest Delivery
+
+🌟 Vyrona Preferred Partner
+
+🔹 2. Product Catalog Management
+Bulk Upload via CSV or Scan: Quickly add products using spreadsheet or mobile barcode scan.
+
+Live Inventory Toggle: Instantly turn products ON/OFF based on availability.
+
+Flexible Pricing & Variants: Set discounts, multi-unit packs, sizes, and weight options.
+
+POS/Excel Sync: Auto-update inventory via POS APIs or Excel imports.
+
+🔹 3. Order Management System
+Live Order Feed: Real-time dashboard with order status: Confirmed → Packed → Out for Delivery → Delivered.
+
+Accept/Reject Controls: Manual control or auto-confirm based on pre-set rules.
+
+Smart Preparation Time: Category-specific prep timing (e.g., hot food vs packaged goods).
+
+Delivery Mode Selection:
+
+🚴 Own Delivery: Add local delivery agent details.
+
+📦 Vyrona Delivery Network: Auto-assign to Vyrona fleet (commission-based).
+
+🔹 4. Payments & Settlements
+Daily Sales Summary: Visual overview of orders, revenue, cancellations.
+
+Payout Reports: Track settlements by payment type – COD, UPI, VyronaWallet.
+
+VyronaCoins Reconciliation: View coins redeemed and settlement status with Vyrona.
+
+🔹 5. Customer Engagement Tools
+Built-in Chat: Real-time messaging with buyers for clarifications or substitutions.
+
+Hyperlocal Broadcast Offers: Send SMS/push/email to nearby shoppers with dynamic offers.
+
+Loyalty Engine: Auto-assign perks (e.g., "5th order = 50 VyronaCoins").
+
+🔹 6. Analytics & Performance Insights
+Sales Breakdown: Track revenue by category, brand, or item.
+
+Customer Heatmap: Visualize order hotspots for targeted promotions.
+
+Review Dashboard: See customer feedback, flag issues, and respond.
+
+Delivery Time Tracker: Analyze average time-to-door to improve service speed.
+
+🔹 7. Subscription & Inventory Automation
+Recurring Orders: Enable daily/weekly scheduled deliveries (ideal for milk, groceries).
+
+Restock Alerts: Low-stock triggers + smart supplier suggestions.
+
+🔹 8. Support & Seller Help Center
+Live Support Access: Chat or call Vyrona seller helpline instantly.
+
+Tutorial Hub: Video guides on onboarding, listing, managing orders, payouts.
+
+Seller Community Forum: Network, learn, and share best practices with peers.
+
