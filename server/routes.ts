@@ -9013,8 +9013,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized - seller access required" });
       }
 
-      // For demo purposes, assign store ID based on user
-      const storeId = user.id === 17 ? 9 : 6;
+      // Get seller's store ID
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id} LIMIT 1
+      `);
+      
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "No store found for this seller" });
+      }
+      
+      const storeId = storeResult.rows[0].id;
       const { name, description, category, price, stockQuantity, isActive } = req.body;
 
       const result = await db.execute(sql`
@@ -9051,13 +9059,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const productId = parseInt(req.params.productId);
       const { isActive } = req.body;
 
-      // For demo purposes, verify product belongs to seller's store
-      const storeId = user.id === 17 ? 9 : 6;
-
+      // Verify product belongs to seller's store and update
       const result = await db.execute(sql`
         UPDATE products 
         SET enable_individual_buy = ${isActive}
-        WHERE id = ${productId} AND store_id = ${storeId} AND module = 'space'
+        WHERE id = ${productId} 
+        AND store_id IN (SELECT id FROM stores WHERE seller_id = ${user.id})
+        AND module = 'space'
         RETURNING *
       `);
 
@@ -9080,14 +9088,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized - seller access required" });
       }
 
-      // For demo purposes, assign store ID based on user
-      const storeId = user.id === 17 ? 9 : 6;
-
+      // Get orders for seller's store only
       const result = await db.execute(sql`
         SELECT o.*, u.username as customer_name, u.email as customer_email, u.mobile as customer_phone
         FROM orders o
         LEFT JOIN users u ON o.user_id = u.id
-        WHERE o.module = 'space'
+        INNER JOIN stores s ON JSON_EXTRACT(o.metadata, '$.storeId') = s.id
+        WHERE o.module = 'space' AND s.seller_id = ${user.id}
         ORDER BY o.created_at DESC
       `);
 
@@ -9123,11 +9130,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = parseInt(req.params.orderId);
       const { status } = req.body;
 
-      // For demo purposes, update VyronaSpace orders
+      // Update order only if it belongs to seller's store
       const result = await db.execute(sql`
         UPDATE orders 
         SET status = ${status}
-        WHERE id = ${orderId} AND module = 'space'
+        WHERE id = ${orderId} 
+        AND module = 'space'
+        AND JSON_EXTRACT(metadata, '$.storeId') IN (SELECT id FROM stores WHERE seller_id = ${user.id})
         RETURNING *
       `);
 
