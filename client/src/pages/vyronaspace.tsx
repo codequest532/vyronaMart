@@ -448,10 +448,14 @@ export default function VyronaSpace() {
 
           {/* Navigation Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-4 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
+            <TabsList className="grid w-full grid-cols-5 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
               <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
                 <Sparkles className="h-4 w-4 mr-2" />
                 Discover
+              </TabsTrigger>
+              <TabsTrigger value="group-buy" className="rounded-xl py-3 data-[state=active]:bg-green-100 data-[state=active]:shadow-md data-[state=active]:text-green-800">
+                <Users className="h-4 w-4 mr-2" />
+                Group Buy
               </TabsTrigger>
               <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
                 <Package className="h-4 w-4 mr-2" />
@@ -462,7 +466,7 @@ export default function VyronaSpace() {
                 Rewards
               </TabsTrigger>
               <TabsTrigger value="profile" className="rounded-xl py-3 data-[state=active]:bg-purple-100 data-[state=active]:shadow-md data-[state=active]:text-purple-800">
-                <Users className="h-4 w-4 mr-2" />
+                <User className="h-4 w-4 mr-2" />
                 Profile
               </TabsTrigger>
             </TabsList>
@@ -777,6 +781,11 @@ export default function VyronaSpace() {
               </div>
             ) : null}
               </div>
+            </TabsContent>
+
+            {/* Group Buy Tab - VyronSocial Integration */}
+            <TabsContent value="group-buy" className="space-y-6">
+              <VyronaSocialGroupBuy />
             </TabsContent>
 
             {/* Orders Tab - Complete Functionality */}
