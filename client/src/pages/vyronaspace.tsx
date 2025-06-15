@@ -95,7 +95,7 @@ export default function VyronaSpace() {
   });
 
   // Transform store data with product counts
-  const stores = storesData.map((store: any) => ({
+  const stores = (storesData as any[]).map((store: any) => ({
     id: store.id,
     name: store.name,
     category: store.type === 'kirana' ? 'Grocery' : 
