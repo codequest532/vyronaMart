@@ -174,7 +174,7 @@ export default function VyronaSpaceCheckout() {
       // Clear cart from sessionStorage
       sessionStorage.removeItem('vyronaspace-cart');
       
-      // Store order data for success page
+      // Store order data for tracking page
       sessionStorage.setItem('orderData', JSON.stringify({
         orderId: data.id,
         total: finalTotal,
@@ -184,10 +184,13 @@ export default function VyronaSpaceCheckout() {
       
       toast({
         title: "Order Placed Successfully!",
-        description: `Your order #${data.id} has been confirmed`,
+        description: `Your order #${data.id} is now being prepared. Redirecting to live tracking...`,
       });
       
-      setLocation('/order-success');
+      // Redirect to live order tracking instead of success page
+      setTimeout(() => {
+        setLocation(`/order-tracking?orderId=${data.id}&module=vyronaspace`);
+      }, 1500);
     },
     onError: (error: any) => {
       toast({
