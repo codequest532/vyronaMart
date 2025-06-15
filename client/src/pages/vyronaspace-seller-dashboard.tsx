@@ -187,15 +187,15 @@ export default function VyronaSpaceSellerDashboard() {
   useEffect(() => {
     if (store) {
       setStoreForm({
-        name: store.name || "",
-        description: store.description || "",
-        type: store.type || "kirana",
-        address: store.address || "",
-        phone: store.phone || "",
-        email: store.email || "",
-        businessHours: store.businessHours || "7:00 AM - 10:00 PM",
-        deliveryTime: store.deliveryTime || "15-30 min",
-        deliveryFee: store.deliveryFee || 0
+        name: store?.name || "",
+        description: store?.description || "",
+        type: store?.type || "kirana",
+        address: store?.address || "",
+        phone: store?.phone || "",
+        email: store?.email || "",
+        businessHours: store?.businessHours || "7:00 AM - 10:00 PM",
+        deliveryTime: store?.deliveryTime || "15-30 min",
+        deliveryFee: store?.deliveryFee || 0
       });
     }
   }, [store]);
