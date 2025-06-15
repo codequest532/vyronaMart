@@ -8876,12 +8876,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized - seller access required" });
       }
 
-      // For demo purposes, assign store ID 9 to the demo seller (user ID 17)
-      // In production, this would be based on proper seller-store relationships
-      const storeId = user.id === 17 ? 9 : 6; // Demo seller gets store 9, others get store 6
-      
+      // Get store owned by this specific seller
       const result = await db.execute(sql`
-        SELECT * FROM stores WHERE id = ${storeId} LIMIT 1
+        SELECT * FROM stores WHERE seller_id = ${user.id} LIMIT 1
       `);
       
       if (result.rows.length === 0) {
@@ -8930,7 +8927,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         SET name = ${name}, 
             type = ${type},
             address = ${address}
-        WHERE id = ${user.id === 17 ? 9 : 6}
+        WHERE seller_id = ${user.id}
         RETURNING *
       `);
 
@@ -8958,7 +8955,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await db.execute(sql`
         UPDATE stores 
         SET is_open = ${isOpen}
-        WHERE id = ${user.id === 17 ? 9 : 6}
+        WHERE seller_id = ${user.id}
         RETURNING *
       `);
 
@@ -8981,13 +8978,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized - seller access required" });
       }
 
-      // For demo purposes, assign store ID based on user
-      const storeId = user.id === 17 ? 9 : 6;
-
+      // Get products from seller's own store
       const result = await db.execute(sql`
-        SELECT * FROM products 
-        WHERE store_id = ${storeId} AND module = 'space'
-        ORDER BY id DESC
+        SELECT p.* FROM products p
+        INNER JOIN stores s ON p.store_id = s.id
+        WHERE s.seller_id = ${user.id} AND p.module = 'space'
+        ORDER BY p.id DESC
       `);
 
       const products = result.rows.map((product: any) => ({
