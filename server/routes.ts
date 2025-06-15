@@ -1166,7 +1166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Product routes - VyronaHub (individual buy enabled products, excluding VyronaRead)
+  // Product routes - VyronaHub and VyronaSpace (individual buy enabled products, excluding VyronaRead)
   app.get("/api/products", async (req, res) => {
     try {
       const { module, category } = req.query;
@@ -1182,15 +1182,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category as string
       );
       
-      // Filter out VyronaRead products for VyronaHub interface
-      // Only show products that are NOT vyronaread module
-      const hubProducts = products.filter(product => 
+      // Filter out VyronaRead products and include VyronaSpace + VyronaHub products
+      // Show products that are NOT vyronaread module and have individual buy enabled
+      const displayProducts = products.filter(product => 
         product.enableIndividualBuy !== false && 
-        product.module !== 'vyronaread'
+        product.module !== 'vyronaread' &&
+        (product.module === 'vyronahub' || product.module === 'space')
       );
       
-      res.json(hubProducts);
+      res.json(displayProducts);
     } catch (error) {
+      console.error("Error fetching products:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
