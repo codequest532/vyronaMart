@@ -66,6 +66,7 @@ export const stores = pgTable("stores", {
   isOpen: boolean("is_open").default(true),
   rating: integer("rating").default(0), // out of 500 (5.00 stars)
   reviewCount: integer("review_count").default(0),
+  sellerId: integer("seller_id"), // Track which seller owns this store
 });
 
 export const shoppingRooms = pgTable("shopping_rooms", {
