@@ -77,7 +77,9 @@ export default function VyronaSpaceSellerDashboard() {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [showEditProduct, setShowEditProduct] = useState(false);
   const [showStoreEdit, setShowStoreEdit] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [productToDelete, setProductToDelete] = useState<SellerProduct | null>(null);
   const [editingProduct, setEditingProduct] = useState<SellerProduct | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -622,9 +624,8 @@ export default function VyronaSpaceSellerDashboard() {
                             size="sm" 
                             className="text-red-600 hover:bg-red-50 rounded-xl"
                             onClick={() => {
-                              if (confirm('Are you sure you want to delete this product?')) {
-                                deleteProductMutation.mutate(product.id);
-                              }
+                              setProductToDelete(product);
+                              setShowDeleteConfirm(true);
                             }}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -1442,6 +1443,46 @@ export default function VyronaSpaceSellerDashboard() {
                 className="flex-1 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
               >
                 {updateStoreMutation.isPending ? "Updating..." : "Update Store"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete Product</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600">
+                Are you sure you want to delete "{productToDelete?.name}"? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex space-x-2 mt-6">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setProductToDelete(null);
+                }} 
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={() => {
+                  if (productToDelete) {
+                    deleteProductMutation.mutate(productToDelete.id);
+                    setShowDeleteConfirm(false);
+                    setProductToDelete(null);
+                  }
+                }}
+                disabled={deleteProductMutation.isPending}
+                className="flex-1"
+              >
+                {deleteProductMutation.isPending ? "Deleting..." : "Delete"}
               </Button>
             </div>
           </DialogContent>
