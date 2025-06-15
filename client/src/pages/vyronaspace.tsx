@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import VyronaSocialGroupBuy from "@/components/VyronaSocialGroupBuy";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
   Star, ShoppingCart, ShoppingBag, Plus, Minus, Truck, Phone,

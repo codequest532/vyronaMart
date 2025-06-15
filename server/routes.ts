@@ -9317,6 +9317,341 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to update profile" });
     }
   });
+
+  // =============================================================================
+  // VyronSocial Group Buying API Endpoints
+  // =============================================================================
+
+  // Create or Join VyronSocial Group
+  app.post("/api/vyrona-social/groups", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { name, locality, pincode, apartmentName, description, groupCode } = req.body;
+
+      if (groupCode) {
+        // Join existing group
+        const groupResult = await db.execute(sql`
+          SELECT * FROM vyrona_social_groups WHERE group_code = ${groupCode} AND is_active = true
+        `);
+
+        if (groupResult.rows.length === 0) {
+          return res.status(404).json({ message: "Group not found" });
+        }
+
+        const group = groupResult.rows[0] as any;
+
+        // Check if already a member
+        const memberCheck = await db.execute(sql`
+          SELECT * FROM vyrona_social_group_members 
+          WHERE group_id = ${group.id} AND user_id = ${user.id} AND is_active = true
+        `);
+
+        if (memberCheck.rows.length > 0) {
+          return res.status(400).json({ message: "Already a member of this group" });
+        }
+
+        // Add user to group
+        await db.execute(sql`
+          INSERT INTO vyrona_social_group_members (group_id, user_id, role)
+          VALUES (${group.id}, ${user.id}, 'member')
+        `);
+
+        // Update member count
+        await db.execute(sql`
+          UPDATE vyrona_social_groups 
+          SET current_members = current_members + 1 
+          WHERE id = ${group.id}
+        `);
+
+        res.json({ success: true, group, message: "Joined group successfully" });
+      } else {
+        // Create new group
+        const newGroupCode = `${locality.substring(0, 3).toUpperCase()}${Math.floor(Math.random() * 9999)}`;
+        
+        const groupResult = await db.execute(sql`
+          INSERT INTO vyrona_social_groups (name, group_code, locality, pincode, apartment_name, description, created_by, current_members)
+          VALUES (${name}, ${newGroupCode}, ${locality}, ${pincode || ''}, ${apartmentName || ''}, ${description || ''}, ${user.id}, 1)
+          RETURNING *
+        `);
+
+        const group = groupResult.rows[0] as any;
+
+        // Add creator as admin
+        await db.execute(sql`
+          INSERT INTO vyrona_social_group_members (group_id, user_id, role)
+          VALUES (${group.id}, ${user.id}, 'admin')
+        `);
+
+        res.json({ success: true, group, message: "Group created successfully" });
+      }
+    } catch (error) {
+      console.error("Error creating/joining group:", error);
+      res.status(500).json({ message: "Failed to create/join group" });
+    }
+  });
+
+  // Get User's Groups
+  app.get("/api/vyrona-social/my-groups", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const result = await db.execute(sql`
+        SELECT g.*, gm.role, gm.joined_at
+        FROM vyrona_social_groups g
+        JOIN vyrona_social_group_members gm ON g.id = gm.group_id
+        WHERE gm.user_id = ${user.id} AND gm.is_active = true AND g.is_active = true
+        ORDER BY gm.joined_at DESC
+      `);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching user groups:", error);
+      res.status(500).json({ message: "Failed to fetch groups" });
+    }
+  });
+
+  // Start Group Shopping Session
+  app.post("/api/vyrona-social/shopping-sessions", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { groupId, storeId, orderWindow } = req.body;
+
+      // Check if user is member of group
+      const memberCheck = await db.execute(sql`
+        SELECT * FROM vyrona_social_group_members 
+        WHERE group_id = ${groupId} AND user_id = ${user.id} AND is_active = true
+      `);
+
+      if (memberCheck.rows.length === 0) {
+        return res.status(403).json({ message: "Not a member of this group" });
+      }
+
+      // Check if store has group buying enabled
+      const storeSettings = await db.execute(sql`
+        SELECT * FROM store_group_buy_settings WHERE store_id = ${storeId} AND is_group_buy_enabled = true
+      `);
+
+      if (storeSettings.rows.length === 0) {
+        return res.status(400).json({ message: "Store does not support group buying" });
+      }
+
+      const sessionCode = `GRP${Math.floor(Math.random() * 999999)}`;
+      const orderWindowTime = new Date(Date.now() + (orderWindow || 60) * 60 * 1000);
+
+      const result = await db.execute(sql`
+        INSERT INTO group_shopping_sessions (group_id, store_id, session_code, order_window, created_by)
+        VALUES (${groupId}, ${storeId}, ${sessionCode}, ${orderWindowTime}, ${user.id})
+        RETURNING *
+      `);
+
+      res.json({ success: true, session: result.rows[0] });
+    } catch (error) {
+      console.error("Error starting shopping session:", error);
+      res.status(500).json({ message: "Failed to start shopping session" });
+    }
+  });
+
+  // Get Stores with Group Buy Enabled
+  app.get("/api/vyrona-social/stores", async (req, res) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT s.*, sgbs.min_order_value, sgbs.discount_tiers, sgbs.delivery_slots, sgbs.group_order_window
+        FROM stores s
+        JOIN store_group_buy_settings sgbs ON s.id = sgbs.store_id
+        WHERE sgbs.is_group_buy_enabled = true AND s.is_open = true
+        ORDER BY s.rating DESC
+      `);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching group buy stores:", error);
+      res.status(500).json({ message: "Failed to fetch stores" });
+    }
+  });
+
+  // Get Group Shopping Session Details
+  app.get("/api/vyrona-social/sessions/:sessionId", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const sessionId = parseInt(req.params.sessionId);
+
+      // Get session with store info
+      const sessionResult = await db.execute(sql`
+        SELECT gs.*, s.name as store_name, s.address as store_address, g.name as group_name
+        FROM group_shopping_sessions gs
+        JOIN stores s ON gs.store_id = s.id
+        JOIN vyrona_social_groups g ON gs.group_id = g.id
+        JOIN vyrona_social_group_members gm ON g.id = gm.group_id
+        WHERE gs.id = ${sessionId} AND gm.user_id = ${user.id}
+      `);
+
+      if (sessionResult.rows.length === 0) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+
+      const session = sessionResult.rows[0];
+
+      // Get cart items with user and product details
+      const cartResult = await db.execute(sql`
+        SELECT gci.*, u.username, p.name as product_name, p.description as product_description
+        FROM group_cart_items gci
+        JOIN users u ON gci.user_id = u.id
+        JOIN products p ON gci.product_id = p.id
+        WHERE gci.session_id = ${sessionId}
+        ORDER BY gci.added_at DESC
+      `);
+
+      // Get recent chat messages
+      const chatResult = await db.execute(sql`
+        SELECT gcm.*, u.username
+        FROM group_chat_messages gcm
+        JOIN users u ON gcm.user_id = u.id
+        WHERE gcm.session_id = ${sessionId}
+        ORDER BY gcm.created_at DESC
+        LIMIT 50
+      `);
+
+      res.json({
+        session,
+        cartItems: cartResult.rows,
+        chatMessages: chatResult.rows.reverse()
+      });
+    } catch (error) {
+      console.error("Error fetching session details:", error);
+      res.status(500).json({ message: "Failed to fetch session details" });
+    }
+  });
+
+  // Add Item to Group Cart
+  app.post("/api/vyrona-social/cart", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { sessionId, productId, quantity } = req.body;
+
+      // Verify session and user access
+      const sessionResult = await db.execute(sql`
+        SELECT gs.*, gm.user_id 
+        FROM group_shopping_sessions gs
+        JOIN vyrona_social_group_members gm ON gs.group_id = gm.group_id
+        WHERE gs.id = ${sessionId} AND gm.user_id = ${user.id} AND gs.status = 'active'
+      `);
+
+      if (sessionResult.rows.length === 0) {
+        return res.status(403).json({ message: "Invalid session or access denied" });
+      }
+
+      // Get product price
+      const productResult = await db.execute(sql`
+        SELECT price FROM products WHERE id = ${productId}
+      `);
+
+      if (productResult.rows.length === 0) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const product = productResult.rows[0] as any;
+
+      // Check if item already exists for this user in this session
+      const existingItem = await db.execute(sql`
+        SELECT id FROM group_cart_items 
+        WHERE session_id = ${sessionId} AND user_id = ${user.id} AND product_id = ${productId}
+      `);
+
+      if (existingItem.rows.length > 0) {
+        // Update existing item
+        await db.execute(sql`
+          UPDATE group_cart_items 
+          SET quantity = ${quantity}, price = ${product.price}
+          WHERE session_id = ${sessionId} AND user_id = ${user.id} AND product_id = ${productId}
+        `);
+      } else {
+        // Add new item
+        await db.execute(sql`
+          INSERT INTO group_cart_items (session_id, user_id, product_id, quantity, price)
+          VALUES (${sessionId}, ${user.id}, ${productId}, ${quantity}, ${product.price})
+        `);
+      }
+
+      // Update session total
+      const totalResult = await db.execute(sql`
+        SELECT SUM(quantity * price) as total_amount 
+        FROM group_cart_items 
+        WHERE session_id = ${sessionId}
+      `);
+
+      const totalAmount = Math.round(Number((totalResult.rows[0] as any)?.total_amount || 0));
+
+      // Calculate discount based on store settings
+      const storeSettings = await db.execute(sql`
+        SELECT discount_tiers FROM store_group_buy_settings 
+        WHERE store_id = (SELECT store_id FROM group_shopping_sessions WHERE id = ${sessionId})
+      `);
+
+      let discountPercent = 0;
+      if (storeSettings.rows.length > 0) {
+        const tiers = (storeSettings.rows[0] as any).discount_tiers || [];
+        for (const tier of tiers) {
+          if (totalAmount >= tier.threshold) {
+            discountPercent = tier.discount;
+          }
+        }
+      }
+
+      await db.execute(sql`
+        UPDATE group_shopping_sessions 
+        SET total_amount = ${totalAmount}, discount_percent = ${discountPercent}
+        WHERE id = ${sessionId}
+      `);
+
+      res.json({ success: true, totalAmount, discountPercent });
+    } catch (error) {
+      console.error("Error adding to group cart:", error);
+      res.status(500).json({ message: "Failed to add item to cart" });
+    }
+  });
+
+  // Send Group Chat Message
+  app.post("/api/vyrona-social/chat", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const { sessionId, groupId, message, messageType, metadata } = req.body;
+
+      const result = await db.execute(sql`
+        INSERT INTO group_chat_messages (group_id, session_id, user_id, message, message_type, metadata)
+        VALUES (${groupId || null}, ${sessionId || null}, ${user.id}, ${message}, ${messageType || 'text'}, ${JSON.stringify(metadata || {})})
+        RETURNING *
+      `);
+
+      const chatMessage = result.rows[0];
+      res.json({ success: true, message: chatMessage });
+    } catch (error) {
+      console.error("Error sending chat message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
   
   return httpServer;
 }
