@@ -9672,12 +9672,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "VyronaSpace seller access required" });
       }
 
-      // For VyronaSpace demo seller, use store ID 9
-      const storeId = user.username === 'vyronaspace_demo' ? 9 : null;
+      // Find the store owned by this VyronaSpace seller
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id}
+      `);
       
-      if (!storeId) {
+      if (storeResult.rows.length === 0) {
         return res.status(404).json({ message: "Store not found for this seller" });
       }
+      
+      const storeId = storeResult.rows[0].id;
 
       // Get group buy settings
       const settingsResult = await db.execute(sql`
@@ -9724,12 +9728,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { isGroupBuyEnabled, minOrderValue, discountTiers, deliverySlots, groupOrderWindow } = req.body;
 
-      // For VyronaSpace demo seller, use store ID 9
-      const storeId = user.username === 'vyronaspace_demo' ? 9 : null;
+      // Find the store owned by this VyronaSpace seller
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id}
+      `);
       
-      if (!storeId) {
+      if (storeResult.rows.length === 0) {
         return res.status(404).json({ message: "Store not found for this seller" });
       }
+      
+      const storeId = storeResult.rows[0].id;
 
       // Update settings
       const result = await db.execute(sql`
@@ -9763,12 +9771,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "VyronaSpace seller access required" });
       }
 
-      // For VyronaSpace demo seller, use store ID 9
-      const storeId = user.username === 'vyronaspace_demo' ? 9 : null;
+      // Find the store owned by this VyronaSpace seller
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id}
+      `);
       
-      if (!storeId) {
+      if (storeResult.rows.length === 0) {
         return res.status(404).json({ message: "Store not found for this seller" });
       }
+      
+      const storeId = storeResult.rows[0].id;
 
       // Get group shopping sessions for this store
       const sessionsResult = await db.execute(sql`
