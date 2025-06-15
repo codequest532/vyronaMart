@@ -548,7 +548,7 @@ export default function PlaceOrderNew() {
       return response.json();
     },
     onSuccess: (result) => {
-      // Store order data for tracking page
+      // Store order data for success page
       const orderData = {
         orderId: result.orderId || result.id,
         module: 'vyronasocial',
@@ -568,13 +568,13 @@ export default function PlaceOrderNew() {
       sessionStorage.setItem('orderData', JSON.stringify(orderData));
       
       toast({
-        title: "Group Order Placed Successfully",
-        description: "Your group order is now being prepared. Redirecting to live tracking...",
+        title: "Order Placed Successfully",
+        description: "Your group order has been placed successfully.",
       });
       
-      // Redirect to live order tracking instead of success page
+      // Redirect to order success page
       setTimeout(() => {
-        setLocation(`/order-tracking?orderId=${result.orderId || result.id}&module=vyronasocial&type=group`);
+        setLocation("/order-success");
       }, 1500);
     },
     onError: (error: any) => {
