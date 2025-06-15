@@ -118,6 +118,29 @@ export default function VyronaSpaceSellerDashboard() {
     isActive: true
   });
 
+  // Group Buy Settings state
+  const [groupBuySettings, setGroupBuySettings] = useState({
+    isGroupBuyEnabled: false,
+    minOrderValue: 500,
+    discountTiers: [
+      { threshold: 500, discount: 10 },
+      { threshold: 1000, discount: 15 },
+      { threshold: 2000, discount: 20 }
+    ],
+    deliverySlots: ["9-11 AM", "2-4 PM", "6-8 PM"],
+    groupOrderWindow: 60
+  });
+
+  // Fetch group buy settings
+  const { data: groupBuySettingsData, isLoading: groupBuyLoading } = useQuery({
+    queryKey: ["/api/vyronaspace/seller/group-buy-settings"]
+  });
+
+  // Fetch group orders
+  const { data: groupOrders = [], isLoading: groupOrdersLoading } = useQuery({
+    queryKey: ["/api/vyronaspace/seller/group-orders"]
+  });
+
   // Update store mutation
   const updateStoreMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -181,6 +204,28 @@ export default function VyronaSpaceSellerDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/vyronaspace/seller/store"] });
+    }
+  });
+
+  // Update group buy settings mutation
+  const updateGroupBuySettingsMutation = useMutation({
+    mutationFn: async (settings: any) => {
+      return apiRequest("PATCH", "/api/vyronaspace/seller/group-buy-settings", settings);
+    },
+    onSuccess: () => {
+      toast({ title: "Group buy settings updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaspace/seller/group-buy-settings"] });
+    }
+  });
+
+  // Update group session status mutation
+  const updateGroupSessionMutation = useMutation({
+    mutationFn: async ({ sessionId, status, sellerNotes }: { sessionId: number; status: string; sellerNotes?: string }) => {
+      return apiRequest("PATCH", `/api/vyronaspace/seller/group-sessions/${sessionId}`, { status, sellerNotes });
+    },
+    onSuccess: () => {
+      toast({ title: "Group session updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaspace/seller/group-orders"] });
     }
   });
 
@@ -257,7 +302,7 @@ export default function VyronaSpaceSellerDashboard() {
 
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-8 bg-white/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
+          <TabsList className="grid w-full grid-cols-9 bg-white/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
             <TabsTrigger value="overview" className="rounded-xl py-3 data-[state=active]:bg-orange-100">
               <Home className="h-4 w-4 mr-2" />
               Overview
@@ -269,6 +314,10 @@ export default function VyronaSpaceSellerDashboard() {
             <TabsTrigger value="products" className="rounded-xl py-3 data-[state=active]:bg-orange-100">
               <Package className="h-4 w-4 mr-2" />
               Products
+            </TabsTrigger>
+            <TabsTrigger value="group-buy" className="rounded-xl py-3 data-[state=active]:bg-green-100">
+              <Users className="h-4 w-4 mr-2" />
+              Group Buy
             </TabsTrigger>
             <TabsTrigger value="analytics" className="rounded-xl py-3 data-[state=active]:bg-orange-100">
               <BarChart3 className="h-4 w-4 mr-2" />
@@ -634,6 +683,291 @@ export default function VyronaSpaceSellerDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Group Buy Settings Tab */}
+          <TabsContent value="group-buy" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Group Buy Settings */}
+              <Card className="bg-white/80 backdrop-blur-sm border-green-200/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-green-600" />
+                    Group Buy Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Enable/Disable Group Buy */}
+                  <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                    <div>
+                      <h3 className="font-medium text-green-800">Enable Group Buying</h3>
+                      <p className="text-sm text-green-600">Allow customers to create group buying sessions</p>
+                    </div>
+                    <Switch
+                      checked={groupBuySettingsData?.is_group_buy_enabled || groupBuySettings.isGroupBuyEnabled}
+                      onCheckedChange={(checked) => {
+                        const newSettings = { 
+                          ...groupBuySettings, 
+                          isGroupBuyEnabled: checked 
+                        };
+                        setGroupBuySettings(newSettings);
+                        updateGroupBuySettingsMutation.mutate(newSettings);
+                      }}
+                    />
+                  </div>
+
+                  {/* Minimum Order Value */}
+                  <div>
+                    <Label htmlFor="min-order-value">Minimum Group Order Value (₹)</Label>
+                    <Input
+                      id="min-order-value"
+                      type="number"
+                      value={groupBuySettingsData?.min_order_value || groupBuySettings.minOrderValue}
+                      onChange={(e) => {
+                        const newSettings = { 
+                          ...groupBuySettings, 
+                          minOrderValue: parseInt(e.target.value) 
+                        };
+                        setGroupBuySettings(newSettings);
+                      }}
+                      onBlur={() => updateGroupBuySettingsMutation.mutate(groupBuySettings)}
+                      placeholder="Minimum order value for group buying"
+                    />
+                  </div>
+
+                  {/* Discount Tiers */}
+                  <div>
+                    <Label>Tiered Discount Rules</Label>
+                    <div className="space-y-3 mt-2">
+                      {groupBuySettings.discountTiers.map((tier, index) => (
+                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <Label className="text-xs">Order Value (₹)</Label>
+                            <Input
+                              type="number"
+                              value={tier.threshold}
+                              onChange={(e) => {
+                                const newTiers = [...groupBuySettings.discountTiers];
+                                newTiers[index].threshold = parseInt(e.target.value);
+                                setGroupBuySettings({ ...groupBuySettings, discountTiers: newTiers });
+                              }}
+                              className="h-8"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Label className="text-xs">Discount (%)</Label>
+                            <Input
+                              type="number"
+                              value={tier.discount}
+                              onChange={(e) => {
+                                const newTiers = [...groupBuySettings.discountTiers];
+                                newTiers[index].discount = parseInt(e.target.value);
+                                setGroupBuySettings({ ...groupBuySettings, discountTiers: newTiers });
+                              }}
+                              className="h-8"
+                            />
+                          </div>
+                          {groupBuySettings.discountTiers.length > 1 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newTiers = groupBuySettings.discountTiers.filter((_, i) => i !== index);
+                                setGroupBuySettings({ ...groupBuySettings, discountTiers: newTiers });
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newTiers = [...groupBuySettings.discountTiers, { threshold: 0, discount: 0 }];
+                          setGroupBuySettings({ ...groupBuySettings, discountTiers: newTiers });
+                        }}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Discount Tier
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Delivery Slots */}
+                  <div>
+                    <Label>Available Delivery Slots</Label>
+                    <div className="space-y-2 mt-2">
+                      {groupBuySettings.deliverySlots.map((slot, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <Input
+                            value={slot}
+                            onChange={(e) => {
+                              const newSlots = [...groupBuySettings.deliverySlots];
+                              newSlots[index] = e.target.value;
+                              setGroupBuySettings({ ...groupBuySettings, deliverySlots: newSlots });
+                            }}
+                            className="flex-1"
+                          />
+                          {groupBuySettings.deliverySlots.length > 1 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newSlots = groupBuySettings.deliverySlots.filter((_, i) => i !== index);
+                                setGroupBuySettings({ ...groupBuySettings, deliverySlots: newSlots });
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newSlots = [...groupBuySettings.deliverySlots, "New Slot"];
+                          setGroupBuySettings({ ...groupBuySettings, deliverySlots: newSlots });
+                        }}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Delivery Slot
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Group Order Window */}
+                  <div>
+                    <Label htmlFor="order-window">Group Order Window (minutes)</Label>
+                    <Input
+                      id="order-window"
+                      type="number"
+                      value={groupBuySettingsData?.group_order_window || groupBuySettings.groupOrderWindow}
+                      onChange={(e) => {
+                        const newSettings = { 
+                          ...groupBuySettings, 
+                          groupOrderWindow: parseInt(e.target.value) 
+                        };
+                        setGroupBuySettings(newSettings);
+                      }}
+                      onBlur={() => updateGroupBuySettingsMutation.mutate(groupBuySettings)}
+                      placeholder="How long groups have to place orders"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Time limit for group shopping sessions</p>
+                  </div>
+
+                  <Button
+                    onClick={() => updateGroupBuySettingsMutation.mutate(groupBuySettings)}
+                    disabled={updateGroupBuySettingsMutation.isPending}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    {updateGroupBuySettingsMutation.isPending ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Save Group Buy Settings
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Active Group Sessions */}
+              <Card className="bg-white/80 backdrop-blur-sm border-green-200/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-green-600" />
+                    Active Group Sessions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {groupOrdersLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="h-6 w-6 animate-spin text-green-600" />
+                    </div>
+                  ) : groupOrders.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                      <p>No active group sessions</p>
+                      <p className="text-sm">Group sessions will appear here when customers start group buying</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {groupOrders.slice(0, 3).map((session: any) => (
+                        <div key={session.id} className="p-4 border border-green-200 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h4 className="font-medium text-green-800">{session.group_name}</h4>
+                              <p className="text-sm text-gray-600">{session.locality}</p>
+                            </div>
+                            <Badge className={
+                              session.status === 'active' ? 'bg-green-100 text-green-700' :
+                              session.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }>
+                              {session.status}
+                            </Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4 text-sm mb-3">
+                            <div>
+                              <span className="text-gray-600">Created by:</span>
+                              <span className="font-medium ml-1">{session.creator_name}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Items:</span>
+                              <span className="font-medium ml-1">{session.items?.length || 0}</span>
+                            </div>
+                          </div>
+
+                          {session.recentMessages && session.recentMessages.length > 0 && (
+                            <div className="bg-gray-50 p-3 rounded-lg mb-3">
+                              <p className="text-xs text-gray-600 mb-2">Recent Messages:</p>
+                              {session.recentMessages.slice(0, 2).map((msg: any, idx: number) => (
+                                <p key={idx} className="text-xs text-gray-700 mb-1">
+                                  <span className="font-medium">{msg.username}:</span> {msg.message}
+                                </p>
+                              ))}
+                            </div>
+                          )}
+
+                          <div className="flex gap-2">
+                            <Select
+                              value={session.status}
+                              onValueChange={(value) => {
+                                updateGroupSessionMutation.mutate({
+                                  sessionId: session.id,
+                                  status: value
+                                });
+                              }}
+                            >
+                              <SelectTrigger className="flex-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="preparing">Preparing</SelectItem>
+                                <SelectItem value="ready">Ready</SelectItem>
+                                <SelectItem value="completed">Completed</SelectItem>
+                                <SelectItem value="cancelled">Cancelled</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Analytics Tab */}

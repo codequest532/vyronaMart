@@ -9652,6 +9652,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to send message" });
     }
   });
+
+  // =============================================================================
+  // VyronaSpace Seller Group Buy Management API Endpoints
+  // =============================================================================
+
+  // Get Store Group Buy Settings
+  app.get("/api/vyronaspace/seller/group-buy-settings", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller' || user.sellerType !== 'VyronaSpace') {
+        return res.status(403).json({ message: "VyronaSpace seller access required" });
+      }
+
+      // Get seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id}
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+
+      // Get group buy settings
+      const settingsResult = await db.execute(sql`
+        SELECT * FROM store_group_buy_settings WHERE store_id = ${storeId}
+      `);
+
+      if (settingsResult.rows.length === 0) {
+        // Create default settings if none exist
+        const defaultSettings = {
+          store_id: storeId,
+          is_group_buy_enabled: false,
+          min_order_value: 500,
+          discount_tiers: [
+            { threshold: 500, discount: 10 },
+            { threshold: 1000, discount: 15 },
+            { threshold: 2000, discount: 20 }
+          ],
+          delivery_slots: ["9-11 AM", "2-4 PM", "6-8 PM"],
+          group_order_window: 60
+        };
+
+        await db.execute(sql`
+          INSERT INTO store_group_buy_settings (store_id, is_group_buy_enabled, min_order_value, discount_tiers, delivery_slots, group_order_window)
+          VALUES (${storeId}, ${defaultSettings.is_group_buy_enabled}, ${defaultSettings.min_order_value}, ${JSON.stringify(defaultSettings.discount_tiers)}, ${JSON.stringify(defaultSettings.delivery_slots)}, ${defaultSettings.group_order_window})
+        `);
+
+        res.json(defaultSettings);
+      } else {
+        res.json(settingsResult.rows[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching group buy settings:", error);
+      res.status(500).json({ message: "Failed to fetch settings" });
+    }
+  });
+
+  // Update Store Group Buy Settings
+  app.patch("/api/vyronaspace/seller/group-buy-settings", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller' || user.sellerType !== 'VyronaSpace') {
+        return res.status(403).json({ message: "VyronaSpace seller access required" });
+      }
+
+      const { isGroupBuyEnabled, minOrderValue, discountTiers, deliverySlots, groupOrderWindow } = req.body;
+
+      // Get seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id}
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+
+      // Update settings
+      const result = await db.execute(sql`
+        UPDATE store_group_buy_settings 
+        SET is_group_buy_enabled = ${isGroupBuyEnabled},
+            min_order_value = ${minOrderValue},
+            discount_tiers = ${JSON.stringify(discountTiers)},
+            delivery_slots = ${JSON.stringify(deliverySlots)},
+            group_order_window = ${groupOrderWindow},
+            updated_at = NOW()
+        WHERE store_id = ${storeId}
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Settings not found" });
+      }
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error updating group buy settings:", error);
+      res.status(500).json({ message: "Failed to update settings" });
+    }
+  });
+
+  // Get Group Orders for Seller
+  app.get("/api/vyronaspace/seller/group-orders", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller' || user.sellerType !== 'VyronaSpace') {
+        return res.status(403).json({ message: "VyronaSpace seller access required" });
+      }
+
+      // Get seller's store
+      const storeResult = await db.execute(sql`
+        SELECT id FROM stores WHERE seller_id = ${user.id}
+      `);
+
+      if (storeResult.rows.length === 0) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      const storeId = (storeResult.rows[0] as any).id;
+
+      // Get group shopping sessions for this store
+      const sessionsResult = await db.execute(sql`
+        SELECT gs.*, g.name as group_name, g.locality, u.username as creator_name
+        FROM group_shopping_sessions gs
+        JOIN vyrona_social_groups g ON gs.group_id = g.id
+        JOIN users u ON gs.created_by = u.id
+        WHERE gs.store_id = ${storeId}
+        ORDER BY gs.created_at DESC
+      `);
+
+      // Get group cart items for each session
+      for (const session of sessionsResult.rows) {
+        const sessionId = (session as any).id;
+        
+        const itemsResult = await db.execute(sql`
+          SELECT gci.*, u.username, p.name as product_name
+          FROM group_cart_items gci
+          JOIN users u ON gci.user_id = u.id
+          JOIN products p ON gci.product_id = p.id
+          WHERE gci.session_id = ${sessionId}
+        `);
+
+        const messagesResult = await db.execute(sql`
+          SELECT gcm.*, u.username
+          FROM group_chat_messages gcm
+          JOIN users u ON gcm.user_id = u.id
+          WHERE gcm.session_id = ${sessionId}
+          ORDER BY gcm.created_at DESC
+          LIMIT 5
+        `);
+
+        (session as any).items = itemsResult.rows;
+        (session as any).recentMessages = messagesResult.rows;
+      }
+
+      res.json(sessionsResult.rows);
+    } catch (error) {
+      console.error("Error fetching group orders:", error);
+      res.status(500).json({ message: "Failed to fetch group orders" });
+    }
+  });
+
+  // Update Group Session Status
+  app.patch("/api/vyronaspace/seller/group-sessions/:sessionId", async (req, res) => {
+    try {
+      const user = getAuthenticatedUser(req);
+      if (!user || user.role !== 'seller' || user.sellerType !== 'VyronaSpace') {
+        return res.status(403).json({ message: "VyronaSpace seller access required" });
+      }
+
+      const sessionId = parseInt(req.params.sessionId);
+      const { status, sellerNotes } = req.body;
+
+      // Verify session belongs to seller's store
+      const sessionResult = await db.execute(sql`
+        SELECT gs.* FROM group_shopping_sessions gs
+        JOIN stores s ON gs.store_id = s.id
+        WHERE gs.id = ${sessionId} AND s.seller_id = ${user.id}
+      `);
+
+      if (sessionResult.rows.length === 0) {
+        return res.status(404).json({ message: "Session not found or access denied" });
+      }
+
+      const result = await db.execute(sql`
+        UPDATE group_shopping_sessions 
+        SET status = ${status}, seller_notes = ${sellerNotes || null}, updated_at = NOW()
+        WHERE id = ${sessionId}
+        RETURNING *
+      `);
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error updating group session:", error);
+      res.status(500).json({ message: "Failed to update session" });
+    }
+  });
   
   return httpServer;
 }
