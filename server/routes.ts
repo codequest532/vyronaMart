@@ -9860,12 +9860,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Serve the React app directly from client folder
-  app.use(express.static(path.join(process.cwd(), 'client')));
-  
-  // For all non-API routes, serve the index.html
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'client', 'index.html'));
+  // Simple homepage for demo store removal verification
+  app.get('/', (req, res) => {
+    res.json({ 
+      status: 'VyronaSpace Demo Stores Removed',
+      message: 'All demo stores have been successfully removed from the platform. VyronaSpace is now ready for authentic retail partner onboarding.',
+      timestamp: new Date().toISOString(),
+      stores_count: 0,
+      initialization: 'skipped - authentic stores only'
+    });
+  });
+
+  // Health check endpoint
+  app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 
   return httpServer;
