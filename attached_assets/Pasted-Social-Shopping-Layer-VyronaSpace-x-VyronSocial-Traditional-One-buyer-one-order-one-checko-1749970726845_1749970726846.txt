@@ -1,0 +1,100 @@
+Social Shopping Layer – VyronaSpace x VyronSocial
+🚫 Traditional: One buyer → one order → one checkout.
+✅ Vyrona: Multiple buyers → group cart → shared checkout → social rewards.
+
+🧩 Core Concept: VyronSocial Rooms for Local Group Orders
+🏢 What is a VyronSocial Room?
+A digital group space, exclusive to people in the same locality or interest group (e.g., apartment block, street, office floor), where they can:
+
+Discover nearby Vyrona-enabled stores.
+
+Coordinate and combine orders from the same seller.
+
+Get discounts by unlocking group-buy thresholds (e.g., ₹500+ combined = 10% off).
+
+Chat, suggest, react, and shop together in real time.
+
+📦 Example Scenario:
+Apartment: "Kumarasamy Enclave"
+Residents form a VyronSocial Room.
+4 of them want to buy from "FreshDaily Grocery Store":
+
+Name	Item	Price
+Sita	2L Milk, Bananas	₹120
+Raj	Rice 5kg	₹300
+Asha	Biscuits, Butter	₹180
+Vikram	Eggs, Juice	₹200
+
+Total: ₹800 → 📉 Unlock 10% Group Discount
+
+Delivery happens together → delivery fee split → coins rewarded based on contribution.
+
+💡 Key Features of VyronSocial Rooms
+1. 🛒 Group Cart Integration
+Each participant adds to a shared cart from the same store.
+
+Real-time view of total value & remaining for discount unlock (like "₹120 more to unlock 15%").
+
+Each person pays individually for their items, but delivery is shared.
+
+2. 💬 In-Room Chat & Notifications
+Built-in chat window for coordinating:
+
+“Anyone need eggs?”
+
+“Let’s order before 5pm slot ends!”
+
+Emoji reactions, ping members, product suggestions.
+
+3. 🏷️ Group Discounts & Reward Coins
+Sellers can configure Tiered Group Offers:
+
+₹500+: 10% off
+
+₹1000+: 15% off
+
+₹1500+: Free delivery
+
+VyronaCoins earned on group thresholds → distributed fairly based on contribution amount.
+
+4. ⏰ Timed Shopping Rounds
+Optional "Order Window" setup:
+
+E.g., "Next group order closes in 30 mins"
+
+Builds urgency and shared participation.
+
+5. 📦 Smart Delivery Scheduling
+Combines delivery into one slot.
+
+Delivery partner assigned once order window closes.
+
+Users can optionally self-pickup from a shared drop point.
+
+🧪 MVP Feature: Group Buy from Local Retailers
+✅ MVP Scope:
+Create or join a VyronSocial Room based on Pincode or Apartment Name.
+
+Select a VyronaSpace-enabled seller (e.g., local grocery).
+
+Add items to shared group cart.
+
+See live total & group discount status.
+
+Checkout individually with split delivery fee.
+
+Group reward logic (e.g., 5 coins per ₹100) → auto-split.
+
+Basic chat support (text-only or prebuilt messages like “I added Milk”).
+
+📊 Seller-Side Controls for Group Buy
+VyronaStore (seller) dashboard options:
+
+✅ Enable/Disable group buying per store.
+
+📈 Set tiered pricing rules for group discounts.
+
+📦 Set delivery conditions (e.g., group order min value).
+
+💬 View group order comments or requests.
+

@@ -557,6 +557,85 @@ export const groupBuyOrders = pgTable("group_buy_orders", {
   completedAt: timestamp("completed_at"),
 });
 
+// VyronSocial Groups for Local Group Orders
+export const vyronaSocialGroups = pgTable("vyrona_social_groups", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // "Kumarasamy Enclave", "BTM 2nd Stage"
+  groupCode: text("group_code").notNull().unique(), // "KUM123", "BTM456"
+  locality: text("locality").notNull(), // pincode or area name
+  pincode: text("pincode"),
+  apartmentName: text("apartment_name"),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  maxMembers: integer("max_members").default(50),
+  currentMembers: integer("current_members").default(0),
+  createdBy: integer("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Group Members
+export const vyronaSocialGroupMembers = pgTable("vyrona_social_group_members", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  userId: integer("user_id").notNull(),
+  role: text("role").default("member"), // "admin", "member"
+  joinedAt: timestamp("joined_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+});
+
+// Group Shopping Sessions - When a group decides to order from a store
+export const groupShoppingSessions = pgTable("group_shopping_sessions", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull(),
+  storeId: integer("store_id").notNull(),
+  sessionCode: text("session_code").notNull().unique(), // "GRP789"
+  status: text("status").default("active"), // "active", "checkout", "completed", "cancelled"
+  orderWindow: timestamp("order_window"), // deadline for adding items
+  totalAmount: integer("total_amount").default(0), // total cart value
+  discountPercent: integer("discount_percent").default(0),
+  deliveryFee: integer("delivery_fee").default(0),
+  splitDeliveryFee: integer("split_delivery_fee").default(0), // delivery fee per person
+  createdBy: integer("created_by").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// Individual items added to group cart
+export const groupCartItems = pgTable("group_cart_items", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").notNull(),
+  userId: integer("user_id").notNull(),
+  productId: integer("product_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  price: integer("price").notNull(), // price at time of adding
+  addedAt: timestamp("added_at").defaultNow(),
+});
+
+// Group chat messages
+export const groupChatMessages = pgTable("group_chat_messages", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id"),
+  sessionId: integer("session_id"), // if message is about a specific shopping session
+  userId: integer("user_id").notNull(),
+  message: text("message").notNull(),
+  messageType: text("message_type").default("text"), // "text", "product_suggestion", "system"
+  metadata: jsonb("metadata"), // for product suggestions, reactions, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Store-level group buy settings
+export const storeGroupBuySettings = pgTable("store_group_buy_settings", {
+  id: serial("id").primaryKey(),
+  storeId: integer("store_id").notNull(),
+  isGroupBuyEnabled: boolean("is_group_buy_enabled").default(false),
+  minOrderValue: integer("min_order_value").default(500), // ₹500
+  discountTiers: jsonb("discount_tiers"), // [{"threshold": 500, "discount": 10}, {"threshold": 1000, "discount": 15}]
+  maxDeliveryDistance: integer("max_delivery_distance").default(5), // km
+  deliverySlots: jsonb("delivery_slots"), // ["9-11 AM", "2-4 PM", "6-8 PM"]
+  groupOrderWindow: integer("group_order_window").default(60), // minutes
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
