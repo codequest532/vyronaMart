@@ -9860,16 +9860,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Simple homepage for demo store removal verification
-  app.get('/', (req, res) => {
-    res.json({ 
-      status: 'VyronaSpace Demo Stores Removed',
-      message: 'All demo stores have been successfully removed from the platform. VyronaSpace is now ready for authentic retail partner onboarding.',
-      timestamp: new Date().toISOString(),
-      stores_count: 0,
-      initialization: 'skipped - authentic stores only'
+  // Serve frontend in development mode with Vite
+  if (process.env.NODE_ENV !== 'production') {
+    try {
+      const { createServer } = await import('vite');
+      const vite = await createServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+        root: process.cwd()
+      });
+      app.use(vite.ssrFixStacktrace);
+      app.use(vite.middlewares);
+    } catch (error) {
+      console.log('Vite server setup failed, serving simple status page');
+      app.get('/', (req, res) => {
+        res.send(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>VyronaSpace - Demo Stores Removed</title>
+            <style>
+              body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+              .status { background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 20px; margin: 20px 0; }
+              .success { background: #f0fdf4; border-color: #22c55e; }
+            </style>
+          </head>
+          <body>
+            <h1>VyronaSpace Platform Status</h1>
+            <div class="status success">
+              <h2>✓ Demo Stores Successfully Removed</h2>
+              <p>All demo stores (FreshMart Express, MedPlus Essentials, Fashion District) have been completely removed from the platform.</p>
+              <p><strong>Platform Status:</strong> Ready for authentic retail partner onboarding</p>
+              <p><strong>Stores Count:</strong> 0 demo stores remaining</p>
+              <p><strong>Initialization:</strong> Skipped - authentic stores only</p>
+            </div>
+            <div class="status">
+              <h3>API Endpoints Available:</h3>
+              <ul>
+                <li><a href="/api/stores">/api/stores</a> - View stores (empty)</li>
+                <li><a href="/api/products">/api/products</a> - View products</li>
+                <li><a href="/health">/health</a> - Server health check</li>
+              </ul>
+            </div>
+          </body>
+          </html>
+        `);
+      });
+    }
+  } else {
+    // Production mode
+    app.use(express.static(path.join(process.cwd(), 'dist')));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
     });
-  });
+  }
 
   // Health check endpoint
   app.get('/health', (req, res) => {
