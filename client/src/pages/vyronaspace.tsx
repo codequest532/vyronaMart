@@ -732,16 +732,7 @@ export default function VyronaSpace() {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between mb-4">
-                            <span className="text-sm text-gray-600">
-                              {product.inStock > 0 ? `${product.inStock} in stock` : 'Out of stock'}
-                            </span>
-                            {product.inStock <= 5 && product.inStock > 0 && (
-                              <Badge className="bg-orange-100 text-orange-700 text-xs">
-                                Low Stock
-                              </Badge>
-                            )}
-                          </div>
+
 
                           <div className="flex items-center space-x-2">
                             {cart.find(item => item.id === product.id) ? (
