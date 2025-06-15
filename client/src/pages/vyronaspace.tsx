@@ -748,7 +748,7 @@ export default function VyronaSpace() {
               {ordersViewMode === "reorder" && (
                 <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
                   <h3 className="text-lg font-bold text-gray-900 mb-3">Easy Reorder</h3>
-                  {reorderLoading ? (
+                  {false ? (
                     <div className="animate-pulse space-y-3">
                       <div className="h-16 bg-gray-200 rounded-xl"></div>
                       <div className="h-16 bg-gray-200 rounded-xl"></div>
@@ -786,7 +786,7 @@ export default function VyronaSpace() {
               {ordersViewMode === "subscriptions" && (
                 <div className="mb-6 p-4 bg-white/90 backdrop-blur-sm rounded-xl border border-emerald-200/50">
                   <h3 className="text-lg font-bold text-gray-900 mb-3">Active Subscriptions</h3>
-                  {subscriptionsLoading ? (
+                  {false ? (
                     <div className="animate-pulse space-y-3">
                       <div className="h-20 bg-gray-200 rounded-xl"></div>
                       <div className="h-20 bg-gray-200 rounded-xl"></div>
@@ -853,11 +853,11 @@ export default function VyronaSpace() {
               {ordersViewMode === "orders" && (
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Order History</h3>
-              {ordersLoading ? (
+              {false ? (
                 <div className="flex items-center justify-center p-8">
                   <div className="animate-spin w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full"></div>
                 </div>
-              ) : (userOrders as any[]).length === 0 ? (
+              ) : (orders as any[]).length === 0 ? (
                 <div className="text-center p-8 bg-white/90 rounded-xl">
                   <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h4 className="text-lg font-semibold text-gray-900 mb-2">No Orders Yet</h4>
@@ -865,7 +865,7 @@ export default function VyronaSpace() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {(userOrders as any[]).map((order: any) => (
+                  {(orders as any[]).map((order: any) => (
                   <Card key={order.id} className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md hover:shadow-lg transition-all">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
@@ -953,7 +953,7 @@ export default function VyronaSpace() {
                         <p className="text-emerald-100">Available balance</p>
                       </div>
                       <div className="text-right">
-                        {balanceLoading ? (
+                        {false ? (
                           <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
                         ) : (
                           <>
@@ -1050,7 +1050,7 @@ export default function VyronaSpace() {
                   <CardContent className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
                     <div className="space-y-3">
-                      {profileLoading ? (
+                      {false ? (
                         <div className="animate-pulse space-y-3">
                           <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                           <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -1094,7 +1094,7 @@ export default function VyronaSpace() {
                   <CardContent className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-4">Delivery Address</h3>
                     <div className="space-y-3">
-                      {addressesLoading ? (
+                      {false ? (
                         <div className="animate-pulse space-y-3">
                           <div className="h-4 bg-gray-200 rounded w-full"></div>
                           <div className="h-4 bg-gray-200 rounded w-3/4"></div>
