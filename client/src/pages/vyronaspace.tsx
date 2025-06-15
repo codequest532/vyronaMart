@@ -58,127 +58,9 @@ interface Order {
   currentLocation: string;
 }
 
-const mockStores: Store[] = [
-  {
-    id: 1,
-    name: "FreshMart Express",
-    category: "Grocery",
-    rating: 4.8,
-    reviewCount: 1250,
-    deliveryTime: "8 min",
-    distance: "0.5 km",
-    isOpen: true,
-    address: "123 Green Valley Road",
-    description: "Fresh fruits, vegetables, and daily essentials",
-    featuredProducts: ["Fresh Bananas", "Organic Apples", "Green Vegetables"],
-    totalProducts: 450,
-    deliveryFee: 25
-  },
-  {
-    id: 2,
-    name: "MedPlus Essentials",
-    category: "Pharmacy",
-    rating: 4.7,
-    reviewCount: 890,
-    deliveryTime: "6 min",
-    distance: "0.3 km",
-    isOpen: true,
-    address: "456 Health Street",
-    description: "Medicines, healthcare products, and wellness items",
-    featuredProducts: ["Pain Relief", "Vitamins", "First Aid"],
-    totalProducts: 320,
-    deliveryFee: 15
-  },
-  {
-    id: 3,
-    name: "TechHub Electronics",
-    category: "Electronics",
-    rating: 4.6,
-    reviewCount: 670,
-    deliveryTime: "12 min",
-    distance: "0.8 km",
-    isOpen: true,
-    address: "789 Tech Avenue",
-    description: "Latest gadgets, accessories, and electronics",
-    featuredProducts: ["Smartphones", "Headphones", "Chargers"],
-    totalProducts: 280,
-    deliveryFee: 35
-  },
-  {
-    id: 4,
-    name: "Fashion District",
-    category: "Fashion",
-    rating: 4.5,
-    reviewCount: 540,
-    deliveryTime: "15 min",
-    distance: "1.2 km",
-    isOpen: true,
-    address: "321 Style Boulevard",
-    description: "Trendy clothing, accessories, and footwear",
-    featuredProducts: ["T-Shirts", "Jeans", "Sneakers"],
-    totalProducts: 890,
-    deliveryFee: 45
-  },
-  {
-    id: 5,
-    name: "BookWorld Cafe",
-    category: "Books",
-    rating: 4.9,
-    reviewCount: 320,
-    deliveryTime: "10 min",
-    distance: "0.7 km",
-    isOpen: false,
-    address: "654 Literature Lane",
-    description: "Books, stationery, and coffee",
-    featuredProducts: ["Bestsellers", "Notebooks", "Coffee"],
-    totalProducts: 150,
-    deliveryFee: 30
-  },
-  {
-    id: 6,
-    name: "HomeMart Essentials",
-    category: "Home & Garden",
-    rating: 4.4,
-    reviewCount: 420,
-    deliveryTime: "14 min",
-    distance: "1.0 km",
-    isOpen: true,
-    address: "987 Garden Grove",
-    description: "Home improvement, garden supplies, and decor",
-    featuredProducts: ["Plants", "Tools", "Decor"],
-    totalProducts: 380,
-    deliveryFee: 40
-  }
-];
+// Real stores data comes from backend API
 
-const mockOrders: Order[] = [
-  {
-    id: 1001,
-    status: "In Transit",
-    estimatedDelivery: "Today, 4:30 PM",
-    trackingNumber: "VYR1001",
-    items: [
-      { name: "Fresh Bananas", quantity: 2, price: 45 },
-      { name: "Organic Milk", quantity: 1, price: 85 }
-    ],
-    total: 175,
-    deliveryPartner: "SpeedX",
-    currentLocation: "Near your location"
-  },
-  {
-    id: 1002,
-    status: "Delivered",
-    estimatedDelivery: "Yesterday, 3:15 PM",
-    trackingNumber: "VYR1002",
-    items: [
-      { name: "Whole Wheat Bread", quantity: 1, price: 35 },
-      { name: "Premium Rice", quantity: 1, price: 120 }
-    ],
-    total: 155,
-    deliveryPartner: "FastTrack",
-    currentLocation: "Delivered"
-  }
-];
+// Real orders data comes from backend API
 
 export default function VyronaSpace() {
   const [, setLocation] = useLocation();
@@ -200,6 +82,83 @@ export default function VyronaSpace() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch real stores data from backend
+  const { data: storesData = [], isLoading: storesLoading } = useQuery({
+    queryKey: ["/api/stores"]
+  });
+
+  // Fetch real products data from backend
+  const { data: productsData = [] } = useQuery({
+    queryKey: ["/api/products"],
+    select: (data: any[]) => data.filter(product => product.module === 'space')
+  });
+
+  // Transform store data with product counts
+  const stores = storesData.map((store: any) => ({
+    id: store.id,
+    name: store.name,
+    category: store.type === 'kirana' ? 'Grocery' : 
+              store.type === 'pharmacy' ? 'Pharmacy' :
+              store.type === 'fashion' ? 'Fashion' :
+              store.type === 'electronics' ? 'Electronics' :
+              store.type === 'books' ? 'Books' : 'Home & Garden',
+    rating: Math.round(store.rating / 100),
+    reviewCount: store.reviewCount,
+    deliveryTime: store.type === 'kirana' ? '8 min' :
+                 store.type === 'pharmacy' ? '6 min' :
+                 store.type === 'fashion' ? '15 min' : '12 min',
+    distance: '0.5 km',
+    isOpen: store.isOpen,
+    address: store.address,
+    description: store.type === 'kirana' ? 'Fresh fruits, vegetables, and daily essentials' :
+                store.type === 'pharmacy' ? 'Medicines, healthcare products, and wellness items' :
+                store.type === 'fashion' ? 'Trendy clothing, accessories, and footwear' :
+                'Quality products and services',
+    featuredProducts: productsData.filter(p => p.storeId === store.id).slice(0, 3).map(p => p.name),
+    totalProducts: productsData.filter(p => p.storeId === store.id).length,
+    deliveryFee: store.type === 'pharmacy' ? 15 : store.type === 'kirana' ? 25 : 35
+  }));
+
+  // Use products data directly
+  const products = productsData;
+
+  // Fetch real orders data from backend (VyronaSpace orders only)
+  const { data: ordersData = [] } = useQuery({
+    queryKey: ["/api/orders/user/1"],
+    select: (data: any[]) => data.filter(order => order.module === 'space').map(order => ({
+      id: order.id,
+      status: order.status === 'pending' ? 'In Transit' : order.status === 'delivered' ? 'Delivered' : 'Processing',
+      estimatedDelivery: new Date(order.createdAt).toLocaleDateString(),
+      trackingNumber: `VYR${order.id}`,
+      items: order.items || [],
+      total: Math.round(order.totalAmount),
+      deliveryPartner: 'SpeedX',
+      currentLocation: order.status === 'delivered' ? 'Delivered' : 'Near your location'
+    }))
+  });
+
+  const orders = ordersData;
+
+  // Fetch user profile data
+  const { data: userProfile } = useQuery({
+    queryKey: ["/api/profile/1"]
+  });
+
+  // Fetch user addresses
+  const { data: userAddresses = [] } = useQuery({
+    queryKey: ["/api/addresses/1"]
+  });
+
+  // Fetch subscriptions
+  const { data: subscriptions = [] } = useQuery({
+    queryKey: ["/api/subscriptions/1"]
+  });
+
+  // Fetch reorder history
+  const { data: reorderHistory = [] } = useQuery({
+    queryKey: ["/api/reorder-history/1"]
+  });
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -246,46 +205,9 @@ export default function VyronaSpace() {
     },
   });
 
-  // Real API calls replacing mock data
-  const { data: stores = [], isLoading: storesLoading } = useQuery({
-    queryKey: ["/api/stores"],
-  });
-
-  const { data: products = [], isLoading: productsLoading } = useQuery({
-    queryKey: ["/api/products"],
-  });
-
-  const { data: userOrders = [], isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/orders/user/1"],
-  });
-
-  const { data: walletBalance = { balance: 0 }, isLoading: balanceLoading } = useQuery({
-    queryKey: ["/api/wallet/balance/1"],
-  });
-
-  const { data: achievements = [], isLoading: achievementsLoading } = useQuery({
-    queryKey: ["/api/achievements/1"],
-  });
-
-  // Fetch user subscriptions
-  const { data: subscriptions = [], isLoading: subscriptionsLoading } = useQuery({
-    queryKey: ["/api/subscriptions/1"]
-  });
-
-  // Fetch user reorder history
-  const { data: reorderHistory = [], isLoading: reorderLoading } = useQuery({
-    queryKey: ["/api/reorder-history/1"]
-  });
-
-  // Fetch user addresses
-  const { data: userAddresses = [], isLoading: addressesLoading } = useQuery({
-    queryKey: ["/api/addresses/1"]
-  });
-
-  // Fetch user profile
-  const { data: userProfile, isLoading: profileLoading } = useQuery({
-    queryKey: ["/api/profile/1"]
-  });
+  // Additional loading states
+  const walletBalance = { balance: 0 };
+  const achievements = [];
 
   const categories = ["All", "Grocery", "Pharmacy", "Electronics", "Fashion", "Books", "Home & Garden"];
 
