@@ -9860,5 +9860,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Serve the React app directly from client folder
+  app.use(express.static(path.join(process.cwd(), 'client')));
+  
+  // For all non-API routes, serve the index.html
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'client', 'index.html'));
+  });
+
   return httpServer;
 }
