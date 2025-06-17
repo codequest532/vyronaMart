@@ -72,7 +72,7 @@ import {
   Truck
 } from "lucide-react";
 
-type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "mall" | "instashop" | "profile";
+type TabType = "home" | "vyronahub" | "social" | "space" | "read" | "read-book" | "instashop" | "profile";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>("home");
@@ -1215,87 +1215,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* VyronaMall Tab */}
-        {activeTab === "mall" && (
-          <div className="space-y-6">
-            <Card className="vyrona-gradient-mall text-white">
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-bold mb-2">VyronaMallConnect</h2>
-                <p className="opacity-90">Mall brands delivered to your doorstep with exclusive pricing</p>
-              </CardContent>
-            </Card>
 
-            {/* Mall Selection */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Select Your Mall</h3>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  {stores.filter(s => s.type === "mall").map((mall, index) => (
-                    <Card key={mall.id} className={index === 0 ? "border-2 border-amber-500 bg-amber-50" : "border border-gray-200 hover:border-amber-300 transition-colors cursor-pointer"}>
-                      <CardContent className="p-4">
-                        <div className="w-full h-32 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg mb-3 flex items-center justify-center">
-                          <Building className="text-amber-600 h-12 w-12" />
-                        </div>
-                        <h4 className="font-semibold">{mall.name}</h4>
-                        <p className="text-sm text-gray-500">Chennai • 2.5km away</p>
-                        <Badge className="mt-2 bg-green-100 text-green-700">150+ brands</Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Brand Categories */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Brand Categories</h3>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { name: "Fashion", icon: Shirt, color: "pink", count: "50+ brands" },
-                    { name: "Electronics", icon: Laptop, color: "blue", count: "25+ brands" },
-                    { name: "Food Court", icon: Utensils, color: "green", count: "30+ outlets" },
-                    { name: "Home & Living", icon: HomeIcon, color: "purple", count: "35+ brands" },
-                  ].map((category) => (
-                    <Card key={category.name} className={`bg-${category.color}-50 border-${category.color}-200 cursor-pointer hover:bg-${category.color}-100 transition-colors`}>
-                      <CardContent className="p-4">
-                        <category.icon className={`text-${category.color}-500 h-8 w-8 mb-2`} />
-                        <h4 className="font-semibold text-sm">{category.name}</h4>
-                        <p className="text-xs text-gray-500">{category.count}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Featured Products */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Featured Products</h3>
-                  <Button variant="ghost" className="text-amber-600">View All Products</Button>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {products.filter(p => p.module === "mall").map((product) => (
-                    <div key={product.id} className="group cursor-pointer" onClick={() => handleProductClick(product.name)}>
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        className="w-full h-40 object-cover rounded-lg mb-3 group-hover:scale-105 transition-transform"
-                      />
-                      <h4 className="font-semibold text-sm">{product.name}</h4>
-                      <p className="text-blue-600 font-bold">₹{(product.price / 100).toLocaleString()}</p>
-                      <Badge variant="secondary" className="mt-1 text-green-600 bg-green-50">
-                        +{Math.floor(product.price / 10000)} coins
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         {/* MyVyrona Tab */}
         {activeTab === "profile" && (
