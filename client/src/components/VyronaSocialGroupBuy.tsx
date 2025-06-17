@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -91,6 +91,9 @@ export default function VyronaSocialGroupBuy() {
   const [selectedGroup, setSelectedGroup] = useState<VyronaSocialGroup | null>(null);
   const [selectedSession, setSelectedSession] = useState<GroupShoppingSession | null>(null);
   const [chatMessage, setChatMessage] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [selectedGroupForAction, setSelectedGroupForAction] = useState<VyronaSocialGroup | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -511,9 +514,8 @@ export default function VyronaSocialGroupBuy() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => {
-                                  if (confirm(`Are you sure you want to delete "${group.name}"? This action cannot be undone.`)) {
-                                    deleteGroupMutation.mutate(group.id);
-                                  }
+                                  setSelectedGroupForAction(group);
+                                  setShowDeleteConfirm(true);
                                 }}
                                 className="flex items-center gap-2 text-red-600"
                               >
@@ -527,9 +529,8 @@ export default function VyronaSocialGroupBuy() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              if (confirm(`Are you sure you want to leave "${group.name}"?`)) {
-                                exitGroupMutation.mutate(group.id);
-                              }
+                              setSelectedGroupForAction(group);
+                              setShowExitConfirm(true);
                             }}
                             className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
                             disabled={exitGroupMutation.isPending}
@@ -891,6 +892,8 @@ function ManageMembersContent({ groupId, onMemberRemoved }: {
   groupId?: number; 
   onMemberRemoved: () => void;
 }) {
+  const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState(false);
+  const [selectedMemberForRemoval, setSelectedMemberForRemoval] = useState<any>(null);
   const { toast } = useToast();
   
   const { data: members, isLoading } = useQuery({
@@ -962,9 +965,8 @@ function ManageMembersContent({ groupId, onMemberRemoved }: {
                 size="sm"
                 className="text-red-600 border-red-200 hover:bg-red-50"
                 onClick={() => {
-                  if (confirm(`Are you sure you want to remove ${member.username} from the group?`)) {
-                    removeMemberMutation.mutate(member.id);
-                  }
+                  setSelectedMemberForRemoval(member);
+                  setShowRemoveMemberConfirm(true);
                 }}
                 disabled={removeMemberMutation.isPending}
               >
@@ -987,6 +989,78 @@ function ManageMembersContent({ groupId, onMemberRemoved }: {
           </div>
         </div>
       </div>
+
+      {/* Delete Group Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Group</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{selectedGroupForAction?.name}"? This action cannot be undone and will remove all group data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedGroupForAction) {
+                  deleteGroupMutation.mutate(selectedGroupForAction.id);
+                }
+                setShowDeleteConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+              disabled={deleteGroupMutation.isPending}
+            >
+              {deleteGroupMutation.isPending ? "Deleting..." : "Delete Group"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exit Group Confirmation Dialog */}
+      <Dialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Exit Group</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to leave "{selectedGroupForAction?.name}"? You'll need to be re-invited to join again.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowExitConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedGroupForAction) {
+                  exitGroupMutation.mutate(selectedGroupForAction.id);
+                }
+                setShowExitConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+              disabled={exitGroupMutation.isPending}
+            >
+              {exitGroupMutation.isPending ? "Leaving..." : "Exit Group"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
