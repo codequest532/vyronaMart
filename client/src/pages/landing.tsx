@@ -116,6 +116,7 @@ export default function Landing() {
 
   const signupMutation = useMutation({
     mutationFn: async (data: { 
+      username: string;
       email: string; 
       password: string; 
       confirmPassword: string;
@@ -262,12 +263,13 @@ export default function Landing() {
   const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const username = formData.get("username") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const confirmPassword = formData.get("confirmPassword") as string;
     const mobile = formData.get("mobile") as string;
 
-    if (!email || !password || !confirmPassword || !mobile) {
+    if (!username || !email || !password || !confirmPassword || !mobile) {
       toast({
         title: "Error",
         description: "Please fill in all fields.",
@@ -285,7 +287,7 @@ export default function Landing() {
       return;
     }
 
-    signupMutation.mutate({ email, password, confirmPassword, mobile });
+    signupMutation.mutate({ username, email, password, confirmPassword, mobile });
   };
 
   const handleForgotPasswordStep = (e: React.FormEvent<HTMLFormElement>) => {
@@ -1204,6 +1206,17 @@ export default function Landing() {
             
             <TabsContent value="signup" className="mt-6">
               <form onSubmit={handleSignup} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-username" className="text-gray-700 font-medium">Username</Label>
+                  <Input
+                    id="signup-username"
+                    name="username"
+                    type="text"
+                    placeholder="Choose a unique username"
+                    className="h-12 bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-lg transition-all"
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email" className="text-gray-700 font-medium">Email Address</Label>
                   <Input
