@@ -140,10 +140,10 @@ export default function GroupMallCartCheckout() {
   const getDeliveryFee = () => {
     let baseFee;
     switch (deliveryOption) {
-      case "express": baseFee = 99; break; // VyronaExpress 90-min delivery
-      case "standard": baseFee = 49; break; // Standard 24-hour delivery
+      case "express": baseFee = 80; break; // VyronaExpress 30-min delivery
+      case "standard": baseFee = 45; break; // Standard 60-min delivery
       case "pickup": baseFee = 0; break; // Store pickup
-      default: baseFee = 99;
+      default: baseFee = 80;
     }
     // Split delivery fee among group members
     return selectedRoom && selectedRoom.memberCount > 1 ? Math.round(baseFee / selectedRoom.memberCount) : baseFee;
@@ -699,10 +699,10 @@ export default function GroupMallCartCheckout() {
                       <RadioGroupItem value="express" id="express" />
                       <div className="flex-1">
                         <Label htmlFor="express" className="font-medium text-green-800 cursor-pointer">
-                          VyronaExpress - 90 Min Delivery
+                          VyronaExpress - 30 Min Delivery
                         </Label>
                         <p className="text-sm text-green-600 mt-1">
-                          Lightning-fast hyperlocal delivery • ₹99 total ({selectedRoom ? `₹${Math.round(99 / selectedRoom.memberCount)}` : '₹99'} per member)
+                          Lightning-fast hyperlocal delivery • ₹80 total ({selectedRoom ? `₹${Math.round(80 / selectedRoom.memberCount)}` : '₹80'} per member)
                         </p>
                         <div className="flex items-center space-x-2 mt-2">
                           <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -715,10 +715,10 @@ export default function GroupMallCartCheckout() {
                       <RadioGroupItem value="standard" id="standard" />
                       <div className="flex-1">
                         <Label htmlFor="standard" className="font-medium text-gray-800 cursor-pointer">
-                          Standard Delivery - 24 Hours
+                          Standard Delivery - 60 Min
                         </Label>
                         <p className="text-sm text-gray-600 mt-1">
-                          Regular delivery within one day • ₹49 total ({selectedRoom ? `₹${Math.round(49 / selectedRoom.memberCount)}` : '₹49'} per member)
+                          Regular delivery within one hour • ₹45 total ({selectedRoom ? `₹${Math.round(45 / selectedRoom.memberCount)}` : '₹45'} per member)
                         </p>
                         <div className="flex items-center space-x-2 mt-2">
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>

@@ -59,10 +59,10 @@ export default function MallCartCheckout() {
   // Calculate delivery fee based on selected option
   const getDeliveryFee = () => {
     switch (deliveryOption) {
-      case "express": return 99; // VyronaExpress 90-min delivery
-      case "standard": return 49; // Standard 24-hour delivery
+      case "express": return 80; // VyronaExpress 30-min delivery
+      case "standard": return 45; // Standard 60-min delivery
       case "pickup": return 0; // Store pickup
-      default: return 99;
+      default: return 80;
     }
   };
 
@@ -309,11 +309,11 @@ export default function MallCartCheckout() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-medium">VyronaExpress Delivery</div>
-                          <div className="text-sm text-gray-600">90-minute hyperlocal delivery</div>
+                          <div className="text-sm text-gray-600">30-minute hyperlocal delivery</div>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Clock className="h-4 w-4 text-purple-600" />
-                          <span className="text-sm font-medium">₹99</span>
+                          <span className="text-sm font-medium">₹80</span>
                         </div>
                       </div>
                     </Label>
@@ -327,11 +327,11 @@ export default function MallCartCheckout() {
                       <div className="flex items-center justify-between">
                         <div>
                           <div className="font-medium">Standard Delivery</div>
-                          <div className="text-sm text-gray-600">Next day delivery (24 hours)</div>
+                          <div className="text-sm text-gray-600">60-minute delivery</div>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Clock className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium">₹49</span>
+                          <span className="text-sm font-medium">₹45</span>
                         </div>
                       </div>
                     </Label>
