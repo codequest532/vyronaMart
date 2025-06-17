@@ -929,7 +929,7 @@ export default function VyronaMallConnect() {
                   <h3 className="text-lg font-bold">VyronaCoins & Coupons</h3>
                   <div className="flex items-center space-x-1">
                     <Coins className="h-5 w-5 text-yellow-500" />
-                    <span className="font-bold text-lg">{user?.vyronaCoins || 0}</span>
+                    <span className="font-bold text-lg">{(user as any)?.vyronaCoins || 0}</span>
                   </div>
                 </div>
                 
@@ -1289,7 +1289,7 @@ export default function VyronaMallConnect() {
                         </div>
                       </CardContent>
                     </Card>
-                    );
+                    )
                   })}
                 </div>
 
