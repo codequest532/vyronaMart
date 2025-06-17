@@ -67,6 +67,12 @@ export const stores = pgTable("stores", {
   rating: integer("rating").default(0), // out of 500 (5.00 stars)
   reviewCount: integer("review_count").default(0),
   sellerId: integer("seller_id"), // Track which seller owns this store
+  logoUrl: text("logo_url"),
+  bannerUrl: text("banner_url"),
+  primaryColor: text("primary_color"),
+  secondaryColor: text("secondary_color"),
+  brandFont: text("brand_font"),
+  theme: text("theme"),
 });
 
 export const shoppingRooms = pgTable("shopping_rooms", {
