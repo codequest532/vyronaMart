@@ -31,6 +31,7 @@ export default function VyronaMallConnect() {
   const [mallCart, setMallCart] = useState<any[]>([]);
   const [nearbyLocation, setNearbyLocation] = useState("Chennai");
   const [userLocation, setUserLocation] = useState<any>(null);
+  const [joinGroupCode, setJoinGroupCode] = useState("");
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -188,6 +189,36 @@ export default function VyronaMallConnect() {
       toast({
         title: "Error",
         description: error.message || "Failed to create shopping group",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Join group mutation
+  const joinGroupMutation = useMutation({
+    mutationFn: async (groupCode: string) => {
+      const response = await apiRequest("POST", "/api/shopping-rooms/join", { code: groupCode });
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Joined Group Successfully",
+        description: `Welcome to ${data.group?.name || 'the group'}! Start shopping together.`,
+      });
+      setJoinGroupCode("");
+      // Stay in VyronaMallConnect and show group shopping interface
+      setActiveTab("group-shopping");
+      // Store the joined room data
+      if (data.group) {
+        localStorage.setItem('currentGroupRoom', JSON.stringify(data.group));
+      }
+      // Refresh the group shopping data
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Join Group",
+        description: error.message || "Invalid group code or group not found",
         variant: "destructive",
       });
     },
@@ -1055,9 +1086,20 @@ export default function VyronaMallConnect() {
                   <Input 
                     placeholder="Enter group code (e.g., ABC123)"
                     className="flex-1"
+                    value={joinGroupCode}
+                    onChange={(e) => setJoinGroupCode(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && joinGroupCode.trim()) {
+                        joinGroupMutation.mutate(joinGroupCode.trim());
+                      }
+                    }}
                   />
-                  <Button variant="outline">
-                    Join Group
+                  <Button 
+                    variant="outline"
+                    disabled={!joinGroupCode.trim() || joinGroupMutation.isPending}
+                    onClick={() => joinGroupMutation.mutate(joinGroupCode.trim())}
+                  >
+                    {joinGroupMutation.isPending ? "Joining..." : "Join Group"}
                   </Button>
                 </div>
               </div>
