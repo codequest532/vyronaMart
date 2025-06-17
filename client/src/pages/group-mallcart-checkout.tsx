@@ -38,12 +38,21 @@ interface AddressData {
   pincode: string;
 }
 
+interface MemberContribution {
+  memberId: string;
+  memberName: string;
+  contributionAmount: number;
+  paymentMethod: string;
+  contributionItems: GroupCartItem[];
+}
+
 interface GroupCheckoutData {
   items: GroupCartItem[];
   shippingAddress: AddressData;
   memberAddresses?: {[key: string]: AddressData};
   useCommonAddress: boolean;
-  paymentMethod: string;
+  paymentMethod: string; // Fallback payment method
+  memberContributions: MemberContribution[];
   selectedRoom?: any;
   enableSubscription: boolean;
   subscriptionFrequency?: string;
@@ -66,8 +75,10 @@ export default function GroupMallCartCheckout() {
   const [subscriptionTime, setSubscriptionTime] = useState("10:00");
   const [subscriptionStartDate, setSubscriptionStartDate] = useState("");
   const [useCommonAddress, setUseCommonAddress] = useState(true);
+  const [memberContributions, setMemberContributions] = useState<MemberContribution[]>([]);
+  const [contributionMode, setContributionMode] = useState<"equal" | "custom">("equal");
   
-  const [shippingAddress, setShippingAddress] = useState({
+  const [shippingAddress, setShippingAddress] = useState<AddressData>({
     fullName: "",
     phone: "",
     email: "",
@@ -78,7 +89,7 @@ export default function GroupMallCartCheckout() {
     pincode: ""
   });
   
-  const [memberAddresses, setMemberAddresses] = useState<{[key: string]: typeof shippingAddress}>({});
+  const [memberAddresses, setMemberAddresses] = useState<{[key: string]: AddressData}>({});
 
   // Load group cart from localStorage
   useEffect(() => {
@@ -229,10 +240,11 @@ export default function GroupMallCartCheckout() {
 
     const orderData: GroupCheckoutData = {
       items: groupCart,
-      shippingAddress: useCommonAddress ? shippingAddress : shippingAddress, // Use common or first member address for main order
+      shippingAddress: useCommonAddress ? shippingAddress : shippingAddress,
       memberAddresses: useCommonAddress ? undefined : memberAddresses,
       useCommonAddress,
       paymentMethod,
+      memberContributions,
       selectedRoom,
       enableSubscription,
       subscriptionFrequency: enableSubscription ? subscriptionFrequency : undefined,
@@ -559,15 +571,160 @@ export default function GroupMallCartCheckout() {
               </CardContent>
             </Card>
 
+            {/* Member Contributions */}
+            {selectedRoom && selectedRoom.memberCount > 1 && (
+              <Card className="border-purple-200 shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <Users className="h-5 w-5 text-purple-600" />
+                    <span>Member Contributions</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {/* Contribution Mode Toggle */}
+                    <div className="flex space-x-4">
+                      <Button
+                        variant={contributionMode === "equal" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setContributionMode("equal")}
+                      >
+                        Equal Split
+                      </Button>
+                      <Button
+                        variant={contributionMode === "custom" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setContributionMode("custom")}
+                      >
+                        Custom Amounts
+                      </Button>
+                    </div>
+
+                    {/* Member Contribution List */}
+                    <div className="space-y-3">
+                      {memberContributions.map((contribution, index) => (
+                        <div key={contribution.memberId} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-medium text-purple-700">{index + 1}</span>
+                              </div>
+                              <div>
+                                <p className="font-medium">{contribution.memberName}</p>
+                                <p className="text-sm text-gray-600">
+                                  {contributionMode === "equal" ? "Equal share" : "Custom amount"}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-purple-600">
+                                ₹{contribution.contributionAmount}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Payment Method for This Member */}
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button
+                              variant={contribution.paymentMethod === "upi" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                const updated = [...memberContributions];
+                                updated[index].paymentMethod = "upi";
+                                setMemberContributions(updated);
+                              }}
+                            >
+                              <Smartphone className="h-4 w-4 mr-1" />
+                              UPI
+                            </Button>
+                            <Button
+                              variant={contribution.paymentMethod === "wallet" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                const updated = [...memberContributions];
+                                updated[index].paymentMethod = "wallet";
+                                setMemberContributions(updated);
+                              }}
+                            >
+                              <Wallet className="h-4 w-4 mr-1" />
+                              Wallet
+                            </Button>
+                            <Button
+                              variant={contribution.paymentMethod === "card" ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => {
+                                const updated = [...memberContributions];
+                                updated[index].paymentMethod = "card";
+                                setMemberContributions(updated);
+                              }}
+                            >
+                              <CreditCard className="h-4 w-4 mr-1" />
+                              Card
+                            </Button>
+                          </div>
+
+                          {/* Custom Amount Input */}
+                          {contributionMode === "custom" && (
+                            <div className="mt-3">
+                              <Label htmlFor={`amount-${contribution.memberId}`}>Contribution Amount</Label>
+                              <Input
+                                id={`amount-${contribution.memberId}`}
+                                type="number"
+                                value={contribution.contributionAmount}
+                                onChange={(e) => {
+                                  const updated = [...memberContributions];
+                                  updated[index].contributionAmount = Number(e.target.value);
+                                  setMemberContributions(updated);
+                                }}
+                                className="mt-1"
+                                placeholder="Enter amount"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Contribution Summary */}
+                    <div className="border-t pt-4">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Total Contributions:</span>
+                        <span className="text-lg font-bold text-purple-600">
+                          ₹{memberContributions.reduce((sum, c) => sum + c.contributionAmount, 0)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center mt-1">
+                        <span className="text-sm text-gray-600">Order Total:</span>
+                        <span className="text-sm text-gray-600">₹{total}</span>
+                      </div>
+                      {memberContributions.reduce((sum, c) => sum + c.contributionAmount, 0) !== total && (
+                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                          <p className="text-sm text-yellow-800">
+                            ⚠️ Contribution total doesn't match order total
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Payment Method */}
             <Card className="border-purple-200 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
                 <CardTitle className="flex items-center space-x-2">
                   <CreditCard className="h-5 w-5 text-purple-600" />
-                  <span>Payment Method</span>
+                  <span>Fallback Payment Method</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
+                <p className="text-sm text-gray-600 mb-4">
+                  {selectedRoom && selectedRoom.memberCount > 1 
+                    ? "This payment method will be used if any member fails to contribute their share."
+                    : "Select your preferred payment method for this order."
+                  }
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
