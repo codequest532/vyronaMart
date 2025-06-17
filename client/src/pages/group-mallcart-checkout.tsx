@@ -129,35 +129,42 @@ export default function GroupMallCartCheckout() {
     }
   }, [user]);
 
-  // Initialize member data when room is selected
+  // Calculate totals
+  const subtotal = groupCart.reduce((sum, item) => sum + ((item.price / 100) * item.quantity), 0);
+  const deliveryFee = selectedRoom && selectedRoom.memberCount > 1 ? Math.round(99 / selectedRoom.memberCount) : 99;
+  const vyronaCoinsEarned = Math.round(subtotal * 0.05);
+  const total = subtotal + deliveryFee;
+
+  // Initialize member addresses when room is selected and common address is disabled
   useEffect(() => {
-    if (selectedRoom && selectedRoom.memberCount > 0) {
-      // Initialize member addresses for individual delivery mode
-      if (!useCommonAddress) {
-        const newMemberAddresses: {[key: string]: AddressData} = {};
-        
-        for (let i = 1; i <= selectedRoom.memberCount; i++) {
-          const memberKey = `member_${i}`;
-          if (!memberAddresses[memberKey]) {
-            newMemberAddresses[memberKey] = {
-              fullName: i === 1 ? (user?.username || "") : "",
-              phone: i === 1 ? (user?.mobile || "") : "",
-              email: i === 1 ? (user?.email || "") : "",
-              addressLine1: "",
-              addressLine2: "",
-              city: "",
-              state: "",
-              pincode: ""
-            };
-          } else {
-            newMemberAddresses[memberKey] = memberAddresses[memberKey];
-          }
+    if (selectedRoom && !useCommonAddress && selectedRoom.memberCount > 0) {
+      const newMemberAddresses: {[key: string]: AddressData} = {};
+      
+      for (let i = 1; i <= selectedRoom.memberCount; i++) {
+        const memberKey = `member_${i}`;
+        if (!memberAddresses[memberKey]) {
+          newMemberAddresses[memberKey] = {
+            fullName: i === 1 ? (user?.username || "") : "",
+            phone: i === 1 ? (user?.mobile || "") : "",
+            email: i === 1 ? (user?.email || "") : "",
+            addressLine1: "",
+            addressLine2: "",
+            city: "",
+            state: "",
+            pincode: ""
+          };
+        } else {
+          newMemberAddresses[memberKey] = memberAddresses[memberKey];
         }
-        
-        setMemberAddresses(newMemberAddresses);
       }
       
-      // Initialize member contributions with equal split
+      setMemberAddresses(newMemberAddresses);
+    }
+  }, [selectedRoom, useCommonAddress, user]);
+
+  // Initialize member contributions when room or total changes
+  useEffect(() => {
+    if (selectedRoom && selectedRoom.memberCount > 0 && total > 0) {
       const newContributions: MemberContribution[] = [];
       const contributionPerMember = Math.round(total / selectedRoom.memberCount);
       
@@ -168,20 +175,14 @@ export default function GroupMallCartCheckout() {
           memberId: memberKey,
           memberName: i === 1 ? (user?.username || `Member ${i}`) : `Member ${i}`,
           contributionAmount: contributionPerMember,
-          paymentMethod: "upi", // Default to UPI for all members
+          paymentMethod: "upi",
           contributionItems: []
         });
       }
       
       setMemberContributions(newContributions);
     }
-  }, [selectedRoom, useCommonAddress, user, total, memberAddresses]);
-
-  // Calculate totals
-  const subtotal = groupCart.reduce((sum, item) => sum + ((item.price / 100) * item.quantity), 0);
-  const deliveryFee = selectedRoom && selectedRoom.memberCount > 1 ? Math.round(99 / selectedRoom.memberCount) : 99;
-  const vyronaCoinsEarned = Math.round(subtotal * 0.05);
-  const total = subtotal + deliveryFee;
+  }, [selectedRoom, total, user]);
 
   // Place group order mutation
   const placeOrderMutation = useMutation({
