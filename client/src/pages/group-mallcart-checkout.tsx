@@ -27,18 +27,22 @@ interface GroupCartItem {
   storeId?: number;
 }
 
+interface AddressData {
+  fullName: string;
+  phone: string;
+  email: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
 interface GroupCheckoutData {
   items: GroupCartItem[];
-  shippingAddress: {
-    fullName: string;
-    phone: string;
-    email: string;
-    addressLine1: string;
-    addressLine2: string;
-    city: string;
-    state: string;
-    pincode: string;
-  };
+  shippingAddress: AddressData;
+  memberAddresses?: {[key: string]: AddressData};
+  useCommonAddress: boolean;
   paymentMethod: string;
   selectedRoom?: any;
   enableSubscription: boolean;
@@ -185,13 +189,30 @@ export default function GroupMallCartCheckout() {
       return;
     }
 
-    if (!shippingAddress.fullName || !shippingAddress.phone || !shippingAddress.addressLine1) {
-      toast({
-        title: "Incomplete Address",
-        description: "Please fill in all required shipping address fields",
-        variant: "destructive",
-      });
-      return;
+    // Validate addresses based on selected mode
+    if (useCommonAddress) {
+      if (!shippingAddress.fullName || !shippingAddress.phone || !shippingAddress.addressLine1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+        toast({
+          title: "Incomplete Address",
+          description: "Please fill in all required shipping address fields",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      // Validate individual member addresses
+      const incompleteAddresses = Object.entries(memberAddresses).some(([_, address]) => 
+        !address.fullName || !address.phone || !address.addressLine1 || !address.city || !address.state || !address.pincode
+      );
+      
+      if (incompleteAddresses) {
+        toast({
+          title: "Incomplete Member Addresses",
+          description: "Please fill in all required fields for each member address",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     if (paymentMethod === "wallet") {
@@ -208,7 +229,9 @@ export default function GroupMallCartCheckout() {
 
     const orderData: GroupCheckoutData = {
       items: groupCart,
-      shippingAddress,
+      shippingAddress: useCommonAddress ? shippingAddress : shippingAddress, // Use common or first member address for main order
+      memberAddresses: useCommonAddress ? undefined : memberAddresses,
+      useCommonAddress,
       paymentMethod,
       selectedRoom,
       enableSubscription,
