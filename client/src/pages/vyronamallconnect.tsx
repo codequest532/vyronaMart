@@ -26,6 +26,7 @@ export default function VyronaMallConnect() {
   const [deliveryOption, setDeliveryOption] = useState("express");
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showConciergeChat, setShowConciergeChat] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
   const [mallCart, setMallCart] = useState<any[]>([]);
   const [nearbyLocation, setNearbyLocation] = useState("Chennai");
   const [userLocation, setUserLocation] = useState<any>(null);
@@ -167,6 +168,39 @@ export default function VyronaMallConnect() {
       description: "Invite friends to shop together and share delivery costs",
     });
     setShowGroupModal(false);
+  };
+
+  const updateCartItemQuantity = (itemId: string, newQuantity: number) => {
+    if (newQuantity === 0) {
+      setMallCart(mallCart.filter(item => item.id !== itemId));
+    } else {
+      setMallCart(mallCart.map(item => 
+        item.id === itemId ? { ...item, quantity: newQuantity } : item
+      ));
+    }
+  };
+
+  const removeFromCart = (itemId: string) => {
+    setMallCart(mallCart.filter(item => item.id !== itemId));
+    toast({
+      title: "Item Removed",
+      description: "Item removed from your MallCart",
+    });
+  };
+
+  const getTotalPrice = () => {
+    return mallCart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const getTotalItems = () => {
+    return mallCart.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const getDeliveryFee = () => {
+    const storeCount = new Set(mallCart.map(item => item.storeId)).size;
+    if (deliveryOption === "pickup") return 0;
+    if (deliveryOption === "group") return Math.ceil(99 / 2); // Split delivery
+    return storeCount > 1 ? 99 : 99; // Single delivery fee for multiple stores in same mall
   };
 
   if (!selectedMall) {
@@ -682,11 +716,15 @@ export default function VyronaMallConnect() {
               </Button>
 
               <div className="text-right">
-                <div className="flex items-center space-x-1">
-                  <ShoppingCart className="h-4 w-4" />
+                <Button 
+                  variant="outline"
+                  className="bg-white/20 text-white border-white/30"
+                  onClick={() => setShowCartModal(true)}
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
                   <span className="font-bold">{mallCart.length}</span>
-                </div>
-                <p className="text-xs opacity-80">Mall Cart</p>
+                  <span className="ml-1">Mall Cart</span>
+                </Button>
               </div>
             </div>
           </div>
@@ -1088,7 +1126,7 @@ export default function VyronaMallConnect() {
       {mallCart.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
           <div className="container mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 cursor-pointer" onClick={() => setShowCartModal(true)}>
               <div className="flex items-center space-x-2">
                 <ShoppingCart className="h-5 w-5 text-amber-600" />
                 <span className="font-medium">{mallCart.length} items in MallCart</span>
@@ -1097,8 +1135,11 @@ export default function VyronaMallConnect() {
                 From {new Set(mallCart.map(item => item.storeName)).size} stores
               </div>
             </div>
-            <Button className="bg-amber-500 hover:bg-amber-600">
-              Proceed to MallCart Checkout
+            <Button 
+              className="bg-amber-500 hover:bg-amber-600"
+              onClick={() => setShowCartModal(true)}
+            >
+              View MallCart
             </Button>
           </div>
         </div>
@@ -1130,6 +1171,200 @@ export default function VyronaMallConnect() {
                 <Button>Send</Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* MallCart Modal */}
+      {showCartModal && (
+        <Dialog open={showCartModal} onOpenChange={setShowCartModal}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <ShoppingCart className="h-5 w-5 text-amber-600" />
+                <span>MallCart - {selectedMall.name}</span>
+              </DialogTitle>
+            </DialogHeader>
+            
+            {mallCart.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingCart className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Your MallCart is Empty</h3>
+                <p className="text-gray-500 mb-4">Add some products from mall stores to get started.</p>
+                <Button onClick={() => setShowCartModal(false)} className="bg-amber-500 hover:bg-amber-600">
+                  Continue Shopping
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Cart Items */}
+                <div className="space-y-4">
+                  {Object.entries(
+                    mallCart.reduce((grouped: any, item) => {
+                      if (!grouped[item.storeId]) {
+                        grouped[item.storeId] = [];
+                      }
+                      grouped[item.storeId].push(item);
+                      return grouped;
+                    }, {})
+                  ).map(([storeId, items]: [string, any[]]) => (
+                    <Card key={storeId}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-2 mb-4">
+                          <Store className="h-5 w-5 text-blue-600" />
+                          <h3 className="font-semibold text-lg">{items[0].storeName}</h3>
+                          <Badge variant="outline" className="text-xs">
+                            {items.length} item{items.length > 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {items.map((item: any) => (
+                            <div key={item.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <img 
+                                  src={item.image || "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80"} 
+                                  alt={item.name}
+                                  className="w-16 h-16 rounded-lg object-cover"
+                                />
+                                <div className="flex-1">
+                                  <h4 className="font-medium">{item.name}</h4>
+                                  <p className="text-sm text-gray-600">{item.deliveryOption === "express" ? "VyronaExpress" : item.deliveryOption === "pickup" ? "Store Pickup" : "Group Delivery"}</p>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    <span className="font-bold text-amber-600">
+                                      ₹{Math.round(item.price / 100).toLocaleString()}
+                                    </span>
+                                    <div className="flex items-center space-x-1">
+                                      <Coins className="h-3 w-3 text-yellow-500" />
+                                      <span className="text-xs text-green-600">
+                                        +{Math.floor(item.price / 10000)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
+                                    disabled={item.quantity <= 1}
+                                  >
+                                    -
+                                  </Button>
+                                  <span className="w-8 text-center font-medium">{item.quantity}</span>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                                  >
+                                    +
+                                  </Button>
+                                </div>
+                                
+                                <div className="text-right">
+                                  <p className="font-bold">
+                                    ₹{Math.round((item.price * item.quantity) / 100).toLocaleString()}
+                                  </p>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => removeFromCart(item.id)}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Order Summary */}
+                <Card>
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold text-lg mb-4">Order Summary</h3>
+                    
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Subtotal ({getTotalItems()} items)</span>
+                        <span>₹{Math.round(getTotalPrice() / 100).toLocaleString()}</span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span>Delivery Fee</span>
+                        <span className={getDeliveryFee() === 0 ? "text-green-600" : ""}>
+                          {getDeliveryFee() === 0 ? "FREE" : `₹${getDeliveryFee()}`}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span>VyronaCoins Earned</span>
+                        <span className="text-green-600">+{Math.floor(getTotalPrice() / 10000)}</span>
+                      </div>
+                      
+                      <div className="border-t pt-3">
+                        <div className="flex justify-between font-bold text-lg">
+                          <span>Total</span>
+                          <span>₹{Math.round((getTotalPrice() + getDeliveryFee() * 100) / 100).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Delivery Info */}
+                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-medium mb-2">Delivery Information</h4>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p>📍 Delivering to: {selectedMall.location}</p>
+                        <p>🕐 Estimated delivery: {deliveryOption === "express" ? "90 minutes" : deliveryOption === "pickup" ? "Ready for pickup" : "2 hours (shared)"}</p>
+                        <p>🏪 From {new Set(mallCart.map(item => item.storeId)).size} store{new Set(mallCart.map(item => item.storeId)).size > 1 ? 's' : ''} in {selectedMall.name}</p>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-6 space-y-3">
+                      <Button 
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                        onClick={() => {
+                          toast({
+                            title: "Order Placed Successfully!",
+                            description: `Your order from ${selectedMall.name} has been confirmed`,
+                          });
+                          setMallCart([]);
+                          setShowCartModal(false);
+                        }}
+                      >
+                        Place Order - ₹{Math.round((getTotalPrice() + getDeliveryFee() * 100) / 100).toLocaleString()}
+                      </Button>
+                      
+                      <div className="flex space-x-3">
+                        <Button 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => setShowGroupModal(true)}
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Share with Friends
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          className="flex-1"
+                          onClick={() => setShowCartModal(false)}
+                        >
+                          Continue Shopping
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       )}
