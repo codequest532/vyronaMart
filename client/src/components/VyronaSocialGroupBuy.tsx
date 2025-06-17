@@ -848,3 +848,108 @@ function GroupChatView({ sessionId }: { sessionId: number }) {
     </div>
   );
 }
+
+// Manage Members Component
+function ManageMembersContent({ groupId, onMemberRemoved }: { 
+  groupId?: number; 
+  onMemberRemoved: () => void;
+}) {
+  const { toast } = useToast();
+  
+  const { data: members, isLoading } = useQuery({
+    queryKey: [`/api/vyrona-social/groups/${groupId}/members`],
+    enabled: !!groupId,
+  });
+
+  const removeMemberMutation = useMutation({
+    mutationFn: async (memberId: number) => {
+      return apiRequest("DELETE", `/api/vyrona-social/groups/${groupId}/members/${memberId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Member removed successfully",
+      });
+      onMemberRemoved();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove member",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (isLoading) {
+    return <div className="text-center py-4">Loading members...</div>;
+  }
+
+  if (!members || members.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+        <h3 className="text-lg font-semibold mb-2">No Members Found</h3>
+        <p className="text-gray-600">This group has no members yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3">
+        {members.map((member: any) => (
+          <div 
+            key={member.id} 
+            className="flex items-center justify-between p-3 border rounded-lg"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
+                {member.username.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div className="font-medium">{member.username}</div>
+                <div className="text-sm text-gray-500">{member.email}</div>
+                {member.role === 'admin' && (
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-800 mt-1">
+                    <Crown className="h-3 w-3 mr-1" />
+                    Admin
+                  </Badge>
+                )}
+              </div>
+            </div>
+            
+            {member.role !== 'admin' && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-red-600 border-red-200 hover:bg-red-50"
+                onClick={() => {
+                  if (confirm(`Are you sure you want to remove ${member.username} from the group?`)) {
+                    removeMemberMutation.mutate(member.id);
+                  }
+                }}
+                disabled={removeMemberMutation.isPending}
+              >
+                <UserX className="h-4 w-4 mr-1" />
+                Remove
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      <div className="bg-orange-50 p-4 rounded-lg">
+        <div className="flex items-start gap-3">
+          <Crown className="h-5 w-5 text-orange-600 mt-0.5" />
+          <div>
+            <h4 className="font-medium text-orange-900">Admin Privileges</h4>
+            <p className="text-sm text-orange-700 mt-1">
+              As a group admin, you can remove members from the group. Admin accounts cannot be removed by other admins.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

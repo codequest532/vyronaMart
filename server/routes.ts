@@ -1795,6 +1795,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaSocial - Group Admin Management routes
+  app.delete("/api/social/groups/:id", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Get group to verify admin privileges
+      const group = await storage.getShoppingGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+
+      // Check if user is group admin
+      const members = await storage.getGroupMembers(groupId);
+      const userMembership = members.find(m => m.userId === authenticatedUser.id);
+      
+      if (!userMembership || (userMembership.role !== 'admin' && group.creatorId !== authenticatedUser.id)) {
+        return res.status(403).json({ message: "Only group admins can delete groups" });
+      }
+
+      // Delete the group
+      const success = await storage.deleteShoppingGroup(groupId);
+      if (success) {
+        res.json({ message: "Group deleted successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to delete group" });
+      }
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.delete("/api/social/groups/:groupId/members/:userId", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.groupId);
+      const targetUserId = parseInt(req.params.userId);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Get group to verify admin privileges
+      const group = await storage.getShoppingGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+
+      // Check if user is group admin
+      const members = await storage.getGroupMembers(groupId);
+      const userMembership = members.find(m => m.userId === authenticatedUser.id);
+      
+      if (!userMembership || (userMembership.role !== 'admin' && group.creatorId !== authenticatedUser.id)) {
+        return res.status(403).json({ message: "Only group admins can remove members" });
+      }
+
+      // Cannot remove group creator
+      if (targetUserId === group.creatorId) {
+        return res.status(400).json({ message: "Cannot remove group creator" });
+      }
+
+      // Remove the member
+      const success = await storage.removeGroupMember(groupId, targetUserId);
+      if (success) {
+        res.json({ message: "Member removed successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to remove member" });
+      }
+    } catch (error) {
+      console.error("Error removing group member:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // VyronaSocial - Product Shares routes
   app.post("/api/social/shares", async (req, res) => {
     try {
