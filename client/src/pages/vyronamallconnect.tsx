@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -164,13 +165,48 @@ export default function VyronaMallConnect() {
     });
   };
 
+  // Group room creation mutation
+  const createGroupRoomMutation = useMutation({
+    mutationFn: async (roomData: any) => {
+      const response = await apiRequest("POST", "/api/shopping-rooms", roomData);
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Group Room Created",
+        description: `Room code: ${data.roomCode}. Share with friends to shop together!`,
+      });
+      setShowGroupModal(false);
+      // Navigate to VyronaSocial with the created room
+      setLocation(`/social?room=${data.roomCode}`);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create group room",
+        variant: "destructive",
+      });
+    },
+  });
+
   const createGroupRoom = () => {
-    // Integration with VyronaSocial for group shopping
-    toast({
-      title: "Group Room Created",
-      description: "Invite friends to shop together and share delivery costs",
-    });
-    setShowGroupModal(false);
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to create a group shopping room",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const roomData = {
+      name: `${selectedMall?.name || 'Mall'} Shopping Group`,
+      description: `Group shopping session for ${selectedMall?.name || 'mall'} with shared delivery costs`,
+      locality: selectedMall?.location || nearbyLocation,
+      maxMembers: 10
+    };
+
+    createGroupRoomMutation.mutate(roomData);
   };
 
   const updateCartItemQuantity = (itemId: string, newQuantity: number) => {
@@ -708,23 +744,72 @@ export default function VyronaMallConnect() {
                     <DialogTitle>Create Group Shopping Room</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <p className="text-sm text-gray-600">Invite friends to shop together and share delivery costs</p>
-                    <div className="space-y-3">
+                    <p className="text-sm text-gray-600">Invite friends to shop together at {selectedMall?.name} and share delivery costs</p>
+                    
+                    {/* Group Shopping Benefits */}
+                    <div className="space-y-3 bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
                       <div className="flex items-center space-x-2">
                         <Users className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm">Walk Together Mode - Shop as if walking through mall</span>
+                        <span className="text-sm font-medium">Walk Together Mode</span>
+                        <span className="text-xs text-gray-500">- Shop as if walking through mall together</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Gift className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Group Buy Discounts on combo purchases</span>
+                        <span className="text-sm font-medium">Group Buy Discounts</span>
+                        <span className="text-xs text-gray-500">- Bulk purchase savings</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Truck className="h-4 w-4 text-amber-500" />
-                        <span className="text-sm">Shared delivery costs</span>
+                        <span className="text-sm font-medium">Shared Delivery</span>
+                        <span className="text-xs text-gray-500">- Split delivery costs among friends</span>
                       </div>
                     </div>
-                    <Button onClick={createGroupRoom} className="w-full">
-                      Create VyronSocial Room
+
+                    {/* Room Settings */}
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-sm font-medium">Shopping Group Name</label>
+                        <Input 
+                          placeholder={`${selectedMall?.name || 'Mall'} Shopping Group`}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-sm font-medium">Max Members</label>
+                          <Select defaultValue="10">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5 friends</SelectItem>
+                              <SelectItem value="10">10 friends</SelectItem>
+                              <SelectItem value="15">15 friends</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium">Duration</label>
+                          <Select defaultValue="2">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1 hour</SelectItem>
+                              <SelectItem value="2">2 hours</SelectItem>
+                              <SelectItem value="4">4 hours</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={createGroupRoom} 
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                      disabled={createGroupRoomMutation.isPending}
+                    >
+                      {createGroupRoomMutation.isPending ? "Creating..." : "Create VyronSocial Room"}
                     </Button>
                   </div>
                 </DialogContent>
