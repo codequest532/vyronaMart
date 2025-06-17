@@ -61,6 +61,7 @@ export default function GroupMallCartCheckout() {
   const [subscriptionDayOfWeek, setSubscriptionDayOfWeek] = useState("monday");
   const [subscriptionTime, setSubscriptionTime] = useState("10:00");
   const [subscriptionStartDate, setSubscriptionStartDate] = useState("");
+  const [useCommonAddress, setUseCommonAddress] = useState(true);
   
   const [shippingAddress, setShippingAddress] = useState({
     fullName: "",
@@ -72,6 +73,8 @@ export default function GroupMallCartCheckout() {
     state: "",
     pincode: ""
   });
+  
+  const [memberAddresses, setMemberAddresses] = useState<{[key: string]: typeof shippingAddress}>({});
 
   // Load group cart from localStorage
   useEffect(() => {
@@ -110,6 +113,34 @@ export default function GroupMallCartCheckout() {
       }));
     }
   }, [user]);
+
+  // Initialize member addresses when room is selected and common address is disabled
+  useEffect(() => {
+    if (selectedRoom && !useCommonAddress && selectedRoom.memberCount > 0) {
+      const newMemberAddresses: {[key: string]: typeof shippingAddress} = {};
+      
+      // Create placeholder addresses for each member
+      for (let i = 1; i <= selectedRoom.memberCount; i++) {
+        const memberKey = `member_${i}`;
+        if (!memberAddresses[memberKey]) {
+          newMemberAddresses[memberKey] = {
+            fullName: i === 1 ? (user?.username || "") : "",
+            phone: i === 1 ? (user?.mobile || "") : "",
+            email: i === 1 ? (user?.email || "") : "",
+            addressLine1: "",
+            addressLine2: "",
+            city: "",
+            state: "",
+            pincode: ""
+          };
+        } else {
+          newMemberAddresses[memberKey] = memberAddresses[memberKey];
+        }
+      }
+      
+      setMemberAddresses(newMemberAddresses);
+    }
+  }, [selectedRoom, useCommonAddress, user, memberAddresses]);
 
   // Calculate totals
   const subtotal = groupCart.reduce((sum, item) => sum + ((item.price / 100) * item.quantity), 0);
@@ -279,44 +310,70 @@ export default function GroupMallCartCheckout() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Address Type Toggle */}
+                <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="useCommonAddress"
+                      checked={useCommonAddress}
+                      onChange={(e) => setUseCommonAddress(e.target.checked)}
+                      className="rounded"
+                    />
+                    <Label htmlFor="useCommonAddress" className="font-medium text-blue-700">
+                      Set as primary address for all group members
+                    </Label>
+                  </div>
+                  <p className="text-sm text-blue-600 mt-2">
+                    {useCommonAddress 
+                      ? "All group members will receive items at the same address" 
+                      : "Each group member can enter their individual delivery address"
+                    }
+                  </p>
+                </div>
+
+                {useCommonAddress ? (
+                  /* Common Address Form */
                   <div>
-                    <Label htmlFor="fullName">Full Name *</Label>
-                    <Input
-                      id="fullName"
-                      value={shippingAddress.fullName}
-                      onChange={(e) => setShippingAddress(prev => ({ ...prev, fullName: e.target.value }))}
-                      placeholder="Enter full name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone">Phone Number *</Label>
-                    <Input
-                      id="phone"
-                      value={shippingAddress.phone}
-                      onChange={(e) => setShippingAddress(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="Enter phone number"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={shippingAddress.email}
-                      onChange={(e) => setShippingAddress(prev => ({ ...prev, email: e.target.value }))}
-                      placeholder="Enter email address"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="addressLine1">Address Line 1 *</Label>
-                    <Input
-                      id="addressLine1"
-                      value={shippingAddress.addressLine1}
-                      onChange={(e) => setShippingAddress(prev => ({ ...prev, addressLine1: e.target.value }))}
-                      placeholder="House number, street name"
-                    />
-                  </div>
+                    <h3 className="font-medium text-gray-700 mb-4">Common Delivery Address</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="fullName">Full Name *</Label>
+                        <Input
+                          id="fullName"
+                          value={shippingAddress.fullName}
+                          onChange={(e) => setShippingAddress(prev => ({ ...prev, fullName: e.target.value }))}
+                          placeholder="Enter full name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="phone">Phone Number *</Label>
+                        <Input
+                          id="phone"
+                          value={shippingAddress.phone}
+                          onChange={(e) => setShippingAddress(prev => ({ ...prev, phone: e.target.value }))}
+                          placeholder="Enter phone number"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="email">Email Address</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={shippingAddress.email}
+                          onChange={(e) => setShippingAddress(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="Enter email address"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="addressLine1">Address Line 1 *</Label>
+                        <Input
+                          id="addressLine1"
+                          value={shippingAddress.addressLine1}
+                          onChange={(e) => setShippingAddress(prev => ({ ...prev, addressLine1: e.target.value }))}
+                          placeholder="House number, street name"
+                        />
+                      </div>
                   <div className="md:col-span-2">
                     <Label htmlFor="addressLine2">Address Line 2</Label>
                     <Input
@@ -325,35 +382,157 @@ export default function GroupMallCartCheckout() {
                       onChange={(e) => setShippingAddress(prev => ({ ...prev, addressLine2: e.target.value }))}
                       placeholder="Apartment, suite, unit (optional)"
                     />
+                      </div>
+                      <div>
+                        <Label htmlFor="city">City *</Label>
+                        <Input
+                          id="city"
+                          value={shippingAddress.city}
+                          onChange={(e) => setShippingAddress(prev => ({ ...prev, city: e.target.value }))}
+                          placeholder="Enter city"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="state">State *</Label>
+                        <Input
+                          id="state"
+                          value={shippingAddress.state}
+                          onChange={(e) => setShippingAddress(prev => ({ ...prev, state: e.target.value }))}
+                          placeholder="Enter state"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="pincode">Pincode *</Label>
+                        <Input
+                          id="pincode"
+                          value={shippingAddress.pincode}
+                          onChange={(e) => setShippingAddress(prev => ({ ...prev, pincode: e.target.value }))}
+                          placeholder="Enter pincode"
+                        />
+                      </div>
+                    </div>
                   </div>
+                ) : (
+                  /* Individual Member Addresses */
                   <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      value={shippingAddress.city}
-                      onChange={(e) => setShippingAddress(prev => ({ ...prev, city: e.target.value }))}
-                      placeholder="Enter city"
-                    />
+                    <h3 className="font-medium text-gray-700 mb-4">Individual Member Addresses</h3>
+                    {selectedRoom && Object.keys(memberAddresses).length > 0 ? (
+                      <div className="space-y-6">
+                        {Object.entries(memberAddresses).map(([memberKey, address], index) => (
+                          <div key={memberKey} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                            <h4 className="font-medium text-gray-600 mb-3">
+                              Member {index + 1} {index === 0 ? "(You)" : ""} Address
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor={`${memberKey}_fullName`}>Full Name *</Label>
+                                <Input
+                                  id={`${memberKey}_fullName`}
+                                  value={address.fullName}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], fullName: e.target.value }
+                                  }))}
+                                  placeholder="Enter full name"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor={`${memberKey}_phone`}>Phone Number *</Label>
+                                <Input
+                                  id={`${memberKey}_phone`}
+                                  value={address.phone}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], phone: e.target.value }
+                                  }))}
+                                  placeholder="Enter phone number"
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <Label htmlFor={`${memberKey}_email`}>Email Address</Label>
+                                <Input
+                                  id={`${memberKey}_email`}
+                                  type="email"
+                                  value={address.email}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], email: e.target.value }
+                                  }))}
+                                  placeholder="Enter email address"
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <Label htmlFor={`${memberKey}_addressLine1`}>Address Line 1 *</Label>
+                                <Input
+                                  id={`${memberKey}_addressLine1`}
+                                  value={address.addressLine1}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], addressLine1: e.target.value }
+                                  }))}
+                                  placeholder="House number, street name"
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <Label htmlFor={`${memberKey}_addressLine2`}>Address Line 2</Label>
+                                <Input
+                                  id={`${memberKey}_addressLine2`}
+                                  value={address.addressLine2}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], addressLine2: e.target.value }
+                                  }))}
+                                  placeholder="Apartment, suite, unit (optional)"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor={`${memberKey}_city`}>City *</Label>
+                                <Input
+                                  id={`${memberKey}_city`}
+                                  value={address.city}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], city: e.target.value }
+                                  }))}
+                                  placeholder="Enter city"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor={`${memberKey}_state`}>State *</Label>
+                                <Input
+                                  id={`${memberKey}_state`}
+                                  value={address.state}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], state: e.target.value }
+                                  }))}
+                                  placeholder="Enter state"
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <Label htmlFor={`${memberKey}_pincode`}>Pincode *</Label>
+                                <Input
+                                  id={`${memberKey}_pincode`}
+                                  value={address.pincode}
+                                  onChange={(e) => setMemberAddresses(prev => ({
+                                    ...prev,
+                                    [memberKey]: { ...prev[memberKey], pincode: e.target.value }
+                                  }))}
+                                  placeholder="Enter pincode"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <Users className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                        <p>Please select a group to enter member addresses</p>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <Label htmlFor="state">State</Label>
-                    <Input
-                      id="state"
-                      value={shippingAddress.state}
-                      onChange={(e) => setShippingAddress(prev => ({ ...prev, state: e.target.value }))}
-                      placeholder="Enter state"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="pincode">Pin Code</Label>
-                    <Input
-                      id="pincode"
-                      value={shippingAddress.pincode}
-                      onChange={(e) => setShippingAddress(prev => ({ ...prev, pincode: e.target.value }))}
-                      placeholder="Enter pin code"
-                    />
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
