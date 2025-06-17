@@ -935,7 +935,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           address: "Virtual Mall Plaza, Level 2, Store #MC001",
           rating: 480, // 4.8 out of 5 (stored as integer out of 500)
           isOpen: true,
-          sellerId: newSeller.id
+          sellerId: newSeller.id,
+          module: "VyronaMallConnect"
         })
         .returning();
 
@@ -10051,6 +10052,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
   app.get('/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+  });
+
+  // VyronaMallConnect Customer API Endpoints
+  app.get("/api/mallconnect/stores", async (req, res) => {
+    try {
+      const mallConnectStores = await db
+        .select({
+          id: stores.id,
+          name: stores.name,
+          type: stores.type,
+          address: stores.address,
+          rating: stores.rating,
+          reviewCount: stores.reviewCount,
+          isOpen: stores.isOpen,
+          logoUrl: stores.logoUrl,
+          bannerUrl: stores.bannerUrl,
+          primaryColor: stores.primaryColor,
+          secondaryColor: stores.secondaryColor,
+          theme: stores.theme,
+          sellerId: stores.sellerId
+        })
+        .from(stores)
+        .where(eq(stores.module, "VyronaMallConnect"))
+        .orderBy(desc(stores.rating));
+      
+      res.json(mallConnectStores);
+    } catch (error) {
+      console.error("Error fetching VyronaMallConnect stores:", error);
+      res.status(500).json({ message: "Failed to fetch stores" });
+    }
+  });
+
+  app.get("/api/mallconnect/products", async (req, res) => {
+    try {
+      const mallConnectProducts = await db
+        .select({
+          id: products.id,
+          name: products.name,
+          description: products.description,
+          price: products.price,
+          imageUrl: products.imageUrl,
+          category: products.category,
+          inStock: products.inStock,
+          storeId: products.storeId,
+          sellerId: products.sellerId,
+          tags: products.tags,
+          enableGroupBuy: products.enableGroupBuy,
+          groupBuyMinQuantity: products.groupBuyMinQuantity,
+          groupBuyDiscount: products.groupBuyDiscount,
+          storeName: stores.name,
+          storeRating: stores.rating
+        })
+        .from(products)
+        .innerJoin(stores, eq(products.storeId, stores.id))
+        .where(and(
+          eq(products.module, "VyronaMallConnect"),
+          eq(products.inStock, true)
+        ))
+        .orderBy(desc(products.createdAt));
+      
+      res.json(mallConnectProducts);
+    } catch (error) {
+      console.error("Error fetching VyronaMallConnect products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
   });
 
   // VyronaMallConnect Seller Dashboard API Endpoints

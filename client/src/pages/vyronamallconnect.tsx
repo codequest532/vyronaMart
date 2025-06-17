@@ -39,11 +39,11 @@ export default function VyronaMallConnect() {
   const queryClient = useQueryClient();
 
   const { data: stores = [] } = useQuery({
-    queryKey: ["/api/stores"],
+    queryKey: ["/api/mallconnect/stores"],
   });
 
   const { data: products = [] } = useQuery({
-    queryKey: ["/api/products"],
+    queryKey: ["/api/mallconnect/products"],
   });
 
   const { data: user } = useQuery({
