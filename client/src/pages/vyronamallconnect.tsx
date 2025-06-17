@@ -13,7 +13,7 @@ import {
   ArrowLeft, Building, Shirt, Laptop, Utensils, Home as HomeIcon, Star, Coins, 
   MapPin, Clock, ShoppingCart, Users, Heart, Gift, Truck, MessageCircle,
   Search, Filter, Phone, Mail, Calendar, CheckCircle, Timer, Package,
-  Crown, Zap, Target, Camera, Share2, Bell, Award, Store, CreditCard
+  Crown, Zap, Target, Camera, Share2, Bell, Award, Store, CreditCard, Trash2
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -1718,6 +1718,143 @@ export default function VyronaMallConnect() {
                 </Card>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Group MallCart Modal */}
+      {showGroupCartModal && (
+        <Dialog open={showGroupCartModal} onOpenChange={setShowGroupCartModal}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <Users className="h-5 w-5 text-blue-500" />
+                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Group MallCart
+                </span>
+                <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                  {groupMallCart.length} items
+                </Badge>
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {groupMallCart.length === 0 ? (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                    <Users className="h-8 w-8 text-blue-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Your Group Cart is Empty</h3>
+                    <p className="text-gray-500">Add items to your group cart using the "Add to Group MallCart" button on products</p>
+                  </div>
+                  <Button 
+                    onClick={() => setShowGroupCartModal(false)}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                  >
+                    Continue Shopping
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  {/* Group Cart Items */}
+                  <div className="space-y-3">
+                    {groupMallCart.map((item: any, index: number) => (
+                      <Card key={index} className="border-l-4 border-l-blue-500">
+                        <CardContent className="p-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                              {item.imageUrl ? (
+                                <img 
+                                  src={item.imageUrl} 
+                                  alt={item.name}
+                                  className="w-full h-full object-cover rounded-lg"
+                                />
+                              ) : (
+                                <Package className="h-8 w-8 text-gray-400" />
+                              )}
+                            </div>
+                            
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900">{item.name}</h4>
+                              <p className="text-sm text-gray-500">{item.storeName}</p>
+                              {item.groupName && (
+                                <div className="flex items-center space-x-1 mt-1">
+                                  <Users className="h-3 w-3 text-blue-500" />
+                                  <span className="text-xs text-blue-600">{item.groupName}</span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="text-right">
+                              <p className="font-medium text-gray-900">₹{Math.round(item.price)}</p>
+                              <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                            </div>
+                            
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const updatedCart = groupMallCart.filter((_, i) => i !== index);
+                                setGroupMallCart(updatedCart);
+                                localStorage.setItem('groupMallCart', JSON.stringify(updatedCart));
+                              }}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Group Cart Summary */}
+                  <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="font-medium text-gray-900">Group Cart Total</span>
+                        <span className="text-xl font-bold text-blue-600">
+                          ₹{Math.round(groupMallCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0))}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm text-gray-600 mb-4">
+                        <div className="flex items-center space-x-2">
+                          <Users className="h-4 w-4 text-blue-500" />
+                          <span>Items will be shared with your group members</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Truck className="h-4 w-4 text-green-500" />
+                          <span>Shared delivery costs reduce individual expenses</span>
+                        </div>
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => setShowGroupCartModal(false)}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          Continue Shopping
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            // Navigate to group checkout
+                            setShowGroupCartModal(false);
+                            setShowGroupModal(true);
+                          }}
+                          className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Proceed to Group Checkout
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       )}
