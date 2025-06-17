@@ -26,9 +26,11 @@ export default function VyronaMallConnect() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [deliveryOption, setDeliveryOption] = useState("express");
   const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showGroupCartModal, setShowGroupCartModal] = useState(false);
   const [showConciergeChat, setShowConciergeChat] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [mallCart, setMallCart] = useState<any[]>([]);
+  const [groupMallCart, setGroupMallCart] = useState<any[]>([]);
   const [nearbyLocation, setNearbyLocation] = useState("Chennai");
   const [userLocation, setUserLocation] = useState<any>(null);
   const [joinGroupCode, setJoinGroupCode] = useState("");
@@ -70,6 +72,19 @@ export default function VyronaMallConnect() {
           console.log("Location access denied");
         }
       );
+    }
+  }, []);
+
+  // Load both carts from localStorage on component mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem('mallCart');
+    if (savedCart) {
+      setMallCart(JSON.parse(savedCart));
+    }
+    
+    const savedGroupCart = localStorage.getItem('groupMallCart');
+    if (savedGroupCart) {
+      setGroupMallCart(JSON.parse(savedGroupCart));
     }
   }, []);
 
@@ -211,9 +226,9 @@ export default function VyronaMallConnect() {
       groupName: activeGroup.name
     };
     
-    // Store group cart items separately from individual cart
-    const existingGroupCart = JSON.parse(localStorage.getItem('groupMallCart') || '[]');
-    const updatedGroupCart = [...existingGroupCart, groupCartItem];
+    // Update group cart state and localStorage
+    const updatedGroupCart = [...groupMallCart, groupCartItem];
+    setGroupMallCart(updatedGroupCart);
     localStorage.setItem('groupMallCart', JSON.stringify(updatedGroupCart));
     
     toast({
@@ -811,12 +826,13 @@ export default function VyronaMallConnect() {
                 variant="outline"
                 className="bg-gradient-to-r from-blue-500/80 to-purple-500/80 text-white border-white/30"
                 onClick={() => {
-                  setShowGroupModal(true);
+                  setShowGroupCartModal(true);
                 }}
               >
                 <Users className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Group MallCart</span>
-                <span className="sm:hidden">Group</span>
+                <span className="font-bold">{groupMallCart.length}</span>
+                <span className="ml-1 hidden sm:inline">Group MallCart</span>
+                <span className="ml-1 sm:hidden">Group</span>
               </Button>
             </div>
           </div>
