@@ -197,7 +197,7 @@ export default function VyronaSocialGroupBuy() {
   // Delete group mutation
   const deleteGroupMutation = useMutation({
     mutationFn: async (groupId: number) => {
-      return apiRequest("DELETE", `/api/vyrona-social/groups/${groupId}`, {});
+      return apiRequest("DELETE", `/api/social/groups/${groupId}`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/vyrona-social/my-groups"] });
@@ -218,7 +218,7 @@ export default function VyronaSocialGroupBuy() {
   // Remove member mutation
   const removeMemberMutation = useMutation({
     mutationFn: async ({ groupId, memberId }: { groupId: number; memberId: number }) => {
-      return apiRequest("DELETE", `/api/vyrona-social/groups/${groupId}/members/${memberId}`, {});
+      return apiRequest("DELETE", `/api/social/groups/${groupId}/members/${memberId}`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/vyrona-social/my-groups"] });
