@@ -48,6 +48,14 @@ export default function VyronaMallConnect() {
     queryKey: ["/api/current-user"],
   });
 
+  // Fetch shopping rooms for group shopping with real-time updates
+  const { data: shoppingRooms = [], isLoading: loadingRooms } = useQuery({
+    queryKey: ["/api/shopping-rooms"],
+    enabled: activeTab === "group-shopping" && !!user,
+    refetchInterval: 3000, // Refresh every 3 seconds for real-time member count updates
+    refetchIntervalInBackground: true,
+  });
+
   // Get user location for nearby malls
   useEffect(() => {
     if (navigator.geolocation) {
@@ -989,24 +997,26 @@ export default function VyronaMallConnect() {
                 </Button>
               </div>
 
-              {/* Current Group Room Info */}
-              {(() => {
-                const currentRoom = localStorage.getItem('currentGroupRoom');
-                if (currentRoom) {
-                  const roomData = JSON.parse(currentRoom);
-                  return (
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
+              {/* Current Group Room Info - Show user's joined rooms with live member counts */}
+              {!loadingRooms && Array.isArray(shoppingRooms) && shoppingRooms.length > 0 && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="font-semibold text-lg">Your Active Groups</h3>
+                  {shoppingRooms.map((room: any) => (
+                    <div key={room.id} className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-bold text-lg">{roomData.name}</h3>
-                          <p className="text-gray-600">{roomData.description}</p>
+                          <h3 className="font-bold text-lg">{room.name}</h3>
+                          <p className="text-gray-600">{room.description}</p>
                           <div className="flex items-center space-x-4 mt-2">
                             <Badge variant="outline" className="text-blue-600">
                               <Users className="h-3 w-3 mr-1" />
-                              {roomData.memberCount || 1} members
+                              {room.memberCount} members
                             </Badge>
                             <Badge variant="outline" className="text-green-600">
-                              Group Code: {roomData.roomCode}
+                              Group Code: {room.roomCode}
+                            </Badge>
+                            <Badge variant="outline" className="text-purple-600">
+                              Cart Total: ₹{Math.round(room.totalCart || 0)}
                             </Badge>
                           </div>
                         </div>
@@ -1015,7 +1025,7 @@ export default function VyronaMallConnect() {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              navigator.clipboard.writeText(roomData.roomCode);
+                              navigator.clipboard.writeText(room.roomCode);
                               toast({ title: "Group code copied!", description: "Share with friends to invite them" });
                             }}
                           >
@@ -1024,10 +1034,9 @@ export default function VyronaMallConnect() {
                         </div>
                       </div>
                     </div>
-                  );
-                }
-                return null;
-              })()}
+                  ))}
+                </div>
+              )}
 
               {/* Group Shopping Benefits */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

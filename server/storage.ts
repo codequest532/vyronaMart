@@ -1052,18 +1052,19 @@ export class DatabaseStorage implements IStorage {
       console.log("=== STORAGE: getShoppingGroups called ===");
       console.log("User ID:", userId);
       
-      // Use direct SQL query that matches VyronaSocial API pattern
+      // Use direct SQL query with proper JOIN for accurate member count
       // Filter to only show rooms where the user is a member
       const result = await pool.query(`
         SELECT sg.*, 
-               (SELECT COUNT(*) FROM group_members WHERE group_id = sg.id) as member_count,
-               (SELECT COALESCE(SUM(ci.quantity * p.price), 0) 
-                FROM cart_items ci 
-                LEFT JOIN products p ON ci.product_id = p.id 
-                WHERE ci.room_id = sg.id) as total_cart
+               COUNT(DISTINCT gm_all.id) as member_count,
+               COALESCE(SUM(DISTINCT ci.quantity * p.price), 0) as total_cart
         FROM shopping_groups sg
         INNER JOIN group_members gm_user ON sg.id = gm_user.group_id AND gm_user.user_id = $1
+        LEFT JOIN group_members gm_all ON sg.id = gm_all.group_id
+        LEFT JOIN cart_items ci ON sg.id = ci.room_id
+        LEFT JOIN products p ON ci.product_id = p.id
         WHERE sg.is_active = true
+        GROUP BY sg.id, sg.name, sg.description, sg.creator_id, sg.is_active, sg.max_members, sg.room_code, sg.created_at, sg.total_cart
         ORDER BY sg.created_at DESC
       `, [userId]);
       
