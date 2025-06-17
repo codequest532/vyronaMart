@@ -160,6 +160,8 @@ Changelog:
 - June 17, 2025: Added dedicated Group Shopping tab with room creation, sharing, and management features
 - June 17, 2025: Fixed Group Shop workflow to remain within VyronaMallConnect instead of redirecting to VyronaSocial
 - June 17, 2025: Enhanced Group Shop modal with comprehensive benefits display and customizable settings
+- June 17, 2025: Created separate "Group MallCart" button in VyronaMallConnect header for dedicated group shopping access
+- June 17, 2025: Added dual cart functionality - regular MallCart for individual shopping and Group MallCart for group sessions
 - June 15, 2025: Implemented automatic order tracking redirection for ALL VyronaSpace orders (individual and group buy)
 - June 15, 2025: VyronaSpace customers now redirected to live order tracking page instead of static success page
 - June 15, 2025: VyronaSpace group buy orders also redirect to tracking (applies to storeId 6, 7, 8)

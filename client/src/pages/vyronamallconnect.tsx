@@ -704,16 +704,30 @@ export default function VyronaMallConnect() {
               </div>
             </div>
             
-            {/* Cart Button - Always Visible */}
-            <Button 
-              variant="outline"
-              className="bg-white/20 text-white border-white/30 flex-shrink-0"
-              onClick={() => setShowCartModal(true)}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              <span className="font-bold">{mallCart.length}</span>
-              <span className="ml-1 hidden sm:inline">MallCart</span>
-            </Button>
+            {/* Cart Buttons - Individual and Group */}
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <Button 
+                variant="outline"
+                className="bg-white/20 text-white border-white/30"
+                onClick={() => setShowCartModal(true)}
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                <span className="font-bold">{mallCart.length}</span>
+                <span className="ml-1 hidden sm:inline">MallCart</span>
+              </Button>
+              
+              <Button 
+                variant="outline"
+                className="bg-gradient-to-r from-blue-500/80 to-purple-500/80 text-white border-white/30"
+                onClick={() => {
+                  setShowGroupModal(true);
+                }}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Group MallCart</span>
+                <span className="sm:hidden">Group</span>
+              </Button>
+            </div>
           </div>
 
           {/* Bottom Row - Details and Actions */}
@@ -735,12 +749,6 @@ export default function VyronaMallConnect() {
             {/* Quick Actions */}
             <div className="flex items-center space-x-2">
               <Dialog open={showGroupModal} onOpenChange={setShowGroupModal}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="bg-white/20 text-white border-white/30 text-xs px-3 py-2">
-                    <Users className="h-3 w-3 mr-1" />
-                    <span className="hidden md:inline">Group Shop</span>
-                  </Button>
-                </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Create Group Shopping Room</DialogTitle>
