@@ -124,6 +124,12 @@ export default function SellerDashboard() {
         setLocation('/vyronaspace-seller-dashboard');
         return;
       }
+      
+      if (currentUser.sellerType === 'VyronaMallConnect') {
+        // Redirect VyronaMallConnect sellers to their dashboard
+        setLocation('/vyronamallconnect-seller-dashboard');
+        return;
+      }
     } else if (!userLoading && !currentUser) {
       setLocation('/login');
       toast({
