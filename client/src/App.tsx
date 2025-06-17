@@ -41,6 +41,7 @@ import VyronaHubDashboard from "@/pages/vyronahub-dashboard";
 import VyronaReadDashboard from "@/pages/vyronaread-dashboard";
 import VyronaInstaStoreDashboard from "@/pages/vyronainstastore-dashboard";
 import VyronaSpaceSellerDashboard from "@/pages/vyronaspace-seller-dashboard";
+import VyronaMallConnectSellerDashboard from "@/pages/vyronamallconnect-seller-dashboard";
 import EbookReader from "@/pages/ebook-reader";
 
 import NotFound from "@/pages/not-found";
@@ -127,6 +128,7 @@ function Router() {
       <Route path="/vyronaspace" component={VyronaSpace} />
       <Route path="/vyronaspace-checkout" component={VyronaSpaceCheckout} />
       <Route path="/vyronaspace-seller-dashboard" component={VyronaSpaceSellerDashboard} />
+      <Route path="/vyronamallconnect-seller-dashboard" component={VyronaMallConnectSellerDashboard} />
       <Route path="/vyronamallconnect" component={VyronaMallConnect} />
       <Route path="/mallcart-checkout" component={MallCartCheckout} />
       <Route path="/group-mallcart-checkout" component={GroupMallCartCheckout} />

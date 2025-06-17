@@ -1,0 +1,171 @@
+create a dedicated VyronaMallConnect – Seller Dashboard
+
+Storefront Management
+🧾 Store Profile Setup
+Upload logo, store banner, and tagline.
+
+Add floor number, store category (e.g., Fashion, Electronics), and contact details.
+
+Set working hours, support number, and store manager name.
+
+🖼️ Storefront Photo Updation
+Upload / Replace Storefront Images:
+
+Upload up to 5 images for store visuals, interiors, or product displays.
+
+Real-time preview with crop and compress options.
+
+Auto-optimize for mobile and desktop views.
+
+Mall Visual Approval Flow (Optional):
+
+Submit changes for mall admin moderation (if required by mall policy).
+
+Version history for image rollbacks.
+
+🔹 2. Product Catalog & Inventory Management
+📦 Product Listing & Variants
+Add products with:
+
+Name, category, price, discount, description.
+
+Variants: size, color, weight.
+
+Tags: “New Arrival”, “Mall Bestseller”, “Exclusive Drop”.
+
+🖼️ Item Image Manager
+Upload multiple images per product.
+
+Drag-and-drop order rearrangement.
+
+Add 360° product view or video clips (optional).
+
+Auto-thumbnail generation for grid views.
+
+🔄 Inventory Sync & Bulk Upload
+Sync via:
+
+Excel sheet / POS API / Barcode scanner.
+
+Toggle auto-hide when out of stock.
+
+Low-stock alert with recommended reorder point.
+
+🔹 3. Order & Delivery Operations
+🛒 Live Order Feed
+View all incoming orders:
+
+Status filters: New / Confirmed / Packed / Out for Delivery / Delivered / Canceled.
+
+Search by product, order ID, customer name.
+
+🚚 Delivery Management
+Choose delivery mode per order:
+
+✅ VyronaExpress Delivery (auto-assigned).
+
+✅ In-Store Pickup.
+
+✅ Own Rider Delivery (add contact & mall ID).
+
+Real-time delivery ETA tracking (use openroute service integration).
+
+Prep-time setting by product category.
+
+🧾 Print & Notify
+Auto-generate invoice and delivery slip.
+
+SMS/email notification to customer on status update.
+
+🔹 4. Group Buying & Campaign Participation
+👥 VyronSocial Room Integration
+Enable Group Buy toggle per product or combo.
+
+View group orders in progress and their current status.
+
+Built-in chat with group coordinator (optional).
+
+🛍️ Mall-Wide Campaign Participation
+View and enroll in campaigns like:
+
+“Mall Weekend Flash Sale”
+
+“Festival Premium Brand Offer”
+
+Tag promo products, set limited-time discounts.
+
+Schedule future campaign entries.
+
+🔗 Cross-Store Bundle Tools
+Suggest co-bundles with neighboring brands:
+
+e.g., “Buy a watch from Fastrack + sunglasses from Titan = 15% off”
+
+🔹 5. Payments & Financial Reports
+📈 Sales Dashboard
+Daily/weekly/monthly breakdowns.
+
+Filters by product, category, or promo event.
+
+Track:
+
+Avg. order value
+
+Top-selling items
+
+Repeat customer rate
+
+💸 Payout & Coins Tracking
+View VyronaCoins used + reimbursement timeline.
+
+See UPI, Wallet, and COD payments with settlement schedule.
+
+Download order and payout reports in Excel/PDF.
+
+🔹 6. Loyalty & Promotion Engine
+🎁 Coupon Generator
+Create exclusive brand coupons (e.g., “VYRONA15”).
+
+Join mall-wide coupon campaigns with shared logic.
+
+🔗 Brand Loyalty Integration
+Link existing loyalty programs (via API or manual entry).
+
+Allow customer points redemption in-app.
+
+🎖️ Auto-Rewards Engine
+Enable reward logic:
+
+“Every 3rd purchase = ₹50 coupon”
+
+“Buy 2+ items = Free Shipping”
+
+🔹 7. Customer Engagement & Support
+💬 Chatbox with Customer
+Talk to customer post-order for:
+
+Clarification on size, substitution, delivery delay, etc.
+
+Chat logs visible to mall support for compliance.
+
+📣 Push/SMS Offers
+Send targeted promotions to:
+
+Past customers
+
+Cart abandoners
+
+
+
+📝 Ratings Dashboard
+View store rating, product-level reviews.
+
+Respond publicly or flag false reviews.
+
+View badges like “Mall Verified”, “Customer Favorite”.
+
+🔹 8. Support & Helpdesk Tools
+🤝 VyronaSeller Help Center
+Chat, call, or ticket support.
+
+Dedicated Mall Manager contact for fast resolution.
