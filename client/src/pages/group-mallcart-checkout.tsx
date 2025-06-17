@@ -13,7 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { 
   ArrowLeft, Users, MapPin, Clock, ShoppingCart, CreditCard, 
   Wallet, Smartphone, Gift, Coins, Star, CheckCircle, Package,
-  Crown, Zap, Timer, Share2, Bell, Award, Calculator
+  Crown, Zap, Timer, Share2, Bell, Award, Calculator, Truck
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -56,6 +56,7 @@ interface GroupCheckoutData {
   memberAddresses?: {[key: string]: AddressData};
   useCommonAddress: boolean;
   paymentMethod: string; // Fallback payment method
+  deliveryOption: string;
   memberContributions: MemberContribution[];
   selectedRoom?: any;
   enableSubscription: boolean;
@@ -355,6 +356,7 @@ export default function GroupMallCartCheckout() {
       memberAddresses: useCommonAddress ? undefined : memberAddresses,
       useCommonAddress,
       paymentMethod,
+      deliveryOption,
       memberContributions,
       selectedRoom,
       enableSubscription,
@@ -677,6 +679,83 @@ export default function GroupMallCartCheckout() {
                         <p>Please select a group to enter member addresses</p>
                       </div>
                     )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Delivery Options */}
+            <Card className="border-green-200 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+                <CardTitle className="flex items-center space-x-2">
+                  <Truck className="h-5 w-5 text-green-600" />
+                  <span>Delivery Options</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <RadioGroup value={deliveryOption} onValueChange={setDeliveryOption} className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3 p-4 border-2 border-green-200 rounded-lg hover:bg-green-50 transition-colors">
+                      <RadioGroupItem value="express" id="express" />
+                      <div className="flex-1">
+                        <Label htmlFor="express" className="font-medium text-green-800 cursor-pointer">
+                          VyronaExpress - 90 Min Delivery
+                        </Label>
+                        <p className="text-sm text-green-600 mt-1">
+                          Lightning-fast hyperlocal delivery • ₹99 total ({selectedRoom ? `₹${Math.round(99 / selectedRoom.memberCount)}` : '₹99'} per member)
+                        </p>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-xs text-green-700">Most Popular for Groups</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <RadioGroupItem value="standard" id="standard" />
+                      <div className="flex-1">
+                        <Label htmlFor="standard" className="font-medium text-gray-800 cursor-pointer">
+                          Standard Delivery - 24 Hours
+                        </Label>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Regular delivery within one day • ₹49 total ({selectedRoom ? `₹${Math.round(49 / selectedRoom.memberCount)}` : '₹49'} per member)
+                        </p>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          <span className="text-xs text-gray-700">Budget-Friendly Option</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 p-4 border-2 border-orange-200 rounded-lg hover:bg-orange-50 transition-colors">
+                      <RadioGroupItem value="pickup" id="pickup" />
+                      <div className="flex-1">
+                        <Label htmlFor="pickup" className="font-medium text-orange-800 cursor-pointer">
+                          Store Pickup - Free
+                        </Label>
+                        <p className="text-sm text-orange-600 mt-1">
+                          Collect from nearest VyronaMall store • No delivery charges
+                        </p>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                          <span className="text-xs text-orange-700">Save on Delivery Costs</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </RadioGroup>
+
+                {selectedRoom && (
+                  <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Users className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium text-blue-800">Group Delivery Benefits</span>
+                    </div>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Delivery cost split equally among {selectedRoom.memberCount} members</li>
+                      <li>• Single delivery saves environment and reduces individual costs</li>
+                      <li>• Coordinated delivery time for the entire group</li>
+                    </ul>
                   </div>
                 )}
               </CardContent>
