@@ -103,7 +103,8 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
         "VyronaHub": "/vyronahub-dashboard", 
         "VyronaSocial": "/vyronahub-dashboard",
         "VyronaInstaStore": "/vyronainstastore-dashboard",
-        "VyronaRead": "/vyronaread-dashboard"
+        "VyronaRead": "/vyronaread-dashboard",
+        "VyronaMallConnect": "/vyronamallconnect-seller-dashboard"
       };
       
       const dashboardRoute = dashboardRoutes[selectedPlatform];

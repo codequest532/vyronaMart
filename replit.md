@@ -164,6 +164,10 @@ Changelog:
 - June 17, 2025: Added dual cart functionality - regular MallCart for individual shopping and Group MallCart for group sessions
 - June 17, 2025: Fixed Group MallCart pricing display error - converted prices from cents to rupees (5999→₹60, 2999→₹30)
 - June 17, 2025: Corrected Group MallCart total calculation to properly handle price conversion from database storage format
+- June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
+- June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
+- June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
+- June 17, 2025: Updated seller registration routing to automatically redirect VyronaMallConnect sellers to /vyronamallconnect-seller-dashboard
 - June 15, 2025: Implemented automatic order tracking redirection for ALL VyronaSpace orders (individual and group buy)
 - June 15, 2025: VyronaSpace customers now redirected to live order tracking page instead of static success page
 - June 15, 2025: VyronaSpace group buy orders also redirect to tracking (applies to storeId 6, 7, 8)
