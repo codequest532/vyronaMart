@@ -19,7 +19,7 @@ import {
   Phone, Mail, MapPin, Calendar, DollarSign, Tag,
   Image as ImageIcon, RotateCcw, Save, Eye, Search,
   Download, Filter, RefreshCw, AlertCircle, CheckCircle,
-  ArrowLeft, Building, Zap, Target, Crown, Award, Copy
+  ArrowLeft, Building, Zap, Target, Crown, Award, Copy, Check, X
 } from "lucide-react";
 
 export default function VyronaMallConnectSellerDashboard() {
@@ -32,6 +32,8 @@ export default function VyronaMallConnectSellerDashboard() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [csvData, setCsvData] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+  const [bannerUrl, setBannerUrl] = useState("");
   const [productFormData, setProductFormData] = useState({
     name: "",
     category: "",
@@ -496,7 +498,7 @@ export default function VyronaMallConnectSellerDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Store Images */}
+              {/* Store Images & Branding */}
               <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -504,34 +506,210 @@ export default function VyronaMallConnectSellerDashboard() {
                     <span>Store Images & Branding</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
+                  {/* Logo and Banner Upload */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <Label>Store Logo</Label>
-                      <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Upload store logo</p>
-                        <p className="text-xs text-gray-500">PNG, JPG up to 2MB</p>
+                      <Label htmlFor="storeLogo">Store Logo</Label>
+                      <div className="mt-2">
+                        {store.logoUrl ? (
+                          <div className="relative">
+                            <img 
+                              src={store.logoUrl} 
+                              alt="Store Logo"
+                              className="w-full h-32 object-contain bg-gray-50 rounded-lg border-2 border-gray-200"
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="absolute top-2 right-2"
+                              onClick={() => {
+                                // Update store logo URL to empty
+                                updateStoreMutation.mutate({ logoUrl: "" });
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-600 mb-3">Upload store logo</p>
+                            <Input
+                              type="text"
+                              placeholder="Enter image URL (Google Drive or direct link)"
+                              value={logoUrl}
+                              onChange={(e) => setLogoUrl(e.target.value)}
+                              className="mb-3"
+                            />
+                            <div className="text-xs text-gray-500 mb-3">
+                              <p>Google Drive: Right-click → Share → "Anyone with link" → Copy</p>
+                              <p>Direct URLs: PNG, JPG, WebP formats</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                if (logoUrl.trim()) {
+                                  updateStoreMutation.mutate({ logoUrl: logoUrl.trim() });
+                                  setLogoUrl("");
+                                }
+                              }}
+                              disabled={!logoUrl.trim() || updateStoreMutation.isPending}
+                            >
+                              {updateStoreMutation.isPending ? "Uploading..." : "Set Logo"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     <div>
-                      <Label>Store Banner</Label>
-                      <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Upload store banner</p>
-                        <p className="text-xs text-gray-500">1200x400px recommended</p>
+                      <Label htmlFor="storeBanner">Store Banner</Label>
+                      <div className="mt-2">
+                        {store.bannerUrl ? (
+                          <div className="relative">
+                            <img 
+                              src={store.bannerUrl} 
+                              alt="Store Banner"
+                              className="w-full h-32 object-cover bg-gray-50 rounded-lg border-2 border-gray-200"
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="absolute top-2 right-2"
+                              onClick={() => {
+                                updateStoreMutation.mutate({ bannerUrl: "" });
+                              }}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-600 mb-3">Upload store banner</p>
+                            <Input
+                              type="text"
+                              placeholder="Enter banner image URL"
+                              value={bannerUrl}
+                              onChange={(e) => setBannerUrl(e.target.value)}
+                              className="mb-3"
+                            />
+                            <div className="text-xs text-gray-500 mb-3">
+                              <p>Recommended: 1200x400px</p>
+                              <p>Google Drive or direct image URLs</p>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                if (bannerUrl.trim()) {
+                                  updateStoreMutation.mutate({ bannerUrl: bannerUrl.trim() });
+                                  setBannerUrl("");
+                                }
+                              }}
+                              disabled={!bannerUrl.trim() || updateStoreMutation.isPending}
+                            >
+                              {updateStoreMutation.isPending ? "Uploading..." : "Set Banner"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-6">
-                    <Label>Storefront Images (Up to 5)</Label>
-                    <div className="mt-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                      {[1, 2, 3, 4, 5].map((index) => (
-                        <div key={index} className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center aspect-square flex flex-col items-center justify-center">
-                          <Camera className="h-6 w-6 text-gray-400 mb-1" />
-                          <p className="text-xs text-gray-500">Image {index}</p>
+                  {/* Brand Colors */}
+                  <div>
+                    <Label>Brand Colors</Label>
+                    <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <Label htmlFor="primaryColor" className="text-xs">Primary Color</Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Input
+                            id="primaryColor"
+                            type="color"
+                            value={store.primaryColor || "#3B82F6"}
+                            onChange={(e) => updateStoreMutation.mutate({ primaryColor: e.target.value })}
+                            className="w-12 h-8 p-1 rounded"
+                          />
+                          <Input
+                            type="text"
+                            value={store.primaryColor || "#3B82F6"}
+                            onChange={(e) => updateStoreMutation.mutate({ primaryColor: e.target.value })}
+                            className="flex-1 text-xs"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="secondaryColor" className="text-xs">Secondary Color</Label>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Input
+                            id="secondaryColor"
+                            type="color"
+                            value={store.secondaryColor || "#8B5CF6"}
+                            onChange={(e) => updateStoreMutation.mutate({ secondaryColor: e.target.value })}
+                            className="w-12 h-8 p-1 rounded"
+                          />
+                          <Input
+                            type="text"
+                            value={store.secondaryColor || "#8B5CF6"}
+                            onChange={(e) => updateStoreMutation.mutate({ secondaryColor: e.target.value })}
+                            className="flex-1 text-xs"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Brand Typography */}
+                  <div>
+                    <Label>Brand Font</Label>
+                    <Select 
+                      value={store.brandFont || "Inter"} 
+                      onValueChange={(value) => updateStoreMutation.mutate({ brandFont: value })}
+                    >
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Inter">Inter (Modern)</SelectItem>
+                        <SelectItem value="Roboto">Roboto (Clean)</SelectItem>
+                        <SelectItem value="Poppins">Poppins (Friendly)</SelectItem>
+                        <SelectItem value="Playfair Display">Playfair Display (Elegant)</SelectItem>
+                        <SelectItem value="Montserrat">Montserrat (Professional)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Store Theme */}
+                  <div>
+                    <Label>Store Theme</Label>
+                    <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        { name: "Modern", bg: "bg-gradient-to-r from-blue-500 to-purple-600", value: "modern" },
+                        { name: "Elegant", bg: "bg-gradient-to-r from-gray-800 to-gray-600", value: "elegant" },
+                        { name: "Vibrant", bg: "bg-gradient-to-r from-pink-500 to-orange-500", value: "vibrant" },
+                        { name: "Minimalist", bg: "bg-gradient-to-r from-gray-200 to-gray-400", value: "minimalist" },
+                        { name: "Luxury", bg: "bg-gradient-to-r from-yellow-600 to-yellow-800", value: "luxury" },
+                        { name: "Fresh", bg: "bg-gradient-to-r from-green-400 to-blue-500", value: "fresh" }
+                      ].map((theme) => (
+                        <div
+                          key={theme.value}
+                          className={`relative rounded-lg p-4 cursor-pointer border-2 transition-all ${
+                            store.theme === theme.value 
+                              ? "border-blue-500 ring-2 ring-blue-200" 
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                          onClick={() => updateStoreMutation.mutate({ theme: theme.value })}
+                        >
+                          <div className={`w-full h-8 ${theme.bg} rounded mb-2`}></div>
+                          <p className="text-xs font-medium text-center">{theme.name}</p>
+                          {store.theme === theme.value && (
+                            <div className="absolute top-1 right-1">
+                              <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                                <Check className="h-2 w-2 text-white" />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
