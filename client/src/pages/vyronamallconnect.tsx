@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -36,6 +36,9 @@ export default function VyronaMallConnect() {
   const [nearbyLocation, setNearbyLocation] = useState("Chennai");
   const [userLocation, setUserLocation] = useState<any>(null);
   const [joinGroupCode, setJoinGroupCode] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [selectedGroupForAction, setSelectedGroupForAction] = useState<any>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1172,9 +1175,8 @@ export default function VyronaMallConnect() {
                                   Share Group Code
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => {
-                                  if (confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
-                                    deleteGroupMutation.mutate(room.id);
-                                  }
+                                  setSelectedGroupForAction(room);
+                                  setShowDeleteConfirm(true);
                                 }} className="text-red-600">
                                   <Trash2 className="h-4 w-4 mr-2" />
                                   Delete Group
@@ -1199,9 +1201,8 @@ export default function VyronaMallConnect() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  if (confirm("Are you sure you want to leave this group?")) {
-                                    exitGroupMutation.mutate(room.id);
-                                  }
+                                  setSelectedGroupForAction(room);
+                                  setShowExitConfirm(true);
                                 }}
                                 className="text-red-600 border-red-200 hover:bg-red-50"
                               >
@@ -1970,6 +1971,76 @@ export default function VyronaMallConnect() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete Group Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Group</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            Are you sure you want to delete "{selectedGroupForAction?.name}"? This action cannot be undone and will remove all group data including messages and shared cart items.
+          </p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedGroupForAction) {
+                  deleteGroupMutation.mutate(selectedGroupForAction.id);
+                }
+                setShowDeleteConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Delete Group
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exit Group Confirmation Dialog */}
+      <Dialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Exit Group</DialogTitle>
+          </DialogHeader>
+          <p className="text-gray-600">
+            Are you sure you want to leave "{selectedGroupForAction?.name}"? You'll lose access to the group chat and shared cart.
+          </p>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowExitConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedGroupForAction) {
+                  exitGroupMutation.mutate(selectedGroupForAction.id);
+                }
+                setShowExitConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Exit Group
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

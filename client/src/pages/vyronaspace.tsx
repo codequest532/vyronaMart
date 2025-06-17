@@ -79,6 +79,9 @@ export default function VyronaSpace() {
   const [newAddress, setNewAddress] = useState({ 
     name: "", address: "", city: "", state: "", pincode: "", phone: "", isDefault: false 
   });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [selectedGroupForAction, setSelectedGroupForAction] = useState<any>(null);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
