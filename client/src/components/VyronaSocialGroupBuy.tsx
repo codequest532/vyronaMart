@@ -236,6 +236,29 @@ export default function VyronaSocialGroupBuy() {
     },
   });
 
+  // Exit group mutation (for non-admin members)
+  const exitGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      // Get current user info first
+      const currentUser = await apiRequest("GET", "/api/current-user");
+      return apiRequest("DELETE", `/api/social/groups/${groupId}/members/${currentUser.id}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/vyrona-social/my-groups"] });
+      toast({
+        title: "Success",
+        description: "You have left the group successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error", 
+        description: error.message || "Failed to leave group",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleCreateGroup = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -467,7 +490,7 @@ export default function VyronaSocialGroupBuy() {
                         <Badge variant="outline" className="font-mono">
                           {group.group_code}
                         </Badge>
-                        {group.role === 'admin' && (
+                        {group.role === 'admin' ? (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -499,6 +522,20 @@ export default function VyronaSocialGroupBuy() {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to leave "${group.name}"?`)) {
+                                exitGroupMutation.mutate(group.id);
+                              }
+                            }}
+                            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                            disabled={exitGroupMutation.isPending}
+                          >
+                            {exitGroupMutation.isPending ? "Leaving..." : "Exit Group"}
+                          </Button>
                         )}
                       </div>
                     </div>
