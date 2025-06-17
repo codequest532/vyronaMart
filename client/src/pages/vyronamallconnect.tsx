@@ -177,8 +177,10 @@ export default function VyronaMallConnect() {
         description: `Room code: ${data.roomCode}. Share with friends to shop together!`,
       });
       setShowGroupModal(false);
-      // Navigate to VyronaSocial with the created room
-      setLocation(`/social?room=${data.roomCode}`);
+      // Stay in VyronaMallConnect and show group shopping interface
+      setActiveTab("group-shopping");
+      // Store the created room data for the group shopping interface
+      localStorage.setItem('currentGroupRoom', JSON.stringify(data));
     },
     onError: (error: any) => {
       toast({
@@ -830,8 +832,9 @@ export default function VyronaMallConnect() {
 
       {/* Main Mall Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="browse">Browse Stores</TabsTrigger>
+          <TabsTrigger value="group-shopping">Group Shopping</TabsTrigger>
           <TabsTrigger value="delivery">Delivery Options</TabsTrigger>
           <TabsTrigger value="loyalty">Loyalty & Offers</TabsTrigger>
           <TabsTrigger value="support">Support & Reviews</TabsTrigger>
@@ -925,6 +928,131 @@ export default function VyronaMallConnect() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        {/* Group Shopping Tab */}
+        <TabsContent value="group-shopping" className="space-y-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold">Group Shopping at {selectedMall?.name}</h2>
+                  <p className="text-gray-600">Shop together with friends and split delivery costs</p>
+                </div>
+                <Button 
+                  onClick={() => setShowGroupModal(true)}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Create New Group
+                </Button>
+              </div>
+
+              {/* Current Group Room Info */}
+              {(() => {
+                const currentRoom = localStorage.getItem('currentGroupRoom');
+                if (currentRoom) {
+                  const roomData = JSON.parse(currentRoom);
+                  return (
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg mb-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-bold text-lg">{roomData.name}</h3>
+                          <p className="text-gray-600">{roomData.description}</p>
+                          <div className="flex items-center space-x-4 mt-2">
+                            <Badge variant="outline" className="text-blue-600">
+                              <Users className="h-3 w-3 mr-1" />
+                              {roomData.memberCount || 1} members
+                            </Badge>
+                            <Badge variant="outline" className="text-green-600">
+                              Room Code: {roomData.roomCode}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(roomData.roomCode);
+                              toast({ title: "Room code copied!", description: "Share with friends to invite them" });
+                            }}
+                          >
+                            Share Code
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+
+              {/* Group Shopping Benefits */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Users className="h-5 w-5 text-blue-500" />
+                    <h4 className="font-medium">Walk Together Mode</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Browse stores together virtually as if walking through the mall</p>
+                </div>
+                
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Gift className="h-5 w-5 text-green-500" />
+                    <h4 className="font-medium">Group Discounts</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Unlock bulk purchase savings when buying together</p>
+                </div>
+                
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Truck className="h-5 w-5 text-amber-500" />
+                    <h4 className="font-medium">Shared Delivery</h4>
+                  </div>
+                  <p className="text-sm text-gray-600">Split delivery costs among group members</p>
+                </div>
+              </div>
+
+              {/* Group Shopping Instructions */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-3">How Group Shopping Works:</h4>
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">1</div>
+                    <span>Create a group room or join one using a room code</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">2</div>
+                    <span>Browse stores together and add items to shared group cart</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">3</div>
+                    <span>Members contribute to items they want using various payment methods</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">4</div>
+                    <span>Order is placed when funding goals are met and delivery costs are shared</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Join Section */}
+              <div className="mt-6 p-4 border border-dashed border-gray-300 rounded-lg">
+                <h4 className="font-medium mb-3">Join Existing Group</h4>
+                <div className="flex items-center space-x-3">
+                  <Input 
+                    placeholder="Enter room code (e.g., ABC123)"
+                    className="flex-1"
+                  />
+                  <Button variant="outline">
+                    Join Group
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Delivery Options Tab */}

@@ -156,6 +156,10 @@ Changelog:
 - June 17, 2025: Fixed MallCart checkout pricing calculation error - corrected double conversion from cents to rupees
 - June 17, 2025: Completed comprehensive MallCart backend API integration with VyronaCoins rewards and multi-store order handling
 - June 17, 2025: Added localStorage cart persistence and proper order placement flow for VyronaMallConnect module
+- June 17, 2025: Implemented standalone Group Shop functionality in VyronaMallConnect page
+- June 17, 2025: Added dedicated Group Shopping tab with room creation, sharing, and management features
+- June 17, 2025: Fixed Group Shop workflow to remain within VyronaMallConnect instead of redirecting to VyronaSocial
+- June 17, 2025: Enhanced Group Shop modal with comprehensive benefits display and customizable settings
 - June 15, 2025: Implemented automatic order tracking redirection for ALL VyronaSpace orders (individual and group buy)
 - June 15, 2025: VyronaSpace customers now redirected to live order tracking page instead of static success page
 - June 15, 2025: VyronaSpace group buy orders also redirect to tracking (applies to storeId 6, 7, 8)
