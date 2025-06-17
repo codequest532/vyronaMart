@@ -234,7 +234,7 @@ export default function VyronaMallConnect() {
               <div className="text-right">
                 <div className="flex items-center space-x-2">
                   <Coins className="h-5 w-5 text-yellow-300" />
-                  <span className="font-bold">{user?.vyronaCoins || 0}</span>
+                  <span className="font-bold">{(user as any)?.vyronaCoins || 0}</span>
                 </div>
                 <p className="text-sm opacity-80">VyronaCoins</p>
               </div>
@@ -642,41 +642,57 @@ export default function VyronaMallConnect() {
       {/* Mall Header with Live Info */}
       <Card className="vyrona-gradient-mall text-white">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+          {/* Top Row - Mall Info */}
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
                 onClick={() => setSelectedMall(null)}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 flex-shrink-0"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 All Malls
               </Button>
               <div>
                 <h1 className="text-2xl font-bold">{selectedMall.name}</h1>
-                <div className="flex items-center space-x-4 mt-2">
-                  <div className="flex items-center space-x-1">
-                    <Clock className="h-4 w-4" />
-                    <span className="text-sm">{selectedMall.timing}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Truck className="h-4 w-4 text-green-300" />
-                    <span className="text-sm">Delivery: {selectedMall.deliveryTime}</span>
-                  </div>
-                  <Badge className="bg-red-500 text-white animate-pulse">
-                    {selectedMall.currentOffers}
-                  </Badge>
-                </div>
               </div>
+            </div>
+            
+            {/* Cart Button - Always Visible */}
+            <Button 
+              variant="outline"
+              className="bg-white/20 text-white border-white/30 flex-shrink-0"
+              onClick={() => setShowCartModal(true)}
+            >
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              <span className="font-bold">{mallCart.length}</span>
+              <span className="ml-1 hidden sm:inline">MallCart</span>
+            </Button>
+          </div>
+
+          {/* Bottom Row - Details and Actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 flex-wrap">
+              <div className="flex items-center space-x-1">
+                <Clock className="h-4 w-4" />
+                <span className="text-sm">{selectedMall.timing}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <Truck className="h-4 w-4 text-green-300" />
+                <span className="text-sm">Delivery: {selectedMall.deliveryTime}</span>
+              </div>
+              <Badge className="bg-red-500 text-white animate-pulse text-xs">
+                {selectedMall.currentOffers}
+              </Badge>
             </div>
 
             {/* Quick Actions */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               <Dialog open={showGroupModal} onOpenChange={setShowGroupModal}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="bg-white/20 text-white border-white/30">
-                    <Users className="h-4 w-4 mr-2" />
-                    Group Shop
+                  <Button variant="outline" className="bg-white/20 text-white border-white/30 text-xs px-3 py-2">
+                    <Users className="h-3 w-3 mr-1" />
+                    <span className="hidden md:inline">Group Shop</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -708,24 +724,12 @@ export default function VyronaMallConnect() {
 
               <Button 
                 variant="outline"
-                className="bg-white/20 text-white border-white/30"
+                className="bg-white/20 text-white border-white/30 text-xs px-3 py-2"
                 onClick={() => setShowConciergeChat(true)}
               >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Mall Concierge
+                <MessageCircle className="h-3 w-3 mr-1" />
+                <span className="hidden md:inline">Concierge</span>
               </Button>
-
-              <div className="text-right">
-                <Button 
-                  variant="outline"
-                  className="bg-white/20 text-white border-white/30"
-                  onClick={() => setShowCartModal(true)}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  <span className="font-bold">{mallCart.length}</span>
-                  <span className="ml-1">Mall Cart</span>
-                </Button>
-              </div>
             </div>
           </div>
         </CardContent>
@@ -1207,19 +1211,21 @@ export default function VyronaMallConnect() {
                       grouped[item.storeId].push(item);
                       return grouped;
                     }, {})
-                  ).map(([storeId, items]: [string, any[]]) => (
+                  ).map(([storeId, items]: [string, any]) => {
+                    const storeItems = items as any[];
+                    return (
                     <Card key={storeId}>
                       <CardContent className="p-4">
                         <div className="flex items-center space-x-2 mb-4">
                           <Store className="h-5 w-5 text-blue-600" />
-                          <h3 className="font-semibold text-lg">{items[0].storeName}</h3>
+                          <h3 className="font-semibold text-lg">{storeItems[0]?.storeName}</h3>
                           <Badge variant="outline" className="text-xs">
-                            {items.length} item{items.length > 1 ? 's' : ''}
+                            {storeItems.length} item{storeItems.length > 1 ? 's' : ''}
                           </Badge>
                         </div>
                         
                         <div className="space-y-3">
-                          {items.map((item: any) => (
+                          {storeItems.map((item: any) => (
                             <div key={item.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                               <div className="flex items-center space-x-3">
                                 <img 
@@ -1283,7 +1289,8 @@ export default function VyronaMallConnect() {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Order Summary */}
