@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -72,6 +73,7 @@ export default function GroupMallCartCheckout() {
   const [groupCart, setGroupCart] = useState<GroupCartItem[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
   const [paymentMethod, setPaymentMethod] = useState("upi");
+  const [deliveryOption, setDeliveryOption] = useState("express");
   const [enableSubscription, setEnableSubscription] = useState(false);
   const [subscriptionFrequency, setSubscriptionFrequency] = useState("weekly");
   const [subscriptionDayOfWeek, setSubscriptionDayOfWeek] = useState("monday");
@@ -133,9 +135,22 @@ export default function GroupMallCartCheckout() {
     }
   }, [user]);
 
+  // Calculate delivery fee based on selected option
+  const getDeliveryFee = () => {
+    let baseFee;
+    switch (deliveryOption) {
+      case "express": baseFee = 99; break; // VyronaExpress 90-min delivery
+      case "standard": baseFee = 49; break; // Standard 24-hour delivery
+      case "pickup": baseFee = 0; break; // Store pickup
+      default: baseFee = 99;
+    }
+    // Split delivery fee among group members
+    return selectedRoom && selectedRoom.memberCount > 1 ? Math.round(baseFee / selectedRoom.memberCount) : baseFee;
+  };
+
   // Calculate totals
   const subtotal = Math.round(groupCart.reduce((sum, item) => sum + ((item.price / 100) * item.quantity), 0));
-  const deliveryFee = selectedRoom && selectedRoom.memberCount > 1 ? Math.round(99 / selectedRoom.memberCount) : 99;
+  const deliveryFee = getDeliveryFee();
   const vyronaCoinsEarned = Math.round(subtotal * 0.05);
   const total = Math.round(subtotal + deliveryFee);
 

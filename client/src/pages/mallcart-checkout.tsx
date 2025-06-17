@@ -37,6 +37,7 @@ export default function MallCartCheckout() {
     pincode: ""
   });
   const [paymentMethod, setPaymentMethod] = useState("upi");
+  const [deliveryOption, setDeliveryOption] = useState("express");
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -55,9 +56,19 @@ export default function MallCartCheckout() {
     enabled: !!user?.id,
   });
 
+  // Calculate delivery fee based on selected option
+  const getDeliveryFee = () => {
+    switch (deliveryOption) {
+      case "express": return 99; // VyronaExpress 90-min delivery
+      case "standard": return 49; // Standard 24-hour delivery
+      case "pickup": return 0; // Store pickup
+      default: return 99;
+    }
+  };
+
   // Calculate totals (convert from cents to rupees)
   const subtotal = mallCart.reduce((total: number, item: any) => total + ((item.price * item.quantity) / 100), 0);
-  const deliveryFee = 99; // Standard VyronaExpress delivery
+  const deliveryFee = getDeliveryFee();
   const vyronaCoinsEarned = Math.floor(subtotal / 100);
   const total = subtotal + deliveryFee;
 
@@ -278,6 +289,73 @@ export default function MallCartCheckout() {
                   rows={2}
                 />
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Delivery Options */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Truck className="h-5 w-5" />
+                <span>Delivery Options</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup value={deliveryOption} onValueChange={setDeliveryOption} className="space-y-4">
+                <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-purple-50 transition-colors">
+                  <RadioGroupItem value="express" id="express" />
+                  <div className="flex-1">
+                    <Label htmlFor="express" className="cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">VyronaExpress Delivery</div>
+                          <div className="text-sm text-gray-600">90-minute hyperlocal delivery</div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-purple-600" />
+                          <span className="text-sm font-medium">₹99</span>
+                        </div>
+                      </div>
+                    </Label>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-purple-50 transition-colors">
+                  <RadioGroupItem value="standard" id="standard" />
+                  <div className="flex-1">
+                    <Label htmlFor="standard" className="cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">Standard Delivery</div>
+                          <div className="text-sm text-gray-600">Next day delivery (24 hours)</div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-green-600" />
+                          <span className="text-sm font-medium">₹49</span>
+                        </div>
+                      </div>
+                    </Label>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-purple-50 transition-colors">
+                  <RadioGroupItem value="pickup" id="pickup" />
+                  <div className="flex-1">
+                    <Label htmlFor="pickup" className="cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium">Store Pickup</div>
+                          <div className="text-sm text-gray-600">Collect from nearest mall store</div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Store className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-green-600">FREE</span>
+                        </div>
+                      </div>
+                    </Label>
+                  </div>
+                </div>
+              </RadioGroup>
             </CardContent>
           </Card>
 
