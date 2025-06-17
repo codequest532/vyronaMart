@@ -129,33 +129,53 @@ export default function GroupMallCartCheckout() {
     }
   }, [user]);
 
-  // Initialize member addresses when room is selected and common address is disabled
+  // Initialize member data when room is selected
   useEffect(() => {
-    if (selectedRoom && !useCommonAddress && selectedRoom.memberCount > 0) {
-      const newMemberAddresses: {[key: string]: typeof shippingAddress} = {};
-      
-      // Create placeholder addresses for each member
-      for (let i = 1; i <= selectedRoom.memberCount; i++) {
-        const memberKey = `member_${i}`;
-        if (!memberAddresses[memberKey]) {
-          newMemberAddresses[memberKey] = {
-            fullName: i === 1 ? (user?.username || "") : "",
-            phone: i === 1 ? (user?.mobile || "") : "",
-            email: i === 1 ? (user?.email || "") : "",
-            addressLine1: "",
-            addressLine2: "",
-            city: "",
-            state: "",
-            pincode: ""
-          };
-        } else {
-          newMemberAddresses[memberKey] = memberAddresses[memberKey];
+    if (selectedRoom && selectedRoom.memberCount > 0) {
+      // Initialize member addresses for individual delivery mode
+      if (!useCommonAddress) {
+        const newMemberAddresses: {[key: string]: AddressData} = {};
+        
+        for (let i = 1; i <= selectedRoom.memberCount; i++) {
+          const memberKey = `member_${i}`;
+          if (!memberAddresses[memberKey]) {
+            newMemberAddresses[memberKey] = {
+              fullName: i === 1 ? (user?.username || "") : "",
+              phone: i === 1 ? (user?.mobile || "") : "",
+              email: i === 1 ? (user?.email || "") : "",
+              addressLine1: "",
+              addressLine2: "",
+              city: "",
+              state: "",
+              pincode: ""
+            };
+          } else {
+            newMemberAddresses[memberKey] = memberAddresses[memberKey];
+          }
         }
+        
+        setMemberAddresses(newMemberAddresses);
       }
       
-      setMemberAddresses(newMemberAddresses);
+      // Initialize member contributions with equal split
+      const newContributions: MemberContribution[] = [];
+      const contributionPerMember = Math.round(total / selectedRoom.memberCount);
+      
+      for (let i = 1; i <= selectedRoom.memberCount; i++) {
+        const memberKey = `member_${i}`;
+        
+        newContributions.push({
+          memberId: memberKey,
+          memberName: i === 1 ? (user?.username || `Member ${i}`) : `Member ${i}`,
+          contributionAmount: contributionPerMember,
+          paymentMethod: "upi", // Default to UPI for all members
+          contributionItems: []
+        });
+      }
+      
+      setMemberContributions(newContributions);
     }
-  }, [selectedRoom, useCommonAddress, user, memberAddresses]);
+  }, [selectedRoom, useCommonAddress, user, total, memberAddresses]);
 
   // Calculate totals
   const subtotal = groupCart.reduce((sum, item) => sum + ((item.price / 100) * item.quantity), 0);
@@ -718,8 +738,9 @@ export default function GroupMallCartCheckout() {
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Subscription Options */}
             <Card className="border-green-200 shadow-sm">
