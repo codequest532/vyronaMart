@@ -1,0 +1,91 @@
+ VyronaMallConnect – Customer Interface Overview
+🎯 Objective:
+To give users the experience of "shopping in a mall from their phone", with added benefits like gamification, brand events, group rewards, and fast local delivery.
+
+🌐 1. Virtual Mall Home
+Mall Selection Page:
+
+Auto-detect nearby malls via GPS or manual filter.
+
+E.g., “Phoenix MarketCity – Chennai”, “Brookefields Coimbatore”.
+
+Mall Home Banner:
+
+Virtual facade with live offers and store highlights.
+
+Shows mall timing, delivery availability, and mall-wide sales.
+
+Mall Categories:
+
+Fashion, Footwear, Beauty, Electronics, Food Court, etc.
+
+Includes “Mall Events”, flash sales, or festival exclusives.
+
+🏬 2. Storefront Browsing
+Digital Storefronts for Each Brand:
+
+Brand logo, store description, star ratings, delivery time estimate.
+
+Show “Top Picks”, “Bestsellers”, “Exclusive to Vyrona” labels.
+
+Brand-wise Search and Filter:
+
+Search across all mall stores or filter by category.
+
+Product Listings:
+
+Multiple images, price, variant options.
+
+Options for “Deliver from Mall” or “Reserve for Pickup”.
+
+🚚 3. Delivery Options
+VyronaExpress Delivery:
+
+90-min to 4-hour hyperlocal mall delivery via Vyrona network.
+
+MallCart Checkout:
+
+Unified cart for multiple stores within the same mall.
+
+Single delivery fee (if within mall delivery area).
+
+Store Pickup Option:
+
+Option to “Pick up at Store” and skip delivery charges.
+
+🤝 4. Group Shopping via VyronSocial
+VyronSocial Room for Mall Offers:
+
+Invite friends to shop from the same mall and share delivery.
+
+Group Buy Discounts on combos (e.g., fashion + accessories from 2 different stores).
+
+“Walk Together” Mode:
+
+Social cart where friends co-shop as if walking through the mall.
+
+💳 5. Wallet, Offers & Loyalty
+VyronaCoins & Coupons:
+
+Stack VyronaCoins for future orders.
+
+Exclusive coupons per mall/brand.
+
+Brand Loyalty Integration:
+
+If brand has existing loyalty program (e.g., Puma, MAC), allow linking or syncing.
+
+Mall Membership Perks:
+
+Certain malls offer early access, free delivery, or cashback via “VyronaMallPass”.
+
+📲 6. Customer Support & Feedback
+Live Mall Concierge Chat:
+
+Chat with mall support for help with multi-store orders, delivery tracking.
+
+Store-specific Ratings & Reviews:
+
+Rate individual stores and products.
+
+“Verified Mall Buyer” badge on authentic reviews.
