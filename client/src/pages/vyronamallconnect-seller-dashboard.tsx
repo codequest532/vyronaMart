@@ -19,7 +19,7 @@ import {
   Phone, Mail, MapPin, Calendar, DollarSign, Tag,
   Image as ImageIcon, RotateCcw, Save, Eye, Search,
   Download, Filter, RefreshCw, AlertCircle, CheckCircle,
-  ArrowLeft, Building, Zap, Target, Crown, Award
+  ArrowLeft, Building, Zap, Target, Crown, Award, Copy
 } from "lucide-react";
 
 export default function VyronaMallConnectSellerDashboard() {
@@ -1516,6 +1516,156 @@ export default function VyronaMallConnectSellerDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* CSV Bulk Import Modal */}
+        {showBulkImportModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Upload className="h-5 w-5 text-blue-600" />
+                  <span>Bulk Import Products via CSV</span>
+                </CardTitle>
+                <p className="text-sm text-gray-600">
+                  Upload multiple products at once using CSV format. Download sample template or paste CSV data directly.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* CSV Format Instructions */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2">CSV Format Requirements:</h4>
+                  <div className="text-sm text-blue-800 space-y-1">
+                    <p><strong>Required columns:</strong> name, category, price, description</p>
+                    <p><strong>Optional columns:</strong> imageUrl, inStock, enableGroupBuy, groupBuyMinQuantity, groupBuyDiscount</p>
+                    <p><strong>Price format:</strong> Enter in rupees (e.g., 599 for ₹599)</p>
+                    <p><strong>Boolean values:</strong> Use true/false for inStock and enableGroupBuy</p>
+                  </div>
+                </div>
+
+                {/* Sample CSV Template */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">Sample CSV Template:</h4>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        const sampleCSV = `name,category,price,description,imageUrl,inStock,enableGroupBuy,groupBuyMinQuantity,groupBuyDiscount
+Wireless Headphones,Electronics,2999,Premium wireless headphones with noise cancellation,,true,true,2,10
+Smart Watch,Electronics,8999,Fitness tracking smartwatch with heart rate monitor,,true,false,1,0
+Organic Coffee Beans,Food & Beverages,899,Premium organic coffee beans - 500g pack,,true,true,5,15`;
+                        navigator.clipboard.writeText(sampleCSV);
+                        toast({
+                          title: "Template Copied",
+                          description: "Sample CSV template copied to clipboard!",
+                        });
+                      }}
+                    >
+                      <Copy className="h-4 w-4 mr-1" />
+                      Copy Template
+                    </Button>
+                  </div>
+                  <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
+{`name,category,price,description,imageUrl,inStock,enableGroupBuy,groupBuyMinQuantity,groupBuyDiscount
+Wireless Headphones,Electronics,2999,Premium wireless headphones with noise cancellation,,true,true,2,10
+Smart Watch,Electronics,8999,Fitness tracking smartwatch with heart rate monitor,,true,false,1,0
+Organic Coffee Beans,Food & Beverages,899,Premium organic coffee beans - 500g pack,,true,true,5,15`}
+                  </pre>
+                </div>
+
+                {/* File Upload Section */}
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-base font-semibold">Upload CSV File</Label>
+                    <div className="mt-2">
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (event) => {
+                              const csv = event.target?.result as string;
+                              setCsvData(csv);
+                            };
+                            reader.readAsText(file);
+                          }
+                        }}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-center text-gray-500">
+                    <span>OR</span>
+                  </div>
+
+                  {/* Manual CSV Input */}
+                  <div>
+                    <Label htmlFor="csvData" className="text-base font-semibold">Paste CSV Data</Label>
+                    <textarea
+                      id="csvData"
+                      value={csvData}
+                      onChange={(e) => setCsvData(e.target.value)}
+                      placeholder="Paste your CSV data here..."
+                      className="mt-2 w-full h-40 p-3 border border-gray-300 rounded-lg text-sm font-mono"
+                    />
+                  </div>
+
+                  {/* Preview Section */}
+                  {csvData && (
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-900 mb-2">Preview:</h4>
+                      <div className="text-sm text-green-800">
+                        <p>CSV data detected - {csvData.split('\n').length - 1} products ready for import</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setShowBulkImportModal(false);
+                      setCsvData("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      if (!csvData.trim()) {
+                        toast({
+                          title: "No Data",
+                          description: "Please upload a CSV file or paste CSV data",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      bulkImportMutation.mutate(csvData);
+                    }}
+                    disabled={bulkImportMutation.isPending || !csvData.trim()}
+                  >
+                    {bulkImportMutation.isPending ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                        Importing...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Import Products
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

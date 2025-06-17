@@ -10130,6 +10130,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CSV bulk import endpoint for VyronaMallConnect sellers
+  app.post("/api/mallconnect/seller/products/bulk-import", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const { csvData } = req.body;
+
+      if (!csvData) {
+        return res.status(400).json({ message: "CSV data is required" });
+      }
+
+      // Get seller's store
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(and(eq(stores.sellerId, sellerId), eq(stores.module, "VyronaMallConnect")))
+        .limit(1);
+      
+      if (!store) {
+        return res.status(404).json({ message: "Store not found" });
+      }
+
+      // Parse CSV data
+      const lines = csvData.trim().split('\n');
+      if (lines.length < 2) {
+        return res.status(400).json({ message: "CSV must contain header and at least one data row" });
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim());
+      const requiredFields = ['name', 'category', 'price', 'description'];
+      
+      // Validate required fields
+      for (const field of requiredFields) {
+        if (!headers.includes(field)) {
+          return res.status(400).json({ message: `Missing required field: ${field}` });
+        }
+      }
+
+      const productsToImport = [];
+      const errors = [];
+
+      // Process each data row
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        
+        if (values.length !== headers.length) {
+          errors.push(`Row ${i + 1}: Column count mismatch`);
+          continue;
+        }
+
+        const productData: any = {};
+        
+        // Map CSV values to product fields
+        headers.forEach((header, index) => {
+          const value = values[index];
+          
+          switch (header) {
+            case 'name':
+            case 'category':
+            case 'description':
+            case 'imageUrl':
+              productData[header] = value || '';
+              break;
+            case 'price':
+              const price = parseFloat(value);
+              if (isNaN(price) || price <= 0) {
+                errors.push(`Row ${i + 1}: Invalid price value`);
+                return;
+              }
+              productData.price = Math.round(price * 100); // Convert to cents
+              break;
+            case 'inStock':
+              productData.inStock = value.toLowerCase() === 'true';
+              break;
+            case 'enableGroupBuy':
+              productData.enableGroupBuy = value.toLowerCase() === 'true';
+              break;
+            case 'groupBuyMinQuantity':
+              productData.groupBuyMinQuantity = parseInt(value) || 2;
+              break;
+            case 'groupBuyDiscount':
+              productData.groupBuyDiscount = parseInt(value) || 0;
+              break;
+          }
+        });
+
+        // Validate required fields
+        if (!productData.name || !productData.category || !productData.description) {
+          errors.push(`Row ${i + 1}: Missing required field values`);
+          continue;
+        }
+
+        // Add default values and metadata
+        productData.storeId = store.id;
+        productData.sellerId = sellerId;
+        productData.module = "VyronaMallConnect";
+        productData.inStock = productData.inStock !== false; // Default to true
+        productData.createdAt = new Date();
+
+        productsToImport.push(productData);
+      }
+
+      if (errors.length > 0) {
+        return res.status(400).json({ 
+          message: "CSV validation errors", 
+          errors: errors.slice(0, 10) // Limit to first 10 errors
+        });
+      }
+
+      if (productsToImport.length === 0) {
+        return res.status(400).json({ message: "No valid products found in CSV" });
+      }
+
+      // Bulk insert products
+      const importedProducts = await db
+        .insert(products)
+        .values(productsToImport)
+        .returning();
+
+      res.json({ 
+        message: "Products imported successfully", 
+        imported: importedProducts.length,
+        products: importedProducts 
+      });
+
+    } catch (error) {
+      console.error("CSV bulk import error:", error);
+      res.status(500).json({ message: "Failed to import products" });
+    }
+  });
+
   app.get("/api/mallconnect/seller/orders", async (req, res) => {
     try {
       const sellerId = getUserId(req);
