@@ -55,10 +55,10 @@ export default function MallCartCheckout() {
     enabled: !!user?.id,
   });
 
-  // Calculate totals
-  const subtotal = mallCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0);
+  // Calculate totals (convert from cents to rupees)
+  const subtotal = mallCart.reduce((total: number, item: any) => total + ((item.price * item.quantity) / 100), 0);
   const deliveryFee = 99; // Standard VyronaExpress delivery
-  const vyronaCoinsEarned = Math.floor(subtotal / 10000);
+  const vyronaCoinsEarned = Math.floor(subtotal / 100);
   const total = subtotal + deliveryFee;
 
   // Group items by store
@@ -355,7 +355,7 @@ export default function MallCartCheckout() {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span>Subtotal ({mallCart.reduce((total: number, item: any) => total + item.quantity, 0)} items)</span>
-                  <span>₹{Math.round(subtotal / 100).toLocaleString()}</span>
+                  <span>₹{Math.round(subtotal).toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between">
@@ -370,7 +370,7 @@ export default function MallCartCheckout() {
                 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>₹{Math.round(total / 100).toLocaleString()}</span>
+                  <span>₹{Math.round(total).toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">

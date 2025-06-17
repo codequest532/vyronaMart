@@ -153,6 +153,9 @@ Changelog:
 - June 15, 2025: Deleted demo seller account (vyronaspace_demo, ID 17) and associated demo products (IDs 101-104)
 - June 15, 2025: Updated VyronaSpace seller dashboard backend to work with authentic seller accounts using proper store ownership mapping
 - June 15, 2025: Cleaned up backend code references to demo VyronaSpace seller account - platform now production-ready
+- June 17, 2025: Fixed MallCart checkout pricing calculation error - corrected double conversion from cents to rupees
+- June 17, 2025: Completed comprehensive MallCart backend API integration with VyronaCoins rewards and multi-store order handling
+- June 17, 2025: Added localStorage cart persistence and proper order placement flow for VyronaMallConnect module
 - June 15, 2025: Implemented automatic order tracking redirection for ALL VyronaSpace orders (individual and group buy)
 - June 15, 2025: VyronaSpace customers now redirected to live order tracking page instead of static success page
 - June 15, 2025: VyronaSpace group buy orders also redirect to tracking (applies to storeId 6, 7, 8)
