@@ -134,10 +134,10 @@ export default function GroupMallCartCheckout() {
   }, [user]);
 
   // Calculate totals
-  const subtotal = groupCart.reduce((sum, item) => sum + ((item.price / 100) * item.quantity), 0);
+  const subtotal = Math.round(groupCart.reduce((sum, item) => sum + ((item.price / 100) * item.quantity), 0));
   const deliveryFee = selectedRoom && selectedRoom.memberCount > 1 ? Math.round(99 / selectedRoom.memberCount) : 99;
   const vyronaCoinsEarned = Math.round(subtotal * 0.05);
-  const total = subtotal + deliveryFee;
+  const total = Math.round(subtotal + deliveryFee);
 
   // Initialize member addresses when room is selected and common address is disabled
   useEffect(() => {
@@ -1117,7 +1117,7 @@ export default function GroupMallCartCheckout() {
                   <Users className="h-5 w-5" />
                   <span>
                     {selectedRoom && selectedRoom.memberCount > 1 
-                      ? `Initiate Group Payment (₹${Math.round(total)})` 
+                      ? `Place Group Order (₹${Math.round(total)})` 
                       : `Place Order (₹${Math.round(total)})`
                     }
                   </span>
