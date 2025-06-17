@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +26,11 @@ import {
   MapPin,
   Timer,
   Crown,
-  Group
+  Group,
+  Trash2,
+  UserX,
+  Settings,
+  MoreVertical
 } from "lucide-react";
 
 interface VyronaSocialGroup {
@@ -82,6 +87,7 @@ export default function VyronaSocialGroupBuy() {
   const [showCreateGroupDialog, setShowCreateGroupDialog] = useState(false);
   const [showJoinGroupDialog, setShowJoinGroupDialog] = useState(false);
   const [showStartSessionDialog, setShowStartSessionDialog] = useState(false);
+  const [showManageMembersDialog, setShowManageMembersDialog] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<VyronaSocialGroup | null>(null);
   const [selectedSession, setSelectedSession] = useState<GroupShoppingSession | null>(null);
   const [chatMessage, setChatMessage] = useState("");
@@ -183,6 +189,48 @@ export default function VyronaSocialGroupBuy() {
       toast({
         title: "Error",
         description: error.message || "Failed to send message",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete group mutation
+  const deleteGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      return apiRequest("DELETE", `/api/vyrona-social/groups/${groupId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/vyrona-social/my-groups"] });
+      toast({
+        title: "Success",
+        description: "Group deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete group",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove member mutation
+  const removeMemberMutation = useMutation({
+    mutationFn: async ({ groupId, memberId }: { groupId: number; memberId: number }) => {
+      return apiRequest("DELETE", `/api/vyrona-social/groups/${groupId}/members/${memberId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/vyrona-social/my-groups"] });
+      toast({
+        title: "Success",
+        description: "Member removed successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove member",
         variant: "destructive",
       });
     },
@@ -415,9 +463,44 @@ export default function VyronaSocialGroupBuy() {
                           </span>
                         </CardDescription>
                       </div>
-                      <Badge variant="outline" className="font-mono">
-                        {group.group_code}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="font-mono">
+                          {group.group_code}
+                        </Badge>
+                        {group.role === 'admin' && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedGroup(group);
+                                  setShowManageMembersDialog(true);
+                                }}
+                                className="flex items-center gap-2"
+                              >
+                                <Settings className="h-4 w-4" />
+                                Manage Members
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  if (confirm(`Are you sure you want to delete "${group.name}"? This action cannot be undone.`)) {
+                                    deleteGroupMutation.mutate(group.id);
+                                  }
+                                }}
+                                className="flex items-center gap-2 text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                Delete Group
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -576,6 +659,26 @@ export default function VyronaSocialGroupBuy() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Manage Members Dialog */}
+      <Dialog open={showManageMembersDialog} onOpenChange={setShowManageMembersDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Manage Group Members</DialogTitle>
+            <DialogDescription>
+              {selectedGroup?.name} • {selectedGroup?.current_members} members
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <ManageMembersContent 
+              groupId={selectedGroup?.id} 
+              onMemberRemoved={() => {
+                queryClient.invalidateQueries({ queryKey: ["/api/vyrona-social/my-groups"] });
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
