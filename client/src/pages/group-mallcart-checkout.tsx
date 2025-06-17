@@ -44,6 +44,9 @@ interface MemberContribution {
   contributionAmount: number;
   paymentMethod: string;
   contributionItems: GroupCartItem[];
+  paymentStatus: 'pending' | 'processing' | 'completed' | 'failed';
+  paymentId?: string;
+  paidAt?: Date;
 }
 
 interface GroupCheckoutData {
@@ -76,6 +79,7 @@ export default function GroupMallCartCheckout() {
   const [subscriptionStartDate, setSubscriptionStartDate] = useState("");
   const [useCommonAddress, setUseCommonAddress] = useState(true);
   const [memberContributions, setMemberContributions] = useState<MemberContribution[]>([]);
+  const [selectedMemberPayment, setSelectedMemberPayment] = useState<string | null>(null);
 
   
   const [shippingAddress, setShippingAddress] = useState<AddressData>({
@@ -176,13 +180,84 @@ export default function GroupMallCartCheckout() {
           memberName: i === 1 ? (user?.username || `Member ${i}`) : `Member ${i}`,
           contributionAmount: contributionPerMember,
           paymentMethod: "upi",
-          contributionItems: []
+          contributionItems: [],
+          paymentStatus: 'pending'
         });
       }
       
       setMemberContributions(newContributions);
     }
   }, [selectedRoom, total, user]);
+
+  // Member payment mutation
+  const memberPaymentMutation = useMutation({
+    mutationFn: async ({ memberId, paymentMethod, amount }: { memberId: string, paymentMethod: string, amount: number }) => {
+      return await apiRequest("POST", "/api/group-member-payment", {
+        memberId,
+        paymentMethod,
+        amount,
+        roomId: selectedRoom?.id,
+        memberEmail: memberContributions.find(m => m.memberId === memberId)?.memberName === user?.username ? user?.email : `${memberId}@example.com`
+      });
+    },
+    onSuccess: (response, variables) => {
+      // Update member payment status
+      setMemberContributions(prev => 
+        prev.map(member => 
+          member.memberId === variables.memberId 
+            ? { ...member, paymentStatus: 'completed', paymentId: response.paymentId, paidAt: new Date() }
+            : member
+        )
+      );
+      
+      toast({
+        title: "Payment Successful!",
+        description: `Payment of ₹${variables.amount} completed successfully`,
+      });
+      
+      setSelectedMemberPayment(null);
+    },
+    onError: (error: any, variables) => {
+      // Update member payment status to failed
+      setMemberContributions(prev => 
+        prev.map(member => 
+          member.memberId === variables.memberId 
+            ? { ...member, paymentStatus: 'failed' }
+            : member
+        )
+      );
+      
+      toast({
+        title: "Payment Failed",
+        description: error.message || "Failed to process payment",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Check if all members have paid
+  const allMembersPaid = memberContributions.length > 0 && memberContributions.every(member => member.paymentStatus === 'completed');
+
+  // Handle member payment
+  const handleMemberPayment = (memberId: string, paymentMethod: string) => {
+    const member = memberContributions.find(m => m.memberId === memberId);
+    if (!member) return;
+
+    // Update payment status to processing
+    setMemberContributions(prev => 
+      prev.map(m => 
+        m.memberId === memberId 
+          ? { ...m, paymentStatus: 'processing', paymentMethod }
+          : m
+      )
+    );
+
+    memberPaymentMutation.mutate({
+      memberId,
+      paymentMethod,
+      amount: member.contributionAmount
+    });
+  };
 
   // Place group order mutation
   const placeOrderMutation = useMutation({
@@ -638,28 +713,133 @@ export default function GroupMallCartCheckout() {
                     </div>
 
                     {/* Member list with payment status */}
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <h4 className="font-medium text-gray-900 mb-3">Member Payment Status</h4>
                       {memberContributions.map((contribution, index) => (
-                        <div key={contribution.memberId} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-medium text-purple-700">{index + 1}</span>
-                            </div>
-                            <div>
-                              <p className="font-medium">{contribution.memberName}</p>
-                              <div className="flex items-center space-x-2">
-                                {contribution.paymentMethod === "upi" && <Smartphone className="h-4 w-4 text-blue-600" />}
-                                {contribution.paymentMethod === "wallet" && <Wallet className="h-4 w-4 text-green-600" />}
-                                {contribution.paymentMethod === "card" && <CreditCard className="h-4 w-4 text-purple-600" />}
-                                <span className="text-sm text-gray-600 capitalize">{contribution.paymentMethod}</span>
+                        <div key={contribution.memberId} className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-medium text-purple-700">{index + 1}</span>
+                              </div>
+                              <div>
+                                <p className="font-medium">{contribution.memberName}</p>
+                                <div className="flex items-center space-x-2">
+                                  {contribution.paymentStatus === 'completed' && (
+                                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                      ✓ Paid
+                                    </span>
+                                  )}
+                                  {contribution.paymentStatus === 'processing' && (
+                                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                      Processing...
+                                    </span>
+                                  )}
+                                  {contribution.paymentStatus === 'failed' && (
+                                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                                      Failed
+                                    </span>
+                                  )}
+                                  {contribution.paymentStatus === 'pending' && (
+                                    <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
+                                      Pending
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
+                            <div className="text-right">
+                              <p className="font-bold text-purple-600">₹{contribution.contributionAmount}</p>
+                              {contribution.paidAt && (
+                                <p className="text-xs text-gray-500">
+                                  Paid {new Date(contribution.paidAt).toLocaleTimeString()}
+                                </p>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold text-purple-600">₹{contribution.contributionAmount}</p>
-                            <p className="text-xs text-gray-500">Pending Payment</p>
-                          </div>
+
+                          {/* Payment button for pending payments */}
+                          {contribution.paymentStatus === 'pending' && (
+                            <div className="mt-3">
+                              {selectedMemberPayment === contribution.memberId ? (
+                                <div className="space-y-2">
+                                  <p className="text-sm font-medium text-gray-700">Choose Payment Method:</p>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleMemberPayment(contribution.memberId, 'upi')}
+                                      disabled={memberPaymentMutation.isPending}
+                                      className="flex items-center space-x-2"
+                                    >
+                                      <Smartphone className="h-4 w-4" />
+                                      <span>UPI</span>
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleMemberPayment(contribution.memberId, 'wallet')}
+                                      disabled={memberPaymentMutation.isPending}
+                                      className="flex items-center space-x-2"
+                                    >
+                                      <Wallet className="h-4 w-4" />
+                                      <span>Wallet</span>
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleMemberPayment(contribution.memberId, 'card')}
+                                      disabled={memberPaymentMutation.isPending}
+                                      className="flex items-center space-x-2"
+                                    >
+                                      <CreditCard className="h-4 w-4" />
+                                      <span>Card</span>
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleMemberPayment(contribution.memberId, 'cod')}
+                                      disabled={memberPaymentMutation.isPending}
+                                      className="flex items-center space-x-2"
+                                    >
+                                      <Package className="h-4 w-4" />
+                                      <span>COD</span>
+                                    </Button>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setSelectedMemberPayment(null)}
+                                    className="w-full text-gray-600"
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  onClick={() => setSelectedMemberPayment(contribution.memberId)}
+                                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                                >
+                                  Pay Now ₹{contribution.contributionAmount}
+                                </Button>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Retry payment for failed payments */}
+                          {contribution.paymentStatus === 'failed' && (
+                            <div className="mt-3">
+                              <Button
+                                size="sm"
+                                onClick={() => setSelectedMemberPayment(contribution.memberId)}
+                                variant="outline"
+                                className="w-full border-red-300 text-red-600 hover:bg-red-50"
+                              >
+                                Retry Payment ₹{contribution.contributionAmount}
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -923,9 +1103,9 @@ export default function GroupMallCartCheckout() {
             {/* Place Order Button */}
             <Button
               size="lg"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handlePlaceOrder}
-              disabled={placeOrderMutation.isPending || groupCart.length === 0}
+              disabled={placeOrderMutation.isPending || groupCart.length === 0 || (selectedRoom && selectedRoom.memberCount > 1 && !allMembersPaid)}
             >
               {placeOrderMutation.isPending ? (
                 <div className="flex items-center space-x-2">
