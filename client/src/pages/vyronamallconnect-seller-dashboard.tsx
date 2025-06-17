@@ -30,6 +30,8 @@ export default function VyronaMallConnectSellerDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showProductModal, setShowProductModal] = useState(false);
+  const [showBulkImportModal, setShowBulkImportModal] = useState(false);
+  const [csvData, setCsvData] = useState("");
   const [productFormData, setProductFormData] = useState({
     name: "",
     category: "",
@@ -64,6 +66,29 @@ export default function VyronaMallConnectSellerDashboard() {
   const { data: analyticsData } = useQuery({
     queryKey: ["/api/mallconnect/seller/analytics"],
     retry: false,
+  });
+
+  // CSV bulk import mutation
+  const bulkImportMutation = useMutation({
+    mutationFn: async (csvData: string) => {
+      return await apiRequest("POST", "/api/mallconnect/seller/products/bulk-import", { csvData });
+    },
+    onSuccess: (response: any) => {
+      toast({
+        title: "Bulk Import Successful",
+        description: `${response.imported} products imported successfully!`,
+      });
+      setShowBulkImportModal(false);
+      setCsvData("");
+      queryClient.invalidateQueries({ queryKey: ["/api/mallconnect/seller/products"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Import Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const store = storeData || {};
@@ -521,10 +546,16 @@ export default function VyronaMallConnectSellerDashboard() {
                 <h2 className="text-2xl font-bold text-gray-900">Product Catalog</h2>
                 <p className="text-gray-600">Manage your store's product inventory</p>
               </div>
-              <Button onClick={() => setShowProductModal(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Product
-              </Button>
+              <div className="flex space-x-3">
+                <Button variant="outline" onClick={() => setShowBulkImportModal(true)}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Bulk Import CSV
+                </Button>
+                <Button onClick={() => setShowProductModal(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Product
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
