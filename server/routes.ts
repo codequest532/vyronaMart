@@ -10495,7 +10495,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/mallconnect/seller/orders/:orderId", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const orderId = parseInt(req.params.orderId);
       const { status } = req.body;
       const [updatedOrder] = await db
