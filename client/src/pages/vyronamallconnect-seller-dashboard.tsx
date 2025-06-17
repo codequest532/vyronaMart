@@ -678,13 +678,16 @@ export default function VyronaMallConnectSellerDashboard() {
                       <Label htmlFor="productImageUrl">Image URL</Label>
                       <Input
                         id="productImageUrl"
-                        type="url"
+                        type="text"
                         value={productFormData.imageUrl}
                         onChange={(e) => setProductFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                        placeholder="https://example.com/product-image.jpg"
+                        placeholder="https://drive.google.com/file/d/your-file-id/view or direct image URL"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Enter a direct URL to the product image (JPG, PNG, WebP formats supported)
+                        Enter a Google Drive link (make sure file is publicly viewable) or direct image URL (JPG, PNG, WebP)
+                      </p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        💡 For Google Drive: Right-click image → Share → Change access to "Anyone with the link" → Copy link
                       </p>
                     </div>
 
