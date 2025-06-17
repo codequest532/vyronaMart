@@ -934,7 +934,12 @@ export default function GroupMallCartCheckout() {
               ) : (
                 <div className="flex items-center space-x-2">
                   <Users className="h-5 w-5" />
-                  <span>Place Group Order (₹{Math.round(total)})</span>
+                  <span>
+                    {selectedRoom && selectedRoom.memberCount > 1 
+                      ? `Initiate Group Payment (₹${Math.round(total)})` 
+                      : `Place Order (₹${Math.round(total)})`
+                    }
+                  </span>
                 </div>
               )}
             </Button>
