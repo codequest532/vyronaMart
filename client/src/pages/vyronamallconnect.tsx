@@ -173,19 +173,21 @@ export default function VyronaMallConnect() {
     },
     onSuccess: (data: any) => {
       toast({
-        title: "Group Room Created",
-        description: `Room code: ${data.roomCode}. Share with friends to shop together!`,
+        title: "Group Created Successfully",
+        description: `Group code: ${data.roomCode}. Share with friends to shop together!`,
       });
       setShowGroupModal(false);
       // Stay in VyronaMallConnect and show group shopping interface
       setActiveTab("group-shopping");
       // Store the created room data for the group shopping interface
       localStorage.setItem('currentGroupRoom', JSON.stringify(data));
+      // Refresh the group shopping data
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create group room",
+        description: error.message || "Failed to create shopping group",
         variant: "destructive",
       });
     },
@@ -819,7 +821,7 @@ export default function VyronaMallConnect() {
                       className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                       disabled={createGroupRoomMutation.isPending}
                     >
-                      {createGroupRoomMutation.isPending ? "Creating..." : "Create VyronSocial Room"}
+                      {createGroupRoomMutation.isPending ? "Creating..." : "Create Shopping Group"}
                     </Button>
                   </div>
                 </DialogContent>
@@ -973,7 +975,7 @@ export default function VyronaMallConnect() {
                               {roomData.memberCount || 1} members
                             </Badge>
                             <Badge variant="outline" className="text-green-600">
-                              Room Code: {roomData.roomCode}
+                              Group Code: {roomData.roomCode}
                             </Badge>
                           </div>
                         </div>
@@ -1029,7 +1031,7 @@ export default function VyronaMallConnect() {
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">1</div>
-                    <span>Create a group room or join one using a room code</span>
+                    <span>Create a group room or join one using a group code</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">2</div>
@@ -1051,7 +1053,7 @@ export default function VyronaMallConnect() {
                 <h4 className="font-medium mb-3">Join Existing Group</h4>
                 <div className="flex items-center space-x-3">
                   <Input 
-                    placeholder="Enter room code (e.g., ABC123)"
+                    placeholder="Enter group code (e.g., ABC123)"
                     className="flex-1"
                   />
                   <Button variant="outline">
