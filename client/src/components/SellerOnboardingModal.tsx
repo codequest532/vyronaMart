@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Store, Instagram, BookOpen, ShoppingBag, Truck } from "lucide-react";
+import { Check, Store, Instagram, BookOpen, ShoppingBag, Truck, Building2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -76,6 +76,14 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
       description: "Books, e-books & library management",
       features: ["Book rentals", "E-book sales", "Library system", "Reading analytics"],
       color: "from-green-500 to-teal-500"
+    },
+    {
+      id: "VyronaMallConnect",
+      name: "VyronaMallConnect",
+      icon: <Building2 className="h-8 w-8" />,
+      description: "Virtual mall storefront management",
+      features: ["Virtual storefronts", "Mall partnerships", "Cross-store bundles", "Premium placement"],
+      color: "from-purple-500 to-indigo-500"
     }
   ];
 

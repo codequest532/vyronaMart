@@ -931,16 +931,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .insert(stores)
         .values({
           name: "Demo MallConnect Electronics",
-          description: "Premium electronics store in virtual mall with latest gadgets and accessories",
-          sellerId: newSeller.id,
-          module: "VyronaMallConnect",
-          category: "Electronics",
+          type: "electronics",
           address: "Virtual Mall Plaza, Level 2, Store #MC001",
-          rating: 4.8,
+          rating: 480, // 4.8 out of 5 (stored as integer out of 500)
           isOpen: true,
-          deliveryFee: 50,
-          deliveryTime: "30-45 mins",
-          imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400"
+          sellerId: newSeller.id
         })
         .returning();
 
