@@ -147,6 +147,7 @@ export default function VyronaMallConnect() {
   const addToMallCart = (product: any, store: any) => {
     const cartItem = {
       ...product,
+      id: `${product.id}-${store.id}-${deliveryOption}`,
       storeId: store.id,
       storeName: store.name,
       mallId: selectedMall?.id,
@@ -154,7 +155,9 @@ export default function VyronaMallConnect() {
       quantity: 1,
       deliveryOption
     };
-    setMallCart([...mallCart, cartItem]);
+    const updatedCart = [...mallCart, cartItem];
+    setMallCart(updatedCart);
+    localStorage.setItem('mallCart', JSON.stringify(updatedCart));
     toast({
       title: "Added to Mall Cart",
       description: `${product.name} from ${store.name} added to your cart`,
@@ -171,17 +174,22 @@ export default function VyronaMallConnect() {
   };
 
   const updateCartItemQuantity = (itemId: string, newQuantity: number) => {
+    let updatedCart;
     if (newQuantity === 0) {
-      setMallCart(mallCart.filter(item => item.id !== itemId));
+      updatedCart = mallCart.filter(item => item.id !== itemId);
     } else {
-      setMallCart(mallCart.map(item => 
+      updatedCart = mallCart.map(item => 
         item.id === itemId ? { ...item, quantity: newQuantity } : item
-      ));
+      );
     }
+    setMallCart(updatedCart);
+    localStorage.setItem('mallCart', JSON.stringify(updatedCart));
   };
 
   const removeFromCart = (itemId: string) => {
-    setMallCart(mallCart.filter(item => item.id !== itemId));
+    const updatedCart = mallCart.filter(item => item.id !== itemId);
+    setMallCart(updatedCart);
+    localStorage.setItem('mallCart', JSON.stringify(updatedCart));
     toast({
       title: "Item Removed",
       description: "Item removed from your MallCart",
@@ -1339,15 +1347,13 @@ export default function VyronaMallConnect() {
                       <Button 
                         className="w-full bg-amber-500 hover:bg-amber-600 text-white"
                         onClick={() => {
-                          toast({
-                            title: "Order Placed Successfully!",
-                            description: `Your order from ${selectedMall.name} has been confirmed`,
-                          });
-                          setMallCart([]);
+                          // Save cart to localStorage and redirect to checkout
+                          localStorage.setItem('mallCart', JSON.stringify(mallCart));
                           setShowCartModal(false);
+                          setLocation("/mallcart-checkout");
                         }}
                       >
-                        Place Order - ₹{Math.round((getTotalPrice() + getDeliveryFee() * 100) / 100).toLocaleString()}
+                        Proceed to Checkout - ₹{Math.round((getTotalPrice() + getDeliveryFee() * 100) / 100).toLocaleString()}
                       </Button>
                       
                       <div className="flex space-x-3">
