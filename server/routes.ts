@@ -2110,7 +2110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const orderData = {
           module: 'mallcart',
           userId,
-          totalAmount: storeTotal + (deliveryFee * 100), // Convert to cents
+          totalAmount: storeTotal, // Items total only - delivery fee already included in frontend
           status: 'confirmed',
           metadata: {
             storeId: parseInt(storeId),
