@@ -314,6 +314,294 @@ export default function VyronaMallConnect() {
     );
   }
 
+  // 3. Individual Store Interface
+  if (selectedStore) {
+    const storeProducts = [
+      {
+        id: 1,
+        name: "Premium Cotton T-Shirt",
+        price: 2999,
+        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300",
+        rating: 4.5,
+        inStock: true,
+        tags: ["Bestseller", "New Arrival"]
+      },
+      {
+        id: 2,
+        name: "Denim Jacket",
+        price: 5999,
+        image: "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=300",
+        rating: 4.7,
+        inStock: true,
+        tags: ["Top Pick", "Limited Edition"]
+      },
+      {
+        id: 3,
+        name: "Casual Sneakers",
+        price: 8999,
+        image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300",
+        rating: 4.3,
+        inStock: false,
+        tags: ["Popular"]
+      }
+    ];
+
+    return (
+      <div className="container mx-auto px-4 py-8 space-y-6">
+        {/* Store Header */}
+        <Card className="vyrona-gradient-mall text-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => setSelectedStore(null)}
+                  className="text-white hover:bg-white/20"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Mall
+                </Button>
+                <img 
+                  src={selectedStore.logo} 
+                  alt={selectedStore.name}
+                  className="w-16 h-16 rounded-lg object-cover"
+                />
+                <div>
+                  <div className="flex items-center space-x-2 mb-1">
+                    <h1 className="text-2xl font-bold">{selectedStore.name}</h1>
+                    {selectedStore.isExclusive && (
+                      <Badge className="bg-purple-500 text-white">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Exclusive
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-lg opacity-90 mb-2">{selectedStore.description}</p>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-4 w-4 text-yellow-300" />
+                      <span className="text-sm">{selectedStore.rating} rating</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Timer className="h-4 w-4 text-green-300" />
+                      <span className="text-sm">Delivery: {selectedStore.deliveryTime}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <Button 
+                  onClick={() => setShowGroupModal(true)}
+                  className="bg-white/20 text-white border-white/30 mr-2"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Shop with Friends
+                </Button>
+                <div className="mt-2">
+                  <div className="flex items-center space-x-1">
+                    <ShoppingCart className="h-4 w-4" />
+                    <span className="font-bold">{mallCart.filter(item => item.storeId === selectedStore.id).length}</span>
+                  </div>
+                  <p className="text-xs opacity-80">Items in cart</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Store Categories & Search */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Badge variant="outline" className="text-blue-600">
+                  <Target className="h-3 w-3 mr-1" />
+                  {selectedStore.topPicks} Top Picks
+                </Badge>
+                <Badge variant="outline" className="text-red-600">
+                  <Zap className="h-3 w-3 mr-1" />
+                  {selectedStore.bestSellers} Bestsellers
+                </Badge>
+                <Badge variant="outline" className="text-green-600">
+                  Category: {selectedStore.category}
+                </Badge>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search products..."
+                  className="pl-10 w-64"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Store Products */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {storeProducts.map((product) => (
+            <Card key={product.id} className="hover:shadow-lg transition-all duration-300">
+              <CardContent className="p-0">
+                <div className="relative">
+                  <img 
+                    src={product.image} 
+                    alt={product.name}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                  <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                    {product.tags.map((tag, index) => (
+                      <Badge 
+                        key={index}
+                        className={`text-xs ${
+                          tag === "Bestseller" ? "bg-red-500" :
+                          tag === "Top Pick" ? "bg-blue-500" :
+                          tag === "New Arrival" ? "bg-green-500" :
+                          tag === "Limited Edition" ? "bg-purple-500" :
+                          "bg-gray-500"
+                        } text-white`}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  {!product.inStock && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-t-lg">
+                      <Badge className="bg-red-500 text-white">Out of Stock</Badge>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="text-amber-600 font-bold text-xl">
+                        ₹{Math.round(product.price / 100).toLocaleString()}
+                      </p>
+                      <div className="flex items-center space-x-1 mt-1">
+                        <Star className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm text-gray-600">{product.rating}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Coins className="h-4 w-4 text-yellow-500" />
+                      <span className="text-sm font-medium text-green-600">
+                        +{Math.floor(product.price / 10000)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Button 
+                      className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                      disabled={!product.inStock}
+                      onClick={() => addToMallCart(product, selectedStore)}
+                    >
+                      {product.inStock ? "Add to MallCart" : "Out of Stock"}
+                    </Button>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" className="flex-1" size="sm">
+                        <Heart className="h-4 w-4 mr-1" />
+                        Wishlist
+                      </Button>
+                      <Button variant="outline" className="flex-1" size="sm">
+                        <Share2 className="h-4 w-4 mr-1" />
+                        Share
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Store Delivery Options */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-bold mb-4">Delivery Options from {selectedStore.name}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 border border-green-200 bg-green-50 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Truck className="h-5 w-5 text-green-600" />
+                  <h4 className="font-medium">VyronaExpress</h4>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">{selectedStore.deliveryTime}</p>
+                <p className="font-bold text-green-600">₹99</p>
+              </div>
+              
+              <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Store className="h-5 w-5 text-blue-600" />
+                  <h4 className="font-medium">Store Pickup</h4>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">Available now</p>
+                <p className="font-bold text-blue-600">FREE</p>
+              </div>
+              
+              <div className="p-4 border border-purple-200 bg-purple-50 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Users className="h-5 w-5 text-purple-600" />
+                  <h4 className="font-medium">Group Delivery</h4>
+                </div>
+                <p className="text-sm text-gray-600 mb-1">Share with friends</p>
+                <p className="font-bold text-purple-600">₹25-50</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Store Information */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-bold mb-4">Store Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium mb-2">About {selectedStore.name}</h4>
+                <p className="text-sm text-gray-600 mb-4">{selectedStore.description}</p>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">Open: 10:00 AM - 10:00 PM</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">{selectedMall.name}, {selectedMall.location}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">+91 98765 43210</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-2">Customer Reviews</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <Star className="h-4 w-4 text-yellow-500" />
+                      <Star className="h-4 w-4 text-gray-300" />
+                    </div>
+                    <span className="text-sm font-medium">{selectedStore.rating}/5</span>
+                    <Badge variant="outline" className="text-xs">Verified Mall Buyer</Badge>
+                  </div>
+                  <p className="text-sm text-gray-600">"Great quality products and fast delivery. Highly recommended!"</p>
+                  <Button variant="outline" size="sm">
+                    View All Reviews
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // 2. Virtual Mall Interface with Comprehensive Features
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
