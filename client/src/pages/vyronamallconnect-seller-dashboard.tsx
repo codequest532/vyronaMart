@@ -1557,7 +1557,12 @@ export default function VyronaMallConnectSellerDashboard() {
                     <p><strong>Required columns:</strong> name, category, price, description</p>
                     <p><strong>Optional columns:</strong> imageUrl, inStock, enableGroupBuy, groupBuyMinQuantity, groupBuyDiscount</p>
                     <p><strong>Price format:</strong> Enter in rupees (e.g., 599 for ₹599)</p>
+                    <p><strong>Image URLs:</strong> Use Google Drive links (make file publicly viewable) or direct image URLs</p>
                     <p><strong>Boolean values:</strong> Use true/false for inStock and enableGroupBuy</p>
+                  </div>
+                  <div className="mt-3 p-3 bg-blue-100 rounded-lg">
+                    <p className="text-xs text-blue-700 font-medium mb-1">💡 Google Drive Setup:</p>
+                    <p className="text-xs text-blue-700">Right-click image in Drive → Share → Change access to "Anyone with the link" → Copy link</p>
                   </div>
                 </div>
 
@@ -1570,9 +1575,9 @@ export default function VyronaMallConnectSellerDashboard() {
                       size="sm"
                       onClick={() => {
                         const sampleCSV = `name,category,price,description,imageUrl,inStock,enableGroupBuy,groupBuyMinQuantity,groupBuyDiscount
-Wireless Headphones,Electronics,2999,Premium wireless headphones with noise cancellation,,true,true,2,10
-Smart Watch,Electronics,8999,Fitness tracking smartwatch with heart rate monitor,,true,false,1,0
-Organic Coffee Beans,Food & Beverages,899,Premium organic coffee beans - 500g pack,,true,true,5,15`;
+Wireless Headphones,Electronics,2999,Premium wireless headphones with noise cancellation,https://drive.google.com/file/d/1abc123def456/view,true,true,2,10
+Smart Watch,Electronics,8999,Fitness tracking smartwatch with heart rate monitor,https://example.com/smartwatch.jpg,true,false,1,0
+Organic Coffee Beans,Food & Beverages,899,Premium organic coffee beans - 500g pack,https://drive.google.com/file/d/1xyz789uvw012/view,true,true,5,15`;
                         navigator.clipboard.writeText(sampleCSV);
                         toast({
                           title: "Template Copied",

@@ -170,6 +170,7 @@ Changelog:
 - June 17, 2025: Updated seller registration routing to automatically redirect VyronaMallConnect sellers to /vyronamallconnect-seller-dashboard
 - June 17, 2025: Added image URL field to VyronaMallConnect seller dashboard "Add Product" modal with URL validation and helper text
 - June 17, 2025: Updated image URL field to accept Google Drive links with detailed instructions for public sharing
+- June 17, 2025: Enhanced CSV bulk import to support Google Drive links with comprehensive setup instructions and sample template
 - June 15, 2025: Implemented automatic order tracking redirection for ALL VyronaSpace orders (individual and group buy)
 - June 15, 2025: VyronaSpace customers now redirected to live order tracking page instead of static success page
 - June 15, 2025: VyronaSpace group buy orders also redirect to tracking (applies to storeId 6, 7, 8)
