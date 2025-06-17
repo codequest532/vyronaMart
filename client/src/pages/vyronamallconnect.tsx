@@ -985,7 +985,7 @@ export default function VyronaMallConnect() {
                             size="sm"
                             onClick={() => {
                               navigator.clipboard.writeText(roomData.roomCode);
-                              toast({ title: "Room code copied!", description: "Share with friends to invite them" });
+                              toast({ title: "Group code copied!", description: "Share with friends to invite them" });
                             }}
                           >
                             Share Code
