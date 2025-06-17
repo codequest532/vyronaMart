@@ -10201,7 +10201,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // VyronaMallConnect Seller Dashboard API Endpoints
   app.get("/api/mallconnect/seller/store", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const [store] = await db
         .select()
         .from(stores)
@@ -10217,7 +10227,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/mallconnect/seller/store", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const [updatedStore] = await db
         .update(stores)
         .set({ ...req.body, updatedAt: new Date() })
@@ -10231,7 +10251,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/mallconnect/seller/products", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const [store] = await db
         .select()
         .from(stores)
@@ -10251,7 +10281,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/mallconnect/seller/products", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const [store] = await db
         .select()
         .from(stores)
@@ -10278,7 +10318,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CSV bulk import endpoint for VyronaMallConnect sellers
   app.post("/api/mallconnect/seller/products/bulk-import", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const { csvData } = req.body;
 
       if (!csvData) {
@@ -10407,7 +10457,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/mallconnect/seller/orders", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const sellerOrders = await db
         .select({
           id: orders.id,
@@ -10481,7 +10541,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/mallconnect/seller/analytics", async (req, res) => {
     try {
-      const sellerId = getUserId(req);
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+      
+      const sellerId = authenticatedUser.id;
       const [totalSalesResult] = await db
         .select({ total: sql`COALESCE(SUM(${orders.totalAmount}), 0)` })
         .from(orders)
