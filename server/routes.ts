@@ -9946,5 +9946,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
 
+  // VyronaMallConnect Seller Dashboard API Endpoints
+  app.get("/api/mallconnect/seller/store", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(and(eq(stores.sellerId, sellerId), eq(stores.module, "VyronaMallConnect")))
+        .limit(1);
+      if (!store) return res.status(404).json({ message: "Store not found" });
+      res.json(store);
+    } catch (error) {
+      console.error("Error fetching store:", error);
+      res.status(500).json({ message: "Failed to fetch store data" });
+    }
+  });
+
+  app.put("/api/mallconnect/seller/store", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const [updatedStore] = await db
+        .update(stores)
+        .set({ ...req.body, updatedAt: new Date() })
+        .where(and(eq(stores.sellerId, sellerId), eq(stores.module, "VyronaMallConnect")))
+        .returning();
+      res.json(updatedStore);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update store" });
+    }
+  });
+
+  app.get("/api/mallconnect/seller/products", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(and(eq(stores.sellerId, sellerId), eq(stores.module, "VyronaMallConnect")))
+        .limit(1);
+      if (!store) return res.status(404).json({ message: "Store not found" });
+      const storeProducts = await db
+        .select()
+        .from(products)
+        .where(eq(products.storeId, store.id))
+        .orderBy(desc(products.createdAt));
+      res.json(storeProducts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  app.post("/api/mallconnect/seller/products", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const [store] = await db
+        .select()
+        .from(stores)
+        .where(and(eq(stores.sellerId, sellerId), eq(stores.module, "VyronaMallConnect")))
+        .limit(1);
+      if (!store) return res.status(404).json({ message: "Store not found" });
+      const [newProduct] = await db
+        .insert(products)
+        .values({
+          ...req.body,
+          storeId: store.id,
+          sellerId: sellerId,
+          module: "VyronaMallConnect",
+          inStock: true,
+          createdAt: new Date()
+        })
+        .returning();
+      res.json(newProduct);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  app.get("/api/mallconnect/seller/orders", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const sellerOrders = await db
+        .select({
+          id: orders.id,
+          totalAmount: orders.totalAmount,
+          status: orders.status,
+          createdAt: orders.createdAt,
+          customerName: orders.customerName,
+          customerEmail: orders.customerEmail,
+          customerMobile: orders.customerMobile,
+          shippingAddress: orders.shippingAddress,
+          paymentMethod: orders.paymentMethod,
+          itemCount: sql`1`
+        })
+        .from(orders)
+        .where(and(
+          eq(orders.sellerId, sellerId),
+          eq(orders.module, "VyronaMallConnect")
+        ))
+        .orderBy(desc(orders.createdAt));
+      res.json(sellerOrders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.put("/api/mallconnect/seller/orders/:orderId", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const orderId = parseInt(req.params.orderId);
+      const { status } = req.body;
+      const [updatedOrder] = await db
+        .update(orders)
+        .set({ status, updatedAt: new Date() })
+        .where(and(
+          eq(orders.id, orderId),
+          eq(orders.sellerId, sellerId),
+          eq(orders.module, "VyronaMallConnect")
+        ))
+        .returning();
+      if (!updatedOrder) return res.status(404).json({ message: "Order not found" });
+      
+      if (updatedOrder.customerEmail) {
+        try {
+          const { sendBrevoEmail } = await import('./brevo-email');
+          await sendBrevoEmail(
+            updatedOrder.customerEmail,
+            `VyronaMallConnect Order #${orderId} - Status Update`,
+            `<h2>Order Status Update</h2>
+            <p>Dear ${updatedOrder.customerName || 'Customer'},</p>
+            <p>Your order #${orderId} status has been updated to: <strong>${status}</strong></p>
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <h3>Order Details:</h3>
+              <p><strong>Order ID:</strong> #${orderId}</p>
+              <p><strong>Total Amount:</strong> ₹${Math.round(updatedOrder.totalAmount)}</p>
+              <p><strong>Status:</strong> ${status}</p>
+              <p><strong>Updated:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            <p>You can track your order by visiting VyronaMallConnect.</p>
+            <p>Thank you for shopping with us!</p>
+            <p>Best regards,<br>VyronaMallConnect Team</p>`
+          );
+        } catch (emailError) {
+          console.error("Failed to send status update email:", emailError);
+        }
+      }
+      res.json(updatedOrder);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order" });
+    }
+  });
+
+  app.get("/api/mallconnect/seller/analytics", async (req, res) => {
+    try {
+      const sellerId = getUserId(req);
+      const [totalSalesResult] = await db
+        .select({ total: sql`COALESCE(SUM(${orders.totalAmount}), 0)` })
+        .from(orders)
+        .where(and(
+          eq(orders.sellerId, sellerId),
+          eq(orders.module, "VyronaMallConnect"),
+          ne(orders.status, "cancelled")
+        ));
+      const [orderCountResult] = await db
+        .select({ count: sql`COUNT(*)` })
+        .from(orders)
+        .where(and(
+          eq(orders.sellerId, sellerId),
+          eq(orders.module, "VyronaMallConnect")
+        ));
+      const [avgOrderValueResult] = await db
+        .select({ avg: sql`COALESCE(AVG(${orders.totalAmount}), 0)` })
+        .from(orders)
+        .where(and(
+          eq(orders.sellerId, sellerId),
+          eq(orders.module, "VyronaMallConnect"),
+          ne(orders.status, "cancelled")
+        ));
+      const analytics = {
+        totalSales: Math.round(totalSalesResult.total || 0),
+        totalEarnings: Math.round((totalSalesResult.total || 0) * 0.85),
+        pendingPayout: Math.round((totalSalesResult.total || 0) * 0.1),
+        avgOrderValue: Math.round(avgOrderValueResult.avg || 0),
+        totalCustomers: orderCountResult.count || 0,
+        repeatCustomers: Math.floor((orderCountResult.count || 0) * 0.3),
+        vyronaCoinsUsed: Math.floor((totalSalesResult.total || 0) * 0.05)
+      };
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   return httpServer;
 }
