@@ -168,6 +168,7 @@ Changelog:
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
 - June 17, 2025: Updated seller registration routing to automatically redirect VyronaMallConnect sellers to /vyronamallconnect-seller-dashboard
+- June 17, 2025: Added image URL field to VyronaMallConnect seller dashboard "Add Product" modal with URL validation and helper text
 - June 15, 2025: Implemented automatic order tracking redirection for ALL VyronaSpace orders (individual and group buy)
 - June 15, 2025: VyronaSpace customers now redirected to live order tracking page instead of static success page
 - June 15, 2025: VyronaSpace group buy orders also redirect to tracking (applies to storeId 6, 7, 8)

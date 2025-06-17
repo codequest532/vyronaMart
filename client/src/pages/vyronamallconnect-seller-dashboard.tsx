@@ -37,6 +37,7 @@ export default function VyronaMallConnectSellerDashboard() {
     category: "",
     price: "",
     description: "",
+    imageUrl: "",
     variants: [],
     tags: [],
     enableGroupBuy: false,
@@ -133,6 +134,7 @@ export default function VyronaMallConnectSellerDashboard() {
         category: "",
         price: "",
         description: "",
+        imageUrl: "",
         variants: [],
         tags: [],
         enableGroupBuy: false,
@@ -670,6 +672,20 @@ export default function VyronaMallConnectSellerDashboard() {
                         placeholder="Describe your product"
                         rows={3}
                       />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="productImageUrl">Image URL</Label>
+                      <Input
+                        id="productImageUrl"
+                        type="url"
+                        value={productFormData.imageUrl}
+                        onChange={(e) => setProductFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
+                        placeholder="https://example.com/product-image.jpg"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Enter a direct URL to the product image (JPG, PNG, WebP formats supported)
+                      </p>
                     </div>
 
                     <div className="flex items-center space-x-2">
