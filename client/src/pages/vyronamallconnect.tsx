@@ -13,7 +13,7 @@ import {
   ArrowLeft, Building, Shirt, Laptop, Utensils, Home as HomeIcon, Star, Coins, 
   MapPin, Clock, ShoppingCart, Users, Heart, Gift, Truck, MessageCircle,
   Search, Filter, Phone, Mail, Calendar, CheckCircle, Timer, Package,
-  Crown, Zap, Target, Camera, Share2, Bell, Award, Store, CreditCard, Trash2
+  Crown, Zap, Target, Camera, Share2, Bell, Award, Store, CreditCard, X
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -1801,7 +1801,7 @@ export default function VyronaMallConnect() {
                               }}
                               className="text-red-500 hover:text-red-700 hover:bg-red-50"
                             >
-                              <X className="h-4 w-4" />
+                              ×
                             </Button>
                           </div>
                         </CardContent>
