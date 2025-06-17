@@ -1787,7 +1787,7 @@ export default function VyronaMallConnect() {
                             </div>
                             
                             <div className="text-right">
-                              <p className="font-medium text-gray-900">₹{Math.round(item.price)}</p>
+                              <p className="font-medium text-gray-900">₹{Math.round(item.price / 100)}</p>
                               <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                             </div>
                             
@@ -1815,7 +1815,7 @@ export default function VyronaMallConnect() {
                       <div className="flex items-center justify-between mb-4">
                         <span className="font-medium text-gray-900">Group Cart Total</span>
                         <span className="text-xl font-bold text-blue-600">
-                          ₹{Math.round(groupMallCart.reduce((total: number, item: any) => total + (item.price * item.quantity), 0))}
+                          ₹{Math.round(groupMallCart.reduce((total: number, item: any) => total + ((item.price / 100) * item.quantity), 0))}
                         </span>
                       </div>
                       
