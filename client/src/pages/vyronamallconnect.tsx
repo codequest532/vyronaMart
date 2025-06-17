@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft, Building, Shirt, Laptop, Utensils, Home as HomeIcon, Star, Coins, 
   MapPin, Clock, ShoppingCart, Users, Heart, Gift, Truck, MessageCircle,
   Search, Filter, Phone, Mail, Calendar, CheckCircle, Timer, Package,
-  Crown, Zap, Target, Camera, Share2, Bell, Award, Store, CreditCard, X
+  Crown, Zap, Target, Camera, Share2, Bell, Award, Store, CreditCard, X,
+  MoreVertical, Settings, Trash2
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -293,6 +295,71 @@ export default function VyronaMallConnect() {
       toast({
         title: "Failed to Join Group",
         description: error.message || "Invalid group code or group not found",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete group mutation (for admins)
+  const deleteGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      return apiRequest("DELETE", `/api/shopping-rooms/${groupId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      toast({
+        title: "Success",
+        description: "Group deleted successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete group",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove member mutation (for admins)
+  const removeMemberMutation = useMutation({
+    mutationFn: async ({ groupId, memberId }: { groupId: number; memberId: number }) => {
+      return apiRequest("DELETE", `/api/shopping-rooms/${groupId}/members/${memberId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      toast({
+        title: "Success",
+        description: "Member removed successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove member",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Exit group mutation (for non-admin members)
+  const exitGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      // Get current user info first
+      const currentUser = await apiRequest("GET", "/api/current-user");
+      return apiRequest("DELETE", `/api/shopping-rooms/${groupId}/members/${currentUser.id}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      toast({
+        title: "Success",
+        description: "You have left the group successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error", 
+        description: error.message || "Failed to leave group",
         variant: "destructive",
       });
     },
@@ -1086,17 +1153,63 @@ export default function VyronaMallConnect() {
                             </Badge>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              navigator.clipboard.writeText(room.roomCode);
-                              toast({ title: "Group code copied!", description: "Share with friends to invite them" });
-                            }}
-                          >
-                            Share Code
-                          </Button>
+                        <div className="flex items-center space-x-2">
+                          {user && room.creatorId === user.id ? (
+                            // Admin controls (creator of the group)
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Settings className="h-4 w-4 mr-2" />
+                                  Admin
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => {
+                                  navigator.clipboard.writeText(room.roomCode);
+                                  toast({ title: "Group code copied!", description: "Share with friends to invite them" });
+                                }}>
+                                  <Share2 className="h-4 w-4 mr-2" />
+                                  Share Group Code
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  if (confirm("Are you sure you want to delete this group? This action cannot be undone.")) {
+                                    deleteGroupMutation.mutate(room.id);
+                                  }
+                                }} className="text-red-600">
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Group
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          ) : (
+                            // Non-admin controls (regular group members)
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(room.roomCode);
+                                  toast({ title: "Group code copied!", description: "Share with friends to invite them" });
+                                }}
+                              >
+                                <Share2 className="h-4 w-4 mr-2" />
+                                Share Code
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (confirm("Are you sure you want to leave this group?")) {
+                                    exitGroupMutation.mutate(room.id);
+                                  }
+                                }}
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                              >
+                                <LogOut className="h-4 w-4 mr-2" />
+                                Exit Group
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
