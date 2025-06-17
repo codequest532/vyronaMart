@@ -38,6 +38,7 @@ export interface IStorage {
   updateUserCoins(id: number, coins: number): Promise<User | undefined>;
   updateUserXP(id: number, xp: number): Promise<User | undefined>;
   updateUserPassword(userId: number, newPassword: string): Promise<void>;
+  addVyronaCoins(userId: number, coins: number): Promise<User | undefined>;
 
   // OTP Verification
   createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification>;
@@ -364,6 +365,16 @@ export class MemStorage implements IStorage {
         user.level = newLevel;
       }
       this.users.set(id, user);
+      return user;
+    }
+    return undefined;
+  }
+
+  async addVyronaCoins(userId: number, coins: number): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.vyronaCoins = (user.vyronaCoins || 0) + coins;
+      this.users.set(userId, user);
       return user;
     }
     return undefined;

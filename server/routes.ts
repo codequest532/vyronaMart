@@ -2074,6 +2074,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // MallCart order creation endpoint
+  app.post("/api/mallcart/orders", async (req, res) => {
+    try {
+      const { 
+        items, 
+        deliveryAddress, 
+        paymentMethod, 
+        deliveryInstructions, 
+        subtotal, 
+        deliveryFee, 
+        total, 
+        vyronaCoinsEarned,
+        orderType 
+      } = req.body;
+
+      const userId = req.session?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Create order for each store
+      const orderPromises = [];
+      const groupedItems = items.reduce((grouped: any, item: any) => {
+        if (!grouped[item.storeId]) {
+          grouped[item.storeId] = [];
+        }
+        grouped[item.storeId].push(item);
+        return grouped;
+      }, {});
+
+      for (const [storeId, storeItems] of Object.entries(groupedItems)) {
+        const storeTotal = (storeItems as any[]).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        const orderData = {
+          module: 'mallcart',
+          userId,
+          totalAmount: storeTotal + (deliveryFee * 100), // Convert to cents
+          status: 'confirmed',
+          metadata: {
+            storeId: parseInt(storeId),
+            items: storeItems,
+            shippingAddress: deliveryAddress,
+            paymentMethod,
+            deliveryInstructions: deliveryInstructions || '',
+            orderType: 'mallcart'
+          }
+        };
+
+        orderPromises.push(storage.createOrder(orderData));
+      }
+
+      const orders = await Promise.all(orderPromises);
+      
+      // Award VyronaCoins to user
+      if (vyronaCoinsEarned > 0) {
+        await storage.addVyronaCoins(userId, vyronaCoinsEarned);
+      }
+
+      res.json({ 
+        success: true, 
+        orderId: orders[0].id, 
+        orders,
+        message: `Order placed successfully for ${Object.keys(groupedItems).length} store(s)` 
+      });
+
+    } catch (error) {
+      console.error("Error creating MallCart order:", error);
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
   // Order tracking route for real-time delivery tracking
   app.get('/api/orders/track/:orderId', async (req, res) => {
     try {
