@@ -877,16 +877,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Debug endpoint to check existing users
   app.get("/api/debug/users", async (req, res) => {
     try {
-      // Get all users for debugging (remove passwords for security)
-      const allUsers = Array.from((storage as any).users.values()).map((user: any) => ({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role
-      }));
+      const allUsers = await db.select({
+        id: users.id,
+        username: users.username,
+        email: users.email,
+        role: users.role,
+        sellerType: users.sellerType
+      }).from(users);
       res.json(allUsers);
     } catch (error) {
+      console.error("Debug users error:", error);
       res.status(500).json({ message: "Debug failed" });
+    }
+  });
+
+  // Create demo VyronaMallConnect seller account
+  app.post("/api/create-demo-mallconnect-seller", async (req, res) => {
+    try {
+      // Check if demo seller already exists
+      const existingSeller = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, "mallconnect_demo@vyronamart.com"))
+        .limit(1);
+
+      if (existingSeller.length > 0) {
+        return res.json({
+          success: true,
+          message: "Demo VyronaMallConnect seller already exists",
+          credentials: {
+            email: "mallconnect_demo@vyronamart.com",
+            password: "demo123"
+          }
+        });
+      }
+
+      // Create demo seller user
+      const [newSeller] = await db
+        .insert(users)
+        .values({
+          username: "mallconnect_demo",
+          email: "mallconnect_demo@vyronamart.com",
+          mobile: "9876543210",
+          role: "seller",
+          sellerType: "VyronaMallConnect",
+          password: "demo123",
+          walletBalance: "500"
+        })
+        .returning();
+
+      // Create demo VyronaMallConnect store
+      const [newStore] = await db
+        .insert(stores)
+        .values({
+          name: "Demo MallConnect Electronics",
+          description: "Premium electronics store in virtual mall with latest gadgets and accessories",
+          sellerId: newSeller.id,
+          module: "VyronaMallConnect",
+          category: "Electronics",
+          address: "Virtual Mall Plaza, Level 2, Store #MC001",
+          rating: 4.8,
+          isOpen: true,
+          deliveryFee: 50,
+          deliveryTime: "30-45 mins",
+          imageUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400"
+        })
+        .returning();
+
+      // Create sample products for demo store
+      const sampleProducts = [
+        {
+          name: "Premium Wireless Headphones",
+          description: "High-quality noise-canceling wireless headphones with 30-hour battery life",
+          price: 8999,
+          category: "Audio",
+          imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+          storeId: newStore.id,
+          sellerId: newSeller.id,
+          module: "VyronaMallConnect",
+          inStock: true,
+          stock: 15
+        },
+        {
+          name: "Smart Fitness Watch",
+          description: "Advanced fitness tracker with heart rate monitoring and GPS",
+          price: 12999,
+          category: "Wearables",
+          imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
+          storeId: newStore.id,
+          sellerId: newSeller.id,
+          module: "VyronaMallConnect",
+          inStock: true,
+          stock: 20
+        },
+        {
+          name: "Wireless Phone Charger",
+          description: "Fast wireless charging pad compatible with all Qi-enabled devices",
+          price: 2499,
+          category: "Accessories",
+          imageUrl: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400",
+          storeId: newStore.id,
+          sellerId: newSeller.id,
+          module: "VyronaMallConnect",
+          inStock: true,
+          stock: 30
+        }
+      ];
+
+      await db.insert(products).values(sampleProducts);
+
+      res.json({
+        success: true,
+        message: "Demo VyronaMallConnect seller account created successfully",
+        sellerId: newSeller.id,
+        storeId: newStore.id,
+        credentials: {
+          email: "mallconnect_demo@vyronamart.com",
+          password: "demo123"
+        }
+      });
+    } catch (error) {
+      console.error("Error creating demo seller:", error);
+      res.status(500).json({ message: "Failed to create demo seller" });
     }
   });
 
