@@ -51,7 +51,7 @@ export default function VyronaMallConnect() {
   // Fetch shopping rooms for group shopping with real-time updates
   const { data: shoppingRooms = [], isLoading: loadingRooms } = useQuery({
     queryKey: ["/api/shopping-rooms"],
-    enabled: activeTab === "group-shopping" && !!user,
+    enabled: !!user,
     refetchInterval: 3000, // Refresh every 3 seconds for real-time member count updates
     refetchIntervalInBackground: true,
   });
@@ -185,7 +185,7 @@ export default function VyronaMallConnect() {
     }
 
     // Check if user is in any active group
-    if (!shoppingRooms || shoppingRooms.length === 0) {
+    if (!Array.isArray(shoppingRooms) || shoppingRooms.length === 0) {
       toast({
         title: "No Active Group",
         description: "Create or join a group first to add items to group cart",
