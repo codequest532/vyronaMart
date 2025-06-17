@@ -76,7 +76,7 @@ export default function GroupMallCartCheckout() {
   const [subscriptionStartDate, setSubscriptionStartDate] = useState("");
   const [useCommonAddress, setUseCommonAddress] = useState(true);
   const [memberContributions, setMemberContributions] = useState<MemberContribution[]>([]);
-  const [contributionMode, setContributionMode] = useState<"equal" | "custom">("equal");
+
   
   const [shippingAddress, setShippingAddress] = useState<AddressData>({
     fullName: "",
@@ -571,160 +571,92 @@ export default function GroupMallCartCheckout() {
               </CardContent>
             </Card>
 
-            {/* Member Contributions */}
+            {/* Member Payment Responsibilities */}
             {selectedRoom && selectedRoom.memberCount > 1 && (
               <Card className="border-purple-200 shadow-sm">
                 <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
                   <CardTitle className="flex items-center space-x-2">
                     <Users className="h-5 w-5 text-purple-600" />
-                    <span>Member Contributions</span>
+                    <span>Group Payment Split</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    {/* Contribution Mode Toggle */}
-                    <div className="flex space-x-4">
-                      <Button
-                        variant={contributionMode === "equal" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setContributionMode("equal")}
-                      >
-                        Equal Split
-                      </Button>
-                      <Button
-                        variant={contributionMode === "custom" ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setContributionMode("custom")}
-                      >
-                        Custom Amounts
-                      </Button>
-                    </div>
-
-                    {/* Member Contribution List */}
-                    <div className="space-y-3">
-                      {memberContributions.map((contribution, index) => (
-                        <div key={contribution.memberId} className="border rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center space-x-3">
-                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                <span className="text-sm font-medium text-purple-700">{index + 1}</span>
-                              </div>
-                              <div>
-                                <p className="font-medium">{contribution.memberName}</p>
-                                <p className="text-sm text-gray-600">
-                                  {contributionMode === "equal" ? "Equal share" : "Custom amount"}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-lg font-bold text-purple-600">
-                                ₹{contribution.contributionAmount}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Payment Method for This Member */}
-                          <div className="grid grid-cols-3 gap-2">
-                            <Button
-                              variant={contribution.paymentMethod === "upi" ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => {
-                                const updated = [...memberContributions];
-                                updated[index].paymentMethod = "upi";
-                                setMemberContributions(updated);
-                              }}
-                            >
-                              <Smartphone className="h-4 w-4 mr-1" />
-                              UPI
-                            </Button>
-                            <Button
-                              variant={contribution.paymentMethod === "wallet" ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => {
-                                const updated = [...memberContributions];
-                                updated[index].paymentMethod = "wallet";
-                                setMemberContributions(updated);
-                              }}
-                            >
-                              <Wallet className="h-4 w-4 mr-1" />
-                              Wallet
-                            </Button>
-                            <Button
-                              variant={contribution.paymentMethod === "card" ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => {
-                                const updated = [...memberContributions];
-                                updated[index].paymentMethod = "card";
-                                setMemberContributions(updated);
-                              }}
-                            >
-                              <CreditCard className="h-4 w-4 mr-1" />
-                              Card
-                            </Button>
-                          </div>
-
-                          {/* Custom Amount Input */}
-                          {contributionMode === "custom" && (
-                            <div className="mt-3">
-                              <Label htmlFor={`amount-${contribution.memberId}`}>Contribution Amount</Label>
-                              <Input
-                                id={`amount-${contribution.memberId}`}
-                                type="number"
-                                value={contribution.contributionAmount}
-                                onChange={(e) => {
-                                  const updated = [...memberContributions];
-                                  updated[index].contributionAmount = Number(e.target.value);
-                                  setMemberContributions(updated);
-                                }}
-                                className="mt-1"
-                                placeholder="Enter amount"
-                              />
-                            </div>
-                          )}
+                    {/* Simple explanation */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+                          <span className="text-xs font-bold text-white">i</span>
                         </div>
-                      ))}
-                    </div>
-
-                    {/* Contribution Summary */}
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Total Contributions:</span>
-                        <span className="text-lg font-bold text-purple-600">
-                          ₹{memberContributions.reduce((sum, c) => sum + c.contributionAmount, 0)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-sm text-gray-600">Order Total:</span>
-                        <span className="text-sm text-gray-600">₹{total}</span>
-                      </div>
-                      {memberContributions.reduce((sum, c) => sum + c.contributionAmount, 0) !== total && (
-                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                          <p className="text-sm text-yellow-800">
-                            ⚠️ Contribution total doesn't match order total
+                        <div>
+                          <h4 className="font-medium text-blue-900 mb-1">How Group Payment Works</h4>
+                          <p className="text-sm text-blue-800">
+                            Each member will pay their share directly using their preferred payment method. 
+                            The order will be placed once all members have completed their payments.
                           </p>
                         </div>
-                      )}
+                      </div>
+                    </div>
+
+                    {/* Split calculation */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Total Order Amount:</span>
+                        <span className="text-xl font-bold text-purple-600">₹{total}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Number of Members:</span>
+                        <span className="text-sm font-medium">{selectedRoom.memberCount}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-t pt-2">
+                        <span className="font-medium">Amount per Member:</span>
+                        <span className="text-lg font-bold text-green-600">
+                          ₹{Math.round(total / selectedRoom.memberCount)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Member list with payment status */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-900 mb-3">Member Payment Status</h4>
+                      {memberContributions.map((contribution, index) => (
+                        <div key={contribution.memberId} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-medium text-purple-700">{index + 1}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{contribution.memberName}</p>
+                              <div className="flex items-center space-x-2">
+                                {contribution.paymentMethod === "upi" && <Smartphone className="h-4 w-4 text-blue-600" />}
+                                {contribution.paymentMethod === "wallet" && <Wallet className="h-4 w-4 text-green-600" />}
+                                {contribution.paymentMethod === "card" && <CreditCard className="h-4 w-4 text-purple-600" />}
+                                <span className="text-sm text-gray-600 capitalize">{contribution.paymentMethod}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-purple-600">₹{contribution.contributionAmount}</p>
+                            <p className="text-xs text-gray-500">Pending Payment</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {/* Payment Method */}
-            <Card className="border-purple-200 shadow-sm">
-              <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
-                <CardTitle className="flex items-center space-x-2">
-                  <CreditCard className="h-5 w-5 text-purple-600" />
-                  <span>Fallback Payment Method</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <p className="text-sm text-gray-600 mb-4">
-                  {selectedRoom && selectedRoom.memberCount > 1 
-                    ? "This payment method will be used if any member fails to contribute their share."
-                    : "Select your preferred payment method for this order."
-                  }
-                </p>
+            {/* Payment Method for Individual Orders */}
+            {(!selectedRoom || selectedRoom.memberCount <= 1) && (
+              <Card className="border-purple-200 shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+                  <CardTitle className="flex items-center space-x-2">
+                    <CreditCard className="h-5 w-5 text-purple-600" />
+                    <span>Payment Method</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
