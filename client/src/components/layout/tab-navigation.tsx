@@ -13,7 +13,7 @@ const tabs = [
   { id: "social" as const, label: "VyronaSocial", icon: Users },
   { id: "space" as const, label: "VyronaSpace", icon: MapPin },
   { id: "read" as const, label: "VyronaRead", icon: Book },
-  { id: "mall" as const, label: "MallConnect", icon: ShoppingBag },
+  { id: "mall" as const, label: "VyronaMallConnect", icon: ShoppingBag },
   { id: "instashop" as const, label: "VyronaInstaShop", icon: Instagram },
   { id: "profile" as const, label: "MyVyrona", icon: UserCircle },
 ];

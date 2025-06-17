@@ -146,6 +146,10 @@ export default function Home() {
       setLocation("/vyronaread");
       return;
     }
+    if (tab === "mall") {
+      setLocation("/vyronamallconnect");
+      return;
+    }
     if (tab === "instashop") {
       setLocation("/instashop");
       return;
