@@ -1840,9 +1840,8 @@ export default function VyronaMallConnect() {
                         </Button>
                         <Button 
                           onClick={() => {
-                            // Navigate to group checkout
                             setShowGroupCartModal(false);
-                            setShowGroupModal(true);
+                            setLocation("/group-mallcart-checkout");
                           }}
                           className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                         >

@@ -29,6 +29,7 @@ import VyronaSpace from "@/pages/vyronaspace";
 import VyronaSpaceCheckout from "@/pages/vyronaspace-checkout";
 import VyronaMallConnect from "@/pages/vyronamallconnect";
 import MallCartCheckout from "@/pages/mallcart-checkout";
+import GroupMallCartCheckout from "@/pages/group-mallcart-checkout";
 import OrderTracking from "@/pages/order-tracking";
 import MyVyrona from "@/pages/myvyrona";
 import Cart from "@/pages/cart";
@@ -127,6 +128,7 @@ function Router() {
       <Route path="/vyronaspace-seller-dashboard" component={VyronaSpaceSellerDashboard} />
       <Route path="/vyronamallconnect" component={VyronaMallConnect} />
       <Route path="/mallcart-checkout" component={MallCartCheckout} />
+      <Route path="/group-mallcart-checkout" component={GroupMallCartCheckout} />
       <Route path="/track-order/:orderId">
         {(params) => <OrderTracking />}
       </Route>
