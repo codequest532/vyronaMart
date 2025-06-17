@@ -15,7 +15,7 @@ import {
   MapPin, Clock, ShoppingCart, Users, Heart, Gift, Truck, MessageCircle,
   Search, Filter, Phone, Mail, Calendar, CheckCircle, Timer, Package,
   Crown, Zap, Target, Camera, Share2, Bell, Award, Store, CreditCard, X,
-  MoreVertical, Settings, Trash2
+  MoreVertical, Settings, Trash2, LogOut as ExitIcon
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -1205,7 +1205,7 @@ export default function VyronaMallConnect() {
                                 }}
                                 className="text-red-600 border-red-200 hover:bg-red-50"
                               >
-                                <LogOut className="h-4 w-4 mr-2" />
+                                <ExitIcon className="h-4 w-4 mr-2" />
                                 Exit Group
                               </Button>
                             </>
