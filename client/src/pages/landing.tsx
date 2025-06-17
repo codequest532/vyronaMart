@@ -423,7 +423,7 @@ export default function Landing() {
               <span className="cursor-pointer hover:underline">VyronaSpace</span>
               <span className="cursor-pointer hover:underline">VyronaSocial</span>
               <span className="cursor-pointer hover:underline">VyronaRead</span>
-              <span className="cursor-pointer hover:underline">MallConnect</span>
+              <span className="cursor-pointer hover:underline" onClick={() => setLocation('/vyronamallconnect')}>MallConnect</span>
             </div>
 
           </div>

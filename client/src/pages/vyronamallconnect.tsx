@@ -22,8 +22,8 @@ export default function VyronaMallConnect() {
     console.log(`Clicked on ${productName}`);
   };
 
-  const mallStores = stores.filter((s: any) => s.type === "mall");
-  const mallProducts = products.filter((p: any) => p.module === "mall");
+  const mallStores = Array.isArray(stores) ? stores.filter((s: any) => s.type === "mall") : [];
+  const mallProducts = Array.isArray(products) ? products.filter((p: any) => p.module === "mall") : [];
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">

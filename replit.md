@@ -132,6 +132,9 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 15, 2025: Moved all VyronaMallConnect components from home page to dedicated /vyronamallconnect page
+- June 15, 2025: Created standalone VyronaMallConnect interface with mall selection, brand categories, and featured products
+- June 15, 2025: Added routing support and landing page navigation for VyronaMallConnect module
 - June 15, 2025: Removed all VyronaSpace demo stores and products from database - platform ready for authentic retail partner onboarding
 - June 15, 2025: Disabled VyronaSpace store initialization code to prevent demo stores from being created on server restart
 - June 15, 2025: Updated VyronaSpace customer interface to show professional empty state when no stores are onboarded
