@@ -174,6 +174,57 @@ export default function VyronaMallConnect() {
     });
   };
 
+  const addToGroupMallCart = (product: any, store: any) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to add items to group cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if user is in any active group
+    if (!shoppingRooms || shoppingRooms.length === 0) {
+      toast({
+        title: "No Active Group",
+        description: "Create or join a group first to add items to group cart",
+        variant: "destructive",
+      });
+      setShowGroupModal(true);
+      return;
+    }
+
+    // For now, add to the first active group (user can have multiple groups)
+    const activeGroup = shoppingRooms[0];
+    
+    const groupCartItem = {
+      ...product,
+      id: `group-${product.id}-${store.id}-${Date.now()}`,
+      storeId: store.id,
+      storeName: store.name,
+      mallId: selectedMall?.id,
+      mallName: selectedMall?.name,
+      quantity: 1,
+      deliveryOption: "group",
+      groupId: activeGroup.id,
+      groupName: activeGroup.name
+    };
+    
+    // Store group cart items separately from individual cart
+    const existingGroupCart = JSON.parse(localStorage.getItem('groupMallCart') || '[]');
+    const updatedGroupCart = [...existingGroupCart, groupCartItem];
+    localStorage.setItem('groupMallCart', JSON.stringify(updatedGroupCart));
+    
+    toast({
+      title: "Added to Group MallCart",
+      description: `${product.name} added to ${activeGroup.name} group cart`,
+    });
+    
+    // Refresh group data to update cart totals
+    queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+  };
+
   // Group room creation mutation
   const createGroupRoomMutation = useMutation({
     mutationFn: async (roomData: any) => {
@@ -620,16 +671,15 @@ export default function VyronaMallConnect() {
                     >
                       {product.inStock ? "Add to MallCart" : "Out of Stock"}
                     </Button>
-                    <div className="flex space-x-2">
-                      <Button variant="outline" className="flex-1" size="sm">
-                        <Heart className="h-4 w-4 mr-1" />
-                        Wishlist
-                      </Button>
-                      <Button variant="outline" className="flex-1" size="sm">
-                        <Share2 className="h-4 w-4 mr-1" />
-                        Share
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:from-blue-100 hover:to-purple-100"
+                      disabled={!product.inStock}
+                      onClick={() => addToGroupMallCart(product, selectedStore)}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Add to Group MallCart
+                    </Button>
                   </div>
                 </div>
               </CardContent>
