@@ -717,6 +717,78 @@ export default function VyronaSocialGroupBuy() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Group Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Group</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{selectedGroupForAction?.name}"? This action cannot be undone and will remove all group data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedGroupForAction) {
+                  deleteGroupMutation.mutate(selectedGroupForAction.id);
+                }
+                setShowDeleteConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+              disabled={deleteGroupMutation.isPending}
+            >
+              {deleteGroupMutation.isPending ? "Deleting..." : "Delete Group"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exit Group Confirmation Dialog */}
+      <Dialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Exit Group</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to leave "{selectedGroupForAction?.name}"? You'll need to be re-invited to join again.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowExitConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (selectedGroupForAction) {
+                  exitGroupMutation.mutate(selectedGroupForAction.id);
+                }
+                setShowExitConfirm(false);
+                setSelectedGroupForAction(null);
+              }}
+              disabled={exitGroupMutation.isPending}
+            >
+              {exitGroupMutation.isPending ? "Leaving..." : "Exit Group"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -990,21 +1062,21 @@ function ManageMembersContent({ groupId, onMemberRemoved }: {
         </div>
       </div>
 
-      {/* Delete Group Confirmation Dialog */}
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      {/* Remove Member Confirmation Dialog */}
+      <Dialog open={showRemoveMemberConfirm} onOpenChange={setShowRemoveMemberConfirm}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Group</DialogTitle>
+            <DialogTitle>Remove Member</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedGroupForAction?.name}"? This action cannot be undone and will remove all group data.
+              Are you sure you want to remove {selectedMemberForRemoval?.username} from the group? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
-                setShowDeleteConfirm(false);
-                setSelectedGroupForAction(null);
+                setShowRemoveMemberConfirm(false);
+                setSelectedMemberForRemoval(null);
               }}
             >
               Cancel
@@ -1012,51 +1084,15 @@ function ManageMembersContent({ groupId, onMemberRemoved }: {
             <Button
               variant="destructive"
               onClick={() => {
-                if (selectedGroupForAction) {
-                  deleteGroupMutation.mutate(selectedGroupForAction.id);
+                if (selectedMemberForRemoval) {
+                  removeMemberMutation.mutate(selectedMemberForRemoval.id);
                 }
-                setShowDeleteConfirm(false);
-                setSelectedGroupForAction(null);
+                setShowRemoveMemberConfirm(false);
+                setSelectedMemberForRemoval(null);
               }}
-              disabled={deleteGroupMutation.isPending}
+              disabled={removeMemberMutation.isPending}
             >
-              {deleteGroupMutation.isPending ? "Deleting..." : "Delete Group"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Exit Group Confirmation Dialog */}
-      <Dialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Exit Group</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to leave "{selectedGroupForAction?.name}"? You'll need to be re-invited to join again.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowExitConfirm(false);
-                setSelectedGroupForAction(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (selectedGroupForAction) {
-                  exitGroupMutation.mutate(selectedGroupForAction.id);
-                }
-                setShowExitConfirm(false);
-                setSelectedGroupForAction(null);
-              }}
-              disabled={exitGroupMutation.isPending}
-            >
-              {exitGroupMutation.isPending ? "Leaving..." : "Exit Group"}
+              {removeMemberMutation.isPending ? "Removing..." : "Remove Member"}
             </Button>
           </DialogFooter>
         </DialogContent>
