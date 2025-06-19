@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { useQuery } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -158,40 +158,26 @@ export default function VyronaRead() {
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
   const [showBorrowModal, setShowBorrowModal] = useState(false);
   const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [otpStep, setOtpStep] = useState<"email" | "otp" | "reset">("email");
+  const [resetEmail, setResetEmail] = useState("");
   const { toast } = useToast();
 
-  // Authentication check
+  // Authentication check - allow both authenticated and unauthenticated users
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/current-user"],
     retry: false,
   });
 
-  // Use useEffect for redirect to avoid setState during render
-  useEffect(() => {
-    if (!userLoading && !user) {
-      setLocation("/login");
-    }
-  }, [user, userLoading, setLocation]);
-
-  // Show loading while checking authentication
+  // Show loading only while initially checking authentication
   if (userLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading VyronaRead...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading while redirecting if not authenticated
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to login...</p>
         </div>
       </div>
     );
@@ -295,6 +281,10 @@ export default function VyronaRead() {
   };
 
   const goToCartCheckout = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     if (cart.length === 0) {
       toast({
         title: "Empty Cart",
@@ -353,6 +343,10 @@ export default function VyronaRead() {
   };
 
   const goToLibraryCartCheckout = () => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     if (libraryCart.length === 0) {
       toast({
         title: "Empty Library Cart",
@@ -373,16 +367,28 @@ export default function VyronaRead() {
 
   // Handler functions for buy/rent/borrow operations
   const handleBuyBook = async (book: any) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     // Navigate to VyronaRead checkout page with buy parameters
     setLocation(`/vyronaread-checkout?type=buy&bookId=${book.id}`);
   };
 
   const handleRentBook = async (book: any) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     // Navigate to VyronaRead checkout page with rent parameters  
     setLocation(`/vyronaread-checkout?type=rent&bookId=${book.id}`);
   };
 
   const openBorrowModal = (book: any) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     setSelectedBookForBorrow(book);
     setShowBorrowModal(true);
   };
@@ -413,6 +419,10 @@ export default function VyronaRead() {
 
   const proceedToEBookCheckout = async (ebook: any, type: 'buy' | 'rent' = 'buy') => {
     if (!ebook) return;
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     
     // Navigate to VyronaRead checkout page with appropriate parameters
     const params = new URLSearchParams({
@@ -589,6 +599,73 @@ export default function VyronaRead() {
   const currentlyReadingBooks = Array.isArray(userOrders) ? userOrders
     .filter((order: any) => order.status === 'completed' && order.module === 'vyronaread')
     .slice(0, 2) : [];
+
+  // Authentication mutations
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      setShowAuthModal(false);
+      toast({
+        title: "Welcome back!",
+        description: "You're now logged in to VyronaRead.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const signupMutation = useMutation({
+    mutationFn: async (data: { 
+      username: string;
+      email: string; 
+      password: string; 
+      confirmPassword: string;
+      mobile: string;
+    }) => {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      setShowAuthModal(false);
+      toast({
+        title: "Account Created",
+        description: "Welcome to VyronaRead!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Signup Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <div className="container mx-auto px-4 py-6">

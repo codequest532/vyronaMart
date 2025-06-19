@@ -132,11 +132,7 @@ export default function Home() {
       return;
     }
     if (tab === "read") {
-      if (user) {
-        setLocation("/vyronaread");
-      } else {
-        setShowAuthModal(true);
-      }
+      setLocation("/vyronaread");
       return;
     }
     if (tab === "mall") {
@@ -775,7 +771,7 @@ export default function Home() {
                 </Card>
 
                 {/* VyronaRead */}
-                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-pink-50 to-rose-100" onClick={() => user ? setLocation('/vyronaread') : setShowAuthModal(true)}>
+                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-pink-50 to-rose-100" onClick={() => setLocation('/vyronaread')}>
                   <div className="relative overflow-hidden rounded-t-lg h-48 bg-gradient-to-br from-pink-500 to-rose-600">
                     <div className="absolute inset-0 bg-black/20"></div>
                     <div className="relative p-6 h-full flex flex-col justify-center items-center text-white">
@@ -789,7 +785,7 @@ export default function Home() {
                   <CardContent className="p-6">
                     <p className="text-gray-600 mb-4">Access digital books, manage library services, and explore educational content.</p>
                     <div className="flex items-center text-pink-600 group-hover:text-pink-700 transition-colors">
-                      <span className="font-semibold">{user ? "Start Reading" : "Login to Start Reading"}</span>
+                      <span className="font-semibold">Start Reading</span>
                       <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </CardContent>
