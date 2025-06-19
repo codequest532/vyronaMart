@@ -624,12 +624,12 @@ export default function Home() {
                 </Button>
                 <Button 
                   onClick={() => {
-                    setAuthMode("signup");
+                    setAuthMode("login");
                     setShowAuthModal(true);
                   }}
                   className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
                 >
-                  Get Started
+                  Log in
                 </Button>
               </div>
             </div>
