@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Coins, Star, User, Gamepad2, ShoppingBag, Bell, Search, LogOut, Settings, ChevronDown, Lock, Phone, BellRing, Shield, CreditCard, Eye, EyeOff, Store } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -18,6 +19,7 @@ interface HeaderProps {
 }
 
 export default function Header({ user, onNavigateToProfile }: HeaderProps) {
+  const [, setLocation] = useLocation();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -98,7 +100,7 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onClick={() => onNavigateToProfile?.()}>
+                <DropdownMenuItem onClick={() => setLocation("/myvyrona")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>View Profile</span>
                 </DropdownMenuItem>
