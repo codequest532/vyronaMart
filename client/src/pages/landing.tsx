@@ -11,7 +11,7 @@ import { ShoppingCart, Search, Star, Heart, MapPin, Gamepad2, BookOpen, Building
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import SellerOnboardingModal from "@/components/SellerOnboardingModal";
+import SellerOnboardingModal from "@/components/seller-onboarding-modal";
 import type { Product, Store } from "@shared/schema";
 
 export default function Landing() {
