@@ -2434,6 +2434,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaMallConnect Group order creation endpoint
+  app.post("/api/group-mallcart-orders", async (req, res) => {
+    try {
+      const { 
+        items, 
+        shippingAddress, 
+        memberAddresses,
+        useCommonAddress,
+        paymentMethod, 
+        deliveryOption,
+        memberContributions,
+        selectedRoom,
+        enableSubscription,
+        subscriptionFrequency,
+        subscriptionDayOfWeek,
+        subscriptionTime,
+        subscriptionStartDate
+      } = req.body;
+
+      const userId = req.session?.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Calculate totals
+      const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
+      const deliveryFee = deliveryOption === "pickup" ? 0 : deliveryOption === "express" ? 80 : 45;
+      const total = subtotal + deliveryFee;
+
+      // Create group order
+      const orderData = {
+        module: 'VyronaMallConnect',
+        userId,
+        totalAmount: total,
+        status: 'confirmed',
+        metadata: {
+          type: 'group_order',
+          items,
+          shippingAddress: useCommonAddress ? shippingAddress : memberAddresses,
+          useCommonAddress,
+          paymentMethod,
+          deliveryOption,
+          memberContributions,
+          selectedRoom,
+          groupOrderData: {
+            roomId: selectedRoom?.id,
+            roomName: selectedRoom?.name,
+            memberCount: selectedRoom?.memberCount || 1,
+            contributions: memberContributions
+          },
+          subscription: enableSubscription ? {
+            frequency: subscriptionFrequency,
+            dayOfWeek: subscriptionDayOfWeek,
+            time: subscriptionTime,
+            startDate: subscriptionStartDate
+          } : null,
+          orderType: 'group_mallcart'
+        }
+      };
+
+      const order = await storage.createOrder(orderData);
+      
+      res.json({ 
+        success: true, 
+        orderId: order.id,
+        message: "Group order placed successfully" 
+      });
+
+    } catch (error) {
+      console.error("Error creating VyronaMallConnect group order:", error);
+      res.status(500).json({ message: "Failed to create group order" });
+    }
+  });
+
   // Order tracking route for real-time delivery tracking
   app.get('/api/orders/track/:orderId', async (req, res) => {
     try {
@@ -2497,16 +2571,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
 
+      // Determine store name and address based on order module
+      let storeName = 'VyronaMart Store';
+      let storeAddress = 'Local Store Address';
+      let estimatedDelivery = 'Within 30-60 minutes';
+      
+      if (order.module === 'VyronaMallConnect' || order.module === 'mallcart') {
+        storeName = 'VyronaMallConnect Store';
+        storeAddress = 'Virtual Mall Location';
+        estimatedDelivery = 'Within 30-60 minutes';
+      } else if (order.module === 'VyronaSpace') {
+        storeName = 'VyronaSpace Partner';
+        storeAddress = 'Local Retail Partner';
+        estimatedDelivery = 'Within 15 minutes';
+      }
+
       const trackingData = {
         id: order.id,
         status: order.status,
-        estimatedDelivery: 'Within 15 minutes',
-        trackingNumber: `VS${String(order.id).padStart(6, '0')}`,
-        items: order.items || [],
-        total: order.total,
-        deliveryAddress: order.shippingAddress || 'Default address',
-        storeName: 'FreshMart Express',
-        storeAddress: '123 Green Valley Road, Koramangala',
+        estimatedDelivery,
+        trackingNumber: `VM${String(order.id).padStart(6, '0')}`,
+        items: order.metadata?.items || order.items || [],
+        total: order.totalAmount || order.total,
+        deliveryAddress: order.metadata?.shippingAddress?.addressLine1 || order.shippingAddress || 'Default address',
+        storeName,
+        storeAddress,
         deliveryPartner,
         timeline
       };

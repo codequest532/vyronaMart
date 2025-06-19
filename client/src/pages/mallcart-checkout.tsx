@@ -92,8 +92,8 @@ export default function MallCartCheckout() {
         title: "Order Placed Successfully!",
         description: "Your VyronaMallConnect order has been confirmed. You'll receive updates via email.",
       });
-      // Redirect to order confirmation
-      setLocation(`/order-confirmation/${response.orderId}`);
+      // Redirect to live order tracking
+      setLocation(`/track-order/${response.orderId}`);
     },
     onError: (error) => {
       toast({

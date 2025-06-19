@@ -186,6 +186,8 @@ Changelog:
 - June 19, 2025: Confirmed VyronaInstaStore sellers' products only accessible through /instashop customer interface with dedicated API endpoints
 - June 19, 2025: Added 15-minute checkout timer to VyronaMallConnect group checkout page with countdown functionality
 - June 19, 2025: Implemented timer expiration handling - disables checkout and displays expired state notification when 15 minutes elapsed
+- June 19, 2025: Integrated live order tracking for VyronaMallConnect orders using OpenRouteService API
+- June 19, 2025: Updated both regular and group checkout flows to redirect to /track-order/{orderId} after successful order placement
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing

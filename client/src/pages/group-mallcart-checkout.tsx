@@ -321,8 +321,8 @@ export default function GroupMallCartCheckout() {
         description: `Order #${response.orderId} has been placed. Group members will be notified.`,
       });
       
-      // Navigate to group order confirmation
-      setLocation(`/group-order-confirmation/${response.orderId}`);
+      // Navigate to live order tracking
+      setLocation(`/track-order/${response.orderId}`);
     },
     onError: (error: any) => {
       toast({
