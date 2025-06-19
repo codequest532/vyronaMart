@@ -71,25 +71,41 @@ export default function Landing() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ 
+          identifier: data.email, 
+          password: data.password 
+        }),
+        credentials: "include",
       });
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error);
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
       }
-      return response.json();
+      const responseData = await response.json();
+      
+      // Store user data in query cache immediately
+      if (responseData.success && responseData.user) {
+        queryClient.setQueryData(["/api/auth/me"], responseData.user);
+      }
+      
+      return responseData;
     },
     onSuccess: (data) => {
+      console.log("Landing login response:", data);
       setShowAuthModal(false);
-      // Store user data in query cache to maintain auth state
-      queryClient.setQueryData(["/api/current-user"], data.user);
       toast({
         title: "Success",
         description: "Logged in successfully!",
       });
+      
+      // Force refresh auth state
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
+      }, 100);
       
       // Redirect based on user role
       if (data.user?.role === 'admin') {
@@ -106,6 +122,7 @@ export default function Landing() {
       }
     },
     onError: (error: Error) => {
+      console.error("Landing login error:", error);
       toast({
         title: "Login Failed",
         description: error.message,

@@ -445,6 +445,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         req.session.user = sessionUser;
         
+        console.log("Setting session user:", sessionUser);
+        console.log("Session ID before save:", req.sessionID);
+        
         // Force session save and wait for completion
         req.session.save((err) => {
           if (err) {
@@ -454,6 +457,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               message: "Session save failed"
             });
           }
+          
+          console.log("Session saved successfully:", req.sessionID);
+          console.log("Session user data after save:", req.session.user);
           
           res.json({
             success: true,

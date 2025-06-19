@@ -969,20 +969,38 @@ export default function VyronaSocial() {
       const response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ 
+          identifier: data.email, 
+          password: data.password 
+        }),
+        credentials: "include",
       });
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Login failed");
       }
-      return response.json();
+      const responseData = await response.json();
+      
+      // Store user data in query cache immediately
+      if (responseData.success && responseData.user) {
+        queryClient.setQueryData(["/api/auth/me"], responseData.user);
+      }
+      
+      return responseData;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Social login response:", data);
       toast({ title: "Welcome back!" });
       setShowAuthModal(false);
+      
+      // Force refresh auth state
       queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
+      }, 100);
     },
     onError: (error: Error) => {
+      console.error("Social login error:", error);
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
     },
   });
