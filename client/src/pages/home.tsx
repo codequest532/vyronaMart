@@ -686,7 +686,7 @@ export default function Home() {
                       <Store className="h-5 w-5 mr-2" />
                       Start Shopping
                     </Button>
-                    <Button size="lg" variant="outline" className="border-white text-white bg-white/10" onClick={() => user ? setLocation('/social') : setShowAuthModal(true)}>
+                    <Button size="lg" variant="outline" className="border-white text-purple-900 bg-white" onClick={() => user ? setLocation('/social') : setShowAuthModal(true)}>
                       <Users className="h-5 w-5 mr-2" />
                       Group Shopping
                     </Button>
