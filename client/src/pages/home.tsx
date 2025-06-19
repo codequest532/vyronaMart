@@ -607,7 +607,7 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
       {/* Header */}
       {user ? (
-        <Header />
+        <Header user={user} />
       ) : (
         <header className="bg-white/80 backdrop-blur-sm border-b border-purple-200 sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
