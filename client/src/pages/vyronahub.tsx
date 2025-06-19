@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { 
   ShoppingBag, 
   Search, 
@@ -53,6 +57,21 @@ export default function VyronaHub() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  // Login form schema
+  const loginSchema = z.object({
+    identifier: z.string().min(1, "Email or username is required"),
+    password: z.string().min(1, "Password is required"),
+  });
+
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      identifier: "",
+      password: "",
+    },
+  });
   
   // Cart query for item count
   const { data: rawCartItems = [] } = useQuery({
@@ -68,8 +87,30 @@ export default function VyronaHub() {
   });
 
   const showLogin = () => {
-    setLocation("/login");
+    setIsLoginModalOpen(true);
   };
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async (data: z.infer<typeof loginSchema>) => {
+      return apiRequest("POST", "/api/login", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      setIsLoginModalOpen(false);
+      toast({
+        title: "Logged in successfully!",
+        description: "Welcome back to VyronaHub!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Login Failed",
+        description: "Invalid credentials. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Add to cart mutation
   const addToCartMutation = useMutation({
@@ -559,6 +600,70 @@ export default function VyronaHub() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Login Modal */}
+        <Dialog open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center text-xl font-bold text-gray-900 dark:text-white">
+                Welcome to VyronaHub
+              </DialogTitle>
+              <DialogDescription className="text-center text-gray-600 dark:text-gray-400">
+                Sign in to access your cart and start shopping
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="identifier"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email or Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter your email or username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter your password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex flex-col gap-3">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    disabled={loginMutation.isPending}
+                  >
+                    {loginMutation.isPending ? "Signing in..." : "Sign In"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setIsLoginModalOpen(false);
+                      setLocation("/register");
+                    }}
+                  >
+                    Create New Account
+                  </Button>
+                </div>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
       </div>
