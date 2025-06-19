@@ -252,27 +252,24 @@ export default function MyVyrona() {
 
   const handleLogout = async () => {
     try {
-      // Clear client state immediately for responsive UI
-      queryClient.clear();
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Call logout endpoint
+      // Call logout endpoint first
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include"
       });
+      
+      // Clear all client state
+      queryClient.clear();
+      localStorage.clear();
+      sessionStorage.clear();
       
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
       
-      // Force complete page reload to reset all state
-      setTimeout(() => {
-        window.location.href = "/";
-        window.location.reload();
-      }, 500);
+      // Immediate redirect without delay
+      window.location.href = "/";
       
     } catch (error) {
       console.error("Logout error:", error);
@@ -286,10 +283,8 @@ export default function MyVyrona() {
         description: "Session cleared locally.",
       });
       
-      setTimeout(() => {
-        window.location.href = "/";
-        window.location.reload();
-      }, 500);
+      // Immediate redirect without delay
+      window.location.href = "/";
     }
   };
 

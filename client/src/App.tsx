@@ -138,7 +138,9 @@ function Router() {
       <Route path="/track-order/:orderId">
         {(params) => <OrderTracking />}
       </Route>
-      <Route path="/myvyrona" component={MyVyrona} />
+      <Route path="/myvyrona">
+        {user ? <MyVyrona /> : <Landing />}
+      </Route>
       <Route path="/cart" component={Cart} />
       <Route path="/instacart" component={InstaCart} />
       <Route path="/ebook-reader" component={EbookReader} />
