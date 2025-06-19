@@ -1032,9 +1032,21 @@ export default function VyronaSocial() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
+    const identifier = formData.get("email") as string; // Can be email or username
+    const password = formData.get("password") as string;
+    
+    if (!identifier || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     loginMutation.mutate({
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
+      email: identifier,
+      password: password,
     });
   };
 
@@ -2495,12 +2507,11 @@ export default function VyronaSocial() {
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email or Username</Label>
                   <Input
                     id="email"
                     name="email"
-                    type="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter your email or username"
                     required
                   />
                 </div>

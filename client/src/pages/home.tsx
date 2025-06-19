@@ -346,10 +346,10 @@ export default function Home() {
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
+    const identifier = formData.get("email") as string; // Can be email or username
     const password = formData.get("password") as string;
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       toast({
         title: "Error",
         description: "Please fill in all fields.",
@@ -358,7 +358,7 @@ export default function Home() {
       return;
     }
 
-    loginMutation.mutate({ email, password });
+    loginMutation.mutate({ email: identifier, password });
   };
 
   const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
@@ -1142,12 +1142,11 @@ export default function Home() {
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">Email or Username</Label>
                   <Input
                     id="email"
                     name="email"
-                    type="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter your email or username"
                     required
                   />
                 </div>
