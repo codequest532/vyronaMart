@@ -250,9 +250,39 @@ export default function MyVyrona() {
     );
   }
 
-  const handleLogout = () => {
-    queryClient.clear();
-    window.location.href = "/";
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      if (response.ok) {
+        // Clear all cached data
+        queryClient.clear();
+        // Clear local storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        toast({
+          title: "Logged Out",
+          description: "You have been successfully logged out.",
+        });
+        
+        // Force reload to ensure clean state
+        setTimeout(() => {
+          window.location.replace("/");
+        }, 1000);
+      } else {
+        throw new Error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout Failed",
+        description: "Unable to logout. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
