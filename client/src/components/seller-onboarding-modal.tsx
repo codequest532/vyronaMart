@@ -29,7 +29,7 @@ interface SellerOnboardingModalProps {
   onClose: () => void;
 }
 
-type SellerType = "vyronainstastore" | "vyronahub" | "vyronaspace" | "vyronamallconnect" | "vyronaread" | null;
+type SellerType = "vyronahub" | "vyronasocial" | "vyronaread" | "vyronaspace" | "vyronainstastore" | "vyronamallconnect" | null;
 
 interface FormData {
   sellerType: SellerType;
@@ -104,20 +104,28 @@ interface FormData {
 
 const sellerTypes = [
   {
-    id: "vyronainstastore" as const,
-    title: "VyronaInstaStore",
-    description: "For Instagram-based sellers",
-    icon: Instagram,
-    color: "bg-gradient-to-br from-pink-500 to-purple-600",
-    features: ["Instagram Integration", "Social Commerce", "Direct Messaging", "Story Integration"]
+    id: "vyronahub" as const,
+    title: "VyronaHub",
+    description: "For general e-commerce sellers",
+    icon: Store,
+    color: "bg-gradient-to-br from-blue-500 to-indigo-600",
+    features: ["Product Catalog", "Order Management", "Customer Reviews", "Analytics Dashboard"]
   },
   {
-    id: "vyronahub" as const,
-    title: "VyronaHub & VyronaSocial",
-    description: "For general e-commerce sellers with group-buying",
+    id: "vyronasocial" as const,
+    title: "VyronaSocial",
+    description: "For social shopping and group buying",
     icon: Users,
-    color: "bg-gradient-to-br from-blue-500 to-indigo-600",
+    color: "bg-gradient-to-br from-purple-500 to-pink-600",
     features: ["Group Buying", "Social Shopping", "Community Features", "Bulk Orders"]
+  },
+  {
+    id: "vyronaread" as const,
+    title: "VyronaRead",
+    description: "For book sellers, libraries & educational institutions",
+    icon: BookOpen,
+    color: "bg-gradient-to-br from-amber-500 to-yellow-600",
+    features: ["Book Sales", "Rentals", "Library Management", "Digital Books", "Educational Content"]
   },
   {
     id: "vyronaspace" as const,
@@ -128,20 +136,20 @@ const sellerTypes = [
     features: ["Local Discovery", "In-Store Pickup", "Location-Based", "Hybrid Shopping"]
   },
   {
+    id: "vyronainstastore" as const,
+    title: "VyronaInstaStore",
+    description: "For Instagram-based sellers",
+    icon: Instagram,
+    color: "bg-gradient-to-br from-pink-500 to-purple-600",
+    features: ["Instagram Integration", "Social Commerce", "Direct Messaging", "Story Integration"]
+  },
+  {
     id: "vyronamallconnect" as const,
     title: "VyronaMallConnect",
     description: "For mall-based or premium brand stores",
     icon: Building,
     color: "bg-gradient-to-br from-orange-500 to-red-600",
     features: ["Premium Branding", "Mall Integration", "Brand Management", "Enterprise Features"]
-  },
-  {
-    id: "vyronaread" as const,
-    title: "VyronaRead",
-    description: "For book sellers, libraries & educational institutions",
-    icon: BookOpen,
-    color: "bg-gradient-to-br from-amber-500 to-yellow-600",
-    features: ["Book Sales", "Rentals", "Library Management", "Digital Books", "Educational Content"]
   }
 ];
 
@@ -1197,9 +1205,9 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
             "vyronahub": "/vyronahub-dashboard",
             "vyronasocial": "/vyronahub-dashboard", 
             "vyronaread": "/vyronaread-dashboard",
+            "vyronaspace": "/vyronaspace-seller-dashboard",
             "vyronainstastore": "/vyronainstastore-dashboard",
-            "vyronamallconnect": "/vyronamallconnect-seller-dashboard",
-            "vyronaspace": "/vyronaspace-seller-dashboard"
+            "vyronamallconnect": "/vyronamallconnect-seller-dashboard"
           };
           
           const redirectPath = dashboardRoutes[formData.sellerType as keyof typeof dashboardRoutes];
