@@ -322,179 +322,239 @@ export default function Home() {
 
         {/* Home Tab */}
         {activeTab === "home" && (
-          <div className="space-y-8">
-            {/* Welcome Section */}
-            <Card className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white">
-              <CardContent className="p-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold mb-2">Welcome to VyronaMart</h1>
-                    <p className="text-purple-100 text-lg">Discover amazing products across all our platforms</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">₹{Math.round((walletBalance as any)?.balance || 0)}</div>
-                    <div className="text-purple-200">Wallet Balance</div>
+          <div className="space-y-12">
+            {/* Hero Section */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 rounded-2xl">
+              <div className="absolute inset-0 bg-black/20"></div>
+              <div className="relative px-8 py-16 md:py-24">
+                <div className="max-w-4xl mx-auto text-center text-white">
+                  <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                    Welcome to VyronaMart
+                  </h1>
+                  <p className="text-xl md:text-2xl text-purple-100 mb-8 max-w-2xl mx-auto">
+                    Your ultimate destination for shopping, socializing, and discovering amazing products across multiple platforms
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-4">
+                    <Button size="lg" className="bg-white text-purple-900 hover:bg-purple-50" onClick={() => setLocation('/vyronahub')}>
+                      <Store className="h-5 w-5 mr-2" />
+                      Start Shopping
+                    </Button>
+                    <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" onClick={() => setLocation('/social')}>
+                      <Users className="h-5 w-5 mr-2" />
+                      Join Groups
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="absolute -bottom-1 left-0 right-0 h-4 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500"></div>
+            </div>
 
-            {/* Module Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* VyronaHub */}
-              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronahub')}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Store className="h-6 w-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-blue-700">VyronaHub</h3>
-                      <p className="text-sm text-blue-600">Traditional E-commerce</p>
+            {/* Platform Cards */}
+            <div className="space-y-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Explore Our Platforms</h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  Discover unique shopping experiences tailored to your needs across our diverse ecosystem
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* VyronaHub */}
+                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-blue-50 to-indigo-100" onClick={() => setLocation('/vyronahub')}>
+                  <div className="relative overflow-hidden rounded-t-lg h-48 bg-gradient-to-br from-blue-500 to-indigo-600">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="relative p-6 h-full flex flex-col justify-center items-center text-white">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Store className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">VyronaHub</h3>
+                      <p className="text-blue-100 text-center">Traditional E-commerce Experience</p>
                     </div>
                   </div>
-                  <p className="text-blue-700 font-bold text-xl">{vyronaHubProducts.length} Products</p>
-                </CardContent>
-              </Card>
-
-              {/* VyronaSocial */}
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/social')}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <Users className="h-6 w-6 text-green-600" />
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 mb-4">Browse thousands of products from trusted sellers with secure payments and reliable delivery.</p>
+                    <div className="flex items-center text-blue-600 group-hover:text-blue-700 transition-colors">
+                      <span className="font-semibold">Explore Products</span>
+                      <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-green-700">VyronaSocial</h3>
-                      <p className="text-sm text-green-600">Group Shopping</p>
+                  </CardContent>
+                </Card>
+
+                {/* VyronaSocial */}
+                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-green-50 to-emerald-100" onClick={() => setLocation('/social')}>
+                  <div className="relative overflow-hidden rounded-t-lg h-48 bg-gradient-to-br from-green-500 to-emerald-600">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="relative p-6 h-full flex flex-col justify-center items-center text-white">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Users className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">VyronaSocial</h3>
+                      <p className="text-green-100 text-center">Group Shopping & Social Commerce</p>
                     </div>
                   </div>
-                  <p className="text-green-700 font-bold text-xl">{socialProducts.length + groupBuyProducts.length} Products</p>
-                </CardContent>
-              </Card>
-
-              {/* VyronaSpace */}
-              <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronaspace')}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Zap className="h-6 w-6 text-purple-600" />
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 mb-4">Shop together with friends, split costs, and enjoy exclusive group discounts on your favorite items.</p>
+                    <div className="flex items-center text-green-600 group-hover:text-green-700 transition-colors">
+                      <span className="font-semibold">Join Groups</span>
+                      <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-purple-700">VyronaSpace</h3>
-                      <p className="text-sm text-purple-600">Hyperlocal Delivery</p>
+                  </CardContent>
+                </Card>
+
+                {/* VyronaSpace */}
+                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-purple-50 to-violet-100" onClick={() => setLocation('/vyronaspace')}>
+                  <div className="relative overflow-hidden rounded-t-lg h-48 bg-gradient-to-br from-purple-500 to-violet-600">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="relative p-6 h-full flex flex-col justify-center items-center text-white">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Zap className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">VyronaSpace</h3>
+                      <p className="text-purple-100 text-center">Hyperlocal Quick Commerce</p>
                     </div>
                   </div>
-                  <p className="text-purple-700 font-bold text-xl">{vyronaSpaceProducts.length} Products</p>
-                </CardContent>
-              </Card>
-
-              {/* VyronaMallConnect */}
-              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronamallconnect')}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                      <Building className="h-6 w-6 text-amber-600" />
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 mb-4">Get essentials delivered from nearby stores in 30-60 minutes with real-time tracking.</p>
+                    <div className="flex items-center text-purple-600 group-hover:text-purple-700 transition-colors">
+                      <span className="font-semibold">Quick Order</span>
+                      <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-amber-700">VyronaMallConnect</h3>
-                      <p className="text-sm text-amber-600">Virtual Malls</p>
+                  </CardContent>
+                </Card>
+
+                {/* VyronaMallConnect */}
+                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-amber-50 to-orange-100" onClick={() => setLocation('/vyronamallconnect')}>
+                  <div className="relative overflow-hidden rounded-t-lg h-48 bg-gradient-to-br from-amber-500 to-orange-600">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="relative p-6 h-full flex flex-col justify-center items-center text-white">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Building className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">VyronaMallConnect</h3>
+                      <p className="text-amber-100 text-center">Virtual Mall Experience</p>
                     </div>
                   </div>
-                  <p className="text-amber-700 font-bold text-xl">{mallConnectProducts.length} Products</p>
-                </CardContent>
-              </Card>
-
-              {/* VyronaRead */}
-              <Card className="bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronaread')}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
-                      <BookOpen className="h-6 w-6 text-pink-600" />
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 mb-4">Experience digital storefronts with brand collections and mall-exclusive offers.</p>
+                    <div className="flex items-center text-amber-600 group-hover:text-amber-700 transition-colors">
+                      <span className="font-semibold">Visit Malls</span>
+                      <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-pink-700">VyronaRead</h3>
-                      <p className="text-sm text-pink-600">Library Management</p>
+                  </CardContent>
+                </Card>
+
+                {/* VyronaRead */}
+                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-pink-50 to-rose-100" onClick={() => setLocation('/vyronaread')}>
+                  <div className="relative overflow-hidden rounded-t-lg h-48 bg-gradient-to-br from-pink-500 to-rose-600">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="relative p-6 h-full flex flex-col justify-center items-center text-white">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <BookOpen className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">VyronaRead</h3>
+                      <p className="text-pink-100 text-center">Digital Library & Learning</p>
                     </div>
                   </div>
-                  <p className="text-pink-700 font-bold text-xl">{sellerBooks.length + sellerEBooks.length} Books</p>
-                </CardContent>
-              </Card>
-
-              {/* VyronaInstaStore */}
-              <Card className="bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/instashop')}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                      <Camera className="h-6 w-6 text-teal-600" />
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 mb-4">Access digital books, manage library services, and explore educational content.</p>
+                    <div className="flex items-center text-pink-600 group-hover:text-pink-700 transition-colors">
+                      <span className="font-semibold">Start Reading</span>
+                      <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-teal-700">VyronaInstaStore</h3>
-                      <p className="text-sm text-teal-600">Instagram Shopping</p>
+                  </CardContent>
+                </Card>
+
+                {/* VyronaInstaStore */}
+                <Card className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer border-0 bg-gradient-to-br from-teal-50 to-cyan-100" onClick={() => setLocation('/instashop')}>
+                  <div className="relative overflow-hidden rounded-t-lg h-48 bg-gradient-to-br from-teal-500 to-cyan-600">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="relative p-6 h-full flex flex-col justify-center items-center text-white">
+                      <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Camera className="h-8 w-8" />
+                      </div>
+                      <h3 className="text-2xl font-bold mb-2">VyronaInstaStore</h3>
+                      <p className="text-teal-100 text-center">Instagram-Style Shopping</p>
                     </div>
                   </div>
-                  <p className="text-teal-700 font-bold text-xl">{instaStoreProducts.length} Products</p>
-                </CardContent>
-              </Card>
+                  <CardContent className="p-6">
+                    <p className="text-gray-600 mb-4">Discover trendy products through visual stories and instant shopping experiences.</p>
+                    <div className="flex items-center text-teal-600 group-hover:text-teal-700 transition-colors">
+                      <span className="font-semibold">Discover Trends</span>
+                      <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
             {/* Featured Products Section */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    <SelectItem value="vyronahub">VyronaHub</SelectItem>
-                    <SelectItem value="social">VyronaSocial</SelectItem>
-                    <SelectItem value="space">VyronaSpace</SelectItem>
-                    <SelectItem value="mallconnect">VyronaMallConnect</SelectItem>
-                    <SelectItem value="read">VyronaRead</SelectItem>
-                    <SelectItem value="instastore">VyronaInstaStore</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="space-y-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
+                <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                  Discover handpicked products from across our platforms, curated just for you
+                </p>
+                <div className="flex justify-center">
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-64 h-12 text-lg">
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="vyronahub">VyronaHub</SelectItem>
+                      <SelectItem value="social">VyronaSocial</SelectItem>
+                      <SelectItem value="space">VyronaSpace</SelectItem>
+                      <SelectItem value="mallconnect">VyronaMallConnect</SelectItem>
+                      <SelectItem value="read">VyronaRead</SelectItem>
+                      <SelectItem value="instastore">VyronaInstaStore</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {isLoadingProducts ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {[...Array(8)].map((_, i) => (
-                    <Card key={i} className="animate-pulse">
-                      <div className="h-48 bg-gray-200 rounded-t-lg"></div>
-                      <CardContent className="p-4">
-                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded mb-2"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <Card key={i} className="animate-pulse border-0 shadow-lg">
+                      <div className="h-64 bg-gray-200 rounded-t-xl"></div>
+                      <CardContent className="p-6">
+                        <div className="h-5 bg-gray-200 rounded mb-3"></div>
+                        <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                        <div className="h-6 bg-gray-200 rounded w-1/2"></div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {/* VyronaHub Products */}
                   {(selectedCategory === "all" || selectedCategory === "vyronahub") &&
-                    vyronaHubProducts.slice(0, 4).map((product: any) => (
-                      <Card key={`hub-${product.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/product/${product.id}`)}>
-                        <div className="relative overflow-hidden rounded-t-lg">
+                    vyronaHubProducts.slice(0, 8).map((product: any) => (
+                      <Card key={`hub-${product.id}`} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-0 bg-white overflow-hidden" onClick={() => setLocation(`/product/${product.id}`)}>
+                        <div className="relative overflow-hidden h-64">
                           <img
-                            src={product.imageUrl || "/api/placeholder/300/200"}
+                            src={product.imageUrl || "/api/placeholder/400/300"}
                             alt={product.name}
-                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
-                          <Badge className="absolute top-2 left-2 bg-blue-600 text-white">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <Badge className="absolute top-3 left-3 bg-blue-600/90 text-white backdrop-blur-sm border-0 px-3 py-1">
                             VyronaHub
                           </Badge>
+                          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <Button size="sm" className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white hover:text-gray-900">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                        <CardContent className="p-6">
+                          <h3 className="font-bold text-lg mb-2 line-clamp-1 group-hover:text-blue-600 transition-colors">{product.name}</h3>
+                          <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed">{product.description}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold text-blue-600">₹{product.price / 100}</span>
-                            <Button size="sm" variant="outline">
-                              <ShoppingCart className="h-4 w-4 mr-1" />
-                              Add
+                            <span className="text-2xl font-bold text-blue-600">₹{product.price / 100}</span>
+                            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Add to Cart
                             </Button>
                           </div>
                         </CardContent>
@@ -503,26 +563,32 @@ export default function Home() {
 
                   {/* Social Products */}
                   {(selectedCategory === "all" || selectedCategory === "social") &&
-                    [...socialProducts, ...groupBuyProducts].slice(0, 4).map((product: any) => (
-                      <Card key={`social-${product.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/social/product/${product.id}`)}>
-                        <div className="relative overflow-hidden rounded-t-lg">
+                    [...socialProducts, ...groupBuyProducts].slice(0, 8).map((product: any) => (
+                      <Card key={`social-${product.id}`} className="group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer border-0 bg-white overflow-hidden" onClick={() => setLocation(`/social/product/${product.id}`)}>
+                        <div className="relative overflow-hidden h-64">
                           <img
-                            src={product.imageUrl || "/api/placeholder/300/200"}
+                            src={product.imageUrl || "/api/placeholder/400/300"}
                             alt={product.name}
-                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
-                          <Badge className="absolute top-2 left-2 bg-green-600 text-white">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <Badge className="absolute top-3 left-3 bg-green-600/90 text-white backdrop-blur-sm border-0 px-3 py-1">
                             VyronaSocial
                           </Badge>
+                          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <Button size="sm" className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white hover:text-gray-900">
+                              <Users className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                        <CardContent className="p-4">
-                          <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
-                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                        <CardContent className="p-6">
+                          <h3 className="font-bold text-lg mb-2 line-clamp-1 group-hover:text-green-600 transition-colors">{product.name}</h3>
+                          <p className="text-gray-600 mb-4 line-clamp-2 text-sm leading-relaxed">{product.description}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-lg font-bold text-green-600">₹{product.price / 100}</span>
-                            <Button size="sm" variant="outline">
-                              <Users className="h-4 w-4 mr-1" />
-                              Join
+                            <span className="text-2xl font-bold text-green-600">₹{product.price / 100}</span>
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                              <Users className="h-4 w-4 mr-2" />
+                              Join Group
                             </Button>
                           </div>
                         </CardContent>
@@ -644,54 +710,48 @@ export default function Home() {
               )}
 
               {/* View All Button */}
-              <div className="text-center">
-                <Button variant="outline" size="lg" onClick={() => setLocation('/vyronahub')}>
-                  <Eye className="h-4 w-4 mr-2" />
+              <div className="text-center mt-12">
+                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3" onClick={() => setLocation('/vyronahub')}>
+                  <Eye className="h-5 w-5 mr-2" />
                   Explore All Products
                 </Button>
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageCircle className="h-8 w-8 text-gray-600" />
+            {/* Features Section */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 md:p-12">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose VyronaMart?</h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                  Experience the future of e-commerce with our innovative features and seamless shopping experience
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="text-center group">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <Users className="h-10 w-10 text-white" />
                   </div>
-                  <h3 className="font-semibold mb-2">Join Group Shopping</h3>
-                  <p className="text-sm text-gray-600 mb-4">Shop together and save more with friends</p>
-                  <Button variant="outline" onClick={() => setLocation('/social')}>
-                    Start Shopping
-                  </Button>
-                </CardContent>
-              </Card>
+                  <h3 className="text-xl font-bold mb-3">Social Shopping</h3>
+                  <p className="text-gray-600 leading-relaxed">Join friends, create groups, and enjoy exclusive discounts when shopping together</p>
+                </div>
 
-              <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Truck className="h-8 w-8 text-gray-600" />
+                <div className="text-center group">
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <Zap className="h-10 w-10 text-white" />
                   </div>
-                  <h3 className="font-semibold mb-2">Quick Delivery</h3>
-                  <p className="text-sm text-gray-600 mb-4">Get your orders delivered in 30-60 minutes</p>
-                  <Button variant="outline" onClick={() => setLocation('/vyronaspace')}>
-                    Order Now
-                  </Button>
-                </CardContent>
-              </Card>
+                  <h3 className="text-xl font-bold mb-3">Lightning Fast</h3>
+                  <p className="text-gray-600 leading-relaxed">Get your orders delivered in 30-60 minutes with real-time tracking and updates</p>
+                </div>
 
-              <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
-                <CardContent className="p-6 text-center">
-                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Wallet className="h-8 w-8 text-gray-600" />
+                <div className="text-center group">
+                  <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <Star className="h-10 w-10 text-white" />
                   </div>
-                  <h3 className="font-semibold mb-2">Manage Wallet</h3>
-                  <p className="text-sm text-gray-600 mb-4">Add money and track your transactions</p>
-                  <Button variant="outline" onClick={() => setLocation('/myvyrona')}>
-                    Open Wallet
-                  </Button>
-                </CardContent>
-              </Card>
+                  <h3 className="text-xl font-bold mb-3">Premium Quality</h3>
+                  <p className="text-gray-600 leading-relaxed">Curated products from trusted sellers with quality guarantee and easy returns</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
