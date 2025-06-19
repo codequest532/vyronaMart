@@ -11,7 +11,7 @@ import { useToastNotifications } from "@/hooks/use-toast-notifications";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import SellerOnboardingModal from "@/components/seller-onboarding-modal";
+import SellerOnboardingModal from "@/components/SellerOnboardingModal";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -1304,7 +1304,7 @@ export default function Home() {
 
       {/* Seller Onboarding Modal */}
       <SellerOnboardingModal 
-        open={showSellerOnboarding}
+        isOpen={showSellerOnboarding}
         onClose={() => setShowSellerOnboarding(false)}
       />
     </div>
