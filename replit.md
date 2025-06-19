@@ -202,6 +202,8 @@ Changelog:
 - June 19, 2025: Created comprehensive MyVyrona dashboard with wallet management, transaction history, achievements, and user profile
 - June 19, 2025: Updated homepage profile tab to redirect to dedicated MyVyrona page for cleaner homepage navigation
 - June 19, 2025: Enhanced user experience by separating profile management from main homepage navigation flow
+- June 19, 2025: Restored MyVyrona content to dedicated page structure per user request - profile tab redirects to /myvyrona
+- June 19, 2025: Maintained clean homepage navigation with profile functionality separated into standalone dashboard experience
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
