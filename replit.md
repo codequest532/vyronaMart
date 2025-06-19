@@ -204,6 +204,8 @@ Changelog:
 - June 19, 2025: Enhanced user experience by separating profile management from main homepage navigation flow
 - June 19, 2025: Restored MyVyrona content to dedicated page structure per user request - profile tab redirects to /myvyrona
 - June 19, 2025: Maintained clean homepage navigation with profile functionality separated into standalone dashboard experience
+- June 19, 2025: Enforced strict module isolation by removing VyronaRead books section and Shop by Category from home page
+- June 19, 2025: Home page now focuses on unified dashboard experience without module-specific content bleeding
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display

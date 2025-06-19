@@ -458,74 +458,7 @@ export default function Home() {
 
 
 
-            {/* Product Categories */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-bold text-gray-900">Shop by Category</h3>
-                  <Button variant="ghost" className="text-blue-600">View All Categories</Button>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                  {[
-                    { name: "Electronics", icon: Laptop, color: "blue", count: products.filter(p => p.category === "electronics").length },
-                    { name: "Fashion", icon: Shirt, color: "pink", count: products.filter(p => p.category === "fashion").length },
-                    { name: "Books", icon: Book, color: "purple", count: products.filter(p => p.category === "mystery" || p.category === "sci-fi").length },
-                    { name: "Home & Living", icon: HomeIcon, color: "green", count: products.filter(p => p.category === "home").length || 3 },
-                  ].map((category) => (
-                    <Card key={category.name} className={`bg-${category.color}-50 border-${category.color}-200 cursor-pointer hover:bg-${category.color}-100 hover:shadow-lg transition-all duration-300 group`}>
-                      <CardContent className="p-6 text-center">
-                        <div className={`w-16 h-16 bg-${category.color}-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>
-                          <category.icon className={`text-${category.color}-600 h-8 w-8`} />
-                        </div>
-                        <h4 className="font-semibold text-gray-900 mb-2">{category.name}</h4>
-                        <p className="text-sm text-gray-600">{category.count}+ products</p>
-                        <Badge variant="secondary" className={`mt-2 text-${category.color}-600 bg-${category.color}-50`}>
-                          Earn up to 50 coins
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
 
-                {/* Trending Products */}
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-bold text-gray-900">🔥 Trending Products</h4>
-                  <Button variant="ghost" className="text-blue-600 text-sm">View All</Button>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {products.slice(0, 4).map((product) => (
-                    <div 
-                      key={product.id} 
-                      className="group cursor-pointer bg-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden"
-                      onClick={() => handleProductClick(product.name)}
-                    >
-                      <div className="relative">
-                        <img 
-                          src={product.imageUrl} 
-                          alt={product.name}
-                          className="w-full h-32 object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute top-2 right-2">
-                          <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs">
-                            +{Math.floor(product.price / 10000)}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="p-3">
-                        <h4 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2">{product.name}</h4>
-                        <p className="text-blue-600 font-bold text-lg">₹{Math.round(product.price / 100)}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-gray-500">Free shipping</span>
-                          <Button size="sm" className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700">
-                            Add to Cart
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Game Explorer */}
             <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
