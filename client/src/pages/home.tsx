@@ -154,6 +154,10 @@ export default function Home() {
       setLocation("/instashop");
       return;
     }
+    if (tab === "profile") {
+      setLocation("/myvyrona");
+      return;
+    }
     setActiveTab(tab);
   };
   const { user, updateCoins } = useUserData();
