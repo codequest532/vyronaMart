@@ -126,7 +126,7 @@ function LibraryBooksSection({ libraryId, libraryName, addToLibraryCart }: { lib
                 <Button 
                   size="sm" 
                   className="flex-1 h-7 text-xs bg-green-600 hover:bg-green-700"
-                  onClick={() => handleBorrowBook(book)}
+                  onClick={() => requireAuth("borrow books", () => handleBorrowBook(book))}
                 >
                   Borrow
                 </Button>
@@ -134,7 +134,7 @@ function LibraryBooksSection({ libraryId, libraryName, addToLibraryCart }: { lib
                   size="sm" 
                   variant="outline"
                   className="flex-1 h-7 text-xs border-green-600 text-green-600 hover:bg-green-50"
-                  onClick={() => addToLibraryCart(book)}
+                  onClick={() => requireAuth("add items to cart", () => addToLibraryCart(book))}
                 >
                   Add to Cart
                 </Button>
@@ -373,28 +373,14 @@ export default function VyronaRead() {
 
   // Handler functions for buy/rent/borrow operations
   const handleBuyBook = async (book: any) => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
-    // Navigate to VyronaRead checkout page with buy parameters
     setLocation(`/vyronaread-checkout?type=buy&bookId=${book.id}`);
   };
 
   const handleRentBook = async (book: any) => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
-    // Navigate to VyronaRead checkout page with rent parameters  
     setLocation(`/vyronaread-checkout?type=rent&bookId=${book.id}`);
   };
 
   const openBorrowModal = (book: any) => {
-    if (!user) {
-      setShowAuthModal(true);
-      return;
-    }
     setSelectedBookForBorrow(book);
     setShowBorrowModal(true);
   };
@@ -932,14 +918,14 @@ export default function VyronaRead() {
                             <Button 
                               size="sm" 
                               className="bg-purple-600 hover:bg-purple-700"
-                              onClick={() => handleBuyBook(book)}
+                              onClick={() => requireAuth("purchase books", () => handleBuyBook(book))}
                             >
                               Buy Now
                             </Button>
                             <Button 
                               size="sm" 
                               variant="outline"
-                              onClick={() => handleRentBook(book)}
+                              onClick={() => requireAuth("rent books", () => handleRentBook(book))}
                             >
                               Rent
                             </Button>
@@ -949,7 +935,7 @@ export default function VyronaRead() {
                               size="sm" 
                               variant="outline"
                               className="text-purple-600 border-purple-600 hover:bg-purple-50"
-                              onClick={() => addToCart(book, 'buy')}
+                              onClick={() => requireAuth("add items to cart", () => addToCart(book, 'buy'))}
                             >
                               <ShoppingCart className="mr-1 h-3 w-3" />
                               Add to Cart
@@ -958,7 +944,7 @@ export default function VyronaRead() {
                               size="sm" 
                               variant="outline"
                               className="text-green-600 border-green-600 hover:bg-green-50"
-                              onClick={() => addToCart(book, 'rent')}
+                              onClick={() => requireAuth("add items to cart", () => addToCart(book, 'rent'))}
                             >
                               <ShoppingCart className="mr-1 h-3 w-3" />
                               Add (Rent)
@@ -1175,7 +1161,7 @@ export default function VyronaRead() {
                             <Button 
                               size="sm" 
                               className="w-full bg-green-600 hover:bg-green-700"
-                              onClick={() => openBorrowModal(book)}
+                              onClick={() => requireAuth("borrow books", () => openBorrowModal(book))}
                             >
                               <BookOpen className="mr-1 h-3 w-3" />
                               Borrow Book
@@ -1271,7 +1257,7 @@ export default function VyronaRead() {
                           <Button 
                             size="sm" 
                             className="bg-blue-600 hover:bg-blue-700"
-                            onClick={() => proceedToEBookCheckout(ebook, 'buy')}
+                            onClick={() => requireAuth("purchase ebooks", () => proceedToEBookCheckout(ebook, 'buy'))}
                           >
                             Buy - ₹{ebook.salePrice || ebook.price || '9.99'}
                           </Button>
@@ -1279,7 +1265,7 @@ export default function VyronaRead() {
                             size="sm" 
                             variant="outline"
                             className="border-orange-200 text-orange-700 hover:bg-orange-50"
-                            onClick={() => proceedToEBookCheckout(ebook, 'rent')}
+                            onClick={() => requireAuth("rent ebooks", () => proceedToEBookCheckout(ebook, 'rent'))}
                           >
                             Rent - ₹{ebook.rentalPrice || '2.99'}
                           </Button>
@@ -1289,7 +1275,7 @@ export default function VyronaRead() {
                             size="sm" 
                             variant="outline"
                             className="text-blue-600 border-blue-600 hover:bg-blue-50"
-                            onClick={() => addToCart(ebook, 'buy')}
+                            onClick={() => requireAuth("add items to cart", () => addToCart(ebook, 'buy'))}
                           >
                             <ShoppingCart className="mr-1 h-3 w-3" />
                             Add to Cart
@@ -1298,7 +1284,7 @@ export default function VyronaRead() {
                             size="sm" 
                             variant="outline"
                             className="text-green-600 border-green-600 hover:bg-green-50"
-                            onClick={() => addToCart(ebook, 'rent')}
+                            onClick={() => requireAuth("add items to cart", () => addToCart(ebook, 'rent'))}
                           >
                             <Calendar className="mr-1 h-3 w-3" />
                             Add to Rent Cart
