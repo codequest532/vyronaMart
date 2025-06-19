@@ -3058,6 +3058,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           OR (o.module = 'vyronaread' AND o.metadata->>'sellerId' = ${sellerId.toString()})
           OR (${authenticatedUser.role === 'admin'})
           OR (${sellerId} = 14 AND o.module IN ('vyronahub', 'vyronaread'))
+          OR (${authenticatedUser.sellerType === 'vyronasocial'} AND o.module = 'vyronasocial')
+          OR (${authenticatedUser.sellerType === 'vyronahub'} AND o.module IN ('vyronahub', 'vyronasocial'))
         )
         
         UNION ALL
@@ -3215,6 +3217,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           (module = 'vyronahub' AND metadata->>'sellerId' = ${sellerId.toString()})
           OR (module = 'vyronasocial' AND metadata->>'sellerId' = ${sellerId.toString()})
           OR (module = 'vyronaread' AND metadata->>'sellerId' = ${sellerId.toString()})
+          OR (${authenticatedUser.sellerType === 'vyronasocial'} AND module = 'vyronasocial')
+          OR (${authenticatedUser.sellerType === 'vyronahub'} AND module IN ('vyronahub', 'vyronasocial'))
         )
       `);
       
@@ -9488,8 +9492,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const email = registrationData.email;
         const password = registrationData.password;
         
-        // Create VyronaHub or VyronaSocial seller account - both use VyronaHub dashboard
-        const sellerType = registrationData.sellerType === "vyronasocial" ? "vyronahub" : "vyronahub";
+        // Create VyronaHub or VyronaSocial seller account - preserve original seller type
+        const sellerType = registrationData.sellerType;
         const newSeller = await db
           .insert(users)
           .values({
@@ -9516,7 +9520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await sendSellerConfirmationEmail(email, {
             businessName: registrationData.businessName,
             ownerName: registrationData.ownerName,
-            sellerType: 'vyronahub',
+            sellerType: sellerType,
             credentials: {
               email: email,
               password: password

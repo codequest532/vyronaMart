@@ -29,7 +29,7 @@ interface SellerOnboardingModalProps {
   onClose: () => void;
 }
 
-type SellerType = "vyronahub" | "vyronaread" | "vyronaspace" | "vyronainstastore" | "vyronamallconnect" | null;
+type SellerType = "vyronahub" | "vyronasocial" | "vyronaread" | "vyronaspace" | "vyronainstastore" | "vyronamallconnect" | null;
 
 interface FormData {
   sellerType: SellerType;
@@ -110,6 +110,14 @@ const sellerTypes = [
     icon: Users,
     color: "bg-gradient-to-br from-blue-500 to-indigo-600",
     features: ["Product Catalog", "Group Buying", "Social Shopping", "Analytics Dashboard"]
+  },
+  {
+    id: "vyronasocial" as const,
+    title: "VyronaSocial",
+    description: "For social shopping and group buying",
+    icon: Users,
+    color: "bg-gradient-to-br from-purple-500 to-pink-600",
+    features: ["Group Buying", "Social Shopping", "Community Features", "Bulk Orders"]
   },
   {
     id: "vyronaread" as const,
@@ -1195,6 +1203,7 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
           // Redirect to appropriate dashboard based on seller type
           const dashboardRoutes = {
             "vyronahub": "/vyronahub-dashboard",
+            "vyronasocial": "/vyronahub-dashboard",
             "vyronaread": "/vyronaread-dashboard",
             "vyronaspace": "/vyronaspace-seller-dashboard",
             "vyronainstastore": "/vyronainstastore-dashboard",
