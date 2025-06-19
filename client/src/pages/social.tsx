@@ -1351,15 +1351,24 @@ export default function VyronaSocial() {
                     <h2 className="text-lg font-semibold text-green-800 dark:text-green-200">Shopping Groups</h2>
                     <div className="flex gap-2">
                       <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>
-                        <DialogTrigger asChild>
+                        {authUser ? (
+                          <DialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              className="bg-green-500 hover:bg-green-600 text-white rounded-full w-8 h-8 p-0"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                        ) : (
                           <Button 
                             size="sm" 
                             className="bg-green-500 hover:bg-green-600 text-white rounded-full w-8 h-8 p-0"
-                            onClick={!authUser ? showLogin : undefined}
+                            onClick={showLogin}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
-                        </DialogTrigger>
+                        )}
                         <DialogContent className="sm:max-w-md">
                           <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
@@ -1407,16 +1416,26 @@ export default function VyronaSocial() {
                       </Dialog>
                       
                       <Dialog open={isJoinGroupOpen} onOpenChange={setIsJoinGroupOpen}>
-                        <DialogTrigger asChild>
+                        {authUser ? (
+                          <DialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="rounded-full w-8 h-8 p-0 border-green-300"
+                            >
+                              <UserPlus className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                        ) : (
                           <Button 
                             size="sm" 
                             variant="outline" 
                             className="rounded-full w-8 h-8 p-0 border-green-300"
-                            onClick={!authUser ? showLogin : undefined}
+                            onClick={showLogin}
                           >
                             <UserPlus className="h-4 w-4" />
                           </Button>
-                        </DialogTrigger>
+                        )}
                         <DialogContent className="sm:max-w-md">
                           <DialogHeader>
                             <DialogTitle className="flex items-center gap-2">
