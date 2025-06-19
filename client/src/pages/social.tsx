@@ -1041,29 +1041,111 @@ export default function VyronaSocial() {
                   <div className="p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
                     <div className="flex items-center justify-between">
                       <h2 className="font-bold text-white text-lg">Your Groups</h2>
-                      <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>
-                        <DialogTrigger asChild>
-                          <Button 
-                            size="sm" 
-                            onClick={() => requireAuth("create a group")}
-                            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
-                            variant="outline"
-                          >
-                            <Plus className="h-4 w-4 mr-1" />
-                            New Group
-                          </Button>
-                        </DialogTrigger>
+                      <div className="flex gap-2">
+                        <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                if (!requireAuth("create a group")) return;
+                                setIsCreateGroupOpen(true);
+                              }}
+                              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                              variant="outline"
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              New Group
+                            </Button>
+                          </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>Create New Group</DialogTitle>
                           </DialogHeader>
-                          <div className="space-y-4">
-                            <Input placeholder="Group name" />
-                            <Input placeholder="Description" />
-                            <Button className="w-full">Create Group</Button>
-                          </div>
+                          <Form {...createGroupForm}>
+                            <form onSubmit={createGroupForm.handleSubmit((data) => {
+                              if (!requireAuth("create a group")) return;
+                              createGroupMutation.mutate(data);
+                            })} className="space-y-4">
+                              <FormField
+                                control={createGroupForm.control}
+                                name="name"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input placeholder="Group name" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <FormField
+                                control={createGroupForm.control}
+                                name="description"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormControl>
+                                      <Input placeholder="Description" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <Button type="submit" className="w-full" disabled={createGroupMutation.isPending}>
+                                {createGroupMutation.isPending ? "Creating..." : "Create Group"}
+                              </Button>
+                            </form>
+                          </Form>
                         </DialogContent>
                       </Dialog>
+                      
+                      <Dialog open={isJoinGroupOpen} onOpenChange={setIsJoinGroupOpen}>
+                        <DialogTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            onClick={() => {
+                              if (!requireAuth("join a group")) return;
+                              setIsJoinGroupOpen(true);
+                            }}
+                            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                            variant="outline"
+                          >
+                            <UserPlus className="h-4 w-4 mr-1" />
+                            Join Group
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Join Existing Group</DialogTitle>
+                            <DialogDescription>
+                              Enter the group code to join an existing group
+                            </DialogDescription>
+                          </DialogHeader>
+                          <Form {...joinGroupForm}>
+                            <form onSubmit={joinGroupForm.handleSubmit((data) => {
+                              if (!requireAuth("join a group")) return;
+                              joinGroupMutation.mutate(data);
+                            })} className="space-y-4">
+                              <FormField
+                                control={joinGroupForm.control}
+                                name="code"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Group Code</FormLabel>
+                                    <FormControl>
+                                      <Input placeholder="Enter group code" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                              <Button type="submit" className="w-full" disabled={joinGroupMutation.isPending}>
+                                {joinGroupMutation.isPending ? "Joining..." : "Join Group"}
+                              </Button>
+                            </form>
+                          </Form>
+                        </DialogContent>
+                      </Dialog>
+                      </div>
                     </div>
                   </div>
                 </div>
