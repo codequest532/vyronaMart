@@ -71,6 +71,10 @@ export default function GroupMallCartCheckout() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
+  // 15-minute checkout timer (900 seconds)
+  const [timeLeft, setTimeLeft] = useState(900);
+  const [timerExpired, setTimerExpired] = useState(false);
+  
   const [groupCart, setGroupCart] = useState<GroupCartItem[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
   const [paymentMethod, setPaymentMethod] = useState("upi");
@@ -123,6 +127,33 @@ export default function GroupMallCartCheckout() {
     queryKey: ["/api/shopping-rooms"],
     retry: false,
   });
+
+  // 15-minute checkout timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          setTimerExpired(true);
+          toast({
+            title: "Checkout Timer Expired",
+            description: "Your checkout session has expired. Please restart the process.",
+            variant: "destructive",
+          });
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [toast]);
+
+  // Format time for display
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   // Pre-fill user data
   useEffect(() => {
@@ -303,6 +334,15 @@ export default function GroupMallCartCheckout() {
   });
 
   const handlePlaceOrder = () => {
+    if (timerExpired) {
+      toast({
+        title: "Checkout Timer Expired",
+        description: "Your checkout session has expired. Please restart the process.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!selectedRoom) {
       toast({
         title: "Please Select Group",
@@ -374,19 +414,35 @@ export default function GroupMallCartCheckout() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/vyronamallconnect")}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to VyronaMallConnect
-            </Button>
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <h1 className="text-xl font-bold text-gray-900">Group MallCart Checkout</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/vyronamallconnect")}
+                className="text-gray-600 hover:text-gray-900"
+                disabled={timerExpired}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to VyronaMallConnect
+              </Button>
+              <div className="flex items-center space-x-2">
+                <Users className="h-5 w-5 text-blue-600" />
+                <h1 className="text-xl font-bold text-gray-900">Group MallCart Checkout</h1>
+              </div>
+            </div>
+            
+            {/* Checkout Timer */}
+            <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
+              timeLeft <= 300 ? 'bg-red-100 text-red-700' : 
+              timeLeft <= 600 ? 'bg-yellow-100 text-yellow-700' : 
+              'bg-green-100 text-green-700'
+            }`}>
+              <Timer className="h-5 w-5" />
+              <div className="text-center">
+                <div className="text-sm font-medium">Time Remaining</div>
+                <div className="text-lg font-bold">{formatTime(timeLeft)}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1194,17 +1250,37 @@ export default function GroupMallCartCheckout() {
               </CardContent>
             </Card>
 
+            {/* Timer Expired Warning */}
+            {timerExpired && (
+              <Card className="border-red-300 bg-red-50">
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-2 text-red-700">
+                    <Timer className="h-5 w-5" />
+                    <div>
+                      <p className="font-medium">Checkout Session Expired</p>
+                      <p className="text-sm">Your 15-minute checkout window has expired. Please restart the process.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Place Order Button */}
             <Button
               size="lg"
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handlePlaceOrder}
-              disabled={placeOrderMutation.isPending || groupCart.length === 0 || (selectedRoom && selectedRoom.memberCount > 1 && !allMembersPaid)}
+              disabled={timerExpired || placeOrderMutation.isPending || groupCart.length === 0 || (selectedRoom && selectedRoom.memberCount > 1 && !allMembersPaid)}
             >
               {placeOrderMutation.isPending ? (
                 <div className="flex items-center space-x-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Placing Group Order...</span>
+                </div>
+              ) : timerExpired ? (
+                <div className="flex items-center space-x-2">
+                  <Timer className="h-5 w-5" />
+                  <span>Checkout Session Expired</span>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
