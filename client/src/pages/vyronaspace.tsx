@@ -88,7 +88,7 @@ export default function VyronaSpace() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { requireAuth } = useAuthGuard();
+  const { requireAuth, isAuthenticated } = useAuthGuard();
 
   // Fetch real stores data from backend
   const { data: storesData = [], isLoading: storesLoading } = useQuery({
@@ -389,7 +389,14 @@ export default function VyronaSpace() {
           </div>
 
           {/* Navigation Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <Tabs value={activeTab} onValueChange={(value) => {
+            if (value === "group-buy" && !isAuthenticated) {
+              setShowAuthModal(true);
+              setAuthMode("login");
+              return;
+            }
+            setActiveTab(value);
+          }} className="space-y-8">
             <TabsList className="grid w-full grid-cols-5 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
               <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
                 <Sparkles className="h-4 w-4 mr-2" />
@@ -397,7 +404,7 @@ export default function VyronaSpace() {
               </TabsTrigger>
               <TabsTrigger value="group-buy" className="rounded-xl py-3 data-[state=active]:bg-green-100 data-[state=active]:shadow-md data-[state=active]:text-green-800">
                 <Users className="h-4 w-4 mr-2" />
-                Group Buy
+                {isAuthenticated ? "Group Buy" : "Sign In for Groups"}
               </TabsTrigger>
               <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
                 <Package className="h-4 w-4 mr-2" />
@@ -727,7 +734,26 @@ export default function VyronaSpace() {
 
             {/* Group Buy Tab - VyronSocial Integration */}
             <TabsContent value="group-buy" className="space-y-6">
-              <VyronaSocialGroupBuy />
+              {isAuthenticated ? (
+                <VyronaSocialGroupBuy />
+              ) : (
+                <div className="text-center py-12 space-y-4">
+                  <Users className="h-16 w-16 mx-auto text-gray-400" />
+                  <h3 className="text-xl font-semibold text-gray-900">Sign In Required</h3>
+                  <p className="text-gray-600 max-w-md mx-auto">
+                    Join VyronaSpace group buying to unlock exclusive discounts and shop with your neighbors.
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      setShowAuthModal(true);
+                      setAuthMode("login");
+                    }}
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                  >
+                    Sign In to Join Groups
+                  </Button>
+                </div>
+              )}
             </TabsContent>
 
             {/* Orders Tab - Complete Functionality */}
