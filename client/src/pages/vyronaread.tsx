@@ -161,42 +161,11 @@ export default function VyronaRead() {
   const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<any>(null);
   const { toast } = useToast();
 
-  // Authentication check
+  // Authentication check (no redirect, allow browsing)
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/current-user"],
     retry: false,
   });
-
-  // Use useEffect for redirect to avoid setState during render
-  useEffect(() => {
-    if (!userLoading && !user) {
-      setLocation("/login");
-    }
-  }, [user, userLoading, setLocation]);
-
-  // Show loading while checking authentication
-  if (userLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading VyronaRead...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading while redirecting if not authenticated
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to login...</p>
-        </div>
-      </div>
-    );
-  }
 
   const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -252,8 +221,12 @@ export default function VyronaRead() {
     }
   }, [libraryCart]);
 
+  const { requireAuth } = useAuthGuard();
+
   // Cart handler functions
   const addToCart = (book: any, type: 'buy' | 'rent') => {
+    if (!requireAuth(`add ${book.title || book.name} to cart`)) return;
+    
     const cartItem = {
       id: `${book.id}-${type}`,
       book,
@@ -296,6 +269,7 @@ export default function VyronaRead() {
   };
 
   const goToCartCheckout = () => {
+    if (!requireAuth("proceed to checkout")) return;
     if (cart.length === 0) {
       toast({
         title: "Empty Cart",
@@ -311,6 +285,8 @@ export default function VyronaRead() {
 
   // Library cart handler functions
   const addToLibraryCart = (book: any) => {
+    if (!requireAuth(`add ${book.title || book.name} to library cart`)) return;
+    
     const cartItem = {
       id: `library-${book.id}`,
       book,
@@ -354,6 +330,7 @@ export default function VyronaRead() {
   };
 
   const goToLibraryCartCheckout = () => {
+    if (!requireAuth("proceed to library checkout")) return;
     if (libraryCart.length === 0) {
       toast({
         title: "Empty Library Cart",
@@ -374,16 +351,19 @@ export default function VyronaRead() {
 
   // Handler functions for buy/rent/borrow operations
   const handleBuyBook = async (book: any) => {
+    if (!requireAuth(`purchase ${book.title || book.name}`)) return;
     // Navigate to VyronaRead checkout page with buy parameters
     setLocation(`/vyronaread-checkout?type=buy&bookId=${book.id}`);
   };
 
   const handleRentBook = async (book: any) => {
+    if (!requireAuth(`rent ${book.title || book.name}`)) return;
     // Navigate to VyronaRead checkout page with rent parameters  
     setLocation(`/vyronaread-checkout?type=rent&bookId=${book.id}`);
   };
 
   const openBorrowModal = (book: any) => {
+    if (!requireAuth(`borrow ${book.title || book.name}`)) return;
     setSelectedBookForBorrow(book);
     setShowBorrowModal(true);
   };
