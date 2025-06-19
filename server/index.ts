@@ -172,7 +172,7 @@ async function startServer() {
     log("VyronaRead initialization skipped - books created by actual sellers only");
     await initializeVyronaSpaceData();
     
-    // Register routes and start server
+    // Register routes FIRST, before any other middleware
     const server = await registerRoutes(app);
     const PORT = process.env.PORT || 5000;
     

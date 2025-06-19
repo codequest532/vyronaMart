@@ -10843,6 +10843,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Serve frontend using the existing Vite setup
+  // Setup Vite AFTER all API routes are registered
   const { setupVite } = await import('./vite');
   await setupVite(app, httpServer);
 
