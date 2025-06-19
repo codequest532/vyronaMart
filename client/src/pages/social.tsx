@@ -1214,12 +1214,14 @@ export default function VyronaSocial() {
                                         variant="outline"
                                         className="h-6 w-6 p-0"
                                         onClick={() => {
-                                          if (item.quantity > 1) {
-                                            updateCartQuantityMutation.mutate({
-                                              cartItemId: item.id,
-                                              quantity: item.quantity - 1
-                                            });
-                                          }
+                                          requireAuth("update cart quantity", () => {
+                                            if (item.quantity > 1) {
+                                              updateCartQuantityMutation.mutate({
+                                                cartItemId: item.id,
+                                                quantity: item.quantity - 1
+                                              });
+                                            }
+                                          });
                                         }}
                                         disabled={item.quantity <= 1}
                                       >
@@ -1230,9 +1232,11 @@ export default function VyronaSocial() {
                                         size="sm"
                                         variant="outline"
                                         className="h-6 w-6 p-0"
-                                        onClick={() => updateCartQuantityMutation.mutate({
-                                          cartItemId: item.id,
-                                          quantity: item.quantity + 1
+                                        onClick={() => requireAuth("update cart quantity", () => {
+                                          updateCartQuantityMutation.mutate({
+                                            cartItemId: item.id,
+                                            quantity: item.quantity + 1
+                                          });
                                         })}
                                       >
                                         <Plus className="w-3 h-3" />
@@ -1242,7 +1246,7 @@ export default function VyronaSocial() {
                                       size="sm"
                                       variant="ghost"
                                       className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                                      onClick={() => removeFromCartMutation.mutate(item.id)}
+                                      onClick={() => requireAuth("remove items from cart", () => removeFromCartMutation.mutate(item.id))}
                                     >
                                       <Trash2 className="w-3 h-3" />
                                     </Button>
@@ -1265,7 +1269,7 @@ export default function VyronaSocial() {
                           <Button 
                             className="w-full" 
                             size="sm"
-                            onClick={() => setLocation(`/place-order/${selectedGroupId}`)}
+                            onClick={() => requireAuth("proceed to checkout", () => setLocation(`/place-order/${selectedGroupId}`))}
                           >
                             Proceed to Group Checkout
                           </Button>
@@ -2164,15 +2168,17 @@ export default function VyronaSocial() {
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (selectedGroupId) {
-                            handleAddToGroupCart(product.id);
-                          } else {
-                            toast({
-                              title: "Select a group first",
-                              description: "Choose a shopping group to add products",
-                              variant: "destructive"
-                            });
-                          }
+                          requireAuth("add items to cart", () => {
+                            if (selectedGroupId) {
+                              handleAddToGroupCart(product.id);
+                            } else {
+                              toast({
+                                title: "Select a group first",
+                                description: "Choose a shopping group to add products",
+                                variant: "destructive"
+                              });
+                            }
+                          });
                         }}
                       >
                         <ShoppingBag className="w-4 h-4 mr-2" />
@@ -2343,7 +2349,7 @@ export default function VyronaSocial() {
                           className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
                           size="sm"
                           disabled={!selectedGroupId || addToGroupCartMutation.isPending}
-                          onClick={() => handleAddToGroupCart(product.id)}
+                          onClick={() => requireAuth("add items to group cart", () => handleAddToGroupCart(product.id))}
                         >
                           <ShoppingBag className="w-4 h-4 mr-2" />
                           Add to Group
