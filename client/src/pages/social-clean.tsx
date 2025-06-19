@@ -69,7 +69,7 @@ export default function VyronaSocial() {
 
   // Authentication check
   const { data: authUser, isLoading: userLoading } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
     retry: false,
   });
 

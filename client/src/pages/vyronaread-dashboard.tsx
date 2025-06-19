@@ -132,7 +132,7 @@ export default function BookSellerDashboard() {
 
   // All useQuery hooks must be at top level before any conditional logic
   const { data: currentUser, isLoading: userLoading } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
   });
 
   // Check authentication and redirect if not authenticated

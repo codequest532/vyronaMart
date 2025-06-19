@@ -83,7 +83,7 @@ export default function VyronaHub() {
   const cartItemCount = cartItems.length;
 
   const { data: user, refetch: refetchUser } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
     retry: false,
   });
 
@@ -98,7 +98,7 @@ export default function VyronaHub() {
     },
     onSuccess: async () => {
       // Invalidate and refetch user data immediately
-      await queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       
@@ -110,7 +110,7 @@ export default function VyronaHub() {
       
       // Wait a moment for queries to update, then refetch
       setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ["/api/current-user"] });
+        queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
         queryClient.refetchQueries({ queryKey: ["/api/cart"] });
       }, 100);
     },

@@ -130,7 +130,7 @@ export default function VyronaSocial() {
 
   // Authentication check
   const { data: authUser, isLoading: userLoading, error: userError } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 0,
   });
@@ -980,7 +980,7 @@ export default function VyronaSocial() {
     onSuccess: () => {
       toast({ title: "Welcome back!" });
       setShowAuthModal(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
     onError: (error: Error) => {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
@@ -1003,7 +1003,7 @@ export default function VyronaSocial() {
     onSuccess: () => {
       toast({ title: "Account created successfully!" });
       setShowAuthModal(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
     },
     onError: (error: Error) => {
       toast({ title: "Signup failed", description: error.message, variant: "destructive" });

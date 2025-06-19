@@ -48,7 +48,7 @@ export default function MallCartCheckout() {
   const mallCart = JSON.parse(localStorage.getItem('mallCart') || '[]');
   
   const { data: user } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
   });
 
   const { data: walletBalance } = useQuery({

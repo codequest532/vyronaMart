@@ -52,7 +52,7 @@ export default function VyronaMallConnect() {
   });
 
   const { data: user } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
   });
 
   // Fetch VyronaMallConnect shopping groups with real-time updates
@@ -294,7 +294,7 @@ export default function VyronaMallConnect() {
   const exitGroupMutation = useMutation({
     mutationFn: async (groupId: number) => {
       // Get current user info first
-      const currentUser = await apiRequest("GET", "/api/current-user");
+      const currentUser = await apiRequest("GET", "/api/auth/me");
       return apiRequest("DELETE", `/api/shopping-rooms/${groupId}/members/${currentUser.id}`, {});
     },
     onSuccess: () => {

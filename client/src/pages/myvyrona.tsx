@@ -189,7 +189,7 @@ export default function MyVyrona() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       toast({
         title: "Account Updated",
         description: "Your account information has been updated successfully.",

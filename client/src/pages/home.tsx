@@ -168,7 +168,7 @@ export default function Home() {
     },
     onSuccess: (data) => {
       setShowAuthModal(false);
-      queryClient.setQueryData(["/api/current-user"], data.user);
+      queryClient.setQueryData(["/api/auth/me"], data.user);
       toast({
         title: "Success",
         description: "Logged in successfully!",
@@ -219,7 +219,7 @@ export default function Home() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["/api/current-user"], data.user);
+      queryClient.setQueryData(["/api/auth/me"], data.user);
       setShowAuthModal(false);
       toast({
         title: "Account Created",

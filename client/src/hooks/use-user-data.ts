@@ -6,12 +6,30 @@ export function useUserData() {
   const queryClient = useQueryClient();
   
   // Check if we have a current user stored in the query cache
-  const currentUser = queryClient.getQueryData<User>(["/api/current-user"]);
+  const currentUser = queryClient.getQueryData<User>(["/api/auth/me"]);
   
   const { data: user, isLoading, error } = useQuery<User>({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    queryFn: async () => {
+      try {
+        const response = await fetch("/api/auth/me", {
+          credentials: "include",
+        });
+        if (response.status === 401) {
+          return null;
+        }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.success ? data.user : null;
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        return null;
+      }
+    },
   });
 
   const actualUser = user || currentUser;
@@ -25,7 +43,7 @@ export function useUserData() {
     onSuccess: () => {
       if (actualUser) {
         queryClient.invalidateQueries({ queryKey: [`/api/user/${actualUser.id}`] });
-        queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       }
     },
   });
@@ -39,7 +57,7 @@ export function useUserData() {
     onSuccess: () => {
       if (actualUser) {
         queryClient.invalidateQueries({ queryKey: [`/api/user/${actualUser.id}`] });
-        queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       }
     },
   });

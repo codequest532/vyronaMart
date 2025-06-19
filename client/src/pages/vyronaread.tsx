@@ -167,7 +167,7 @@ export default function VyronaRead() {
 
   // Authentication check - allow both authenticated and unauthenticated users
   const { data: user, isLoading: userLoading } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
     retry: false,
   });
 
@@ -615,7 +615,7 @@ export default function VyronaRead() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["/api/current-user"], data.user);
+      queryClient.setQueryData(["/api/auth/me"], data.user);
       setShowAuthModal(false);
       toast({
         title: "Welcome back!",
@@ -651,7 +651,7 @@ export default function VyronaRead() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(["/api/current-user"], data.user);
+      queryClient.setQueryData(["/api/auth/me"], data.user);
       setShowAuthModal(false);
       toast({
         title: "Account Created",

@@ -38,7 +38,7 @@ export default function ProductDetails({ productId }: ProductDetailsProps) {
   });
 
   const { data: currentUser } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
     retry: false,
   });
 

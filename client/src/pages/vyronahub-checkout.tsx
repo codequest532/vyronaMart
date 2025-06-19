@@ -73,7 +73,7 @@ export default function VyronaHubCheckout() {
 
   // Get user wallet balance
   const { data: userData } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
   });
 
   // Fetch direct product data if coming from "Buy Now"

@@ -91,7 +91,7 @@ export default function SellerDashboard() {
 
   // Get current user for authentication check
   const { data: currentUser, isLoading: userLoading } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
   });
 
   // Check authentication and redirect if not authenticated or wrong seller type

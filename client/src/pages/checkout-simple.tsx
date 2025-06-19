@@ -105,8 +105,8 @@ export default function SimpleCheckout() {
   });
 
   const { data: currentUser } = useQuery({
-    queryKey: ["/api/current-user"],
-    queryFn: () => fetch("/api/current-user").then(res => res.json()),
+    queryKey: ["/api/auth/me"],
+    queryFn: () => fetch("/api/auth/me").then(res => res.json()),
   });
 
   // Process cart data into order items

@@ -112,7 +112,7 @@ export default function GroupMallCartCheckout() {
 
   // Fetch current user for pre-filling address
   const { data: user } = useQuery({
-    queryKey: ["/api/current-user"],
+    queryKey: ["/api/auth/me"],
     retry: false,
   });
 
