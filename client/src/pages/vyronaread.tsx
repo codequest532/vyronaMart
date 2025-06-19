@@ -306,29 +306,31 @@ export default function VyronaRead() {
 
   // Library cart handler functions
   const addToLibraryCart = (book: any) => {
-    const cartItem = {
-      id: `library-${book.id}`,
-      book,
-      type: 'borrow',
-      libraryId: book.libraryId,
-      addedAt: new Date().toISOString()
-    };
+    requireAuth("add items to library cart", () => {
+      const cartItem = {
+        id: `library-${book.id}`,
+        book,
+        type: 'borrow',
+        libraryId: book.libraryId,
+        addedAt: new Date().toISOString()
+      };
 
-    // Check if item already exists in library cart
-    const existingItem = libraryCart.find(item => item.id === cartItem.id);
-    if (existingItem) {
+      // Check if item already exists in library cart
+      const existingItem = libraryCart.find(item => item.id === cartItem.id);
+      if (existingItem) {
+        toast({
+          title: "Already in Library Cart",
+          description: `${book.title || book.name} is already in your library cart.`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setLibraryCart(prev => [...prev, cartItem]);
       toast({
-        title: "Already in Library Cart",
-        description: `${book.title || book.name} is already in your library cart.`,
-        variant: "destructive"
+        title: "Added to Library Cart",
+        description: `${book.title || book.name} added to library cart for borrowing.`,
       });
-      return;
-    }
-
-    setLibraryCart(prev => [...prev, cartItem]);
-    toast({
-      title: "Added to Library Cart",
-      description: `${book.title || book.name} added to library cart for borrowing.`,
     });
   };
 
@@ -685,7 +687,7 @@ export default function VyronaRead() {
               <Button 
                 variant="outline" 
                 className="bg-white/10 border-white/30 text-white hover:bg-white/20 relative"
-                onClick={() => setShowCart(true)}
+                onClick={() => requireAuth("view book cart", () => setShowCart(true))}
               >
                 <ShoppingCart className="h-5 w-5 mr-2" />
                 Book Cart
@@ -698,7 +700,7 @@ export default function VyronaRead() {
               <Button 
                 variant="outline" 
                 className="bg-white/10 border-white/30 text-white hover:bg-white/20 relative"
-                onClick={() => setShowLibraryCart(true)}
+                onClick={() => requireAuth("view library cart", () => setShowLibraryCart(true))}
               >
                 <Library className="h-5 w-5 mr-2" />
                 Library Cart
