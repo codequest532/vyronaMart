@@ -358,32 +358,63 @@ export default function MyVyrona() {
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setActiveSection("orders")}>
                 <CardContent className="p-4 text-center">
                   <ShoppingBag className="h-8 w-8 mx-auto text-blue-600 mb-2" />
-                  <p className="text-2xl font-bold">{purchases.length}</p>
+                  <p className="text-2xl font-bold">{totalOrders}</p>
                   <p className="text-sm text-gray-600">Total Orders</p>
+                  {totalOrders > 0 && (
+                    <p className="text-xs text-blue-600 mt-1">Click to view</p>
+                  )}
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setActiveSection("social")}>
                 <CardContent className="p-4 text-center">
                   <Users className="h-8 w-8 mx-auto text-green-600 mb-2" />
-                  <p className="text-2xl font-bold">{shoppingGroups.length}</p>
+                  <p className="text-2xl font-bold">{groupOrders}</p>
                   <p className="text-sm text-gray-600">Group Orders</p>
+                  {groupOrders > 0 && (
+                    <p className="text-xs text-green-600 mt-1">Click to view</p>
+                  )}
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-4 text-center">
                   <Trophy className="h-8 w-8 mx-auto text-yellow-600 mb-2" />
-                  <p className="text-2xl font-bold">{achievements.length}</p>
+                  <p className="text-2xl font-bold">{totalAchievements}</p>
                   <p className="text-sm text-gray-600">Achievements</p>
+                  {totalAchievements > 0 && (
+                    <div className="mt-2">
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
+                        {totalAchievements >= 10 ? "Expert" : 
+                         totalAchievements >= 5 ? "Advanced" : 
+                         totalAchievements >= 1 ? "Beginner" : "New"}
+                      </Badge>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-4 text-center">
                   <Star className="h-8 w-8 mx-auto text-purple-600 mb-2" />
-                  <p className="text-2xl font-bold">4.8</p>
+                  <p className="text-2xl font-bold">
+                    {userRating > 0 ? userRating.toFixed(1) : "New"}
+                  </p>
                   <p className="text-sm text-gray-600">Rating</p>
+                  {userRating > 0 && (
+                    <div className="flex justify-center mt-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`h-3 w-3 ${
+                            i < Math.floor(userRating) 
+                              ? "text-yellow-400 fill-current" 
+                              : "text-gray-300"
+                          }`} 
+                        />
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

@@ -7979,6 +7979,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User statistics endpoint for profile dashboard
+  app.get("/api/user/:id/stats", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Get user orders
+      const orders = await db.select().from(orders).where(eq(orders.userId, userId));
+      
+      // Get user shopping groups
+      const userGroups = await db
+        .select()
+        .from(shoppingGroups)
+        .where(eq(shoppingGroups.creatorId, userId));
+      
+      // Get user achievements
+      const userAchievements = await db
+        .select()
+        .from(achievements)
+        .where(eq(achievements.userId, userId));
+      
+      // Calculate statistics
+      const totalOrders = orders.length;
+      const completedOrders = orders.filter(order => order.status === 'delivered').length;
+      const groupOrders = userGroups.filter(group => group.isActive).length;
+      const totalAchievements = userAchievements.length;
+      
+      // Calculate user rating based on activity
+      const baseRating = 3.5;
+      const orderBonus = Math.min(1.0, completedOrders * 0.1);
+      const achievementBonus = Math.min(0.3, totalAchievements * 0.05);
+      const userRating = completedOrders > 0 ? 
+        Math.min(5.0, baseRating + orderBonus + achievementBonus) : 0;
+      
+      res.json({
+        totalOrders,
+        completedOrders,
+        groupOrders,
+        totalAchievements,
+        userRating: parseFloat(userRating.toFixed(1))
+      });
+    } catch (error) {
+      console.error('User stats error:', error);
+      res.status(500).json({ message: "Failed to fetch user statistics" });
+    }
+  });
+
   // Submit support ticket endpoint
   app.post("/api/support/submit-ticket", async (req, res) => {
     try {
