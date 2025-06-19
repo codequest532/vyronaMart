@@ -100,11 +100,13 @@ export default function VyronaSocialGroupBuy() {
   // Fetch user's groups
   const { data: myGroups = [], isLoading: groupsLoading } = useQuery({
     queryKey: ["/api/vyrona-social/my-groups"],
+    retry: false,
   });
 
   // Fetch stores with group buying enabled
   const { data: groupStores = [], isLoading: storesLoading } = useQuery({
     queryKey: ["/api/vyrona-social/stores"],
+    retry: false,
   });
 
   // Create group mutation
@@ -455,7 +457,7 @@ export default function VyronaSocialGroupBuy() {
           <div className="grid gap-4">
             {groupsLoading ? (
               <div className="text-center py-8">Loading your groups...</div>
-            ) : myGroups.length === 0 ? (
+            ) : !myGroups || myGroups.length === 0 ? (
               <Card className="text-center py-8">
                 <CardContent>
                   <Group className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -464,7 +466,7 @@ export default function VyronaSocialGroupBuy() {
                 </CardContent>
               </Card>
             ) : (
-              myGroups.map((group: VyronaSocialGroup) => (
+              (myGroups || []).map((group: VyronaSocialGroup) => (
                 <Card key={group.id} className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
                   <CardHeader>
                     <div className="flex justify-between items-start">

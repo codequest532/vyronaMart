@@ -129,16 +129,22 @@ export default function VyronaSocial() {
     retry: false,
   });
 
-  // Handle redirect to auth if not authenticated
-  React.useEffect(() => {
-    if (!userLoading && !authUser) {
-      setLocation("/login");
-    }
-  }, [userLoading, authUser, setLocation]);
+  // Show loading state while checking authentication
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading VyronaSocial...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Fetch groups
+  // Fetch groups (only if authenticated)
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["/api/shopping-rooms"],
+    enabled: !!authUser,
   });
 
   // Fetch products (VyronaSocial specific - group buy enabled products only)
@@ -950,6 +956,141 @@ export default function VyronaSocial() {
       setSelectedProductForGroup(null);
     }
   };
+
+  // If not authenticated, show showcase/preview mode
+  if (!authUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900/20">
+        {/* Header */}
+        <div className="border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => setLocation("/home")}
+                  className="flex items-center gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Home
+                </Button>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
+                    <Sparkles className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      VyronaSocial
+                    </h1>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Group Shopping Experience</p>
+                  </div>
+                </div>
+              </div>
+              <Button
+                onClick={() => setLocation("/login")}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+              >
+                Log in to Join Groups
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Showcase Content */}
+        <div className="container mx-auto px-6 py-12">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Shop Together, Save More
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Join friends to discover exclusive group discounts, share products, and enjoy a social shopping experience
+            </p>
+          </div>
+
+          {/* Feature Cards */}
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Create Groups</h3>
+              <p className="text-gray-600">Start shopping groups with friends and family for exclusive discounts</p>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShoppingCart className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Shared Carts</h3>
+              <p className="text-gray-600">Add items to group carts and split costs automatically</p>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Group Discounts</h3>
+              <p className="text-gray-600">Unlock special pricing when you shop together</p>
+            </Card>
+          </div>
+
+          {/* Sample Products */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-center mb-8">Featured Group Buy Products</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              {products && products.slice(0, 6).map((product: any) => (
+                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gray-100 relative">
+                    {product.imageUrl ? (
+                      <img
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
+                    <Badge className="absolute top-2 right-2 bg-green-500">
+                      Group Discount Available
+                    </Badge>
+                  </div>
+                  <CardContent className="p-4">
+                    <h4 className="font-semibold mb-2">{product.name}</h4>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-bold">₹{Math.round(product.price)}</span>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => setLocation("/login")}
+                      >
+                        Join Group
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-12 text-white">
+            <h3 className="text-3xl font-bold mb-4">Ready to Start Group Shopping?</h3>
+            <p className="text-xl mb-6 opacity-90">Join thousands of users saving money together</p>
+            <Button
+              size="lg"
+              onClick={() => setLocation("/login")}
+              className="bg-white text-indigo-600 hover:bg-gray-100"
+            >
+              Get Started Now
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900/20">
