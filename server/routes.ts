@@ -1451,6 +1451,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaMallConnect shopping groups endpoint
+  app.get("/api/mallconnect/shopping-groups", async (req, res) => {
+    try {
+      console.log("=== MALLCONNECT SHOPPING GROUPS ENDPOINT ===");
+      
+      // Get current user ID from session (fallback to user 1 for demo)
+      const session = (req as any).session;
+      const userId = session?.user?.id || 1;
+      
+      console.log("MallConnect groups endpoint - User ID:", userId);
+      
+      // Get VyronaMallConnect shopping groups only
+      const groups = await storage.getShoppingGroups(userId, 'mallconnect');
+      console.log("MallConnect groups from storage:", groups);
+      
+      // Transform to match expected format
+      const transformedGroups = groups.map(group => ({
+        id: group.id,
+        name: group.name,
+        description: group.description || '',
+        creatorId: group.creatorId,
+        isActive: group.isActive,
+        maxMembers: group.maxMembers || 10,
+        memberCount: group.memberCount || 0,
+        totalCart: group.totalCart || 0,
+        roomCode: group.roomCode,
+        createdAt: group.createdAt
+      }));
+      
+      console.log("Transformed MallConnect groups:", transformedGroups);
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      res.json(transformedGroups);
+    } catch (error) {
+      console.error("MallConnect groups error:", error);
+      res.status(500).json({ message: "Failed to fetch VyronaMallConnect groups" });
+    }
+  });
+
   // Shopping room routes (maps to VyronaSocial rooms for checkout)
   app.get("/api/shopping-rooms", async (req, res) => {
     try {
@@ -1463,8 +1503,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Shopping rooms endpoint - Session:", session);
       console.log("Shopping rooms endpoint - User ID:", userId);
       
-      // Use the VyronaSocial shopping groups data
-      const rooms = await storage.getShoppingGroups(userId);
+      // Use the VyronaSocial shopping groups data (only social module)
+      const rooms = await storage.getShoppingGroups(userId, 'social');
       console.log("Shopping rooms from storage:", rooms);
       
       // Transform to match expected format for checkout
@@ -6200,7 +6240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/social/groups", async (req, res) => {
     try {
       const userId = 1; // From session when auth is implemented
-      const groups = await storage.getShoppingGroups(userId);
+      const groups = await storage.getShoppingGroups(userId, 'social');
       res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.set('Pragma', 'no-cache');
       res.set('Expires', '0');

@@ -171,6 +171,10 @@ Changelog:
 - June 17, 2025: Implemented role-based access control requiring authenticated VyronaMallConnect sellers for dashboard data access
 - June 17, 2025: Enhanced data security to prevent cross-seller data access and ensure complete seller-specific data isolation
 - June 19, 2025: Reverted landing page to previous stable version per user request
+- June 19, 2025: Fixed critical data isolation bug - VyronaMallConnect shopping groups no longer appear in VyronaSocial
+- June 19, 2025: Added 'module' field to shopping_groups schema to separate VyronaSocial and VyronaMallConnect groups
+- June 19, 2025: Created dedicated VyronaMallConnect shopping group endpoints: /api/mallconnect/shopping-groups and /api/mallconnect/create-group
+- June 19, 2025: Updated VyronaMallConnect frontend to use dedicated endpoints ensuring complete module isolation
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing

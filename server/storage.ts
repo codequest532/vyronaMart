@@ -1047,13 +1047,13 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getShoppingGroups(userId: number): Promise<ShoppingGroup[]> {
+  async getShoppingGroups(userId: number, module: string = 'social'): Promise<ShoppingGroup[]> {
     try {
       console.log("=== STORAGE: getShoppingGroups called ===");
-      console.log("User ID:", userId);
+      console.log("User ID:", userId, "Module:", module);
       
       // Use direct SQL query with proper JOIN for accurate member count
-      // Filter to only show rooms where the user is a member
+      // Filter to only show rooms where the user is a member AND match the module
       const result = await pool.query(`
         SELECT sg.*, 
                COUNT(DISTINCT gm_all.id) as member_count,
@@ -1063,10 +1063,10 @@ export class DatabaseStorage implements IStorage {
         LEFT JOIN group_members gm_all ON sg.id = gm_all.group_id
         LEFT JOIN cart_items ci ON sg.id = ci.room_id
         LEFT JOIN products p ON ci.product_id = p.id
-        WHERE sg.is_active = true
-        GROUP BY sg.id, sg.name, sg.description, sg.creator_id, sg.is_active, sg.max_members, sg.room_code, sg.created_at, sg.total_cart
+        WHERE sg.is_active = true AND sg.module = $2
+        GROUP BY sg.id, sg.name, sg.description, sg.creator_id, sg.is_active, sg.max_members, sg.room_code, sg.module, sg.created_at, sg.total_cart
         ORDER BY sg.created_at DESC
-      `, [userId]);
+      `, [userId, module]);
       
       console.log("SQL Query result:", result.rows);
       

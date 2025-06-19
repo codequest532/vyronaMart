@@ -55,9 +55,9 @@ export default function VyronaMallConnect() {
     queryKey: ["/api/current-user"],
   });
 
-  // Fetch shopping rooms for group shopping with real-time updates
+  // Fetch VyronaMallConnect shopping groups with real-time updates
   const { data: shoppingRooms = [], isLoading: loadingRooms } = useQuery({
-    queryKey: ["/api/shopping-rooms"],
+    queryKey: ["/api/mallconnect/shopping-groups"],
     enabled: !!user,
     refetchInterval: 3000, // Refresh every 3 seconds for real-time member count updates
     refetchIntervalInBackground: true,
@@ -248,7 +248,7 @@ export default function VyronaMallConnect() {
   // Group room creation mutation
   const createGroupRoomMutation = useMutation({
     mutationFn: async (roomData: any) => {
-      const response = await apiRequest("POST", "/api/shopping-rooms", roomData);
+      const response = await apiRequest("POST", "/api/mallconnect/create-group", roomData);
       return response.json();
     },
     onSuccess: (data: any) => {
@@ -262,7 +262,7 @@ export default function VyronaMallConnect() {
       // Store the created room data for the group shopping interface
       localStorage.setItem('currentGroupRoom', JSON.stringify(data));
       // Refresh the group shopping data
-      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mallconnect/shopping-groups"] });
     },
     onError: (error: any) => {
       toast({
@@ -276,7 +276,7 @@ export default function VyronaMallConnect() {
   // Join group mutation
   const joinGroupMutation = useMutation({
     mutationFn: async (groupCode: string) => {
-      const response = await apiRequest("POST", "/api/shopping-rooms/join", { code: groupCode });
+      const response = await apiRequest("POST", "/api/join-group", { code: groupCode });
       return response.json();
     },
     onSuccess: (data: any) => {
@@ -292,7 +292,7 @@ export default function VyronaMallConnect() {
         localStorage.setItem('currentGroupRoom', JSON.stringify(data.group));
       }
       // Refresh the group shopping data
-      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/mallconnect/shopping-groups"] });
     },
     onError: (error: any) => {
       toast({

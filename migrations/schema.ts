@@ -251,6 +251,7 @@ export const shoppingGroups = pgTable("shopping_groups", {
         isActive: boolean("is_active").default(true),
         maxMembers: integer("max_members").default(10),
         roomCode: text("room_code"),
+        module: text("module").default("social"), // 'social', 'mallconnect'
         createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
 });
 
