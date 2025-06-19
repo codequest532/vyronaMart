@@ -640,17 +640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.session?.user) {
       res.json(req.session.user);
     } else {
-      // Create a test user session for development
-      const testUser = {
-        id: 2,
-        email: "codestudio.solutions@gmail.com",
-        username: "codestudio",
-        role: "customer"
-      };
-      
-      req.session.user = testUser;
-      console.log("Created test user session:", testUser);
-      res.json(testUser);
+      res.status(401).json({ message: "Not authenticated" });
     }
   });
 
