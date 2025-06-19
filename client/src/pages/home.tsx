@@ -414,7 +414,7 @@ export default function Home() {
                     </div>
                   </div>
                   <CardContent className="p-6">
-                    <p className="text-gray-600 mb-4">Get essentials delivered from nearby stores in 30-60 minutes with real-time tracking.</p>
+                    <p className="text-gray-600 mb-4">Get essentials delivered from nearby stores in 5-15 minutes with real-time tracking.</p>
                     <div className="flex items-center text-purple-600 group-hover:text-purple-700 transition-colors">
                       <span className="font-semibold">Quick Order</span>
                       <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
@@ -435,7 +435,7 @@ export default function Home() {
                     </div>
                   </div>
                   <CardContent className="p-6">
-                    <p className="text-gray-600 mb-4">Experience digital storefronts with brand collections and mall-exclusive offers.</p>
+                    <p className="text-gray-600 mb-4">Experience digital storefronts with brand collections delivered in 30-60 minutes.</p>
                     <div className="flex items-center text-amber-600 group-hover:text-amber-700 transition-colors">
                       <span className="font-semibold">Visit Malls</span>
                       <ArrowLeft className="h-4 w-4 ml-2 rotate-180 group-hover:translate-x-1 transition-transform" />
@@ -741,7 +741,7 @@ export default function Home() {
                     <Zap className="h-10 w-10 text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-3">Lightning Fast</h3>
-                  <p className="text-gray-600 leading-relaxed">Get your orders delivered in 30-60 minutes with real-time tracking and updates</p>
+                  <p className="text-gray-600 leading-relaxed">Get your orders delivered in 5-15 minutes from VyronaSpace or 30-60 minutes from virtual malls</p>
                 </div>
 
                 <div className="text-center group">
