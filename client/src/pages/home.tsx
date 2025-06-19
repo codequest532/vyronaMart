@@ -144,13 +144,36 @@ export default function Home() {
   const { user } = useUserData();
   const { notification, showNotification, hideNotification } = useToastNotifications();
 
-  const { data: products = [], isLoading: isLoadingProducts } = useQuery({
+  // Fetch all products from different modules
+  const { data: vyronaHubProducts = [], isLoading: isLoadingHub } = useQuery({
     queryKey: ["/api/products"],
+  });
+
+  const { data: socialProducts = [], isLoading: isLoadingSocial } = useQuery({
+    queryKey: ["/api/social/products"],
+  });
+
+  const { data: groupBuyProducts = [], isLoading: isLoadingGroupBuy } = useQuery({
+    queryKey: ["/api/group-buy/products"],
+  });
+
+  const { data: vyronaSpaceProducts = [], isLoading: isLoadingSpace } = useQuery({
+    queryKey: ["/api/vyronaspace/products"],
+  });
+
+  const { data: mallConnectProducts = [], isLoading: isLoadingMallConnect } = useQuery({
+    queryKey: ["/api/mallconnect/products"],
+  });
+
+  const { data: instaStoreProducts = [], isLoading: isLoadingInstaStore } = useQuery({
+    queryKey: ["/api/instashop/products"],
   });
 
   const { data: stores = [] } = useQuery({
     queryKey: ["/api/stores"],
   });
+
+  const isLoadingProducts = isLoadingHub || isLoadingSocial || isLoadingGroupBuy || isLoadingSpace || isLoadingMallConnect || isLoadingInstaStore;
 
   // VyronaRead queries
   const { data: sellerBooks = [] } = useQuery({
@@ -305,8 +328,8 @@ export default function Home() {
               <CardContent className="p-8">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.username || 'User'}!</h1>
-                    <p className="text-purple-100 text-lg">Ready to explore the VyronaMart ecosystem?</p>
+                    <h1 className="text-3xl font-bold mb-2">Welcome to VyronaMart</h1>
+                    <p className="text-purple-100 text-lg">Discover amazing products across all our platforms</p>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold">₹{Math.round((walletBalance as any)?.balance || 0)}</div>
@@ -316,69 +339,357 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+            {/* Module Overview Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* VyronaHub */}
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronahub')}>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <ShoppingBag className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-green-700">Total Orders</p>
-                        <p className="text-2xl font-bold text-green-700">{purchases.length}</p>
-                      </div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Store className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-blue-700">VyronaHub</h3>
+                      <p className="text-sm text-blue-600">Traditional E-commerce</p>
                     </div>
                   </div>
+                  <p className="text-blue-700 font-bold text-xl">{vyronaHubProducts.length} Products</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+              {/* VyronaSocial */}
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/social')}>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Users className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-blue-700">Group Orders</p>
-                        <p className="text-2xl font-bold text-blue-700">{shoppingRooms.length}</p>
-                      </div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <Users className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-green-700">VyronaSocial</h3>
+                      <p className="text-sm text-green-600">Group Shopping</p>
                     </div>
                   </div>
+                  <p className="text-green-700 font-bold text-xl">{socialProducts.length + groupBuyProducts.length} Products</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200">
+              {/* VyronaSpace */}
+              <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronaspace')}>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                        <Trophy className="h-6 w-6 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-purple-700">Achievements</p>
-                        <p className="text-2xl font-bold text-purple-700">{achievements.length}</p>
-                      </div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                      <Zap className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-purple-700">VyronaSpace</h3>
+                      <p className="text-sm text-purple-600">Hyperlocal Delivery</p>
                     </div>
                   </div>
+                  <p className="text-purple-700 font-bold text-xl">{vyronaSpaceProducts.length} Products</p>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+              {/* VyronaMallConnect */}
+              <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronamallconnect')}>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                        <Store className="text-amber-600 h-6 w-6" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-amber-700">Local Stores</p>
-                        <p className="text-2xl font-bold text-amber-700">{stores.length}</p>
-                      </div>
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+                      <Building className="h-6 w-6 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-amber-700">VyronaMallConnect</h3>
+                      <p className="text-sm text-amber-600">Virtual Malls</p>
                     </div>
                   </div>
+                  <p className="text-amber-700 font-bold text-xl">{mallConnectProducts.length} Products</p>
+                </CardContent>
+              </Card>
+
+              {/* VyronaRead */}
+              <Card className="bg-gradient-to-br from-pink-50 to-rose-50 border-pink-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/vyronaread')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center">
+                      <BookOpen className="h-6 w-6 text-pink-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-pink-700">VyronaRead</h3>
+                      <p className="text-sm text-pink-600">Library Management</p>
+                    </div>
+                  </div>
+                  <p className="text-pink-700 font-bold text-xl">{sellerBooks.length + sellerEBooks.length} Books</p>
+                </CardContent>
+              </Card>
+
+              {/* VyronaInstaStore */}
+              <Card className="bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/instashop')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
+                      <Camera className="h-6 w-6 text-teal-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-teal-700">VyronaInstaStore</h3>
+                      <p className="text-sm text-teal-600">Instagram Shopping</p>
+                    </div>
+                  </div>
+                  <p className="text-teal-700 font-bold text-xl">{instaStoreProducts.length} Products</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Featured Products Section */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="vyronahub">VyronaHub</SelectItem>
+                    <SelectItem value="social">VyronaSocial</SelectItem>
+                    <SelectItem value="space">VyronaSpace</SelectItem>
+                    <SelectItem value="mallconnect">VyronaMallConnect</SelectItem>
+                    <SelectItem value="read">VyronaRead</SelectItem>
+                    <SelectItem value="instastore">VyronaInstaStore</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {isLoadingProducts ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[...Array(8)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                      <CardContent className="p-4">
+                        <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {/* VyronaHub Products */}
+                  {(selectedCategory === "all" || selectedCategory === "vyronahub") &&
+                    vyronaHubProducts.slice(0, 4).map((product: any) => (
+                      <Card key={`hub-${product.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/product/${product.id}`)}>
+                        <div className="relative overflow-hidden rounded-t-lg">
+                          <img
+                            src={product.imageUrl || "/api/placeholder/300/200"}
+                            alt={product.name}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-blue-600 text-white">
+                            VyronaHub
+                          </Badge>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-blue-600">₹{product.price / 100}</span>
+                            <Button size="sm" variant="outline">
+                              <ShoppingCart className="h-4 w-4 mr-1" />
+                              Add
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                  {/* Social Products */}
+                  {(selectedCategory === "all" || selectedCategory === "social") &&
+                    [...socialProducts, ...groupBuyProducts].slice(0, 4).map((product: any) => (
+                      <Card key={`social-${product.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/social/product/${product.id}`)}>
+                        <div className="relative overflow-hidden rounded-t-lg">
+                          <img
+                            src={product.imageUrl || "/api/placeholder/300/200"}
+                            alt={product.name}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-green-600 text-white">
+                            VyronaSocial
+                          </Badge>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-green-600">₹{product.price / 100}</span>
+                            <Button size="sm" variant="outline">
+                              <Users className="h-4 w-4 mr-1" />
+                              Join
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                  {/* VyronaSpace Products */}
+                  {(selectedCategory === "all" || selectedCategory === "space") &&
+                    vyronaSpaceProducts.slice(0, 4).map((product: any) => (
+                      <Card key={`space-${product.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/vyronaspace`)}>
+                        <div className="relative overflow-hidden rounded-t-lg">
+                          <img
+                            src={product.imageUrl || "/api/placeholder/300/200"}
+                            alt={product.name}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-purple-600 text-white">
+                            VyronaSpace
+                          </Badge>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-purple-600">₹{product.price / 100}</span>
+                            <Button size="sm" variant="outline">
+                              <Zap className="h-4 w-4 mr-1" />
+                              Quick
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                  {/* VyronaMallConnect Products */}
+                  {(selectedCategory === "all" || selectedCategory === "mallconnect") &&
+                    mallConnectProducts.slice(0, 4).map((product: any) => (
+                      <Card key={`mall-${product.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/vyronamallconnect`)}>
+                        <div className="relative overflow-hidden rounded-t-lg">
+                          <img
+                            src={product.imageUrl || "/api/placeholder/300/200"}
+                            alt={product.name}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-amber-600 text-white">
+                            MallConnect
+                          </Badge>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-amber-600">₹{product.price / 100}</span>
+                            <Button size="sm" variant="outline">
+                              <Building className="h-4 w-4 mr-1" />
+                              Mall
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                  {/* VyronaRead Books */}
+                  {(selectedCategory === "all" || selectedCategory === "read") &&
+                    [...sellerBooks, ...sellerEBooks].slice(0, 4).map((book: any) => (
+                      <Card key={`read-${book.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/vyronaread`)}>
+                        <div className="relative overflow-hidden rounded-t-lg">
+                          <img
+                            src={book.coverImage || "/api/placeholder/300/200"}
+                            alt={book.title}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-pink-600 text-white">
+                            VyronaRead
+                          </Badge>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-1 line-clamp-1">{book.title}</h3>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{book.author}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-pink-600">₹{book.price / 100}</span>
+                            <Button size="sm" variant="outline">
+                              <BookOpen className="h-4 w-4 mr-1" />
+                              Read
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+
+                  {/* VyronaInstaStore Products */}
+                  {(selectedCategory === "all" || selectedCategory === "instastore") &&
+                    instaStoreProducts.slice(0, 4).map((product: any) => (
+                      <Card key={`insta-${product.id}`} className="hover:shadow-lg transition-shadow cursor-pointer group" onClick={() => setLocation(`/instashop`)}>
+                        <div className="relative overflow-hidden rounded-t-lg">
+                          <img
+                            src={product.imageUrl || "/api/placeholder/300/200"}
+                            alt={product.name}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-teal-600 text-white">
+                            InstaStore
+                          </Badge>
+                        </div>
+                        <CardContent className="p-4">
+                          <h3 className="font-semibold mb-1 line-clamp-1">{product.name}</h3>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-teal-600">₹{product.price / 100}</span>
+                            <Button size="sm" variant="outline">
+                              <Camera className="h-4 w-4 mr-1" />
+                              Shop
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              )}
+
+              {/* View All Button */}
+              <div className="text-center">
+                <Button variant="outline" size="lg" onClick={() => setLocation('/vyronahub')}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Explore All Products
+                </Button>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <MessageCircle className="h-8 w-8 text-gray-600" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Join Group Shopping</h3>
+                  <p className="text-sm text-gray-600 mb-4">Shop together and save more with friends</p>
+                  <Button variant="outline" onClick={() => setLocation('/social')}>
+                    Start Shopping
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Truck className="h-8 w-8 text-gray-600" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Quick Delivery</h3>
+                  <p className="text-sm text-gray-600 mb-4">Get your orders delivered in 30-60 minutes</p>
+                  <Button variant="outline" onClick={() => setLocation('/vyronaspace')}>
+                    Order Now
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Wallet className="h-8 w-8 text-gray-600" />
+                  </div>
+                  <h3 className="font-semibold mb-2">Manage Wallet</h3>
+                  <p className="text-sm text-gray-600 mb-4">Add money and track your transactions</p>
+                  <Button variant="outline" onClick={() => setLocation('/myvyrona')}>
+                    Open Wallet
+                  </Button>
                 </CardContent>
               </Card>
             </div>
