@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Home from "@/pages/home";
+// Home page removed - users redirect to preferred module
 import Landing from "@/pages/landing";
 import ProductDetails from "@/pages/product-details";
 import SocialProductDetails from "@/pages/social-product-details";
@@ -90,12 +90,18 @@ function Router() {
 
       
       {/* Customer Interface (Default) */}
-      {user ? (
-        <Route path="/" component={Home} />
-      ) : (
+      {isLoading || !user ? (
         <Route path="/" component={Landing} />
+      ) : (
+        <Route path="/">
+          {() => {
+            // Redirect authenticated users to their preferred module
+            const preferredModule = localStorage.getItem('preferredModule') || 'vyronahub';
+            window.location.replace(`/${preferredModule}`);
+            return null;
+          }}
+        </Route>
       )}
-      <Route path="/home" component={Home} />
       <Route path="/product/:productId">
         {(params) => <ProductDetails productId={params.productId} />}
       </Route>
