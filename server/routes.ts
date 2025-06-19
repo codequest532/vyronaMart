@@ -35,6 +35,7 @@ import { eq, desc, and, sql } from "drizzle-orm";
 import { shoppingGroups, groupMembers } from "../migrations/schema";
 import { z } from "zod";
 import { sendOTPEmail, sendOrderConfirmationEmail } from "./email";
+import { sendSellerConfirmationEmail } from "./brevo-email";
 
 // Online status and WebSocket management
 interface OnlineUser {
@@ -9406,6 +9407,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: email
         });
         
+        // Send confirmation email to seller
+        try {
+          await sendSellerConfirmationEmail(email, {
+            businessName: registrationData.businessName,
+            ownerName: registrationData.ownerName,
+            sellerType: 'vyronaread',
+            credentials: {
+              email: email,
+              password: password
+            }
+          });
+        } catch (emailError) {
+          console.log("Email sending failed (registration still successful):", emailError);
+        }
+        
         return res.json({
           success: true,
           sellerId: sellerId,
@@ -9442,6 +9458,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           category: registrationData.businessCategory,
           email: email
         });
+        
+        // Send confirmation email to seller
+        try {
+          await sendSellerConfirmationEmail(email, {
+            businessName: registrationData.businessName,
+            ownerName: registrationData.ownerName,
+            sellerType: 'vyronainstastore',
+            credentials: {
+              email: email,
+              password: password
+            }
+          });
+        } catch (emailError) {
+          console.log("Email sending failed (registration still successful):", emailError);
+        }
         
         return res.json({
           success: true,
@@ -9480,6 +9511,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: email
         });
         
+        // Send confirmation email to seller
+        try {
+          await sendSellerConfirmationEmail(email, {
+            businessName: registrationData.businessName,
+            ownerName: registrationData.ownerName,
+            sellerType: 'vyronahub',
+            credentials: {
+              email: email,
+              password: password
+            }
+          });
+        } catch (emailError) {
+          console.log("Email sending failed (registration still successful):", emailError);
+        }
+        
         return res.json({
           success: true,
           sellerId: sellerId,
@@ -9516,6 +9562,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: email
         });
         
+        // Send confirmation email to seller
+        try {
+          await sendSellerConfirmationEmail(email, {
+            businessName: registrationData.businessName,
+            ownerName: registrationData.ownerName,
+            sellerType: 'vyronaspace',
+            credentials: {
+              email: email,
+              password: password
+            }
+          });
+        } catch (emailError) {
+          console.log("Email sending failed (registration still successful):", emailError);
+        }
+        
         return res.json({
           success: true,
           sellerId: sellerId,
@@ -9551,6 +9612,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           category: registrationData.businessCategory,
           email: email
         });
+        
+        // Send confirmation email to seller
+        try {
+          await sendSellerConfirmationEmail(email, {
+            businessName: registrationData.businessName,
+            ownerName: registrationData.ownerName,
+            sellerType: 'vyronamallconnect',
+            credentials: {
+              email: email,
+              password: password
+            }
+          });
+        } catch (emailError) {
+          console.log("Email sending failed (registration still successful):", emailError);
+        }
         
         return res.json({
           success: true,

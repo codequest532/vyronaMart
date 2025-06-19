@@ -651,3 +651,183 @@ export function generateInstagramCustomerConfirmationEmail(data: any): string {
     </div>
   `;
 }
+
+export async function sendSellerConfirmationEmail(
+  recipientEmail: string,
+  sellerData: {
+    businessName: string;
+    ownerName: string;
+    sellerType: string;
+    credentials: {
+      email: string;
+      password: string;
+    };
+  }
+): Promise<void> {
+  const platformFeatures = {
+    'vyronainstastore': {
+      name: 'VyronaInstaStore',
+      features: [
+        'Connect your Instagram business account',
+        'Import products directly from Instagram posts',
+        'Manage customer inquiries through direct messaging',
+        'Track social commerce analytics'
+      ]
+    },
+    'vyronaread': {
+      name: 'VyronaRead',
+      features: [
+        'Add books, e-books, and educational materials',
+        'Set up library partnerships and bulk orders',
+        'Manage book loans and rental schedules',
+        'Access educational institution features'
+      ]
+    },
+    'vyronaspace': {
+      name: 'VyronaSpace',
+      features: [
+        'Configure your store location for local discovery',
+        'Enable 15-minute hyperlocal delivery',
+        'Set up in-store pickup options',
+        'Manage geo-based inventory and pricing'
+      ]
+    },
+    'vyronamallconnect': {
+      name: 'VyronaMallConnect',
+      features: [
+        'Set up your virtual mall storefront',
+        'Connect with mall partnerships',
+        'Access premium branding tools',
+        'Enterprise-level analytics and reporting'
+      ]
+    },
+    'vyronahub': {
+      name: 'VyronaHub & VyronaSocial',
+      features: [
+        'Create and manage your product catalog',
+        'Enable group buying and social shopping features',
+        'Access comprehensive sales analytics',
+        'Utilize targeted marketing tools'
+      ]
+    }
+  };
+
+  const platform = platformFeatures[sellerData.sellerType] || platformFeatures['vyronahub'];
+  
+  const emailContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to VyronaMart - Seller Registration Confirmed</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px; }
+        .credentials { background: #e8f4f8; border-left: 4px solid #3498db; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .platform-info { background: #e8f5e8; border-left: 4px solid #27ae60; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .next-steps { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }
+        ul { padding-left: 20px; }
+        li { margin: 8px 0; }
+        .highlight { background: #ffeb3b; padding: 2px 4px; border-radius: 2px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Welcome to VyronaMart!</h1>
+        <p>Your ${platform.name} seller account has been successfully created</p>
+    </div>
+    
+    <div class="content">
+        <h2>Dear ${sellerData.ownerName},</h2>
+        
+        <p>Congratulations! Your seller registration for <strong>${sellerData.businessName}</strong> has been approved and your account is now active on the VyronaMart platform.</p>
+        
+        <div class="platform-info">
+            <h3>Registration Details</h3>
+            <ul>
+                <li><strong>Business Name:</strong> ${sellerData.businessName}</li>
+                <li><strong>Owner Name:</strong> ${sellerData.ownerName}</li>
+                <li><strong>Platform:</strong> ${platform.name}</li>
+                <li><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</li>
+                <li><strong>Account Status:</strong> <span class="highlight">ACTIVE</span></li>
+            </ul>
+        </div>
+        
+        <div class="credentials">
+            <h3>Your Login Credentials</h3>
+            <p><strong>Login Email:</strong> ${sellerData.credentials.email}</p>
+            <p><strong>Password:</strong> ${sellerData.credentials.password}</p>
+            <p><em>Please keep these credentials secure and consider changing your password after first login for enhanced security.</em></p>
+        </div>
+        
+        <div class="next-steps">
+            <h3>Next Steps to Start Selling</h3>
+            <ol>
+                <li>Log into your seller dashboard using the credentials above</li>
+                <li>Complete your store profile and business information</li>
+                <li>Upload your first products with high-quality images</li>
+                <li>Configure payment methods and shipping settings</li>
+                <li>Launch your store and start selling!</li>
+            </ol>
+        </div>
+        
+        <h3>Platform-Specific Features Available to You</h3>
+        <div class="platform-info">
+            <ul>
+                ${platform.features.map(feature => `<li>${feature}</li>`).join('')}
+            </ul>
+        </div>
+        
+        <h3>Need Help Getting Started?</h3>
+        <p>Our dedicated seller support team is here to help you succeed:</p>
+        <ul>
+            <li><strong>Email Support:</strong> seller-support@vyronamart.com</li>
+            <li><strong>Phone Support:</strong> +91-8888-123-456 (9 AM - 6 PM)</li>
+            <li><strong>Live Chat:</strong> Available in your seller dashboard</li>
+            <li><strong>Seller Guide:</strong> Complete setup tutorials and best practices</li>
+            <li><strong>Training Resources:</strong> Video tutorials and webinars</li>
+        </ul>
+        
+        <p><strong>Important:</strong> Your account is immediately active and ready for use. You can start adding products and accepting orders right away.</p>
+        
+        <p>Thank you for choosing VyronaMart to grow your business. We're committed to your success and look forward to supporting your entrepreneurial journey!</p>
+        
+        <p>Best regards,<br>
+        <strong>The VyronaMart Admin Team</strong><br>
+        Email: admin@vyronamart.com<br>
+        VyronaMart Seller Operations</p>
+    </div>
+    
+    <div class="footer">
+        <p>© 2025 VyronaMart. All rights reserved.</p>
+        <p>This is an automated confirmation email. For support inquiries, please use the contact information above.</p>
+    </div>
+</body>
+</html>`;
+
+  try {
+    const response = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        to: [{ email: recipientEmail, name: sellerData.ownerName }],
+        sender: { email: 'admin@vyronamart.com', name: 'VyronaMart Admin Team' },
+        subject: `Welcome to ${platform.name} - Your Seller Account is Active!`,
+        htmlContent: emailContent
+      },
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'api-key': process.env.BREVO_API_KEY
+        }
+      }
+    );
+    
+    console.log(`Seller confirmation email sent successfully to ${recipientEmail}`);
+  } catch (error) {
+    console.error('Error sending seller confirmation email:', error);
+    // Don't throw error to avoid breaking registration flow
+  }
+}
