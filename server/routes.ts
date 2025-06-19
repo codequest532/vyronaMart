@@ -1013,18 +1013,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Logout endpoint
   app.post("/api/auth/logout", async (req, res) => {
     try {
-      (req as any).session.destroy((err: any) => {
-        if (err) {
-          console.error("Session destroy error:", err);
-          return res.status(500).json({ message: "Logout failed" });
-        }
-        // Clear the session cookie
-        res.clearCookie('connect.sid');
-        res.json({ message: "Logged out successfully" });
-      });
+      // Clear session data first
+      if ((req as any).session) {
+        (req as any).session.user = null;
+        (req as any).session.destroy((err: any) => {
+          if (err) {
+            console.error("Session destroy error:", err);
+          }
+          // Clear session cookies with all possible names
+          res.clearCookie('connect.sid', { path: '/' });
+          res.clearCookie('session', { path: '/' });
+          res.clearCookie('sessionid', { path: '/' });
+          
+          // Set headers to prevent caching
+          res.set({
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          });
+          
+          res.json({ message: "Logged out successfully" });
+        });
+      } else {
+        // No session exists, still return success
+        res.json({ message: "Already logged out" });
+      }
     } catch (error) {
       console.error("Logout error:", error);
-      res.status(500).json({ message: "Logout failed" });
+      // Even if there's an error, clear cookies and return success
+      res.clearCookie('connect.sid', { path: '/' });
+      res.clearCookie('session', { path: '/' });
+      res.json({ message: "Session cleared" });
     }
   });
 
