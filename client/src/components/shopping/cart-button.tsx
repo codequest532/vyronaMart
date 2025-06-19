@@ -2,12 +2,16 @@ import { ShoppingCart, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToastNotifications } from "@/hooks/use-toast-notifications";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
 
 export default function CartButton() {
   const { showNotification } = useToastNotifications();
+  const { requireAuth } = useAuthGuard();
 
   const handleCartClick = () => {
-    showNotification("Cart Opened!", "Your shopping cart is ready", "success");
+    requireAuth("access your cart", () => {
+      showNotification("Cart Opened!", "Your shopping cart is ready", "success");
+    });
   };
 
   return (

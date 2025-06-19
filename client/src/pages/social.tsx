@@ -48,6 +48,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import LoginModal from "@/components/auth/login-modal";
 import { useLocation } from "wouter";
 import { Label } from "@/components/ui/label";
 
@@ -199,6 +201,8 @@ export default function VyronaSocial() {
   });
 
   // Mutations
+  const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
+
   const createGroupMutation = useMutation({
     mutationFn: async (data: CreateGroupForm) => {
       const response = await fetch("/api/shopping-rooms", {
@@ -2579,6 +2583,12 @@ export default function VyronaSocial() {
           </Tabs>
         </DialogContent>
       </Dialog>
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }

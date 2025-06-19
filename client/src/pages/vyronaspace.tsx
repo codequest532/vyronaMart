@@ -12,6 +12,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import VyronaSocialGroupBuy from "@/components/VyronaSocialGroupBuy";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import LoginModal from "@/components/auth/login-modal";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
   Star, ShoppingCart, ShoppingBag, Plus, Minus, Truck, Phone,
@@ -250,17 +252,21 @@ export default function VyronaSpace() {
     });
   };
 
+  const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
+
   const addToCart = (item: { id: number; name: string; price: number; storeName: string }) => {
-    const existingItem = cart.find(cartItem => cartItem.id === item.id);
-    if (existingItem) {
-      setCart(cart.map(cartItem => 
-        cartItem.id === item.id 
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      ));
-    } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
-    }
+    requireAuth("add items to cart", () => {
+      const existingItem = cart.find(cartItem => cartItem.id === item.id);
+      if (existingItem) {
+        setCart(cart.map(cartItem => 
+          cartItem.id === item.id 
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        ));
+      } else {
+        setCart([...cart, { ...item, quantity: 1 }]);
+      }
+    });
   };
 
   const getStoreProducts = (storeId: number) => {
@@ -1453,6 +1459,12 @@ export default function VyronaSpace() {
           </DialogFooter>
         </DialogContent>
         </Dialog>
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
       </div>
     </>
   );

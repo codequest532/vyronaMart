@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import LoginModal from "@/components/auth/login-modal";
 import { 
   ArrowLeft, Building, Shirt, Laptop, Utensils, Home as HomeIcon, Star, Coins, 
   MapPin, Clock, ShoppingCart, Users, Heart, Gift, Truck, MessageCircle,
@@ -112,35 +114,32 @@ export default function VyronaMallConnect() {
 
 
 
+  const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
+
   const addToMallCart = (product: any, store: any) => {
-    const cartItem = {
-      ...product,
-      id: `${product.id}-${store.id}-${deliveryOption}`,
-      storeId: store.id,
-      storeName: store.name,
-      mallId: selectedMall?.id,
-      mallName: selectedMall?.name,
-      quantity: 1,
-      deliveryOption
-    };
-    const updatedCart = [...mallCart, cartItem];
-    setMallCart(updatedCart);
-    localStorage.setItem('mallCart', JSON.stringify(updatedCart));
-    toast({
-      title: "Added to Mall Cart",
-      description: `${product.name} from ${store.name} added to your cart`,
+    requireAuth("add items to cart", () => {
+      const cartItem = {
+        ...product,
+        id: `${product.id}-${store.id}-${deliveryOption}`,
+        storeId: store.id,
+        storeName: store.name,
+        mallId: selectedMall?.id,
+        mallName: selectedMall?.name,
+        quantity: 1,
+        deliveryOption
+      };
+      const updatedCart = [...mallCart, cartItem];
+      setMallCart(updatedCart);
+      localStorage.setItem('mallCart', JSON.stringify(updatedCart));
+      toast({
+        title: "Added to Mall Cart",
+        description: `${product.name} from ${store.name} added to your cart`,
+      });
     });
   };
 
   const addToGroupMallCart = (product: any, store: any) => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please login to add items to group cart",
-        variant: "destructive",
-      });
-      return;
-    }
+    requireAuth("add items to group cart", () => {
 
     // Check if user is in any active group
     if (!Array.isArray(shoppingRooms) || shoppingRooms.length === 0) {
@@ -181,6 +180,7 @@ export default function VyronaMallConnect() {
     
     // Refresh group data to update cart totals
     queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+    });
   };
 
   // Group room creation mutation
@@ -314,23 +314,16 @@ export default function VyronaMallConnect() {
   });
 
   const createGroupRoom = () => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please login to create a group shopping room",
-        variant: "destructive",
-      });
-      return;
-    }
+    requireAuth("create a shopping group", () => {
+      const roomData = {
+        name: `${selectedMall?.name || 'Mall'} Shopping Group`,
+        description: `Group shopping session for ${selectedMall?.name || 'mall'} with shared delivery costs`,
+        locality: selectedMall?.location || nearbyLocation,
+        maxMembers: 10
+      };
 
-    const roomData = {
-      name: `${selectedMall?.name || 'Mall'} Shopping Group`,
-      description: `Group shopping session for ${selectedMall?.name || 'mall'} with shared delivery costs`,
-      locality: selectedMall?.location || nearbyLocation,
-      maxMembers: 10
-    };
-
-    createGroupRoomMutation.mutate(roomData);
+      createGroupRoomMutation.mutate(roomData);
+    });
   };
 
   const updateCartItemQuantity = (itemId: string, newQuantity: number) => {
@@ -1808,6 +1801,12 @@ export default function VyronaMallConnect() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }

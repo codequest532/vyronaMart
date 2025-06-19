@@ -3,6 +3,8 @@ import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import LoginModal from "@/components/auth/login-modal";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -237,30 +239,34 @@ export default function VyronaRead() {
     }
   }, [libraryCart]);
 
+  const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
+
   // Cart handler functions
   const addToCart = (book: any, type: 'buy' | 'rent') => {
-    const cartItem = {
-      id: `${book.id}-${type}`,
-      book,
-      type,
-      addedAt: new Date().toISOString()
-    };
+    requireAuth("add items to cart", () => {
+      const cartItem = {
+        id: `${book.id}-${type}`,
+        book,
+        type,
+        addedAt: new Date().toISOString()
+      };
 
-    // Check if item already exists in cart
-    const existingItem = cart.find(item => item.id === cartItem.id);
-    if (existingItem) {
+      // Check if item already exists in cart
+      const existingItem = cart.find(item => item.id === cartItem.id);
+      if (existingItem) {
+        toast({
+          title: "Already in Cart",
+          description: `${book.title || book.name} (${type}) is already in your cart.`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setCart(prev => [...prev, cartItem]);
       toast({
-        title: "Already in Cart",
-        description: `${book.title || book.name} (${type}) is already in your cart.`,
-        variant: "destructive"
+        title: "Added to Cart",
+        description: `${book.title || book.name} added to cart for ${type}.`,
       });
-      return;
-    }
-
-    setCart(prev => [...prev, cartItem]);
-    toast({
-      title: "Added to Cart",
-      description: `${book.title || book.name} added to cart for ${type}.`,
     });
   };
 
@@ -1768,6 +1774,12 @@ export default function VyronaRead() {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { GroupCartModal } from "@/components/GroupCartModal";
 import ProductionWelcome from "@/components/ProductionWelcome";
 import { useUserData } from "@/hooks/use-user-data";
 import { useToastNotifications } from "@/hooks/use-toast-notifications";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -540,13 +541,16 @@ export default function Home() {
     enabled: !!user?.id,
   });
 
+  const { requireAuth } = useAuthGuard();
+
   // Wallet mutations
   const addMoneyMutation = useMutation({
     mutationFn: async (amount: number) => {
+      if (!user) throw new Error("User not authenticated");
       const response = await fetch("/api/wallet/add-money", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user?.id, amount }),
+        body: JSON.stringify({ userId: user.id, amount }),
       });
       if (!response.ok) throw new Error("Failed to add money");
       return response.json();
@@ -574,31 +578,29 @@ export default function Home() {
   };
 
   const handleLibraryBorrow = async (bookId: string, libraryId: number) => {
-    if (!user) {
-      showNotification("Login Required", "Please login to borrow books", "success");
-      return;
-    }
+    requireAuth("borrow books", async () => {
+      try {
+        const response = await fetch(`/api/library-books/${bookId}/borrow`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id, libraryId }),
+          credentials: 'include'
+        });
 
-    try {
-      const response = await fetch(`/api/library-books/${bookId}/borrow`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, libraryId }),
-      });
-
-      if (response.ok) {
-        showNotification("Book Borrowed!", `Successfully borrowed from library.`, "success");
-        
-        // Refresh library data
-        queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
-      } else {
-        const error = await response.json();
-        showNotification("Borrow Failed", error.message || "Unable to borrow book", "success");
+        if (response.ok) {
+          showNotification("Book Borrowed!", `Successfully borrowed from library.`, "success");
+          
+          // Refresh library data
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
+        } else {
+          const error = await response.json();
+          showNotification("Borrow Failed", error.message || "Unable to borrow book", "success");
+        }
+      } catch (error) {
+        console.error('Borrow error:', error);
+        showNotification("Error", "Failed to borrow book", "success");
       }
-    } catch (error) {
-      console.error('Borrow error:', error);
-      showNotification("Error", "Failed to borrow book", "success");
-    }
+    });
   };
 
   return (
