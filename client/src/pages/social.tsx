@@ -1032,1286 +1032,208 @@ export default function VyronaSocial() {
                   Login to Join Groups
                 </Button>
               )}
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <ShoppingCart className="h-5 w-5" />
-                      Group Cart {selectedGroup && `- ${selectedGroup.name}`}
-                    </DialogTitle>
-                    <DialogDescription>
-                      View and manage items in your group shopping cart
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <ScrollArea className="h-64">
-                      <div className="space-y-3">
-                        {cartItems.length === 0 ? (
-                          <div className="text-center py-8 text-gray-500">
-                            <ShoppingCart className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">Cart is empty</p>
-                            <p className="text-xs opacity-75">Add products to start shopping!</p>
-                          </div>
-                        ) : (
-                          cartItems.map((item) => (
-                            <Card key={item.id} className="p-3">
-                              <div className="flex items-start gap-3">
-                                <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
-                                  {item.imageUrl ? (
-                                    <img
-                                      src={item.imageUrl}
-                                      alt={item.name}
-                                      className="w-full h-full object-cover rounded"
-                                    />
-                                  ) : (
-                                    <Package className="w-6 h-6 text-gray-400" />
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-sm truncate">{item.name}</h4>
-                                  <p className="text-xs text-gray-600 mb-2">₹{item.price}</p>
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1">
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-6 w-6 p-0"
-                                        onClick={() => {
-                                          if (item.quantity > 1) {
-                                            updateCartQuantityMutation.mutate({
-                                              cartItemId: item.id,
-                                              quantity: item.quantity - 1
-                                            });
-                                          }
-                                        }}
-                                        disabled={item.quantity <= 1}
-                                      >
-                                        <Minus className="w-3 h-3" />
-                                      </Button>
-                                      <span className="text-sm px-2">{item.quantity}</span>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-6 w-6 p-0"
-                                        onClick={() => updateCartQuantityMutation.mutate({
-                                          cartItemId: item.id,
-                                          quantity: item.quantity + 1
-                                        })}
-                                      >
-                                        <Plus className="w-3 h-3" />
-                                      </Button>
-                                    </div>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
-                                      onClick={() => removeFromCartMutation.mutate(item.id)}
-                                    >
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </Card>
-                          ))
-                        )}
-                      </div>
-                    </ScrollArea>
-                    
-                    {cartItems.length > 0 && (
-                      <div className="border-t pt-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="font-semibold">Total:</span>
-                          <span className="font-bold text-lg">₹{cartTotal}</span>
-                        </div>
-                        {(selectedGroup?.memberCount || 0) >= 2 ? (
-                          <Button 
-                            className="w-full" 
-                            size="sm"
-                            onClick={() => setLocation(`/place-order/${selectedGroupId}`)}
-                          >
-                            Proceed to Group Checkout
-                          </Button>
-                        ) : (
-                          <div className="space-y-2">
-                            <Button 
-                              disabled
-                              className="w-full bg-gray-300 text-gray-500 cursor-not-allowed"
-                              size="sm"
-                            >
-                              <Users className="h-4 w-4 mr-2" />
-                              Need 2+ Members for Group Checkout
-                            </Button>
-                            <p className="text-sm text-orange-600 text-center">
-                              This group needs {2 - (selectedGroup?.memberCount || 0)} more member{2 - (selectedGroup?.memberCount || 0) === 1 ? '' : 's'} to enable group checkout
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
-
-              <Avatar className="h-8 w-8 ring-2 ring-indigo-200 dark:ring-indigo-800">
-                <AvatarImage src="" />
-                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
-                  {(authUser as any)?.username?.[0]?.toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Video Call Overlay */}
-      {isVideoCallActive && (
-        <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-4xl w-full mx-4 shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Group Video Call - {selectedGroup?.name}</h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsMicOn(!isMicOn)}
-                  className={isMicOn ? "bg-green-100" : "bg-red-100"}
-                >
-                  {isMicOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsCameraOn(!isCameraOn)}
-                  className={isCameraOn ? "bg-green-100" : "bg-red-100"}
-                >
-                  {isCameraOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleEndVideoCall}
-                >
-                  <Phone className="h-4 w-4" />
-                  End Call
-                </Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center relative">
-                {isCameraOn ? (
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    muted
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-gray-500 p-4">
-                    <VideoOff className="w-8 h-8 mb-2" />
-                    <p className="text-sm text-center">Camera not available</p>
-                    <p className="text-xs text-center opacity-75">You can still participate in the call</p>
-                  </div>
-                )}
-                <div className="absolute bottom-2 left-2 bg-black/50 rounded px-2 py-1 text-white text-xs">
-                  {(authUser as any)?.username || 'codestudio.solutions@gmail.com'}
-                </div>
-              </div>
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg aspect-video flex items-center justify-center">
-                <div className="flex flex-col items-center justify-center text-gray-500">
-                  <Users className="w-8 h-8 mb-2" />
-                  <p className="text-sm">Waiting for others to join</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Call Info */}
-            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                <Video className="w-4 h-4" />
-                <span className="text-sm font-medium">Group Video Call Active</span>
-              </div>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                {isCameraOn && isMicOn ? "Camera and microphone are on" : 
-                 !isCameraOn && !isMicOn ? "Audio-only mode - camera and microphone are off" :
-                 !isCameraOn ? "Audio-only mode - camera is off" : "Microphone is off"}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main Content with Modern Layout */}
-      <div className="container mx-auto px-6 py-8">
-        <div className="space-y-6">
-
-          {/* Groups Content - WhatsApp Style */}
-          <div className="space-y-0">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 h-[calc(100vh-200px)]">
-              
-              {/* Groups List - WhatsApp Style Sidebar */}
-              <div className="lg:col-span-1 border-r bg-white dark:bg-gray-900 flex flex-col">
-                {/* Header */}
-                <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
-                  <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-semibold text-green-800 dark:text-green-200">Shopping Groups</h2>
-                    <div className="flex gap-2">
+        {/* Main Content */}
+        <div className="container mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Left Sidebar - Groups (Only for authenticated users) */}
+            {authUser ? (
+              <div className="lg:col-span-1">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                  <div className="p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-bold text-white text-lg">Your Groups</h2>
                       <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>
                         <DialogTrigger asChild>
-                          <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white rounded-full w-8 h-8 p-0">
-                            <Plus className="h-4 w-4" />
+                          <Button 
+                            size="sm" 
+                            onClick={() => requireAuth("create a group")}
+                            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                            variant="outline"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            New Group
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
+                        <DialogContent>
                           <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <Users className="h-5 w-5 text-green-600" />
-                              Create New Group
-                            </DialogTitle>
-                            <DialogDescription>
-                              Create a new shopping group to collaborate with friends
-                            </DialogDescription>
+                            <DialogTitle>Create New Group</DialogTitle>
                           </DialogHeader>
-                          <Form {...createGroupForm}>
-                            <form onSubmit={createGroupForm.handleSubmit((data) => createGroupMutation.mutate(data))} className="space-y-4">
-                              <FormField
-                                control={createGroupForm.control}
-                                name="name"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Group Name</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Enter group name..." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <FormField
-                                control={createGroupForm.control}
-                                name="description"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Group Description</FormLabel>
-                                    <FormControl>
-                                      <Textarea placeholder="What's this group about?" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <Button type="submit" disabled={createGroupMutation.isPending} className="w-full bg-green-500 hover:bg-green-600">
-                                {createGroupMutation.isPending ? "Creating..." : "Create Group"}
-                              </Button>
-                            </form>
-                          </Form>
-                        </DialogContent>
-                      </Dialog>
-                      
-                      <Dialog open={isJoinGroupOpen} onOpenChange={setIsJoinGroupOpen}>
-                        <DialogTrigger asChild>
-                          <Button size="sm" variant="outline" className="rounded-full w-8 h-8 p-0 border-green-300">
-                            <UserPlus className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                          <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <UserPlus className="h-5 w-5 text-blue-600" />
-                              Join Group
-                            </DialogTitle>
-                            <DialogDescription>
-                              Enter a group code to join an existing shopping group
-                            </DialogDescription>
-                          </DialogHeader>
-                          <Form {...joinGroupForm}>
-                            <form onSubmit={joinGroupForm.handleSubmit((data) => joinGroupMutation.mutate(data))} className="space-y-4">
-                              <FormField
-                                control={joinGroupForm.control}
-                                name="code"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Group Code</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Enter group code..." {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                              <Button type="submit" disabled={joinGroupMutation.isPending} className="w-full">
-                                {joinGroupMutation.isPending ? "Joining..." : "Join Group"}
-                              </Button>
-                            </form>
-                          </Form>
+                          <div className="space-y-4">
+                            <Input placeholder="Group name" />
+                            <Input placeholder="Description" />
+                            <Button className="w-full">Create Group</Button>
+                          </div>
                         </DialogContent>
                       </Dialog>
                     </div>
-                  </div>
-                  
-                  {/* Search */}
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search groups..."
-                      className="pl-10 bg-white dark:bg-gray-700 border-green-300 dark:border-green-700 focus:border-green-500"
-                    />
                   </div>
                 </div>
-
-                {/* Groups List */}
-                <ScrollArea className="flex-1">
-                  <div className="divide-y">
-                    {groupsLoading ? (
-                      Array.from({ length: 5 }).map((_, i) => (
-                        <div key={`loading-group-${i}`} className="p-4 animate-pulse">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                            <div className="flex-1">
-                              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : userGroups.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">
-                        <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm mb-2">No groups yet</p>
-                        <p className="text-xs opacity-75">Create your first group!</p>
-                      </div>
-                    ) : (
-                      userGroups.map((group: any) => (
-                        <div
-                          key={group.id}
-                          className={`p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
-                            selectedGroupId === group.id ? 'bg-green-50 dark:bg-green-900/20 border-r-4 border-green-500' : ''
-                          }`}
-                          onClick={() => setSelectedGroupId(group.id)}
-                        >
-                          <div className="flex items-center gap-3">
-                            {/* Group Avatar */}
-                            <div className="relative">
-                              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                                {group.name.charAt(0).toUpperCase()}
-                              </div>
-                              {group.totalCart > 0 && (
-                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                                  <ShoppingCart className="w-3 h-3 text-white" />
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between mb-1">
-                                <h3 className="font-medium text-sm leading-tight">{group.name}</h3>
-                                <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                                  {group.creatorId === (authUser as any)?.id && (
-                                    <Crown className="w-3 h-3 text-yellow-500" />
-                                  )}
-                                  <span className="text-xs text-gray-500 whitespace-nowrap">
-                                    {new Date(group.createdAt).toLocaleDateString('en-GB', { 
-                                      day: '2-digit', 
-                                      month: '2-digit',
-                                      year: '2-digit'
-                                    })}
-                                  </span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center justify-between mb-1">
-                                <p className="text-sm text-gray-600 dark:text-gray-400 flex-1 mr-2 leading-tight">
-                                  {group.description || "Shopping together"}
-                                </p>
-                                <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
-                                  <Users className="w-3 h-3" />
-                                  <span>{group.memberCount}</span>
-                                </div>
-                              </div>
-                              
-                              {/* Status and details row */}
-                              <div className="flex items-center justify-between mt-2">
-                                {group.totalCart > 0 ? (
-                                  <div className="flex items-center gap-1">
-                                    <ShoppingCart className="w-3 h-3 text-green-600 dark:text-green-400" />
-                                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                      ₹{group.totalCart}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <p className="text-xs text-gray-500">
-                                    No items in cart
-                                  </p>
-                                )}
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  {group.roomCode && (
-                                    <Badge variant="outline" className="text-xs font-mono px-1.5 py-0.5">
-                                      {group.roomCode}
-                                    </Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </ScrollArea>
               </div>
+            ) : null}
 
-              {/* Main Content Area */}
-              <div className="lg:col-span-3 flex flex-col bg-gray-50 dark:bg-gray-900 relative">
-                {/* Group Header - Only show when group is selected */}
-                {selectedGroup && (
-                  <div className="p-4 bg-white dark:bg-gray-800 border-b shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            {selectedGroup.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold">{selectedGroup.name}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {selectedGroup.description || "Group Shopping"}
-                            </p>
-                            <div className="flex items-center gap-3 mt-1">
-                              <div className="flex items-center gap-1 text-sm">
-                                <Users className="w-4 h-4 text-blue-500" />
-                                <span className="font-semibold text-blue-600">{selectedGroup.memberCount || 0}</span>
-                                <span className="text-gray-600">members</span>
-                              </div>
-                              <div className="flex items-center gap-1 text-sm">
-                                <span className="text-gray-500">Code:</span>
-                                <Badge variant="outline" className="font-mono text-xs">
-                                  {selectedGroup.roomCode}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <Button
-                            size="sm"
-                            onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
-                            disabled={!isVideoCallActive && deduplicatedOnlineMembers.length <= 1}
-                            className={`gap-1 text-xs px-2 ${isVideoCallActive 
-                              ? 'bg-red-500 hover:bg-red-600' 
-                              : deduplicatedOnlineMembers.length <= 1 
-                                ? 'bg-gray-400 cursor-not-allowed' 
-                                : 'bg-green-500 hover:bg-green-600'}`}
-                          >
-                            {isVideoCallActive ? <VideoOff className="h-3 w-3" /> : <Video className="h-3 w-3" />}
-                            {isVideoCallActive ? 'End' : deduplicatedOnlineMembers.length <= 1 ? `${deduplicatedOnlineMembers.length}` : 'Call'}
-                          </Button>
-                          
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setIsGroupCartOpen(true)}
-                            className="gap-1 text-xs px-2 border-green-300"
-                          >
-                            <ShoppingCart className="h-3 w-3" />
-                            ({cartItems.length})
-                          </Button>
-                          
-                          <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
-                            <DialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="gap-1 text-xs px-2 border-green-300"
-                              >
-                                <UserPlus className="w-3 h-3" />
-                                Invite
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="sm:max-w-md">
-                              <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                  <Users className="h-5 w-5 text-green-600" />
-                                  Invite Members to {selectedGroup?.name}
-                                </DialogTitle>
-                                <DialogDescription>
-                                  Share the group code to invite friends to join your shopping group
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div className="text-sm text-gray-600">
-                                  Share this group code with your friends to invite them:
-                                </div>
-                                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                                  <code className="flex-1 text-lg font-mono font-bold text-green-600">
-                                    {selectedGroup?.roomCode}
-                                  </code>
-                                  <Button
-                                    size="sm"
-                                    onClick={() => {
-                                      const inviteCode = selectedGroup?.roomCode;
-                                      if (inviteCode) {
-                                        navigator.clipboard.writeText(inviteCode);
-                                        toast({ title: "Code copied!", description: "Share this code with friends to invite them" });
-                                      }
-                                    }}
-                                  >
-                                    <Copy className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="sm" variant="outline" className="gap-2">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {selectedGroup?.creatorId === (authUser as any)?.id ? (
-                                <DropdownMenuItem 
-                                  onClick={handleDeleteGroup}
-                                  className="text-red-600 focus:text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete Group
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem 
-                                  onClick={handleExitGroup}
-                                  className="text-orange-600 focus:text-orange-600"
-                                >
-                                  <LogOut className="h-4 w-4 mr-2" />
-                                  Exit Group
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                    </div>
-                )}
-
-                {/* Products Section - Always visible */}
-                <div className="flex-1 flex flex-col">
-                      <div className="p-4 border-b bg-white dark:bg-gray-800">
-                        <div className="flex items-center gap-2">
-                          <Package className="h-5 w-5 text-indigo-600" />
-                          <h3 className="font-semibold">Browse Products</h3>
-                        </div>
-                      </div>
-                      
-                      <div className="flex-1 p-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                              Exclusive Products
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">VyronaSocial exclusive products with group discounts</p>
-                          </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                            className="gap-2"
-                          >
-                            {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
-                            {viewMode === 'grid' ? 'List' : 'Grid'}
-                          </Button>
-                        </div>
-
-                        {/* Products Grid */}
-                        <ScrollArea className="flex-1">
-                          <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                            {productsLoading ? (
-                              Array.from({ length: 6 }).map((_, i) => (
-                                <Card key={`loading-product-${i}`} className="overflow-hidden">
-                                  <div className="animate-pulse">
-                                    <div className="aspect-square bg-gray-200"></div>
-                                    <div className="p-4 space-y-2">
-                                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                                    </div>
-                                  </div>
-                                </Card>
-                              ))
-                            ) : filteredProducts.length === 0 ? (
-                              <div className="col-span-full text-center py-8">
-                                <Package className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                                <p className="text-gray-500">No products found</p>
-                              </div>
-                            ) : (
-                              filteredProducts.map((product: any) => (
-                                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                                  <CardContent className="p-0">
-                                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center relative">
-                                      <Package className="w-12 h-12 text-gray-400" />
-                                      <Badge className="absolute top-2 right-2 bg-gradient-to-r from-green-500 to-blue-500 text-white">
-                                        VyronaSocial
-                                      </Badge>
-                                    </div>
-                                    
-                                    <div className="p-4 space-y-3">
-                                      <div>
-                                        <h3 className="font-semibold text-sm line-clamp-2">{product.name}</h3>
-                                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                                          {product.description}
-                                        </p>
-                                      </div>
-
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                          <span className="font-bold text-green-600">₹{product.price}</span>
-                                          <span className="text-xs text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
-                                        </div>
-                                        <Badge variant="outline" className="text-xs">
-                                          20% OFF
-                                        </Badge>
-                                      </div>
-
-                                      <div className="flex items-center gap-2">
-                                        <Button 
-                                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
-                                          size="sm"
-                                          disabled={addToGroupCartMutation.isPending}
-                                          onClick={() => handleAddToGroupClick(product.id)}
-                                        >
-                                          <ShoppingBag className="w-4 h-4 mr-2" />
-                                          {selectedGroup ? "Add to Group" : "Add to Group"}
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm"
-                                          className="px-3"
-                                        >
-                                          <Heart className="w-4 h-4" />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              ))
-                            )}
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    </div>
-
-                {/* No Groups Message - Show below products when no group selected */}
-                {!selectedGroup && (
-                  <div className="p-8 text-center bg-green-50 dark:bg-green-900/20 border-t">
-                    <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Users className="w-8 h-8 text-green-600" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">Create or Join a Group</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Start collaborating by creating a new group or joining an existing one
-                    </p>
-                    <div className="flex gap-2 justify-center">
-                      <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2 bg-green-500 hover:bg-green-600">
-                        <Plus className="w-4 h-4" />
-                        Create Group
-                      </Button>
-                      <Button onClick={() => setIsJoinGroupOpen(true)} variant="outline" className="gap-2 border-green-300">
-                        <UserPlus className="w-4 h-4" />
-                        Join Group
+            {/* Main Product Grid */}
+            <div className={`${authUser ? 'lg:col-span-3' : 'lg:col-span-4'}`}>
+              <div className="space-y-6">
+                {/* Products Header */}
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Social Shopping Products</h2>
+                  {!authUser && (
+                    <div className="text-center p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+                      <p className="text-sm text-indigo-700 mb-2">Join groups to shop together and save more!</p>
+                      <Button 
+                        onClick={() => requireAuth("join groups")}
+                        size="sm"
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                      >
+                        Login to Start Group Shopping
                       </Button>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-
-
-              {/* Fixed Chat Panel - Right Side */}
-              <div className="lg:col-span-1 border-l bg-white dark:bg-gray-900 flex flex-col h-screen">
-                {selectedGroup ? (
-                  <>
-                    {/* Chat Header */}
-                    <div className="p-4 border-b bg-green-50 dark:bg-green-900/20 flex-shrink-0">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-5 w-5 text-green-600" />
-                        <h3 className="font-semibold text-green-800 dark:text-green-200">Group Chat</h3>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        {selectedGroup.name}
-                      </p>
-                    </div>
-
-                    {/* Chat Section - 50% */}
-                    <div className="flex flex-col border-b" style={{ height: '50%' }}>
-                      {/* Chat Messages Area */}
-                      <div className="flex-1 min-h-0">
-                        <ScrollArea className="h-full p-4">
-                          <div className="space-y-4">
-                            {/* Test content to make scroller visible */}
-                            {Array.from({length: 10}).map((_, i) => (
-                              <div key={`test-${i}`} className="flex justify-start">
-                                <div className="flex gap-2 max-w-[70%]">
-                                  <Avatar className="w-8 h-8 flex-shrink-0">
-                                    <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                                      T
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div>
-                                    <div className="inline-block p-3 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border">
-                                      Test message {i + 1} to demonstrate scrolling functionality
-                                    </div>
-                                    <div className="text-xs text-gray-500 mt-1">
-                                      {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                            {messages.map((message) => (
-                              <div
-                                key={message.id}
-                                className={`flex ${
-                                  message.messageType === 'system'
-                                    ? 'justify-center'
-                                    : message.userId === (authUser as any)?.id
-                                    ? 'justify-end'
-                                    : 'justify-start'
-                                }`}
-                              >
-                                {message.messageType === 'system' ? (
-                                  <div className="inline-block p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-800 dark:text-green-200 text-center">
-                                    {message.content}
-                                  </div>
-                                ) : (
-                                  <div className={`flex gap-2 max-w-[70%] ${
-                                    message.userId === (authUser as any)?.id ? 'flex-row-reverse' : 'flex-row'
-                                  }`}>
-                                    <Avatar className="w-8 h-8 flex-shrink-0">
-                                      <AvatarFallback className={`text-xs ${
-                                        message.userId === (authUser as any)?.id 
-                                          ? 'bg-green-100 text-green-600' 
-                                          : 'bg-blue-100 text-blue-600'
-                                      }`}>
-                                        {message.username.charAt(0).toUpperCase()}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div className={`${
-                                      message.userId === (authUser as any)?.id ? 'text-right' : 'text-left'
-                                    }`}>
-                                      <div className={`inline-block p-3 rounded-lg ${
-                                        message.userId === (authUser as any)?.id
-                                          ? 'bg-green-500 text-white rounded-br-sm'
-                                          : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-sm border'
-                                      }`}>
-                                        {message.content}
-                                      </div>
-                                      <div className="text-xs text-gray-500 mt-1">
-                                        {new Date(message.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
+                {/* Products Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredProducts.map((product: any) => (
+                    <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+                      <div className="relative overflow-hidden rounded-t-xl">
+                        {product.imageUrl ? (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                            <Package className="w-16 h-16 text-indigo-400" />
                           </div>
-                        </ScrollArea>
-                      </div>
-
-                      {/* Chat Input */}
-                      <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="px-2"
-                            onClick={() => {
-                              const fileInput = document.createElement('input');
-                              fileInput.type = 'file';
-                              fileInput.accept = 'image/*,video/*,.pdf,.doc,.docx,.txt';
-                              fileInput.onchange = (event) => {
-                                const file = (event.target as HTMLInputElement).files?.[0];
-                                if (file) {
-                                  setSelectedFile(file);
-                                  toast({
-                                    title: "File Selected",
-                                    description: `${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`,
-                                  });
-                                }
-                              };
-                              fileInput.click();
-                            }}
-                          >
-                            <Paperclip className="w-4 h-4" />
-                          </Button>
-                          
-                          <div className="flex-1 relative">
-                            <Input
-                              placeholder="Type a message..."
-                              value={newMessage}
-                              onChange={(e) => setNewMessage(e.target.value)}
-                              onKeyPress={handleKeyPress}
-                              className="pr-12 border-green-300 focus:border-green-500"
-                              disabled={sendMessageMutation.isPending}
-                            />
-                          </div>
-                          
-                          <Button 
-                            onClick={handleSendMessage}
-                            disabled={(!newMessage.trim() && !selectedFile) || sendMessageMutation.isPending || uploadFileMutation.isPending}
-                            className="rounded-full p-2 bg-green-500 hover:bg-green-600"
-                          >
-                            <Send className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Participants Section - 50% */}
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800 flex flex-col overflow-hidden" style={{ height: '50%' }}>
-                      <div className="flex items-center gap-2 mb-3 flex-shrink-0">
-                        <Users className="h-4 w-4 text-blue-600" />
-                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Participants</h4>
-                        <span className="text-xs text-gray-500">({deduplicatedOnlineMembers.length} online)</span>
-                      </div>
-                      <div className="flex-1 min-h-0 overflow-hidden">
-                        <div className="h-full overflow-y-auto">
-                          <div className="space-y-2 pr-2">
-                            {deduplicatedOnlineMembers.length > 0 ? (
-                              deduplicatedOnlineMembers.map((member, index) => (
-                                <div key={`member-${member.userId}-${index}`} className="flex items-center gap-2 py-2 px-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                  <Avatar className="w-8 h-8">
-                                    <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                                      {member.username.charAt(0).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1 min-w-0">
-                                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate block">
-                                      {member.username}
-                                    </span>
-                                    <span className="text-xs text-green-600">online</span>
-                                  </div>
-                                </div>
-                              ))
-                            ) : (
-                              <div className="text-center py-8">
-                                <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                                <div className="text-xs text-gray-500 italic">No members online</div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center">
-                    <div className="text-center">
-                      <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">Select a Group</h3>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        Choose a group to start chatting
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Product Browsing Section */}
-        <div className="container mx-auto px-6 py-8">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Social Shopping Products</h2>
-            <p className="text-gray-600 dark:text-gray-400">Discover exclusive products perfect for group buying</p>
-          </div>
-
-          {productsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
-                  <CardContent className="p-4">
-                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredProducts.slice(0, 12).map((product) => (
-                <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-purple-300" onClick={() => setLocation(`/social/product/${product.id}`)}>
-                  <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900">
-                    {product.imageUrl ? (
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Package className="w-12 h-12 text-purple-400" />
-                      </div>
-                    )}
-                    <div className="absolute top-3 right-3">
-                      <Badge className="bg-white/90 text-gray-800 shadow-sm">
-                        {product.category}
-                      </Badge>
-                    </div>
-                    {product.enableGroupBuy && (
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                          <Users className="w-3 h-3 mr-1" />
-                          Group Buy
-                        </Badge>
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">{product.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{product.description}</p>
-                    
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl font-bold text-purple-600">₹{Math.round(product.price)}</span>
-                        {product.enableGroupBuy && (
-                          <span className="text-sm text-gray-500 line-through">₹{Math.round(product.price * 1.2)}</span>
                         )}
+                        <div className="absolute top-3 right-3">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="bg-white/90 hover:bg-white shadow-lg"
+                          >
+                            <Heart className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      {product.enableGroupBuy && (
-                        <Badge variant="outline" className="text-xs text-green-600 border-green-200">
-                          20% OFF
-                        </Badge>
-                      )}
-                    </div>
+                      <CardContent className="p-6">
+                        <div className="space-y-3">
+                          <h3 className="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                            {product.description || "Premium quality product for social shopping"}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-1">
+                              <div className="text-2xl font-bold text-indigo-600">
+                                ₹{product.price?.toLocaleString() || '0'}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Best with groups
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Button
+                                onClick={() => handleAddToGroupCart(product.id)}
+                                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white gap-2"
+                                size="sm"
+                              >
+                                <Users className="h-4 w-4" />
+                                Add to Group
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
 
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (selectedGroupId) {
-                            handleAddToGroupCart(product.id);
-                          } else {
-                            toast({
-                              title: "Select a group first",
-                              description: "Choose a shopping group to add products",
-                              variant: "destructive"
-                            });
-                          }
-                        }}
-                      >
-                        <ShoppingBag className="w-4 h-4 mr-2" />
-                        {product.enableGroupBuy ? 'Group Buy' : 'Add to Cart'}
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="px-3"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Heart className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                {filteredProducts.length === 0 && (
+                  <div className="text-center py-12">
+                    <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No products found</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Try adjusting your search or check back later for new products.</p>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Video Call Overlay - Integrated with Product Browsing */}
-      {isVideoCallActive && (
-        <div className="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex">
-          {/* Left Side - Participants */}
-          <div className="w-1/3 bg-gray-900 p-4 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-lg font-semibold">Video Call</h3>
-              <div className="text-green-400 text-sm flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                {callParticipants.length} participant{callParticipants.length !== 1 ? 's' : ''}
-              </div>
-            </div>
-
-            {/* Participants Grid */}
-            <div className="flex-1 space-y-3">
-              {callParticipants.map((participant, index) => {
-                const isCurrentUser = participant.userId === ((authUser as any)?.id || 1);
-                return (
-                  <div
-                    key={participant.userId}
-                    className="bg-gray-800 rounded-lg relative overflow-hidden aspect-video flex items-center justify-center"
-                  >
-                    {isCurrentUser && isCameraOn ? (
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        muted
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-white p-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-lg font-medium mb-2">
-                          {participant.username.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="text-sm font-medium">{participant.username}</span>
-                      </div>
-                    )}
-                    
-                    {/* Participant Controls */}
-                    <div className="absolute bottom-2 left-2 flex items-center gap-2">
-                      <div className="bg-black/60 rounded px-2 py-1 text-white text-xs">
-                        {isCurrentUser ? 'You' : participant.username}
-                      </div>
-                      {!isMicOn && isCurrentUser && (
-                        <div className="bg-red-600 rounded-full p-1">
-                          <MicOff className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Call Controls */}
-            <div className="mt-4 flex items-center justify-center gap-3">
-              <button
-                onClick={() => setIsMicOn(!isMicOn)}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                  isMicOn 
-                    ? 'bg-gray-600 hover:bg-gray-500 text-white' 
-                    : 'bg-red-600 hover:bg-red-700 text-white'
-                }`}
-              >
-                {isMicOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-              </button>
-
-              <button
-                onClick={() => setIsCameraOn(!isCameraOn)}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                  isCameraOn 
-                    ? 'bg-gray-600 hover:bg-gray-500 text-white' 
-                    : 'bg-red-600 hover:bg-red-700 text-white'
-                }`}
-              >
-                {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-              </button>
-
-              <button
-                onClick={handleEndVideoCall}
-                className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-colors"
-              >
-                <Phone className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Right Side - Collaborative Product Browsing */}
-          <div className="flex-1 bg-white dark:bg-gray-900 flex flex-col">
-            <div className="p-4 border-b bg-green-50 dark:bg-green-900/20">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
-                  Shopping Together
-                </h3>
-                <div className="text-sm text-green-600 dark:text-green-400">
-                  Browse exclusive products with your group
-                </div>
-              </div>
-            </div>
-
-            {/* Product Grid - Synchronized */}
-            <div className="flex-1 p-4 overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredProducts.slice(0, 6).map((product) => (
-                  <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-green-300 cursor-pointer" onClick={() => setLocation(`/social/product/${product.id}`)}>
-                    <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
-                      {product.imageUrl ? (
-                        <img 
-                          src={product.imageUrl} 
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <Package className="w-12 h-12 text-gray-400" />
-                        </div>
-                      )}
-                      <div className="absolute top-3 right-3">
-                        <Badge className="bg-white/90 text-gray-800 shadow-sm">
-                          {product.category}
-                        </Badge>
-                      </div>
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          Exclusive
-                        </Badge>
-                      </div>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-semibold mb-2 line-clamp-1">{product.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{product.description}</p>
-                      
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl font-bold text-indigo-600">₹{Math.round(product.price)}</span>
-                          <span className="text-sm text-gray-500 line-through">₹{Math.round(product.price * 1.2)}</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          20% OFF
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
-                          size="sm"
-                          disabled={!selectedGroupId || addToGroupCartMutation.isPending}
-                          onClick={() => handleAddToGroupCart(product.id)}
-                        >
-                          <ShoppingBag className="w-4 h-4 mr-2" />
-                          Add to Group
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="px-3"
-                        >
-                          <Heart className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-
-            {/* Call Actions */}
-            <div className="p-4 border-t bg-gray-50 dark:bg-gray-800">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Shopping with {callParticipants.length} member{callParticipants.length !== 1 ? 's' : ''}
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsGroupCartOpen(true)}
-                  className="gap-2"
-                >
-                  <ShoppingCart className="w-4 h-4" />
-                  View Group Cart
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Video Call Invitation Dialog */}
-      {videoCallInvite && (
-        <Dialog open={true} onOpenChange={() => setVideoCallInvite(null)}>
-          <DialogContent className="sm:max-w-md">
+      {/* Group Cart Dialog - For authenticated users only */}
+      {authUser && (
+        <Dialog open={isGroupCartOpen} onOpenChange={setIsGroupCartOpen}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Video className="h-5 w-5 text-green-600" />
-                Video Call Invitation
+                <ShoppingCart className="h-5 w-5" />
+                Group Cart {selectedGroup && `- ${selectedGroup.name}`}
               </DialogTitle>
               <DialogDescription>
-                {videoCallInvite.initiatorName} has started a video call in this group
+                View and manage items in your group shopping cart
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="text-sm text-gray-600">
-                Would you like to join the video call?
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleJoinVideoCallInvite}
-                  className="flex-1 bg-green-500 hover:bg-green-600"
-                  disabled={joinVideoCallMutation.isPending}
-                >
-                  <Video className="w-4 h-4 mr-2" />
-                  {joinVideoCallMutation.isPending ? "Joining..." : "Join Call"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setVideoCallInvite(null)}
-                  className="flex-1"
-                >
-                  Decline
-                </Button>
-              </div>
+              <ScrollArea className="h-64">
+                <div className="space-y-3">
+                  {cartItems.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <ShoppingCart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Cart is empty</p>
+                      <p className="text-xs opacity-75">Add products to start shopping!</p>
+                    </div>
+                  ) : (
+                    cartItems.map((item) => (
+                      <Card key={item.id} className="p-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
+                            {item.imageUrl ? (
+                              <img
+                                src={item.imageUrl}
+                                alt={item.name}
+                                className="w-full h-full object-cover rounded"
+                              />
+                            ) : (
+                              <Package className="w-6 h-6 text-gray-400" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">{item.name}</h4>
+                            <p className="text-xs text-gray-600 mb-2">₹{item.price}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Qty: {item.quantity}</span>
+                              <Button size="sm" variant="destructive">Remove</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+              
+              {cartItems.length > 0 && (
+                <div className="space-y-3 pt-4 border-t">
+                  <div className="flex justify-between text-lg font-semibold">
+                    <span>Total:</span>
+                    <span>₹{cartTotal.toLocaleString()}</span>
+                  </div>
+                  <Button className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white">
+                    Proceed to Group Checkout
+                  </Button>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
-      )}
-
-      {/* Group Selection Dialog */}
-      <Dialog open={isGroupSelectionOpen} onOpenChange={setIsGroupSelectionOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-indigo-600" />
-              Select Group
-            </DialogTitle>
-            <DialogDescription>
-              Choose which group to add this product to
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            {userGroups?.map((group) => (
-              <div
-                key={group.id}
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                onClick={() => handleSelectGroupForProduct(group.id)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-sm">{group.name}</div>
-                    <div className="text-xs text-gray-500">
-                      Room Code: {group.roomCode}
-                    </div>
-                  </div>
-                </div>
-                <Button size="sm" variant="outline">
-                  Select
-                </Button>
-              </div>
-            ))}
-            
-            <div className="pt-2 border-t">
-              <Button
-                onClick={() => {
-                  setIsGroupSelectionOpen(false);
-                  setIsCreateGroupOpen(true);
-                }}
-                variant="outline"
-                className="w-full"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Group
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Online Members Indicator */}
-      {selectedGroupId && deduplicatedOnlineMembers.length > 0 && (
-        <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg border border-green-200">
-          <div className="flex items-center gap-2 text-sm">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-gray-600 dark:text-gray-300">
-              {deduplicatedOnlineMembers.length} member{deduplicatedOnlineMembers.length !== 1 ? 's' : ''} online
-            </span>
-          </div>
-        </div>
       )}
     </div>
   );
