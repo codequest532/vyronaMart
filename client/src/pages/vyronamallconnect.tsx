@@ -306,16 +306,23 @@ export default function VyronaMallConnect() {
   // Delete group mutation (for admins)
   const deleteGroupMutation = useMutation({
     mutationFn: async (groupId: number) => {
-      return apiRequest("DELETE", `/api/shopping-rooms/${groupId}`, {});
+      console.log("Deleting VyronaMallConnect group:", groupId);
+      const response = await apiRequest("DELETE", `/api/mallconnect/groups/${groupId}`, {});
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      console.log("Group deleted successfully, refreshing data");
+      queryClient.invalidateQueries({ queryKey: ["/api/mallconnect/shopping-groups"] });
+      setSelectedGroupForAction(null);
+      setShowDeleteConfirm(false);
       toast({
         title: "Success",
         description: "Group deleted successfully",
       });
     },
     onError: (error: any) => {
+      console.error("Error deleting group:", error);
+      setShowDeleteConfirm(false);
       toast({
         title: "Error",
         description: error.message || "Failed to delete group",

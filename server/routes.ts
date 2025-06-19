@@ -1491,6 +1491,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete VyronaMallConnect shopping group
+  app.delete("/api/mallconnect/groups/:id", async (req, res) => {
+    try {
+      const groupId = parseInt(req.params.id);
+      const session = (req as any).session;
+      const userId = session?.user?.id || 1;
+      
+      console.log("Deleting MallConnect group:", groupId, "by user:", userId);
+      
+      // Get group to verify it exists and is a mallconnect group
+      const group = await storage.getShoppingGroup(groupId);
+      if (!group) {
+        return res.status(404).json({ message: "Group not found" });
+      }
+      
+      // Check if user is group creator (only creator can delete)
+      if (group.creatorId !== userId) {
+        return res.status(403).json({ message: "Only group creator can delete the group" });
+      }
+      
+      // Delete the group
+      const success = await storage.deleteShoppingGroup(groupId);
+      if (success) {
+        console.log("Successfully deleted MallConnect group:", groupId);
+        res.json({ message: "Group deleted successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to delete group" });
+      }
+    } catch (error) {
+      console.error("Error deleting MallConnect group:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Shopping room routes (maps to VyronaSocial rooms for checkout)
   app.get("/api/shopping-rooms", async (req, res) => {
     try {
