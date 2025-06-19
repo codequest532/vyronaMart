@@ -16,12 +16,15 @@ export function useUserData() {
     queryFn: async () => {
       try {
         const response = await fetch("/api/auth/me", {
+          method: "GET",
           credentials: "include",
           headers: {
             'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
           },
         });
         if (response.status === 401) {
+          console.log("User not authenticated");
           return null;
         }
         if (!response.ok) {

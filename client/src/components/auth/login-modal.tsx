@@ -33,17 +33,29 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/login", credentials);
-      return response.json();
+      console.log("Login attempt with:", credentials);
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(credentials),
+      });
+      const data = await response.json();
+      console.log("Login response:", data);
+      return data;
     },
     onSuccess: (data) => {
       if (data.success) {
         queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
         toast({
           title: "Login Successful",
-          description: "Welcome back!",
+          description: `Welcome back, ${data.user.username}!`,
         });
         onClose();
+        // Force page refresh to ensure session is properly loaded
+        setTimeout(() => window.location.reload(), 100);
       } else {
         toast({
           title: "Login Failed",

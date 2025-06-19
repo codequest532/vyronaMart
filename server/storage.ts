@@ -293,29 +293,51 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-    // Production-ready system - no mock data
-    // Only essential admin account for system management
-    const existingAdmin = Array.from(this.users.values()).find(user => user.email === "mgmags25@gmail.com");
-    
-    if (!existingAdmin) {
-      const adminUser: User = {
-        id: this.currentUserId++,
+    // Essential user accounts for system functionality
+    const users = [
+      {
         username: "admin",
         email: "mgmags25@gmail.com",
-        mobile: null,
         password: "12345678",
-        role: "admin",
-        vyronaCoins: 1000,
-        xp: 0,
-        level: 1,
-        isActive: true,
-        isVerified: true,
-        createdAt: new Date(),
-      };
-      this.users.set(adminUser.id, adminUser);
-    } else {
-      existingAdmin.role = "admin";
-    }
+        role: "admin"
+      },
+      {
+        username: "riyaesh",
+        email: "riyaesh35@gmail.com", 
+        password: "12345678",
+        role: "customer"
+      },
+      {
+        username: "codestudio",
+        email: "codestudio.solutions@gmail.com",
+        password: "12345678", 
+        role: "customer"
+      }
+    ];
+
+    users.forEach(userData => {
+      const existingUser = Array.from(this.users.values()).find(user => user.email === userData.email);
+      
+      if (!existingUser) {
+        const user: User = {
+          id: this.currentUserId++,
+          username: userData.username,
+          email: userData.email,
+          mobile: null,
+          password: userData.password,
+          role: userData.role,
+          sellerType: null,
+          vyronaCoins: userData.role === "admin" ? 1000 : 100,
+          walletBalance: "0.00",
+          xp: 0,
+          level: 1,
+          isActive: true,
+          isVerified: true,
+          createdAt: new Date(),
+        };
+        this.users.set(user.id, user);
+      }
+    });
   }
 
   // User methods
@@ -327,6 +349,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(user => user.email === email);
   }
 
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.username === username);
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const user: User = {
       id: this.currentUserId++,
@@ -334,12 +360,14 @@ export class MemStorage implements IStorage {
       email: insertUser.email,
       mobile: insertUser.mobile || null,
       password: insertUser.password,
-      role: insertUser.role || "user",
+      role: insertUser.role || "customer",
+      sellerType: insertUser.sellerType || null,
       vyronaCoins: insertUser.vyronaCoins || 100,
+      walletBalance: insertUser.walletBalance || "0.00",
       xp: insertUser.xp || 0,
       level: insertUser.level || 1,
-      isActive: insertUser.isActive || true,
-      isVerified: insertUser.isVerified || false,
+      isActive: insertUser.isActive ?? true,
+      isVerified: insertUser.isVerified ?? false,
       createdAt: new Date(),
     };
     this.users.set(user.id, user);

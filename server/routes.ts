@@ -386,23 +386,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Login endpoint for frontend compatibility
   app.post("/api/login", async (req, res) => {
     try {
-      const { identifier, password } = req.body;
+      const { username, password } = req.body;
       
-      if (!identifier || !password) {
+      if (!username || !password) {
         return res.status(400).json({
           success: false,
-          message: "Email/username and password are required"
+          message: "Username and password are required"
         });
       }
 
       // Check admin credentials first
-      if (identifier === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
         req.session.user = {
           id: ADMIN_CREDENTIALS.id,
           email: ADMIN_CREDENTIALS.email,
           username: ADMIN_CREDENTIALS.username,
           role: ADMIN_CREDENTIALS.role
         };
+        
+        console.log("Admin login successful:", req.session.user);
         
         return res.json({
           success: true,
@@ -411,14 +413,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Check database users (email or username)
+      // Check database users by username
       let user;
       try {
-        user = await storage.getUserByEmail(identifier);
-        if (!user) {
-          // Try by username if email lookup failed
-          user = await storage.getUserByUsername(identifier);
-        }
+        user = await storage.getUserByUsername(username);
         
         if (user && user.password !== password) {
           user = undefined; // Password mismatch
@@ -442,6 +440,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         req.session.user = sessionUser;
         
+        console.log("User login successful:", sessionUser);
+        
         req.session.save((err) => {
           if (err) {
             console.error("Session save error:", err);
@@ -460,7 +460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(401).json({
           success: false,
-          message: "Invalid email/username or password"
+          message: "Invalid username or password"
         });
       }
     } catch (error) {
@@ -475,12 +475,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication endpoints
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { username, password } = req.body;
       
 
       
       // Check admin credentials
-      if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
         req.session.user = {
           id: ADMIN_CREDENTIALS.id,
           email: ADMIN_CREDENTIALS.email,
@@ -498,7 +498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check database for customer/seller users with retry logic
       let user;
       try {
-        user = await storage.getUserByEmail(email);
+        user = await storage.getUserByUsername(username);
         if (user && user.password !== password) {
           user = undefined; // Password mismatch
         }
@@ -507,7 +507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Fallback: retry once after a brief delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         try {
-          user = await storage.getUserByEmail(email);
+          user = await storage.getUserByUsername(username);
           if (user && user.password !== password) {
             user = undefined; // Password mismatch
           }
