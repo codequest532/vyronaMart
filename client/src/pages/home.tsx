@@ -675,7 +675,7 @@ export default function Home() {
                     Your ultimate destination for shopping, socializing, and discovering amazing products across multiple platforms
                   </p>
                   <div className="flex flex-wrap justify-center gap-4">
-                    <Button size="lg" className="bg-white text-purple-900 hover:bg-purple-50" onClick={() => user ? setLocation('/vyronahub') : setShowAuthModal(true)}>
+                    <Button size="lg" className="bg-white text-purple-900" onClick={() => user ? setLocation('/vyronahub') : setShowAuthModal(true)}>
                       <Store className="h-5 w-5 mr-2" />
                       Start Shopping
                     </Button>
