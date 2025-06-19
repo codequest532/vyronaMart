@@ -81,6 +81,8 @@ export default function VyronaSpaceSellerDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [productToDelete, setProductToDelete] = useState<SellerProduct | null>(null);
   const [editingProduct, setEditingProduct] = useState<SellerProduct | null>(null);
+  const [orderToUpdate, setOrderToUpdate] = useState<Order | null>(null);
+  const [showOrderStatusModal, setShowOrderStatusModal] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,6 +100,35 @@ export default function VyronaSpaceSellerDashboard() {
   const { data: orders = [], isLoading: ordersLoading } = useQuery<Order[]>({
     queryKey: ["/api/vyronaspace/seller/orders"]
   });
+
+  // Order status update mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+      const response = await apiRequest('PATCH', `/api/vyronaspace/seller/orders/${orderId}/status`, { status });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/vyronaspace/seller/orders"] });
+      setShowOrderStatusModal(false);
+      setOrderToUpdate(null);
+      toast({
+        title: "Order Status Updated",
+        description: "Customer has been notified via email",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Update Order Status",
+        description: error.message || "Failed to update order status",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleOrderStatusUpdate = (order: Order) => {
+    setOrderToUpdate(order);
+    setShowOrderStatusModal(true);
+  };
 
   // Store profile form
   const [storeForm, setStoreForm] = useState({
@@ -220,7 +251,7 @@ export default function VyronaSpaceSellerDashboard() {
     }
   });
 
-  // Update order status mutation
+  // Legacy mutation - kept for compatibility
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
       return apiRequest("PATCH", `/api/vyronaspace/seller/orders/${orderId}`, { status });
@@ -531,21 +562,14 @@ export default function VyronaSpaceSellerDashboard() {
                       </div>
 
                       <div className="flex items-center space-x-2">
-                        <Select 
-                          value={order.status} 
-                          onValueChange={(value) => updateOrderMutation.mutate({ orderId: order.id, status: value })}
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOrderStatusUpdate(order)}
                         >
-                          <SelectTrigger className="w-48">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="confirmed">Confirmed</SelectItem>
-                            <SelectItem value="packed">Packed</SelectItem>
-                            <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                            <SelectItem value="delivered">Delivered</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          <Truck className="h-3 w-3 mr-1" />
+                          Update Status
+                        </Button>
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -1485,6 +1509,90 @@ export default function VyronaSpaceSellerDashboard() {
                 {deleteProductMutation.isPending ? "Deleting..." : "Delete"}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Order Status Update Modal */}
+        <Dialog open={showOrderStatusModal} onOpenChange={setShowOrderStatusModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Update Order Status</DialogTitle>
+            </DialogHeader>
+            {orderToUpdate && (
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium">Order #{orderToUpdate.id}</h4>
+                  <p className="text-sm text-gray-600">Customer: {orderToUpdate.customerName}</p>
+                  <p className="text-sm text-gray-600">Current Status: {orderToUpdate.status}</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => updateOrderStatusMutation.mutate({ orderId: orderToUpdate.id, status: 'confirmed' })}
+                    disabled={updateOrderStatusMutation.isPending}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Confirmed - Order accepted and being prepared
+                  </Button>
+                  
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => updateOrderStatusMutation.mutate({ orderId: orderToUpdate.id, status: 'preparing' })}
+                    disabled={updateOrderStatusMutation.isPending}
+                  >
+                    <Clock className="h-4 w-4 mr-2" />
+                    Preparing - Items being prepared
+                  </Button>
+                  
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => updateOrderStatusMutation.mutate({ orderId: orderToUpdate.id, status: 'ready' })}
+                    disabled={updateOrderStatusMutation.isPending}
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Ready - Ready for pickup/delivery
+                  </Button>
+                  
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => updateOrderStatusMutation.mutate({ orderId: orderToUpdate.id, status: 'picked_up' })}
+                    disabled={updateOrderStatusMutation.isPending}
+                  >
+                    <Truck className="h-4 w-4 mr-2" />
+                    Picked Up - Collected by delivery partner
+                  </Button>
+                  
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => updateOrderStatusMutation.mutate({ orderId: orderToUpdate.id, status: 'out_for_delivery' })}
+                    disabled={updateOrderStatusMutation.isPending}
+                  >
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Out for Delivery - On the way to customer
+                  </Button>
+                  
+                  <Button
+                    className="w-full justify-start"
+                    variant="outline"
+                    onClick={() => updateOrderStatusMutation.mutate({ orderId: orderToUpdate.id, status: 'delivered' })}
+                    disabled={updateOrderStatusMutation.isPending}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                    Delivered - Order completed successfully
+                  </Button>
+                </div>
+                
+                <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded-lg">
+                  Customer will receive email notification when status is updated
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

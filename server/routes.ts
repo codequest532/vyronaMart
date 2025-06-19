@@ -208,6 +208,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Get customer information for VyronaSpace notifications
+      const customer = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
       // Send seller notifications for each item
       console.log("Starting email notification process...");
       try {
@@ -219,32 +226,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log("Processing items for email notifications:", items.length);
         
-        // Group items by seller
+        // Group items by seller for VyronaSpace orders
         for (const item of items) {
           try {
-            // Get product information to find the seller
-            const productResult = await db
-              .select()
-              .from(products)
-              .where(eq(products.id, item.productId))
+            // Get store information first to find the seller
+            const storeResult = await db
+              .select({
+                id: stores.id,
+                name: stores.name,
+                sellerId: stores.sellerId
+              })
+              .from(stores)
+              .where(eq(stores.id, item.storeId))
               .limit(1);
             
-            if (productResult.length === 0) {
-              console.warn(`Product not found for item: ${item.name} (ID: ${item.productId})`);
+            if (storeResult.length === 0) {
+              console.warn(`Store not found for item: ${item.name} (Store ID: ${item.storeId})`);
               continue;
             }
             
-            const product = productResult[0];
+            const store = storeResult[0];
             
             // Get seller information
             const sellerResult = await db
               .select()
               .from(users)
-              .where(eq(users.id, product.sellerId))
+              .where(eq(users.id, store.sellerId))
               .limit(1);
             
             if (sellerResult.length === 0) {
-              console.warn(`Seller not found for product: ${product.name} (Seller ID: ${product.sellerId})`);
+              console.warn(`Seller not found for store: ${store.name} (Seller ID: ${store.sellerId})`);
               continue;
             }
             
@@ -255,12 +266,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               sellerNotifications.set(sellerKey, {
                 sellerInfo: seller,
                 orderItems: [],
-                totalAmount: 0
+                totalAmount: 0,
+                storeName: store.name
               });
             }
             
             const notification = sellerNotifications.get(sellerKey)!;
-            notification.orderItems.push(item);
+            notification.orderItems.push({ ...item, storeName: store.name });
             notification.totalAmount += item.price * item.quantity;
             
           } catch (itemError) {
@@ -268,65 +280,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Send notifications to each seller
+        // Send notifications to each VyronaSpace seller
         for (const [sellerKey, notification] of sellerNotifications) {
-          const { sellerInfo, orderItems, totalAmount } = notification;
+          const { sellerInfo, orderItems, totalAmount, storeName } = notification;
           
-          console.log(`Sending order notification to seller: ${sellerInfo.email} (${sellerInfo.username})`);
+          console.log(`Sending VyronaSpace order notification to seller: ${sellerInfo.email} (${sellerInfo.username})`);
           
           const itemsList = orderItems.map((item: any) => 
-            `<li>${item.name} - Quantity: ${item.quantity} - Price: ₹${item.price.toFixed(2)}</li>`
+            `<li>${item.name} - Quantity: ${item.quantity} - Price: ₹${Math.round(item.price * item.quantity)}</li>`
           ).join('');
           
           const emailResult = await sendBrevoEmail(
             sellerInfo.email,
-            "New Order Received - VyronaHub",
-            `<h2>New Order Notification</h2>
+            "New Order Received - VyronaSpace",
+            `<h2>New VyronaSpace Order Notification</h2>
               <p>Dear ${sellerInfo.username},</p>
-              <p>You have received a new order (Order #${orderId}) from VyronaHub for your products.</p>
-              <h3>Your Products in this Order:</h3>
+              <p>You have received a new order (Order #${orderId}) from VyronaSpace for your store "${storeName}".</p>
+              <h3>Items in this Order:</h3>
               <ul>${itemsList}</ul>
-              <p><strong>Your Revenue from this Order: ₹${totalAmount.toFixed(2)}</strong></p>
+              <p><strong>Your Revenue from this Order: ₹${Math.round(totalAmount)}</strong></p>
               <h3>Customer Details:</h3>
               <p>
                 Name: ${shippingAddress.fullName}<br>
                 Phone: ${shippingAddress.phoneNumber}<br>
-                Address: ${shippingAddress.address}<br>
+                Email: ${shippingAddress.email}<br>
+                Delivery Address: ${shippingAddress.address}<br>
                 ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}
               </p>
               <p>Payment Method: ${paymentMethod.toUpperCase()}</p>
-              <p>Please log in to your VyronaHub seller dashboard to process this order.</p>
-              <p>Best regards,<br>VyronaHub Team</p>`
+              <p>Delivery Time: 8-15 minutes (VyronaSpace hyperlocal delivery)</p>
+              <p><strong>Action Required:</strong> Please log in to your VyronaSpace seller dashboard to update order status and manage fulfillment.</p>
+              <p>Best regards,<br>VyronaSpace Team</p>`
           );
           
           if (emailResult.success) {
-            console.log(`Seller notification email sent successfully to ${sellerInfo.email}`);
+            console.log(`VyronaSpace seller notification email sent successfully to ${sellerInfo.email}`);
           } else {
-            console.error(`Failed to send seller notification email to ${sellerInfo.email}:`, emailResult.error);
+            console.error(`Failed to send VyronaSpace seller notification email to ${sellerInfo.email}:`, emailResult.error);
           }
         }
 
-        // Send customer confirmation email
-        const orderEmailData = {
-          orderId: orderId,
-          customerName: shippingAddress.fullName,
-          customerEmail: shippingAddress.email,
-          orderTotal: orderTotal,
-          orderItems: items.map((item: any) => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price
-          })),
-          orderDate: new Date().toLocaleDateString(),
-          deliveryAddress: `${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}`
-        };
-
-        const emailTemplate = generateOrderProcessingEmail(orderEmailData);
-        await sendBrevoEmail(
+        // Send customer confirmation email for VyronaSpace order
+        const customerEmailResult = await sendBrevoEmail(
           shippingAddress.email,
-          emailTemplate.subject,
-          emailTemplate.htmlContent
+          `VyronaSpace Order Confirmation - Order #${orderId}`,
+          `<h2>Order Confirmation</h2>
+            <p>Dear ${shippingAddress.fullName},</p>
+            <p>Thank you for your VyronaSpace order! Your order #${orderId} has been placed successfully.</p>
+            <h3>Order Details:</h3>
+            <p>Total Amount: ₹${Math.round(orderTotal)}<br>
+            Payment Method: ${paymentMethod.toUpperCase()}<br>
+            Estimated Delivery: 8-15 minutes</p>
+            <h3>Delivery Address:</h3>
+            <p>${shippingAddress.address}<br>
+            ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}</p>
+            <p>You can track your order live at: <a href="${process.env.APP_URL || 'https://vyronamart.replit.app'}/track-order/${orderId}">Track Order</a></p>
+            <p>Thank you for choosing VyronaSpace!</p>
+            <p>Best regards,<br>VyronaSpace Team</p>`
         );
+
+        if (customerEmailResult.success) {
+          console.log(`VyronaSpace customer confirmation email sent to: ${shippingAddress.email}`);
+        } else {
+          console.error(`Failed to send VyronaSpace customer confirmation email:`, customerEmailResult.error);
+        }
       } catch (emailError) {
         console.error("Email sending failed:", emailError);
       }
@@ -9716,8 +9733,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update order status
-  app.patch("/api/vyronaspace/seller/orders/:orderId", async (req, res) => {
+  // Update order status with customer notifications
+  app.patch("/api/vyronaspace/seller/orders/:orderId/status", async (req, res) => {
     try {
       const user = getAuthenticatedUser(req);
       if (!user || user.role !== 'seller') {
@@ -9727,24 +9744,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderId = parseInt(req.params.orderId);
       const { status } = req.body;
 
-      // Update order only if it belongs to seller's store
-      const result = await db.execute(sql`
-        UPDATE orders 
-        SET status = ${status}
-        WHERE id = ${orderId} 
-        AND module = 'space'
-        AND JSON_EXTRACT(metadata, '$.storeId') IN (SELECT id FROM stores WHERE seller_id = ${user.id})
-        RETURNING *
+      // Get order details first
+      const orderResult = await db.execute(sql`
+        SELECT o.*, u.username as customer_name, u.email as customer_email, u.mobile as customer_phone,
+               s.name as store_name
+        FROM orders o
+        LEFT JOIN users u ON o.user_id = u.id
+        LEFT JOIN stores s ON JSON_EXTRACT(o.metadata, '$.storeId') = s.id
+        WHERE o.id = ${orderId} 
+        AND o.module = 'space'
+        AND s.seller_id = ${user.id}
       `);
 
-      if (result.rows.length === 0) {
+      if (orderResult.rows.length === 0) {
         return res.status(404).json({ message: "Order not found" });
+      }
+
+      const order = orderResult.rows[0];
+
+      // Update order status
+      await db.execute(sql`
+        UPDATE orders 
+        SET status = ${status}
+        WHERE id = ${orderId}
+      `);
+
+      // Send customer notification email
+      try {
+        const statusMessages = {
+          'confirmed': 'Your order has been confirmed and is being prepared',
+          'preparing': 'Your order is currently being prepared',
+          'ready': 'Your order is ready for pickup/delivery',
+          'picked_up': 'Your order has been picked up by our delivery partner',
+          'out_for_delivery': 'Your order is out for delivery',
+          'delivered': 'Your order has been successfully delivered'
+        };
+
+        const statusMessage = statusMessages[status as keyof typeof statusMessages] || `Order status updated to ${status}`;
+
+        const emailResult = await sendBrevoEmail(
+          order.customer_email,
+          `VyronaSpace Order Update - Order #${orderId}`,
+          `<h2>Order Status Update</h2>
+            <p>Dear ${order.customer_name},</p>
+            <p>${statusMessage}.</p>
+            <h3>Order Details:</h3>
+            <p>Order ID: #${orderId}<br>
+            Store: ${order.store_name}<br>
+            Status: ${status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}<br>
+            Total: ₹${Math.round(order.total_amount)}</p>
+            <p>You can track your order live at: <a href="${process.env.APP_URL || 'https://vyronamart.replit.app'}/track-order/${orderId}">Track Order</a></p>
+            <p>Thank you for choosing VyronaSpace!</p>
+            <p>Best regards,<br>VyronaSpace Team</p>`
+        );
+
+        if (emailResult.success) {
+          console.log(`VyronaSpace status update email sent to customer: ${order.customer_email}`);
+        } else {
+          console.error(`Failed to send VyronaSpace status update email:`, emailResult.error);
+        }
+      } catch (emailError) {
+        console.error("VyronaSpace status update email error:", emailError);
       }
 
       res.json({ success: true, status });
     } catch (error) {
-      console.error("Error updating order status:", error);
-      res.status(500).json({ message: "Failed to update order status" });
+      console.error("Error updating VyronaSpace order status:", error);
+      res.status(500).json({ 
+        message: "Failed to update order status",
+        description: error.message || "Failed to update order status",
+        variant: "destructive"
+      });
     }
   });
 
