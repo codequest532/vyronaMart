@@ -68,14 +68,10 @@ export default function VyronaHub() {
   const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
   const cartItemCount = cartItems.length;
 
-  const { data: user, refetch: refetchUser } = useQuery({
+  const { data: user } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
   });
-
-  const showLogin = () => {
-    setIsLoginModalOpen(true);
-  };
 
   // Login mutation - identical to Home and Social pages
   const loginMutation = useMutation({
@@ -776,8 +772,6 @@ export default function VyronaHub() {
                 </form>
               </TabsContent>
             </Tabs>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
