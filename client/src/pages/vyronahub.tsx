@@ -82,8 +82,9 @@ export default function VyronaHub() {
   const cartItems = Array.isArray(rawCartItems) ? rawCartItems : [];
   const cartItemCount = cartItems.length;
 
-  const { data: user } = useQuery({
+  const { data: user, refetch: refetchUser } = useQuery({
     queryKey: ["/api/current-user"],
+    retry: false,
   });
 
   const showLogin = () => {
@@ -95,18 +96,23 @@ export default function VyronaHub() {
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
       return apiRequest("POST", "/api/login", data);
     },
-    onSuccess: () => {
-      // Invalidate multiple queries to refresh all user-dependent data
-      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+    onSuccess: async () => {
+      // Invalidate and refetch user data immediately
+      await queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      
       setIsLoginModalOpen(false);
       toast({
         title: "Logged in successfully!",
         description: "Welcome back to VyronaHub!",
       });
-      // Force a page refresh to ensure proper session recognition
-      window.location.reload();
+      
+      // Wait a moment for queries to update, then refetch
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/current-user"] });
+        queryClient.refetchQueries({ queryKey: ["/api/cart"] });
+      }, 100);
     },
     onError: () => {
       toast({
