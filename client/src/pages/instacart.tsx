@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import LoginModal from "@/components/auth/login-modal";
 import { 
   ShoppingCart, 
   ArrowLeft, 
@@ -33,14 +35,21 @@ export default function InstaCart() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
   
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
 
-  // Fetch Instagram cart items from server
+  // Check authentication status
+  const { data: user } = useQuery({
+    queryKey: ["/api/auth/me"],
+  });
+
+  // Fetch Instagram cart items from server (only if authenticated)
   const { data: items = [], isLoading } = useQuery({
     queryKey: ["/api/instacart"],
+    enabled: !!user,
     retry: false,
   });
 
@@ -156,6 +165,43 @@ export default function InstaCart() {
 
     setLocation(`/instagram-checkout?data=${encodeURIComponent(JSON.stringify(checkoutData))}`);
   };
+
+  // Show login modal if user is not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Instagram className="text-white h-8 w-8" />
+            </div>
+            <CardTitle className="text-2xl">Instagram Cart Access</CardTitle>
+            <p className="text-gray-600">Sign in to view your Instagram shopping cart</p>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <Button 
+              onClick={() => setShowLoginModal(true)}
+              className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+            >
+              Sign In to Continue
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setLocation('/instashop')}
+              className="w-full"
+            >
+              Back to Instagram Shop
+            </Button>
+          </CardContent>
+        </Card>
+        
+        <LoginModal 
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+        />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -420,6 +466,12 @@ export default function InstaCart() {
           </div>
         )}
       </div>
+      
+      {/* Login Modal for authenticated actions */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }
