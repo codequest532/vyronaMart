@@ -777,9 +777,7 @@ export default function VyronaSocial() {
     );
   }
 
-  if (!authUser) {
-    return null;
-  }
+  // Allow unauthenticated users to view the interface
 
   const filteredProducts = (products as any[])?.filter((product: any) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -787,7 +785,7 @@ export default function VyronaSocial() {
 
   // Deduplicate groups by ID to prevent React key conflicts
   const userGroups = React.useMemo(() => {
-    if (!groups) return [];
+    if (!groups || !authUser) return [];
     const seen = new Set();
     return (groups as any[]).filter((group: any) => {
       if (seen.has(group.id)) {
@@ -796,7 +794,7 @@ export default function VyronaSocial() {
       seen.add(group.id);
       return true;
     });
-  }, [groups]);
+  }, [groups, authUser]);
   
   const selectedGroup = selectedGroupId ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
   const cartItems = (groupCart as CartItem[]) || [];
@@ -1276,7 +1274,11 @@ export default function VyronaSocial() {
                     <div className="flex gap-2">
                       <Dialog open={isCreateGroupOpen} onOpenChange={setIsCreateGroupOpen}>
                         <DialogTrigger asChild>
-                          <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white rounded-full w-8 h-8 p-0">
+                          <Button 
+                            size="sm" 
+                            className="bg-green-500 hover:bg-green-600 text-white rounded-full w-8 h-8 p-0"
+                            onClick={!authUser ? () => setLocation("/login") : undefined}
+                          >
                             <Plus className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
@@ -1328,7 +1330,12 @@ export default function VyronaSocial() {
                       
                       <Dialog open={isJoinGroupOpen} onOpenChange={setIsJoinGroupOpen}>
                         <DialogTrigger asChild>
-                          <Button size="sm" variant="outline" className="rounded-full w-8 h-8 p-0 border-green-300">
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            className="rounded-full w-8 h-8 p-0 border-green-300"
+                            onClick={!authUser ? () => setLocation("/login") : undefined}
+                          >
                             <UserPlus className="h-4 w-4" />
                           </Button>
                         </DialogTrigger>
@@ -1395,8 +1402,8 @@ export default function VyronaSocial() {
                     ) : userGroups.length === 0 ? (
                       <div className="p-8 text-center text-gray-500">
                         <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm mb-2">No groups yet</p>
-                        <p className="text-xs opacity-75">Create your first group!</p>
+                        <p className="text-sm mb-2">{!authUser ? "Login to see your groups" : "No groups yet"}</p>
+                        <p className="text-xs opacity-75">{!authUser ? "Join the community!" : "Create your first group!"}</p>
                       </div>
                     ) : (
                       userGroups.map((group: any) => (
@@ -1722,18 +1729,25 @@ export default function VyronaSocial() {
                     <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                       <Users className="w-8 h-8 text-green-600" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">Create or Join a Group</h3>
+                    <h3 className="text-lg font-semibold mb-2">{!authUser ? "Join VyronaSocial" : "Create or Join a Group"}</h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                      Start collaborating by creating a new group or joining an existing one
+                      {!authUser ? "Login to start group shopping and collaborate with friends" : "Start collaborating by creating a new group or joining an existing one"}
                     </p>
                     <div className="flex gap-2 justify-center">
-                      <Button onClick={() => setIsCreateGroupOpen(true)} className="gap-2 bg-green-500 hover:bg-green-600">
+                      <Button 
+                        onClick={!authUser ? () => setLocation("/login") : () => setIsCreateGroupOpen(true)} 
+                        className="gap-2 bg-green-500 hover:bg-green-600"
+                      >
                         <Plus className="w-4 h-4" />
-                        Create Group
+                        {!authUser ? "Login to Create Group" : "Create Group"}
                       </Button>
-                      <Button onClick={() => setIsJoinGroupOpen(true)} variant="outline" className="gap-2 border-green-300">
+                      <Button 
+                        onClick={!authUser ? () => setLocation("/login") : () => setIsJoinGroupOpen(true)} 
+                        variant="outline" 
+                        className="gap-2 border-green-300"
+                      >
                         <UserPlus className="w-4 h-4" />
-                        Join Group
+                        {!authUser ? "Login to Join Group" : "Join Group"}
                       </Button>
                     </div>
                   </div>
