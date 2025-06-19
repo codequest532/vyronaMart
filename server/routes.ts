@@ -388,12 +388,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication endpoints
   app.post("/api/auth/login", async (req, res) => {
     try {
-      const { username, password } = req.body;
+      const { identifier, username, password } = req.body;
+      const loginIdentifier = identifier || username;
       
 
       
       // Check admin credentials
-      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+      if (loginIdentifier === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
         req.session.user = {
           id: ADMIN_CREDENTIALS.id,
           email: ADMIN_CREDENTIALS.email,
@@ -411,7 +412,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check database for customer/seller users with retry logic
       let user;
       try {
-        user = await storage.getUserByUsername(username);
+        // Try username first, then email if username lookup fails
+        user = await storage.getUserByUsername(loginIdentifier);
+        if (!user) {
+          user = await storage.getUserByEmail(loginIdentifier);
+        }
+        
+        // Check password (plain text comparison)
         if (user && user.password !== password) {
           user = undefined; // Password mismatch
         }
@@ -420,7 +427,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Fallback: retry once after a brief delay
         await new Promise(resolve => setTimeout(resolve, 1000));
         try {
-          user = await storage.getUserByUsername(username);
+          user = await storage.getUserByUsername(loginIdentifier);
+          if (!user) {
+            user = await storage.getUserByEmail(loginIdentifier);
+          }
           if (user && user.password !== password) {
             user = undefined; // Password mismatch
           }
