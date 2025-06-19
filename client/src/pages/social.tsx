@@ -1113,20 +1113,29 @@ export default function VyronaSocial() {
 
               {/* Group Cart Button - Prominent */}
               <Dialog open={isGroupCartOpen} onOpenChange={setIsGroupCartOpen}>
-                <DialogTrigger asChild>
+                {authUser ? (
+                  <DialogTrigger asChild>
+                    <Button 
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white gap-2 relative shadow-lg"
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      Group Cart
+                      {cartItems.length > 0 && (
+                        <Badge className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center text-xs bg-orange-500 text-white rounded-full animate-pulse">
+                          {cartItems.length}
+                        </Badge>
+                      )}
+                    </Button>
+                  </DialogTrigger>
+                ) : (
                   <Button 
                     className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white gap-2 relative shadow-lg"
-                    onClick={!authUser ? showLogin : undefined}
+                    onClick={showLogin}
                   >
                     <ShoppingCart className="h-5 w-5" />
                     Group Cart
-                    {authUser && cartItems.length > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center text-xs bg-orange-500 text-white rounded-full animate-pulse">
-                        {cartItems.length}
-                      </Badge>
-                    )}
                   </Button>
-                </DialogTrigger>
+                )}
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
