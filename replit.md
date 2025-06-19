@@ -188,6 +188,11 @@ Changelog:
 - June 19, 2025: Implemented timer expiration handling - disables checkout and displays expired state notification when 15 minutes elapsed
 - June 19, 2025: Integrated live order tracking for VyronaMallConnect orders using OpenRouteService API
 - June 19, 2025: Updated both regular and group checkout flows to redirect to /track-order/{orderId} after successful order placement
+- June 19, 2025: Implemented comprehensive VyronaMallConnect seller order management system with email notifications via Brevo
+- June 19, 2025: Added order status update functionality allowing sellers to update progress (confirmed, preparing, ready, picked up, out for delivery, delivered)
+- June 19, 2025: Integrated automatic email notifications to customers when order status is updated by VyronaMallConnect sellers
+- June 19, 2025: Created seller dashboard order management interface with real-time status updates reflected in customer live tracking
+- June 19, 2025: Enhanced VyronaMallConnect order fulfillment workflow with comprehensive seller notifications and customer communication system
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing

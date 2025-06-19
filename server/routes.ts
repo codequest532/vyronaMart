@@ -2421,6 +2421,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.addVyronaCoins(userId, vyronaCoinsEarned);
       }
 
+      // Get customer information for notifications
+      const customer = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      // Send order notifications to VyronaMallConnect sellers
+      for (const [storeId, storeItems] of Object.entries(groupedItems)) {
+        try {
+          // Get store and seller information
+          const store = await db
+            .select({
+              id: stores.id,
+              name: stores.name,
+              sellerId: stores.sellerId
+            })
+            .from(stores)
+            .where(eq(stores.id, parseInt(storeId)))
+            .limit(1);
+
+          if (store.length > 0) {
+            const seller = await db
+              .select()
+              .from(users)
+              .where(eq(users.id, store[0].sellerId))
+              .limit(1);
+
+            if (seller.length > 0 && seller[0].email) {
+              const storeTotal = (storeItems as any[]).reduce((sum, item) => sum + (item.price * item.quantity), 0);
+              const orderItems = (storeItems as any[]).map(item => 
+                `<li>${item.name} - Quantity: ${item.quantity} - Price: ₹${Math.round(item.price / 100)}</li>`
+              ).join('');
+
+              // Send seller notification email
+              const { sendBrevoEmail } = await import('./brevo-email');
+              const emailResult = await sendBrevoEmail(
+                seller[0].email,
+                `New Order #${orders[0].id} - VyronaMallConnect`,
+                `<h2>New VyronaMallConnect Order</h2>
+                  <p>Dear ${seller[0].username},</p>
+                  <p>You have received a new order from VyronaMallConnect (Order #${orders[0].id}).</p>
+                  <h3>Order Details:</h3>
+                  <ul>${orderItems}</ul>
+                  <p><strong>Store Total: ₹${Math.round(storeTotal / 100)}</strong></p>
+                  <h3>Customer Details:</h3>
+                  <p>
+                    Name: ${deliveryAddress.name}<br>
+                    Phone: ${deliveryAddress.phone}<br>
+                    Email: ${customer[0]?.email || 'N/A'}<br>
+                    Address: ${deliveryAddress.street}, ${deliveryAddress.landmark || ''}<br>
+                    ${deliveryAddress.city} - ${deliveryAddress.pincode}
+                  </p>
+                  <h3>Delivery Instructions:</h3>
+                  <p>${deliveryInstructions || 'None provided'}</p>
+                  <p>Please log in to your VyronaMallConnect seller dashboard to process this order.</p>
+                  <p>Best regards,<br>VyronaMallConnect Team</p>`
+              );
+
+              if (emailResult.success) {
+                console.log(`VyronaMallConnect order notification sent to ${seller[0].email}`);
+              }
+            }
+          }
+        } catch (emailError) {
+          console.error("Failed to send VyronaMallConnect seller notification:", emailError);
+        }
+      }
+
       res.json({ 
         success: true, 
         orderId: orders[0].id, 
@@ -2496,6 +2565,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const order = await storage.createOrder(orderData);
       
+      // Get customer information for notifications
+      const customer = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      // Send group order notifications to VyronaMallConnect sellers
+      const uniqueStoreIds = [...new Set(items.map((item: any) => item.storeId))];
+      
+      for (const storeId of uniqueStoreIds) {
+        try {
+          const store = await db
+            .select({
+              id: stores.id,
+              name: stores.name,
+              sellerId: stores.sellerId
+            })
+            .from(stores)
+            .where(eq(stores.id, storeId))
+            .limit(1);
+
+          if (store.length > 0) {
+            const seller = await db
+              .select()
+              .from(users)
+              .where(eq(users.id, store[0].sellerId))
+              .limit(1);
+
+            if (seller.length > 0 && seller[0].email) {
+              const storeItems = items.filter((item: any) => item.storeId === storeId);
+              const orderItems = storeItems.map((item: any) => 
+                `<li>${item.name} - Quantity: ${item.quantity} - Price: ₹${Math.round(item.price / 100)}</li>`
+              ).join('');
+
+              const membersList = memberContributions.map((member: any) => 
+                `<li>${member.memberName} - ₹${member.contributionAmount}</li>`
+              ).join('');
+
+              // Send seller notification email
+              const { sendBrevoEmail } = await import('./brevo-email');
+              const emailResult = await sendBrevoEmail(
+                seller[0].email,
+                `New Group Order #${order.id} - VyronaMallConnect`,
+                `<h2>New VyronaMallConnect Group Order</h2>
+                  <p>Dear ${seller[0].username},</p>
+                  <p>You have received a new group order from VyronaMallConnect (Order #${order.id}).</p>
+                  <h3>Order Details:</h3>
+                  <ul>${orderItems}</ul>
+                  <p><strong>Total Amount: ₹${Math.round(total)}</strong></p>
+                  <h3>Group Information:</h3>
+                  <p>Group: ${selectedRoom?.name || 'N/A'} (${selectedRoom?.memberCount || 1} members)</p>
+                  <h3>Member Contributions:</h3>
+                  <ul>${membersList}</ul>
+                  <h3>Primary Contact:</h3>
+                  <p>
+                    Name: ${useCommonAddress ? shippingAddress.fullName : 'Multiple addresses'}<br>
+                    Phone: ${useCommonAddress ? shippingAddress.phone : 'Multiple contacts'}<br>
+                    Email: ${customer[0]?.email || 'N/A'}
+                  </p>
+                  <h3>Delivery Address:</h3>
+                  <p>${useCommonAddress ? 
+                    `${shippingAddress.addressLine1}, ${shippingAddress.addressLine2 || ''}<br>${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.pincode}` : 
+                    'Multiple delivery addresses - see dashboard for details'
+                  }</p>
+                  <p>Please log in to your VyronaMallConnect seller dashboard to process this group order.</p>
+                  <p>Best regards,<br>VyronaMallConnect Team</p>`
+              );
+
+              if (emailResult.success) {
+                console.log(`VyronaMallConnect group order notification sent to ${seller[0].email}`);
+              }
+            }
+          }
+        } catch (emailError) {
+          console.error("Failed to send VyronaMallConnect group order notification:", emailError);
+        }
+      }
+
       res.json({ 
         success: true, 
         orderId: order.id,
@@ -10664,17 +10812,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
           customerMobile: orders.customerMobile,
           shippingAddress: orders.shippingAddress,
           paymentMethod: orders.paymentMethod,
+          metadata: orders.metadata,
           itemCount: sql`1`
         })
         .from(orders)
         .where(and(
-          eq(orders.sellerId, sellerId),
-          eq(orders.module, "VyronaMallConnect")
+          or(
+            and(eq(orders.sellerId, sellerId), eq(orders.module, "VyronaMallConnect")),
+            and(eq(orders.module, "mallcart")),
+            and(eq(orders.module, "VyronaMallConnect"))
+          )
         ))
         .orderBy(desc(orders.createdAt));
       res.json(sellerOrders);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // VyronaMallConnect seller order status update
+  app.patch("/api/mallconnect/seller/orders/:orderId/status", async (req, res) => {
+    try {
+      const authenticatedUser = getAuthenticatedUser(req);
+      
+      if (!authenticatedUser) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      if (authenticatedUser.role !== 'seller' || authenticatedUser.sellerType !== 'VyronaMallConnect') {
+        return res.status(403).json({ message: "Access denied. VyronaMallConnect seller access required." });
+      }
+
+      const { orderId } = req.params;
+      const { status, notes } = req.body;
+      
+      const validStatuses = ['confirmed', 'preparing', 'ready', 'picked up', 'out for delivery', 'delivered'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      // Update order status
+      const updatedOrder = await db
+        .update(orders)
+        .set({ 
+          status,
+          updatedAt: new Date()
+        })
+        .where(eq(orders.id, parseInt(orderId)))
+        .returning();
+
+      if (updatedOrder.length === 0) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Get customer information for notification
+      const order = updatedOrder[0];
+      const customer = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, order.userId))
+        .limit(1);
+
+      // Send status update email to customer
+      if (customer.length > 0 && customer[0].email) {
+        try {
+          const { sendBrevoEmail } = await import('./brevo-email');
+          
+          const statusMessages = {
+            'confirmed': 'Your order has been confirmed and is being processed.',
+            'preparing': 'Your order is being prepared by the store.',
+            'ready': 'Your order is ready for pickup/delivery.',
+            'picked up': 'Your order has been picked up by the delivery partner.',
+            'out for delivery': 'Your order is on the way to your location.',
+            'delivered': 'Your order has been delivered successfully.'
+          };
+
+          const emailResult = await sendBrevoEmail(
+            customer[0].email,
+            `Order Update #${orderId} - ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+            `<h2>Order Status Update</h2>
+              <p>Dear ${customer[0].username},</p>
+              <p>Your VyronaMallConnect order #${orderId} status has been updated.</p>
+              <h3>Current Status: ${status.charAt(0).toUpperCase() + status.slice(1)}</h3>
+              <p>${statusMessages[status as keyof typeof statusMessages]}</p>
+              ${notes ? `<h3>Additional Notes:</h3><p>${notes}</p>` : ''}
+              <p>You can track your order in real-time by visiting your order tracking page.</p>
+              <p>Thank you for choosing VyronaMallConnect!</p>
+              <p>Best regards,<br>VyronaMallConnect Team</p>`
+          );
+
+          if (emailResult.success) {
+            console.log(`Order status update email sent to ${customer[0].email} for order #${orderId}`);
+          }
+        } catch (emailError) {
+          console.error("Failed to send order status update email:", emailError);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        order: updatedOrder[0],
+        message: `Order status updated to ${status}` 
+      });
+
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
     }
   });
 
@@ -10751,23 +10994,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select({ total: sql`COALESCE(SUM(${orders.totalAmount}), 0)` })
         .from(orders)
         .where(and(
-          eq(orders.sellerId, sellerId),
-          eq(orders.module, "VyronaMallConnect"),
+          or(
+            and(eq(orders.sellerId, sellerId), eq(orders.module, "VyronaMallConnect")),
+            and(eq(orders.module, "mallcart")),
+            and(eq(orders.module, "VyronaMallConnect"))
+          ),
           ne(orders.status, "cancelled")
         ));
       const [orderCountResult] = await db
         .select({ count: sql`COUNT(*)` })
         .from(orders)
         .where(and(
-          eq(orders.sellerId, sellerId),
-          eq(orders.module, "VyronaMallConnect")
+          or(
+            and(eq(orders.sellerId, sellerId), eq(orders.module, "VyronaMallConnect")),
+            and(eq(orders.module, "mallcart")),
+            and(eq(orders.module, "VyronaMallConnect"))
+          )
         ));
       const [avgOrderValueResult] = await db
         .select({ avg: sql`COALESCE(AVG(${orders.totalAmount}), 0)` })
         .from(orders)
         .where(and(
-          eq(orders.sellerId, sellerId),
-          eq(orders.module, "VyronaMallConnect"),
+          or(
+            and(eq(orders.sellerId, sellerId), eq(orders.module, "VyronaMallConnect")),
+            and(eq(orders.module, "mallcart")),
+            and(eq(orders.module, "VyronaMallConnect"))
+          ),
           ne(orders.status, "cancelled")
         ));
       const analytics = {

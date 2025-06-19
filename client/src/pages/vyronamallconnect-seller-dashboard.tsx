@@ -31,6 +31,12 @@ export default function VyronaMallConnectSellerDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
+  const [showOrderStatusModal, setShowOrderStatusModal] = useState(false);
+  const [orderStatusUpdate, setOrderStatusUpdate] = useState({
+    orderId: null,
+    status: "",
+    notes: ""
+  });
   const [csvData, setCsvData] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
@@ -99,6 +105,29 @@ export default function VyronaMallConnectSellerDashboard() {
   const orders = ordersData || [];
   const analytics = analyticsData || {};
 
+  // Order status update mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status, notes }: { orderId: number, status: string, notes: string }) => {
+      return await apiRequest("PATCH", `/api/mallconnect/seller/orders/${orderId}/status`, { status, notes });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Order Status Updated",
+        description: "Order status has been updated and customer has been notified",
+      });
+      setShowOrderStatusModal(false);
+      setOrderStatusUpdate({ orderId: null, status: "", notes: "" });
+      queryClient.invalidateQueries({ queryKey: ["/api/mallconnect/seller/orders"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update order status",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Store profile update mutation
   const updateStoreMutation = useMutation({
     mutationFn: async (storeData: any) => {
@@ -154,26 +183,14 @@ export default function VyronaMallConnectSellerDashboard() {
     },
   });
 
-  // Order status update mutation
-  const updateOrderMutation = useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: number, status: string }) => {
-      return await apiRequest("PUT", `/api/mallconnect/seller/orders/${orderId}`, { status });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Order Updated",
-        description: "Order status has been updated successfully",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/mallconnect/seller/orders"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update order status",
-        variant: "destructive",
-      });
-    },
-  });
+  const handleOrderStatusUpdate = (order: any) => {
+    setOrderStatusUpdate({
+      orderId: order.id,
+      status: order.status || "confirmed",
+      notes: ""
+    });
+    setShowOrderStatusModal(true);
+  };
 
   const handleCreateProduct = () => {
     if (!productFormData.name || !productFormData.category || !productFormData.price) {
@@ -995,22 +1012,14 @@ export default function VyronaMallConnectSellerDashboard() {
                               >
                                 <Eye className="h-3 w-3" />
                               </Button>
-                              <Select
-                                value={order.status}
-                                onValueChange={(status) => updateOrderMutation.mutate({ orderId: order.id, status })}
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleOrderStatusUpdate(order)}
                               >
-                                <SelectTrigger className="w-32">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                                  <SelectItem value="packed">Packed</SelectItem>
-                                  <SelectItem value="shipped">Shipped</SelectItem>
-                                  <SelectItem value="delivered">Delivered</SelectItem>
-                                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                                </SelectContent>
-                              </Select>
+                                <Truck className="h-3 w-3 mr-1" />
+                                Update Status
+                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -1860,6 +1869,83 @@ Organic Coffee Beans,Food & Beverages,899,Premium organic coffee beans - 500g pa
                       <>
                         <Upload className="h-4 w-4 mr-2" />
                         Import Products
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Order Status Update Modal */}
+        {showOrderStatusModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle>Update Order Status</CardTitle>
+                <p className="text-sm text-gray-600">Order #{orderStatusUpdate.orderId}</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="orderStatus">Order Status</Label>
+                  <Select 
+                    value={orderStatusUpdate.status}
+                    onValueChange={(value) => setOrderStatusUpdate(prev => ({ ...prev, status: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                      <SelectItem value="preparing">Preparing</SelectItem>
+                      <SelectItem value="ready">Ready for Pickup</SelectItem>
+                      <SelectItem value="picked up">Picked Up</SelectItem>
+                      <SelectItem value="out for delivery">Out for Delivery</SelectItem>
+                      <SelectItem value="delivered">Delivered</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="statusNotes">Additional Notes (Optional)</Label>
+                  <Textarea
+                    id="statusNotes"
+                    value={orderStatusUpdate.notes}
+                    onChange={(e) => setOrderStatusUpdate(prev => ({ ...prev, notes: e.target.value }))}
+                    placeholder="Add any notes for the customer..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex space-x-3 pt-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowOrderStatusModal(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      updateOrderStatusMutation.mutate({
+                        orderId: orderStatusUpdate.orderId as number,
+                        status: orderStatusUpdate.status,
+                        notes: orderStatusUpdate.notes
+                      });
+                    }}
+                    disabled={updateOrderStatusMutation.isPending || !orderStatusUpdate.status}
+                  >
+                    {updateOrderStatusMutation.isPending ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Update Status
                       </>
                     )}
                   </Button>
