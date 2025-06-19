@@ -418,30 +418,32 @@ export class MemStorage implements IStorage {
 
   // Store methods
   async getStores(type?: string): Promise<Store[]> {
-    let stores = Array.from(this.stores.values());
-    if (type) {
-      stores = stores.filter(s => s.type === type);
+    try {
+      if (type) {
+        return await db.select().from(stores).where(eq(stores.type, type));
+      }
+      return await db.select().from(stores);
+    } catch (error) {
+      console.error('Error in getStores:', error);
+      return [];
     }
-    return stores;
   }
 
   async getStore(id: number): Promise<Store | undefined> {
-    return this.stores.get(id);
+    try {
+      const [store] = await db.select().from(stores).where(eq(stores.id, id));
+      return store || undefined;
+    } catch (error) {
+      console.error('Error in getStore:', error);
+      return undefined;
+    }
   }
 
   async createStore(insertStore: InsertStore): Promise<Store> {
-    const store: Store = {
-      id: this.currentStoreId++,
-      name: insertStore.name,
-      type: insertStore.type,
-      address: insertStore.address || null,
-      latitude: insertStore.latitude || null,
-      longitude: insertStore.longitude || null,
-      isOpen: insertStore.isOpen || true,
-      rating: insertStore.rating || null,
-      reviewCount: insertStore.reviewCount || null,
-    };
-    this.stores.set(store.id, store);
+    const [store] = await db
+      .insert(stores)
+      .values(insertStore)
+      .returning();
     return store;
   }
 
@@ -760,15 +762,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getStores(type?: string): Promise<Store[]> {
-    if (type) {
-      return await db.select().from(stores).where(eq(stores.type, type));
+    try {
+      if (type) {
+        return await db.select().from(stores).where(eq(stores.type, type));
+      }
+      return await db.select().from(stores);
+    } catch (error) {
+      console.error('Error in DatabaseStorage getStores:', error);
+      return [];
     }
-    return await db.select().from(stores);
   }
 
   async getStore(id: number): Promise<Store | undefined> {
-    const [store] = await db.select().from(stores).where(eq(stores.id, id));
-    return store || undefined;
+    try {
+      const [store] = await db.select().from(stores).where(eq(stores.id, id));
+      return store || undefined;
+    } catch (error) {
+      console.error('Error in DatabaseStorage getStore:', error);
+      return undefined;
+    }
   }
 
   async createStore(insertStore: InsertStore): Promise<Store> {
