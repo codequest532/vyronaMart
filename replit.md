@@ -230,6 +230,7 @@ Changelog:
 - June 19, 2025: Updated VyronaSocial page to allow non-authenticated users to browse products while requiring authentication for group operations
 - June 19, 2025: Added conditional UI elements - group features only visible to authenticated users, login button for non-authenticated users
 - June 19, 2025: Maintained authentication requirements for cart operations, group creation, and group management features
+- June 19, 2025: Fixed VyronaSocial tile navigation in homepage - removed authentication check from "Join Groups" button to allow non-authenticated access
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display
