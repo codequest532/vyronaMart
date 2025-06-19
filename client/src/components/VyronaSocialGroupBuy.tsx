@@ -97,113 +97,15 @@ export default function VyronaSocialGroupBuy() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch user's groups with error handling for unauthenticated users
-  const { data: myGroups = [], isLoading: groupsLoading, error: groupsError } = useQuery({
+  // Fetch user's groups
+  const { data: myGroups = [], isLoading: groupsLoading } = useQuery({
     queryKey: ["/api/vyrona-social/my-groups"],
-    retry: false,
   });
 
   // Fetch stores with group buying enabled
   const { data: groupStores = [], isLoading: storesLoading } = useQuery({
     queryKey: ["/api/vyrona-social/stores"],
   });
-
-  // Check if user is authenticated based on groups error
-  const isAuthenticated = !groupsError || !groupsError.message?.includes("401");
-
-  // Don't render group creation/management buttons for unauthenticated users
-  if (!isAuthenticated) {
-    return (
-      <div className="w-full max-w-6xl mx-auto p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">VyronSocial Group Buying</h1>
-          <p className="text-gray-600">Join your neighbors for group orders and unlock exclusive discounts</p>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="stores" className="flex items-center gap-2">
-              <Store className="h-4 w-4" />
-              Group Stores
-            </TabsTrigger>
-            <TabsTrigger value="my-groups" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Sign In for Groups
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="stores" className="space-y-6">
-            <h2 className="text-xl font-semibold">Stores with Group Buying</h2>
-            <div className="grid gap-4 md:grid-cols-2">
-              {storesLoading ? (
-                <div className="col-span-2 text-center py-8">Loading stores...</div>
-              ) : (groupStores || []).length === 0 ? (
-                <Card className="col-span-2 text-center py-8">
-                  <CardContent>
-                    <Store className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-semibold mb-2">No Group Stores Available</h3>
-                    <p className="text-gray-600">No stores are currently offering group buying in your area</p>
-                  </CardContent>
-                </Card>
-              ) : (
-                (groupStores || []).map((store: GroupStore) => (
-                  <Card key={store.id} className="border-l-4 border-l-green-500">
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <span>{store.name}</span>
-                        <Badge variant="secondary">{store.rating}★</Badge>
-                      </CardTitle>
-                      <CardDescription>
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin className="h-4 w-4" />
-                          {store.address}
-                        </div>
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span>Min Order:</span>
-                          <span className="font-semibold">₹{store.min_order_value}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Order Window:</span>
-                          <span className="font-semibold">{store.group_order_window}h</span>
-                        </div>
-                      </div>
-                      <Button 
-                        className="w-full mt-4" 
-                        variant="outline"
-                        onClick={() => window.location.href = '/login'}
-                      >
-                        Sign In to Join Group Orders
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="my-groups" className="space-y-6">
-            <Card className="text-center py-8">
-              <CardContent>
-                <Group className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold mb-2">Sign In Required</h3>
-                <p className="text-gray-600 mb-4">Please sign in to view and manage your VyronSocial groups</p>
-                <Button 
-                  onClick={() => window.location.href = '/login'}
-                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                >
-                  Sign In
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    );
-  }
 
   // Create group mutation
   const createGroupMutation = useMutation({
@@ -553,7 +455,7 @@ export default function VyronaSocialGroupBuy() {
           <div className="grid gap-4">
             {groupsLoading ? (
               <div className="text-center py-8">Loading your groups...</div>
-            ) : (myGroups || []).length === 0 ? (
+            ) : myGroups.length === 0 ? (
               <Card className="text-center py-8">
                 <CardContent>
                   <Group className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -562,7 +464,7 @@ export default function VyronaSocialGroupBuy() {
                 </CardContent>
               </Card>
             ) : (
-              (myGroups || []).map((group: VyronaSocialGroup) => (
+              myGroups.map((group: VyronaSocialGroup) => (
                 <Card key={group.id} className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
                   <CardHeader>
                     <div className="flex justify-between items-start">
@@ -717,7 +619,7 @@ export default function VyronaSocialGroupBuy() {
             {storesLoading ? (
               <div className="col-span-2 text-center py-8">Loading stores...</div>
             ) : (
-              (groupStores || []).map((store: GroupStore) => (
+              groupStores.map((store: GroupStore) => (
                 <Card key={store.id} className="border-l-4 border-l-green-500">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">

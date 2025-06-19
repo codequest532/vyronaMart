@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   ShoppingBag, 
   Search, 
@@ -28,7 +26,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -49,9 +46,6 @@ export default function VyronaHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
-  const { requireAuth } = useAuthGuard();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -72,17 +66,6 @@ export default function VyronaHub() {
   const { data: user } = useQuery({
     queryKey: ["/api/current-user"],
   });
-
-  // Listen for auth-required events to show login modal
-  useEffect(() => {
-    const handleAuthRequired = () => {
-      setAuthMode("login");
-      setShowAuthModal(true);
-    };
-
-    window.addEventListener('auth-required', handleAuthRequired);
-    return () => window.removeEventListener('auth-required', handleAuthRequired);
-  }, []);
 
   // Add to cart mutation
   const addToCartMutation = useMutation({
@@ -124,8 +107,6 @@ export default function VyronaHub() {
   const groupBuyCampaigns = Array.isArray(rawGroupBuyCampaigns) ? rawGroupBuyCampaigns : [];
 
   const handleAddToCart = (product: any, isGroupBuy = false) => {
-    if (!requireAuth("add items to cart")) return;
-    
     addToCartMutation.mutate({
       productId: product.id,
       quantity: quantity,
@@ -191,7 +172,7 @@ export default function VyronaHub() {
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => requireAuth("access your cart", () => setLocation("/cart"))}
+                onClick={() => setLocation("/cart")}
                 className="flex items-center gap-2 relative bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
               >
                 <ShoppingCart className="h-4 w-4" />
@@ -561,137 +542,6 @@ export default function VyronaHub() {
                 </div>
               </div>
             )}
-          </DialogContent>
-        </Dialog>
-
-        {/* Auth Modal */}
-        <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-center">
-                {authMode === "login" ? "Sign In to VyronaHub" : "Create Your Account"}
-              </DialogTitle>
-              <DialogDescription className="text-center">
-                {authMode === "login" 
-                  ? "Please sign in to add items to cart and shop." 
-                  : "Create an account to unlock all shopping features."
-                }
-              </DialogDescription>
-            </DialogHeader>
-            
-            <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target as HTMLFormElement);
-                  const email = formData.get("email") as string;
-                  const password = formData.get("password") as string;
-                  
-                  fetch("/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password }),
-                  }).then(async (response) => {
-                    if (response.ok) {
-                      toast({ title: "Welcome back!", description: "You're now signed in." });
-                      setShowAuthModal(false);
-                      window.location.reload();
-                    } else {
-                      const error = await response.json();
-                      toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
-                    }
-                  });
-                }} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-purple-600">
-                    Sign In
-                  </Button>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signup">
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target as HTMLFormElement);
-                  const username = formData.get("username") as string;
-                  const email = formData.get("email") as string;
-                  const password = formData.get("password") as string;
-                  
-                  fetch("/api/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, email, password, userType: "customer" }),
-                  }).then(async (response) => {
-                    if (response.ok) {
-                      toast({ title: "Account created!", description: "Welcome to VyronaHub!" });
-                      setShowAuthModal(false);
-                      window.location.reload();
-                    } else {
-                      const error = await response.json();
-                      toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
-                    }
-                  });
-                }} className="space-y-4">
-                  <div>
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      name="username"
-                      type="text"
-                      placeholder="Choose a username"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      name="password"
-                      type="password"
-                      placeholder="Create a password"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-purple-600">
-                    Create Account
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
           </DialogContent>
         </Dialog>
       </div>

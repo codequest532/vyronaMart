@@ -12,7 +12,6 @@ import { Users, ShoppingCart, MessageCircle, Wallet, Plus, Clock, X } from "luci
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 import type { Product, ShoppingRoom, CartItem } from "@shared/schema";
 
 interface GroupCartModalProps {
@@ -41,14 +40,6 @@ export function GroupCartModal({ isOpen, onClose, product, onSuccess }: GroupCar
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { requireAuth } = useAuthGuard();
-
-  // Check authentication when modal opens
-  useEffect(() => {
-    if (isOpen && !requireAuth("create or join shopping groups")) {
-      onClose();
-    }
-  }, [isOpen, requireAuth, onClose]);
 
   // Fetch existing shopping rooms
   const { data: shoppingRooms, isLoading: loadingRooms, refetch: refetchRooms } = useQuery({

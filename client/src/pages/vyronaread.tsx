@@ -3,17 +3,15 @@ import { useLocation, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft,
   Book,
@@ -160,15 +158,44 @@ export default function VyronaRead() {
   const [selectedLibrary, setSelectedLibrary] = useState<any>(null);
   const [showBorrowModal, setShowBorrowModal] = useState(false);
   const [selectedBookForBorrow, setSelectedBookForBorrow] = useState<any>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const { toast } = useToast();
 
-  // Authentication check (no redirect, allow browsing)
+  // Authentication check
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/current-user"],
     retry: false,
   });
+
+  // Use useEffect for redirect to avoid setState during render
+  useEffect(() => {
+    if (!userLoading && !user) {
+      setLocation("/login");
+    }
+  }, [user, userLoading, setLocation]);
+
+  // Show loading while checking authentication
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading VyronaRead...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while redirecting if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
   const [selectedLibraryBooks, setSelectedLibraryBooks] = useState<any[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -224,23 +251,8 @@ export default function VyronaRead() {
     }
   }, [libraryCart]);
 
-  const { requireAuth } = useAuthGuard();
-
-  // Listen for auth-required events to show login modal
-  useEffect(() => {
-    const handleAuthRequired = () => {
-      setAuthMode("login");
-      setShowAuthModal(true);
-    };
-
-    window.addEventListener('auth-required', handleAuthRequired);
-    return () => window.removeEventListener('auth-required', handleAuthRequired);
-  }, []);
-
   // Cart handler functions
   const addToCart = (book: any, type: 'buy' | 'rent') => {
-    if (!requireAuth(`add ${book.title || book.name} to cart`)) return;
-    
     const cartItem = {
       id: `${book.id}-${type}`,
       book,
@@ -283,7 +295,6 @@ export default function VyronaRead() {
   };
 
   const goToCartCheckout = () => {
-    if (!requireAuth("proceed to checkout")) return;
     if (cart.length === 0) {
       toast({
         title: "Empty Cart",
@@ -299,8 +310,6 @@ export default function VyronaRead() {
 
   // Library cart handler functions
   const addToLibraryCart = (book: any) => {
-    if (!requireAuth(`add ${book.title || book.name} to library cart`)) return;
-    
     const cartItem = {
       id: `library-${book.id}`,
       book,
@@ -344,7 +353,6 @@ export default function VyronaRead() {
   };
 
   const goToLibraryCartCheckout = () => {
-    if (!requireAuth("proceed to library checkout")) return;
     if (libraryCart.length === 0) {
       toast({
         title: "Empty Library Cart",
@@ -365,19 +373,16 @@ export default function VyronaRead() {
 
   // Handler functions for buy/rent/borrow operations
   const handleBuyBook = async (book: any) => {
-    if (!requireAuth(`purchase ${book.title || book.name}`)) return;
     // Navigate to VyronaRead checkout page with buy parameters
     setLocation(`/vyronaread-checkout?type=buy&bookId=${book.id}`);
   };
 
   const handleRentBook = async (book: any) => {
-    if (!requireAuth(`rent ${book.title || book.name}`)) return;
     // Navigate to VyronaRead checkout page with rent parameters  
     setLocation(`/vyronaread-checkout?type=rent&bookId=${book.id}`);
   };
 
   const openBorrowModal = (book: any) => {
-    if (!requireAuth(`borrow ${book.title || book.name}`)) return;
     setSelectedBookForBorrow(book);
     setShowBorrowModal(true);
   };
@@ -1684,137 +1689,6 @@ export default function VyronaRead() {
               </>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Auth Modal */}
-      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">
-              {authMode === "login" ? "Sign In to VyronaRead" : "Create Your Account"}
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              {authMode === "login" 
-                ? "Please sign in to purchase, rent, or borrow books." 
-                : "Create an account to unlock all library features."
-              }
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target as HTMLFormElement);
-                const email = formData.get("email") as string;
-                const password = formData.get("password") as string;
-                
-                fetch("/api/login", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ email, password }),
-                }).then(async (response) => {
-                  if (response.ok) {
-                    toast({ title: "Welcome back!", description: "You're now signed in." });
-                    setShowAuthModal(false);
-                    window.location.reload();
-                  } else {
-                    const error = await response.json();
-                    toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
-                  }
-                });
-              }} className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-gradient-to-r from-green-600 to-blue-600">
-                  Sign In
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target as HTMLFormElement);
-                const username = formData.get("username") as string;
-                const email = formData.get("email") as string;
-                const password = formData.get("password") as string;
-                
-                fetch("/api/register", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ username, email, password, userType: "customer" }),
-                }).then(async (response) => {
-                  if (response.ok) {
-                    toast({ title: "Account created!", description: "Welcome to VyronaRead!" });
-                    setShowAuthModal(false);
-                    window.location.reload();
-                  } else {
-                    const error = await response.json();
-                    toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
-                  }
-                });
-              }} className="space-y-4">
-                <div>
-                  <Label htmlFor="username">Username</Label>
-                  <Input
-                    id="username"
-                    name="username"
-                    type="text"
-                    placeholder="Choose a username"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    name="password"
-                    type="password"
-                    placeholder="Create a password"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-gradient-to-r from-green-600 to-blue-600">
-                  Create Account
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
         </DialogContent>
       </Dialog>
     </div>

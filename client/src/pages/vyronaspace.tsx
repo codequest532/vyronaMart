@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 import VyronaSocialGroupBuy from "@/components/VyronaSocialGroupBuy";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
@@ -83,12 +82,9 @@ export default function VyronaSpace() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [selectedGroupForAction, setSelectedGroupForAction] = useState<any>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { requireAuth, isAuthenticated } = useAuthGuard();
 
   // Fetch real stores data from backend
   const { data: storesData = [], isLoading: storesLoading } = useQuery({
@@ -166,17 +162,6 @@ export default function VyronaSpace() {
   const { data: reorderHistory = [] } = useQuery({
     queryKey: ["/api/reorder-history/1"]
   });
-
-  // Listen for auth-required events to show login modal
-  useEffect(() => {
-    const handleAuthRequired = () => {
-      setAuthMode("login");
-      setShowAuthModal(true);
-    };
-
-    window.addEventListener('auth-required', handleAuthRequired);
-    return () => window.removeEventListener('auth-required', handleAuthRequired);
-  }, []);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -266,8 +251,6 @@ export default function VyronaSpace() {
   };
 
   const addToCart = (item: { id: number; name: string; price: number; storeName: string }) => {
-    if (!requireAuth("add items to cart")) return;
-    
     const existingItem = cart.find(cartItem => cartItem.id === item.id);
     if (existingItem) {
       setCart(cart.map(cartItem => 
@@ -389,14 +372,7 @@ export default function VyronaSpace() {
           </div>
 
           {/* Navigation Tabs */}
-          <Tabs value={activeTab} onValueChange={(value) => {
-            if (value === "group-buy" && !isAuthenticated) {
-              setShowAuthModal(true);
-              setAuthMode("login");
-              return;
-            }
-            setActiveTab(value);
-          }} className="space-y-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <TabsList className="grid w-full grid-cols-5 bg-orange-50/80 backdrop-blur-sm rounded-2xl p-2 h-auto border border-orange-200/50">
               <TabsTrigger value="discover" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
                 <Sparkles className="h-4 w-4 mr-2" />
@@ -404,7 +380,7 @@ export default function VyronaSpace() {
               </TabsTrigger>
               <TabsTrigger value="group-buy" className="rounded-xl py-3 data-[state=active]:bg-green-100 data-[state=active]:shadow-md data-[state=active]:text-green-800">
                 <Users className="h-4 w-4 mr-2" />
-                {isAuthenticated ? "Group Buy" : "Sign In for Groups"}
+                Group Buy
               </TabsTrigger>
               <TabsTrigger value="orders" className="rounded-xl py-3 data-[state=active]:bg-orange-100 data-[state=active]:shadow-md data-[state=active]:text-orange-800">
                 <Package className="h-4 w-4 mr-2" />
@@ -734,26 +710,7 @@ export default function VyronaSpace() {
 
             {/* Group Buy Tab - VyronSocial Integration */}
             <TabsContent value="group-buy" className="space-y-6">
-              {isAuthenticated ? (
-                <VyronaSocialGroupBuy />
-              ) : (
-                <div className="text-center py-12 space-y-4">
-                  <Users className="h-16 w-16 mx-auto text-gray-400" />
-                  <h3 className="text-xl font-semibold text-gray-900">Sign In Required</h3>
-                  <p className="text-gray-600 max-w-md mx-auto">
-                    Join VyronaSpace group buying to unlock exclusive discounts and shop with your neighbors.
-                  </p>
-                  <Button 
-                    onClick={() => {
-                      setShowAuthModal(true);
-                      setAuthMode("login");
-                    }}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
-                  >
-                    Sign In to Join Groups
-                  </Button>
-                </div>
-              )}
+              <VyronaSocialGroupBuy />
             </TabsContent>
 
             {/* Orders Tab - Complete Functionality */}
@@ -1287,8 +1244,6 @@ export default function VyronaSpace() {
       <div className="fixed bottom-6 right-6 z-50">
           <Button 
             onClick={() => {
-              if (!requireAuth("access checkout")) return;
-              
               if (cart.length > 0) {
                 // Save cart to sessionStorage for checkout page
                 sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
@@ -1497,137 +1452,6 @@ export default function VyronaSpace() {
             </Button>
           </DialogFooter>
         </DialogContent>
-        </Dialog>
-
-        {/* Auth Modal */}
-        <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-center">
-                {authMode === "login" ? "Sign In to VyronaSpace" : "Create Your Account"}
-              </DialogTitle>
-              <DialogDescription className="text-center">
-                {authMode === "login" 
-                  ? "Please sign in to add items to cart and place orders." 
-                  : "Create an account to unlock quick commerce features."
-                }
-              </DialogDescription>
-            </DialogHeader>
-            
-            <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target as HTMLFormElement);
-                  const email = formData.get("email") as string;
-                  const password = formData.get("password") as string;
-                  
-                  fetch("/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password }),
-                  }).then(async (response) => {
-                    if (response.ok) {
-                      toast({ title: "Welcome back!", description: "You're now signed in." });
-                      setShowAuthModal(false);
-                      window.location.reload();
-                    } else {
-                      const error = await response.json();
-                      toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
-                    }
-                  });
-                }} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      placeholder="Enter your password"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-pink-500">
-                    Sign In
-                  </Button>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signup">
-                <form onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target as HTMLFormElement);
-                  const username = formData.get("username") as string;
-                  const email = formData.get("email") as string;
-                  const password = formData.get("password") as string;
-                  
-                  fetch("/api/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, email, password, userType: "customer" }),
-                  }).then(async (response) => {
-                    if (response.ok) {
-                      toast({ title: "Account created!", description: "Welcome to VyronaSpace!" });
-                      setShowAuthModal(false);
-                      window.location.reload();
-                    } else {
-                      const error = await response.json();
-                      toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
-                    }
-                  });
-                }} className="space-y-4">
-                  <div>
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      name="username"
-                      type="text"
-                      placeholder="Choose a username"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      name="password"
-                      type="password"
-                      placeholder="Create a password"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-pink-500">
-                    Create Account
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </DialogContent>
         </Dialog>
       </div>
     </>

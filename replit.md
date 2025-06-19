@@ -222,17 +222,6 @@ Changelog:
 - June 19, 2025: Unified home page to serve as both landing and authenticated user homepage with integrated login/signup and seller onboarding functionality
 - June 19, 2025: Renamed "Get Started" button to "Log in" for clearer user action and improved user experience
 - June 19, 2025: Updated header buttons - "Sign in" renamed to "Log in" and "Log in" renamed to "Sign up" for better user flow
-- June 19, 2025: Implemented comprehensive authentication requirements for core functionalities
-- June 19, 2025: Non-authenticated users can browse products and view details across all modules
-- June 19, 2025: Authentication required for cart operations, wallet transactions, group creation, and order placement
-- June 19, 2025: Added authentication guards to all add-to-cart functions across VyronaHub, VyronaSpace, VyronaSocial, VyronaMallConnect, and VyronaRead
-- June 19, 2025: Implemented authentication triggers that display login modal for non-authenticated users attempting core actions
-- June 19, 2025: Updated VyronaSocial page to allow non-authenticated users to browse products while requiring authentication for group operations
-- June 19, 2025: Added conditional UI elements - group features only visible to authenticated users, login button for non-authenticated users
-- June 19, 2025: Maintained authentication requirements for cart operations, group creation, and group management features
-- June 19, 2025: Fixed VyronaSocial tile navigation in homepage - removed authentication check from "Join Groups" button to allow non-authenticated access
-- June 19, 2025: Fixed VyronaRead tile navigation - removed authentication redirect to allow non-authenticated users to browse books
-- June 19, 2025: Added authentication guards to VyronaRead cart operations, purchase, rent, and borrow functions while preserving browsing access
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display
@@ -241,8 +230,7 @@ Changelog:
 - June 19, 2025: Created support system with help center, ticket raising, VyronaBot chat, and FAQ access
 - June 19, 2025: Implemented secure account management with logout and account deletion features
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
-- June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling
-- June 19, 2025: Restored comprehensive VyronaSocial customer interface with complete social shopping features including online status, video calls, real-time chat, and group collaboration functionality  
+- June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 
 - June 17, 2025: Updated seller registration routing to automatically redirect VyronaMallConnect sellers to /vyronamallconnect-seller-dashboard
 - June 17, 2025: Added image URL field to VyronaMallConnect seller dashboard "Add Product" modal with URL validation and helper text
