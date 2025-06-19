@@ -73,6 +73,11 @@ export default function MyVyrona() {
     phone: user?.mobile || "",
     username: user?.username || ""
   });
+  const [supportTicket, setSupportTicket] = useState({
+    issueType: "",
+    priority: "",
+    description: ""
+  });
 
   // Update form when user data changes
   useEffect(() => {
@@ -172,6 +177,38 @@ export default function MyVyrona() {
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update account information",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Support ticket submission mutation
+  const submitTicketMutation = useMutation({
+    mutationFn: async (ticketData: { issueType: string; priority: string; description: string }) => {
+      const response = await fetch("/api/support/submit-ticket", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId: user?.id,
+          userEmail: user?.email,
+          username: user?.username,
+          ...ticketData
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to submit ticket");
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Support Ticket Submitted",
+        description: `Your ticket ${data.ticketId} has been submitted. We'll respond within 24 hours.`,
+      });
+      setSupportTicket({ issueType: "", priority: "", description: "" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Failed to submit support ticket",
         variant: "destructive",
       });
     },
@@ -958,7 +995,7 @@ export default function MyVyrona() {
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="issue-type">Issue Type</Label>
-                    <Select>
+                    <Select value={supportTicket.issueType} onValueChange={(value) => setSupportTicket({...supportTicket, issueType: value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select issue type" />
                       </SelectTrigger>
@@ -976,7 +1013,7 @@ export default function MyVyrona() {
                   </div>
                   <div>
                     <Label htmlFor="priority">Priority Level</Label>
-                    <Select>
+                    <Select value={supportTicket.priority} onValueChange={(value) => setSupportTicket({...supportTicket, priority: value})}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select priority" />
                       </SelectTrigger>
@@ -992,13 +1029,19 @@ export default function MyVyrona() {
                     <Label htmlFor="description">Description</Label>
                     <Textarea 
                       id="description" 
+                      value={supportTicket.description}
+                      onChange={(e) => setSupportTicket({...supportTicket, description: e.target.value})}
                       placeholder="Please describe your issue in detail. Include order numbers, error messages, or any relevant information..."
                       className="min-h-[100px]"
                     />
                   </div>
-                  <Button className="w-full">
+                  <Button 
+                    className="w-full"
+                    onClick={() => submitTicketMutation.mutate(supportTicket)}
+                    disabled={!supportTicket.issueType || !supportTicket.priority || !supportTicket.description || submitTicketMutation.isPending}
+                  >
                     <Mail className="h-4 w-4 mr-2" />
-                    Submit Support Ticket
+                    {submitTicketMutation.isPending ? "Submitting..." : "Submit Support Ticket"}
                   </Button>
                   <p className="text-xs text-gray-500 text-center">
                     Ticket reference will be sent to your registered email

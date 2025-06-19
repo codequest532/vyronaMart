@@ -7979,6 +7979,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Submit support ticket endpoint
+  app.post("/api/support/submit-ticket", async (req, res) => {
+    try {
+      const { userId, userEmail, username, issueType, priority, description } = req.body;
+      
+      if (!userId || !issueType || !priority || !description) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // Generate ticket ID
+      const ticketId = `VYR-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      
+      // Admin email for support tickets
+      const adminEmail = "codestudio.solutions@gmail.com";
+
+      // Send email to admin via Brevo
+      try {
+        await sendEmail({
+          to: adminEmail,
+          subject: `VyronaMart Support Ticket - ${ticketId} - ${issueType.toUpperCase()}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); padding: 30px; text-align: center;">
+                <h1 style="color: white; margin: 0;">VyronaMart Support</h1>
+                <p style="color: white; margin: 10px 0 0 0; opacity: 0.9;">New Support Ticket Received</p>
+              </div>
+              <div style="padding: 30px; background: #f8f9fa;">
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid ${
+                  priority === 'critical' ? '#dc2626' : 
+                  priority === 'high' ? '#ea580c' : 
+                  priority === 'medium' ? '#ca8a04' : '#16a34a'
+                };">
+                  <h2 style="margin: 0 0 15px 0; color: #333;">Ticket Details</h2>
+                  <p style="margin: 5px 0;"><strong>Ticket ID:</strong> ${ticketId}</p>
+                  <p style="margin: 5px 0;"><strong>Priority:</strong> <span style="color: ${
+                    priority === 'critical' ? '#dc2626' : 
+                    priority === 'high' ? '#ea580c' : 
+                    priority === 'medium' ? '#ca8a04' : '#16a34a'
+                  }; font-weight: bold;">${priority.toUpperCase()}</span></p>
+                  <p style="margin: 5px 0;"><strong>Issue Type:</strong> ${issueType.charAt(0).toUpperCase() + issueType.slice(1)}</p>
+                  <p style="margin: 5px 0;"><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                  <h3 style="margin: 0 0 15px 0; color: #333;">Customer Information</h3>
+                  <p style="margin: 5px 0;"><strong>User ID:</strong> ${userId}</p>
+                  <p style="margin: 5px 0;"><strong>Username:</strong> ${username}</p>
+                  <p style="margin: 5px 0;"><strong>Email:</strong> ${userEmail}</p>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                  <h3 style="margin: 0 0 15px 0; color: #333;">Issue Description</h3>
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #6b7280;">
+                    <p style="margin: 0; white-space: pre-wrap;">${description}</p>
+                  </div>
+                </div>
+
+                <div style="text-align: center; margin: 30px 0;">
+                  <p style="color: #666; font-size: 14px;">
+                    Please respond to this ticket within the expected timeframe based on priority level.
+                  </p>
+                  <p style="color: #999; font-size: 12px;">
+                    This is an automated notification from VyronaMart Support System.
+                  </p>
+                </div>
+              </div>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        console.error('Failed to send support ticket email:', emailError);
+        // Don't fail the request if email fails, but log it
+      }
+
+      // Send confirmation email to customer
+      if (userEmail) {
+        try {
+          await sendEmail({
+            to: userEmail,
+            subject: `VyronaMart Support - Ticket ${ticketId} Received`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 30px; text-align: center;">
+                  <h1 style="color: white; margin: 0;">VyronaMart Support</h1>
+                </div>
+                <div style="padding: 30px; background: #f8f9fa;">
+                  <h2 style="color: #333;">Thank you for contacting us!</h2>
+                  <p style="color: #666; font-size: 16px;">Hi ${username},</p>
+                  <p style="color: #666; font-size: 16px;">We've received your support ticket and our team will review it shortly.</p>
+                  
+                  <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #2563eb;">
+                    <h3 style="margin: 0 0 10px 0; color: #2563eb;">Your Ticket Details</h3>
+                    <p style="margin: 5px 0;"><strong>Ticket ID:</strong> ${ticketId}</p>
+                    <p style="margin: 5px 0;"><strong>Priority:</strong> ${priority.toUpperCase()}</p>
+                    <p style="margin: 5px 0;"><strong>Issue Type:</strong> ${issueType.charAt(0).toUpperCase() + issueType.slice(1)}</p>
+                    <p style="margin: 5px 0;"><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
+                  </div>
+                  
+                  <p style="color: #666; font-size: 16px;">
+                    Expected response time: ${
+                      priority === 'critical' ? 'Within 2 hours' :
+                      priority === 'high' ? 'Within 4 hours' :
+                      priority === 'medium' ? 'Within 12 hours' : 'Within 24 hours'
+                    }
+                  </p>
+                  
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${process.env.FRONTEND_URL || 'https://vyronamart.replit.app'}/myvyrona" 
+                       style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                      View My Account
+                    </a>
+                  </div>
+                  
+                  <p style="color: #999; font-size: 14px; text-align: center;">
+                    Thank you for choosing VyronaMart!
+                  </p>
+                </div>
+              </div>
+            `
+          });
+        } catch (customerEmailError) {
+          console.error('Failed to send customer confirmation email:', customerEmailError);
+        }
+      }
+      
+      res.json({ 
+        message: "Support ticket submitted successfully",
+        ticketId: ticketId
+      });
+    } catch (error) {
+      console.error('Support ticket submission error:', error);
+      res.status(500).json({ message: "Failed to submit support ticket" });
+    }
+  });
+
   // Razorpay wallet routes
   app.post("/api/wallet/create-order", async (req, res) => {
     try {
