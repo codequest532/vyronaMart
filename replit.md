@@ -241,7 +241,8 @@ Changelog:
 - June 19, 2025: Created support system with help center, ticket raising, VyronaBot chat, and FAQ access
 - June 19, 2025: Implemented secure account management with logout and account deletion features
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
-- June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
+- June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling
+- June 19, 2025: Restored comprehensive VyronaSocial customer interface with complete social shopping features including online status, video calls, real-time chat, and group collaboration functionality  
 
 - June 17, 2025: Updated seller registration routing to automatically redirect VyronaMallConnect sellers to /vyronamallconnect-seller-dashboard
 - June 17, 2025: Added image URL field to VyronaMallConnect seller dashboard "Add Product" modal with URL validation and helper text
