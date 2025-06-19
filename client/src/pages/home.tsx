@@ -688,7 +688,7 @@ export default function Home() {
                     </Button>
                     <Button size="lg" variant="outline" className="border-white text-white bg-white/10" onClick={() => user ? setLocation('/social') : setShowAuthModal(true)}>
                       <Users className="h-5 w-5 mr-2" />
-                      Join Groups
+                      Group Shopping
                     </Button>
                   </div>
                 </div>
