@@ -107,7 +107,7 @@ export default function VyronaMallConnect() {
       name: "Phoenix MarketCity",
       location: "Chennai",
       distance: "2.5 km",
-      deliveryTime: "90 min",
+      deliveryTime: "30-60 min",
       rating: 4.8,
       totalStores: 150,
       isOpen: true,
@@ -139,7 +139,7 @@ export default function VyronaMallConnect() {
       mallId: "phoenix-chennai",
       category: "Fashion",
       rating: 4.7,
-      deliveryTime: "90 min",
+      deliveryTime: "30-60 min",
       logo: "https://images.unsplash.com/photo-1555529902-8ac3d4b95963?w=100",
       isExclusive: true,
       topPicks: 15,
@@ -152,7 +152,7 @@ export default function VyronaMallConnect() {
       mallId: "phoenix-chennai",
       category: "Beauty",
       rating: 4.9,
-      deliveryTime: "90 min",
+      deliveryTime: "30-60 min",
       logo: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=100",
       isExclusive: false,
       topPicks: 12,
@@ -488,7 +488,7 @@ export default function VyronaMallConnect() {
               </Select>
               <Badge variant="outline" className="text-green-600">
                 <Clock className="h-3 w-3 mr-1" />
-                90 min delivery
+                30-60 min delivery
               </Badge>
             </div>
           </CardContent>
@@ -1609,7 +1609,7 @@ export default function VyronaMallConnect() {
                       <h4 className="font-medium mb-2">Delivery Information</h4>
                       <div className="text-sm text-gray-600 space-y-1">
                         <p>📍 Delivering to: {selectedMall.location}</p>
-                        <p>🕐 Estimated delivery: {deliveryOption === "express" ? "90 minutes" : deliveryOption === "pickup" ? "Ready for pickup" : "2 hours (shared)"}</p>
+                        <p>🕐 Estimated delivery: {deliveryOption === "express" ? "30-60 minutes" : deliveryOption === "pickup" ? "Ready for pickup" : "2 hours (shared)"}</p>
                         <p>🏪 From {new Set(mallCart.map(item => item.storeId)).size} store{new Set(mallCart.map(item => item.storeId)).size > 1 ? 's' : ''} in {selectedMall.name}</p>
                       </div>
                     </div>

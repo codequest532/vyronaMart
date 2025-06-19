@@ -135,7 +135,7 @@ Changelog:
 - June 15, 2025: Completed comprehensive VyronaMallConnect customer interface with all advanced features
 - June 15, 2025: Implemented Virtual Mall Home with GPS-based mall detection and live offers display
 - June 15, 2025: Added digital storefronts with brand ratings, delivery estimates, and exclusive labels
-- June 15, 2025: Created VyronaExpress delivery system with 90-min hyperlocal delivery and store pickup options
+- June 15, 2025: Created VyronaExpress delivery system with 30-60 min hyperlocal delivery and store pickup options
 - June 15, 2025: Integrated VyronSocial group shopping with "Walk Together" mode and shared delivery costs
 - June 15, 2025: Built VyronaCoins wallet system with mall-exclusive coupons and VyronaMallPass premium membership
 - June 15, 2025: Implemented live mall concierge chat for multi-store order assistance and delivery tracking
@@ -177,6 +177,7 @@ Changelog:
 - June 19, 2025: Updated VyronaMallConnect frontend to use dedicated endpoints ensuring complete module isolation
 - June 19, 2025: Removed Delivery Options and Loyalty & Offers tabs from VyronaMallConnect customer interface per user request
 - June 19, 2025: Streamlined VyronaMallConnect to focus on core features: Browse Stores, Group Shopping, and Support & Reviews
+- June 19, 2025: Updated VyronaMallConnect delivery time from 90 min to 30-60 min across all customer-facing interfaces
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
