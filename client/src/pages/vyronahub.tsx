@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import LoginModal from "@/components/auth/login-modal";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -48,6 +50,7 @@ export default function VyronaHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
+  const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -55,10 +58,6 @@ export default function VyronaHub() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  // Auth mode state for unified login modal
-  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   
   // Cart query for item count
   const { data: rawCartItems = [] } = useQuery({
@@ -231,18 +230,18 @@ export default function VyronaHub() {
   const groupBuyCampaigns = Array.isArray(rawGroupBuyCampaigns) ? rawGroupBuyCampaigns : [];
 
   const handleAddToCart = (product: any, isGroupBuy = false) => {
-    if (!user) {
-      showLogin();
-      return;
-    }
-    
-    addToCartMutation.mutate({
-      productId: product.id,
-      quantity: quantity,
+    requireAuth("add items to cart", () => {
+      if (isGroupBuy) {
+        setLocation(`/social?groupBuy=true&productId=${product.id}`);
+      } else {
+        addToCartMutation.mutate({
+          productId: product.id,
+          quantity: quantity,
+        });
+        setQuantity(1);
+        setIsProductModalOpen(false);
+      }
     });
-    
-    setQuantity(1);
-    setIsProductModalOpen(false);
   };
 
   const filteredProducts = products
@@ -301,7 +300,7 @@ export default function VyronaHub() {
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => user ? setLocation("/cart") : showLogin()}
+                onClick={() => requireAuth("view cart", () => setLocation("/cart"))}
                 className="flex items-center gap-2 relative bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
               >
                 <ShoppingCart className="h-4 w-4" />
@@ -469,7 +468,7 @@ export default function VyronaHub() {
             <div className="text-center">
               <Button 
                 size="lg"
-                onClick={() => user ? setLocation("/social") : showLogin()}
+                onClick={() => requireAuth("access group shopping", () => setLocation("/social"))}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all"
               >
                 <Users className="w-6 h-6 mr-3" />
@@ -611,7 +610,7 @@ export default function VyronaHub() {
                         className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs"
                       >
                         <ShoppingCart className="h-3 w-3 mr-1" />
-                        {user ? "Add to Cart" : "Login to Add"}
+                        Add to Cart
                       </Button>
                     </div>
                   </CardContent>
@@ -672,7 +671,7 @@ export default function VyronaHub() {
                         className="bg-blue-500 hover:bg-blue-600"
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
-                        {user ? "Add to Cart" : "Login to Add"}
+                        Add to Cart
                       </Button>
                     </div>
                   </div>
@@ -682,9 +681,11 @@ export default function VyronaHub() {
           </DialogContent>
         </Dialog>
 
-        {/* Login Modal - Identical to Home and Social pages */}
-        <Dialog open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
-          <DialogContent className="sm:max-w-md">
+        {/* Login Modal */}
+        <LoginModal 
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+        />
             <DialogHeader>
               <DialogTitle className="text-center">
                 {authMode === "login" ? "Sign In to VyronaHub" : "Join VyronaHub"}
