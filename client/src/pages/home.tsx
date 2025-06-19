@@ -160,7 +160,7 @@ export default function Home() {
     }
     setActiveTab(tab);
   };
-  const { user, updateCoins } = useUserData();
+  const { user } = useUserData();
   const { notification, showNotification, hideNotification } = useToastNotifications();
 
   const { data: products = [], isLoading: isLoadingProducts } = useQuery({
@@ -262,16 +262,8 @@ export default function Home() {
     },
   });
 
-  const handleGameClick = (gameName: string) => {
-    const coinReward = Math.floor(Math.random() * 100) + 10;
-    updateCoins(coinReward);
-    showNotification("Game Started!", `Playing ${gameName}`, "game");
-  };
-
   const handleProductClick = (productName: string) => {
-    const coinReward = Math.floor(Math.random() * 50) + 10;
-    updateCoins(coinReward);
-    showNotification("Product Viewed!", `Earned ${coinReward} coins`, "success");
+    showNotification("Product Viewed!", `Viewing ${productName}`, "success");
   };
 
   const handleLibraryBorrow = async (bookId: string, libraryId: number) => {
@@ -288,9 +280,7 @@ export default function Home() {
       });
 
       if (response.ok) {
-        const coinReward = 25;
-        updateCoins(coinReward);
-        showNotification("Book Borrowed!", `Successfully borrowed from library. Earned ${coinReward} coins!`, "success");
+        showNotification("Book Borrowed!", `Successfully borrowed from library.`, "success");
         
         // Refresh library data
         queryClient.invalidateQueries({ queryKey: ["/api/admin/library-requests"] });
@@ -460,63 +450,7 @@ export default function Home() {
 
 
 
-            {/* Game Explorer */}
-            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">🎮 Game Explorer</h3>
-                    <p className="text-gray-600">Play games, earn coins, and unlock exclusive rewards!</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-purple-600">2,450</div>
-                    <div className="text-sm text-gray-500">Your Coins</div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  {[
-                    { name: "Ludo Battle", icon: Dice1, color: "from-red-400 to-red-600", reward: "50-100 coins", players: "2-4 players" },
-                    { name: "Trivia Master", icon: Brain, color: "from-blue-400 to-blue-600", reward: "30-80 coins", players: "1-6 players" },
-                    { name: "Merge Tiles", icon: Grid3X3, color: "from-green-400 to-green-600", reward: "40-90 coins", players: "Solo" },
-                    { name: "Lucky Wheel", icon: Target, color: "from-purple-400 to-purple-600", reward: "10-200 coins", players: "Daily spins" },
-                  ].map((game) => (
-                    <div 
-                      key={game.name}
-                      className={`bg-gradient-to-br ${game.color} rounded-xl p-4 text-white cursor-pointer hover:scale-105 hover:shadow-xl transition-all duration-300 group relative overflow-hidden`}
-                      onClick={() => handleGameClick(game.name)}
-                    >
-                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <div className="relative z-10">
-                        <game.icon className="h-8 w-8 mb-3" />
-                        <h4 className="font-semibold mb-1">{game.name}</h4>
-                        <p className="text-xs opacity-90 mb-2">{game.players}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium">{game.reward}</span>
-                          <Play className="h-4 w-4 opacity-80" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="mt-6 p-4 bg-white/50 rounded-lg backdrop-blur-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Trophy className="text-amber-500 h-6 w-6" />
-                      <div>
-                        <h5 className="font-semibold text-gray-900">Daily Challenge</h5>
-                        <p className="text-sm text-gray-600">Complete 3 games to unlock bonus rewards</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-amber-600">Progress: 1/3</div>
-                      <Progress value={33} className="w-20 mt-1" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         )}
 

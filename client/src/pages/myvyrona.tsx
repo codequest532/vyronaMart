@@ -471,22 +471,7 @@ export default function MyVyrona() {
           {/* 2. Wallet & Rewards */}
           <TabsContent value="wallet" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* VyronaCoins Card */}
-              <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                        <Coins className="h-6 w-6 text-orange-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-orange-700">VyronaCoins</p>
-                        <p className="text-2xl font-bold text-orange-700">{user?.vyronaCoins || 0}</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Loyalty Points Card - Removed VyronaCoins */}
 
               {/* Cash Balance Card */}
               <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
@@ -1019,8 +1004,8 @@ export default function MyVyrona() {
                               <p className="text-sm text-gray-600 mt-1">Go to MyVyrona → Wallet tab → Click "Add Money" → Choose payment method (UPI, Card, Net Banking) → Complete payment.</p>
                             </div>
                             <div className="border-l-4 border-green-200 pl-4">
-                              <h4 className="font-medium">What are VyronaCoins and how do I earn them?</h4>
-                              <p className="text-sm text-gray-600 mt-1">VyronaCoins are reward points earned through shopping, referrals, and platform activities. Use them for discounts and exclusive offers.</p>
+                              <h4 className="font-medium">How do returns and refunds work?</h4>
+                              <p className="text-sm text-gray-600 mt-1">Returns are accepted within 7-30 days depending on the product category. Refunds are processed to your original payment method within 5-7 business days.</p>
                             </div>
                           </div>
                         </div>

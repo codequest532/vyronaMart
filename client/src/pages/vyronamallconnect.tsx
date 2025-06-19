@@ -401,10 +401,10 @@ export default function VyronaMallConnect() {
               </div>
               <div className="text-right">
                 <div className="flex items-center space-x-2">
-                  <Coins className="h-5 w-5 text-yellow-300" />
-                  <span className="font-bold">{(user as any)?.vyronaCoins || 0}</span>
+                  <MapPin className="h-5 w-5 text-yellow-300" />
+                  <span className="font-bold">Live</span>
                 </div>
-                <p className="text-sm opacity-80">VyronaCoins</p>
+                <p className="text-sm opacity-80">Mall Status</p>
               </div>
             </div>
           </CardContent>

@@ -118,13 +118,7 @@ export default function GroupOrderConfirmation({ params }: GroupOrderConfirmatio
                   <span className="text-lg font-bold text-green-600">₹{Math.round(totalAmount)}</span>
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">VyronaCoins Earned</span>
-                  <div className="flex items-center space-x-1 text-orange-600">
-                    <Coins className="h-4 w-4" />
-                    <span className="font-medium">+{Math.round(totalAmount * 0.05)}</span>
-                  </div>
-                </div>
+                {/* VyronaCoins feature removed */}
               </div>
             </CardContent>
           </Card>
