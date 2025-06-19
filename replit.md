@@ -175,6 +175,8 @@ Changelog:
 - June 19, 2025: Added 'module' field to shopping_groups schema to separate VyronaSocial and VyronaMallConnect groups
 - June 19, 2025: Created dedicated VyronaMallConnect shopping group endpoints: /api/mallconnect/shopping-groups and /api/mallconnect/create-group
 - June 19, 2025: Updated VyronaMallConnect frontend to use dedicated endpoints ensuring complete module isolation
+- June 19, 2025: Removed Delivery Options and Loyalty & Offers tabs from VyronaMallConnect customer interface per user request
+- June 19, 2025: Streamlined VyronaMallConnect to focus on core features: Browse Stores, Group Shopping, and Support & Reviews
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
