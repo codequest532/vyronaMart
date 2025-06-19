@@ -119,15 +119,77 @@ export default function VyronaHub() {
         refetchUser();
       }, 100);
     },
-    onError: (error: any) => {
-      console.error("Login error:", error);
+    onError: (error: Error) => {
+      console.error("VyronaHub login error:", error);
       toast({
         title: "Login Failed",
-        description: "Invalid credentials. Please try again.",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
+
+  // Signup mutation - identical to Home and Social pages
+  const signupMutation = useMutation({
+    mutationFn: async (data: { username: string; email: string; password: string }) => {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Signup failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Account created successfully!" });
+      setIsLoginModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Auth form handlers - identical to Home and Social pages
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const identifier = formData.get("email") as string; // Can be email or username
+    const password = formData.get("password") as string;
+
+    if (!identifier || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    loginMutation.mutate({ email: identifier, password });
+  };
+
+  const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get("username") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!username || !email || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    signupMutation.mutate({ username, email, password });
+  };
 
   // Add to cart mutation
   const addToCartMutation = useMutation({
