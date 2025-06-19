@@ -96,12 +96,17 @@ export default function VyronaHub() {
       return apiRequest("POST", "/api/login", data);
     },
     onSuccess: () => {
+      // Invalidate multiple queries to refresh all user-dependent data
       queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       setIsLoginModalOpen(false);
       toast({
         title: "Logged in successfully!",
         description: "Welcome back to VyronaHub!",
       });
+      // Force a page refresh to ensure proper session recognition
+      window.location.reload();
     },
     onError: () => {
       toast({
