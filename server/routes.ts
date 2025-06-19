@@ -1525,6 +1525,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // VyronaMallConnect malls endpoint (empty for real partner onboarding)
+  app.get("/api/mallconnect/malls", async (req, res) => {
+    try {
+      // Return empty array - malls will be added when real partners onboard
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching VyronaMallConnect malls:", error);
+      res.status(500).json({ message: "Failed to fetch malls" });
+    }
+  });
+
+  // VyronaMallConnect brands endpoint (empty for real partner onboarding)
+  app.get("/api/mallconnect/brands", async (req, res) => {
+    try {
+      // Return empty array - brands will be added when real partners onboard
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching VyronaMallConnect brands:", error);
+      res.status(500).json({ message: "Failed to fetch brands" });
+    }
+  });
+
   // Shopping room routes (maps to VyronaSocial rooms for checkout)
   app.get("/api/shopping-rooms", async (req, res) => {
     try {

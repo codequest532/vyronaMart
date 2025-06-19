@@ -100,79 +100,17 @@ export default function VyronaMallConnect() {
   const mallStores = Array.isArray(stores) ? stores.filter((s: any) => s.type === "mall") : [];
   const mallProducts = Array.isArray(products) ? products.filter((p: any) => p.module === "mall") : [];
 
-  // Mock data for comprehensive mall experience
-  const mockMalls = [
-    {
-      id: "phoenix-chennai",
-      name: "Phoenix MarketCity",
-      location: "Chennai",
-      distance: "2.5 km",
-      deliveryTime: "30-60 min",
-      rating: 4.8,
-      totalStores: 150,
-      isOpen: true,
-      timing: "10:00 AM - 10:00 PM",
-      image: "https://images.unsplash.com/photo-1555529902-8ac3d4b95963?w=400",
-      currentOffers: "Mega Sale - Up to 70% Off",
-      categories: ["Fashion", "Electronics", "Food Court", "Beauty", "Footwear", "Home & Living"]
-    },
-    {
-      id: "brookefields-coimbatore", 
-      name: "Brookefields Mall",
-      location: "Coimbatore",
-      distance: "1.8 km",
-      deliveryTime: "2 hours",
-      rating: 4.6,
-      totalStores: 120,
-      isOpen: true,
-      timing: "10:00 AM - 9:30 PM",
-      image: "https://images.unsplash.com/photo-1574098160653-04cfc24ff0c4?w=400",
-      currentOffers: "Weekend Special - Buy 2 Get 1 Free",
-      categories: ["Fashion", "Electronics", "Food Court", "Beauty", "Sports", "Books"]
-    }
-  ];
+  // Get mall data from API
+  const { data: malls = [] } = useQuery({
+    queryKey: ["/api/mallconnect/malls"],
+  });
 
-  const mockBrands = [
-    {
-      id: "zara-phoenix",
-      name: "Zara",
-      mallId: "phoenix-chennai",
-      category: "Fashion",
-      rating: 4.7,
-      deliveryTime: "30-60 min",
-      logo: "https://images.unsplash.com/photo-1555529902-8ac3d4b95963?w=100",
-      isExclusive: true,
-      topPicks: 15,
-      bestSellers: 8,
-      description: "International fashion brand with latest trends"
-    },
-    {
-      id: "mac-phoenix",
-      name: "MAC Cosmetics", 
-      mallId: "phoenix-chennai",
-      category: "Beauty",
-      rating: 4.9,
-      deliveryTime: "30-60 min",
-      logo: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=100",
-      isExclusive: false,
-      topPicks: 12,
-      bestSellers: 6,
-      description: "Professional makeup and cosmetics"
-    },
-    {
-      id: "apple-store",
-      name: "Apple Store",
-      mallId: "phoenix-chennai", 
-      category: "Electronics",
-      rating: 4.8,
-      deliveryTime: "2 hours",
-      logo: "https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=100",
-      isExclusive: true,
-      topPicks: 10,
-      bestSellers: 5,
-      description: "Latest Apple products and accessories"
-    }
-  ];
+  // Get brand data from API  
+  const { data: brands = [] } = useQuery({
+    queryKey: ["/api/mallconnect/brands"],
+  });
+
+
 
   const addToMallCart = (product: any, store: any) => {
     const cartItem = {
@@ -496,7 +434,7 @@ export default function VyronaMallConnect() {
 
         {/* Mall Selection with Live Offers */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {mockMalls.map((mall) => (
+          {Array.isArray(malls) && malls.length > 0 ? malls.map((mall: any) => (
             <Card 
               key={mall.id} 
               className="cursor-pointer hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-amber-400"
@@ -555,7 +493,13 @@ export default function VyronaMallConnect() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          )) : (
+            <div className="col-span-full text-center py-12">
+              <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Malls Available</h3>
+              <p className="text-gray-600">We're working on partnering with malls in your area.</p>
+            </div>
+          )}
         </div>
 
         {/* Quick Access Categories */}
@@ -1063,7 +1007,7 @@ export default function VyronaMallConnect() {
 
           {/* Digital Storefronts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {mockBrands
+            {Array.isArray(brands) && brands.length > 0 ? brands
               .filter(brand => selectedCategory === "all" || brand.category === selectedCategory)
               .map((brand) => (
               <Card key={brand.id} className="hover:shadow-xl transition-all duration-300 cursor-pointer" onClick={() => setSelectedStore(brand)}>
@@ -1116,7 +1060,12 @@ export default function VyronaMallConnect() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )) : (
+              <div className="col-span-full text-center py-8">
+                <Store className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600">No brands available in this mall yet.</p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -1350,7 +1299,7 @@ export default function VyronaMallConnect() {
                 <h3 className="text-lg font-bold mb-4">Store Reviews & Ratings</h3>
                 
                 <div className="space-y-4">
-                  {mockBrands.slice(0, 3).map((brand) => (
+                  {brands.slice(0, 3).map((brand: any) => (
                     <div key={brand.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                       <div className="flex items-center space-x-3">
                         <img 
