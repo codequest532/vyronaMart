@@ -9,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Users, Store, ShoppingCart, MessageCircle, Plus, UserPlus, Play, Settings, 
@@ -450,151 +452,98 @@ export default function VyronaSocialGroupBuy() {
                 <CardContent>
                   <Group className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                   <h3 className="text-lg font-semibold mb-2">No Groups Yet</h3>
-                  <p className="text-gray-600 mb-4">Create or join a group to start group buying with your neighbors</p>
+                  <p className="text-gray-600 mb-4">Create or join a group to start shopping together</p>
                 </CardContent>
               </Card>
             ) : (
               (myGroups || []).map((group: VyronaSocialGroup) => (
-                <Card key={group.id} className="cursor-pointer hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          {group.name}
-                          {group.role === 'admin' && (
-                            <Badge variant="secondary" className="bg-orange-100 text-orange-800">
-                              <Crown className="h-3 w-3 mr-1" />
-                              Admin
-                            </Badge>
-                          )}
-                        </CardTitle>
-                        <CardDescription className="flex items-center gap-4 mt-2">
-                          <span className="flex items-center gap-1">
+                <Card key={group.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-gradient-to-r from-orange-100 to-pink-100 rounded-lg">
+                          <Building className="h-6 w-6 text-orange-500" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">{group.name}</h3>
+                          <p className="text-gray-600 flex items-center gap-1">
                             <MapPin className="h-4 w-4" />
                             {group.locality}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            {group.current_members}/{group.max_members} members
-                          </span>
-                        </CardDescription>
+                          </p>
+                          <div className="flex items-center gap-4 mt-2">
+                            <Badge variant="secondary" className="text-xs">
+                              <Users className="h-3 w-3 mr-1" />
+                              {group.current_members}/{group.max_members} members
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              Code: {group.group_code}
+                            </Badge>
+                            {group.role === 'admin' && (
+                              <Badge className="text-xs bg-gradient-to-r from-orange-500 to-pink-500">
+                                <Crown className="h-3 w-3 mr-1" />
+                                Admin
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="font-mono">
-                          {group.group_code}
-                        </Badge>
-                        {group.role === 'admin' ? (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
+                        <Button
+                          onClick={() => {
+                            setSelectedGroup(group);
+                            setShowStartSessionDialog(true);
+                          }}
+                          className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          Start Session
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            {group.role === 'admin' && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedGroup(group);
+                                    setShowManageMembersDialog(true);
+                                  }}
+                                >
+                                  <Settings className="h-4 w-4 mr-2" />
+                                  Manage Members
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-red-600"
+                                  onClick={() => {
+                                    setSelectedGroupForAction(group);
+                                    setShowDeleteConfirm(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Group
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {group.role !== 'admin' && (
                               <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedGroup(group);
-                                  setShowManageMembersDialog(true);
-                                }}
-                                className="flex items-center gap-2"
-                              >
-                                <Settings className="h-4 w-4" />
-                                Manage Members
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
+                                className="text-red-600"
                                 onClick={() => {
                                   setSelectedGroupForAction(group);
-                                  setShowDeleteConfirm(true);
+                                  setShowExitConfirm(true);
                                 }}
-                                className="flex items-center gap-2 text-red-600"
                               >
-                                <Trash2 className="h-4 w-4" />
-                                Delete Group
+                                <UserX className="h-4 w-4 mr-2" />
+                                Exit Group
                               </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedGroupForAction(group);
-                              setShowExitConfirm(true);
-                            }}
-                            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
-                            disabled={exitGroupMutation.isPending}
-                          >
-                            {exitGroupMutation.isPending ? "Leaving..." : "Exit Group"}
-                          </Button>
-                        )}
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">
-                        Start group shopping sessions with nearby stores
-                      </span>
-                      <Dialog open={showStartSessionDialog} onOpenChange={setShowStartSessionDialog}>
-                        <DialogTrigger asChild>
-                          <Button 
-                            size="sm"
-                            className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                            onClick={() => setSelectedGroup(group)}
-                          >
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            Start Shopping
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Start Group Shopping Session</DialogTitle>
-                            <DialogDescription>
-                              Choose a store and set the order window for {selectedGroup?.name}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <form onSubmit={handleStartSession} className="space-y-4">
-                            <div>
-                              <Label htmlFor="storeId">Select Store</Label>
-                              <select
-                                id="storeId"
-                                name="storeId"
-                                className="w-full p-2 border rounded-md"
-                                required
-                              >
-                                <option value="">Choose a store...</option>
-                                {groupStores.map((store: GroupStore) => (
-                                  <option key={store.id} value={store.id}>
-                                    {store.name} - Min ₹{store.min_order_value}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <Label htmlFor="orderWindow">Order Window (minutes)</Label>
-                              <select
-                                id="orderWindow"
-                                name="orderWindow"
-                                className="w-full p-2 border rounded-md"
-                                required
-                              >
-                                <option value="30">30 minutes</option>
-                                <option value="60">1 hour</option>
-                                <option value="90">1.5 hours</option>
-                                <option value="120">2 hours</option>
-                              </select>
-                            </div>
-                            <Button 
-                              type="submit" 
-                              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                              disabled={startSessionMutation.isPending}
-                            >
-                              {startSessionMutation.isPending ? "Starting..." : "Start Session"}
-                            </Button>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
                     </div>
                   </CardContent>
                 </Card>
@@ -604,51 +553,53 @@ export default function VyronaSocialGroupBuy() {
         </TabsContent>
 
         <TabsContent value="stores" className="space-y-6">
-          <h2 className="text-xl font-semibold">Stores with Group Buying</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Stores Supporting Group Orders</h2>
+          </div>
+
+          <div className="grid gap-4">
             {storesLoading ? (
-              <div className="col-span-2 text-center py-8">Loading stores...</div>
+              <div className="text-center py-8">Loading stores...</div>
+            ) : !groupStores || groupStores.length === 0 ? (
+              <Card className="text-center py-8">
+                <CardContent>
+                  <Store className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-semibold mb-2">No Stores Available</h3>
+                  <p className="text-gray-600">Group buying stores will appear here when available</p>
+                </CardContent>
+              </Card>
             ) : (
               groupStores.map((store: GroupStore) => (
-                <Card key={store.id} className="border-l-4 border-l-green-500">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      {store.name}
-                      <Badge className="bg-green-100 text-green-800">
-                        ⭐ {(store.rating / 100).toFixed(1)}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription>{store.address}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Building className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">Min Order: {formatCurrency(store.min_order_value)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Timer className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm">Order Window: {store.group_order_window} mins</span>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2">Group Discounts:</h4>
-                        <div className="space-y-1">
-                          {store.discount_tiers?.map((tier: any, index: number) => (
-                            <div key={index} className="flex items-center gap-2 text-sm">
-                              <Percent className="h-3 w-3 text-green-600" />
-                              <span>{formatCurrency(tier.threshold)}+ → {tier.discount}% off</span>
-                            </div>
-                          ))}
+                <Card key={store.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg">
+                          <Store className="h-6 w-6 text-green-600" />
                         </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm mb-2">Delivery Slots:</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {store.delivery_slots?.map((slot: string, index: number) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {slot}
+                        <div>
+                          <h3 className="text-lg font-semibold">{store.name}</h3>
+                          <p className="text-gray-600">{store.address}</p>
+                          <div className="flex items-center gap-4 mt-2">
+                            <Badge variant="secondary" className="text-xs">
+                              ⭐ {store.rating}/5
                             </Badge>
-                          ))}
+                            <Badge variant="outline" className="text-xs">
+                              Min Order: {formatCurrency(store.min_order_value)}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              <Timer className="h-3 w-3 mr-1" />
+                              {store.group_order_window}h window
+                            </Badge>
+                          </div>
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-600">
+                              <Percent className="h-3 w-3 inline mr-1" />
+                              Discounts: {store.discount_tiers?.map(tier => 
+                                `${tier.discount}% off ₹${tier.threshold}+`
+                              ).join(', ')}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -659,52 +610,93 @@ export default function VyronaSocialGroupBuy() {
           </div>
         </TabsContent>
 
-        <TabsContent value="group-cart" className="space-y-6">
+        <TabsContent value="group-cart">
           {selectedSession ? (
             <GroupCartView sessionId={selectedSession.id} />
           ) : (
-            <Card className="text-center py-8">
+            <Card className="text-center py-12">
               <CardContent>
-                <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold mb-2">No Active Session</h3>
-                <p className="text-gray-600">Start a group shopping session from your groups to begin</p>
+                <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-xl font-semibold mb-2">No Active Session</h3>
+                <p className="text-gray-600 mb-4">Start a group shopping session to begin adding items</p>
+                <Button
+                  onClick={() => setActiveTab("my-groups")}
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                >
+                  Go to Groups
+                </Button>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="chat" className="space-y-6">
+        <TabsContent value="chat">
           {selectedSession ? (
             <GroupChatView sessionId={selectedSession.id} />
           ) : (
-            <Card className="text-center py-8">
+            <Card className="text-center py-12">
               <CardContent>
-                <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-semibold mb-2">No Active Chat</h3>
-                <p className="text-gray-600">Start a group shopping session to chat with group members</p>
+                <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-xl font-semibold mb-2">No Active Session</h3>
+                <p className="text-gray-600 mb-4">Start a group shopping session to chat with members</p>
+                <Button
+                  onClick={() => setActiveTab("my-groups")}
+                  className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+                >
+                  Go to Groups
+                </Button>
               </CardContent>
             </Card>
           )}
         </TabsContent>
       </Tabs>
 
-      {/* Manage Members Dialog */}
-      <Dialog open={showManageMembersDialog} onOpenChange={setShowManageMembersDialog}>
-        <DialogContent className="max-w-2xl">
+      {/* Start Session Dialog */}
+      <Dialog open={showStartSessionDialog} onOpenChange={setShowStartSessionDialog}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>Manage Group Members</DialogTitle>
+            <DialogTitle>Start Group Shopping Session</DialogTitle>
             <DialogDescription>
-              {selectedGroup?.name} • {selectedGroup?.current_members} members
+              Choose a store and set order window for {selectedGroup?.name}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <ManageMembersContent 
-              groupId={selectedGroup?.id} 
-              onMemberRemoved={() => {
-                queryClient.invalidateQueries({ queryKey: ["/api/vyrona-social/my-groups"] });
-              }}
-            />
-          </div>
+          <form onSubmit={handleStartSession} className="space-y-4">
+            <div>
+              <Label htmlFor="storeId">Select Store</Label>
+              <select
+                id="storeId"
+                name="storeId"
+                className="w-full p-2 border rounded-md"
+                required
+              >
+                <option value="">Choose a store</option>
+                {groupStores.map((store: GroupStore) => (
+                  <option key={store.id} value={store.id}>
+                    {store.name} - Min Order: {formatCurrency(store.min_order_value)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="orderWindow">Order Window (hours)</Label>
+              <Input
+                id="orderWindow"
+                name="orderWindow"
+                type="number"
+                min="1"
+                max="24"
+                defaultValue="2"
+                required
+              />
+            </div>
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
+              disabled={startSessionMutation.isPending}
+            >
+              {startSessionMutation.isPending ? "Starting..." : "Start Session"}
+            </Button>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -714,27 +706,21 @@ export default function VyronaSocialGroupBuy() {
           <DialogHeader>
             <DialogTitle>Delete Group</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{selectedGroupForAction?.name}"? This action cannot be undone and will remove all group data.
+              Are you sure you want to delete "{selectedGroupForAction?.name}"? This action cannot be undone and will remove all members from the group.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowDeleteConfirm(false);
-                setSelectedGroupForAction(null);
-              }}
-            >
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
+            <Button 
+              variant="destructive" 
               onClick={() => {
                 if (selectedGroupForAction) {
                   deleteGroupMutation.mutate(selectedGroupForAction.id);
+                  setShowDeleteConfirm(false);
+                  setSelectedGroupForAction(null);
                 }
-                setShowDeleteConfirm(false);
-                setSelectedGroupForAction(null);
               }}
               disabled={deleteGroupMutation.isPending}
             >
@@ -750,124 +736,124 @@ export default function VyronaSocialGroupBuy() {
           <DialogHeader>
             <DialogTitle>Exit Group</DialogTitle>
             <DialogDescription>
-              Are you sure you want to leave "{selectedGroupForAction?.name}"? You'll need to be re-invited to join again.
+              Are you sure you want to leave "{selectedGroupForAction?.name}"? You will need to be re-invited to join again.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowExitConfirm(false);
-                setSelectedGroupForAction(null);
-              }}
-            >
+            <Button variant="outline" onClick={() => setShowExitConfirm(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
+            <Button 
+              variant="destructive" 
               onClick={() => {
                 if (selectedGroupForAction) {
                   exitGroupMutation.mutate(selectedGroupForAction.id);
+                  setShowExitConfirm(false);
+                  setSelectedGroupForAction(null);
                 }
-                setShowExitConfirm(false);
-                setSelectedGroupForAction(null);
               }}
               disabled={exitGroupMutation.isPending}
             >
-              {exitGroupMutation.isPending ? "Leaving..." : "Exit Group"}
+              {exitGroupMutation.isPending ? "Leaving..." : "Leave Group"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+      />
     </div>
   );
 }
 
-// Group Cart Component
 function GroupCartView({ sessionId }: { sessionId: number }) {
-  const { data: sessionData, isLoading } = useQuery({
+  const { data: cartItems = [], isLoading } = useQuery({
+    queryKey: [`/api/vyrona-social/sessions/${sessionId}/cart`],
+    retry: false,
+  });
+
+  const { data: sessionDetails } = useQuery({
     queryKey: [`/api/vyrona-social/sessions/${sessionId}`],
+    retry: false,
   });
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading group cart...</div>;
+    return <div className="text-center py-8">Loading cart...</div>;
   }
 
-  if (!sessionData) {
-    return <div className="text-center py-8">Session not found</div>;
-  }
-
-  const { session, cartItems } = sessionData;
-  const formatCurrency = (amount: number) => `₹${Math.round(amount)}`;
+  const totalAmount = cartItems.reduce((sum: number, item: GroupCartItem) => 
+    sum + (item.price * item.quantity), 0
+  );
 
   return (
     <div className="space-y-6">
-      <Card className="border-l-4 border-l-blue-500">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            {session.group_name} × {session.store_name}
-            <Badge className={session.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
-              {session.status}
-            </Badge>
-          </CardTitle>
-          <CardDescription>
-            Session Code: {session.session_code} • Order window closes at {new Date(session.order_window).toLocaleTimeString()}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold text-green-600">{formatCurrency(session.total_amount)}</div>
-              <div className="text-sm text-gray-600">Total Amount</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-orange-600">{session.discount_percent}%</div>
-              <div className="text-sm text-gray-600">Group Discount</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-blue-600">{formatCurrency(session.total_amount * (1 - session.discount_percent / 100))}</div>
-              <div className="text-sm text-gray-600">Final Amount</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Group Cart</h2>
+        <Badge className="bg-gradient-to-r from-orange-500 to-pink-500">
+          {sessionDetails?.status || 'Active'}
+        </Badge>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Group Cart Items</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {cartItems.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No items in cart yet. Start adding items to unlock group discounts!
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {cartItems.map((item: GroupCartItem) => (
-                <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+      {cartItems.length === 0 ? (
+        <Card className="text-center py-8">
+          <CardContent>
+            <ShoppingCart className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <h3 className="text-lg font-semibold mb-2">Cart is Empty</h3>
+            <p className="text-gray-600">Group members haven't added any items yet</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {cartItems.map((item: GroupCartItem) => (
+            <Card key={item.id}>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-medium">{item.product_name}</div>
-                    <div className="text-sm text-gray-600">Added by {item.username}</div>
+                    <h3 className="font-semibold">{item.product_name}</h3>
+                    <p className="text-sm text-gray-600">{item.product_description}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline" className="text-xs">
+                        Added by {item.username}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        Qty: {item.quantity}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">{formatCurrency(item.price * item.quantity)}</div>
-                    <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
+                    <p className="font-semibold">{Math.round(item.price * item.quantity)}</p>
+                    <p className="text-sm text-gray-600">{Math.round(item.price)} each</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          ))}
+
+          <Card className="bg-gradient-to-r from-orange-50 to-pink-50 border-orange-200">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Total Amount</h3>
+                <p className="text-2xl font-bold text-orange-600">
+                  ₹{Math.round(totalAmount)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
 
-// Group Chat Component
 function GroupChatView({ sessionId }: { sessionId: number }) {
   const [message, setMessage] = useState("");
-  const { data: sessionData } = useQuery({
-    queryKey: [`/api/vyrona-social/sessions/${sessionId}`],
+  const { toast } = useToast();
+
+  const { data: chatMessages = [], isLoading } = useQuery({
+    queryKey: [`/api/vyrona-social/sessions/${sessionId}/chat`],
+    retry: false,
   });
 
   const sendMessageMutation = useMutation({
@@ -877,10 +863,18 @@ function GroupChatView({ sessionId }: { sessionId: number }) {
     onSuccess: () => {
       setMessage("");
     },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send message",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
+    
     sendMessageMutation.mutate({
       sessionId,
       message,
@@ -888,21 +882,17 @@ function GroupChatView({ sessionId }: { sessionId: number }) {
     });
   };
 
-  if (!sessionData) {
+  if (isLoading) {
     return <div className="text-center py-8">Loading chat...</div>;
   }
 
-  const { chatMessages } = sessionData;
-
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Group Chat</CardTitle>
-          <CardDescription>Coordinate with your group members</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-96 w-full border rounded-lg p-4">
+      <h2 className="text-xl font-semibold">Group Chat</h2>
+
+      <Card className="h-96">
+        <CardContent className="p-4 h-full flex flex-col">
+          <ScrollArea className="flex-1 mb-4">
             <div className="space-y-3">
               {chatMessages.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
@@ -910,34 +900,32 @@ function GroupChatView({ sessionId }: { sessionId: number }) {
                 </div>
               ) : (
                 chatMessages.map((msg: ChatMessage) => (
-                  <div key={msg.id} className="flex items-start gap-2">
-                    <div className="bg-blue-100 text-blue-800 rounded-full w-8 h-8 flex items-center justify-center text-xs font-semibold">
-                      {msg.username.charAt(0).toUpperCase()}
+                  <div key={msg.id} className="flex flex-col space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-orange-600">
+                        {msg.username}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {new Date(msg.created_at).toLocaleTimeString()}
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm">{msg.username}</span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(msg.created_at).toLocaleTimeString()}
-                        </span>
-                      </div>
-                      <div className="text-sm">{msg.message}</div>
-                    </div>
+                    <p className="text-sm bg-gray-50 p-2 rounded-lg">{msg.message}</p>
                   </div>
                 ))
               )}
             </div>
           </ScrollArea>
-          <div className="flex gap-2 mt-4">
+
+          <div className="flex gap-2">
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type your message..."
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             />
             <Button 
               onClick={handleSendMessage}
-              disabled={!message.trim() || sendMessageMutation.isPending}
+              disabled={sendMessageMutation.isPending}
               className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
             >
               <Send className="h-4 w-4" />
@@ -949,144 +937,14 @@ function GroupChatView({ sessionId }: { sessionId: number }) {
   );
 }
 
-// Manage Members Component
 function ManageMembersContent({ groupId, onMemberRemoved }: { 
-  groupId?: number; 
-  onMemberRemoved: () => void;
+  groupId: number; 
+  onMemberRemoved: () => void; 
 }) {
-  const [showRemoveMemberConfirm, setShowRemoveMemberConfirm] = useState(false);
-  const [selectedMemberForRemoval, setSelectedMemberForRemoval] = useState<any>(null);
-  const { toast } = useToast();
-  
-  const { data: members, isLoading } = useQuery({
-    queryKey: [`/api/vyrona-social/groups/${groupId}/members`],
-    enabled: !!groupId,
-  });
-
-  const removeMemberMutation = useMutation({
-    mutationFn: async (memberId: number) => {
-      return apiRequest("DELETE", `/api/vyrona-social/groups/${groupId}/members/${memberId}`, {});
-    },
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Member removed successfully",
-      });
-      onMemberRemoved();
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to remove member",
-        variant: "destructive",
-      });
-    },
-  });
-
-  if (isLoading) {
-    return <div className="text-center py-4">Loading members...</div>;
-  }
-
-  if (!members || members.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-        <h3 className="text-lg font-semibold mb-2">No Members Found</h3>
-        <p className="text-gray-600">This group has no members yet</p>
-      </div>
-    );
-  }
-
+  // This would be implemented with actual member management functionality
   return (
     <div className="space-y-4">
-      <div className="grid gap-3">
-        {members.map((member: any) => (
-          <div 
-            key={member.id} 
-            className="flex items-center justify-between p-3 border rounded-lg"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
-                {member.username.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <div className="font-medium">{member.username}</div>
-                <div className="text-sm text-gray-500">{member.email}</div>
-                {member.role === 'admin' && (
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800 mt-1">
-                    <Crown className="h-3 w-3 mr-1" />
-                    Admin
-                  </Badge>
-                )}
-              </div>
-            </div>
-            
-            {member.role !== 'admin' && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-red-600 border-red-200 hover:bg-red-50"
-                onClick={() => {
-                  setSelectedMemberForRemoval(member);
-                  setShowRemoveMemberConfirm(true);
-                }}
-                disabled={removeMemberMutation.isPending}
-              >
-                <UserX className="h-4 w-4 mr-1" />
-                Remove
-              </Button>
-            )}
-          </div>
-        ))}
-      </div>
-      
-      <div className="bg-orange-50 p-4 rounded-lg">
-        <div className="flex items-start gap-3">
-          <Crown className="h-5 w-5 text-orange-600 mt-0.5" />
-          <div>
-            <h4 className="font-medium text-orange-900">Admin Privileges</h4>
-            <p className="text-sm text-orange-700 mt-1">
-              As a group admin, you can remove members from the group. Admin accounts cannot be removed by other admins.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Remove Member Confirmation Dialog */}
-      <Dialog open={showRemoveMemberConfirm} onOpenChange={setShowRemoveMemberConfirm}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Remove Member</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to remove {selectedMemberForRemoval?.username} from the group? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowRemoveMemberConfirm(false);
-                setSelectedMemberForRemoval(null);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (selectedMemberForRemoval) {
-                  removeMemberMutation.mutate(selectedMemberForRemoval.id);
-                }
-                setShowRemoveMemberConfirm(false);
-                setSelectedMemberForRemoval(null);
-              }}
-              disabled={removeMemberMutation.isPending}
-            >
-              {removeMemberMutation.isPending ? "Removing..." : "Remove Member"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <p className="text-gray-600">Member management functionality will be implemented here.</p>
     </div>
   );
 }
