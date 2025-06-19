@@ -14,25 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Users, Store, ShoppingCart, MessageCircle, Plus, UserPlus, Play, Settings, 
-  Crown, Building, Timer, Percent, UserX, Send
-} from "lucide-react"; 
-  Plus, 
-  ShoppingCart, 
-  MessageCircle, 
-  Clock, 
-  Percent, 
-  Store,
-  Send,
-  UserPlus,
-  Building,
-  MapPin,
-  Timer,
-  Crown,
-  Group,
-  Trash2,
-  UserX,
-  Settings,
-  MoreVertical
+  Crown, Building, Timer, Percent, UserX, Send, Clock, MapPin, Group, Trash2, MoreVertical
 } from "lucide-react";
 
 interface VyronaSocialGroup {
