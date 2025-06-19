@@ -676,7 +676,7 @@ export default function VyronaSpace() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => updateCartQuantity(product.id, -1)}
+                                  onClick={() => requireAuth("update cart quantity", () => updateCartQuantity(product.id, -1))}
                                   className="h-8 w-8 p-0 rounded-lg"
                                 >
                                   <Minus className="h-4 w-4" />
@@ -687,7 +687,7 @@ export default function VyronaSpace() {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => updateCartQuantity(product.id, 1)}
+                                  onClick={() => requireAuth("update cart quantity", () => updateCartQuantity(product.id, 1))}
                                   className="h-8 w-8 p-0 rounded-lg"
                                 >
                                   <Plus className="h-4 w-4" />
@@ -695,7 +695,7 @@ export default function VyronaSpace() {
                               </div>
                             ) : (
                               <Button 
-                                onClick={() => addToCart({...product, storeName: selectedStore.name})}
+                                onClick={() => requireAuth("add items to cart", () => addToCart({...product, storeName: selectedStore.name}))}
                                 disabled={product.inStock === 0}
                                 className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
                               >
@@ -920,7 +920,7 @@ export default function VyronaSpace() {
                       
                       <div className="flex space-x-2 mt-4">
                         <Button 
-                          onClick={() => setSelectedOrder(order)} 
+                          onClick={() => requireAuth("view order details", () => setSelectedOrder(order))} 
                           variant="outline" 
                           className="flex-1 rounded-xl border-emerald-200 hover:bg-emerald-50"
                         >
@@ -1288,20 +1288,22 @@ export default function VyronaSpace() {
                 <div className="text-sm text-emerald-700">{getCartItemCount()} items in cart</div>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline" onClick={() => setCart([])} className="rounded-xl border-emerald-200 hover:bg-emerald-100">
+                <Button variant="outline" onClick={() => requireAuth("clear cart", () => setCart([]))} className="rounded-xl border-emerald-200 hover:bg-emerald-100">
                   Clear
                 </Button>
                 <Button 
                   onClick={() => {
-                    // Save cart to sessionStorage for checkout page
-                    sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
-                    
-                    // Set subscription mode flag if in subscription mode
-                    if (isSubscriptionMode) {
-                      sessionStorage.setItem('subscription-mode', 'true');
-                    }
-                    
-                    setLocation('/vyronaspace-checkout');
+                    requireAuth("proceed to checkout", () => {
+                      // Save cart to sessionStorage for checkout page
+                      sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));
+                      
+                      // Set subscription mode flag if in subscription mode
+                      if (isSubscriptionMode) {
+                        sessionStorage.setItem('subscription-mode', 'true');
+                      }
+                      
+                      setLocation('/vyronaspace-checkout');
+                    });
                   }}
                   className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 rounded-xl"
                 >
