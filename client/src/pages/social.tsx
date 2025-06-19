@@ -124,10 +124,13 @@ export default function VyronaSocial() {
   const wsRef = useRef<WebSocket | null>(null);
 
   // Authentication check
-  const { data: authUser, isLoading: userLoading } = useQuery({
+  const { data: authUser, isLoading: userLoading, error: userError } = useQuery({
     queryKey: ["/api/current-user"],
     retry: false,
+    staleTime: 0,
   });
+
+  console.log("VyronaSocial Auth State:", { authUser, userLoading, userError });
 
   // Show loading state while checking authentication
   if (userLoading) {
