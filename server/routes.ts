@@ -435,18 +435,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sellerType = user.sellerType || 'vyronahub';
         }
 
-        req.session.user = {
+        const sessionUser = {
           id: user.id,
           email: user.email,
           username: user.username,
           role: user.role as 'customer' | 'seller' | 'admin',
           sellerType
         };
+
+        req.session.user = sessionUser;
         
-        res.json({
-          success: true,
-          user: req.session.user,
-          message: "Login successful"
+        // Force session save and wait for completion
+        req.session.save((err) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({
+              success: false,
+              message: "Session save failed"
+            });
+          }
+          
+          res.json({
+            success: true,
+            user: sessionUser,
+            message: "Login successful"
+          });
         });
       } else {
         res.status(401).json({
@@ -631,6 +644,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/auth/me", (req, res) => {
+    console.log("Auth check - Session ID:", req.sessionID);
+    console.log("Auth check - Session user:", req.session?.user);
+    
     if (req.session?.user) {
       res.json({
         success: true,

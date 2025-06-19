@@ -94,11 +94,18 @@ export default function VyronaHub() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (data: z.infer<typeof loginSchema>) => {
-      return apiRequest("POST", "/api/login", data);
+      const response = await apiRequest("POST", "/api/login", data);
+      return response.json();
     },
-    onSuccess: async () => {
-      // Invalidate and refetch user data immediately
-      await queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    onSuccess: async (data) => {
+      console.log("Login response:", data);
+      
+      // Store user data in query cache immediately
+      if (data.success && data.user) {
+        queryClient.setQueryData(["/api/auth/me"], data.user);
+      }
+      
+      // Invalidate related queries
       await queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       await queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       
@@ -108,13 +115,14 @@ export default function VyronaHub() {
         description: "Welcome back to VyronaHub!",
       });
       
-      // Wait a moment for queries to update, then refetch
+      // Force refetch user data to ensure UI updates
       setTimeout(() => {
         queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
-        queryClient.refetchQueries({ queryKey: ["/api/cart"] });
+        refetchUser();
       }, 100);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Login error:", error);
       toast({
         title: "Login Failed",
         description: "Invalid credentials. Please try again.",

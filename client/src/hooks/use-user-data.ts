@@ -11,11 +11,15 @@ export function useUserData() {
   const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/auth/me"],
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute for better real-time updates
+    refetchOnWindowFocus: true, // Refetch when window gains focus
     queryFn: async () => {
       try {
         const response = await fetch("/api/auth/me", {
           credentials: "include",
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
         });
         if (response.status === 401) {
           return null;
@@ -24,6 +28,7 @@ export function useUserData() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        console.log("Auth response:", data);
         return data.success ? data.user : null;
       } catch (error) {
         console.error("Auth check failed:", error);
