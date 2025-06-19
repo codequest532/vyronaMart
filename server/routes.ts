@@ -383,6 +383,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve uploaded files statically
   app.use('/uploads', express.static('uploads'));
 
+  // Login endpoint for frontend compatibility
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { identifier, password } = req.body;
+      
+      if (!identifier || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Email/username and password are required"
+        });
+      }
+
+      // Check admin credentials first
+      if (identifier === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
+        req.session.user = {
+          id: ADMIN_CREDENTIALS.id,
+          email: ADMIN_CREDENTIALS.email,
+          username: ADMIN_CREDENTIALS.username,
+          role: ADMIN_CREDENTIALS.role
+        };
+        
+        return res.json({
+          success: true,
+          user: req.session.user,
+          message: "Admin login successful"
+        });
+      }
+
+      // Check database users (email or username)
+      let user;
+      try {
+        user = await storage.getUserByEmail(identifier);
+        if (!user) {
+          // Try by username if email lookup failed
+          user = await storage.getUserByUsername(identifier);
+        }
+        
+        if (user && user.password !== password) {
+          user = undefined; // Password mismatch
+        }
+      } catch (dbError) {
+        console.error("Database error during login:", dbError);
+        return res.status(500).json({
+          success: false,
+          message: "Database connection error"
+        });
+      }
+
+      if (user) {
+        const sessionUser = {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          role: user.role,
+          sellerType: user.sellerType
+        };
+        
+        req.session.user = sessionUser;
+        
+        req.session.save((err) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({
+              success: false,
+              message: "Session save failed"
+            });
+          }
+          
+          res.json({
+            success: true,
+            user: sessionUser,
+            message: "Login successful"
+          });
+        });
+      } else {
+        res.status(401).json({
+          success: false,
+          message: "Invalid email/username or password"
+        });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Login failed"
+      });
+    }
+  });
+
   // Authentication endpoints
   app.post("/api/auth/login", async (req, res) => {
     try {
