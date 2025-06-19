@@ -596,11 +596,11 @@ export default function MyVyrona() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" value={user.email} disabled />
+                    <Input id="email" defaultValue={user.email} readOnly className="bg-gray-50" />
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" value={user.mobile || ""} placeholder="Add phone number" />
+                    <Input id="phone" defaultValue={user.mobile || ""} placeholder="Add phone number" />
                   </div>
                 </div>
                 <Button className="w-full">Update Account Information</Button>
@@ -650,10 +650,68 @@ export default function MyVyrona() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Button variant="outline" className="w-full">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add New Address
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add New Address
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add New Address</DialogTitle>
+                        <DialogDescription>
+                          Add a delivery address to your address book
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="address-type">Address Type</Label>
+                            <Select>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="home">Home</SelectItem>
+                                <SelectItem value="office">Office</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="address-name">Address Label</Label>
+                            <Input id="address-name" placeholder="e.g., Home, Office" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="full-address">Full Address</Label>
+                          <Textarea 
+                            id="full-address" 
+                            placeholder="House/Flat number, Building name, Street, Area"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="city">City</Label>
+                            <Input id="city" placeholder="Enter city" />
+                          </div>
+                          <div>
+                            <Label htmlFor="pincode">Pincode</Label>
+                            <Input id="pincode" placeholder="6-digit pincode" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="landmark">Landmark (Optional)</Label>
+                          <Input id="landmark" placeholder="Nearby landmark for easy delivery" />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline">Cancel</Button>
+                        <Button>Save Address</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   <p className="text-center text-gray-500 py-4">No saved addresses</p>
                 </div>
               </CardContent>
@@ -691,18 +749,181 @@ export default function MyVyrona() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Browse FAQs
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Chat with VyronaBot
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Contact Support
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Browse FAQs
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Frequently Asked Questions</DialogTitle>
+                        <DialogDescription>
+                          Find answers to common questions about VyronaMart
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-6">
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-blue-600">Account & Profile</h3>
+                          <div className="space-y-3">
+                            <div className="border-l-4 border-blue-200 pl-4">
+                              <h4 className="font-medium">How do I update my profile information?</h4>
+                              <p className="text-sm text-gray-600 mt-1">Go to MyVyrona → Profile tab → Click "Edit Profile" to update your details including location and contact information.</p>
+                            </div>
+                            <div className="border-l-4 border-blue-200 pl-4">
+                              <h4 className="font-medium">How do I change my password?</h4>
+                              <p className="text-sm text-gray-600 mt-1">Visit Settings → Account Settings → Update your password. You'll need to enter your current password for security.</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-green-600">Wallet & Payments</h3>
+                          <div className="space-y-3">
+                            <div className="border-l-4 border-green-200 pl-4">
+                              <h4 className="font-medium">How do I add money to my VyronaWallet?</h4>
+                              <p className="text-sm text-gray-600 mt-1">Go to MyVyrona → Wallet tab → Click "Add Money" → Choose payment method (UPI, Card, Net Banking) → Complete payment.</p>
+                            </div>
+                            <div className="border-l-4 border-green-200 pl-4">
+                              <h4 className="font-medium">What are VyronaCoins and how do I earn them?</h4>
+                              <p className="text-sm text-gray-600 mt-1">VyronaCoins are reward points earned through shopping, referrals, and platform activities. Use them for discounts and exclusive offers.</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-purple-600">Orders & Delivery</h3>
+                          <div className="space-y-3">
+                            <div className="border-l-4 border-purple-200 pl-4">
+                              <h4 className="font-medium">How can I track my order?</h4>
+                              <p className="text-sm text-gray-600 mt-1">Go to MyVyrona → Orders tab → Click "Track" on any active order for real-time location tracking and delivery updates.</p>
+                            </div>
+                            <div className="border-l-4 border-purple-200 pl-4">
+                              <h4 className="font-medium">What are the delivery options available?</h4>
+                              <p className="text-sm text-gray-600 mt-1">VyronaExpress (30-min, ₹80), Standard Delivery (60-min, ₹45), Store Pickup (Free). Times may vary by location.</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-semibold text-orange-600">Group Shopping</h3>
+                          <div className="space-y-3">
+                            <div className="border-l-4 border-orange-200 pl-4">
+                              <h4 className="font-medium">How do I create a shopping group?</h4>
+                              <p className="text-sm text-gray-600 mt-1">Go to VyronaSocial → Click "Create Group" → Set group details → Share room code with friends to invite them.</p>
+                            </div>
+                            <div className="border-l-4 border-orange-200 pl-4">
+                              <h4 className="font-medium">How are payments split in group orders?</h4>
+                              <p className="text-sm text-gray-600 mt-1">Members contribute individually using their preferred payment method. Order is placed once the funding goal is reached.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Chat with VyronaBot
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh]">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center space-x-2">
+                          <MessageCircle className="h-5 w-5 text-blue-600" />
+                          <span>VyronaBot Assistant</span>
+                        </DialogTitle>
+                        <DialogDescription>
+                          Get instant help from our AI assistant
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="h-96 border rounded-lg p-4 bg-gray-50 overflow-y-auto">
+                          <div className="space-y-4">
+                            <div className="flex items-start space-x-3">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <MessageCircle className="h-4 w-4 text-blue-600" />
+                              </div>
+                              <div className="flex-1 bg-white p-3 rounded-lg shadow-sm">
+                                <p className="text-sm">Hi {user.username}! I'm VyronaBot, your personal shopping assistant. How can I help you today?</p>
+                                <p className="text-xs text-gray-500 mt-1">Just now</p>
+                              </div>
+                            </div>
+                            <div className="flex items-start space-x-3">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <MessageCircle className="h-4 w-4 text-blue-600" />
+                              </div>
+                              <div className="flex-1 bg-white p-3 rounded-lg shadow-sm">
+                                <p className="text-sm">I can help you with:</p>
+                                <ul className="text-sm mt-2 space-y-1">
+                                  <li>• Order tracking and status</li>
+                                  <li>• Wallet and payment issues</li>
+                                  <li>• Product recommendations</li>
+                                  <li>• Account settings</li>
+                                  <li>• Group shopping guidance</li>
+                                </ul>
+                                <p className="text-xs text-gray-500 mt-2">Just now</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Input placeholder="Type your message..." className="flex-1" />
+                          <Button>
+                            <MessageCircle className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button variant="outline" size="sm">Track my order</Button>
+                          <Button variant="outline" size="sm">Wallet help</Button>
+                          <Button variant="outline" size="sm">Return item</Button>
+                          <Button variant="outline" size="sm">Group shopping</Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start">
+                        <Mail className="h-4 w-4 mr-2" />
+                        Contact Support
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Contact Support Team</DialogTitle>
+                        <DialogDescription>
+                          Reach our support team directly for personalized assistance
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-4 border rounded-lg">
+                            <Mail className="h-8 w-8 mx-auto text-blue-600 mb-2" />
+                            <h3 className="font-medium">Email Support</h3>
+                            <p className="text-sm text-gray-600">support@vyronamart.com</p>
+                            <p className="text-xs text-gray-500 mt-1">Response within 24 hours</p>
+                          </div>
+                          <div className="text-center p-4 border rounded-lg">
+                            <Phone className="h-8 w-8 mx-auto text-green-600 mb-2" />
+                            <h3 className="font-medium">Phone Support</h3>
+                            <p className="text-sm text-gray-600">1800-VYRONA-1</p>
+                            <p className="text-xs text-gray-500 mt-1">Mon-Sat, 9 AM - 9 PM</p>
+                          </div>
+                        </div>
+                        <div className="text-center p-4 border rounded-lg bg-blue-50">
+                          <MessageCircle className="h-8 w-8 mx-auto text-blue-600 mb-2" />
+                          <h3 className="font-medium">Live Chat</h3>
+                          <p className="text-sm text-gray-600 mb-3">Get instant help from our support team</p>
+                          <Button className="bg-blue-600 hover:bg-blue-700">Start Live Chat</Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </CardContent>
               </Card>
 
@@ -710,6 +931,7 @@ export default function MyVyrona() {
               <Card>
                 <CardHeader>
                   <CardTitle>Raise a Support Ticket</CardTitle>
+                  <CardDescription>Describe your issue and we'll get back to you</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -722,16 +944,43 @@ export default function MyVyrona() {
                         <SelectItem value="order">Order Issue</SelectItem>
                         <SelectItem value="payment">Payment Problem</SelectItem>
                         <SelectItem value="account">Account Issue</SelectItem>
+                        <SelectItem value="delivery">Delivery Problem</SelectItem>
+                        <SelectItem value="refund">Refund Request</SelectItem>
                         <SelectItem value="technical">Technical Problem</SelectItem>
+                        <SelectItem value="feedback">Feedback & Suggestions</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" placeholder="Describe your issue..." />
+                    <Label htmlFor="priority">Priority Level</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low - General inquiry</SelectItem>
+                        <SelectItem value="medium">Medium - Standard issue</SelectItem>
+                        <SelectItem value="high">High - Urgent problem</SelectItem>
+                        <SelectItem value="critical">Critical - Immediate attention needed</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Button className="w-full">Submit Ticket</Button>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea 
+                      id="description" 
+                      placeholder="Please describe your issue in detail. Include order numbers, error messages, or any relevant information..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                  <Button className="w-full">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Submit Support Ticket
+                  </Button>
+                  <p className="text-xs text-gray-500 text-center">
+                    Ticket reference will be sent to your registered email
+                  </p>
                 </CardContent>
               </Card>
             </div>
