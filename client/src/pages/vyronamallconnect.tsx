@@ -97,8 +97,8 @@ export default function VyronaMallConnect() {
     console.log(`Clicked on ${productName}`);
   };
 
-  const mallStores = Array.isArray(stores) ? stores.filter((s: any) => s.type === "mall") : [];
-  const mallProducts = Array.isArray(products) ? products.filter((p: any) => p.module === "mall") : [];
+  const mallStores = Array.isArray(stores) ? stores : [];
+  const mallProducts = Array.isArray(products) ? products : [];
 
   // Get mall data from API
   const { data: malls = [] } = useQuery({

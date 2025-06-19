@@ -180,6 +180,8 @@ Changelog:
 - June 19, 2025: Updated VyronaMallConnect delivery time from 90 min to 30-60 min across all customer-facing interfaces
 - June 19, 2025: Removed all mock data from VyronaMallConnect customer interface - platform ready for authentic mall partner onboarding
 - June 19, 2025: Added proper empty states and API endpoints for real mall and brand data integration
+- June 19, 2025: Completed VyronaMallConnect product isolation - sellers' products only available to VyronaMallConnect customers
+- June 19, 2025: Fixed product filtering to ensure complete module separation between VyronaMallConnect and other platforms
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
