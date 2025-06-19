@@ -112,9 +112,9 @@ app.use(session({
     checkPeriod: 86400000 // prune expired entries every 24h
   }),
   secret: process.env.SESSION_SECRET || 'vyrona-social-secret-key-2025',
-  resave: true, // Force session save
-  saveUninitialized: true, // Create sessions immediately
-  rolling: true, // Reset expiration on activity
+  resave: false, // Don't save session if unmodified
+  saveUninitialized: false, // Don't create sessions until needed
+  rolling: false, // Don't reset expiration on every request
   name: 'connect.sid', // Use default session name
   cookie: { 
     secure: false, // Set to true in production with HTTPS
