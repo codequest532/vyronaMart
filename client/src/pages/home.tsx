@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import Header from "@/components/layout/header";
 import TabNavigation from "@/components/layout/tab-navigation";
-import CartButton from "@/components/shopping/cart-button";
+
 import NotificationToast from "@/components/ui/notification-toast";
 import { GroupCartModal } from "@/components/GroupCartModal";
 import ProductionWelcome from "@/components/ProductionWelcome";
@@ -1107,7 +1107,6 @@ export default function Home() {
         
       </div>
 
-      {user && <CartButton />}
       <NotificationToast 
         notification={notification}
         onHide={hideNotification}
