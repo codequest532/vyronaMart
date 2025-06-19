@@ -78,6 +78,7 @@ export default function MyVyrona() {
     priority: "",
     description: ""
   });
+  const [paymentMethodType, setPaymentMethodType] = useState("card");
 
   // Update form when user data changes
   useEffect(() => {
@@ -1286,7 +1287,7 @@ export default function MyVyrona() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="payment-type">Payment Type</Label>
-              <Select>
+              <Select value={paymentMethodType} onValueChange={setPaymentMethodType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select payment type" />
                 </SelectTrigger>
@@ -1297,29 +1298,72 @@ export default function MyVyrona() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            
+            {/* Card Payment Form */}
+            {paymentMethodType === "card" && (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="card-number">Card Number</Label>
+                    <Input id="card-number" placeholder="1234 5678 9012 3456" />
+                  </div>
+                  <div>
+                    <Label htmlFor="card-name">Cardholder Name</Label>
+                    <Input id="card-name" placeholder="Full name on card" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="expiry">Expiry Date</Label>
+                    <Input id="expiry" placeholder="MM/YY" />
+                  </div>
+                  <div>
+                    <Label htmlFor="cvv">CVV</Label>
+                    <Input id="cvv" placeholder="123" type="password" />
+                  </div>
+                </div>
+              </>
+            )}
+            
+            {/* UPI Payment Form */}
+            {paymentMethodType === "upi" && (
               <div>
-                <Label htmlFor="card-number">Card Number</Label>
-                <Input id="card-number" placeholder="1234 5678 9012 3456" />
+                <Label htmlFor="upi-id">UPI ID</Label>
+                <Input 
+                  id="upi-id" 
+                  placeholder="yourname@paytm / yourname@gpay"
+                  type="email"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter your UPI ID (e.g., 9876543210@paytm, username@gpay)
+                </p>
               </div>
+            )}
+            
+            {/* Net Banking Form */}
+            {paymentMethodType === "netbanking" && (
               <div>
-                <Label htmlFor="card-name">Cardholder Name</Label>
-                <Input id="card-name" placeholder="Full name on card" />
+                <Label htmlFor="bank-name">Select Bank</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose your bank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="sbi">State Bank of India</SelectItem>
+                    <SelectItem value="hdfc">HDFC Bank</SelectItem>
+                    <SelectItem value="icici">ICICI Bank</SelectItem>
+                    <SelectItem value="axis">Axis Bank</SelectItem>
+                    <SelectItem value="kotak">Kotak Mahindra Bank</SelectItem>
+                    <SelectItem value="pnb">Punjab National Bank</SelectItem>
+                    <SelectItem value="other">Other Bank</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input id="expiry" placeholder="MM/YY" />
-              </div>
-              <div>
-                <Label htmlFor="cvv">CVV</Label>
-                <Input id="cvv" placeholder="123" type="password" />
-              </div>
-            </div>
+            )}
+            
             <div className="flex items-center space-x-2">
-              <input type="checkbox" id="save-card" className="rounded" />
-              <Label htmlFor="save-card" className="text-sm">
+              <input type="checkbox" id="save-payment" className="rounded" />
+              <Label htmlFor="save-payment" className="text-sm">
                 Save this payment method for future use
               </Label>
             </div>
