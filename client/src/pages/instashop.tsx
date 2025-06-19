@@ -36,10 +36,13 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuthGuard } from "@/hooks/use-auth-guard";
+import LoginModal from "@/components/auth/login-modal";
 
 export default function VyronaInstaShop() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
@@ -361,7 +364,7 @@ export default function VyronaInstaShop() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setLocation('/instacart')}
+                onClick={() => requireAuth("view cart", () => setLocation('/instacart'))}
                 className="relative text-pink-600 border-pink-300 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-400"
               >
                 <ShoppingBag className="h-4 w-4 mr-2" />
@@ -579,10 +582,12 @@ export default function VyronaInstaShop() {
                           className="flex-1 bg-purple-600 hover:bg-purple-700"
                           onClick={(e) => {
                             e.stopPropagation();
-                            addToCartMutation.mutate({
-                              productId: product.id,
-                              quantity: 1,
-                              price: product.price // Price already in rupees
+                            requireAuth("add items to cart", () => {
+                              addToCartMutation.mutate({
+                                productId: product.id,
+                                quantity: 1,
+                                price: product.price // Price already in rupees
+                              });
                             });
                           }}
                           disabled={addToCartMutation.isPending}
@@ -840,14 +845,14 @@ export default function VyronaInstaShop() {
                     <Button 
                       size="lg" 
                       className="bg-purple-600 hover:bg-purple-700 h-14 text-lg"
-                      onClick={() => {
+                      onClick={() => requireAuth("add items to cart", () => {
                         addToCartMutation.mutate({
                           productId: selectedProduct.id,
                           quantity: 1,
                           price: selectedProduct.price
                         });
                         setSelectedProduct(null);
-                      }}
+                      })}
                       disabled={addToCartMutation.isPending}
                     >
                       <ShoppingCart className="mr-2 h-5 w-5" />
@@ -1082,6 +1087,12 @@ export default function VyronaInstaShop() {
           </DialogContent>
         </Dialog>
       )}
+      
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }
