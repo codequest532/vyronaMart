@@ -1041,40 +1041,77 @@ export default function VyronaSocial() {
           <div className="mb-12">
             <h3 className="text-2xl font-bold text-center mb-8">Featured Group Buy Products</h3>
             <div className="grid md:grid-cols-3 gap-6">
-              {products && products.slice(0, 6).map((product: any) => (
-                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="aspect-video bg-gray-100 relative">
-                    {product.imageUrl ? (
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
+              {products && products.length > 0 ? (
+                products.slice(0, 6).map((product: any) => (
+                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="aspect-video bg-gray-100 relative">
+                      {product.imageUrl ? (
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Package className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                      <Badge className="absolute top-2 right-2 bg-green-500">
+                        Group Discount Available
+                      </Badge>
+                    </div>
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold mb-2">{product.name}</h4>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold">₹{Math.round(product.price)}</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setLocation("/login")}
+                        >
+                          Join Group
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                // Show demo products when no real products exist
+                [
+                  { id: 'demo1', name: 'Premium Organic Rice', description: 'High-quality basmati rice perfect for group buying', price: 2500, imageUrl: null },
+                  { id: 'demo2', name: 'Fresh Vegetables Bundle', description: 'Weekly fresh vegetable package for families', price: 800, imageUrl: null },
+                  { id: 'demo3', name: 'Household Essentials Kit', description: 'Complete cleaning and household supplies', price: 1200, imageUrl: null },
+                  { id: 'demo4', name: 'Organic Fruits Box', description: 'Seasonal organic fruits delivered weekly', price: 1500, imageUrl: null },
+                  { id: 'demo5', name: 'Dairy Products Bundle', description: 'Fresh milk, yogurt, and cheese package', price: 600, imageUrl: null },
+                  { id: 'demo6', name: 'Snacks & Beverages Pack', description: 'Healthy snacks and drinks for the family', price: 900, imageUrl: null }
+                ].map((product) => (
+                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <div className="aspect-video bg-gray-100 relative">
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="h-12 w-12 text-gray-400" />
                       </div>
-                    )}
-                    <Badge className="absolute top-2 right-2 bg-green-500">
-                      Group Discount Available
-                    </Badge>
-                  </div>
-                  <CardContent className="p-4">
-                    <h4 className="font-semibold mb-2">{product.name}</h4>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold">₹{Math.round(product.price)}</span>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => setLocation("/login")}
-                      >
-                        Join Group
-                      </Button>
+                      <Badge className="absolute top-2 right-2 bg-green-500">
+                        Group Discount Available
+                      </Badge>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardContent className="p-4">
+                      <h4 className="font-semibold mb-2">{product.name}</h4>
+                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold">₹{Math.round(product.price)}</span>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => setLocation("/login")}
+                        >
+                          Join Group
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
 
