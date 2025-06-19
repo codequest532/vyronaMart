@@ -170,11 +170,7 @@ Changelog:
 - June 17, 2025: Added proper authentication checks to all VyronaMallConnect API endpoints: /store, /products, /orders, /analytics, /bulk-import
 - June 17, 2025: Implemented role-based access control requiring authenticated VyronaMallConnect sellers for dashboard data access
 - June 17, 2025: Enhanced data security to prevent cross-seller data access and ensure complete seller-specific data isolation
-- June 19, 2025: Completed comprehensive VyronaMart landing page redesign with modern UI and improved customer appeal
-- June 19, 2025: Created cohesive module showcase featuring all 6 VyronaMart platforms: VyronaHub, VyronaSocial, VyronaSpace, VyronaRead, VyronaMallConnect, VyronaInstaStore
-- June 19, 2025: Implemented gradient-based modern design with consistent module branding and clear value propositions
-- June 19, 2025: Enhanced user experience with intuitive navigation, featured products section, and compelling call-to-action elements
-- June 19, 2025: Updated landing page to highlight unique VyronaMart features: gamified shopping, social rooms, quick commerce, and multi-platform access
+- June 19, 2025: Reverted landing page to previous stable version per user request
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
