@@ -57,7 +57,7 @@ function Router() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading VyronaRead...</p>
+          <p className="text-gray-600">Loading VyronaMart...</p>
         </div>
       </div>
     );
@@ -89,10 +89,9 @@ function Router() {
       
 
       
-      {/* Customer Interface (Default) - Digital Reading Platform */}
-      <Route path="/" component={VyronaRead} />
-      <Route path="/home" component={VyronaRead} />
-      <Route path="/vyronamart" component={Home} />
+      {/* Customer Interface (Default) */}
+      <Route path="/" component={Home} />
+      <Route path="/home" component={Home} />
       <Route path="/landing" component={Landing} />
       <Route path="/product/:productId">
         {(params) => <ProductDetails productId={params.productId} />}
