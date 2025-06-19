@@ -222,6 +222,11 @@ Changelog:
 - June 19, 2025: Unified home page to serve as both landing and authenticated user homepage with integrated login/signup and seller onboarding functionality
 - June 19, 2025: Renamed "Get Started" button to "Log in" for clearer user action and improved user experience
 - June 19, 2025: Updated header buttons - "Sign in" renamed to "Log in" and "Log in" renamed to "Sign up" for better user flow
+- June 19, 2025: Implemented comprehensive authentication requirements for core functionalities
+- June 19, 2025: Non-authenticated users can browse products and view details across all modules
+- June 19, 2025: Authentication required for cart operations, wallet transactions, group creation, and order placement
+- June 19, 2025: Added authentication guards to all add-to-cart functions across VyronaHub, VyronaSpace, VyronaSocial, VyronaMallConnect, and VyronaRead
+- June 19, 2025: Implemented authentication triggers that display login modal for non-authenticated users attempting core actions
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display

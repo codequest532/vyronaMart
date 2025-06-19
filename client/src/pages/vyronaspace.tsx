@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import VyronaSocialGroupBuy from "@/components/VyronaSocialGroupBuy";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
@@ -85,6 +86,7 @@ export default function VyronaSpace() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { requireAuth } = useAuthGuard();
 
   // Fetch real stores data from backend
   const { data: storesData = [], isLoading: storesLoading } = useQuery({
@@ -251,6 +253,8 @@ export default function VyronaSpace() {
   };
 
   const addToCart = (item: { id: number; name: string; price: number; storeName: string }) => {
+    if (!requireAuth("add items to cart")) return;
+    
     const existingItem = cart.find(cartItem => cartItem.id === item.id);
     if (existingItem) {
       setCart(cart.map(cartItem => 
@@ -1244,6 +1248,8 @@ export default function VyronaSpace() {
       <div className="fixed bottom-6 right-6 z-50">
           <Button 
             onClick={() => {
+              if (!requireAuth("access checkout")) return;
+              
               if (cart.length > 0) {
                 // Save cart to sessionStorage for checkout page
                 sessionStorage.setItem('vyronaspace-cart', JSON.stringify(cart));

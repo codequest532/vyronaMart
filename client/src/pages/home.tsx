@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import Header from "@/components/layout/header";
 import TabNavigation from "@/components/layout/tab-navigation";
@@ -8,6 +8,7 @@ import { GroupCartModal } from "@/components/GroupCartModal";
 import ProductionWelcome from "@/components/ProductionWelcome";
 import { useUserData } from "@/hooks/use-user-data";
 import { useToastNotifications } from "@/hooks/use-toast-notifications";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -150,7 +151,19 @@ export default function Home() {
     setActiveTab(tab);
   };
   const { user } = useUserData();
+  const { requireAuth } = useAuthGuard();
   const { notification, showNotification, hideNotification } = useToastNotifications();
+
+  // Listen for auth-required events to show login modal
+  useEffect(() => {
+    const handleAuthRequired = () => {
+      setAuthMode("login");
+      setShowAuthModal(true);
+    };
+
+    window.addEventListener('auth-required', handleAuthRequired);
+    return () => window.removeEventListener('auth-required', handleAuthRequired);
+  }, []);
 
   // Authentication mutations
   const loginMutation = useMutation({
@@ -1087,7 +1100,7 @@ export default function Home() {
         
       </div>
 
-      {user && <CartButton />}
+      <CartButton />
       <NotificationToast 
         notification={notification}
         onHide={hideNotification}

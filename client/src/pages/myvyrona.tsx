@@ -4,6 +4,7 @@ import { useUserData } from "@/hooks/use-user-data";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,7 @@ export default function MyVyrona() {
   const [, setLocation] = useLocation();
   const { user } = useUserData();
   const { toast } = useToast();
+  const { requireAuth } = useAuthGuard();
   const [addMoneyAmount, setAddMoneyAmount] = useState("");
   const [activeSection, setActiveSection] = useState("profile");
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
@@ -140,9 +142,11 @@ export default function MyVyrona() {
     canceled: purchases.filter(order => order.status === 'canceled').length
   };
 
-  // Wallet mutations
+  // Wallet mutations with authentication checks
   const addMoneyMutation = useMutation({
     mutationFn: async (data: { amount: number; paymentMethod: string }) => {
+      if (!requireAuth("add money to wallet")) return;
+      
       const response = await fetch("/api/wallet/add-money", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

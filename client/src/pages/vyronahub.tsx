@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -46,6 +47,7 @@ export default function VyronaHub() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location, setLocation] = useLocation();
+  const { requireAuth } = useAuthGuard();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -107,6 +109,8 @@ export default function VyronaHub() {
   const groupBuyCampaigns = Array.isArray(rawGroupBuyCampaigns) ? rawGroupBuyCampaigns : [];
 
   const handleAddToCart = (product: any, isGroupBuy = false) => {
+    if (!requireAuth("add items to cart")) return;
+    
     addToCartMutation.mutate({
       productId: product.id,
       quantity: quantity,
@@ -172,7 +176,7 @@ export default function VyronaHub() {
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => setLocation("/cart")}
+                onClick={() => requireAuth("access your cart", () => setLocation("/cart"))}
                 className="flex items-center gap-2 relative bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
               >
                 <ShoppingCart className="h-4 w-4" />

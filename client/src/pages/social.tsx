@@ -49,6 +49,7 @@ import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 // Form schemas
 const createGroupSchema = z.object({
@@ -97,6 +98,7 @@ export default function VyronaSocial() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { requireAuth } = useAuthGuard();
   
   // State Management
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
@@ -750,6 +752,8 @@ export default function VyronaSocial() {
   };
 
   const handleAddToGroupCart = (productId: number) => {
+    if (!requireAuth("add items to group cart")) return;
+    
     if (!selectedGroupId) {
       toast({ title: "Please select a group first", variant: "destructive" });
       return;

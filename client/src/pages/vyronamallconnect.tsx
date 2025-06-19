@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { 
   ArrowLeft, Building, Shirt, Laptop, Utensils, Home as HomeIcon, Star, Coins, 
   MapPin, Clock, ShoppingCart, Users, Heart, Gift, Truck, MessageCircle,
@@ -42,6 +43,7 @@ export default function VyronaMallConnect() {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { requireAuth } = useAuthGuard();
 
   const { data: stores = [] } = useQuery({
     queryKey: ["/api/mallconnect/stores"],
