@@ -340,12 +340,14 @@ export default function VyronaMallConnect() {
   };
 
   const removeFromCart = (itemId: string) => {
-    const updatedCart = mallCart.filter(item => item.id !== itemId);
-    setMallCart(updatedCart);
-    localStorage.setItem('mallCart', JSON.stringify(updatedCart));
-    toast({
-      title: "Item Removed",
-      description: "Item removed from your MallCart",
+    requireAuth("remove items from cart", () => {
+      const updatedCart = mallCart.filter(item => item.id !== itemId);
+      setMallCart(updatedCart);
+      localStorage.setItem('mallCart', JSON.stringify(updatedCart));
+      toast({
+        title: "Item Removed",
+        description: "Item removed from your MallCart",
+      });
     });
   };
 
@@ -1561,10 +1563,12 @@ export default function VyronaMallConnect() {
                       <Button 
                         className="w-full bg-amber-500 hover:bg-amber-600 text-white"
                         onClick={() => {
-                          // Save cart to localStorage and redirect to checkout
-                          localStorage.setItem('mallCart', JSON.stringify(mallCart));
-                          setShowCartModal(false);
-                          setLocation("/mallcart-checkout");
+                          requireAuth("proceed to checkout", () => {
+                            // Save cart to localStorage and redirect to checkout
+                            localStorage.setItem('mallCart', JSON.stringify(mallCart));
+                            setShowCartModal(false);
+                            setLocation("/mallcart-checkout");
+                          });
                         }}
                       >
                         Proceed to Checkout - ₹{Math.round((getTotalPrice() + getDeliveryFee() * 100) / 100).toLocaleString()}
@@ -1714,8 +1718,10 @@ export default function VyronaMallConnect() {
                         </Button>
                         <Button 
                           onClick={() => {
-                            setShowGroupCartModal(false);
-                            setLocation("/group-mallcart-checkout");
+                            requireAuth("proceed to group checkout", () => {
+                              setShowGroupCartModal(false);
+                              setLocation("/group-mallcart-checkout");
+                            });
                           }}
                           className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                         >
