@@ -772,17 +772,15 @@ export default function VyronaSocial() {
     );
   }
 
-  if (!authUser) {
-    return null;
-  }
+  // Remove authentication requirement for browsing - users can view products without login
 
   const filteredProducts = (products as any[])?.filter((product: any) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  // Deduplicate groups by ID to prevent React key conflicts
+  // Deduplicate groups by ID to prevent React key conflicts - only for authenticated users
   const userGroups = React.useMemo(() => {
-    if (!groups) return [];
+    if (!groups || !authUser) return [];
     const seen = new Set();
     return (groups as any[]).filter((group: any) => {
       if (seen.has(group.id)) {
@@ -791,10 +789,10 @@ export default function VyronaSocial() {
       seen.add(group.id);
       return true;
     });
-  }, [groups]);
+  }, [groups, authUser]);
   
-  const selectedGroup = selectedGroupId ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
-  const cartItems = (groupCart as CartItem[]) || [];
+  const selectedGroup = selectedGroupId && authUser ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
+  const cartItems = authUser ? ((groupCart as CartItem[]) || []) : [];
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
 
   // Deduplicate online members to prevent React key conflicts
@@ -1002,45 +1000,38 @@ export default function VyronaSocial() {
             </div>
 
             {/* Right side - Actions and Group Cart */}
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="h-5 w-5" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs bg-red-500 text-white rounded-full">
-                  3
-                </Badge>
-              </Button>
-              
-              {/* Video Call Toggle */}
-              {selectedGroupId && (
-                <Button
-                  onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
-                  disabled={!isVideoCallActive && deduplicatedOnlineMembers.length <= 1}
-                  className={`gap-2 ${isVideoCallActive 
-                    ? 'bg-red-500 hover:bg-red-600' 
-                    : deduplicatedOnlineMembers.length <= 1 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-green-500 hover:bg-green-600'}`}
-                  size="sm"
-                >
-                  {isVideoCallActive ? <VideoOff className="h-4 w-4" /> : <Video className="h-4 w-4" />}
-                  {isVideoCallActive ? 'End Call' : 
-                   deduplicatedOnlineMembers.length <= 1 ? 'Not enough members online' : 'Start Call'}
-                </Button>
-              )}
-
-              {/* Group Cart Button - Prominent */}
-              <Dialog open={isGroupCartOpen} onOpenChange={setIsGroupCartOpen}>
-                <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white gap-2 relative shadow-lg">
-                    <ShoppingCart className="h-5 w-5" />
-                    Group Cart
+            <div className="flex items-center gap-4">
+              {authUser ? (
+                <>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Heart className="h-4 w-4" />
+                    <span className="hidden sm:inline">Wishlist</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="relative">
+                    <Bell className="h-4 w-4" />
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center text-[10px] bg-red-500 text-white rounded-full">
+                      3
+                    </Badge>
+                  </Button>
+                  <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white gap-2 shadow-lg hover:shadow-xl transition-all">
+                    <ShoppingCart className="h-4 w-4" />
+                    <span className="hidden sm:inline">Group Cart</span>
                     {cartItems.length > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center text-xs bg-orange-500 text-white rounded-full animate-pulse">
+                      <Badge className="bg-orange-500 text-white">
                         {cartItems.length}
                       </Badge>
                     )}
                   </Button>
-                </DialogTrigger>
+                </>
+              ) : (
+                <Button 
+                  onClick={() => requireAuth("access VyronaSocial features")}
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white gap-2"
+                >
+                  <Users className="h-4 w-4" />
+                  Login to Join Groups
+                </Button>
+              )}
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">

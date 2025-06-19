@@ -227,6 +227,9 @@ Changelog:
 - June 19, 2025: Authentication required for cart operations, wallet transactions, group creation, and order placement
 - June 19, 2025: Added authentication guards to all add-to-cart functions across VyronaHub, VyronaSpace, VyronaSocial, VyronaMallConnect, and VyronaRead
 - June 19, 2025: Implemented authentication triggers that display login modal for non-authenticated users attempting core actions
+- June 19, 2025: Updated VyronaSocial page to allow non-authenticated users to browse products while requiring authentication for group operations
+- June 19, 2025: Added conditional UI elements - group features only visible to authenticated users, login button for non-authenticated users
+- June 19, 2025: Maintained authentication requirements for cart operations, group creation, and group management features
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display
