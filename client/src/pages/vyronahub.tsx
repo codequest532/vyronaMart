@@ -67,6 +67,10 @@ export default function VyronaHub() {
     queryKey: ["/api/current-user"],
   });
 
+  const showLogin = () => {
+    setLocation("/login");
+  };
+
   // Add to cart mutation
   const addToCartMutation = useMutation({
     mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
@@ -107,6 +111,11 @@ export default function VyronaHub() {
   const groupBuyCampaigns = Array.isArray(rawGroupBuyCampaigns) ? rawGroupBuyCampaigns : [];
 
   const handleAddToCart = (product: any, isGroupBuy = false) => {
+    if (!user) {
+      showLogin();
+      return;
+    }
+    
     addToCartMutation.mutate({
       productId: product.id,
       quantity: quantity,
@@ -172,7 +181,7 @@ export default function VyronaHub() {
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => setLocation("/cart")}
+                onClick={() => user ? setLocation("/cart") : showLogin()}
                 className="flex items-center gap-2 relative bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/30"
               >
                 <ShoppingCart className="h-4 w-4" />
@@ -340,7 +349,7 @@ export default function VyronaHub() {
             <div className="text-center">
               <Button 
                 size="lg"
-                onClick={() => setLocation("/social")}
+                onClick={() => user ? setLocation("/social") : showLogin()}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 text-lg font-semibold shadow-lg transform hover:scale-105 transition-all"
               >
                 <Users className="w-6 h-6 mr-3" />
@@ -418,7 +427,15 @@ export default function VyronaHub() {
                       <Badge className="bg-purple-500 text-white border-0 text-xs">NEW</Badge>
                     </div>
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Button size="sm" variant="secondary" className="text-gray-400 hover:text-red-500 bg-white/90 hover:bg-white shadow-lg h-8 w-8 p-0">
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="text-gray-400 hover:text-red-500 bg-white/90 hover:bg-white shadow-lg h-8 w-8 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!user) showLogin();
+                        }}
+                      >
                         <Heart className="h-3 w-3" />
                       </Button>
                     </div>
@@ -474,7 +491,7 @@ export default function VyronaHub() {
                         className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-3 py-1 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs"
                       >
                         <ShoppingCart className="h-3 w-3 mr-1" />
-                        Add to Cart
+                        {user ? "Add to Cart" : "Login to Add"}
                       </Button>
                     </div>
                   </CardContent>
@@ -535,7 +552,7 @@ export default function VyronaHub() {
                         className="bg-blue-500 hover:bg-blue-600"
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
-                        Add to Cart
+                        {user ? "Add to Cart" : "Login to Add"}
                       </Button>
                     </div>
                   </div>
