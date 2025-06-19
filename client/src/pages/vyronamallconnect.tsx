@@ -1226,14 +1226,14 @@ export default function VyronaMallConnect() {
                     onChange={(e) => setJoinGroupCode(e.target.value)}
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && joinGroupCode.trim()) {
-                        joinGroupMutation.mutate(joinGroupCode.trim());
+                        requireAuth("join a group", () => joinGroupMutation.mutate(joinGroupCode.trim()));
                       }
                     }}
                   />
                   <Button 
                     variant="outline"
                     disabled={!joinGroupCode.trim() || joinGroupMutation.isPending}
-                    onClick={() => joinGroupMutation.mutate(joinGroupCode.trim())}
+                    onClick={() => requireAuth("join a group", () => joinGroupMutation.mutate(joinGroupCode.trim()))}
                   >
                     {joinGroupMutation.isPending ? "Joining..." : "Join Group"}
                   </Button>
