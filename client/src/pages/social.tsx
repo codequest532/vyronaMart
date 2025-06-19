@@ -131,12 +131,7 @@ export default function VyronaSocial() {
     retry: false,
   });
 
-  // Handle redirect to auth if not authenticated
-  React.useEffect(() => {
-    if (!userLoading && !authUser) {
-      setLocation("/login");
-    }
-  }, [userLoading, authUser, setLocation]);
+  // Authentication check (no redirect, allow browsing)
 
   // Fetch groups
   const { data: groups, isLoading: groupsLoading } = useQuery({
