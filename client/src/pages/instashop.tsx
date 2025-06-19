@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 import { 
   Instagram, 
   ShoppingCart, 
@@ -46,6 +48,8 @@ export default function VyronaInstaShop() {
   const [sortBy, setSortBy] = useState("popular");
   const [viewMode, setViewMode] = useState("grid");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   
   // Chat states
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -73,6 +77,17 @@ export default function VyronaInstaShop() {
   const safeCartItems = Array.isArray(cartItems) ? cartItems : [];
 
   // Add to Instagram cart mutation
+  // Listen for auth-required events to show login modal
+  useEffect(() => {
+    const handleAuthRequired = () => {
+      setAuthMode("login");
+      setShowAuthModal(true);
+    };
+
+    window.addEventListener('auth-required', handleAuthRequired);
+    return () => window.removeEventListener('auth-required', handleAuthRequired);
+  }, []);
+
   const addToCartMutation = useMutation({
     mutationFn: async (productData: any) => {
       return await apiRequest("POST", "/api/instacart/add", productData);
@@ -1082,6 +1097,137 @@ export default function VyronaInstaShop() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Auth Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {authMode === "login" ? "Sign In to VyronaInstaStore" : "Create Your Account"}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {authMode === "login" 
+                ? "Please sign in to add items to cart and shop." 
+                : "Create an account to unlock Instagram shopping features."
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const email = formData.get("email") as string;
+                const password = formData.get("password") as string;
+                
+                fetch("/api/login", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email, password }),
+                }).then(async (response) => {
+                  if (response.ok) {
+                    toast({ title: "Welcome back!", description: "You're now signed in." });
+                    setShowAuthModal(false);
+                    window.location.reload();
+                  } else {
+                    const error = await response.json();
+                    toast({ title: "Sign in failed", description: error.message, variant: "destructive" });
+                  }
+                });
+              }} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-teal-500 to-cyan-600">
+                  Sign In
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const username = formData.get("username") as string;
+                const email = formData.get("email") as string;
+                const password = formData.get("password") as string;
+                
+                fetch("/api/register", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ username, email, password, userType: "customer" }),
+                }).then(async (response) => {
+                  if (response.ok) {
+                    toast({ title: "Account created!", description: "Welcome to VyronaInstaStore!" });
+                    setShowAuthModal(false);
+                    window.location.reload();
+                  } else {
+                    const error = await response.json();
+                    toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
+                  }
+                });
+              }} className="space-y-4">
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Choose a username"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input
+                    id="signup-password"
+                    name="password"
+                    type="password"
+                    placeholder="Create a password"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-teal-500 to-cyan-600">
+                  Create Account
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </DialogContent>
+        </Dialog>
     </div>
   );
 }
