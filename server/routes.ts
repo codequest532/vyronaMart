@@ -7882,6 +7882,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add money to wallet endpoint with email notification
+  app.post("/api/wallet/add-money", async (req, res) => {
+    try {
+      const { userId, amount, paymentMethod } = req.body;
+      
+      if (!userId || !amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid user ID or amount" });
+      }
+
+      // Get user details
+      const userResult = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (userResult.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const user = userResult[0];
+      const currentBalance = parseFloat(user.walletBalance || "0");
+      const newBalance = currentBalance + amount;
+      
+      // Update wallet balance
+      await db
+        .update(users)
+        .set({ walletBalance: newBalance.toString() })
+        .where(eq(users.id, userId));
+
+      // Create transaction record
+      await db.insert(walletTransactions).values({
+        userId,
+        amount: amount.toString(),
+        type: "credit",
+        status: "completed",
+        description: `Wallet top-up via ${paymentMethod}`,
+        transactionId: `wallet_add_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      });
+
+      // Send confirmation email via Brevo
+      if (user.email) {
+        try {
+          await sendEmail({
+            to: user.email,
+            subject: "VyronaWallet - Money Added Successfully",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+                  <h1 style="color: white; margin: 0;">VyronaWallet</h1>
+                </div>
+                <div style="padding: 30px; background: #f8f9fa;">
+                  <h2 style="color: #333;">Money Added Successfully!</h2>
+                  <p style="color: #666; font-size: 16px;">Hi ${user.username},</p>
+                  <p style="color: #666; font-size: 16px;">We've successfully added money to your VyronaWallet.</p>
+                  
+                  <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
+                    <h3 style="margin: 0 0 10px 0; color: #28a745;">Transaction Details</h3>
+                    <p style="margin: 5px 0;"><strong>Amount Added:</strong> ₹${amount}</p>
+                    <p style="margin: 5px 0;"><strong>Payment Method:</strong> ${paymentMethod.toUpperCase()}</p>
+                    <p style="margin: 5px 0;"><strong>New Balance:</strong> ₹${newBalance}</p>
+                    <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+                  </div>
+                  
+                  <p style="color: #666; font-size: 16px;">You can now use this money for shopping across all VyronaMart platforms.</p>
+                  
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${process.env.FRONTEND_URL || 'https://vyronamart.replit.app'}" 
+                       style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                      Start Shopping
+                    </a>
+                  </div>
+                  
+                  <p style="color: #999; font-size: 14px; text-align: center;">
+                    Thank you for choosing VyronaMart!
+                  </p>
+                </div>
+              </div>
+            `
+          });
+        } catch (emailError) {
+          console.error('Email sending failed:', emailError);
+          // Don't fail the request if email fails
+        }
+      }
+      
+      res.json({ 
+        message: "Money added successfully", 
+        newBalance,
+        amount: amount
+      });
+    } catch (error) {
+      console.error('Add money error:', error);
+      res.status(500).json({ message: "Failed to add money to wallet" });
+    }
+  });
+
   // Razorpay wallet routes
   app.post("/api/wallet/create-order", async (req, res) => {
     try {
