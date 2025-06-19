@@ -219,6 +219,7 @@ Changelog:
 - June 19, 2025: Implemented modern card layouts, gradient backgrounds, and feature highlights section for improved user experience
 - June 19, 2025: Corrected delivery times on home page - VyronaSpace: 5-15 minutes, VyronaMallConnect: 30-60 minutes
 - June 19, 2025: Updated landing page to match redesigned home page with same modern layout, platform cards, and product showcase
+- June 19, 2025: Unified home page to serve as both landing and authenticated user homepage with integrated login/signup and seller onboarding functionality
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display

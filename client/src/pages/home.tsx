@@ -11,6 +11,7 @@ import { useToastNotifications } from "@/hooks/use-toast-notifications";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import SellerOnboardingModal from "@/components/seller-onboarding-modal";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Gamepad2, 
   Zap, 
@@ -107,6 +109,12 @@ export default function Home() {
   const [selectedEbook, setSelectedEbook] = useState<any>(null);
   const [addMoneyAmount, setAddMoneyAmount] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("upi");
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showSellerOnboarding, setShowSellerOnboarding] = useState(false);
+  const [otpStep, setOtpStep] = useState<"email" | "otp" | "reset">("email");
+  const [resetEmail, setResetEmail] = useState("");
   const { toast } = useToast();
   
   const handleTabChange = (tab: TabType) => {
@@ -143,6 +151,277 @@ export default function Home() {
   };
   const { user } = useUserData();
   const { notification, showNotification, hideNotification } = useToastNotifications();
+
+  // Authentication mutations
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setShowAuthModal(false);
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      toast({
+        title: "Success",
+        description: "Logged in successfully!",
+      });
+      
+      if (data.user?.role === 'admin') {
+        setLocation("/admin");
+      } else if (data.user?.role === 'seller') {
+        if (data.user.sellerType === 'vyronaread') {
+          setLocation("/vyronaread-dashboard");
+        } else if (data.user.sellerType === 'VyronaMallConnect') {
+          setLocation("/vyronamallconnect-seller-dashboard");
+        } else if (data.user.sellerType === 'vyronaspace') {
+          setLocation("/vyronaspace-seller-dashboard");
+        } else if (data.user.sellerType === 'vyronainstastore') {
+          setLocation("/vyronainstastore-seller-dashboard");
+        } else {
+          setLocation("/vyronahub-dashboard");
+        }
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Login Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const signupMutation = useMutation({
+    mutationFn: async (data: { 
+      username: string;
+      email: string; 
+      password: string; 
+      confirmPassword: string;
+      mobile: string;
+    }) => {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/current-user"], data.user);
+      setShowAuthModal(false);
+      toast({
+        title: "Account Created",
+        description: "Welcome to VyronaMart!",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Signup Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (data: { email: string }) => {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setOtpStep("otp");
+      toast({
+        title: "OTP Sent",
+        description: "Please check your email for the verification code.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const verifyOtpMutation = useMutation({
+    mutationFn: async (data: { email: string; otp: string }) => {
+      const response = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setOtpStep("reset");
+      toast({
+        title: "OTP Verified",
+        description: "You can now reset your password.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Invalid OTP",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string; confirmPassword: string }) => {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to reset password");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      setShowForgotPassword(false);
+      setOtpStep("email");
+      setResetEmail("");
+      toast({
+        title: "Password Reset",
+        description: "Your password has been reset successfully. Please login with your new password.",
+      });
+      setAuthMode("login");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    loginMutation.mutate({ email, password });
+  };
+
+  const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get("username") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    const mobile = formData.get("mobile") as string;
+
+    if (!username || !email || !password || !confirmPassword || !mobile) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    signupMutation.mutate({ username, email, password, confirmPassword, mobile });
+  };
+
+  const handleForgotPasswordStep = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    if (otpStep === "email") {
+      const email = formData.get("email") as string;
+      if (!email) {
+        toast({
+          title: "Error",
+          description: "Please enter your email address.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setResetEmail(email);
+      forgotPasswordMutation.mutate({ email });
+    } else if (otpStep === "otp") {
+      const otp = formData.get("otp") as string;
+      if (!otp) {
+        toast({
+          title: "Error",
+          description: "Please enter the OTP.",
+          variant: "destructive",
+        });
+        return;
+      }
+      verifyOtpMutation.mutate({ email: resetEmail, otp });
+    } else if (otpStep === "reset") {
+      const password = formData.get("password") as string;
+      const confirmPassword = formData.get("confirmPassword") as string;
+      if (!password || !confirmPassword) {
+        toast({
+          title: "Error",
+          description: "Please fill in all fields.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (password !== confirmPassword) {
+        toast({
+          title: "Error",
+          description: "Passwords do not match.",
+          variant: "destructive",
+        });
+        return;
+      }
+      resetPasswordMutation.mutate({ email: resetEmail, password, confirmPassword });
+    }
+  };
 
   // Fetch all products from different modules
   const { data: vyronaHubProducts = [], isLoading: isLoadingHub } = useQuery({
@@ -304,24 +583,72 @@ export default function Home() {
     }
   };
 
-  if (!user) {
-    return <ProductionWelcome />;
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
-      <Header />
+      {/* Header */}
+      {user ? (
+        <Header />
+      ) : (
+        <header className="bg-white/80 backdrop-blur-sm border-b border-purple-200 sticky top-0 z-50">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <Store className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    VyronaMart
+                  </h1>
+                  <p className="text-sm text-gray-600">Multi-Platform Commerce</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowSellerOnboarding(true)}
+                  className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                >
+                  <Building className="h-4 w-4 mr-2" />
+                  Become a Seller
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => {
+                    setAuthMode("login");
+                    setShowAuthModal(true);
+                  }}
+                  className="text-purple-700 hover:text-purple-800 hover:bg-purple-50"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setAuthMode("signup");
+                    setShowAuthModal(true);
+                  }}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+                >
+                  Get Started
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+      )}
       
       <div className="container mx-auto px-4 py-8">
-        <TabNavigation 
-          activeTab={activeTab} 
-          onTabChange={handleTabChange}
-          showGroupCartModal={showGroupCartModal}
-          setShowGroupCartModal={setShowGroupCartModal}
-        />
+        {user && (
+          <TabNavigation 
+            activeTab={activeTab} 
+            onTabChange={handleTabChange}
+            showGroupCartModal={showGroupCartModal}
+            setShowGroupCartModal={setShowGroupCartModal}
+          />
+        )}
 
-        {/* Home Tab */}
-        {activeTab === "home" && (
+        {/* Home Content */}
+        {(!user || activeTab === "home") && (
           <div className="space-y-12">
             {/* Hero Section */}
             <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 rounded-2xl">
@@ -335,11 +662,11 @@ export default function Home() {
                     Your ultimate destination for shopping, socializing, and discovering amazing products across multiple platforms
                   </p>
                   <div className="flex flex-wrap justify-center gap-4">
-                    <Button size="lg" className="bg-white text-purple-900 hover:bg-purple-50" onClick={() => setLocation('/vyronahub')}>
+                    <Button size="lg" className="bg-white text-purple-900 hover:bg-purple-50" onClick={() => user ? setLocation('/vyronahub') : setShowAuthModal(true)}>
                       <Store className="h-5 w-5 mr-2" />
                       Start Shopping
                     </Button>
-                    <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" onClick={() => setLocation('/social')}>
+                    <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10" onClick={() => user ? setLocation('/social') : setShowAuthModal(true)}>
                       <Users className="h-5 w-5 mr-2" />
                       Join Groups
                     </Button>
@@ -711,7 +1038,7 @@ export default function Home() {
 
               {/* View All Button */}
               <div className="text-center mt-12">
-                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3" onClick={() => setLocation('/vyronahub')}>
+                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3" onClick={() => user ? setLocation('/vyronahub') : setShowAuthModal(true)}>
                   <Eye className="h-5 w-5 mr-2" />
                   Explore All Products
                 </Button>
@@ -760,7 +1087,7 @@ export default function Home() {
         
       </div>
 
-      <CartButton />
+      {user && <CartButton />}
       <NotificationToast 
         notification={notification}
         onHide={hideNotification}
@@ -772,6 +1099,214 @@ export default function Home() {
           onClose={() => setShowGroupCartModal(false)}
         />
       )}
+
+      {/* Auth Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {authMode === "login" ? "Sign In to VyronaMart" : "Create Your Account"}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {authMode === "login" 
+                ? "Welcome back! Enter your credentials to access your account." 
+                : "Join VyronaMart today and start your shopping journey."
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Signing In..." : "Sign In"}
+                </Button>
+                <div className="text-center">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-purple-600 hover:text-purple-700"
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Forgot your password?
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    name="username"
+                    placeholder="Choose a username"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signupEmail">Email</Label>
+                  <Input
+                    id="signupEmail"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="mobile">Mobile Number</Label>
+                  <Input
+                    id="mobile"
+                    name="mobile"
+                    placeholder="Enter your mobile number"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signupPassword">Password</Label>
+                  <Input
+                    id="signupPassword"
+                    name="password"
+                    type="password"
+                    placeholder="Create a password"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  disabled={signupMutation.isPending}
+                >
+                  {signupMutation.isPending ? "Creating Account..." : "Create Account"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      {/* Forgot Password Modal */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset Your Password</DialogTitle>
+            <DialogDescription>
+              {otpStep === "email" && "Enter your email to receive a reset code"}
+              {otpStep === "otp" && "Enter the verification code sent to your email"}
+              {otpStep === "reset" && "Create a new password for your account"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleForgotPasswordStep} className="space-y-4">
+            {otpStep === "email" && (
+              <div>
+                <Label htmlFor="resetEmail">Email Address</Label>
+                <Input
+                  id="resetEmail"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                />
+              </div>
+            )}
+            
+            {otpStep === "otp" && (
+              <div>
+                <Label htmlFor="otp">Verification Code</Label>
+                <Input
+                  id="otp"
+                  name="otp"
+                  placeholder="Enter the 6-digit code"
+                  required
+                />
+              </div>
+            )}
+            
+            {otpStep === "reset" && (
+              <>
+                <div>
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    name="password"
+                    type="password"
+                    placeholder="Create a new password"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmNewPassword"
+                    name="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your new password"
+                    required
+                  />
+                </div>
+              </>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              disabled={forgotPasswordMutation.isPending || verifyOtpMutation.isPending || resetPasswordMutation.isPending}
+            >
+              {otpStep === "email" && (forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Code")}
+              {otpStep === "otp" && (verifyOtpMutation.isPending ? "Verifying..." : "Verify Code")}
+              {otpStep === "reset" && (resetPasswordMutation.isPending ? "Resetting..." : "Reset Password")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Seller Onboarding Modal */}
+      <SellerOnboardingModal 
+        open={showSellerOnboarding}
+        onClose={() => setShowSellerOnboarding(false)}
+      />
     </div>
   );
 }

@@ -90,12 +90,9 @@ function Router() {
 
       
       {/* Customer Interface (Default) */}
-      {user ? (
-        <Route path="/" component={Home} />
-      ) : (
-        <Route path="/" component={Landing} />
-      )}
+      <Route path="/" component={Home} />
       <Route path="/home" component={Home} />
+      <Route path="/landing" component={Landing} />
       <Route path="/product/:productId">
         {(params) => <ProductDetails productId={params.productId} />}
       </Route>
