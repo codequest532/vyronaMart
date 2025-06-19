@@ -79,14 +79,6 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
               <Search className="h-4 w-4" />
             </Button>
 
-            {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">3</span>
-              </span>
-            </Button>
-
             {/* Shopping Cart */}
             <Button variant="ghost" size="sm" className="relative">
               <ShoppingBag className="h-4 w-4" />
@@ -94,18 +86,6 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
                 <span className="text-white text-xs font-bold">2</span>
               </span>
             </Button>
-
-            {/* VyronaCoins */}
-            <Badge className="bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg px-3 py-1">
-              <Coins className="mr-1 h-4 w-4" />
-              <span className="font-bold">{user?.vyronaCoins?.toLocaleString() || '0'}</span>
-            </Badge>
-            
-            {/* XP Level */}
-            <Badge className="bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:from-purple-600 hover:to-pink-700 shadow-lg px-3 py-1">
-              <Star className="mr-1 h-4 w-4 fill-current" />
-              <span className="font-bold">Lv.{user?.level || 1}</span>
-            </Badge>
 
             {/* Profile Avatar with Dropdown */}
             <DropdownMenu>
