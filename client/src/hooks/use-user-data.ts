@@ -32,7 +32,7 @@ export function useUserData() {
         }
         const data = await response.json();
         console.log("Auth response:", data);
-        return data.success ? data.user : null;
+        return data;
       } catch (error) {
         console.error("Auth check failed:", error);
         return null;

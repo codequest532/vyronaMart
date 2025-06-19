@@ -54,8 +54,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           description: `Welcome back, ${data.user.username}!`,
         });
         onClose();
-        // Force page refresh to ensure session is properly loaded
-        setTimeout(() => window.location.reload(), 100);
       } else {
         toast({
           title: "Login Failed",
