@@ -49,6 +49,7 @@ import { z } from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { Label } from "@/components/ui/label";
 
 // Form schemas
 const createGroupSchema = z.object({
@@ -96,6 +97,10 @@ interface CartItem {
 export default function VyronaSocial() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  
+  // Authentication modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const queryClient = useQueryClient();
   
   // State Management
@@ -958,6 +963,79 @@ export default function VyronaSocial() {
     }
   };
 
+  // Login/Signup mutations
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Welcome back!" });
+      setShowAuthModal(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const signupMutation = useMutation({
+    mutationFn: async (data: { username: string; email: string; password: string }) => {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Signup failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Account created successfully!" });
+      setShowAuthModal(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  // Auth form handlers
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    loginMutation.mutate({
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    });
+  };
+
+  const handleSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    signupMutation.mutate({
+      username: formData.get("username") as string,
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    });
+  };
+
+  // Function to show login modal instead of redirecting
+  const showLogin = () => {
+    setAuthMode("login");
+    setShowAuthModal(true);
+  };
+
   // For unauthenticated users, show login prompt in interactive buttons but allow browsing
 
   return (
@@ -1038,7 +1116,7 @@ export default function VyronaSocial() {
                 <DialogTrigger asChild>
                   <Button 
                     className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white gap-2 relative shadow-lg"
-                    onClick={!authUser ? () => setLocation("/login") : undefined}
+                    onClick={!authUser ? showLogin : undefined}
                   >
                     <ShoppingCart className="h-5 w-5" />
                     Group Cart
@@ -1277,7 +1355,7 @@ export default function VyronaSocial() {
                           <Button 
                             size="sm" 
                             className="bg-green-500 hover:bg-green-600 text-white rounded-full w-8 h-8 p-0"
-                            onClick={!authUser ? () => setLocation("/login") : undefined}
+                            onClick={!authUser ? showLogin : undefined}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
@@ -1334,7 +1412,7 @@ export default function VyronaSocial() {
                             size="sm" 
                             variant="outline" 
                             className="rounded-full w-8 h-8 p-0 border-green-300"
-                            onClick={!authUser ? () => setLocation("/login") : undefined}
+                            onClick={!authUser ? showLogin : undefined}
                           >
                             <UserPlus className="h-4 w-4" />
                           </Button>
@@ -1700,10 +1778,10 @@ export default function VyronaSocial() {
                                           className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
                                           size="sm"
                                           disabled={addToGroupCartMutation.isPending}
-                                          onClick={() => handleAddToGroupClick(product.id)}
+                                          onClick={!authUser ? showLogin : () => handleAddToGroupClick(product.id)}
                                         >
                                           <ShoppingBag className="w-4 h-4 mr-2" />
-                                          {selectedGroup ? "Add to Group" : "Add to Group"}
+                                          {!authUser ? "Login to Add" : selectedGroup ? "Add to Group" : "Add to Group"}
                                         </Button>
                                         <Button 
                                           variant="outline" 
@@ -1735,14 +1813,14 @@ export default function VyronaSocial() {
                     </p>
                     <div className="flex gap-2 justify-center">
                       <Button 
-                        onClick={!authUser ? () => setLocation("/login") : () => setIsCreateGroupOpen(true)} 
+                        onClick={!authUser ? showLogin : () => setIsCreateGroupOpen(true)} 
                         className="gap-2 bg-green-500 hover:bg-green-600"
                       >
                         <Plus className="w-4 h-4" />
                         {!authUser ? "Login to Create Group" : "Create Group"}
                       </Button>
                       <Button 
-                        onClick={!authUser ? () => setLocation("/login") : () => setIsJoinGroupOpen(true)} 
+                        onClick={!authUser ? showLogin : () => setIsJoinGroupOpen(true)} 
                         variant="outline" 
                         className="gap-2 border-green-300"
                       >
@@ -2346,6 +2424,104 @@ export default function VyronaSocial() {
           </div>
         </div>
       )}
+
+      {/* Authentication Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              {authMode === "login" ? "Sign In to VyronaSocial" : "Join VyronaSocial"}
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              {authMode === "login" 
+                ? "Welcome back! Sign in to join groups and start social shopping." 
+                : "Create your account to join the social shopping community."
+              }
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs value={authMode} onValueChange={(value) => setAuthMode(value as "login" | "signup")}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Signing in..." : "Sign In"}
+                </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Choose a username"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input
+                    id="signup-password"
+                    name="password"
+                    type="password"
+                    placeholder="Create a password"
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
+                  disabled={signupMutation.isPending}
+                >
+                  {signupMutation.isPending ? "Creating account..." : "Create Account"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
