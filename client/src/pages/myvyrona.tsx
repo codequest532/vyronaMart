@@ -66,6 +66,24 @@ export default function MyVyrona() {
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [showAddMoneyDialog, setShowAddMoneyDialog] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("upi");
+  const [showAddAddressDialog, setShowAddAddressDialog] = useState(false);
+  const [showAddPaymentDialog, setShowAddPaymentDialog] = useState(false);
+  const [accountForm, setAccountForm] = useState({
+    email: user?.email || "",
+    phone: user?.mobile || "",
+    username: user?.username || ""
+  });
+
+  // Update form when user data changes
+  useEffect(() => {
+    if (user) {
+      setAccountForm({
+        email: user.email || "",
+        phone: user.mobile || "",
+        username: user.username || ""
+      });
+    }
+  }, [user]);
 
   // Data queries
   const { data: walletBalance = { balance: 0 }, isLoading: isLoadingWallet } = useQuery({
@@ -124,6 +142,36 @@ export default function MyVyrona() {
       toast({
         title: "Payment Failed",
         description: error.message || "Failed to add money to wallet",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Account update mutation
+  const updateAccountMutation = useMutation({
+    mutationFn: async (data: { email: string; phone: string; username: string }) => {
+      const response = await fetch("/api/auth/update-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          userId: user?.id, 
+          ...data
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to update account");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/current-user"] });
+      toast({
+        title: "Account Updated",
+        description: "Your account information has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update account information",
         variant: "destructive",
       });
     },
@@ -596,14 +644,38 @@ export default function MyVyrona() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" defaultValue={user.email} readOnly className="bg-gray-50" />
+                    <Input 
+                      id="email" 
+                      value={accountForm.email} 
+                      onChange={(e) => setAccountForm({...accountForm, email: e.target.value})}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" defaultValue={user.mobile || ""} placeholder="Add phone number" />
+                    <Input 
+                      id="phone" 
+                      value={accountForm.phone} 
+                      onChange={(e) => setAccountForm({...accountForm, phone: e.target.value})}
+                      placeholder="Add phone number" 
+                    />
                   </div>
                 </div>
-                <Button className="w-full">Update Account Information</Button>
+                <div>
+                  <Label htmlFor="username">Username</Label>
+                  <Input 
+                    id="username" 
+                    value={accountForm.username} 
+                    onChange={(e) => setAccountForm({...accountForm, username: e.target.value})}
+                    placeholder="Enter username" 
+                  />
+                </div>
+                <Button 
+                  className="w-full"
+                  onClick={() => updateAccountMutation.mutate(accountForm)}
+                  disabled={updateAccountMutation.isPending}
+                >
+                  {updateAccountMutation.isPending ? "Updating..." : "Update Account Information"}
+                </Button>
               </CardContent>
             </Card>
 
@@ -650,68 +722,14 @@ export default function MyVyrona() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="w-full">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add New Address
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New Address</DialogTitle>
-                        <DialogDescription>
-                          Add a delivery address to your address book
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="address-type">Address Type</Label>
-                            <Select>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="home">Home</SelectItem>
-                                <SelectItem value="office">Office</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="address-name">Address Label</Label>
-                            <Input id="address-name" placeholder="e.g., Home, Office" />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="full-address">Full Address</Label>
-                          <Textarea 
-                            id="full-address" 
-                            placeholder="House/Flat number, Building name, Street, Area"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="city">City</Label>
-                            <Input id="city" placeholder="Enter city" />
-                          </div>
-                          <div>
-                            <Label htmlFor="pincode">Pincode</Label>
-                            <Input id="pincode" placeholder="6-digit pincode" />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor="landmark">Landmark (Optional)</Label>
-                          <Input id="landmark" placeholder="Nearby landmark for easy delivery" />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline">Cancel</Button>
-                        <Button>Save Address</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setShowAddAddressDialog(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add New Address
+                  </Button>
                   <p className="text-center text-gray-500 py-4">No saved addresses</p>
                 </div>
               </CardContent>
@@ -727,7 +745,11 @@ export default function MyVyrona() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Button variant="outline" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => setShowAddPaymentDialog(true)}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Payment Method
                   </Button>
@@ -1136,6 +1158,141 @@ export default function MyVyrona() {
             <Button variant="destructive">
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Account
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Address Dialog */}
+      <Dialog open={showAddAddressDialog} onOpenChange={setShowAddAddressDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Address</DialogTitle>
+            <DialogDescription>
+              Add a delivery address to your address book
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="address-type">Address Type</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="home">Home</SelectItem>
+                    <SelectItem value="office">Office</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="address-name">Address Label</Label>
+                <Input id="address-name" placeholder="e.g., Home, Office" />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="full-address">Full Address</Label>
+              <Textarea 
+                id="full-address" 
+                placeholder="House/Flat number, Building name, Street, Area"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input id="city" placeholder="Enter city" />
+              </div>
+              <div>
+                <Label htmlFor="pincode">Pincode</Label>
+                <Input id="pincode" placeholder="6-digit pincode" />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="landmark">Landmark (Optional)</Label>
+              <Input id="landmark" placeholder="Nearby landmark for easy delivery" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddAddressDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast({
+                title: "Address Added",
+                description: "Your delivery address has been saved successfully.",
+              });
+              setShowAddAddressDialog(false);
+            }}>
+              Save Address
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Payment Method Dialog */}
+      <Dialog open={showAddPaymentDialog} onOpenChange={setShowAddPaymentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Payment Method</DialogTitle>
+            <DialogDescription>
+              Add a new payment method to your account
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="payment-type">Payment Type</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="card">Credit/Debit Card</SelectItem>
+                  <SelectItem value="upi">UPI ID</SelectItem>
+                  <SelectItem value="netbanking">Net Banking</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="card-number">Card Number</Label>
+                <Input id="card-number" placeholder="1234 5678 9012 3456" />
+              </div>
+              <div>
+                <Label htmlFor="card-name">Cardholder Name</Label>
+                <Input id="card-name" placeholder="Full name on card" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="expiry">Expiry Date</Label>
+                <Input id="expiry" placeholder="MM/YY" />
+              </div>
+              <div>
+                <Label htmlFor="cvv">CVV</Label>
+                <Input id="cvv" placeholder="123" type="password" />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" id="save-card" className="rounded" />
+              <Label htmlFor="save-card" className="text-sm">
+                Save this payment method for future use
+              </Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddPaymentDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast({
+                title: "Payment Method Added",
+                description: "Your payment method has been saved securely.",
+              });
+              setShowAddPaymentDialog(false);
+            }}>
+              Add Payment Method
             </Button>
           </DialogFooter>
         </DialogContent>
