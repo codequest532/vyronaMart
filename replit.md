@@ -210,6 +210,7 @@ Changelog:
 - June 19, 2025: Cleaned up Game Explorer section and VyronaCoins references across all modules for simplified user experience
 - June 19, 2025: Reverted to previous version with home page restored per user request
 - June 19, 2025: Home page now displays unified dashboard with cross-module statistics and quick access navigation
+- June 19, 2025: Removed VyronaMallConnect demo seller account (mallconnect_demo) and associated demo data from platform
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display
@@ -219,7 +220,7 @@ Changelog:
 - June 19, 2025: Implemented secure account management with logout and account deletion features
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
-- June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
+
 - June 17, 2025: Updated seller registration routing to automatically redirect VyronaMallConnect sellers to /vyronamallconnect-seller-dashboard
 - June 17, 2025: Added image URL field to VyronaMallConnect seller dashboard "Add Product" modal with URL validation and helper text
 - June 17, 2025: Updated image URL field to accept Google Drive links with detailed instructions for public sharing
