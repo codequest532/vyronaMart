@@ -9452,12 +9452,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           message: "VyronaInstaStore seller registration successful"
         });
-      } else if (registrationData.sellerType === "vyronahub") {
+      } else if (registrationData.sellerType === "vyronahub" || registrationData.sellerType === "vyronasocial") {
         // Use seller's actual email and password from registration form
         const email = registrationData.email;
         const password = registrationData.password;
         
-        // Create VyronaHub seller account
+        // Create VyronaHub or VyronaSocial seller account - both use VyronaHub dashboard
+        const sellerType = registrationData.sellerType === "vyronasocial" ? "vyronahub" : "vyronahub";
         const newSeller = await db
           .insert(users)
           .values({
@@ -9465,14 +9466,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             email: email,
             mobile: registrationData.phone,
             role: 'seller',
-            sellerType: 'vyronahub',
+            sellerType: sellerType,
             password: password
           })
           .returning({ id: users.id });
         
         const sellerId = newSeller[0].id;
         
-        console.log("VyronaHub seller registered:", {
+        console.log(`${registrationData.sellerType === "vyronasocial" ? "VyronaSocial" : "VyronaHub"} seller registered:`, {
           sellerId,
           businessName: registrationData.businessName,
           category: registrationData.businessCategory,
@@ -9486,7 +9487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             email: email,
             password: password
           },
-          message: "VyronaHub seller registration successful"
+          message: `${registrationData.sellerType === "vyronasocial" ? "VyronaSocial" : "VyronaHub"} seller registration successful`
         });
       } else if (registrationData.sellerType === "vyronaspace") {
         // Use seller's actual email and password from registration form

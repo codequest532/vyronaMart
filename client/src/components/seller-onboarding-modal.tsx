@@ -1193,34 +1193,28 @@ export default function SellerOnboardingModal({ isOpen, onClose }: SellerOnboard
 
         if (loginResponse.ok) {
           // Redirect to appropriate dashboard based on seller type
-          if (formData.sellerType === "vyronaread") {
-            setLocation("/vyronaread-dashboard");
+          const dashboardRoutes = {
+            "vyronahub": "/vyronahub-dashboard",
+            "vyronasocial": "/vyronahub-dashboard", 
+            "vyronaread": "/vyronaread-dashboard",
+            "vyronainstastore": "/vyronainstastore-dashboard",
+            "vyronamallconnect": "/vyronamallconnect-seller-dashboard",
+            "vyronaspace": "/vyronaspace-seller-dashboard"
+          };
+          
+          const redirectPath = dashboardRoutes[formData.sellerType as keyof typeof dashboardRoutes];
+          
+          if (redirectPath) {
+            setLocation(redirectPath);
             setTimeout(() => {
+              const platformName = sellerTypes.find(t => t.id === formData.sellerType)?.title;
               toast({
-                title: "Welcome to VyronaRead!",
-                description: "You've been automatically logged in. Start by adding your first book or setting up library partnerships!",
-              });
-            }, 1000);
-          } else if (formData.sellerType === "vyronainstastore") {
-            // VyronaInstaStore sellers go to Instagram seller dashboard
-            setLocation("/vyronainstastore-dashboard");
-            setTimeout(() => {
-              toast({
-                title: "Welcome to VyronaInstaStore!",
-                description: "You've been automatically logged in. Connect your Instagram account and start selling!",
-              });
-            }, 1000);
-          } else if (formData.sellerType === "vyronahub") {
-            // VyronaHub sellers go to VyronaHub dashboard
-            setLocation("/vyronahub-dashboard");
-            setTimeout(() => {
-              toast({
-                title: "Welcome to VyronaHub!",
-                description: "You've been automatically logged in. Start by adding your products and setting up your store!",
+                title: `Welcome to ${platformName}!`,
+                description: "You've been automatically logged in. Start managing your store!",
               });
             }, 1000);
           } else {
-            // Other seller types go to VyronaHub dashboard
+            // Fallback to VyronaHub dashboard
             setLocation("/vyronahub-dashboard");
             setTimeout(() => {
               toast({
