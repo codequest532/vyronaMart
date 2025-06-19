@@ -198,6 +198,10 @@ Changelog:
 - June 19, 2025: Enhanced VyronaSpace seller dashboard with order status update functionality and customer notification system
 - June 19, 2025: Integrated live tracking updates from VyronaSpace seller status changes to customer order tracking via OpenRouteService API
 - June 19, 2025: Completed end-to-end VyronaSpace order fulfillment workflow with professional seller-customer communication system
+- June 19, 2025: Moved MyVyrona profile functionality to dedicated /myvyrona page for better user experience and navigation
+- June 19, 2025: Created comprehensive MyVyrona dashboard with wallet management, transaction history, achievements, and user profile
+- June 19, 2025: Updated homepage profile tab to redirect to dedicated MyVyrona page for cleaner homepage navigation
+- June 19, 2025: Enhanced user experience by separating profile management from main homepage navigation flow
 - June 17, 2025: Completed VyronaMallConnect seller registration integration with platform selection and dashboard routing
 - June 17, 2025: Added VyronaMallConnect to seller onboarding modal with virtual storefront features and purple-indigo gradient styling  
 - June 17, 2025: Created demo VyronaMallConnect seller account (mallconnect_demo@vyronamart.com / demo123) for dashboard testing
