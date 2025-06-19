@@ -130,7 +130,7 @@ export default function VyronaSocial() {
     staleTime: 0,
   });
 
-  console.log("VyronaSocial Auth State:", { authUser, userLoading, userError });
+
 
   // Show loading state while checking authentication
   if (userLoading) {
@@ -960,177 +960,7 @@ export default function VyronaSocial() {
     }
   };
 
-  // If not authenticated, show showcase/preview mode
-  if (!authUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900/20">
-        {/* Header */}
-        <div className="border-b bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  onClick={() => setLocation("/home")}
-                  className="flex items-center gap-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Home
-                </Button>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl">
-                    <Sparkles className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      VyronaSocial
-                    </h1>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Group Shopping Experience</p>
-                  </div>
-                </div>
-              </div>
-              <Button
-                onClick={() => setLocation("/login")}
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-              >
-                Log in to Join Groups
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Showcase Content */}
-        <div className="container mx-auto px-6 py-12">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Shop Together, Save More
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Join friends to discover exclusive group discounts, share products, and enjoy a social shopping experience
-            </p>
-          </div>
-
-          {/* Feature Cards */}
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Create Groups</h3>
-              <p className="text-gray-600">Start shopping groups with friends and family for exclusive discounts</p>
-            </Card>
-            
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ShoppingCart className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Shared Carts</h3>
-              <p className="text-gray-600">Add items to group carts and split costs automatically</p>
-            </Card>
-            
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Group Discounts</h3>
-              <p className="text-gray-600">Unlock special pricing when you shop together</p>
-            </Card>
-          </div>
-
-          {/* Sample Products */}
-          <div className="mb-12">
-            <h3 className="text-2xl font-bold text-center mb-8">Featured Group Buy Products</h3>
-            <div className="grid md:grid-cols-3 gap-6">
-              {products && products.length > 0 ? (
-                products.slice(0, 6).map((product: any) => (
-                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="aspect-video bg-gray-100 relative">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package className="h-12 w-12 text-gray-400" />
-                        </div>
-                      )}
-                      <Badge className="absolute top-2 right-2 bg-green-500">
-                        Group Discount Available
-                      </Badge>
-                    </div>
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold mb-2">{product.name}</h4>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold">₹{Math.round(product.price)}</span>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => setLocation("/login")}
-                        >
-                          Join Group
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                // Show demo products when no real products exist
-                [
-                  { id: 'demo1', name: 'Premium Organic Rice', description: 'High-quality basmati rice perfect for group buying', price: 2500, imageUrl: null },
-                  { id: 'demo2', name: 'Fresh Vegetables Bundle', description: 'Weekly fresh vegetable package for families', price: 800, imageUrl: null },
-                  { id: 'demo3', name: 'Household Essentials Kit', description: 'Complete cleaning and household supplies', price: 1200, imageUrl: null },
-                  { id: 'demo4', name: 'Organic Fruits Box', description: 'Seasonal organic fruits delivered weekly', price: 1500, imageUrl: null },
-                  { id: 'demo5', name: 'Dairy Products Bundle', description: 'Fresh milk, yogurt, and cheese package', price: 600, imageUrl: null },
-                  { id: 'demo6', name: 'Snacks & Beverages Pack', description: 'Healthy snacks and drinks for the family', price: 900, imageUrl: null }
-                ].map((product) => (
-                  <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="aspect-video bg-gray-100 relative">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="h-12 w-12 text-gray-400" />
-                      </div>
-                      <Badge className="absolute top-2 right-2 bg-green-500">
-                        Group Discount Available
-                      </Badge>
-                    </div>
-                    <CardContent className="p-4">
-                      <h4 className="font-semibold mb-2">{product.name}</h4>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold">₹{Math.round(product.price)}</span>
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => setLocation("/login")}
-                        >
-                          Join Group
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* CTA Section */}
-          <div className="text-center bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-12 text-white">
-            <h3 className="text-3xl font-bold mb-4">Ready to Start Group Shopping?</h3>
-            <p className="text-xl mb-6 opacity-90">Join thousands of users saving money together</p>
-            <Button
-              size="lg"
-              onClick={() => setLocation("/login")}
-              className="bg-white text-indigo-600 hover:bg-gray-100"
-            >
-              Get Started Now
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // For unauthenticated users, show login prompt in interactive buttons but allow browsing
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-900/20">
@@ -1188,7 +1018,7 @@ export default function VyronaSocial() {
               </Button>
               
               {/* Video Call Toggle */}
-              {selectedGroupId && (
+              {selectedGroupId && authUser && (
                 <Button
                   onClick={() => isVideoCallActive ? handleEndVideoCall() : handleStartVideoCall()}
                   disabled={!isVideoCallActive && deduplicatedOnlineMembers.length <= 1}
@@ -1208,10 +1038,13 @@ export default function VyronaSocial() {
               {/* Group Cart Button - Prominent */}
               <Dialog open={isGroupCartOpen} onOpenChange={setIsGroupCartOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white gap-2 relative shadow-lg">
+                  <Button 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white gap-2 relative shadow-lg"
+                    onClick={!authUser ? () => setLocation("/login") : undefined}
+                  >
                     <ShoppingCart className="h-5 w-5" />
                     Group Cart
-                    {cartItems.length > 0 && (
+                    {authUser && cartItems.length > 0 && (
                       <Badge className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center text-xs bg-orange-500 text-white rounded-full animate-pulse">
                         {cartItems.length}
                       </Badge>
