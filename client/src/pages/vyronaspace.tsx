@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import VyronaSocialGroupBuy from "@/components/VyronaSocialGroupBuy";
 import { useAuthGuard } from "@/hooks/use-auth-guard";
+import { useUserData } from "@/hooks/use-user-data";
 import LoginModal from "@/components/auth/login-modal";
 import { 
   Sparkles, Package, Award, Users, Search, Filter, MapPin, Clock, 
@@ -87,6 +88,7 @@ export default function VyronaSpace() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user, isLoading: userLoading } = useUserData();
 
   // Fetch real stores data from backend
   const { data: storesData = [], isLoading: storesLoading } = useQuery({
@@ -128,9 +130,10 @@ export default function VyronaSpace() {
   // Use products data directly
   const products = productsData;
 
-  // Fetch real orders data from backend (VyronaSpace orders only)
+  // Fetch real orders data from backend (VyronaSpace orders only) - only if authenticated
   const { data: ordersData = [] } = useQuery({
-    queryKey: ["/api/orders/user/1"],
+    queryKey: ["/api/orders/user", user?.id],
+    enabled: !!user?.id,
     select: (data: any[]) => data.filter(order => order.module === 'space').map(order => ({
       id: order.id,
       status: order.status === 'pending' ? 'In Transit' : order.status === 'delivered' ? 'Delivered' : 'Processing',
@@ -145,33 +148,32 @@ export default function VyronaSpace() {
 
   const orders = ordersData;
 
-  // Fetch user profile data
-  const { data: userProfile } = useQuery({
-    queryKey: ["/api/profile/1"]
-  });
-
-  // Fetch user addresses
+  // Fetch user addresses - only if authenticated
   const { data: userAddresses = [] } = useQuery({
-    queryKey: ["/api/addresses/1"]
+    queryKey: ["/api/addresses", user?.id],
+    enabled: !!user?.id
   });
 
-  // Fetch subscriptions
+  // Fetch subscriptions - only if authenticated
   const { data: subscriptions = [] } = useQuery({
-    queryKey: ["/api/subscriptions/1"]
+    queryKey: ["/api/subscriptions", user?.id],
+    enabled: !!user?.id
   });
 
-  // Fetch reorder history
+  // Fetch reorder history - only if authenticated
   const { data: reorderHistory = [] } = useQuery({
-    queryKey: ["/api/reorder-history/1"]
+    queryKey: ["/api/reorder-history", user?.id],
+    enabled: !!user?.id
   });
 
-  // Update profile mutation
+  // Update profile mutation - only if authenticated
   const updateProfileMutation = useMutation({
     mutationFn: async (profileData: { username: string; email: string; mobile: string }) => {
-      return await apiRequest("PUT", "/api/profile/1", profileData);
+      if (!user?.id) throw new Error("Not authenticated");
+      return await apiRequest("PUT", `/api/profile/${user.id}`, profileData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/profile/1"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
       setShowEditProfile(false);
       toast({
         title: "Profile Updated",
@@ -187,13 +189,14 @@ export default function VyronaSpace() {
     },
   });
 
-  // Add address mutation
+  // Add address mutation - only if authenticated
   const addAddressMutation = useMutation({
     mutationFn: async (addressData: any) => {
-      return await apiRequest("POST", "/api/addresses", { ...addressData, userId: 1 });
+      if (!user?.id) throw new Error("Not authenticated");
+      return await apiRequest("POST", "/api/addresses", { ...addressData, userId: user.id });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/addresses/1"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/addresses", user?.id] });
       setShowManageAddresses(false);
       setNewAddress({ name: "", address: "", city: "", state: "", pincode: "", phone: "", isDefault: false });
       toast({
@@ -962,7 +965,9 @@ export default function VyronaSpace() {
                         <p className="text-emerald-100">Available balance</p>
                       </div>
                       <div className="text-right">
-                        {false ? (
+                        {!user ? (
+                          <div className="text-emerald-100">Please log in</div>
+                        ) : userLoading ? (
                           <div className="animate-spin w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
                         ) : (
                           <>
@@ -1047,200 +1052,166 @@ export default function VyronaSpace() {
               </div>
             </TabsContent>
 
-            {/* Profile Tab - Customer Management */}
-            <TabsContent value="profile" className="space-y-6">
-              <div className="container mx-auto px-4 py-8">
-                <div className="bg-emerald-50/80 backdrop-blur-sm rounded-2xl p-6 border border-emerald-200/50">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">Customer Profile</h2>
-                  
-                  {/* Profile Info */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
-                    <div className="space-y-3">
-                      {false ? (
-                        <div className="animate-pulse space-y-3">
-                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                        </div>
-                      ) : (
-                        <>
-                          <div>
-                            <label className="text-sm font-medium text-gray-700">Full Name</label>
-                            <p className="text-gray-900">{(userProfile as any)?.username || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-700">Email</label>
-                            <p className="text-gray-900">{(userProfile as any)?.email || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-700">Phone</label>
-                            <p className="text-gray-900">{(userProfile as any)?.mobile || 'Not provided'}</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50"
-                      onClick={() => {
-                        setProfileForm({
-                          username: (userProfile as any)?.username || "",
-                          email: (userProfile as any)?.email || "",
-                          mobile: (userProfile as any)?.mobile || ""
-                        });
-                        setShowEditProfile(true);
-                      }}
-                    >
-                      Edit Profile
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
-                  <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Delivery Address</h3>
-                    <div className="space-y-3">
-                      {false ? (
-                        <div className="animate-pulse space-y-3">
-                          <div className="h-4 bg-gray-200 rounded w-full"></div>
-                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        </div>
-                      ) : (userAddresses as any[]).length > 0 ? (
-                        <>
-                          {(userAddresses as any[]).filter((addr: any) => addr.isPrimary).map((address: any) => (
-                            <div key={address.id}>
-                              <label className="text-sm font-medium text-gray-700">{address.type}</label>
-                              <p className="text-gray-900">
-                                {address.addressLine1}, {address.city}, {address.state} - {address.pincode}
-                              </p>
-                            </div>
-                          ))}
-                          {(userAddresses as any[]).filter((addr: any) => addr.isPrimary).length === 0 && (
-                            <div>
-                              <label className="text-sm font-medium text-gray-700">{(userAddresses as any[])[0]?.type || 'Primary'}</label>
-                              <p className="text-gray-900">
-                                {(userAddresses as any[])[0]?.addressLine1 || 'No address'}, {(userAddresses as any[])[0]?.city || ''}, {(userAddresses as any[])[0]?.state || ''} - {(userAddresses as any[])[0]?.pincode || ''}
-                              </p>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div>
-                          <label className="text-sm font-medium text-gray-700">No addresses found</label>
-                          <p className="text-gray-900">Please add a delivery address</p>
-                        </div>
-                      )}
-                      <div className="flex items-center text-sm text-emerald-600">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span>Primary address</span>
-                      </div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-4 rounded-xl border-emerald-200 hover:bg-emerald-50"
-                      onClick={() => setShowManageAddresses(true)}
-                    >
-                      Manage Addresses
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              {/* Quick Actions */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
-                    <RefreshCw className="h-6 w-6 mb-2 text-emerald-600" />
-                    <span className="text-sm">Reorder</span>
-                  </Button>
-                  
-                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
-                    <Phone className="h-6 w-6 mb-2 text-emerald-600" />
-                    <span className="text-sm">Support</span>
-                  </Button>
-                  
-                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
-                    <MessageCircle className="h-6 w-6 mb-2 text-emerald-600" />
-                    <span className="text-sm">Feedback</span>
-                  </Button>
-                  
-                  <Button variant="outline" className="p-4 h-auto flex-col rounded-xl border-emerald-200 hover:bg-emerald-50">
-                    <Gift className="h-6 w-6 mb-2 text-emerald-600" />
-                    <span className="text-sm">Refer & Earn</span>
-                  </Button>
-                </div>
-              </div>
-              </div>
-              </div>
-            </TabsContent>
-            
             {/* Profile Tab - Customer Profile */}
             <TabsContent value="profile" className="space-y-6">
               <div className="container mx-auto px-4 py-8">
-                <div className="bg-orange-50/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-200/50">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-3xl font-bold text-gray-900">Customer Profile</h2>
-                    <div className="flex space-x-3">
-                      <Button 
-                        onClick={() => setShowEditProfile(true)}
-                        className="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 rounded-xl"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Profile
-                      </Button>
-                      <Button 
-                        onClick={() => setShowManageAddresses(true)}
-                        variant="outline" 
-                        className="rounded-xl border-orange-200 hover:bg-orange-50"
-                      >
-                        <MapPin className="h-4 w-4 mr-2" />
-                        Manage Addresses
-                      </Button>
+                {!user ? (
+                  <div className="bg-orange-50/80 backdrop-blur-sm rounded-2xl p-8 border border-orange-200/50 text-center">
+                    <User className="h-16 w-16 text-orange-400 mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Please Log In</h2>
+                    <p className="text-gray-600 mb-6">You need to be logged in to view your profile</p>
+                    <Button 
+                      onClick={() => requireAuth("view profile", () => {})}
+                      className="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 rounded-xl"
+                    >
+                      Log In to Continue
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="bg-orange-50/80 backdrop-blur-sm rounded-2xl p-6 border border-orange-200/50">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-3xl font-bold text-gray-900">Customer Profile</h2>
+                      <div className="flex space-x-3">
+                        <Button 
+                          onClick={() => {
+                            setProfileForm({
+                              username: user?.username || "",
+                              email: user?.email || "",
+                              mobile: user?.mobile || ""
+                            });
+                            setShowEditProfile(true);
+                          }}
+                          className="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 rounded-xl"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Profile
+                        </Button>
+                        <Button 
+                          onClick={() => setShowManageAddresses(true)}
+                          variant="outline" 
+                          className="rounded-xl border-orange-200 hover:bg-orange-50"
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          Manage Addresses
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Profile Info Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                        <CardContent className="p-6">
+                          <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
+                          <div className="space-y-3">
+                            {userLoading ? (
+                              <div className="animate-pulse space-y-3">
+                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                              </div>
+                            ) : (
+                              <>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-700">Full Name</label>
+                                  <p className="text-gray-900">{user?.username || 'Not provided'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-700">Email</label>
+                                  <p className="text-gray-900">{user?.email || 'Not provided'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-gray-700">Phone</label>
+                                  <p className="text-gray-900">{user?.mobile || 'Not provided'}</p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="rounded-2xl border-0 bg-white/90 backdrop-blur-sm shadow-md">
+                        <CardContent className="p-6">
+                          <h3 className="text-xl font-bold text-gray-900 mb-4">Delivery Address</h3>
+                          <div className="space-y-3">
+                            {userLoading ? (
+                              <div className="animate-pulse space-y-3">
+                                <div className="h-4 bg-gray-200 rounded w-full"></div>
+                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                              </div>
+                            ) : (userAddresses as any[]).length > 0 ? (
+                              <>
+                                {(userAddresses as any[]).filter((addr: any) => addr.isPrimary).map((address: any) => (
+                                  <div key={address.id}>
+                                    <label className="text-sm font-medium text-gray-700">{address.type}</label>
+                                    <p className="text-gray-900">
+                                      {address.addressLine1}, {address.city}, {address.state} - {address.pincode}
+                                    </p>
+                                  </div>
+                                ))}
+                                {(userAddresses as any[]).filter((addr: any) => addr.isPrimary).length === 0 && (
+                                  <div>
+                                    <label className="text-sm font-medium text-gray-700">{(userAddresses as any[])[0]?.type || 'Primary'}</label>
+                                    <p className="text-gray-900">
+                                      {(userAddresses as any[])[0]?.addressLine1 || 'No address'}, {(userAddresses as any[])[0]?.city || ''}, {(userAddresses as any[])[0]?.state || ''} - {(userAddresses as any[])[0]?.pincode || ''}
+                                    </p>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div>
+                                <label className="text-sm font-medium text-gray-700">No addresses found</label>
+                                <p className="text-gray-900">Please add a delivery address</p>
+                              </div>
+                            )}
+                            <div className="flex items-center text-sm text-orange-600">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              <span>Primary address</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    {/* Quick Actions Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50 cursor-pointer hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex items-center space-x-4">
+                            <User className="h-10 w-10 text-orange-600" />
+                            <div>
+                              <h3 className="font-semibold text-gray-900">Personal Information</h3>
+                              <p className="text-sm text-gray-600">Manage your account details</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50 cursor-pointer hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex items-center space-x-4">
+                            <Wallet className="h-10 w-10 text-pink-600" />
+                            <div>
+                              <h3 className="font-semibold text-gray-900">VyronaWallet</h3>
+                              <p className="text-sm text-gray-600">Balance: ₹{user?.vyronaCoins || 0}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50 cursor-pointer hover:shadow-lg transition-shadow">
+                        <CardContent className="p-6">
+                          <div className="flex items-center space-x-4">
+                            <Settings className="h-10 w-10 text-purple-600" />
+                            <div>
+                              <h3 className="font-semibold text-gray-900">Preferences</h3>
+                              <p className="text-sm text-gray-600">App settings & notifications</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50">
-                      <CardContent className="p-6">
-                        <div className="flex items-center space-x-4">
-                          <User className="h-10 w-10 text-orange-600" />
-                          <div>
-                            <h3 className="font-semibold text-gray-900">Personal Information</h3>
-                            <p className="text-sm text-gray-600">Manage your account details</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50">
-                      <CardContent className="p-6">
-                        <div className="flex items-center space-x-4">
-                          <Wallet className="h-10 w-10 text-pink-600" />
-                          <div>
-                            <h3 className="font-semibold text-gray-900">VyronaWallet</h3>
-                            <p className="text-sm text-gray-600">Balance: ₹500</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card className="bg-white/70 backdrop-blur-sm border-orange-200/50">
-                      <CardContent className="p-6">
-                        <div className="flex items-center space-x-4">
-                          <Settings className="h-10 w-10 text-purple-600" />
-                          <div>
-                            <h3 className="font-semibold text-gray-900">Preferences</h3>
-                            <p className="text-sm text-gray-600">App settings & notifications</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
+                )}
               </div>
             </TabsContent>
           </Tabs>
