@@ -684,32 +684,6 @@ export default function VyronaRead() {
               <p className="text-lg opacity-90">Read. Return. Repeat. - Your smart reading ecosystem</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="outline" 
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20 relative"
-                onClick={() => requireAuth("view book cart", () => setShowCart(true))}
-              >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                Book Cart
-                {cart.length > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-red-500 text-white min-w-5 h-5 flex items-center justify-center text-xs rounded-full">
-                    {cart.length}
-                  </Badge>
-                )}
-              </Button>
-              <Button 
-                variant="outline" 
-                className="bg-white/10 border-white/30 text-white hover:bg-white/20 relative"
-                onClick={() => requireAuth("view library cart", () => setShowLibraryCart(true))}
-              >
-                <Library className="h-5 w-5 mr-2" />
-                Library Cart
-                {libraryCart.length > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-green-500 text-white min-w-5 h-5 flex items-center justify-center text-xs rounded-full">
-                    {libraryCart.length}
-                  </Badge>
-                )}
-              </Button>
             </div>
           </div>
         </CardContent>
