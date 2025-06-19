@@ -340,7 +340,10 @@ export default function VyronaSocialGroupBuy() {
                 <DialogTrigger asChild>
                   <Button 
                     className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-                    onClick={() => requireAuth("create a group", () => setShowCreateGroupDialog(true))}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      requireAuth("create a group", () => setShowCreateGroupDialog(true));
+                    }}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Create Group
@@ -409,7 +412,10 @@ export default function VyronaSocialGroupBuy() {
 
               <Dialog open={showJoinGroupDialog} onOpenChange={setShowJoinGroupDialog}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" onClick={() => requireAuth("join a group", () => setShowJoinGroupDialog(true))}>
+                  <Button variant="outline" onClick={(e) => {
+                    e.preventDefault();
+                    requireAuth("join a group", () => setShowJoinGroupDialog(true));
+                  }}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Join Group
                   </Button>
