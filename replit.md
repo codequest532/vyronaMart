@@ -208,8 +208,8 @@ Changelog:
 - June 19, 2025: Home page now focuses on unified dashboard experience without module-specific content bleeding
 - June 19, 2025: Removed gaming and VyronaCoins features from platform per user request - focusing on core e-commerce functionality
 - June 19, 2025: Cleaned up Game Explorer section and VyronaCoins references across all modules for simplified user experience
-- June 19, 2025: Eliminated home page entirely per user request - authenticated users now redirect directly to their preferred module
-- June 19, 2025: Added default module selection in MyVyrona settings allowing users to choose their login destination (VyronaHub default)
+- June 19, 2025: Reverted to previous version with home page restored per user request
+- June 19, 2025: Home page now displays unified dashboard with cross-module statistics and quick access navigation
 - June 19, 2025: Created comprehensive MyVyrona dashboard with 7 main sections: Profile Overview, Wallet & Rewards, Orders & Wishlist, Social Engagement, Settings & Preferences, Help & Support, and Account Management
 - June 19, 2025: Added complete wallet management with payment method selection (UPI, Card, Net Banking, Wallets) and Brevo email confirmations
 - June 19, 2025: Implemented user profile overview with location, join date, and comprehensive statistics display
