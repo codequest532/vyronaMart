@@ -79,13 +79,7 @@ export default function Header({ user, onNavigateToProfile }: HeaderProps) {
               <Search className="h-4 w-4" />
             </Button>
 
-            {/* Shopping Cart */}
-            <Button variant="ghost" size="sm" className="relative">
-              <ShoppingBag className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">2</span>
-              </span>
-            </Button>
+
 
             {/* Profile Avatar with Dropdown */}
             <DropdownMenu>
