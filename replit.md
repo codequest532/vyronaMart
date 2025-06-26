@@ -125,6 +125,150 @@ The system uses a PostgreSQL database with tables for:
 - Connection pooling with Neon serverless
 - Automatic database provisioning checks
 
+## Core Platform Documentation
+
+### Customer Interface Overview
+
+#### 1. Landing Page & Authentication
+The VyronaMart platform serves as a unified gateway to all e-commerce modules. Users can access different shopping experiences through a single interface.
+
+**Key Features:**
+- Modern hero section with platform overview
+- Quick access cards for all 6 modules
+- Integrated login/signup functionality
+- Featured products from all platforms
+
+#### 2. Module Navigation
+Customers can seamlessly switch between different shopping experiences:
+
+**VyronaHub**: Traditional e-commerce with product catalogs
+**VyronaSocial**: Group shopping with shared carts and social features  
+**VyronaSpace**: Local store discovery with 5-15 minute delivery
+**VyronaMallConnect**: Mall-based shopping with 30-60 minute delivery
+**VyronaRead**: Book purchases, rentals, and library management
+**VyronaInstaStore**: Instagram-based product discovery
+
+#### 3. Shopping & Checkout Process
+**Individual Shopping:**
+1. Browse products by module or category
+2. Add items to personal cart
+3. Proceed to secure checkout with multiple payment options
+4. Receive order confirmation and tracking information
+
+**Group Shopping (VyronaSocial/VyronaMallConnect):**
+1. Create or join shopping groups using room codes
+2. Add products to shared group cart
+3. Members contribute using UPI, wallet, or card payments
+4. Automatic order placement when funding goals are met
+5. Shared delivery cost optimization
+
+#### 4. Order Tracking & Management
+- Real-time order tracking with live maps (OpenRouteService integration)
+- Delivery partner information and ETA updates
+- Order history across all modules
+- Return and refund management
+
+#### 5. MyVyrona Dashboard
+Comprehensive user profile management with 7 main sections:
+- **Profile Overview**: Location, join date, statistics
+- **Wallet & Rewards**: Payment methods, transaction history
+- **Orders & Wishlist**: Cross-module order management
+- **Social Engagement**: Shopping groups, referral system
+- **Settings & Preferences**: Account details, notifications
+- **Help & Support**: Ticket system, VyronaBot chat, FAQ
+- **Account Management**: Logout, account deletion
+
+### Seller Interface Overview
+
+#### 1. Seller Registration & Onboarding
+**5 Seller Type Options:**
+1. **VyronaHub & VyronaSocial** - General e-commerce with group-buying
+2. **VyronaRead** - Books, libraries, educational institutions
+3. **VyronaSpace** - Retail/local physical stores
+4. **VyronaInstaStore** - Instagram-based sellers
+5. **VyronaMallConnect** - Mall-based/premium brand stores
+
+**Registration Process:**
+- 5-step comprehensive onboarding modal
+- Business information collection
+- Email/password credential setup
+- Automatic dashboard routing based on seller type
+- Brevo email confirmation with login credentials
+
+#### 2. Dashboard Routing System
+Each seller type redirects to their specialized dashboard:
+- VyronaHub & VyronaSocial → `/vyronahub-dashboard`
+- VyronaRead → `/vyronaread-dashboard`
+- VyronaSpace → `/vyronaspace-seller-dashboard`
+- VyronaInstaStore → `/vyronainstastore-dashboard`
+- VyronaMallConnect → `/vyronamallconnect-seller-dashboard`
+
+#### 3. Product Management
+**Core Features Across All Platforms:**
+- Add/edit/delete products with image uploads
+- Inventory management and stock tracking
+- Pricing controls with direct rupee storage
+- Category and metadata management
+- Bulk import via CSV with Google Drive integration
+
+**Platform-Specific Features:**
+- **VyronaInstaStore**: Instagram integration, hashtag management
+- **VyronaRead**: Book-specific metadata, rental pricing
+- **VyronaSpace**: Store hours, location-based delivery
+- **VyronaMallConnect**: Premium branding, mall integration
+
+#### 4. Order Management & Communication
+**Order Processing Workflow:**
+1. Real-time order notifications via email
+2. Order status updates (confirmed, preparing, ready, shipped, delivered)
+3. Customer communication through automated emails
+4. Order details with customer information and delivery addresses
+
+**Email Notification System:**
+- Automatic seller notifications for new orders
+- Customer status update emails via Brevo service
+- Group order notifications for VyronaSocial sellers
+- Order confirmation emails with tracking information
+
+#### 5. Analytics & Business Intelligence
+**Dashboard Analytics:**
+- Total orders and revenue tracking
+- Active orders monitoring
+- Average order value calculations
+- Performance metrics across time periods
+
+### Technical Implementation
+
+#### Authentication & Security
+- Session-based authentication with PostgreSQL storage
+- Role-based access control (customer, seller, admin)
+- Seller-specific data isolation
+- Secure API endpoints with middleware protection
+
+#### Database Architecture
+- PostgreSQL with Drizzle ORM
+- Modular table design for multi-platform support
+- Proper indexing for performance optimization
+- Session storage with connect-pg-simple
+
+#### Email Integration
+- Brevo (Sendinblue) for transactional emails
+- Dynamic email templates for different scenarios
+- Email delivery tracking and logging
+- Multi-recipient support for group orders
+
+#### Payment Processing
+- Multiple payment methods (UPI, cards, wallets, COD)
+- Razorpay integration for secure transactions
+- Group payment contribution tracking
+- Virtual wallet system with transaction history
+
+#### Real-time Features
+- WebSocket integration for live updates
+- Real-time order tracking with maps
+- Live delivery partner location updates
+- Instant messaging for customer-seller communication
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
