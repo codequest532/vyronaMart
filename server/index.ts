@@ -174,7 +174,7 @@ async function startServer() {
     
     // Register routes FIRST, before any other middleware
     const server = await registerRoutes(app);
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5001;
     
     server.listen(PORT, '0.0.0.0', () => {
       log(`serving on port ${PORT}`);
