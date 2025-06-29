@@ -10901,10 +10901,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Serve frontend using the existing Vite setup
-  // Setup Vite AFTER all API routes are registered
-  const { setupVite } = await import('./vite');
-  await setupVite(app, httpServer);
+  // Serve frontend - production static files or development Vite
+  if (process.env.NODE_ENV === 'production') {
+    // Serve production static files
+    const distPath = path.resolve(process.cwd(), 'dist', 'public');
+    console.log('Production mode: serving static files from', distPath);
+    
+    // Serve static assets
+    app.use(express.static(distPath));
+    
+    // Serve index.html for all non-API routes
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve(distPath, 'index.html'));
+    });
+  } else {
+    const { setupVite } = await import('./vite');
+    await setupVite(app, httpServer);
+  }
 
   // Health check endpoint
   app.get('/health', (req, res) => {
