@@ -1,0 +1,80 @@
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 11.31s
+▲ [WARNING] Duplicate member "getLibraryIntegrationRequestById" in class body [duplicate-class-member]
+
+    server/storage.ts:1875:8:
+      1875 │   async getLibraryIntegrationRequestById(id: number): Promise<any> {
+           ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  The original member "getLibraryIntegrationRequestById" is here:
+
+    server/storage.ts:1438:8:
+      1438 │   async getLibraryIntegrationRequestById(id: number): Promise<any> {
+           ╵         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "updateOrderStatus" in class body [duplicate-class-member]
+
+    server/storage.ts:2290:8:
+      2290 │   async updateOrderStatus(orderId: number, status: string, trackingNumber?: string): Promise<any> {
+           ╵         ~~~~~~~~~~~~~~~~~
+
+  The original member "updateOrderStatus" is here:
+
+    server/storage.ts:1727:8:
+      1727 │   async updateOrderStatus(orderId: number, updates: any): Promise<any> {
+           ╵         ~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "getUsers" in class body [duplicate-class-member]
+
+    server/storage.ts:2453:8:
+      2453 │   async getUsers(): Promise<User[]> {
+           ╵         ~~~~~~~~
+
+  The original member "getUsers" is here:
+
+    server/storage.ts:595:8:
+      595 │   async getUsers(): Promise<User[]> {
+          ╵         ~~~~~~~~
+
+▲ [WARNING] Duplicate member "updateUserPassword" in class body [duplicate-class-member]
+
+    server/storage.ts:2457:8:
+      2457 │   async updateUserPassword(email: string, newPassword: string): Promise<void> {
+           ╵         ~~~~~~~~~~~~~~~~~~
+
+  The original member "updateUserPassword" is here:
+
+    server/storage.ts:626:8:
+      626 │   async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+          ╵         ~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "createOtpVerification" in class body [duplicate-class-member]
+
+    server/storage.ts:2461:8:
+      2461 │   async createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification> {
+           ╵         ~~~~~~~~~~~~~~~~~~~~~
+
+  The original member "createOtpVerification" is here:
+
+    server/storage.ts:632:8:
+      632 │   async createOtpVerification(otpData: InsertOtpVerification): Promise<OtpVerification> {
+          ╵         ~~~~~~~~~~~~~~~~~~~~~
+
+▲ [WARNING] Duplicate member "getOtpVerification" in class body [duplicate-class-member]
+
+    server/storage.ts:2466:8:
+      2466 │   async getOtpVerification(identifier: string, otp: string, type: string): Promise<OtpVerification | undefined> {
+           ╵         ~~~~~~~~~~~~~~~~~~
+
+  The original member "getOtpVerification" is here:
+
+    server/storage.ts:640:8:
+      640 │   async getOtpVerification(email: string, otp: string, type: string): Promise<OtpVerification | undefined> {
+          ╵         ~~~~~~~~~~~~~~~~~~
+
+6 of 7 warnings shown (disable the message limit with --log-limit=0)
+
+  dist/index.js  564.0kb

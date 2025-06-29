@@ -1872,13 +1872,7 @@ export class DatabaseStorage implements IStorage {
     // Production-ready system - no mock data initialization
   }
 
-  async getLibraryIntegrationRequestById(id: number): Promise<any> {
-    const [request] = await db
-      .select()
-      .from(libraryIntegrationRequests)
-      .where(eq(libraryIntegrationRequests.id, id));
-    return request;
-  }
+
 
   // Delete Library Integration Request and associated books
   async deleteLibraryIntegrationRequest(id: number): Promise<boolean> {
@@ -2287,35 +2281,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateOrderStatus(orderId: number, status: string, trackingNumber?: string): Promise<any> {
-    try {
-      const [order] = await db
-        .select()
-        .from(orders)
-        .where(eq(orders.id, orderId));
 
-      if (!order) throw new Error('Order not found');
-
-      const updatedMetadata = {
-        ...order.metadata,
-        trackingNumber: trackingNumber || order.metadata?.trackingNumber
-      };
-
-      const [updatedOrder] = await db
-        .update(orders)
-        .set({
-          status: status,
-          metadata: updatedMetadata
-        })
-        .where(eq(orders.id, orderId))
-        .returning();
-
-      return updatedOrder;
-    } catch (error) {
-      console.error("Error in updateOrderStatus:", error);
-      throw error;
-    }
-  }
 
   // VyronaWallet - Wallet Management Implementation
   async getOrCreateVyronaWallet(userId: number): Promise<any> {
@@ -2449,33 +2415,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Implement missing interface methods with stub implementations
-  async getUsers(): Promise<User[]> {
-    return await db.select().from(users);
-  }
-
-  async updateUserPassword(email: string, newPassword: string): Promise<void> {
-    await db.update(users).set({ password: newPassword }).where(eq(users.email, email));
-  }
-
-  async createOtpVerification(otp: InsertOtpVerification): Promise<OtpVerification> {
-    const [verification] = await db.insert(otpVerifications).values(otp).returning();
-    return verification;
-  }
-
-  async getOtpVerification(identifier: string, otp: string, type: string): Promise<OtpVerification | undefined> {
-    const [verification] = await db
-      .select()
-      .from(otpVerifications)
-      .where(
-        and(
-          eq(otpVerifications.identifier, identifier),
-          eq(otpVerifications.otp, otp),
-          eq(otpVerifications.type, type)
-        )
-      );
-    return verification;
-  }
+  // Duplicate methods removed - using original implementations above
 
   async markOtpAsVerified(id: number): Promise<void> {
     await db.update(otpVerifications).set({ isVerified: true }).where(eq(otpVerifications.id, id));
