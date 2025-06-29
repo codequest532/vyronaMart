@@ -1,26 +1,11 @@
 module.exports = {
   apps: [{
     name: 'vyronamart',
-    script: 'node',
-    args: 'dist/index.js',
-    cwd: '/home/vyronamart/vyronaMart',
+    script: 'dist/index.js',
+    cwd: '/home/vyronamart/VyronaMart',
     env: {
       NODE_ENV: 'production',
       PORT: 5000
-    },
-    env_production: {
-      NODE_ENV: 'production',
-      PORT: 5000,
-      DATABASE_URL: process.env.DATABASE_URL,
-      SESSION_SECRET: process.env.SESSION_SECRET,
-      BREVO_API_KEY: process.env.BREVO_API_KEY,
-      RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
-      RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
-      OPENROUTESERVICE_API_KEY: process.env.OPENROUTESERVICE_API_KEY,
-      VITE_OPENROUTESERVICE_API_KEY: process.env.VITE_OPENROUTESERVICE_API_KEY,
-      REPL_ID: process.env.REPL_ID,
-      ISSUER_URL: process.env.ISSUER_URL,
-      REPLIT_DOMAINS: process.env.REPLIT_DOMAINS
     },
     instances: 1,
     exec_mode: 'fork',

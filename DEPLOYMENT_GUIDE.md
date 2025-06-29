@@ -71,7 +71,7 @@ sudo rm -f /etc/nginx/sites-enabled/default
 
 # Test and restart Nginx
 sudo nginx -t
-sudo systemctl restart nginx
+    sudo systemctl restart nginx
 ```
 
 ## Step 2: Set Up PM2 Process Management
@@ -89,38 +89,38 @@ nano ecosystem.config.js
 Add this PM2 configuration:
 
 ```javascript
-module.exports = {
-  apps: [{
-    name: 'vyronamart',
-    script: 'node',
-    args: 'dist/index.js',
-    cwd: '/home/vyronamart/vyronaMart',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 5000
-    },
-    instances: 1,
-    exec_mode: 'fork',
-    autorestart: true,
-    watch: false,
-    max_memory_restart: '1G',
-    error_file: '/home/vyronamart/logs/vyronamart-error.log',
-    out_file: '/home/vyronamart/logs/vyronamart-out.log',
-    log_file: '/home/vyronamart/logs/vyronamart-combined.log',
-    time: true
-  }]
-};
+    module.exports = {
+      apps: [{
+        name: 'vyronamart',
+        script: 'node',
+        args: 'dist/index.js',
+        cwd: '/home/vyronamart/vyronaMart',
+        env: {
+          NODE_ENV: 'production',
+          PORT: 5000
+        },
+        instances: 1,
+        exec_mode: 'fork',
+        autorestart: true,
+        watch: false,
+        max_memory_restart: '1G',
+        error_file: '/home/vyronamart/logs/vyronamart-error.log',
+        out_file: '/home/vyronamart/logs/vyronamart-out.log',
+        log_file: '/home/vyronamart/logs/vyronamart-combined.log',
+        time: true
+      }]
+    };
 ```
 
 Start with PM2:
 
 ```bash
 # Create logs directory
-mkdir -p /home/vyronamart/logs
+    mkdir -p /home/vyronamart/logs
 
 # Load environment and start
 source .env.production
-pm2 start ecosystem.config.js --env production
+    pm2 start ecosystem.config.js --env production
 pm2 save
 pm2 startup
 
