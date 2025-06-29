@@ -132,7 +132,7 @@ OPENROUTE_API_KEY=your_openroute_api_key
 REPL_ID=vyronamart-production
 ISSUER_URL=https://replit.com/oidc
 REPLIT_DOMAINS=yourdomain.com,www.yourdomain.com
-PORT=3000
+PORT=5001
 ```
 
 **For Local PostgreSQL (Option B):**
@@ -147,7 +147,7 @@ OPENROUTE_API_KEY=your_openroute_api_key
 REPL_ID=vyronamart-production
 ISSUER_URL=https://replit.com/oidc
 REPLIT_DOMAINS=yourdomain.com,www.yourdomain.com
-PORT=3000
+PORT=5001
 ```
 
 ### 5.2 Set Environment Variables
@@ -192,7 +192,7 @@ module.exports = {
     cwd: '/home/vyronamart/vyronamart',
     env: {
       NODE_ENV: 'production',
-      PORT: 3000
+      PORT: 5001
     },
     instances: 1,
     autorestart: true,
@@ -231,7 +231,7 @@ server {
     server_name yourdomain.com www.yourdomain.com;
 
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:5001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -246,7 +246,7 @@ server {
 
     # WebSocket support
     location /ws {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:5001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -299,7 +299,7 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ```bash
 sudo ufw allow OpenSSH
 sudo ufw allow 'Nginx Full'
-sudo ufw allow 3000  # Application port
+sudo ufw allow 5001  # Application port
 sudo ufw enable
 ```
 
