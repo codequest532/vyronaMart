@@ -166,7 +166,12 @@ app.use((req, res, next) => {
 
 async function startServer() {
   try {
-    log("Production mode - starting with clean database");
+    // Force production mode if not explicitly set to development
+    if (!process.env.NODE_ENV) {
+      process.env.NODE_ENV = 'production';
+    }
+    
+    log(`${process.env.NODE_ENV} mode - starting with clean database`);
     
     // Initialize data
     log("VyronaRead initialization skipped - books created by actual sellers only");
@@ -175,9 +180,10 @@ async function startServer() {
     // Register routes FIRST, before any other middleware
     const server = await registerRoutes(app);
     const PORT = parseInt(process.env.PORT || '5000', 10);
+    const HOST = process.env.HOST || '0.0.0.0';
     
-    server.listen(PORT, () => {
-      log(`serving on port ${PORT}`);
+    server.listen(PORT, HOST, () => {
+      log(`serving on ${HOST}:${PORT} in ${process.env.NODE_ENV} mode`);
     });
 
   } catch (error) {
