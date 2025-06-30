@@ -106,17 +106,17 @@ The system uses a PostgreSQL database with tables for:
 - **Tailwind CSS**: Utility-first styling
 - **Lucide React**: Icon library
 
-## Deployment Strategy
+## Development Environment
 
-### Development Environment
+### Local Development
 - Replit-based development with hot reloading
 - Vite dev server for frontend development
 - tsx for TypeScript execution in development
 - Memory-based session storage for quick iteration
 
-### Production Build
+### Build System
 - Vite build for optimized frontend bundle
-- ESBuild for backend compilation
+- TypeScript compilation for backend
 - Static file serving from Express
 - Environment-based configuration
 
@@ -276,6 +276,7 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
+- June 30, 2025: Cleaned up all Hostinger VPS deployment files and configuration from codebase
 - June 15, 2025: Completed comprehensive VyronaMallConnect customer interface with all advanced features
 - June 15, 2025: Implemented Virtual Mall Home with GPS-based mall detection and live offers display
 - June 15, 2025: Added digital storefronts with brand ratings, delivery estimates, and exclusive labels
