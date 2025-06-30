@@ -1,16 +1,11 @@
 module.exports = {
   apps: [{
     name: 'vyronamart',
-    script: 'dist/index.js',
+    script: 'production-server.js',
     cwd: '/home/vyronamart/VyronaMart',
-    env: {
-      NODE_ENV: 'development',
-      PORT: 5000,
-      HOST: '0.0.0.0'
-    },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 5000,
+      PORT: 5001,
       HOST: '0.0.0.0'
     },
     instances: 1,
