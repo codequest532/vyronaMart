@@ -1300,32 +1300,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // VyronaHub-specific products route for VyronaHub sellers
-  app.get("/api/vyronahub/products", async (req, res) => {
-    try {
-      const authenticatedUser = getAuthenticatedUser(req);
-      
-      if (!authenticatedUser) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-      
-      if (authenticatedUser.role !== 'seller' || (authenticatedUser.sellerType !== 'vyronahub' && authenticatedUser.sellerType !== 'vyronasocial')) {
-        return res.status(403).json({ message: "Access denied. VyronaHub seller access required." });
-      }
-      
-      // Get all products for this seller (VyronaHub module)
-      const sellerProducts = await storage.getProductsBySeller(authenticatedUser.id);
-      const vyronaHubProducts = sellerProducts.filter(product => 
-        product.module === 'vyronahub' || product.module === 'vyronasocial'
-      );
-      
-      res.json(vyronaHubProducts);
-    } catch (error) {
-      console.error("Error fetching VyronaHub seller products:", error);
-      res.status(500).json({ message: "Failed to fetch VyronaHub products" });
-    }
-  });
-
   // VyronaRead-specific products route for VyronaRead sellers
   app.get("/api/vyronaread/seller-books", async (req, res) => {
     try {
@@ -1368,30 +1342,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category as string
       );
       
-      // Filter logic based on requested module
-      let displayProducts = [];
-      
-      if (module === 'vyronahub') {
-        // For VyronaHub: show all products from VyronaHub sellers (regardless of group buy settings)
-        displayProducts = products.filter(product => 
-          product.enableIndividualBuy !== false && 
-          product.module !== 'vyronaread' &&
-          (product.sellerType === 'vyronahub' || product.module === 'vyronahub')
-        );
-      } else {
-        // For other modules: show products that are NOT vyronaread module and have individual buy enabled
-        displayProducts = products.filter(product => 
-          product.enableIndividualBuy !== false && 
-          product.module !== 'vyronaread' &&
-          (product.module === 'vyronahub' || product.module === 'space')
-        );
-      }
+      // Filter out VyronaRead products and include VyronaSpace + VyronaHub products
+      // Show products that are NOT vyronaread module and have individual buy enabled
+      const displayProducts = products.filter(product => 
+        product.enableIndividualBuy !== false && 
+        product.module !== 'vyronaread' &&
+        (product.module === 'vyronahub' || product.module === 'space')
+      );
       
       res.json(displayProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
-      // Return empty array instead of error to allow page to load
-      res.json([]);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
@@ -1406,8 +1368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(groupBuyProducts);
     } catch (error) {
       console.error("Error fetching social products:", error);
-      // Return empty array instead of error to allow page to load
-      res.json([]);
+      res.status(500).json({ error: "Failed to fetch social products" });
     }
   });
 

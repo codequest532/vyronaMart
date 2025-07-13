@@ -66,8 +66,8 @@ export async function sendBrevoEmail(
   htmlContent: string, 
   textContent?: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  if (!process.env.BREVO_API_KEY) {
-    console.error('BREVO_API_KEY is not configured');
+  if (!process.env.VYRONAMART_BREVO_API_KEY) {
+    console.error('VYRONAMART_BREVO_API_KEY is not configured');
     return { success: false, error: 'Email service not configured' };
   }
 
@@ -88,7 +88,7 @@ export async function sendBrevoEmail(
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'api-key': process.env.BREVO_API_KEY
+        'api-key': process.env.VYRONAMART_BREVO_API_KEY
       }
     });
 
@@ -820,7 +820,7 @@ export async function sendSellerConfirmationEmail(
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'api-key': process.env.BREVO_API_KEY
+          'api-key': process.env.VYRONAMART_BREVO_API_KEY
         }
       }
     );

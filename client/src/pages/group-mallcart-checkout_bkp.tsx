@@ -10,7 +10,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { VyronaMallConnectCheckout } from "@/lib/razorpay";
 import { 
   ArrowLeft, Users, MapPin, Clock, ShoppingCart, CreditCard, 
   Wallet, Smartphone, Gift, Coins, Star, CheckCircle, Package,
@@ -78,7 +77,7 @@ export default function GroupMallCartCheckout() {
   
   const [groupCart, setGroupCart] = useState<GroupCartItem[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [paymentMethod, setPaymentMethod] = useState("upi");
   const [deliveryOption, setDeliveryOption] = useState("express");
   const [enableSubscription, setEnableSubscription] = useState(false);
   const [subscriptionFrequency, setSubscriptionFrequency] = useState("weekly");
@@ -334,7 +333,7 @@ export default function GroupMallCartCheckout() {
     },
   });
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrder = () => {
     if (timerExpired) {
       toast({
         title: "Checkout Timer Expired",
@@ -379,58 +378,6 @@ export default function GroupMallCartCheckout() {
       }
     }
 
-    // Handle Razorpay payment
-    if (paymentMethod === "razorpay") {
-      try {
-        const paymentResult = await VyronaMallConnectCheckout.processPayment(
-          Math.round(total * 100), // Convert to paise
-          user?.id || 1,
-          1, // mallId
-          [{
-            storeId: 1,
-            storeName: "Group Mall Order",
-            items: groupCart
-          }],
-          deliveryOption,
-          user
-        );
-
-        if (paymentResult.success) {
-          // Clear group cart
-          localStorage.removeItem('groupMallCart');
-          setGroupCart([]);
-          
-          // Store order data for tracking
-          sessionStorage.setItem('orderData', JSON.stringify({
-            orderId: paymentResult.orderId,
-            total: total,
-            items: groupCart,
-            module: 'vyronamallconnect'
-          }));
-
-          toast({
-            title: "Payment Successful!",
-            description: `Group Order #${paymentResult.orderId} placed successfully. Redirecting to live tracking...`,
-          });
-
-          // Redirect to live order tracking
-          setTimeout(() => {
-            setLocation(`/order-tracking?orderId=${paymentResult.orderId}&module=vyronamallconnect`);
-          }, 1500);
-        } else {
-          throw new Error(paymentResult.error || 'Payment failed');
-        }
-      } catch (error: any) {
-        toast({
-          title: "Payment Failed",
-          description: error.message || "Payment processing failed. Please try again.",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    // Handle wallet payment
     if (paymentMethod === "wallet") {
       const walletBalance = walletData?.balance || 0;
       if (walletBalance < total) {
@@ -443,7 +390,6 @@ export default function GroupMallCartCheckout() {
       }
     }
 
-    // Handle COD or other payment methods through backend
     const orderData: GroupCheckoutData = {
       items: groupCart,
       shippingAddress: useCommonAddress ? shippingAddress : shippingAddress,
@@ -1065,19 +1011,16 @@ export default function GroupMallCartCheckout() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      paymentMethod === "razorpay" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-300"
+                      paymentMethod === "upi" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-300"
                     }`}
-                    onClick={() => setPaymentMethod("razorpay")}
+                    onClick={() => setPaymentMethod("upi")}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <CreditCard className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="font-medium text-blue-900">Razorpay</p>
-                          <p className="text-sm text-blue-700">Credit/Debit Cards, UPI, Net Banking</p>
-                        </div>
+                    <div className="flex items-center space-x-3">
+                      <Smartphone className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <p className="font-medium">UPI Payment</p>
+                        <p className="text-sm text-gray-600">Pay via UPI apps</p>
                       </div>
-                      <Badge className="bg-blue-100 text-blue-800">Recommended</Badge>
                     </div>
                   </div>
                   
@@ -1090,8 +1033,23 @@ export default function GroupMallCartCheckout() {
                     <div className="flex items-center space-x-3">
                       <Wallet className="h-5 w-5 text-green-600" />
                       <div>
-                        <p className="font-medium">VyronaWallet</p>
+                        <p className="font-medium">VyronaCoins Wallet</p>
                         <p className="text-sm text-gray-600">Balance: ₹{walletData?.balance || 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      paymentMethod === "card" ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-300"
+                    }`}
+                    onClick={() => setPaymentMethod("card")}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <CreditCard className="h-5 w-5 text-purple-600" />
+                      <div>
+                        <p className="font-medium">Credit/Debit Card</p>
+                        <p className="text-sm text-gray-600">Secure card payment</p>
                       </div>
                     </div>
                   </div>

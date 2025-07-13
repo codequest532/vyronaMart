@@ -137,6 +137,20 @@ export default function VyronaSocial() {
     staleTime: 0,
   });
 
+
+
+  // Show loading state while checking authentication
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading VyronaSocial...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Fetch groups (only if authenticated)
   const { data: groups, isLoading: groupsLoading } = useQuery({
     queryKey: ["/api/shopping-rooms"],
@@ -186,10 +200,9 @@ export default function VyronaSocial() {
     defaultValues: { content: "" },
   });
 
-  // Auth Guard
+  // Mutations
   const { requireAuth, showLoginModal, setShowLoginModal } = useAuthGuard();
 
-  // All mutations need to be declared before any conditional returns
   const createGroupMutation = useMutation({
     mutationFn: async (data: CreateGroupForm) => {
       const response = await fetch("/api/shopping-rooms", {
@@ -439,207 +452,6 @@ export default function VyronaSocial() {
     },
   });
 
-  // Delete group mutation
-  const deleteGroupMutation = useMutation({
-    mutationFn: async (groupId: number) => {
-      const response = await fetch(`/api/social/groups/${groupId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to delete group");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Group deleted",
-        description: "The group has been successfully deleted",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
-      setSelectedGroupId(null);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delete group",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Exit group mutation
-  const exitGroupMutation = useMutation({
-    mutationFn: async (groupId: number) => {
-      const response = await fetch(`/api/social/groups/${groupId}/exit`, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to exit group");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Exited group",
-        description: "You have successfully left the group",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
-      setSelectedGroupId(null);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to exit group",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Login/Signup mutations
-  const loginMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string }) => {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          identifier: data.email, 
-          password: data.password 
-        }),
-        credentials: "include",
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Login failed");
-      }
-      const responseData = await response.json();
-      
-      // Store user data in query cache immediately
-      if (responseData.success && responseData.user) {
-        queryClient.setQueryData(["/api/auth/me"], responseData.user);
-      }
-      
-      return responseData;
-    },
-    onSuccess: (data) => {
-      console.log("Social login response:", data);
-      toast({ title: "Welcome back!" });
-      setShowAuthModal(false);
-      
-      // Force refresh auth state
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
-      }, 100);
-    },
-    onError: (error: Error) => {
-      console.error("Social login error:", error);
-      toast({ title: "Login failed", description: error.message, variant: "destructive" });
-    },
-  });
-
-  const signupMutation = useMutation({
-    mutationFn: async (data: { username: string; email: string; password: string }) => {
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Signup failed");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({ title: "Account created successfully!" });
-      setShowAuthModal(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
-    },
-  });
-
-  // Derived state - must be before loading check
-  const filteredProducts = React.useMemo(() => {
-    return (products as any[])?.filter((product: any) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
-  }, [products, searchTerm]);
-
-  // Deduplicate groups by ID to prevent React key conflicts
-  const userGroups = React.useMemo(() => {
-    if (!groups || !authUser) return [];
-    const seen = new Set();
-    return (groups as any[]).filter((group: any) => {
-      if (seen.has(group.id)) {
-        return false;
-      }
-      seen.add(group.id);
-      return true;
-    });
-  }, [groups, authUser]);
-  
-  const selectedGroup = selectedGroupId ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
-  const cartItems = (groupCart as CartItem[]) || [];
-  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-
-  // Deduplicate online members to prevent React key conflicts
-  const deduplicatedOnlineMembers = React.useMemo(() => {
-    if (!onlineMembersData) return [];
-    const seen = new Set();
-    return onlineMembersData.filter((member: any) => {
-      const key = `${member.userId}-${member.username}`;
-      if (seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
-    });
-  }, [onlineMembersData]);
-
-  // Auto-select first group when groups load
-  useEffect(() => {
-    if (groups && Array.isArray(groups) && groups.length > 0 && !selectedGroupId) {
-      setSelectedGroupId(groups[0].id);
-    }
-  }, [groups, selectedGroupId]);
-
-  // Reset selectedGroupId when groups list changes or selected group no longer exists
-  useEffect(() => {
-    if (groups && Array.isArray(groups)) {
-      // If no groups exist, reset selectedGroupId
-      if (groups.length === 0 && selectedGroupId !== null) {
-        setSelectedGroupId(null);
-      }
-      // If selectedGroupId is set but the group doesn't exist in the list, reset it
-      else if (selectedGroupId && !groups.find(g => g.id === selectedGroupId)) {
-        setSelectedGroupId(null);
-      }
-    }
-  }, [groups, selectedGroupId]);
-
-  // Initialize messages from API when group is selected
-  React.useEffect(() => {
-    if (selectedGroupId && fetchedMessages) {
-      setMessages(fetchedMessages);
-      // Scroll to bottom when messages load
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
-  }, [selectedGroupId, fetchedMessages]);
-
-  // Clear messages when switching groups or deselecting
-  React.useEffect(() => {
-    setMessages([]);
-    setNewMessage("");
-  }, [selectedGroupId]);
-
   // WebSocket connection management
   useEffect(() => {
     if (!authUser || !selectedGroupId) {
@@ -657,7 +469,7 @@ export default function VyronaSocial() {
     }
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const wsUrl = `${protocol}//vyronamart.in/ws`;
     
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 3;
@@ -827,7 +639,26 @@ export default function VyronaSocial() {
 
 
 
+  // Auto-select first group when groups load
+  useEffect(() => {
+    if (groups && Array.isArray(groups) && groups.length > 0 && !selectedGroupId) {
+      setSelectedGroupId(groups[0].id);
+    }
+  }, [groups]);
 
+  // Reset selectedGroupId when groups list changes or selected group no longer exists
+  useEffect(() => {
+    if (groups && Array.isArray(groups)) {
+      // If no groups exist, reset selectedGroupId
+      if (groups.length === 0 && selectedGroupId !== null) {
+        setSelectedGroupId(null);
+      }
+      // If selectedGroupId is set but the group doesn't exist in the list, reset it
+      else if (selectedGroupId && !groups.find(g => g.id === selectedGroupId)) {
+        setSelectedGroupId(null);
+      }
+    }
+  }, [groups]);
 
   // Video call functions
   const handleStartVideoCall = async () => {
@@ -957,6 +788,41 @@ export default function VyronaSocial() {
 
   // Allow unauthenticated users to view the interface
 
+  const filteredProducts = (products as any[])?.filter((product: any) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  // Deduplicate groups by ID to prevent React key conflicts
+  const userGroups = React.useMemo(() => {
+    if (!groups || !authUser) return [];
+    const seen = new Set();
+    return (groups as any[]).filter((group: any) => {
+      if (seen.has(group.id)) {
+        return false;
+      }
+      seen.add(group.id);
+      return true;
+    });
+  }, [groups, authUser]);
+  
+  const selectedGroup = selectedGroupId ? userGroups.find((group: any) => group.id === selectedGroupId) : null;
+  const cartItems = (groupCart as CartItem[]) || [];
+  const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Deduplicate online members to prevent React key conflicts
+  const deduplicatedOnlineMembers = React.useMemo(() => {
+    if (!onlineMembersData) return [];
+    const seen = new Set();
+    return onlineMembersData.filter((member: any) => {
+      const key = `${member.userId}-${member.username}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+  }, [onlineMembersData]);
+
   // Send message function
   const handleSendMessage = () => {
     if (!selectedGroupId) return;
@@ -986,6 +852,83 @@ export default function VyronaSocial() {
       handleSendMessage();
     }
   };
+
+  // Initialize messages from API when group is selected
+  React.useEffect(() => {
+    if (selectedGroupId && fetchedMessages) {
+      setMessages(fetchedMessages);
+      // Scroll to bottom when messages load
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [selectedGroupId, fetchedMessages]);
+
+  // Clear messages when switching groups or deselecting
+  React.useEffect(() => {
+    setMessages([]);
+    setNewMessage("");
+  }, [selectedGroupId]);
+
+  // Delete group mutation
+  const deleteGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      const response = await fetch(`/api/social/groups/${groupId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete group");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Group deleted",
+        description: "The group has been successfully deleted",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      setSelectedGroupId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete group",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Exit group mutation
+  const exitGroupMutation = useMutation({
+    mutationFn: async (groupId: number) => {
+      const response = await fetch(`/api/social/groups/${groupId}/exit`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to exit group");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Exited group",
+        description: "You have successfully left the group",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/shopping-rooms"] });
+      setSelectedGroupId(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to exit group",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Handle delete group
   const handleDeleteGroup = () => {
@@ -1023,6 +966,71 @@ export default function VyronaSocial() {
       setSelectedProductForGroup(null);
     }
   };
+
+  // Login/Signup mutations
+  const loginMutation = useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          identifier: data.email, 
+          password: data.password 
+        }),
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Login failed");
+      }
+      const responseData = await response.json();
+      
+      // Store user data in query cache immediately
+      if (responseData.success && responseData.user) {
+        queryClient.setQueryData(["/api/auth/me"], responseData.user);
+      }
+      
+      return responseData;
+    },
+    onSuccess: (data) => {
+      console.log("Social login response:", data);
+      toast({ title: "Welcome back!" });
+      setShowAuthModal(false);
+      
+      // Force refresh auth state
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/auth/me"] });
+      }, 100);
+    },
+    onError: (error: Error) => {
+      console.error("Social login error:", error);
+      toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const signupMutation = useMutation({
+    mutationFn: async (data: { username: string; email: string; password: string }) => {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Signup failed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Account created successfully!" });
+      setShowAuthModal(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Signup failed", description: error.message, variant: "destructive" });
+    },
+  });
 
   // Auth form handlers
   const handleLogin = (e: React.FormEvent) => {
@@ -1763,30 +1771,28 @@ export default function VyronaSocial() {
                         </div>
                       </div>
                       
-                      <div className="flex-1 flex flex-col">
-                        <div className="p-4 border-b bg-white dark:bg-gray-800">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                                Exclusive Products
-                              </h3>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">VyronaSocial exclusive products with group discounts</p>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                              className="gap-2"
-                            >
-                              {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
-                              {viewMode === 'grid' ? 'List' : 'Grid'}
-                            </Button>
+                      <div className="flex-1 p-4 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-lg font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                              Exclusive Products
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">VyronaSocial exclusive products with group discounts</p>
                           </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                            className="gap-2"
+                          >
+                            {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid3X3 className="h-4 w-4" />}
+                            {viewMode === 'grid' ? 'List' : 'Grid'}
+                          </Button>
                         </div>
 
                         {/* Products Grid */}
                         <ScrollArea className="flex-1">
-                          <div className={`p-4 ${viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}`}>
+                          <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                             {productsLoading ? (
                               Array.from({ length: 6 }).map((_, i) => (
                                 <Card key={`loading-product-${i}`} className="overflow-hidden">
@@ -1800,33 +1806,24 @@ export default function VyronaSocial() {
                                 </Card>
                               ))
                             ) : filteredProducts.length === 0 ? (
-                              <div className="col-span-full text-center py-12">
-                                <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                                <h3 className="text-lg font-semibold text-gray-600 mb-2">No products found</h3>
-                                <p className="text-gray-500">Try adjusting your search or check back later</p>
+                              <div className="col-span-full text-center py-8">
+                                <Package className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                                <p className="text-gray-500">No products found</p>
                               </div>
                             ) : (
                               filteredProducts.map((product: any) => (
-                                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer" onClick={() => setLocation(`/social/product/${product.id}`)}>
+                                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                                   <CardContent className="p-0">
-                                    <div className="aspect-square bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 flex items-center justify-center relative">
-                                      {product.imageUrl ? (
-                                        <img 
-                                          src={product.imageUrl} 
-                                          alt={product.name}
-                                          className="w-full h-full object-cover"
-                                        />
-                                      ) : (
-                                        <Package className="w-12 h-12 text-purple-400" />
-                                      )}
-                                      <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+                                    <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center relative">
+                                      <Package className="w-12 h-12 text-gray-400" />
+                                      <Badge className="absolute top-2 right-2 bg-gradient-to-r from-green-500 to-blue-500 text-white">
                                         VyronaSocial
                                       </Badge>
                                     </div>
                                     
                                     <div className="p-4 space-y-3">
                                       <div>
-                                        <h3 className="font-semibold text-sm line-clamp-2 text-gray-800 dark:text-gray-200">{product.name}</h3>
+                                        <h3 className="font-semibold text-sm line-clamp-2">{product.name}</h3>
                                         <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
                                           {product.description}
                                         </p>
@@ -1834,27 +1831,20 @@ export default function VyronaSocial() {
 
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                          <span className="font-bold text-purple-600 dark:text-purple-400">₹{Math.round(product.price)}</span>
-                                          <span className="text-xs text-gray-500 line-through">₹{Math.round(product.price * 1.2)}</span>
+                                          <span className="font-bold text-green-600">₹{product.price}</span>
+                                          <span className="text-xs text-gray-500 line-through">₹{Math.floor(product.price * 1.2)}</span>
                                         </div>
-                                        <Badge variant="outline" className="text-xs border-purple-200 text-purple-600">
+                                        <Badge variant="outline" className="text-xs">
                                           20% OFF
                                         </Badge>
                                       </div>
 
                                       <div className="flex items-center gap-2">
                                         <Button 
-                                          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0" 
+                                          className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600" 
                                           size="sm"
                                           disabled={addToGroupCartMutation.isPending}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            if (!authUser) {
-                                              showLogin();
-                                            } else {
-                                              handleAddToGroupClick(product.id);
-                                            }
-                                          }}
+                                          onClick={!authUser ? showLogin : () => handleAddToGroupClick(product.id)}
                                         >
                                           <ShoppingBag className="w-4 h-4 mr-2" />
                                           {!authUser ? "Login to Add" : selectedGroup ? "Add to Group" : "Add to Group"}
@@ -1862,7 +1852,7 @@ export default function VyronaSocial() {
                                         <Button 
                                           variant="outline" 
                                           size="sm"
-                                          className="px-3 border-purple-200 text-purple-600 hover:bg-purple-50"
+                                          className="px-3"
                                         >
                                           <Heart className="w-4 h-4" />
                                         </Button>
@@ -2104,7 +2094,111 @@ export default function VyronaSocial() {
           </div>
         </div>
 
+        {/* Product Browsing Section */}
+        <div className="container mx-auto px-6 py-8">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Social Shopping Products</h2>
+            <p className="text-gray-600 dark:text-gray-400">Discover exclusive products perfect for group buying</p>
+          </div>
 
+          {productsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredProducts.slice(0, 12).map((product) => (
+                <Card key={product.id} className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-purple-300" onClick={() => setLocation(`/social/product/${product.id}`)}>
+                  <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900">
+                    {product.imageUrl ? (
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <Package className="w-12 h-12 text-purple-400" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 right-3">
+                      <Badge className="bg-white/90 text-gray-800 shadow-sm">
+                        {product.category}
+                      </Badge>
+                    </div>
+                    {product.enableGroupBuy && (
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                          <Users className="w-3 h-3 mr-1" />
+                          Group Buy
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">{product.name}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">{product.description}</p>
+                    
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl font-bold text-purple-600">₹{Math.round(product.price)}</span>
+                        {product.enableGroupBuy && (
+                          <span className="text-sm text-gray-500 line-through">₹{Math.round(product.price * 1.2)}</span>
+                        )}
+                      </div>
+                      {product.enableGroupBuy && (
+                        <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                          20% OFF
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          requireAuth("add items to cart", () => {
+                            if (selectedGroupId) {
+                              handleAddToGroupCart(product.id);
+                            } else {
+                              toast({
+                                title: "Select a group first",
+                                description: "Choose a shopping group to add products",
+                                variant: "destructive"
+                              });
+                            }
+                          });
+                        }}
+                      >
+                        <ShoppingBag className="w-4 h-4 mr-2" />
+                        {product.enableGroupBuy ? 'Group Buy' : 'Add to Cart'}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="px-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Heart className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Video Call Overlay - Integrated with Product Browsing */}

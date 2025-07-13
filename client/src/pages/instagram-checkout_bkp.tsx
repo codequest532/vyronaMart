@@ -10,9 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { VyronaInstaStoreCheckout } from "@/lib/razorpay";
 import { 
   ArrowLeft, 
   Instagram,
@@ -28,8 +27,7 @@ import {
   Star,
   Check,
   Wallet,
-  Smartphone,
-  DollarSign
+  Smartphone
 } from "lucide-react";
 
 interface CheckoutItem {
@@ -67,15 +65,9 @@ export default function InstagramCheckout() {
     pincode: "",
     landmark: ""
   });
-  const [paymentMethod, setPaymentMethod] = useState("credit_debit");
+  const [paymentMethod, setPaymentMethod] = useState("upi");
   const [upiId, setUpiId] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // Get user data for authentication
-  const { data: user, isLoading: isUserLoading } = useQuery({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-  });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -99,84 +91,46 @@ export default function InstagramCheckout() {
     }
   }, [setLocation, toast]);
 
-  // Wallet payment mutation
-  const walletPaymentMutation = useMutation({
-    mutationFn: async (paymentData: any) => {
-      const response = await apiRequest("POST", "/api/vyronainstastore/wallet-payment", paymentData);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      console.log("Wallet payment successful:", data);
-      toast({
-        title: "Payment Successful!",
-        description: "Your Instagram order has been placed successfully.",
-      });
-      
-      // Store order data in session storage for success page
-      sessionStorage.setItem('lastOrderData', JSON.stringify({
-        orderId: data.orderId,
-        items: checkoutData?.items || [],
-        total: total,
-        paymentMethod: 'VyronaWallet',
-        module: 'vyronainstastore'
-      }));
-      
-      // Clear cart and redirect
-      if (checkoutData?.source === 'instagram') {
-        queryClient.invalidateQueries({ queryKey: ["/api/instacart"] });
-      }
-      setLocation('/order-success');
-    },
-    onError: (error: any) => {
-      console.error("Wallet payment failed:", error);
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Wallet payment failed. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // COD order mutation
-  const codOrderMutation = useMutation({
+  const placeOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      const response = await apiRequest("POST", "/api/vyronainstastore/cod-order", orderData);
-      return response.json();
+      const response = await apiRequest("POST", "/api/instagram/orders/place", orderData);
+      return await response.json();
     },
     onSuccess: (data) => {
-      console.log("COD order successful:", data);
+      console.log("Order response:", data);
+      const orderId = data.orderId || data.id;
       toast({
         title: "Order Placed Successfully!",
-        description: "Your Instagram order has been placed for Cash on Delivery.",
+        description: `Your Instagram order #${orderId} has been placed.`,
       });
-      
-      // Store order data in session storage for success page
-      sessionStorage.setItem('lastOrderData', JSON.stringify({
-        orderId: data.orderId,
-        items: checkoutData?.items || [],
-        total: total,
-        paymentMethod: 'Cash on Delivery',
-        module: 'vyronainstastore'
-      }));
-      
-      // Clear cart and redirect
+      // Clear the cart if order came from cart
       if (checkoutData?.source === 'instagram') {
         queryClient.invalidateQueries({ queryKey: ["/api/instacart"] });
       }
-      setLocation('/order-success');
+      setLocation(`/order-confirmation?orderId=${orderId}&source=instagram`);
     },
     onError: (error: any) => {
-      console.error("COD order failed:", error);
-      toast({
-        title: "Order Failed",
-        description: error.message || "Failed to place COD order. Please try again.",
-        variant: "destructive",
-      });
+      if (error.message?.includes("Authentication required") || error.message?.includes("401")) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to place your order",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          setLocation('/login');
+        }, 1500);
+      } else {
+        toast({
+          title: "Order Failed",
+          description: error.message || "Failed to place order. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
   const handlePlaceOrder = async () => {
-    if (!checkoutData || !user) return;
+    if (!checkoutData) return;
 
     // Validate required fields
     if (!shippingAddress.name || !shippingAddress.email || !shippingAddress.phone || 
@@ -201,85 +155,20 @@ export default function InstagramCheckout() {
 
     setIsProcessing(true);
     
-    try {
-      const orderData = {
-        items: checkoutData.items,
-        shippingAddress,
-        paymentMethod,
-        upiId: paymentMethod === "upi" ? upiId : undefined,
-        totalAmount: total,
-        source: 'instagram'
-      };
+    const orderData = {
+      items: checkoutData.items,
+      shippingAddress,
+      paymentMethod,
+      upiId: paymentMethod === "upi" ? upiId : undefined,
+      totalAmount: checkoutData.total,
+      source: 'instagram'
+    };
 
-      if (paymentMethod === "vyronawallet") {
-        await walletPaymentMutation.mutateAsync({
-          amount: total,
-          userId: user.id,
-          instagramStoreId: checkoutData.items[0]?.seller || 1,
-          productIds: checkoutData.items.map(item => item.id),
-          address: shippingAddress
-        });
-      } else if (paymentMethod === "cod") {
-        await codOrderMutation.mutateAsync(orderData);
-      } else {
-        // Razorpay payment (credit_debit or upi)
-        const instagramStoreId = checkoutData.items[0]?.seller || 1;
-        const productIds = checkoutData.items.map(item => item.id);
-        
-        await VyronaInstaStoreCheckout.processPayment(
-          total,
-          user.id,
-          instagramStoreId,
-          productIds,
-          user
-        );
-        
-        // Store order data for success page
-        sessionStorage.setItem('lastOrderData', JSON.stringify({
-          orderId: Date.now().toString(),
-          items: checkoutData.items,
-          total: total,
-          paymentMethod: paymentMethod === "credit_debit" ? "Credit/Debit Card via Razorpay" : "UPI Payment via Razorpay",
-          module: 'vyronainstastore'
-        }));
-        
-        // Clear cart and redirect
-        if (checkoutData?.source === 'instagram') {
-          queryClient.invalidateQueries({ queryKey: ["/api/instacart"] });
-        }
-        setLocation('/order-success');
-      }
-    } catch (error: any) {
-      console.error("Payment processing failed:", error);
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Payment processing failed. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+    await placeOrderMutation.mutateAsync(orderData);
+    setIsProcessing(false);
   };
 
-  // Redirect to login if not authenticated
-  if (!isUserLoading && !user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Instagram className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Required</h2>
-          <p className="text-gray-600 mb-6">Please log in to complete your Instagram purchase</p>
-          <Button onClick={() => setLocation('/login')} className="bg-purple-600 hover:bg-purple-700">
-            Go to Login
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!checkoutData || isUserLoading) {
+  if (!checkoutData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
@@ -440,37 +329,20 @@ export default function InstagramCheckout() {
               </CardHeader>
               <CardContent>
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 relative">
-                    <RadioGroupItem value="credit_debit" id="credit_debit" />
-                    <Label htmlFor="credit_debit" className="flex items-center space-x-2 cursor-pointer flex-1">
-                      <CreditCard className="h-5 w-5 text-purple-600" />
-                      <div>
-                        <div className="font-medium">Credit/Debit Card</div>
-                        <div className="text-sm text-gray-500">Pay securely with Razorpay</div>
-                      </div>
-                    </Label>
-                    <Badge variant="secondary" className="text-xs">Recommended</Badge>
-                  </div>
-                  
                   <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
                     <RadioGroupItem value="upi" id="upi" />
                     <Label htmlFor="upi" className="flex items-center space-x-2 cursor-pointer flex-1">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                      <div>
-                        <div className="font-medium">UPI Payment</div>
-                        <div className="text-sm text-gray-500">Pay using UPI via Razorpay</div>
-                      </div>
+                      <Smartphone className="h-5 w-5 text-green-600" />
+                      <span>UPI Payment</span>
+                      <Badge variant="secondary" className="ml-auto">Recommended</Badge>
                     </Label>
                   </div>
                   
                   <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
-                    <RadioGroupItem value="vyronawallet" id="vyronawallet" />
-                    <Label htmlFor="vyronawallet" className="flex items-center space-x-2 cursor-pointer">
+                    <RadioGroupItem value="wallet" id="wallet" />
+                    <Label htmlFor="wallet" className="flex items-center space-x-2 cursor-pointer">
                       <Wallet className="h-5 w-5 text-blue-600" />
-                      <div>
-                        <div className="font-medium">VyronaWallet</div>
-                        <div className="text-sm text-gray-500">Pay using your wallet balance</div>
-                      </div>
+                      <span>VyronaMart Wallet</span>
                     </Label>
                   </div>
                   
@@ -478,10 +350,7 @@ export default function InstagramCheckout() {
                     <RadioGroupItem value="cod" id="cod" />
                     <Label htmlFor="cod" className="flex items-center space-x-2 cursor-pointer">
                       <Package className="h-5 w-5 text-orange-600" />
-                      <div>
-                        <div className="font-medium">Cash on Delivery</div>
-                        <div className="text-sm text-gray-500">Pay when order arrives</div>
-                      </div>
+                      <span>Cash on Delivery</span>
                     </Label>
                   </div>
                 </RadioGroup>

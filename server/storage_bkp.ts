@@ -633,35 +633,32 @@ export class DatabaseStorage implements IStorage {
       const params: any[] = [];
       
       if (module && category) {
-        whereClause = 'WHERE p.module = $1 AND p.category = $2';
+        whereClause = 'WHERE module = $1 AND category = $2';
         params.push(module, category);
       } else if (module) {
-        whereClause = 'WHERE p.module = $1';
+        whereClause = 'WHERE module = $1';
         params.push(module);
       } else if (category) {
-        whereClause = 'WHERE p.category = $1';
+        whereClause = 'WHERE category = $1';
         params.push(category);
       }
       
       const query = `
         SELECT 
-          p.id, 
-          p.name, 
-          p.description, 
-          TO_CHAR(ROUND(p.price::NUMERIC, 2), 'FM999999999999990.00') as price_string,
-          p.category, 
-          p.module, 
-          p.image_url as "imageUrl", 
-          p.store_id as "storeId", 
-          p.seller_id as "sellerId",
-          p.metadata, 
-          p.enable_individual_buy as "enableIndividualBuy", 
-          p.enable_group_buy as "enableGroupBuy", 
-          p.group_buy_min_quantity as "groupBuyMinQuantity", 
-          p.group_buy_discount as "groupBuyDiscount",
-          u.seller_type as "sellerType"
-        FROM products p
-        LEFT JOIN users u ON p.seller_id = u.id
+          id, 
+          name, 
+          description, 
+          TO_CHAR(ROUND(price::NUMERIC, 2), 'FM999999999999990.00') as price_string,
+          category, 
+          module, 
+          image_url as "imageUrl", 
+          store_id as "storeId", 
+          metadata, 
+          enable_individual_buy as "enableIndividualBuy", 
+          enable_group_buy as "enableGroupBuy", 
+          group_buy_min_quantity as "groupBuyMinQuantity", 
+          group_buy_discount as "groupBuyDiscount"
+        FROM products 
         ${whereClause}
       `;
       

@@ -1,15 +1,15 @@
 // Complete VyronaSocial API - Isolated Implementation
 import express from 'express';
-import pg from 'pg';
-const { Pool } = pg;
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
+
+// Configure WebSocket for Neon
+neonConfig.webSocketConstructor = ws;
 
 export function setupVyronaSocialAPI(app: express.Application) {
   // Create Shopping Room
   app.post("/api/vyronasocial/rooms", async (req, res) => {
-    const pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-    });
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
     
     try {
       const { name, description, addMembers = [] } = req.body;

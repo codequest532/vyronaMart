@@ -101,16 +101,13 @@ export default function Login() {
         setLocation("/admin-dashboard");
       } else if (data.user.role === "seller") {
         // Route sellers based on their seller type
-        const dashboardRoutes = {
-          "vyronahub": "/vyronahub-dashboard",
-          "vyronaread": "/vyronaread-dashboard", 
-          "vyronaspace": "/vyronaspace-seller-dashboard",
-          "vyronainstastore": "/vyronainstastore-dashboard",
-          "vyronamallconnect": "/vyronamallconnect-seller-dashboard"
-        };
-        
-        const redirectPath = dashboardRoutes[data.user.sellerType as keyof typeof dashboardRoutes];
-        setLocation(redirectPath || "/vyronahub-dashboard");
+        if (data.user.sellerType === "vyronaread") {
+          setLocation("/vyronaread-dashboard");
+        } else if (data.user.sellerType === "vyronainstastore") {
+          setLocation("/vyronainstastore-dashboard");
+        } else {
+          setLocation("/vyronahub-dashboard");
+        }
       } else {
         setLocation("/");
       }
@@ -291,7 +288,22 @@ export default function Login() {
                   </form>
                 </Form>
 
-
+                {/* Demo Credentials */}
+                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
+                  <h4 className="font-semibold text-blue-900 mb-3">Admin Access</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="p-3 bg-white rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Shield className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-green-900">Admin Account</span>
+                      </div>
+                      <div className="text-green-700 space-y-1">
+                        <p><strong>Email:</strong> mgmags25@gmail.com</p>
+                        <p><strong>Password:</strong> 12345678</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="signup" className="p-6 space-y-6">

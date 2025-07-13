@@ -10,7 +10,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { VyronaReadCheckout as VyronaReadPaymentService } from "@/lib/razorpay";
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -24,8 +23,7 @@ import {
   User,
   Users,
   Mail,
-  Phone,
-  Wallet
+  Phone
 } from "lucide-react";
 
 export default function VyronaReadCheckout() {
@@ -47,19 +45,11 @@ export default function VyronaReadCheckout() {
   const [libraryCartItems, setLibraryCartItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [rentalDuration, setRentalDuration] = useState('15'); // 15 days default
   const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [userType, setUserType] = useState<'new' | 'existing' | null>(null);
   const [itemRentalDurations, setItemRentalDurations] = useState<{[key: number]: number}>({});
-  
-  // Mock user for testing - replace with actual user context
-  const mockUser = {
-    id: 1,
-    username: 'testuser',
-    email: 'test@example.com',
-    phone: '9876543210'
-  };
   
   // Customer information
   const [customerInfo, setCustomerInfo] = useState({
@@ -96,16 +86,6 @@ export default function VyronaReadCheckout() {
   const fetchBookDetails = async () => {
     try {
       setLoading(true);
-      
-      // Debug: Log all URL parameters
-      console.log('VyronaRead Checkout - URL Parameters:', {
-        checkoutType,
-        bookId,
-        bookName,
-        author,
-        source,
-        format: urlParams.get('format')
-      });
       
       // Handle library cart checkout - load library cart items from sessionStorage
       if (checkoutType === 'borrow' && source === 'library-cart') {
@@ -152,52 +132,18 @@ export default function VyronaReadCheckout() {
       
       // For other types, try API endpoints
       let response;
-      let endpoint;
-      
       if (checkoutType === 'borrow') {
-        endpoint = `/api/vyronaread/library-books/${bookId}`;
-        response = await fetch(endpoint);
+        response = await fetch(`/api/vyronaread/library-books/${bookId}`);
       } else if (urlParams.get('format') === 'ebook') {
         // For e-books, fetch from the e-books endpoint
-        endpoint = `/api/vyronaread/ebooks/${bookId}`;
-        response = await fetch(endpoint);
+        response = await fetch(`/api/vyronaread/ebooks/${bookId}`);
       } else {
-        endpoint = `/api/products/${bookId}`;
-        response = await fetch(endpoint);
+        response = await fetch(`/api/products/${bookId}`);
       }
-      
-      console.log('API Request:', endpoint, 'Status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('API Response:', data);
-        const bookData = Array.isArray(data) ? data[0] : data;
-        
-        if (bookData && bookData.id) {
-          setBookDetails(bookData);
-        } else {
-          console.error('Invalid book data received:', bookData);
-          // If bookName and author are available from URL, use them as fallback
-          if (bookName && author) {
-            setBookDetails({
-              id: bookId,
-              name: decodeURIComponent(bookName),
-              author: decodeURIComponent(author),
-              price: 29900 // Default price
-            });
-          }
-        }
-      } else {
-        console.error('API Error:', response.status, response.statusText);
-        // If bookName and author are available from URL, use them as fallback
-        if (bookName && author) {
-          setBookDetails({
-            id: bookId,
-            name: decodeURIComponent(bookName),
-            author: decodeURIComponent(author),
-            price: 29900 // Default price
-          });
-        }
+        setBookDetails(Array.isArray(data) ? data[0] : data);
       }
     } catch (error) {
       console.error('Error fetching book details:', error);
@@ -364,197 +310,129 @@ export default function VyronaReadCheckout() {
 
     setProcessing(true);
     try {
-      const totalAmount = calculatePrice();
-      
-      // Handle different payment methods
-      if (paymentMethod === 'razorpay') {
-        // Razorpay Payment Integration
-        const orderData = {
-          bookId: parseInt(bookId!),
-          orderType: checkoutType,
-          rentalPeriod: checkoutType === 'rent' ? `${rentalDuration}days` : undefined,
-          customerInfo,
-          shippingAddress: `${customerInfo.address}, ${customerInfo.city} - ${customerInfo.postalCode}`,
-          ...(checkoutType === 'cart' && { 
-            cartItems: cartItems.map(item => ({
-              id: item.book.id,
+      let endpoint = '';
+      let payload: any = {
+        bookId: parseInt(bookId!),
+        customerInfo,
+        type: checkoutType
+      };
+
+      switch (checkoutType) {
+        case 'buy':
+          endpoint = '/api/vyronaread/purchase';
+          payload.amount = calculatePrice();
+          payload.paymentMethod = paymentMethod;
+          break;
+          
+        case 'rent':
+          endpoint = '/api/rentals/create';
+          payload = {
+            userId: 1, // Get from user context
+            productId: parseInt(bookId!),
+            bookId: parseInt(bookId!),
+            bookType: 'physical',
+            rentalPricePerCycle: calculatePrice(), // Price in paise
+            sellerId: bookDetails.sellerId || 1,
+            libraryId: null,
+            customerInfo,
+            paymentMethod
+          };
+          break;
+          
+        case 'cart':
+          endpoint = '/api/orders';
+          payload = {
+            items: cartItems.map(item => ({
+              productId: item.book.id,
               name: item.book.title || item.book.name,
               price: item.type === 'buy' 
                 ? Math.floor(item.book.price || 299)
                 : Math.floor((item.book.price || 299) * 0.1) * (itemRentalDurations[item.book.id] || 1),
+              quantity: 1,
               type: item.type,
               rentalDuration: item.type === 'rent' ? (itemRentalDurations[item.book.id] || 1) * 15 : undefined
-            }))
-          })
-        };
-
-        const result = await VyronaReadPaymentService.processPayment(
-          totalAmount,
-          mockUser.id,
-          parseInt(bookId!) || 1,
-          checkoutType,
-          checkoutType === 'rent' ? `${rentalDuration}days` : 'purchase',
-          mockUser
-        );
-
-        if (result.success) {
-          // Store order data for success page
-          const successData = {
-            orderId: result.orderId,
-            module: 'vyronaread',
-            orderType: checkoutType,
-            bookDetails: checkoutType === 'cart' ? cartItems.map(item => ({
-              id: item.book.id,
-              name: item.book.title || item.book.name,
-              author: item.book.author,
-              type: item.type,
-              rentalDuration: item.type === 'rent' ? (itemRentalDurations[item.book.id] || 1) * 15 : undefined
-            })) : {
-              id: bookId,
-              name: bookDetails?.name || bookName,
-              author: author,
-              type: checkoutType
-            },
-            customerInfo,
-            amount: totalAmount,
-            paymentMethod: 'razorpay',
-            timestamp: new Date().toISOString(),
-            ...(checkoutType === 'rent' && { rentalDuration }),
-            ...(checkoutType === 'borrow' && { borrowingInfo, userType })
+            })),
+            shippingAddress: `${customerInfo.address}, ${customerInfo.city} - ${customerInfo.postalCode}`,
+            paymentMethod: paymentMethod,
+            totalAmount: calculatePrice(),
+            total: calculatePrice()
           };
+          break;
           
-          sessionStorage.setItem('orderData', JSON.stringify(successData));
-          
-          // Clear cart after successful checkout
-          if (checkoutType === 'cart') {
-            sessionStorage.removeItem('vyronaread_cart');
+        case 'borrow':
+          if (userType === 'new') {
+            // New user: process automatic membership activation + borrowing request
+            endpoint = '/api/library-membership';
+            payload = {
+              fullName: customerInfo.name,
+              email: customerInfo.email,
+              phone: customerInfo.phone,
+              address: customerInfo.address,
+              membershipType: "annual",
+              fee: 2000,
+              bookId: bookId,
+              bookTitle: bookDetails?.name || 'Unknown Book',
+              borrowingInfo: borrowingInfo,
+              autoActivate: true // Flag for automatic activation
+            };
+          } else {
+            // Existing member: process borrowing order directly
+            endpoint = '/api/process-borrow-order';
+            payload.borrowingInfo = borrowingInfo;
           }
-          
-          toast({
-            title: "Payment Successful!",
-            description: getSuccessMessage(),
-          });
-
-          // Redirect to order success page
-          setTimeout(() => {
-            setLocation('/order-success');
-          }, 1500);
-        }
-      } else if (paymentMethod === 'wallet') {
-        // Wallet Payment Integration
-        const walletPayload = {
-          userId: mockUser.id,
-          amount: totalAmount,
-          bookId: parseInt(bookId!) || 1,
-          orderType: checkoutType,
-          rentalPeriod: checkoutType === 'rent' ? `${rentalDuration}days` : undefined
-        };
-
-        const response = await apiRequest("POST", '/api/vyronaread/wallet-payment', walletPayload);
-        const result = await response.json();
-        
-        if (result.success) {
-          // Store order data for success page
-          const successData = {
-            orderId: result.orderId,
-            module: 'vyronaread',
-            orderType: checkoutType,
-            bookDetails: {
-              id: bookId,
-              name: bookDetails?.name || bookName,
-              author: author,
-              type: checkoutType
-            },
-            customerInfo,
-            amount: totalAmount,
-            paymentMethod: 'wallet',
-            timestamp: new Date().toISOString(),
-            ...(checkoutType === 'rent' && { rentalDuration })
-          };
-          
-          sessionStorage.setItem('orderData', JSON.stringify(successData));
-          
-          toast({
-            title: "Payment Successful!",
-            description: "Payment processed using VyronaWallet!",
-          });
-
-          // Redirect to order success page
-          setTimeout(() => {
-            setLocation('/order-success');
-          }, 1500);
-        }
-      } else {
-        // Legacy payment processing for borrow and other methods
-        let endpoint = '';
-        let payload: any = {
-          bookId: parseInt(bookId!),
-          customerInfo,
-          type: checkoutType
-        };
-
-        switch (checkoutType) {
-          case 'borrow':
-            if (userType === 'new') {
-              endpoint = '/api/library-membership';
-              payload = {
-                fullName: customerInfo.name,
-                email: customerInfo.email,
-                phone: customerInfo.phone,
-                address: customerInfo.address,
-                membershipType: "annual",
-                fee: 2000,
-                bookId: bookId,
-                bookTitle: bookDetails?.name || 'Unknown Book',
-                borrowingInfo: borrowingInfo,
-                autoActivate: true
-              };
-            } else {
-              endpoint = '/api/process-borrow-order';
-              payload.borrowingInfo = borrowingInfo;
-            }
-            break;
-          default:
-            throw new Error('Unsupported payment method for this checkout type');
-        }
-
-        const response = await apiRequest("POST", endpoint, payload);
-        const result = await response.json();
-        
-        const orderData = {
-          orderId: result.orderId || result.id,
-          module: 'vyronaread',
-          orderType: checkoutType,
-          bookDetails: {
-            id: bookId,
-            name: bookDetails?.name || bookName,
-            author: author,
-            type: checkoutType
-          },
-          customerInfo,
-          amount: totalAmount,
-          paymentMethod,
-          timestamp: new Date().toISOString(),
-          ...(checkoutType === 'borrow' && { borrowingInfo, userType })
-        };
-        
-        sessionStorage.setItem('orderData', JSON.stringify(orderData));
-        
-        toast({
-          title: "Success!",
-          description: getSuccessMessage(),
-        });
-
-        setTimeout(() => {
-          setLocation('/order-success');
-        }, 1500);
+          break;
       }
+
+      const response = await apiRequest("POST", endpoint, payload);
+      const result = await response.json();
+      
+      // Store order data for success page
+      const orderData = {
+        orderId: result.orderId || result.id,
+        module: 'vyronaread',
+        orderType: checkoutType,
+        bookDetails: checkoutType === 'cart' ? cartItems.map(item => ({
+          id: item.book.id,
+          name: item.book.title || item.book.name,
+          author: item.book.author,
+          type: item.type,
+          rentalDuration: item.type === 'rent' ? (itemRentalDurations[item.book.id] || 1) * 15 : undefined
+        })) : {
+          id: bookId,
+          name: bookDetails?.name || bookName,
+          author: author,
+          type: checkoutType
+        },
+        customerInfo,
+        amount: calculatePrice(),
+        paymentMethod,
+        timestamp: new Date().toISOString(),
+        ...(checkoutType === 'rent' && { rentalDuration }),
+        ...(checkoutType === 'borrow' && { borrowingInfo, userType })
+      };
+      
+      sessionStorage.setItem('orderData', JSON.stringify(orderData));
+      
+      // Clear cart after successful checkout
+      if (checkoutType === 'cart') {
+        sessionStorage.removeItem('vyronaread_cart');
+      }
+      
+      toast({
+        title: "Success!",
+        description: getSuccessMessage(),
+      });
+
+      // Redirect to order success page
+      setTimeout(() => {
+        setLocation('/order-success');
+      }, 1500);
 
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment. Please try again.",
+        title: "Error",
+        description: "Failed to process request. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -616,46 +494,13 @@ export default function VyronaReadCheckout() {
 
   // Handle individual book checkout
   if (!bookDetails && checkoutType !== 'cart' && !(checkoutType === 'borrow' && source === 'library-cart')) {
-    if (loading) {
-      return (
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-            <p className="text-gray-500">Loading book details...</p>
-          </div>
-        </div>
-      );
-    }
-    
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Unable to Load Book</h1>
-            <p className="text-gray-600 mb-4">
-              We're having trouble loading the book details. This might be due to a temporary issue with our database.
-            </p>
-            {bookName && author && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                <p className="text-yellow-800">
-                  <strong>Book:</strong> {decodeURIComponent(bookName)}<br/>
-                  <strong>Author:</strong> {decodeURIComponent(author)}
-                </p>
-              </div>
-            )}
-            <div className="space-y-2">
-              <Button 
-                onClick={() => window.location.reload()} 
-                variant="outline"
-                className="mr-2"
-              >
-                Try Again
-              </Button>
-              <Button onClick={() => setLocation('/vyronaread')}>
-                Back to VyronaRead
-              </Button>
-            </div>
-          </div>
+          <p className="text-gray-500 mb-4">Book not found</p>
+          <Button onClick={() => setLocation('/vyronaread')}>
+            Back to VyronaRead
+          </Button>
         </div>
       </div>
     );
@@ -1108,29 +953,17 @@ export default function VyronaReadCheckout() {
               </CardHeader>
               <CardContent>
                 <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border bg-blue-50">
-                    <RadioGroupItem value="razorpay" id="razorpay" />
-                    <Label htmlFor="razorpay" className="flex-1 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4" />
-                        <span className="font-medium">Razorpay (Recommended)</span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        UPI, Cards, Net Banking, Wallets - All payment methods
-                      </p>
-                    </Label>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="card" id="card" />
+                    <Label htmlFor="card">Credit/Debit Card</Label>
                   </div>
-                  <div className="flex items-center space-x-2 p-3 rounded-lg border bg-green-50">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="upi" id="upi" />
+                    <Label htmlFor="upi">UPI Payment</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
                     <RadioGroupItem value="wallet" id="wallet" />
-                    <Label htmlFor="wallet" className="flex-1 cursor-pointer">
-                      <div className="flex items-center gap-2">
-                        <Wallet className="h-4 w-4" />
-                        <span className="font-medium">VyronaWallet</span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        Pay using your VyronaWallet balance
-                      </p>
-                    </Label>
+                    <Label htmlFor="wallet">Digital Wallet</Label>
                   </div>
                   <div className="flex items-center space-x-2 p-3 rounded-lg border">
                     <RadioGroupItem value="cod" id="cod" />

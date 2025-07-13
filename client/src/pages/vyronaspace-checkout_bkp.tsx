@@ -16,7 +16,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { VyronaSpaceCheckout as VyronaSpacePaymentService } from "@/lib/razorpay";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -26,7 +25,7 @@ const checkoutSchema = z.object({
   city: z.string().min(2, "City name is required"),
   state: z.string().min(2, "State name is required"),
   pincode: z.string().min(6, "Pincode must be 6 digits"),
-  paymentMethod: z.enum(["razorpay", "wallet", "cod"]),
+  paymentMethod: z.enum(["upi", "wallet", "credit_debit", "cod"]),
   specialInstructions: z.string().optional(),
   enableSubscription: z.boolean().default(false),
   subscriptionFrequency: z.enum(["daily", "weekly"]).default("daily"),
@@ -82,7 +81,7 @@ export default function VyronaSpaceCheckout() {
       city: "",
       state: "",
       pincode: "",
-      paymentMethod: "razorpay",
+      paymentMethod: "upi",
       specialInstructions: "",
       enableSubscription: false,
       subscriptionFrequency: "daily",
@@ -237,143 +236,28 @@ export default function VyronaSpaceCheckout() {
     console.log("✅ Validation passed, setting submitting state");
     setIsSubmitting(true);
     
-    const paymentMethod = form.getValues("enableSubscription") ? "wallet" : form.getValues("paymentMethod");
-    
-    // Handle different payment methods
-    if (paymentMethod === "razorpay") {
-      try {
-        // Get user data
-        const userQuery = await queryClient.fetchQuery({
-          queryKey: ["/api/user"],
-          queryFn: () => fetch("/api/user").then(res => res.json()),
-        });
-        
-        const paymentResponse = await VyronaSpacePaymentService.processPayment(
-          finalTotal,
-          userQuery.id,
-          cartItems[0]?.storeId || 1,
-          "15min", // Default delivery time
-          cartItems,
-          userQuery
-        );
+    const orderData = {
+      items: cartItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        storeId: item.storeId
+      })),
+      totalAmount: finalTotal,
+      deliveryFee: calculateDeliveryFee(),
+      shippingAddress: addressData,
+      paymentMethod: form.getValues("enableSubscription") ? "wallet" : form.getValues("paymentMethod"),
+      specialInstructions: form.getValues("specialInstructions"),
+      module: "vyronaspace",
+      // Subscription data
+      enableSubscription: form.getValues("enableSubscription"),
+      subscriptionFrequency: form.getValues("subscriptionFrequency"),
+      subscriptionDayOfWeek: form.getValues("subscriptionDayOfWeek"),
+      subscriptionTime: form.getValues("subscriptionTime"),
+      subscriptionStartDate: form.getValues("subscriptionStartDate")
+    };
 
-        if (paymentResponse.success) {
-          // Clear cart and redirect
-          sessionStorage.removeItem('vyronaspace-cart');
-          
-          // Store order data for tracking
-          sessionStorage.setItem('orderData', JSON.stringify({
-            orderId: paymentResponse.orderId,
-            total: finalTotal,
-            items: cartItems,
-            module: 'vyronaspace'
-          }));
-          
-          toast({
-            title: "Payment Successful!",
-            description: `Order #${paymentResponse.orderId} placed successfully. Redirecting to live tracking...`,
-          });
-          
-          // Redirect to live order tracking
-          setTimeout(() => {
-            setLocation(`/order-tracking?orderId=${paymentResponse.orderId}&module=vyronaspace`);
-          }, 1500);
-        }
-      } catch (error: any) {
-        console.error("Razorpay payment error:", error);
-        toast({
-          title: "Payment Failed",
-          description: error.message || "Payment processing failed. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
-      // Handle wallet/COD payments through backend
-      if (paymentMethod === "wallet") {
-        try {
-          // Get user data
-          const userQuery = await queryClient.fetchQuery({
-            queryKey: ["/api/user"],
-            queryFn: () => fetch("/api/user").then(res => res.json()),
-          });
-          
-          const response = await fetch('/api/vyronaspace/wallet-payment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId: userQuery.id,
-              amount: finalTotal,
-              cartItems: cartItems,
-              storeId: cartItems[0]?.storeId || 1,
-              deliveryTime: "15min"
-            }),
-          });
-
-          const result = await response.json();
-          
-          if (result.success) {
-            // Clear cart and redirect
-            sessionStorage.removeItem('vyronaspace-cart');
-            
-            // Store order data for tracking
-            sessionStorage.setItem('orderData', JSON.stringify({
-              orderId: result.orderId,
-              total: finalTotal,
-              items: cartItems,
-              module: 'vyronaspace'
-            }));
-            
-            toast({
-              title: "Payment Successful!",
-              description: `Order #${result.orderId} placed using VyronaWallet. Redirecting to live tracking...`,
-            });
-            
-            // Redirect to live order tracking
-            setTimeout(() => {
-              setLocation(`/order-tracking?orderId=${result.orderId}&module=vyronaspace`);
-            }, 1500);
-          } else {
-            throw new Error(result.error || 'Payment failed');
-          }
-        } catch (error: any) {
-          toast({
-            title: "Payment Failed",
-            description: error.message || "Wallet payment failed. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsSubmitting(false);
-        }
-      } else {
-        // COD payment through backend
-        const orderData = {
-          items: cartItems.map(item => ({
-            productId: item.id,
-            quantity: item.quantity,
-            price: item.price,
-            storeId: item.storeId
-          })),
-          totalAmount: finalTotal,
-          deliveryFee: calculateDeliveryFee(),
-          shippingAddress: addressData,
-          paymentMethod: paymentMethod,
-          specialInstructions: form.getValues("specialInstructions"),
-          module: "vyronaspace",
-          // Subscription data
-          enableSubscription: form.getValues("enableSubscription"),
-          subscriptionFrequency: form.getValues("subscriptionFrequency"),
-          subscriptionDayOfWeek: form.getValues("subscriptionDayOfWeek"),
-          subscriptionTime: form.getValues("subscriptionTime"),
-          subscriptionStartDate: form.getValues("subscriptionStartDate")
-        };
-
-        createOrderMutation.mutate(orderData);
-      }
-    }
+    createOrderMutation.mutate(orderData);
   };
 
   if (cartItems.length === 0) {
@@ -587,25 +471,10 @@ export default function VyronaSpaceCheckout() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="razorpay">
-                                    <div className="flex items-center gap-2">
-                                      <CreditCard className="h-4 w-4" />
-                                      <span>Razorpay</span>
-                                      <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">Recommended</span>
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="wallet">
-                                    <div className="flex items-center gap-2">
-                                      <Wallet className="h-4 w-4" />
-                                      <span>VyronaWallet</span>
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="cod">
-                                    <div className="flex items-center gap-2">
-                                      <Truck className="h-4 w-4" />
-                                      <span>Cash on Delivery</span>
-                                    </div>
-                                  </SelectItem>
+                                  <SelectItem value="upi">UPI Payment</SelectItem>
+                                  <SelectItem value="wallet">VyronaWallet</SelectItem>
+                                  <SelectItem value="credit_debit">Credit/Debit Card</SelectItem>
+                                  <SelectItem value="cod">Cash on Delivery</SelectItem>
                                 </SelectContent>
                               </Select>
                             </FormControl>
@@ -613,45 +482,6 @@ export default function VyronaSpaceCheckout() {
                           </FormItem>
                         )}
                       />
-                      
-                      {/* Payment Method Descriptions */}
-                      <div className="mt-4 space-y-3">
-                        {form.watch("paymentMethod") === "razorpay" && (
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <div className="flex items-center gap-2 text-blue-800 text-sm font-medium">
-                              <CreditCard className="h-4 w-4" />
-                              Razorpay - Secure Payment Gateway
-                            </div>
-                            <p className="text-blue-700 text-xs mt-1">
-                              Pay securely with Credit/Debit Cards, UPI, Net Banking, and Digital Wallets. Recommended for fastest checkout.
-                            </p>
-                          </div>
-                        )}
-                        
-                        {form.watch("paymentMethod") === "wallet" && (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                            <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
-                              <Wallet className="h-4 w-4" />
-                              VyronaWallet - Instant Payment
-                            </div>
-                            <p className="text-green-700 text-xs mt-1">
-                              Pay instantly using your VyronaWallet balance. Current balance: ₹{walletBalance?.balance ?? 0}
-                            </p>
-                          </div>
-                        )}
-                        
-                        {form.watch("paymentMethod") === "cod" && (
-                          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                            <div className="flex items-center gap-2 text-orange-800 text-sm font-medium">
-                              <Truck className="h-4 w-4" />
-                              Cash on Delivery
-                            </div>
-                            <p className="text-orange-700 text-xs mt-1">
-                              Pay with cash when your order arrives. Additional ₹10 COD charges may apply.
-                            </p>
-                          </div>
-                        )}
-                      </div>
                       
                       <FormField
                         control={form.control}
@@ -881,12 +711,7 @@ export default function VyronaSpaceCheckout() {
                       <div>
                         <h3 className="font-semibold mb-2">Payment Method</h3>
                         <div className="bg-emerald-50 p-4 rounded-xl">
-                          <p className="capitalize">
-                            {form.getValues("paymentMethod") === "razorpay" ? "Razorpay (Recommended)" : 
-                             form.getValues("paymentMethod") === "wallet" ? "VyronaWallet" : 
-                             form.getValues("paymentMethod") === "cod" ? "Cash on Delivery" : 
-                             form.getValues("paymentMethod")}
-                          </p>
+                          <p className="capitalize">{form.getValues("paymentMethod").replace("_", " ")}</p>
                         </div>
                       </div>
                       

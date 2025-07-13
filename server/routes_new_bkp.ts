@@ -1368,30 +1368,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         category as string
       );
       
-      // Filter logic based on requested module
-      let displayProducts = [];
-      
-      if (module === 'vyronahub') {
-        // For VyronaHub: show all products from VyronaHub sellers (regardless of group buy settings)
-        displayProducts = products.filter(product => 
-          product.enableIndividualBuy !== false && 
-          product.module !== 'vyronaread' &&
-          (product.sellerType === 'vyronahub' || product.module === 'vyronahub')
-        );
-      } else {
-        // For other modules: show products that are NOT vyronaread module and have individual buy enabled
-        displayProducts = products.filter(product => 
-          product.enableIndividualBuy !== false && 
-          product.module !== 'vyronaread' &&
-          (product.module === 'vyronahub' || product.module === 'space')
-        );
-      }
+      // Filter out VyronaRead products and include VyronaSpace + VyronaHub products
+      // Show products that are NOT vyronaread module and have individual buy enabled
+      const displayProducts = products.filter(product => 
+        product.enableIndividualBuy !== false && 
+        product.module !== 'vyronaread' &&
+        (product.module === 'vyronahub' || product.module === 'space')
+      );
       
       res.json(displayProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
-      // Return empty array instead of error to allow page to load
-      res.json([]);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
@@ -1406,8 +1394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(groupBuyProducts);
     } catch (error) {
       console.error("Error fetching social products:", error);
-      // Return empty array instead of error to allow page to load
-      res.json([]);
+      res.status(500).json({ error: "Failed to fetch social products" });
     }
   });
 

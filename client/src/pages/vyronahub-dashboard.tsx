@@ -1695,6 +1695,376 @@ export default function SellerDashboard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Add Product Dialog */}
+      <Dialog open={showAddProductDialog} onOpenChange={setShowAddProductDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+            <DialogDescription>
+              Create a new product for your VyronaHub store
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...productForm}>
+            <form onSubmit={productForm.handleSubmit(handleAddProduct)} className="space-y-6">
+              <Tabs value={currentProductTab} onValueChange={setCurrentProductTab}>
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="basic" className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${completedProductTabs.has('basic') ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    Basic Info
+                  </TabsTrigger>
+                  <TabsTrigger value="details" className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${completedProductTabs.has('details') ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    Details
+                  </TabsTrigger>
+                  <TabsTrigger value="images" className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${completedProductTabs.has('images') ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    Images
+                  </TabsTrigger>
+                  <TabsTrigger value="inventory" className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${completedProductTabs.has('inventory') ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    Inventory
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="basic" className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={productForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter product name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={productForm.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Price (₹) *</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              placeholder="0" 
+                              {...field} 
+                              onChange={e => field.onChange(Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={productForm.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description *</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Describe your product..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={productForm.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category.value} value={category.value}>
+                                {category.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                <TabsContent value="details" className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={productForm.control}
+                      name="sku"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>SKU *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Product SKU" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={productForm.control}
+                      name="brand"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Brand</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Brand name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={productForm.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weight</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., 500g, 1kg" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={productForm.control}
+                      name="dimensions"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dimensions</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g., 10x5x3 cm" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={productForm.control}
+                    name="specifications"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Specifications</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Technical specifications..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+
+                <TabsContent value="images" className="space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Main Product Image</Label>
+                      <div className="mt-2 flex items-center justify-center w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-10 h-10 mb-3 text-gray-400" />
+                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                              <span className="font-semibold">Click to upload</span> main image
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or GIF (MAX. 5MB)</p>
+                          </div>
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload(e.target.files, 'main')}
+                          />
+                        </label>
+                      </div>
+                      {uploadedFiles.mainImage && (
+                        <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+                          <span>✓ {uploadedFiles.mainImage.name}</span>
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setUploadedFiles(prev => ({ ...prev, mainImage: null }))}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Label>Additional Images (Optional)</Label>
+                      <div className="mt-2 flex items-center justify-center w-full">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Upload additional images</p>
+                          </div>
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) => handleFileUpload(e.target.files, 'additional')}
+                          />
+                        </label>
+                      </div>
+                      {uploadedFiles.additionalMedia.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {uploadedFiles.additionalMedia.map((file, index) => (
+                            <div key={index} className="flex items-center gap-2 text-sm text-blue-600">
+                              <span>✓ {file.name}</span>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setUploadedFiles(prev => ({
+                                  ...prev, 
+                                  additionalMedia: prev.additionalMedia.filter((_, i) => i !== index)
+                                }))}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="inventory" className="space-y-4">
+                  <div className="space-y-4">
+                    <FormField
+                      control={productForm.control}
+                      name="enableGroupBuy"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center space-x-2">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              checked={field.value}
+                              onChange={field.onChange}
+                              className="rounded"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Enable Group Buy</FormLabel>
+                            <p className="text-sm text-gray-600">Allow customers to purchase this product in groups for better pricing</p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {productForm.watch('enableGroupBuy') && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={productForm.control}
+                          name="groupBuyMinQuantity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Min Group Size</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="e.g., 5" 
+                                  {...field}
+                                  onChange={e => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={productForm.control}
+                          name="groupBuyDiscount"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Group Discount (%)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  placeholder="e.g., 10" 
+                                  {...field}
+                                  onChange={e => field.onChange(Number(e.target.value))}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex justify-between">
+                <Button type="button" variant="outline" onClick={resetProductForm}>
+                  Cancel
+                </Button>
+                <div className="flex gap-2">
+                  {currentProductTab !== "basic" && (
+                    <Button 
+                      type="button" 
+                      variant="outline"
+                      onClick={() => {
+                        const currentIndex = tabOrder.indexOf(currentProductTab);
+                        if (currentIndex > 0) {
+                          setCurrentProductTab(tabOrder[currentIndex - 1]);
+                        }
+                      }}
+                    >
+                      Previous
+                    </Button>
+                  )}
+                  {!isLastTab && (
+                    <Button 
+                      type="button" 
+                      onClick={() => {
+                        if (isCurrentTabCompleted) {
+                          goToNextTab();
+                        } else {
+                          toast({
+                            title: "Complete Current Tab",
+                            description: "Please fill all required fields in the current tab before proceeding.",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      Next
+                    </Button>
+                  )}
+                  <Button 
+                    type="submit" 
+                    disabled={!allTabsCompleted || addProductMutation.isPending}
+                  >
+                    {addProductMutation.isPending ? "Adding..." : "Add Product"}
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

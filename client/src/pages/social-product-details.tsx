@@ -1,52 +1,116 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Star, Heart, ShoppingCart, ArrowLeft, Truck, Shield, RotateCcw, Share2, MessageCircle, Users, Zap, Award, Clock, Send, UserPlus, MessageSquare } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
-import type { Product } from "@shared/schema";
+import { toast } from "@/hooks/use-toast";
+import { 
+  ArrowLeft, 
+  ShoppingBag, 
+  Users, 
+  Star, 
+  Heart, 
+  Share2,
+  MessageSquare,
+  Package,
+  Shield,
+  Truck,
+  RefreshCw
+} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
-interface SocialProductDetailsProps {
-  productId: string;
-}
-
-export default function SocialProductDetails({ productId }: SocialProductDetailsProps) {
+export default function SocialProductDetails() {
+  const { productId } = useParams<{ productId: string }>();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [questionDialogOpen, setQuestionDialogOpen] = useState(false);
-  const [groupInviteOpen, setGroupInviteOpen] = useState(false);
-  const [reviewRating, setReviewRating] = useState(5);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewerName, setReviewerName] = useState("");
-  const [questionText, setQuestionText] = useState("");
-  const [questionerName, setQuestionerName] = useState("");
+  const queryClient = useQueryClient();
+  
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [isGroupSelectionOpen, setIsGroupSelectionOpen] = useState(false);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
-  const { data: product, isLoading } = useQuery<Product>({
+  // Get authenticated user
+  const { data: authUser } = useQuery({
+    queryKey: ["/api/auth/me"],
+    retry: false,
+  });
+
+  // Get product details
+  const { data: product, isLoading: productLoading } = useQuery({
     queryKey: [`/api/products/${productId}`],
+    enabled: !!productId,
   });
 
-  // Fetch user's groups for social shopping
+  // Get user's groups
   const { data: userGroups = [] } = useQuery({
-    queryKey: ["/api/shopping-rooms"],
+    queryKey: ["/api/social/groups"],
+    enabled: !!authUser,
   });
 
-  if (isLoading) {
+  // Add to group cart mutation
+  const addToGroupCartMutation = useMutation({
+    mutationFn: async (data: { productId: number; groupId: number; quantity: number }) => {
+      return await apiRequest("/api/social/group-cart", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Added to group cart!",
+        description: "Product has been added to your group's cart"
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/social/group-cart"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add to group cart",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleAddToGroupCart = (groupId: number) => {
+    if (!product) return;
+    
+    addToGroupCartMutation.mutate({
+      productId: product.id,
+      groupId,
+      quantity: selectedQuantity
+    });
+    setIsGroupSelectionOpen(false);
+  };
+
+  const showLogin = () => {
+    toast({
+      title: "Authentication Required",
+      description: "Please log in to add items to your group cart",
+      variant: "destructive"
+    });
+    // Redirect to login or show login modal
+  };
+
+  if (productLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p>Loading product details...</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-8 h-8 bg-gray-200 rounded"></div>
+              <div className="h-6 bg-gray-200 rounded w-48"></div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="aspect-square bg-gray-200 rounded-lg"></div>
+              <div className="space-y-4">
+                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -54,350 +118,299 @@ export default function SocialProductDetails({ productId }: SocialProductDetails
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-xl font-semibold mb-4">Product not found</p>
-          <Button onClick={() => setLocation("/social")}>Back to VyronaSocial</Button>
+          <Package className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+          <h2 className="text-2xl font-semibold mb-2">Product Not Found</h2>
+          <p className="text-gray-600 mb-4">The product you're looking for doesn't exist or has been removed.</p>
+          <Button onClick={() => setLocation("/social")}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Social Shopping
+          </Button>
         </div>
       </div>
     );
   }
 
-  const mockImages = [
-    product.imageUrl || "/api/placeholder/400/400",
-    "/api/placeholder/400/400",
-    "/api/placeholder/400/400",
-    "/api/placeholder/400/400"
-  ];
-
-  const handleAddToGroupCart = (groupId?: number) => {
-    if (groupId) {
-      toast({
-        title: "Added to Group Cart!",
-        description: "Product has been added to your group's shared cart.",
-      });
-    } else {
-      toast({
-        title: "Please select a group",
-        description: "Choose a shopping group to add this product to.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleInviteFriends = () => {
-    setGroupInviteOpen(true);
-  };
-
-  const handleSubmitReview = () => {
-    if (!reviewText.trim() || !reviewerName.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    toast({
-      title: "Review submitted successfully!",
-      description: `Thank you for your ${reviewRating}-star review.`,
-    });
-    
-    setReviewText("");
-    setReviewerName("");
-    setReviewRating(5);
-    setReviewDialogOpen(false);
-  };
-
-  const handleSubmitQuestion = () => {
-    if (!questionText.trim() || !questionerName.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    toast({
-      title: "Question submitted successfully!",
-      description: "Your question has been posted to the community.",
-    });
-    
-    setQuestionText("");
-    setQuestionerName("");
-    setQuestionDialogOpen(false);
-  };
+  const productImages = product.imageUrl ? [product.imageUrl] : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-      {/* Modern Header */}
-      <header className="bg-white/80 backdrop-blur-lg shadow-lg border-b border-purple-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/social")}
-                className="flex items-center gap-2 hover:bg-purple-100 transition-colors"
+                className="gap-2"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to VyronaSocial
+                <ArrowLeft className="w-4 h-4" />
+                Back to Social Shopping
               </Button>
-              <div className="text-sm text-gray-600">
-                <span className="text-purple-600 font-medium">VyronaSocial</span> › {product.category} › {product.name}
-              </div>
+              <div className="h-4 w-px bg-gray-300"></div>
+              <h1 className="text-lg font-semibold">Product Details</h1>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="hover:bg-purple-100" onClick={handleInviteFriends}>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Invite Friends
+              <Button variant="ghost" size="sm">
+                <Share2 className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="hover:bg-purple-100">
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
+              <Button variant="ghost" size="sm">
+                <Heart className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Social Shopping Trust Indicators */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
-            <Users className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-            <p className="text-sm font-medium text-gray-800">Group Shopping</p>
-          </div>
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
-            <MessageSquare className="h-6 w-6 text-pink-600 mx-auto mb-2" />
-            <p className="text-sm font-medium text-gray-800">Live Chat</p>
-          </div>
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
-            <Shield className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-            <p className="text-sm font-medium text-gray-800">Secure Payment</p>
-          </div>
-          <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-center border border-purple-100">
-            <Award className="h-6 w-6 text-orange-600 mx-auto mb-2" />
-            <p className="text-sm font-medium text-gray-800">Community Verified</p>
-          </div>
-        </div>
-
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Compact Product Images */}
+          {/* Product Images */}
           <div className="space-y-4">
-            <div className="relative">
-              <div className="aspect-square bg-white rounded-xl border border-purple-100 overflow-hidden shadow-lg max-w-md mx-auto">
+            <div className="aspect-square bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 rounded-lg overflow-hidden relative">
+              {productImages.length > 0 ? (
                 <img
-                  src={mockImages[selectedImageIndex]}
+                  src={productImages[selectedImage]}
                   alt={product.name}
-                  className="w-full h-full object-cover hover:scale-102 transition-transform duration-300"
+                  className="w-full h-full object-cover"
                 />
-                <div className="absolute top-3 right-3">
-                  <Button variant="secondary" size="sm" className="bg-white/90 backdrop-blur-sm hover:bg-white h-8 w-8 p-0">
-                    <Heart className="h-3 w-3" />
-                  </Button>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <Package className="w-16 h-16 text-purple-400" />
                 </div>
-                <div className="absolute top-3 left-3">
-                  <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs">
-                    <Users className="h-2 w-2 mr-1" />
-                    Social Shopping
-                  </Badge>
-                </div>
+              )}
+              <Badge className="absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+                VyronaSocial
+              </Badge>
+            </div>
+            
+            {/* Thumbnail Images */}
+            {productImages.length > 1 && (
+              <div className="flex gap-2">
+                {productImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedImage === index
+                        ? "border-purple-500 shadow-lg"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
               </div>
-            </div>
-            <div className="grid grid-cols-4 gap-2 max-w-md mx-auto">
-              {mockImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`aspect-square bg-white rounded-lg border overflow-hidden transition-all ${
-                    selectedImageIndex === index ? "ring-2 ring-purple-500 border-purple-300" : "border-gray-200 hover:border-purple-200"
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            )}
           </div>
 
-          {/* Enhanced Product Info */}
-          <div className="space-y-8">
-            {/* Product Header */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100">
-              <div className="flex items-center gap-2 mb-3">
-                <Badge variant="outline" className="border-purple-300 text-purple-700 bg-purple-50">{product.category}</Badge>
-                <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white">
-                  <Zap className="h-3 w-3 mr-1" />
-                  Trending
-                </Badge>
-              </div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
-              
-              {/* Enhanced Rating */}
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <span className="text-lg font-semibold text-gray-800">4.7</span>
-                <span className="text-sm text-purple-600 font-medium hover:underline cursor-pointer">1,892 community reviews</span>
-                <span className="text-sm text-green-600 font-medium">✓ Friend recommended</span>
-              </div>
-
-              {/* Social Proof */}
-              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  <span>847 friends bought this</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Active in 23 groups</span>
-                </div>
-              </div>
-
-              <p className="text-gray-700 leading-relaxed text-lg">{product.description}</p>
+          {/* Product Info */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {product.name}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                {product.description}
+              </p>
             </div>
 
-            {/* Enhanced Pricing */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
-              <div className="space-y-3">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl font-bold text-purple-600">₹{product.price}</span>
-                  <span className="text-xl text-gray-500 line-through">₹{Math.floor(product.price * 1.25)}</span>
-                  <Badge className="bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm">
-                    Group Discount Applied
-                  </Badge>
-                </div>
-                <p className="text-sm text-gray-600">Special social shopping price • Free delivery on group orders</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-green-600 font-medium">✓ Best group price</span>
-                  <span className="text-sm text-purple-600">• Split payments with friends</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Shopping Actions */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-purple-100 space-y-6">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
-                  <label className="font-semibold text-gray-800">Quantity:</label>
-                  <div className="flex items-center border-2 border-purple-200 rounded-xl bg-white">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-4 py-2 hover:bg-purple-50 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="px-6 py-2 border-x-2 border-purple-100 font-semibold">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="px-4 py-2 hover:bg-purple-50 transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-                <div className="text-sm">
-                  <p className="text-purple-600 font-medium">💜 Social Shopping Benefits</p>
-                  <p className="text-gray-600">Shop with friends & save more</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {/* Group Selection */}
-                {userGroups.length > 0 && (
-                  <div className="space-y-2">
-                    <label className="font-semibold text-gray-800">Add to Group:</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(userGroups as any[]).slice(0, 4).map((group: any) => (
-                        <Button
-                          key={group.id}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleAddToGroupCart(group.id)}
-                          className="border-purple-200 hover:bg-purple-50 text-sm"
-                        >
-                          <Users className="h-3 w-3 mr-1" />
-                          {group.name}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+            {/* Pricing */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-4">
+                <span className="text-3xl font-bold text-purple-600">
+                  ₹{Math.round(product.price)}
+                </span>
+                {product.enableGroupBuy && (
+                  <span className="text-xl text-gray-500 line-through">
+                    ₹{Math.round(product.price * 1.2)}
+                  </span>
                 )}
+              </div>
+              {product.enableGroupBuy && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-green-600 border-green-200">
+                    20% OFF with Group Buy
+                  </Badge>
+                  <span className="text-sm text-gray-600">
+                    Save ₹{Math.round(product.price * 0.2)} with friends!
+                  </span>
+                </div>
+              )}
+            </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                  <Button
-                    onClick={() => handleAddToGroupCart()}
-                    size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg py-6 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300"
-                  >
-                    <Users className="h-5 w-5 mr-3" />
-                    Add to Group Cart • ₹{(product.price * quantity).toLocaleString()}
-                  </Button>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" size="lg" className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50 py-4 rounded-xl">
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Start Discussion
-                    </Button>
-                    <Button variant="outline" size="lg" className="border-2 border-pink-300 text-pink-700 hover:bg-pink-50 py-4 rounded-xl" onClick={handleInviteFriends}>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Invite Friends
+            {/* Group Buy Features */}
+            {product.enableGroupBuy && (
+              <Card className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-5 h-5 text-purple-600" />
+                    <h3 className="font-semibold text-purple-800 dark:text-purple-200">
+                      Group Buy Benefits
+                    </h3>
+                  </div>
+                  <ul className="space-y-2 text-sm text-purple-700 dark:text-purple-300">
+                    <li>• 20% discount when buying with friends</li>
+                    <li>• Free delivery on group orders</li>
+                    <li>• Social shopping experience</li>
+                    <li>• Share costs with group members</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Quantity Selection */}
+            <div className="flex items-center gap-4">
+              <span className="font-medium">Quantity:</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
+                  disabled={selectedQuantity <= 1}
+                >
+                  -
+                </Button>
+                <span className="w-12 text-center">{selectedQuantity}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedQuantity(selectedQuantity + 1)}
+                >
+                  +
+                </Button>
+              </div>
+            </div>
+
+            {/* Add to Cart Button */}
+            <div className="space-y-3">
+              {authUser ? (
+                userGroups.length > 0 ? (
+                  <Dialog open={isGroupSelectionOpen} onOpenChange={setIsGroupSelectionOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-6 text-lg"
+                        disabled={addToGroupCartMutation.isPending}
+                      >
+                        <ShoppingBag className="w-5 h-5 mr-2" />
+                        {addToGroupCartMutation.isPending ? "Adding..." : "Add to Group Cart"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Select a Group</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-3">
+                        {userGroups.map((group: any) => (
+                          <Card
+                            key={group.id}
+                            className="cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => handleAddToGroupCart(group.id)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h4 className="font-semibold">{group.name}</h4>
+                                  <p className="text-sm text-gray-600">{group.memberCount} members</p>
+                                </div>
+                                <Badge variant="outline">{group.roomCode}</Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                ) : (
+                  <div className="text-center space-y-3">
+                    <p className="text-gray-600">You need to join a group to add items to cart</p>
+                    <Button
+                      onClick={() => setLocation("/social")}
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-6 text-lg"
+                    >
+                      <Users className="w-5 h-5 mr-2" />
+                      Join a Shopping Group
                     </Button>
                   </div>
-                </div>
-              </div>
+                )
+              ) : (
+                <Button
+                  onClick={showLogin}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-6 text-lg"
+                >
+                  <ShoppingBag className="w-5 h-5 mr-2" />
+                  Login to Add to Cart
+                </Button>
+              )}
+            </div>
 
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>💳 Split payments with friends</span>
-                <span>🚚 Group delivery discounts</span>
+            {/* Product Features */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Shield className="w-4 h-4" />
+                <span>Quality Assured</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Truck className="w-4 h-4" />
+                <span>Free Delivery</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <RefreshCw className="w-4 h-4" />
+                <span>Easy Returns</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <MessageSquare className="w-4 h-4" />
+                <span>24/7 Support</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Product Details with Social Features */}
-        <div className="mt-16">
-          <Tabs defaultValue="details" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 bg-white/80 backdrop-blur-sm rounded-xl p-1 border border-purple-200">
-              <TabsTrigger value="details" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">Details</TabsTrigger>
-              <TabsTrigger value="reviews" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">Community Reviews</TabsTrigger>
-              <TabsTrigger value="groups" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">Active Groups</TabsTrigger>
-              <TabsTrigger value="shipping" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">Shipping</TabsTrigger>
-              <TabsTrigger value="qa" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white">Q&A</TabsTrigger>
+        {/* Product Details Tabs */}
+        <div className="mt-12">
+          <Tabs defaultValue="description" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="description">Description</TabsTrigger>
+              <TabsTrigger value="specifications">Specifications</TabsTrigger>
+              <TabsTrigger value="reviews">Reviews</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="details" className="mt-6">
-              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
+            <TabsContent value="description" className="mt-6">
+              <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Product Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <h3 className="text-lg font-semibold mb-4">Product Description</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {product.description || "No detailed description available for this product."}
+                  </p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="specifications" className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Product Specifications</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-medium mb-2">Key Features</h4>
-                      <ul className="space-y-1 text-gray-600">
-                        <li>• Premium quality materials</li>
-                        <li>• Eco-friendly packaging</li>
-                        <li>• 1-year warranty included</li>
-                        <li>• Free maintenance service</li>
-                      </ul>
+                      <span className="font-medium">Category:</span>
+                      <span className="ml-2 text-gray-600">{product.category}</span>
                     </div>
                     <div>
-                      <h4 className="font-medium mb-2">Social Shopping Benefits</h4>
-                      <ul className="space-y-1 text-gray-600">
-                        <li>• Group discounts available</li>
-                        <li>• Share with friends for better prices</li>
-                        <li>• Community verified quality</li>
-                        <li>• Split payment options</li>
-                      </ul>
+                      <span className="font-medium">Stock:</span>
+                      <span className="ml-2 text-gray-600">{product.stockQuantity} available</span>
+                    </div>
+                    <div>
+                      <span className="font-medium">Group Buy:</span>
+                      <span className="ml-2 text-gray-600">
+                        {product.enableGroupBuy ? "Available" : "Not Available"}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -405,190 +418,13 @@ export default function SocialProductDetails({ productId }: SocialProductDetails
             </TabsContent>
             
             <TabsContent value="reviews" className="mt-6">
-              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
+              <Card>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-semibold">Community Reviews</h3>
-                    <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                          Write Review
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Share Your Experience</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="rating">Rating</Label>
-                            <div className="flex items-center gap-1 mt-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                  key={star}
-                                  onClick={() => setReviewRating(star)}
-                                  className="focus:outline-none"
-                                >
-                                  <Star
-                                    className={`h-6 w-6 ${
-                                      star <= reviewRating
-                                        ? "fill-yellow-400 text-yellow-400"
-                                        : "text-gray-300"
-                                    }`}
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="review">Your Review</Label>
-                            <Textarea
-                              id="review"
-                              placeholder="Share your experience with this product..."
-                              value={reviewText}
-                              onChange={(e) => setReviewText(e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="name">Your Name</Label>
-                            <Input
-                              id="name"
-                              placeholder="Enter your name"
-                              value={reviewerName}
-                              onChange={(e) => setReviewerName(e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <Button onClick={handleSubmitReview} className="w-full">
-                            <Send className="h-4 w-4 mr-2" />
-                            Submit Review
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {/* Sample community reviews */}
-                    <div className="border border-purple-100 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                        <span className="font-medium">Sarah M.</span>
-                        <Badge variant="outline" className="text-xs">Group Purchase</Badge>
-                      </div>
-                      <p className="text-gray-600">Amazing product! Bought it with my shopping group and got a great discount. Quality is exactly as described.</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="groups" className="mt-6">
-              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Active Shopping Groups</h3>
-                  <div className="space-y-4">
-                    <div className="border border-purple-100 rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">Fashion Friends</h4>
-                        <Badge className="bg-green-100 text-green-800">Active • 8 members</Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">Currently discussing this product with 3 potential buyers</p>
-                      <Button size="sm" variant="outline" className="border-purple-200">
-                        <UserPlus className="h-3 w-3 mr-1" />
-                        Join Group
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="shipping" className="mt-6">
-              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-4">Shipping & Returns</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <h4 className="font-medium text-green-600 mb-2">✓ Free Group Delivery</h4>
-                      <p className="text-sm text-gray-600">Free delivery on all group orders above ₹999</p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <h4 className="font-medium text-blue-600 mb-2">🚚 Delivery Options</h4>
-                      <ul className="text-sm text-gray-600 space-y-1">
-                        <li>• Standard delivery: 3-5 business days</li>
-                        <li>• Express delivery: 1-2 business days</li>
-                        <li>• Group delivery: Coordinated delivery to all members</li>
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="qa" className="mt-6">
-              <Card className="bg-white/80 backdrop-blur-sm border border-purple-100">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-semibold">Questions & Answers</h3>
-                    <Dialog open={questionDialogOpen} onOpenChange={setQuestionDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" className="border-purple-300 text-purple-700">
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Ask Question
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Ask the Community</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="question">Your Question</Label>
-                            <Textarea
-                              id="question"
-                              placeholder="What would you like to know about this product?"
-                              value={questionText}
-                              onChange={(e) => setQuestionText(e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="questioner-name">Your Name</Label>
-                            <Input
-                              id="questioner-name"
-                              placeholder="Enter your name"
-                              value={questionerName}
-                              onChange={(e) => setQuestionerName(e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <Button onClick={handleSubmitQuestion} className="w-full">
-                            <Send className="h-4 w-4 mr-2" />
-                            Post Question
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="border border-purple-100 rounded-lg p-4">
-                      <div className="mb-2">
-                        <span className="font-medium">Q:</span>
-                        <span className="ml-2">Is this product available for group buying?</span>
-                      </div>
-                      <div className="text-green-600">
-                        <span className="font-medium">A:</span>
-                        <span className="ml-2">Yes! Group buying is available with additional discounts for 5+ members.</span>
-                      </div>
-                    </div>
+                  <h3 className="text-lg font-semibold mb-4">Customer Reviews</h3>
+                  <div className="text-center py-8">
+                    <Star className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-gray-600">No reviews yet</p>
+                    <p className="text-sm text-gray-500 mt-2">Be the first to review this product!</p>
                   </div>
                 </CardContent>
               </Card>
@@ -596,33 +432,6 @@ export default function SocialProductDetails({ productId }: SocialProductDetails
           </Tabs>
         </div>
       </div>
-
-      {/* Group Invite Dialog */}
-      <Dialog open={groupInviteOpen} onOpenChange={setGroupInviteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invite Friends to Shop</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Share this product with friends:</Label>
-              <div className="flex gap-2 mt-2">
-                <Input 
-                  readOnly 
-                  value={`https://vyrona.social/product/${productId}`}
-                  className="flex-1"
-                />
-                <Button size="sm">Copy</Button>
-              </div>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Friends who join your group get the same discount!
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

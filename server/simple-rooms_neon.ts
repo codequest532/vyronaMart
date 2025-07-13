@@ -1,15 +1,15 @@
 // Simple working room creation API
 import express from 'express';
-import pg from 'pg';
-const { Pool } = pg;
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
+
+// Configure WebSocket for Neon
+neonConfig.webSocketConstructor = ws;
 
 export function setupRoomRoutes(app: express.Application) {
   // Create Shopping Room - Working Implementation
   app.post("/api/social/rooms/create", async (req, res) => {
-    const pool = new Pool({ 
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-    });
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
     
     try {
       const { name, description } = req.body;

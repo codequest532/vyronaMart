@@ -12,7 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { VyronaMallConnectCheckout } from "@/lib/razorpay";
 import { 
   ArrowLeft, 
   MapPin, 
@@ -37,7 +36,7 @@ export default function MallCartCheckout() {
     city: "Chennai",
     pincode: ""
   });
-  const [paymentMethod, setPaymentMethod] = useState("razorpay");
+  const [paymentMethod, setPaymentMethod] = useState("upi");
   const [deliveryOption, setDeliveryOption] = useState("express");
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -117,132 +116,20 @@ export default function MallCartCheckout() {
 
     setIsLoading(true);
 
-    // Handle Razorpay payment
-    if (paymentMethod === "razorpay") {
-      try {
-        const paymentResult = await VyronaMallConnectCheckout.processPayment(
-          Math.round(total * 100), // Convert to paise
-          user?.id || 1,
-          1, // mallId
-          Object.entries(groupedItems).map(([storeId, items]) => ({
-            storeId: parseInt(storeId),
-            storeName: items[0].storeName,
-            items: items
-          })),
-          deliveryOption,
-          user
-        );
+    const orderData = {
+      items: mallCart,
+      deliveryAddress,
+      paymentMethod,
+      deliveryInstructions,
+      subtotal,
+      deliveryFee,
+      total,
+      vyronaCoinsEarned,
+      orderType: "mallcart"
+    };
 
-        if (paymentResult.success) {
-          // Clear cart
-          localStorage.removeItem('mallCart');
-          
-          // Store order data for tracking
-          sessionStorage.setItem('orderData', JSON.stringify({
-            orderId: paymentResult.orderId,
-            total: total,
-            items: mallCart,
-            module: 'vyronamallconnect'
-          }));
-
-          toast({
-            title: "Payment Successful!",
-            description: `Order #${paymentResult.orderId} placed successfully. Redirecting to live tracking...`,
-          });
-
-          // Redirect to live order tracking
-          setTimeout(() => {
-            setLocation(`/order-tracking?orderId=${paymentResult.orderId}&module=vyronamallconnect`);
-          }, 1500);
-        } else {
-          throw new Error(paymentResult.error || 'Payment failed');
-        }
-      } catch (error: any) {
-        toast({
-          title: "Payment Failed",
-          description: error.message || "Payment processing failed. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      // Handle wallet/COD payments through backend
-      if (paymentMethod === "wallet") {
-        try {
-          // Get user data
-          const userQuery = await queryClient.fetchQuery({
-            queryKey: ["/api/auth/me"],
-            queryFn: () => fetch("/api/auth/me").then(res => res.json()),
-          });
-          
-          const response = await fetch('/api/vyronamallconnect/wallet-payment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId: userQuery.id,
-              amount: Math.round(total * 100),
-              cartItems: mallCart,
-              deliveryAddress,
-              deliveryOption
-            }),
-          });
-
-          const result = await response.json();
-          
-          if (result.success) {
-            // Clear cart and redirect
-            localStorage.removeItem('mallCart');
-            
-            // Store order data for tracking
-            sessionStorage.setItem('orderData', JSON.stringify({
-              orderId: result.orderId,
-              total: total,
-              items: mallCart,
-              module: 'vyronamallconnect'
-            }));
-            
-            toast({
-              title: "Payment Successful!",
-              description: `Order #${result.orderId} placed using VyronaWallet. Redirecting to live tracking...`,
-            });
-            
-            // Redirect to live order tracking
-            setTimeout(() => {
-              setLocation(`/order-tracking?orderId=${result.orderId}&module=vyronamallconnect`);
-            }, 1500);
-          } else {
-            throw new Error(result.error || 'Payment failed');
-          }
-        } catch (error: any) {
-          toast({
-            title: "Payment Failed",
-            description: error.message || "Wallet payment failed. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        // COD payment through backend
-        const orderData = {
-          items: mallCart,
-          deliveryAddress,
-          paymentMethod,
-          deliveryInstructions,
-          subtotal,
-          deliveryFee,
-          total,
-          vyronaCoinsEarned,
-          orderType: "mallcart"
-        };
-
-        createOrderMutation.mutate(orderData);
-        setIsLoading(false);
-      }
-    }
+    createOrderMutation.mutate(orderData);
+    setIsLoading(false);
   };
 
   if (mallCart.length === 0) {
@@ -483,15 +370,15 @@ export default function MallCartCheckout() {
             <CardContent>
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3 p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
-                    <RadioGroupItem value="razorpay" id="razorpay" />
-                    <Label htmlFor="razorpay" className="flex-1 cursor-pointer">
+                  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                    <RadioGroupItem value="upi" id="upi" />
+                    <Label htmlFor="upi" className="flex-1 cursor-pointer">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-blue-900">Razorpay</p>
-                          <p className="text-sm text-blue-700">Credit/Debit Cards, UPI, Net Banking, Wallets</p>
+                          <p className="font-medium">UPI Payment</p>
+                          <p className="text-sm text-gray-600">Pay using PhonePe, GPay, Paytm, or any UPI app</p>
                         </div>
-                        <Badge className="bg-blue-100 text-blue-800">Recommended</Badge>
+                        <Badge className="bg-green-100 text-green-800">Recommended</Badge>
                       </div>
                     </Label>
                   </div>
@@ -507,6 +394,16 @@ export default function MallCartCheckout() {
                           </p>
                         </div>
                         <Wallet className="h-5 w-5 text-blue-600" />
+                      </div>
+                    </Label>
+                  </div>
+
+                  <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                    <RadioGroupItem value="card" id="card" />
+                    <Label htmlFor="card" className="flex-1 cursor-pointer">
+                      <div>
+                        <p className="font-medium">Credit/Debit Card</p>
+                        <p className="text-sm text-gray-600">Visa, Mastercard, RuPay cards accepted</p>
                       </div>
                     </Label>
                   </div>

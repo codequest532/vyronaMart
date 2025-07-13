@@ -2,11 +2,33 @@ import dotenv from 'dotenv';
 dotenv.config();
 import path from 'path'; 
 import express from "express";
+import { WebSocketServer } from 'ws';
 import session from "express-session";
 import MemoryStore from "memorystore";
 import { registerRoutes } from "./routes";
 import { storage } from "./storage";
-import { WebSocketServer } from 'ws';
+
+process.env.NODE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const log = (message: string) => {
   const timestamp = new Date().toLocaleTimeString('en-US', { 
@@ -183,6 +205,21 @@ async function startServer() {
     server.listen(PORT, '0.0.0.0', () => {
       log(`serving on port ${PORT}`);
     });
+    
+    const wss = new WebSocketServer({ server });
+
+  wss.on('connection', (ws) => {
+  console.log('🔌 New WebSocket connection');
+
+  ws.on('message', (message) => {
+    console.log('📨 Received from client:', message.toString());
+    ws.send(`Echo: ${message}`);
+  });
+
+  ws.on('close', () => {
+    console.log('❌ WebSocket connection closed');
+  });
+});
 
   } catch (error) {
     console.error("Failed to start server:", error);

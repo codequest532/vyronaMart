@@ -1,13 +1,12 @@
 // Simplified room creation API that works with existing database
-import pg from 'pg';
-const { Pool } = pg;
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
 
+// Configure WebSocket for Neon
+neonConfig.webSocketConstructor = ws;
 
 export async function createRoom(name: string, description: string, userId: number = 1) {
-  const pool = new Pool({ 
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-  });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   
   try {
     // Create room code

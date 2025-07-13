@@ -3,7 +3,6 @@ import { useLocation, useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { VyronaSocialCheckout } from "@/lib/razorpay";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,7 +45,7 @@ interface ItemContributor {
   userId: number;
   username: string;
   amount: number;
-  paymentMethod: 'wallet' | 'googlepay' | 'phonepe' | 'cod' | 'razorpay';
+  paymentMethod: 'wallet' | 'googlepay' | 'phonepe' | 'cod';
   status: 'pending' | 'contributed' | 'confirmed';
   transactionId?: string;
 }
@@ -83,7 +82,7 @@ interface DeliveryAddress {
 interface PaymentMethod {
   id: string;
   name: string;
-  type: 'wallet' | 'googlepay' | 'phonepe' | 'cod' | 'razorpay';
+  type: 'wallet' | 'googlepay' | 'phonepe' | 'cod';
   icon: string;
   enabled: boolean;
   requiresFullPayment?: boolean;
@@ -122,20 +121,28 @@ export default function PlaceOrder() {
   // Payment method configurations
   const paymentMethods: PaymentMethod[] = [
     {
-      id: 'razorpay',
-      name: 'Razorpay',
-      type: 'razorpay',
-      icon: 'Smartphone',
-      enabled: true,
-      apiEndpoint: '/api/vyronasocial/create-order'
-    },
-    {
       id: 'wallet',
-      name: 'VyronaWallet',
+      name: 'Vyrona Wallet',
       type: 'wallet',
       icon: 'Wallet',
       enabled: true,
       apiEndpoint: '/api/wallet/pay'
+    },
+    {
+      id: 'googlepay',
+      name: 'Google Pay Groups',
+      type: 'googlepay',
+      icon: 'Smartphone',
+      enabled: true,
+      apiEndpoint: '/api/payments/googlepay-groups'
+    },
+    {
+      id: 'phonepe',
+      name: 'PhonePe Split',
+      type: 'phonepe',
+      icon: 'Smartphone',
+      enabled: true,
+      apiEndpoint: '/api/payments/phonepe-split'
     },
     {
       id: 'cod',
@@ -254,35 +261,12 @@ export default function PlaceOrder() {
 
       // Process payment based on method
       let transactionId = '';
-      if (paymentMethod.type === 'razorpay') {
-        try {
-          const paymentResult = await VyronaSocialCheckout.processPayment(
-            Math.round(amount * 100), // Convert to paise
-            1, // userId - will be updated with actual user ID
-            roomId,
-            amount,
-            { itemId, roomId, contributionAmount: amount }
-          );
-
-          if (paymentResult.success) {
-            transactionId = paymentResult.paymentId || '';
-          } else {
-            throw new Error(paymentResult.error || 'Payment failed');
-          }
-        } catch (error: any) {
-          toast({
-            title: "Payment Failed",
-            description: error.message || "Payment processing failed. Please try again.",
-            variant: "destructive",
-          });
-          return;
-        }
-      } else if (paymentMethod.type === 'wallet') {
+      if (paymentMethod.type === 'wallet') {
         const walletBalance = walletData?.balance || 0;
         if (amount > walletBalance) {
           toast({
             title: "Insufficient Balance",
-            description: "Please add money to your VyronaWallet first.",
+            description: "Please add money to your Vyrona Wallet first.",
             variant: "destructive",
           });
           return;

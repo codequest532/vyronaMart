@@ -17,7 +17,6 @@ import { apiRequest } from "@/lib/queryClient";
 import { ArrowLeft, MapPin, CreditCard, Wallet, Truck, DollarSign, ShoppingCart, Package, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCartStore } from "@/lib/cart-store";
-import { VyronaHubCheckout as VyronaHubPaymentService } from "@/lib/razorpay";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, "Full name is required"),
@@ -180,114 +179,36 @@ export default function VyronaHubCheckout() {
   };
 
   const onFinalSubmit = async () => {
-    if (!addressData || !userData?.id) return;
+    if (!addressData) return;
 
     setIsSubmitting(true);
     try {
-      const deliveryAddress = {
-        fullName: addressData.fullName,
-        email: addressData.email,
-        phoneNumber: addressData.phoneNumber,
-        address: addressData.address,
-        city: addressData.city,
-        state: addressData.state,
-        pincode: addressData.pincode,
+      const orderData = {
+        items: typedCartItems.map((item: CheckoutCartItem) => ({
+          productId: item.id,
+          quantity: item.quantity,
+          price: Math.round(item.price) // Amount in rupees
+        })),
+        totalAmount: Math.round(total), // Amount in rupees
+        shippingAddress: {
+          fullName: addressData.fullName,
+          phoneNumber: addressData.phoneNumber,
+          address: addressData.address,
+          city: addressData.city,
+          state: addressData.state,
+          pincode: addressData.pincode,
+        },
+        paymentMethod: addressData.paymentMethod,
+        module: "vyronahub",
+        metadata: {
+          deliveryFee: Math.round(deliveryFee), // Amount in rupees
+          subtotal: Math.round(subtotal) // Amount in rupees
+        },
       };
 
-      const cartItems = typedCartItems.map((item: CheckoutCartItem) => ({
-        productId: item.id,
-        name: item.name,
-        quantity: item.quantity,
-        price: Math.round(item.price), // Amount in rupees
-        category: item.category,
-        imageUrl: item.imageUrl
-      }));
-
-      // Handle different payment methods
-      if (addressData.paymentMethod === "credit_debit" || addressData.paymentMethod === "upi") {
-        // Process Razorpay payment
-        const paymentResult = await VyronaHubPaymentService.processPayment(
-          Math.round(total),
-          userData.id,
-          cartItems,
-          deliveryAddress,
-          userData
-        );
-
-        if (paymentResult.success) {
-          // Clear cart after successful payment
-          if (!directProductId) {
-            clearCart();
-          }
-          
-          // Store order data for success page
-          const orderSuccessData = {
-            orderId: paymentResult.orderId,
-            module: "vyronahub",
-            items: cartItems,
-            totalAmount: Math.round(total),
-            shippingAddress: deliveryAddress,
-            paymentMethod: addressData.paymentMethod
-          };
-          
-          sessionStorage.setItem('orderData', JSON.stringify(orderSuccessData));
-          setLocation("/order-success");
-        }
-      } else if (addressData.paymentMethod === "vyronawallet") {
-        // Process VyronaWallet payment
-        const response = await apiRequest("POST", "/api/vyronahub/wallet-payment", {
-          userId: userData.id,
-          amount: Math.round(total),
-          cartItems: cartItems,
-          deliveryAddress: deliveryAddress
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          // Clear cart after successful payment
-          if (!directProductId) {
-            clearCart();
-          }
-          
-          const orderSuccessData = {
-            orderId: result.orderId,
-            module: "vyronahub",
-            items: cartItems,
-            totalAmount: Math.round(total),
-            shippingAddress: deliveryAddress,
-            paymentMethod: "vyronawallet"
-          };
-          
-          sessionStorage.setItem('orderData', JSON.stringify(orderSuccessData));
-          setLocation("/order-success");
-        } else {
-          throw new Error(result.message || 'VyronaWallet payment failed');
-        }
-      } else if (addressData.paymentMethod === "cod") {
-        // Process COD order
-        const orderData = {
-          items: cartItems,
-          totalAmount: Math.round(total),
-          shippingAddress: deliveryAddress,
-          paymentMethod: "cod",
-          module: "vyronahub",
-          userId: userData.id,
-          orderType: "buy",
-          email: addressData.email,
-          deliveryFee: deliveryFee,
-          subtotal: Math.round(subtotal)
-        };
-
-        await createOrderMutation.mutateAsync(orderData);
-      }
-    } catch (error: any) {
-      console.error("Payment processing error:", error);
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Failed to process payment. Please try again.",
-        variant: "destructive",
-      });
+      await createOrderMutation.mutateAsync(orderData);
+    } catch (error) {
+      console.error("Order submission failed:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -506,16 +427,15 @@ export default function VyronaHubCheckout() {
                                 defaultValue={field.value}
                                 className="space-y-4"
                               >
-                                <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50 relative">
+                                <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50">
                                   <RadioGroupItem value="credit_debit" id="credit_debit" />
-                                  <Label htmlFor="credit_debit" className="flex items-center cursor-pointer flex-1">
+                                  <Label htmlFor="credit_debit" className="flex items-center cursor-pointer">
                                     <CreditCard className="h-5 w-5 mr-2" />
                                     <div>
                                       <div className="font-medium">Credit/Debit Card</div>
-                                      <div className="text-sm text-gray-500">Pay securely with Razorpay</div>
+                                      <div className="text-sm text-gray-500">Pay securely with your card</div>
                                     </div>
                                   </Label>
-                                  <Badge variant="secondary" className="text-xs">Recommended</Badge>
                                 </div>
                                 <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-gray-50">
                                   <RadioGroupItem value="upi" id="upi" />
@@ -523,7 +443,7 @@ export default function VyronaHubCheckout() {
                                     <DollarSign className="h-5 w-5 mr-2" />
                                     <div>
                                       <div className="font-medium">UPI Payment</div>
-                                      <div className="text-sm text-gray-500">Pay using UPI via Razorpay</div>
+                                      <div className="text-sm text-gray-500">Pay using UPI ID or QR code</div>
                                     </div>
                                   </Label>
                                 </div>
@@ -599,8 +519,8 @@ export default function VyronaHubCheckout() {
                     <h3 className="font-medium mb-2">Payment Method</h3>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <p className="text-sm">
-                        {addressData?.paymentMethod === "credit_debit" && "Credit/Debit Card via Razorpay"}
-                        {addressData?.paymentMethod === "upi" && "UPI Payment via Razorpay"}
+                        {addressData?.paymentMethod === "credit_debit" && "Credit/Debit Card"}
+                        {addressData?.paymentMethod === "upi" && "UPI Payment"}
                         {addressData?.paymentMethod === "vyronawallet" && "VyronaWallet"}
                         {addressData?.paymentMethod === "cod" && "Cash on Delivery"}
                       </p>
